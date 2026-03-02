@@ -10,7 +10,7 @@ import workmanager_apple
   ) -> Bool {
     WorkmanagerPlugin.registerPeriodicTask(
         withIdentifier: "com.rodonisi.fluvita.periodic_task",
-        frequency: NSNumber(value: 20 * 60) // 20 minutes (15 min minimum)
+        frequency: NSNumber(value: 60 * 60) // 1 hour (15 min minimum)
     )
       
     WorkmanagerDebug.setCurrent(NotificationDebugHandler())
