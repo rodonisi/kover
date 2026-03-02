@@ -21,6 +21,7 @@ enum SyncPhase {
   none,
   allSeries,
   seriesDetails,
+  metadata,
   recentlyAdded,
   recentlyUpdated,
   libraries,
@@ -63,6 +64,7 @@ class SyncManager extends _$SyncManager {
       _syncLibraries(),
       _syncProgress(),
       _syncAllSeriesDetails(),
+      _syncMetadata(),
     ]);
 
     await _syncCovers();
@@ -74,6 +76,7 @@ class SyncManager extends _$SyncManager {
       _syncRecentlyUpdated(),
       _syncRecentlyAdded(),
       _syncProgress(),
+      _syncMetadata(),
     ]);
 
     await _syncCovers();
@@ -100,11 +103,18 @@ class SyncManager extends _$SyncManager {
   Future<void> _syncAllSeriesDetails() async {
     await _runPhase(.seriesDetails, () async {
       final seriesRepo = ref.read(seriesRepositoryProvider);
-      final bookRepo = ref.read(bookRepositoryProvider);
 
       await seriesRepo.refreshAllSeriesDetails();
+    });
+  }
+
+  Future<void> _syncMetadata() async {
+    await _runPhase(.metadata, () async {
+      final seriesRepo = ref.read(seriesRepositoryProvider);
+      final bookRepo = ref.read(bookRepositoryProvider);
+
       await seriesRepo.fetchMissingMetadata();
-      await bookRepo.refreshMissingChaptersTocs();
+      await bookRepo.fetchMissingChaptersTocs();
     });
   }
 

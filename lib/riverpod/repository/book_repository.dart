@@ -76,7 +76,7 @@ class BookRepository {
   }
 
   /// Fetch the table of contents for all chapters that are missing it.
-  Future<void> refreshMissingChaptersTocs() async {
+  Future<void> fetchMissingChaptersTocs() async {
     final chapters = await _db.bookDao.getMissingChapterIds();
     for (final id in chapters) {
       final entries = await _client.getBookChapters(id);
