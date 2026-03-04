@@ -133,6 +133,8 @@ class ReaderRepository {
   /// refetching the updated state and finally merging it with the local state.
   Future<void> mergeProgress() async {
     final dirty = await _db.readerDao.getDirtyProgress();
+    if (dirty.isEmpty) return;
+
     log.d('processing ${dirty.length} progress entries');
 
     final updatedProgress = <ReadingProgressCompanion>[];
