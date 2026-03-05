@@ -246,7 +246,12 @@ class ChapterSnackbar extends StatelessWidget {
         child: Row(
           mainAxisAlignment: .spaceBetween,
           children: [
-            Text(title),
+            Expanded(
+              child: Text(
+                title,
+                overflow: .ellipsis,
+              ),
+            ),
             FilledButton(
               onPressed: onNavigate,
               child: const Text('Go'),
