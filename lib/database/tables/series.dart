@@ -40,7 +40,7 @@ class Series extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-    {name, libraryId},
+    {id, libraryId},
   ];
 }
 

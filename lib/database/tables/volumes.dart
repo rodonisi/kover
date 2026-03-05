@@ -24,6 +24,11 @@ class Volumes extends Table {
 
   @override
   Set<Column<Object>>? get primaryKey => {id};
+
+  @override
+  List<Set<Column<Object>>>? get uniqueKeys => [
+    {id, seriesId},
+  ];
 }
 
 class VolumeCovers extends Table {

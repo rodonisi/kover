@@ -42,7 +42,6 @@ class Chapters extends Table {
   @override
   List<Set<Column<Object>>>? get uniqueKeys => [
     {id, volumeId, seriesId},
-    {id, seriesId},
   ];
 }
 

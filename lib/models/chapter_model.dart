@@ -1,5 +1,6 @@
 import 'package:fluvita/database/app_database.dart';
 import 'package:fluvita/models/enums/format.dart';
+import 'package:fluvita/utils/data_constants.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'chapter_model.freezed.dart';
@@ -24,9 +25,20 @@ sealed class ChapterModel with _$ChapterModel {
     return ChapterModel(
       id: table.id,
       volumeId: table.volumeId,
-      title: table.title ?? 'Untitled',
+      title: _cleanedTitle(table.title ?? table.titleName) ?? 'Untitled',
       pages: table.pages,
       format: table.format,
     );
+  }
+
+  static String? _cleanedTitle(String? title) {
+    if (title != null && title.isEmpty) return null;
+    if (title != null &&
+        title ==
+            'Chapter ${DataConstants.singleVolumeChapterMinNumber.toInt()}') {
+      return 'Single Volume';
+    }
+
+    return title;
   }
 }
