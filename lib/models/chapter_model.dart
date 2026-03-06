@@ -34,8 +34,9 @@ sealed class ChapterModel with _$ChapterModel {
   static String? _cleanedTitle(String? title) {
     if (title != null && title.isEmpty) return null;
     if (title != null &&
-        title ==
-            'Chapter ${DataConstants.singleVolumeChapterMinNumber.toInt()}') {
+        RegExp(
+          '^(Chapter|Book) ${DataConstants.singleVolumeChapterMinNumber.toInt()}',
+        ).hasMatch(title)) {
       return 'Single Volume';
     }
 
