@@ -165,7 +165,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.GOOGLE_PLAY_KEYSTORE_ALIAS }}
           KEY_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEY_PASSWORD }}
 
-      - name: Build and Publish Testflight
+      - name: Publish Google Play
         run: |
           cd android
           fastlane beta
