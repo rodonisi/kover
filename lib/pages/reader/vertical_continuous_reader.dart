@@ -152,6 +152,7 @@ class _VerticalContinuousReaderState
                 data: (data) => Image.memory(
                   data.data,
                   fit: BoxFit.fitWidth,
+                  cacheWidth: MediaQuery.of(context).size.width.toInt(),
                 ),
               ),
             );
@@ -169,6 +170,7 @@ class _VerticalContinuousReaderState
               child: Image.memory(
                 data.data,
                 fit: BoxFit.fitWidth,
+                cacheWidth: MediaQuery.of(context).size.width.toInt(),
               ),
             ),
             loading: () {
@@ -234,7 +236,7 @@ class _VerticalContinuousReaderState
     );
 
     ref.listen(
-      imageReaderSettingsProvider(seriesId:widget.seriesId).select(
+      imageReaderSettingsProvider(seriesId: widget.seriesId).select(
         (settings) => settings.verticalReaderPadding,
       ),
       (previous, next) {
