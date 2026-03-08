@@ -13,7 +13,7 @@
 - **Library Browsing** — browse series, collections, and libraries hosted on the Kavita server
 - **Offline Reading** — content can be downloaded for reading without an active connection
 - **Progress Sync** — reading progress is synced with the Kavita server; progress made offline is stored locally until a connection is available
-- **Native App** — built with Flutter for a native cross-platform experience on iOS, Android, macOS, Windows, and Linux
+- **Native App** — built with Flutter for a native cross-platform experience
 
 ## Getting Started
 
