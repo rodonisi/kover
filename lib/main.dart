@@ -25,7 +25,7 @@ class App extends ConsumerWidget {
     final theme = ref.watch(themeProvider);
     return EagerProviders(
       child: MaterialApp.router(
-        title: 'Kavita',
+        title: 'Kover',
         debugShowCheckedModeBanner: false,
         theme: theme.lightTheme,
         darkTheme: theme.darkTheme,
