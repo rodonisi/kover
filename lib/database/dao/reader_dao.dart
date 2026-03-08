@@ -196,14 +196,6 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   /// Mark all chapters for [seriesId] as [isRead]
   Future<void> markSeriesRead(int seriesId, {required bool isRead}) async {
     await transaction(() async {
-      await (update(
-        readingProgress,
-      )..where((row) => row.seriesId.equals(seriesId))).write(
-        ReadingProgressCompanion.custom(
-          totalReads: readingProgress.totalReads + const Constant(1),
-        ),
-      );
-
       final query =
           (select(
             chapters,
@@ -221,8 +213,8 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
           seriesId: Value(s.id),
           libraryId: Value(s.libraryId),
           pagesRead: Value(isRead ? c.pages : 0),
-          dirty: const Value(true),
           lastModified: Value(DateTime.timestamp()),
+          dirty: const Value(true),
         );
       });
 
@@ -238,17 +230,6 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     required bool isRead,
   }) async {
     await transaction(() async {
-      await (update(
-            readingProgress,
-          )..where(
-            (tbl) => tbl.volumeId.equals(volumeId),
-          ))
-          .write(
-            ReadingProgressCompanion.custom(
-              totalReads: readingProgress.totalReads + const Constant(1),
-            ),
-          );
-
       final query =
           (select(
                 chapters,
@@ -269,8 +250,8 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
           seriesId: Value(s.id),
           libraryId: Value(s.libraryId),
           pagesRead: Value(isRead ? c.pages : 0),
-          dirty: const Value(true),
           lastModified: Value(DateTime.timestamp()),
+          dirty: const Value(true),
         );
       });
 
@@ -283,14 +264,6 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   /// Mark chapter [chapterId] as [isRead]
   Future<void> markChapterRead(int chapterId, {required bool isRead}) async {
     await transaction(() async {
-      (update(
-        readingProgress,
-      )..where((tbl) => tbl.chapterId.equals(chapterId))).write(
-        ReadingProgressCompanion.custom(
-          totalReads: readingProgress.totalReads + const Constant(1),
-        ),
-      );
-
       final join =
           await (select(
             chapters,
