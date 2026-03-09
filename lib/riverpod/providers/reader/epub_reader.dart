@@ -94,7 +94,6 @@ class EpubReader extends _$EpubReader {
         )
         .currentPage;
 
-
     if (state.value == null) {
       _resumeScrollId = readerState.bookScrollId;
     }
@@ -119,8 +118,8 @@ class EpubReader extends _$EpubReader {
     final fragment = DocumentFragment();
 
     listenSelf((prev, next) {
-      next.whenData((data) {
-        data.whenOrNull(
+      next.whenData((data) async {
+        await data.whenOrNull(
           display: (display) async {
             _resumeScrollId = null;
 
