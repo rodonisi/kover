@@ -35,7 +35,7 @@ void callbackDispatcher() {
     } catch (e) {
       log.e('failed background fetch', error: e);
     } finally {
-      db.close();
+      await db.close();
     }
 
     return false;

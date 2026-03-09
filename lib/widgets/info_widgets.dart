@@ -59,7 +59,7 @@ class WantToReadToggle extends ConsumerWidget {
             final notifier = ref.read(
               wantToReadProvider(seriesId: seriesId).notifier,
             );
-            data ? notifier.remove() : notifier.add();
+            await (data ? notifier.remove() : notifier.add());
           },
         );
       },

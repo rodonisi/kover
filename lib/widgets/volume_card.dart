@@ -45,14 +45,14 @@ class VolumeCard extends HookConsumerWidget {
         },
         onDownload: downloadProgress < 1.0
             ? () async {
-                ref
+                await ref
                     .read(downloadManagerProvider.notifier)
                     .enqueueVolume(volumeId);
               }
             : null,
         onRemoveDownload: downloadProgress > 0.0
             ? () async {
-                ref
+                await ref
                     .read(downloadManagerProvider.notifier)
                     .deleteVolume(volumeId);
               }

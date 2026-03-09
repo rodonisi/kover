@@ -81,7 +81,7 @@ class DownloadDao extends DatabaseAccessor<AppDatabase>
   /// Deletes all downloaded pages for a chapter.
   Future<void> deleteChapter({required int chapterId}) async {
     await transaction(() async {
-      managers.downloadedPages
+      await managers.downloadedPages
           .filter((f) => f.chapterId.id(chapterId))
           .delete();
     });

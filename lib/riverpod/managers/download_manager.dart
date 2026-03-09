@@ -85,7 +85,7 @@ class DownloadManager extends _$DownloadManager {
   Future<void> cancel(int chapterId) async {
     final current = await future;
 
-    _activeTasks[chapterId]?.cancel();
+    await _activeTasks[chapterId]?.cancel();
     _activeTasks.remove(chapterId);
 
     final newQueue = Set<int>.from(current.downloadQueue)..remove(chapterId);
@@ -144,7 +144,7 @@ class DownloadManager extends _$DownloadManager {
 
       log.d('Starting download for chapter $nextId');
 
-      _startDownload(nextId);
+      await _startDownload(nextId);
     }
   }
 
@@ -188,7 +188,7 @@ class DownloadManager extends _$DownloadManager {
         .where((k) => chapterIds.contains(k))
         .toList();
     for (final k in active) {
-      _activeTasks[k]!.cancel();
+      await _activeTasks[k]!.cancel();
       _activeTasks.remove(k);
     }
     final newQueue = Set<int>.from(current.downloadQueue)
@@ -201,7 +201,7 @@ class DownloadManager extends _$DownloadManager {
       if (next is SyncingState && previous is! SyncingState) {
         await _clearActiveTasks();
       } else if (next is! SyncingState) {
-        _processQueue();
+        await _processQueue();
       }
     });
   }
@@ -211,7 +211,7 @@ class DownloadManager extends _$DownloadManager {
       next.whenData((good) async {
         if (prev != null && good != prev.value) {
           await _clearActiveTasks();
-          if (good) _processQueue();
+          if (good) await _processQueue();
         }
       });
     });
@@ -221,7 +221,7 @@ class DownloadManager extends _$DownloadManager {
     final observer = LifecycleOnResumeObserver(
       onResume: () async {
         await _clearActiveTasks();
-        _processQueue();
+        await _processQueue();
       },
     );
     WidgetsBinding.instance.addObserver(observer);
