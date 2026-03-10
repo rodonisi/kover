@@ -147,31 +147,39 @@ class RenderContent extends ConsumerWidget {
       child: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(epubSettings.marginSize),
-          child: HtmlWidget(
-            html,
-            buildAsync: false,
-            enableCaching: true,
-            customStylesBuilder: (element) {
-              final s = element.classes
-                  .map((className) {
-                    return styles.keys
-                        .where((selector) => RegExp(r'(?:^|\s)\.' + RegExp.escape(className) + r'(?:\s|:|\.|\{|$)').hasMatch(selector))
-                        .map((e) => styles[e]);
-                  })
-                  .expand((e) => e)
-                  .where((e) => e != null)
-                  .fold<Map<String, String>>({}, (acc, map) {
-                    acc.addAll(map!);
-                    return acc;
-                  });
+          child: SelectionArea(
+            child: HtmlWidget(
+              html,
+              buildAsync: false,
+              enableCaching: true,
+              customStylesBuilder: (element) {
+                final s = element.classes
+                    .map((className) {
+                      return styles.keys
+                          .where(
+                            (selector) => RegExp(
+                              r'(?:^|\s)\.' +
+                                  RegExp.escape(className) +
+                                  r'(?:\s|:|\.|\{|$)',
+                            ).hasMatch(selector),
+                          )
+                          .map((e) => styles[e]);
+                    })
+                    .expand((e) => e)
+                    .where((e) => e != null)
+                    .fold<Map<String, String>>({}, (acc, map) {
+                      acc.addAll(map!);
+                      return acc;
+                    });
 
-              s.addAll(styles[element.localName] ?? {});
+                s.addAll(styles[element.localName] ?? {});
 
-              return s;
-            },
-            textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontSize: epubSettings.fontSize,
-              height: epubSettings.lineHeight,
+                return s;
+              },
+              textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: epubSettings.fontSize,
+                height: epubSettings.lineHeight,
+              ),
             ),
           ),
         ),
