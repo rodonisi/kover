@@ -142,36 +142,43 @@ class RenderContent extends ConsumerWidget {
       epubReaderSettingsProvider(seriesId: seriesId),
     );
 
+    final selectorClassRegex = RegExp(
+      r'\.([a-zA-Z0-9_-]+)(?:\s|:|\.|\{|$)[^.]*$',
+    );
+    final Map<String, List<Map<String, String>>> classStyles = {};
+    for (final entry in styles.entries) {
+      final match = selectorClassRegex.firstMatch(entry.key);
+      if (match != null) {
+        classStyles.putIfAbsent(match.group(1)!, () => []).add(entry.value);
+      }
+    }
+
     return Align(
       alignment: Alignment.topCenter,
       child: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(epubSettings.marginSize),
-          child: HtmlWidget(
-            html,
-            buildAsync: false,
-            enableCaching: true,
-            customStylesBuilder: (element) {
-              final s = element.classes
-                  .map((className) {
-                    return styles.keys
-                        .where((selector) => selector.contains('.$className'))
-                        .map((e) => styles[e]);
-                  })
-                  .expand((e) => e)
-                  .where((e) => e != null)
-                  .fold<Map<String, String>>({}, (acc, map) {
-                    acc.addAll(map!);
-                    return acc;
-                  });
+          child: SelectionArea(
+            child: HtmlWidget(
+              html,
+              buildAsync: false,
+              enableCaching: true,
+              customStylesBuilder: (element) {
+                final s = element.classes
+                    .expand((className) => classStyles[className] ?? [])
+                    .fold<Map<String, String>>({}, (acc, map) {
+                      acc.addAll(map);
+                      return acc;
+                    });
 
-              s.addAll(styles[element.localName] ?? {});
+                s.addAll(styles[element.localName] ?? {});
 
-              return s;
-            },
-            textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontSize: epubSettings.fontSize,
-              height: epubSettings.lineHeight,
+                return s;
+              },
+              textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: epubSettings.fontSize,
+                height: epubSettings.lineHeight,
+              ),
             ),
           ),
         ),

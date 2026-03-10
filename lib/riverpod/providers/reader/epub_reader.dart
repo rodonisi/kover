@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:html/dom.dart';
 import 'package:kover/models/page_content.dart';
@@ -104,6 +105,17 @@ class EpubReader extends _$EpubReader {
         page: currentPage,
       ).future,
     );
+
+    for (final family in pageContent.fonts.entries) {
+      final loader = FontLoader(family.key);
+      for (final font in family.value) {
+        loader.addFont(
+          Future.value(ByteData.sublistView(font)),
+        );
+      }
+      await loader.load();
+      log.d('loaded font family ${family.key}');
+    }
 
     final cursor = NodeCursor(
       root:

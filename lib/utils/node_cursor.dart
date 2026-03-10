@@ -35,7 +35,7 @@ class NodeCursor {
     if (!iterator.moveNext()) {
       hasNext = false;
       log.d(
-        'iterator exhausted, hasNext=false, current root has ${root.children.length} children: ${(DocumentFragment()..append(root.clone(true))).outerHtml}',
+        'iterator exhausted, hasNext=false, current root has ${root.children.length}',
       );
       if (root.children.isNotEmpty) {
         final lastChunk = root.clone(true);
@@ -83,9 +83,10 @@ class NodeCursor {
       return childCursor!.splitChild();
     }
 
+    if (!hasNext) return false;
+
     final current = iterator.current;
-    if (hasNext &&
-        current is Element &&
+    if (current is Element &&
         current.localName != 'p' &&
         current.children.isNotEmpty) {
       childCursor = NodeCursor(root: current);
