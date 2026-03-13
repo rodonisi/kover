@@ -52,6 +52,7 @@ dependencies:
   connectivity_plus: ^7.0.0
   workmanager: ^0.9.0+3
   async: ^2.13.0
+  csslib: ^1.0.2
 
 dev_dependencies:
   flutter_test:

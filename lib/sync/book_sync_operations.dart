@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:csslib/visitor.dart';
 import 'package:drift/drift.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
+import 'package:csslib/parser.dart' as css;
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/models/page_content.dart';
@@ -58,9 +60,7 @@ class BookSyncOperations {
     final styles = <String, Map<String, String>>{};
     final fonts = <String, List<Uint8List>>{};
 
-    final stylesElements = frag.querySelectorAll('style');
-
-    for (final stylesElement in stylesElements) {
+    for (final stylesElement in frag.querySelectorAll('style')) {
       styles.addAll(_parseStyles(stylesElement.innerHtml));
       fonts.addAll(await _parseFonts(stylesElement.innerHtml));
       stylesElement.remove();
@@ -196,25 +196,78 @@ class BookSyncOperations {
     return null;
   }
 
-  static Map<String, Map<String, String>> _parseStyles(String css) {
-    final Map<String, Map<String, String>> stylesMap = {};
-    final RegExp ruleRegExp = RegExp(r'([^{]+)\{([^}]+)\}');
-    final RegExp propRegExp = RegExp(r'([^:]+):([^;]+);?');
+  Map<String, Map<String, String>> _parseStyles(String cssString) {
+    final sheet = css.parse(cssString);
+    final visitor = _CssToMapVisitor();
+    sheet.visit(visitor);
 
-    for (final ruleMatch in ruleRegExp.allMatches(css)) {
-      final selector = ruleMatch.group(1)!.trim();
-      final properties = ruleMatch.group(2)!;
-      final Map<String, String> propsMap = {};
+    return visitor.resultMap;
+  }
+}
 
-      for (final propMatch in propRegExp.allMatches(properties)) {
-        final prop = propMatch.group(1)!.trim();
-        final value = propMatch.group(2)!.trim();
-        propsMap[prop] = value;
+class _CssToMapVisitor extends Visitor {
+  final Map<String, Map<String, String>> resultMap = {};
+  Set<String> currentSelectors = {};
+
+  @override
+  void visitRuleSet(RuleSet node) {
+    final selectorGroup = node.selectorGroup;
+    if (selectorGroup == null) return;
+
+    currentSelectors = {};
+
+    // Iterate through every selector in the comma-separated list
+    for (var selector in selectorGroup.selectors) {
+      final sequences = selector.simpleSelectorSequences;
+      if (sequences.isEmpty) continue;
+
+      // Collect any trailing pseudo-element suffix (e.g. "::first-letter").
+      // These appear as the last sequence(s) with no combinator.
+      final pseudoSuffix = StringBuffer();
+      var baseIndex = sequences.length - 1;
+      while (baseIndex >= 0 &&
+          sequences[baseIndex].simpleSelector is PseudoElementSelector) {
+        final pseudo =
+            sequences[baseIndex].simpleSelector as PseudoElementSelector;
+        // Prepend so multiple pseudos come out in source order
+        pseudoSuffix.write('::${pseudo.name}');
+        baseIndex--;
       }
 
-      stylesMap[selector] = propsMap;
+      if (baseIndex < 0) continue;
+
+      // The base is the rightmost non-pseudo-element selector.
+      // We ignore ancestor/combinator parts (flat, specificity-free).
+      final baseSimple = sequences[baseIndex].simpleSelector;
+      String? base;
+
+      if (baseSimple is ClassSelector) {
+        base = '.${baseSimple.name}';
+      } else if (baseSimple is ElementSelector) {
+        base = baseSimple.name;
+      }
+
+      if (base != null) {
+        final name = '$base$pseudoSuffix';
+        currentSelectors.add(name);
+        resultMap.putIfAbsent(name, () => {});
+      }
     }
-    return stylesMap;
+
+    super.visitRuleSet(node);
+  }
+
+  @override
+  void visitDeclaration(Declaration node) {
+    final expr = node.expression;
+    if (expr == null) return;
+    final printer = CssPrinter();
+    expr.visit(printer);
+    final value = printer.toString();
+    for (final selector in currentSelectors) {
+      resultMap[selector]![node.property] = value;
+    }
+    super.visitDeclaration(node);
   }
 
   Future<Map<String, List<Uint8List>>> _parseFonts(String css) async {
