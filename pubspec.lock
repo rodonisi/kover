@@ -422,22 +422,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.21.3+1"
-  flutter_html:
-    dependency: transitive
-    description:
-      name: flutter_html
-      sha256: "38a2fd702ffdf3243fb7441ab58aa1bc7e6922d95a50db76534de8260638558d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
-  flutter_html_svg:
-    dependency: "direct main"
-    description:
-      name: flutter_html_svg
-      sha256: "76f59c238571333d95271817c3d94688b3c4dca2735552e481e49039d3efdb13"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
@@ -744,14 +728,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.0"
-  list_counter:
-    dependency: transitive
-    description:
-      name: list_counter
-      sha256: c447ae3dfcd1c55f0152867090e67e219d42fe6d4f2807db4bbe8b8d69912237
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.2"
   logger:
     dependency: "direct main"
     description:

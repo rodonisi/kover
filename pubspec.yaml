@@ -35,7 +35,6 @@ dependencies:
   logger: ^2.6.2
   go_router: ^17.0.1
   html: ^0.15.6
-  flutter_html_svg: ^3.0.0
   flutter_svg: ^2.2.3
   flutter_widget_from_html: ^0.17.1
   equatable: ^2.0.7
