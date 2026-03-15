@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/settings/settings.dart';
@@ -14,6 +15,8 @@ class CredentialsSettings extends HookConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final currentUser = ref.watch(currentUserProvider);
     final loginStatus = ref.watch(loginStatusProvider);
+
+    final obscureKey = useState(true);
 
     return Card(
       margin: LayoutConstants.mediumEdgeInsets,
@@ -37,12 +40,36 @@ class CredentialsSettings extends HookConsumerWidget {
                 TextField(
                   enabled: loginStatus != .loading,
                   controller: urlController,
-                  decoration: const InputDecoration(labelText: 'Base URL'),
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    labelText: 'Base URL',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 TextField(
+                  obscureText: obscureKey.value,
                   enabled: loginStatus != .loading,
                   controller: apiKeyController,
-                  decoration: const InputDecoration(labelText: 'API Key'),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    labelText: 'API Key',
+                    border: const OutlineInputBorder(),
+                    suffixIcon: Padding(
+                      padding: const EdgeInsetsGeometry.symmetric(
+                        horizontal: LayoutConstants.smallPadding,
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          obscureKey.value = !obscureKey.value;
+                        },
+                        icon: Icon(
+                          obscureKey.value
+                              ? LucideIcons.eye
+                              : LucideIcons.eyeOff,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
