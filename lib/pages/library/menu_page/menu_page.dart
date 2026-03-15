@@ -6,9 +6,9 @@ import 'package:kover/pages/library/menu_page/sliver_libraries.dart';
 import 'package:kover/pages/library/menu_page/sliver_section.dart';
 import 'package:kover/riverpod/managers/download_manager.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
+import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/login_guard.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -21,19 +21,23 @@ class MenuPage extends ConsumerWidget {
       ref.read(syncManagerProvider.notifier).syncLibraries();
     });
 
+    final loggedIn = ref.watch(
+      currentUserProvider.select((state) => state.hasValue),
+    );
+
     final isDownloading = ref.watch(
       downloadManagerProvider.select(
         (state) => state.value?.downloadQueue.isNotEmpty ?? false,
       ),
     );
 
-    return LoginGuard(
-      child: SafeArea(
-        bottom: false,
-        child: Scaffold(
-          extendBody: true,
-          body: CustomScrollView(
-            slivers: [
+    return SafeArea(
+      bottom: false,
+      child: Scaffold(
+        extendBody: true,
+        body: CustomScrollView(
+          slivers: [
+            if (loggedIn) ...[
               SliverPadding(
                 padding: LayoutConstants.mediumEdgeInsets,
                 sliver: SliverToBoxAdapter(
@@ -46,42 +50,42 @@ class MenuPage extends ConsumerWidget {
               ),
               const SliverSection(title: 'Libraries'),
               const SliverLibraries(),
-              const SliverSection(title: 'More'),
-              SliverPadding(
-                padding: const EdgeInsetsGeometry.symmetric(
-                  vertical: LayoutConstants.smallerPadding,
-                  horizontal: LayoutConstants.mediumPadding,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: AppListTile(
-                    title: 'Download Queue',
-                    icon: isDownloading
-                        ? const Icon(LucideIcons.refreshCw)
-                              .animate(
-                                onPlay: (controller) => controller.repeat(),
-                              )
-                              .rotate(duration: 1500.ms)
-                        : const Icon(LucideIcons.download),
-                    onTap: () => const DownloadQueueRoute().push(context),
-                  ),
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsetsGeometry.symmetric(
-                  vertical: LayoutConstants.smallerPadding,
-                  horizontal: LayoutConstants.mediumPadding,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: AppListTile(
-                    title: 'Settings',
-                    icon: const Icon(LucideIcons.settings),
-                    onTap: () => const SettingsRoute().push(context),
-                  ),
-                ),
-              ),
-              const SliverBottomPadding(),
             ],
-          ),
+            const SliverSection(title: 'More'),
+            SliverPadding(
+              padding: const EdgeInsetsGeometry.symmetric(
+                vertical: LayoutConstants.smallerPadding,
+                horizontal: LayoutConstants.mediumPadding,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: AppListTile(
+                  title: 'Download Queue',
+                  icon: isDownloading
+                      ? const Icon(LucideIcons.refreshCw)
+                            .animate(
+                              onPlay: (controller) => controller.repeat(),
+                            )
+                            .rotate(duration: 1500.ms)
+                      : const Icon(LucideIcons.download),
+                  onTap: () => const DownloadQueueRoute().push(context),
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsetsGeometry.symmetric(
+                vertical: LayoutConstants.smallerPadding,
+                horizontal: LayoutConstants.mediumPadding,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: AppListTile(
+                  title: 'Settings',
+                  icon: const Icon(LucideIcons.settings),
+                  onTap: () => const SettingsRoute().push(context),
+                ),
+              ),
+            ),
+            const SliverBottomPadding(),
+          ],
         ),
       ),
     );
