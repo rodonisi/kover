@@ -193,6 +193,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Fetch web dependencies
+        run: dart run tools/fetch_web_dependencies.dart
+
       - name: Codegen
         run: |
           dart run build_runner build --delete-conflicting-outputs

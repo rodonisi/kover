@@ -43,6 +43,10 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y ninja-build libgtk-3-dev
 
+      - name: Fetch web dependencies 🌐
+        if: matrix.platform == 'web'
+        run: dart run tools/fetch_web_dependencies.dart
+
       - name: Code Generation 🧬
         run: dart run build_runner build --delete-conflicting-outputs
 
