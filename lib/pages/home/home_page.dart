@@ -5,6 +5,7 @@ import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/widgets/async_value.dart';
 import 'package:kover/widgets/login_guard.dart';
+import 'package:kover/widgets/shell_action_bar.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
 
 class HomePage extends ConsumerWidget {
@@ -32,6 +33,7 @@ class HomePageContent extends ConsumerWidget {
         },
         child: const CustomScrollView(
           slivers: [
+            ActionsAppBar(),
             OnDeck(),
             RecentlyUpdated(),
             RecentlyAdded(),

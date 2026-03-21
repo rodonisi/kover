@@ -9,6 +9,7 @@ import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/widgets/shell_action_bar.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -37,6 +38,7 @@ class MenuPage extends ConsumerWidget {
         extendBody: true,
         body: CustomScrollView(
           slivers: [
+            const ActionsAppBar(),
             if (loggedIn) ...[
               SliverPadding(
                 padding: LayoutConstants.mediumEdgeInsets,

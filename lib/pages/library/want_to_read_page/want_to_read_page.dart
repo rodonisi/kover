@@ -6,6 +6,7 @@ import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/async_value.dart';
 import 'package:kover/widgets/login_guard.dart';
 import 'package:kover/widgets/series_sliver_grid.dart';
+import 'package:kover/widgets/shell_action_bar.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
 
 class WantToReadPage extends ConsumerWidget {
@@ -25,6 +26,7 @@ class WantToReadPage extends ConsumerWidget {
             onRefresh: () async => await ref.refresh(wantToReadListProvider),
             child: CustomScrollView(
               slivers: [
+                const ActionsAppBar(),
                 SliverPadding(
                   padding: LayoutConstants.smallEdgeInsets,
                   sliver: SliverToBoxAdapter(
