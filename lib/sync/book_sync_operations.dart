@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:csslib/visitor.dart';
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide Expression;
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:csslib/parser.dart' as css;
@@ -204,37 +204,21 @@ class BookSyncOperations {
     return visitor.resultMap;
   }
 
-  Future<Map<String, List<Uint8List>>> _parseFonts(String css) async {
+  Future<Map<String, List<Uint8List>>> _parseFonts(String cssString) async {
+    final sheet = css.parse(cssString);
+    final visitor = _FontFaceVisitor();
+    sheet.visit(visitor);
+
     final res = <String, List<Uint8List>>{};
-    final fontFaceRegex = RegExp(r'@font-face\s*\{([^}]*)\}', multiLine: true);
-    final familyRegex = RegExp(
-      r'''font-family:\s*(?:"([^"]+)"|'([^']+)'|([^;'"]+))\s*;?''',
-      caseSensitive: false,
-    );
-    final srcRegex = RegExp(r'src:\s*url\([" "]?([^" ")]+)[" "]?\)');
-
-    var matches = fontFaceRegex.allMatches(css);
-    for (var match in matches) {
-      String block = match.group(1) ?? "";
-
-      final familyMatch = familyRegex.firstMatch(block);
-      String? family =
-          familyMatch?.group(1) ??
-          familyMatch?.group(2) ??
-          familyMatch?.group(3)?.trim();
-      String? url = srcRegex.firstMatch(block)?.group(1);
-
-      log.d('Found Font: $family at $url');
-      if (family == null || url == null) continue;
-
-      final data = await _fetchData(url);
-
-      if (data == null || data.bytes.isEmpty) continue;
-
-      res.putIfAbsent(family, () => []).add(data.bytes);
+    for (final entry in visitor.fontMap.entries) {
+      for (final url in entry.value) {
+        log.d('Found Font: ${entry.key} at $url');
+        final data = await _fetchData(url);
+        if (data == null || data.bytes.isEmpty) continue;
+        res.putIfAbsent(entry.key, () => []).add(data.bytes);
+      }
     }
 
-    log.d('fetched ${res.length} fonts');
     return res;
   }
 
@@ -243,6 +227,60 @@ class BookSyncOperations {
       return '${_client.client.baseUrl.scheme}:$url';
     }
     return url;
+  }
+}
+
+class _FontFaceVisitor extends Visitor {
+  // family name → all src URLs collected across all @font-face blocks
+  final Map<String, List<String>> fontMap = {};
+
+  bool _inFontFace = false;
+  String? _currentFamily;
+  List<String> _currentUrls = [];
+
+  @override
+  void visitFontFaceDirective(FontFaceDirective node) {
+    _inFontFace = true;
+    _currentFamily = null;
+    _currentUrls = [];
+
+    super.visitFontFaceDirective(node);
+
+    if (_currentFamily != null && _currentUrls.isNotEmpty) {
+      fontMap.putIfAbsent(_currentFamily!, () => []).addAll(_currentUrls);
+    }
+
+    _inFontFace = false;
+  }
+
+  @override
+  void visitDeclaration(Declaration node) {
+    if (!_inFontFace) return;
+
+    final property = node.property.toLowerCase();
+
+    final expr = node.expression;
+    if (expr == null) return;
+
+    if (property == 'font-family') {
+      final term = expr is Expressions ? expr.expressions.firstOrNull : expr;
+      if (term is LiteralTerm) {
+        final v = term.value;
+        _currentFamily = v is Identifier ? v.name : v as String;
+      }
+    } else if (property == 'src') {
+      _currentUrls = _extractUrls(expr);
+    }
+
+    super.visitDeclaration(node);
+  }
+
+  List<String> _extractUrls(Expression expr) {
+    if (expr is! Expressions) return [];
+    return expr.expressions
+        .whereType<UriTerm>()
+        .map((t) => t.value as String)
+        .toList();
   }
 }
 
