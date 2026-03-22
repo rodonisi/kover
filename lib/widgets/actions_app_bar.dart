@@ -104,11 +104,9 @@ class _SyncButton extends HookConsumerWidget {
         targetAnchor: Alignment.bottomRight,
         followerAnchor: Alignment.topRight,
         offset: const Offset(0, LayoutConstants.smallerPadding),
-        child: Align(
+        child: const Align(
           alignment: Alignment.topRight,
-          child: _SyncMenuOverlay(
-            onDismiss: overlayController.hide,
-          ),
+          child: _SyncMenuOverlay(),
         ),
       ),
       child: CompositedTransformTarget(
@@ -142,9 +140,7 @@ class _SyncButton extends HookConsumerWidget {
 }
 
 class _SyncMenuOverlay extends ConsumerWidget {
-  final VoidCallback onDismiss;
-
-  const _SyncMenuOverlay({required this.onDismiss});
+  const _SyncMenuOverlay();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
