@@ -3,6 +3,7 @@ import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/dao/volumes_dao.dart';
 import 'package:kover/mapping/dto/chapter_dto_mappings.dart';
+import 'package:kover/utils/extensions/date_time.dart';
 
 extension VolumeDtoMappings on VolumeDto {
   VolumeWithChaptersCompanion toVolumeCompanion() {
@@ -20,8 +21,8 @@ extension VolumeDtoMappings on VolumeDto {
         avgHoursToRead: Value.absentIfNull(avgHoursToRead),
         primaryColor: Value.absentIfNull(primaryColor),
         secondaryColor: Value.absentIfNull(secondaryColor),
-        created: Value.absentIfNull(createdUtc),
-        lastModified: Value.absentIfNull(lastModifiedUtc),
+        created: Value.absentIfNull(createdUtc?.normalizeUtc()),
+        lastModified: Value.absentIfNull(lastModifiedUtc?.normalizeUtc()),
       ),
       chapters: (chapters ?? []).map(
         (c) => c.toChapterCompanion().copyWith(

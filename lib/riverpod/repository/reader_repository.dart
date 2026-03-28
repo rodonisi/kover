@@ -141,10 +141,10 @@ class ReaderRepository {
 
     for (final toUpdate in newer) {
       final chaptersLastRead = await _db.readerDao
-          .getLastReadDateForSeriesChapters(seriesId: toUpdate.key);
+          .getLastReadDatePerSeriesChapters(seriesId: toUpdate.key);
 
       final outdated = chaptersLastRead.entries.where(
-        (e) => toUpdate.value.isAfter(e.value),
+        (e) => e.value == null || toUpdate.value.isAfter(e.value!),
       );
 
       final progress = await Future.wait(
@@ -169,16 +169,17 @@ class ReaderRepository {
 
     await Future.wait(
       dirty.map((d) async {
-        await _readerClient.sendProgress(d);
-      }),
-    );
-    await Future.wait(
-      dirty.map((d) async {
         remoteProgress.add(await _readerClient.getProgress(d.chapterId));
       }),
     );
 
-    await _db.readerDao.mergeProgressBatch(remoteProgress);
+    final remaining = await _db.readerDao.mergeProgressBatch(remoteProgress);
+
+    await Future.wait(
+      remaining.map((d) async {
+        await _readerClient.sendProgress(d);
+      }),
+    );
     await _db.readerDao.clearDirtyFlags(dirty.map((e) => e.chapterId));
   }
 

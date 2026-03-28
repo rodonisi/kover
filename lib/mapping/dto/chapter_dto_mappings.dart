@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/models/enums/format.dart';
+import 'package:kover/utils/extensions/date_time.dart';
 
 extension ChapterDtoMappings on ChapterDto {
   /// Map available to a [ReadingProgressCompanion].
@@ -12,7 +13,7 @@ extension ChapterDtoMappings on ChapterDto {
       volumeId: Value(volumeId!),
       pagesRead: Value(pagesRead!),
       totalReads: Value(totalReads!),
-      lastModified: Value.absentIfNull(lastReadingProgressUtc),
+      lastModified: Value.absentIfNull(lastReadingProgressUtc?.normalizeUtc()),
     );
   }
 
@@ -41,9 +42,9 @@ extension ChapterDtoMappings on ChapterDto {
       primaryColor: Value.absentIfNull(primaryColor),
       secondaryColor: Value.absentIfNull(secondaryColor),
       isSpecial: Value.absentIfNull(isSpecial),
-      releaseDate: Value.absentIfNull(releaseDate),
-      created: Value.absentIfNull(createdUtc),
-      lastModified: Value.absentIfNull(lastModifiedUtc),
+      releaseDate: Value.absentIfNull(releaseDate?.normalizeUtc()),
+      created: Value.absentIfNull(createdUtc?.normalizeUtc()),
+      lastModified: Value.absentIfNull(lastModifiedUtc?.normalizeUtc()),
     );
   }
 }

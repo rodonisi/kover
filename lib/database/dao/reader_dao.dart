@@ -11,17 +11,22 @@ part 'reader_dao.g.dart';
 class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   ReaderDao(super.attachedDatabase);
 
+  JoinedSelectStatement<HasResultSet, dynamic> _chaptersWithProgressQuery({
+    required int seriesId,
+  }) {
+    return select(chapters).join([
+      leftOuterJoin(
+        readingProgress,
+        readingProgress.chapterId.equalsExp(chapters.id),
+      ),
+    ])..where(chapters.seriesId.equals(seriesId));
+  }
+
   /// Base continue point query
   JoinedSelectStatement<HasResultSet, dynamic> _continuePointQuery({
     required int seriesId,
   }) {
-    return select(chapters).join([
-        leftOuterJoin(
-          readingProgress,
-          readingProgress.chapterId.equalsExp(chapters.id),
-        ),
-      ])
-      ..where(chapters.seriesId.equals(seriesId))
+    return _chaptersWithProgressQuery(seriesId: seriesId)
       ..orderBy([
         OrderingTerm.desc(
           readingProgress.chapterId.isNotNull() &
@@ -70,15 +75,16 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   }
 
   /// Get last read date for all chapters of series [seriesId]
-  Future<Map<int, DateTime>> getLastReadDateForSeriesChapters({
+  Future<Map<int, DateTime?>> getLastReadDatePerSeriesChapters({
     required int seriesId,
   }) async {
-    final result = await managers.readingProgress
-        .filter((f) => f.seriesId.id(seriesId))
-        .get();
+    final result = await _chaptersWithProgressQuery(seriesId: seriesId).get();
 
     return {
-      for (final entry in result) entry.chapterId: entry.lastModified,
+      for (final entry in result)
+        entry.readTable(chapters).id: entry
+            .readTableOrNull(readingProgress)
+            ?.lastModified,
     };
   }
 
@@ -116,14 +122,13 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
 
   /// Merge a progress batch. Updates all entries that are last modified at the
   /// same time or before the existing dirty progress entry
-  Future<void> mergeProgressBatch(
+  Future<List<ReadingProgressData>> mergeProgressBatch(
     Iterable<ReadingProgressCompanion> incomingList,
   ) async {
     final ids = incomingList.map((p) => p.chapterId.value).toList();
-    final localRecords = await (select(
-      readingProgress,
-    )..where((tbl) => tbl.chapterId.isIn(ids))).get();
-
+    final localRecords = await managers.readingProgress
+        .filter((f) => f.chapterId.id.isIn(ids))
+        .get();
     final localMap = {for (var r in localRecords) r.chapterId: r};
 
     final toUpdate = incomingList.where((incoming) {
@@ -140,6 +145,10 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
         b.insertAllOnConflictUpdate(readingProgress, toUpdate);
       });
     }
+
+    return await managers.readingProgress
+        .filter((f) => f.dirty.equals(true))
+        .get();
   }
 
   /// Clear dirty flag for all progress entries for the given [chapterIds]

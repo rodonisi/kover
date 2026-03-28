@@ -7,6 +7,7 @@ import 'package:kover/mapping/dto/chapter_dto_mappings.dart';
 import 'package:kover/mapping/dto/series_dto_mappings.dart';
 import 'package:kover/mapping/dto/series_metadata_dto_mappings.dart';
 import 'package:kover/mapping/dto/volume_dto_mappings.dart';
+import 'package:kover/utils/extensions/date_time.dart';
 
 class SeriesSyncOperations {
   final Openapi _client;
@@ -28,7 +29,13 @@ class SeriesSyncOperations {
     final res = await _fetchAllSeries();
 
     return Map.fromEntries(
-      res.map((entry) => MapEntry(entry.id!, entry.latestReadDate!)),
+      res
+          .where((entry) => entry.id != null && entry.latestReadDate != null)
+          .map(
+            (entry) =>
+                MapEntry(entry.id!, entry.latestReadDate!.normalizeUtc()),
+          ),
+
     );
   }
 

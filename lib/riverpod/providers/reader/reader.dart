@@ -86,6 +86,8 @@ class Reader extends _$Reader {
         'Saving progress: page=$page, scrollId=$scrollId, chapter=${current.chapter.id}',
       );
 
+      if (!ref.mounted) return;
+
       await ref
           .read(readerRepositoryProvider)
           .saveProgress(

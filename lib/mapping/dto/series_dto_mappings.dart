@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/models/enums/format.dart';
+import 'package:kover/utils/extensions/date_time.dart';
 
 extension SeriesDtoMappings on SeriesDto {
   SeriesCompanion toSeriesCompanion() {
@@ -21,8 +22,8 @@ extension SeriesDtoMappings on SeriesDto {
       primaryColor: Value(primaryColor),
       secondaryColor: Value(secondaryColor),
       isBlacklisted: Value.absentIfNull(isBlacklisted),
-      created: Value.absentIfNull(created),
-      lastChapterAdded: Value.absentIfNull(lastChapterAddedUtc),
+      created: Value.absentIfNull(created?.normalizeUtc()),
+      lastChapterAdded: Value.absentIfNull(lastChapterAddedUtc?.normalizeUtc()),
     );
   }
 }
