@@ -19,6 +19,10 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
         readingProgress,
         readingProgress.chapterId.equalsExp(chapters.id),
       ),
+      leftOuterJoin(
+        volumes,
+        volumes.id.equalsExp(chapters.volumeId),
+      ),
     ])..where(chapters.seriesId.equals(seriesId));
   }
 
@@ -38,6 +42,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
               readingProgress.pagesRead.equals(0),
         ),
         OrderingTerm.asc(chapters.sortOrder),
+        OrderingTerm.asc(volumes.minNumber),
       ])
       ..limit(1);
   }
