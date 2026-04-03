@@ -47,7 +47,10 @@ sealed class ImageReaderSettingsState with _$ImageReaderSettingsState {
 class DefaultImageReaderSettings extends _$DefaultImageReaderSettings {
   @override
   Future<ImageReaderSettingsState> build() async {
-    await persist(ref.watch(storageProvider.future)).future;
+    await persist(
+      ref.watch(storageProvider.future),
+      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
+    ).future;
     return state.value ?? const ImageReaderSettingsState();
   }
 
@@ -61,7 +64,10 @@ class DefaultImageReaderSettings extends _$DefaultImageReaderSettings {
 class ImageReaderSettings extends _$ImageReaderSettings {
   @override
   Future<ImageReaderSettingsState> build({required int seriesId}) async {
-    await persist(ref.watch(storageProvider.future)).future;
+    await persist(
+      ref.watch(storageProvider.future),
+      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
+    ).future;
     return state.value ??
         await ref.watch(defaultImageReaderSettingsProvider.future);
   }

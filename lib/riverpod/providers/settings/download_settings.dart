@@ -22,7 +22,10 @@ sealed class DownloadSettingsState with _$DownloadSettingsState {
 class DownloadSettings extends _$DownloadSettings {
   @override
   Future<DownloadSettingsState> build() async {
-    await persist(ref.watch(storageProvider.future)).future;
+    await persist(
+      ref.watch(storageProvider.future),
+      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
+    ).future;
     return state.value ?? const DownloadSettingsState();
   }
 

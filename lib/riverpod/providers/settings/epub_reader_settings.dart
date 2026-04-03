@@ -42,7 +42,10 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
 class DefaultEpubReaderSettings extends _$DefaultEpubReaderSettings {
   @override
   Future<EpubReaderSettingsState> build() async {
-    await persist(ref.watch(storageProvider.future)).future;
+    await persist(
+      ref.watch(storageProvider.future),
+      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
+    ).future;
     return state.value ?? const EpubReaderSettingsState();
   }
 
@@ -60,7 +63,10 @@ class EpubReaderSettings extends _$EpubReaderSettings {
 
   @override
   Future<EpubReaderSettingsState> build({required int seriesId}) async {
-    await persist(ref.watch(storageProvider.future)).future;
+    await persist(
+      ref.watch(storageProvider.future),
+      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
+    ).future;
     return state.value ??
         await ref.watch(defaultEpubReaderSettingsProvider.future);
   }

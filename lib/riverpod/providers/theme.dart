@@ -127,7 +127,10 @@ sealed class ThemeModel with _$ThemeModel {
 class Theme extends _$Theme {
   @override
   Future<ThemeModel> build() async {
-    await persist(ref.watch(storageProvider.future)).future;
+    await persist(
+      ref.watch(storageProvider.future),
+      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
+    ).future;
 
     return state.value ?? const ThemeModel();
   }
