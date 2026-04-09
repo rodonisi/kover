@@ -166,7 +166,7 @@ class ImageReaderSettings extends _$ImageReaderSettings {
   }
 
   Future<void> reset() async {
-    final defaults = await ref.watch(defaultImageReaderSettingsProvider.future);
+    final defaults = await ref.read(defaultImageReaderSettingsProvider.future);
     state = AsyncData(defaults);
   }
 

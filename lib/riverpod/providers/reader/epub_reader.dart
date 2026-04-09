@@ -101,36 +101,36 @@ class EpubReflow extends _$EpubReflow {
   Future<void> addElement() async {
     if (_processingRender) return;
 
-    _processingRender = true;
+    try {
+      _processingRender = true;
 
-    final current = await future;
+      final current = await future;
 
-    final next = _cursor.next();
+      final next = _cursor.next();
 
-    if (next == null) {
-      log.d('no next element, all elements measured');
-      final newSubpages = [
-        ...current.subpages,
-        if (current.buffer.hasChildNodes()) current.buffer,
-      ];
+      if (next == null) {
+        log.d('no next element, all elements measured');
+        final newSubpages = [
+          ...current.subpages,
+          if (current.buffer.hasChildNodes()) current.buffer,
+        ];
+        state = AsyncData(
+          current.copyWith(
+            subpages: newSubpages,
+            status: .done,
+          ),
+        );
+        return;
+      }
+
       state = AsyncData(
         current.copyWith(
-          subpages: newSubpages,
-          status: .done,
+          buffer: DocumentFragment()..append(next),
         ),
       );
-      return;
+    } finally {
+      _processingRender = false;
     }
-
-    // _buffer = DocumentFragment()..append(next);
-
-    state = AsyncData(
-      current.copyWith(
-        buffer: DocumentFragment()..append(next),
-      ),
-    );
-
-    _processingRender = false;
   }
 
   Future<void> overflow() async {

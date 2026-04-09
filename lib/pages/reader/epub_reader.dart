@@ -81,7 +81,6 @@ class EpubReader extends HookConsumerWidget {
                           seriesId: seriesId,
                           chapterId: chapterId,
                           page: index,
-                          outerController: controller,
                           fromEnd: fromEnd,
                         );
                       },
@@ -105,14 +104,12 @@ class _Page extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
   final int page;
-  final PageController outerController;
   final bool fromEnd;
 
   const _Page({
     required this.seriesId,
     required this.chapterId,
     required this.page,
-    required this.outerController,
     this.fromEnd = false,
   });
 
@@ -255,7 +252,6 @@ class _MeasureContent extends ConsumerWidget {
         return Async(
           asyncValue: ref.watch(provider),
           data: (data) => Offstage(
-            // offstage: false,
             child: Column(
               mainAxisSize: .min,
               children: [
