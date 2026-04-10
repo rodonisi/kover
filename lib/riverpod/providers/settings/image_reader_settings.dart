@@ -68,8 +68,8 @@ class ImageReaderSettings extends _$ImageReaderSettings {
       ref.watch(storageProvider.future),
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
     ).future;
-    return state.value ??
-        await ref.watch(defaultImageReaderSettingsProvider.future);
+    final defaults = await ref.watch(defaultImageReaderSettingsProvider.future);
+    return state.value ?? defaults;
   }
 
   Future<void> toggleScaleType() async {
@@ -166,9 +166,8 @@ class ImageReaderSettings extends _$ImageReaderSettings {
   }
 
   Future<void> reset() async {
-    state = AsyncData(
-      await ref.read(defaultImageReaderSettingsProvider.future),
-    );
+    final defaults = await ref.read(defaultImageReaderSettingsProvider.future);
+    state = AsyncData(defaults);
   }
 
   Future<void> setDefault() async {

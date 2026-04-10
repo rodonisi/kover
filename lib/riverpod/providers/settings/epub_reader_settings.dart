@@ -67,8 +67,9 @@ class EpubReaderSettings extends _$EpubReaderSettings {
       ref.watch(storageProvider.future),
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
     ).future;
-    return state.value ??
-        await ref.watch(defaultEpubReaderSettingsProvider.future);
+
+    final defaults = await ref.watch(defaultEpubReaderSettingsProvider.future);
+    return state.value ?? defaults;
   }
 
   Future<void> toggleReadDirection() async {
@@ -155,7 +156,8 @@ class EpubReaderSettings extends _$EpubReaderSettings {
   }
 
   Future<void> reset() async {
-    state = AsyncData(await ref.read(defaultEpubReaderSettingsProvider.future));
+    final defaults = await ref.read(defaultEpubReaderSettingsProvider.future);
+    state = AsyncData(defaults);
   }
 
   Future<void> setDefault() async {

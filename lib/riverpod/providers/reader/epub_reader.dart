@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:html/dom.dart';
 import 'package:kover/models/page_content.dart';
 import 'package:kover/riverpod/providers/book.dart';
@@ -15,94 +16,61 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'epub_reader.freezed.dart';
 part 'epub_reader.g.dart';
 
+enum EpubReflowStatus {
+  measuring,
+  done,
+}
+
 @freezed
-sealed class EpubReaderState with _$EpubReaderState {
-  const EpubReaderState._();
+sealed class EpubReflowState with _$EpubReflowState {
+  const EpubReflowState._();
 
-  const factory EpubReaderState.measuring({
-    required int pageIndex,
-    required int totalPages,
+  const factory EpubReflowState({
     required PageContent page,
-    required DocumentFragment subpage,
-    required NodeCursor cursor,
-    @Default(0) int subpageIndex,
-    @Default(false) bool fromLast,
+    required DocumentFragment buffer,
+    @Default(EpubReflowStatus.measuring) EpubReflowStatus status,
     @Default(null) String? scrollId,
+    @Default(null) int? resumeSubpage,
     @Default([]) List<DocumentFragment> subpages,
-  }) = Measuring;
-
-  const factory EpubReaderState.display({
-    required int pageIndex,
-    required int totalPages,
-    required PageContent page,
-    required DocumentFragment subpage,
-    required NodeCursor cursor,
-    @Default(0) int subpageIndex,
-    @Default([]) List<DocumentFragment> subpages,
-  }) = Display;
-
-  T when<T>({
-    required T Function(Measuring value) measuring,
-    required T Function(Display value) display,
-  }) {
-    return switch (this) {
-      Measuring() => measuring(this as Measuring),
-      Display() => display(this as Display),
-    };
-  }
-
-  T? whenOrNull<T>({
-    T Function(Measuring value)? measuring,
-    T Function(Display value)? display,
-  }) {
-    return switch (this) {
-      Measuring() when measuring != null => measuring(this as Measuring),
-      Display() when display != null => display(this as Display),
-      _ => null,
-    };
-  }
+  }) = _EpubReflowState;
 }
 
 @riverpod
-class EpubReader extends _$EpubReader {
+class EpubReflow extends _$EpubReflow {
   bool _processingRender = false;
 
   // The scroll-id to seek to on resume. Set once from the DB on the very
   // first build and cleared as soon as we reach a Display state, so that
   // subsequent page-turn rebuilds never re-trigger a seek.
   String? _resumeScrollId;
+  late NodeCursor _cursor;
 
   @override
-  Future<EpubReaderState> build({
+  Future<EpubReflowState> build({
     required int seriesId,
     required int chapterId,
+    required int page,
   }) async {
     // force rerender on settings change
     ref.listen(epubReaderSettingsProvider(seriesId: seriesId), (prev, next) {
       ref.invalidateSelf(asReload: true);
     });
 
-    final readerState = await ref.watch(
+    final readerState = await ref.read(
       readerProvider(
         seriesId: seriesId,
         chapterId: chapterId,
       ).future,
     );
 
-    final currentPage = ref
-        .watch(
-          readerNavigationProvider(seriesId: seriesId, chapterId: chapterId),
-        )
-        .currentPage;
-
-    if (state.value == null) {
+    if (state.value == null && page == readerState.initialPage) {
       _resumeScrollId = readerState.bookScrollId;
     }
 
     final pageContent = await ref.read(
       epubPageProvider(
         chapterId: chapterId,
-        page: currentPage,
+        page: page,
       ).future,
     );
 
@@ -117,284 +85,257 @@ class EpubReader extends _$EpubReader {
       log.d('loaded font family ${family.key}');
     }
 
-    final cursor = NodeCursor(
+    _cursor = NodeCursor(
       root:
           pageContent.root.nodes.firstWhere((node) => node is Element)
               as Element,
     );
 
-    final fromLast = (state.value != null)
-        ? state.value!.pageIndex == currentPage + 1
-        : false;
-
-    final fragment = DocumentFragment();
-
-    listenSelf((prev, next) {
-      next.whenData((data) async {
-        await data.whenOrNull(
-          display: (display) async {
-            _resumeScrollId = null;
-
-            await ref
-                .read(
-                  readerProvider(
-                    seriesId: seriesId,
-                    chapterId: chapterId,
-                  ).notifier,
-                )
-                .saveProgress(
-                  page: display.pageIndex,
-                  scrollId: display.subpage.paragraphScrollId(),
-                );
-          },
-        );
-      });
-    });
-
-    return EpubReaderState.measuring(
-      pageIndex: currentPage,
-      totalPages: readerState.totalPages,
-      fromLast: fromLast,
+    return EpubReflowState(
       page: pageContent,
-      subpage: fragment,
       scrollId: _resumeScrollId,
-      cursor: cursor,
+      buffer: DocumentFragment(),
     );
   }
 
   Future<void> addElement() async {
     if (_processingRender) return;
 
-    _processingRender = true;
+    try {
+      _processingRender = true;
 
-    final current = await future;
+      final current = await future;
 
-    current.whenOrNull(
-      measuring: (measuring) {
-        if (measuring.subpageIndex + 1 < measuring.subpages.length) {
-          log.d(
-            'next page already measured, converting to display with subpageIndex=${measuring.subpageIndex}',
-          );
-          state = AsyncData(
-            EpubReaderState.display(
-              pageIndex: measuring.pageIndex,
-              totalPages: measuring.totalPages,
-              page: measuring.page,
-              subpage: measuring.subpages[measuring.subpageIndex],
-              subpageIndex: measuring.subpageIndex,
-              subpages: measuring.subpages,
-              cursor: measuring.cursor,
-            ),
-          );
-          return;
-        }
+      final next = _cursor.next();
 
-        final next = measuring.cursor.next();
-
-        if (next == null) {
-          log.d('no next element, all elements measured');
-          final newSubpages = [
-            ...measuring.subpages,
-            if (measuring.subpage.hasChildNodes()) measuring.subpage,
-          ];
-          state = AsyncData(
-            EpubReaderState.display(
-              pageIndex: measuring.pageIndex,
-              totalPages: measuring.totalPages,
-              page: measuring.page,
-              subpage: measuring.subpage,
-              subpageIndex: measuring.subpageIndex,
-              subpages: newSubpages,
-              cursor: measuring.cursor,
-            ),
-          );
-          return;
-        }
-
-        final fragment = DocumentFragment()..append(next);
-
+      if (next == null) {
+        log.d('no next element, all elements measured');
+        final newSubpages = [
+          ...current.subpages,
+          if (current.buffer.hasChildNodes()) current.buffer,
+        ];
         state = AsyncData(
-          measuring.copyWith(
-            subpage: fragment,
+          current.copyWith(
+            subpages: newSubpages,
+            status: .done,
           ),
         );
-      },
-    );
+        return;
+      }
 
-    _processingRender = false;
+      state = AsyncData(
+        current.copyWith(
+          buffer: DocumentFragment()..append(next),
+        ),
+      );
+    } finally {
+      _processingRender = false;
+    }
   }
 
   Future<void> overflow() async {
     final current = await future;
 
-    current.whenOrNull(
-      measuring: (measuring) {
-        log.d('overflow detected');
+    log.d('overflow detected');
 
-        if (measuring.cursor.splitChild()) {
-          log.d('splitting child node for overflow');
-          addElement();
-          return;
+    if (_cursor.splitChild()) {
+      log.d('splitting child node for overflow');
+      await addElement();
+      return;
+    }
+
+    final newSubpageNode = _cursor.split();
+    if (!newSubpageNode.hasChildNodes()) {
+      log.d('split resulted in an empty page, re-measuring');
+
+      state = AsyncData(
+        current.copyWith(
+          buffer: DocumentFragment(),
+        ),
+      );
+      return;
+    }
+
+    final fragment = DocumentFragment()..append(newSubpageNode);
+    final newSubpages = [...current.subpages, fragment];
+    var newState = current.copyWith(
+      subpages: newSubpages,
+      buffer: DocumentFragment(),
+    );
+
+    if (current.scrollId != null) {
+      final resumePoint = fragment.querySelector(
+        '[${HtmlConstants.scrollIdAttribute}="${current.scrollId}"]',
+      );
+      if (resumePoint != null && resumePoint.hasChildNodes()) {
+        log.d(
+          'found resume point with scrollId: ${current.scrollId}',
+        );
+
+        resumePoint.classes.add(HtmlConstants.resumeParagraphClass);
+        newState = newState.copyWith(
+          scrollId: null,
+          resumeSubpage: newSubpages.length - 1,
+        );
+      }
+    }
+
+    state = AsyncData(newState);
+  }
+}
+
+@freezed
+sealed class EpubNavigationState with _$EpubNavigationState {
+  const factory EpubNavigationState({
+    required int page,
+    required int totalPages,
+    required int subpage,
+    @Default(false) bool ready,
+  }) = _EpubNavigationState;
+}
+
+@riverpod
+class EpubNavigation extends _$EpubNavigation {
+  ProviderSubscription<AsyncValue<EpubReflowState>>? _reflowSub;
+  var _fromLastSubpage = false;
+  var _resumed = false;
+
+  @override
+  Future<EpubNavigationState> build({
+    required int seriesId,
+    required int chapterId,
+  }) async {
+    final reader = await ref.read(
+      readerProvider(seriesId: seriesId, chapterId: chapterId).future,
+    );
+
+    _handleNavigationProviderChanges();
+    _handleProgress();
+    _handleSettingsChanges();
+
+    return EpubNavigationState(
+      page: reader.initialPage,
+      totalPages: reader.totalPages,
+      subpage: 0,
+    );
+  }
+
+  void _handleSettingsChanges() {
+    ref.listen(epubReaderSettingsProvider(seriesId: seriesId), (prev, next) {
+      _resumed = false;
+      ref.invalidateSelf(asReload: true);
+    });
+  }
+
+  void _handleProgress() {
+    listenSelf((prev, next) {
+      next.whenData((data) async {
+        if (!data.ready) return;
+
+        final reflow = await ref.read(
+          epubReflowProvider(
+            seriesId: seriesId,
+            chapterId: chapterId,
+            page: data.page,
+          ).future,
+        );
+
+        final scrollId = reflow.subpages[data.subpage].paragraphScrollId();
+
+        await ref
+            .read(
+              readerProvider(seriesId: seriesId, chapterId: chapterId).notifier,
+            )
+            .saveProgress(page: data.page, scrollId: scrollId);
+      });
+    });
+  }
+
+  void _handleNavigationProviderChanges() {
+    ref.listen(
+      readerNavigationProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+      ).select((state) => state.currentPage),
+      (prev, next) {
+        final current = state.value;
+        if (current == null) return;
+
+        if (prev != null && (next - prev).abs() > 1) {
+          _fromLastSubpage = false;
         }
 
-        final newSubpageNode = measuring.cursor.split();
-        if (!newSubpageNode.hasChildNodes()) {
-          log.d('split resulted in an empty page, re-measuring');
-          state = AsyncData(
-            measuring.copyWith(
-              subpage: DocumentFragment(),
-            ),
-          );
-          return;
-        }
-        final fragment = DocumentFragment()..append(newSubpageNode);
-        final newSubpages = [...measuring.subpages, fragment];
+        state = AsyncData(
+          current.copyWith(
+            page: next,
+            subpage: 0,
+            ready: false,
+          ),
+        );
 
-        if (measuring.fromLast) {
-          log.d('fromLast: fast forward');
-          state = AsyncData(
-            measuring.copyWith(
-              subpages: newSubpages,
-              subpageIndex: measuring.subpageIndex + 1,
-              subpage: DocumentFragment(),
-            ),
-          );
-          return; // Stay in measuring state
-        }
+        _handleReflowChanges(
+          seriesId: seriesId,
+          chapterId: chapterId,
+          page: next,
+        );
+      },
+      fireImmediately: true,
+    );
+  }
 
-        if (measuring.scrollId != null) {
-          final resumePoint = fragment.querySelector(
-            '[${HtmlConstants.scrollIdAttribute}="${measuring.scrollId}"]',
-          );
-          if (resumePoint == null || !resumePoint.hasChildNodes()) {
-            log.d(
-              'searching for resume point with scrollId: ${measuring.scrollId}, fast forward',
-            );
+  void _handleReflowChanges({
+    required int seriesId,
+    required int chapterId,
+    required int page,
+  }) {
+    _reflowSub?.close();
+    _reflowSub = ref.listen(
+      epubReflowProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        page: page,
+      ),
+      (prev, next) {
+        next.whenData((data) {
+          final current = state.value;
+          if (current == null) return;
+
+          if (_fromLastSubpage) {
+            if (data.status == .done) {
+              state = AsyncData(
+                current.copyWith(
+                  subpage: data.subpages.length - 1,
+                  ready: true,
+                ),
+              );
+              _fromLastSubpage = false;
+            }
+            return;
+          }
+
+          if (!_resumed && data.resumeSubpage != null) {
+            _resumed = true;
             state = AsyncData(
-              measuring.copyWith(
-                subpages: newSubpages,
-                subpageIndex: measuring.subpageIndex + 1,
-                subpage: DocumentFragment(),
-              ),
+              current.copyWith(subpage: data.resumeSubpage!, ready: true),
             );
             return;
           }
 
-          resumePoint.classes.add(HtmlConstants.resumeParagraphClass);
-        }
-
-        log.d(
-          'creating new display state for subpageIndex: ${measuring.subpageIndex}, total subpages: ${newSubpages.length}',
-        );
-        state = AsyncData(
-          EpubReaderState.display(
-            pageIndex: measuring.pageIndex,
-            totalPages: measuring.totalPages,
-            page: measuring.page,
-            subpage: fragment,
-            subpageIndex: newSubpages.length - 1,
-            subpages: newSubpages,
-            cursor: measuring.cursor,
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> nextPage() async {
-    final current = await future;
-
-    await current.whenOrNull(
-      display: (display) async {
-        final nextSubpageIndex = display.subpageIndex + 1;
-        //  Next subpage is already measured and available
-        if (nextSubpageIndex < display.subpages.length) {
-          log.d('displaying pre-measured subpage $nextSubpageIndex');
           state = AsyncData(
-            display.copyWith(
-              subpage: display.subpages[nextSubpageIndex],
-              subpageIndex: nextSubpageIndex,
+            current.copyWith(
+              ready: data.status == .done || data.scrollId == null,
             ),
           );
-          return;
-        }
-
-        //  Need to measure a new subpage
-        if (display.cursor.hasNext) {
-          log.d('start measuring for subpage $nextSubpageIndex');
-          final next = EpubReaderState.measuring(
-            pageIndex: display.pageIndex,
-            totalPages: display.totalPages,
-            subpageIndex: nextSubpageIndex,
-            subpage: DocumentFragment(),
-            page: display.page,
-            subpages: display.subpages,
-            cursor: display.cursor,
-          );
-
-          state = const AsyncLoading();
-          state = AsyncData(next);
-          log.d('state updated, adding first element');
-          await addElement();
-          return;
-        }
-
-        // No more measured subpages and no more content to measure
-        log.d('at end of chapter, moving to next chapter page');
-        ref
-            .read(
-              readerNavigationProvider(
-                seriesId: seriesId,
-                chapterId: chapterId,
-              ).notifier,
-            )
-            .nextPage();
+        });
       },
-      measuring: (measuring) {
-        log.d('ERROR: nextPage called while in measuring state!');
-      },
-    );
-  }
-
-  Future<void> previousPage() async {
-    final current = await future;
-    log.d('previousPage called, current state type: ${current.runtimeType}');
-
-    // Guard: don't allow navigation while measuring
-    if (current is Measuring) {
-      log.d('ignoring previousPage - already measuring');
-      return;
-    }
-
-    await current.whenOrNull(
-      display: (display) async {
-        log.d('moving to previous page');
-        if (display.subpageIndex <= 0) {
-          log.d('at first subpage, moving to previous chapter page');
-          ref
-              .read(
-                readerNavigationProvider(
-                  seriesId: seriesId,
-                  chapterId: chapterId,
-                ).notifier,
-              )
-              .previousPage();
-          return;
-        }
-
-        final prevSubpageIndex = display.subpageIndex - 1;
-        final next = display.copyWith(
-          subpageIndex: prevSubpageIndex,
-          subpage: display.subpages[prevSubpageIndex],
-        );
-
-        state = AsyncData(next);
-      },
+      fireImmediately: true,
     );
   }
 
   Future<void> jumpToPage(int page) async {
-    log.d('Jumping to page $page');
+    final current = await future;
+
+    if (!current.ready) return;
 
     ref
         .read(
@@ -404,5 +345,58 @@ class EpubReader extends _$EpubReader {
           ).notifier,
         )
         .jumpToPage(page);
+  }
+
+  Future<void> jumpToSubpage(int subpage) async {
+    final current = await future;
+
+    if (!current.ready) return;
+
+    final reflow = await ref.read(
+      epubReflowProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        page: current.page,
+      ).future,
+    );
+
+    state = AsyncData(
+      current.copyWith(
+        subpage: subpage,
+        ready: reflow.status == .done || subpage < reflow.subpages.length,
+      ),
+    );
+  }
+
+  Future<void> nextPage() async {
+    final current = await future;
+    final reflow = await ref.read(
+      epubReflowProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        page: current.page,
+      ).future,
+    );
+
+    if (reflow.status == .measuring &&
+        current.subpage >= reflow.subpages.length) {
+      return;
+    }
+
+    if (current.subpage < reflow.subpages.length - 1) {
+      await jumpToSubpage(current.subpage + 1);
+    } else if (current.page < current.totalPages - 1) {
+      await jumpToPage(current.page + 1);
+    }
+  }
+
+  Future<void> previousPage() async {
+    final current = await future;
+    if (current.subpage > 0) {
+      await jumpToSubpage(current.subpage - 1);
+    } else if (current.page > 0) {
+      _fromLastSubpage = true;
+      await jumpToPage(current.page - 1);
+    }
   }
 }

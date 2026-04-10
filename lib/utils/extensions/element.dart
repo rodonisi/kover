@@ -1,9 +1,10 @@
 import 'package:html/dom.dart';
+import 'package:kover/utils/html_constants.dart';
 
 extension ScrollIdExtension on Element {
   /// Computes the XPath of this element relative to the root of the document.
   String get scrollId {
-    final cached = attributes['data-scroll-id'];
+    final cached = attributes[HtmlConstants.scrollIdAttribute];
     if (cached != null) {
       return cached;
     }
