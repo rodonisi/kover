@@ -64,11 +64,15 @@ class NodeCursor {
       return true;
     }
 
+    if (!hasNext) {
+      return false;
+    }
+
     // Otherwise we can split only inside current node.
     final current = iterator.current;
     return current is Element &&
         current.localName != 'p' &&
-        current.nodes.isNotEmpty;
+        current.children.isNotEmpty;
   }
 
   /// Return the root node up to and not including the current iterator position. The root children are cleared and the
