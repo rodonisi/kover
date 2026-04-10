@@ -256,20 +256,18 @@ class EpubNavigation extends _$EpubNavigation {
             page: data.page,
           ).future,
         );
-        try {
-          final scrollId = reflow.subpages[data.subpage].paragraphScrollId();
+        if (reflow.subpages.length <= data.subpage) return;
 
-          await ref
-              .read(
-                readerProvider(
-                  seriesId: seriesId,
-                  chapterId: chapterId,
-                ).notifier,
-              )
-              .saveProgress(page: data.page, scrollId: scrollId);
-        } catch (e) {
-          log.e('Error saving progress: $e');
-        }
+        final scrollId = reflow.subpages[data.subpage].paragraphScrollId();
+
+        await ref
+            .read(
+              readerProvider(
+                seriesId: seriesId,
+                chapterId: chapterId,
+              ).notifier,
+            )
+            .saveProgress(page: data.page, scrollId: scrollId);
       });
     });
   }
