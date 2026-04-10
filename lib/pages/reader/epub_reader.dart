@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
+import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/widgets/async_value.dart';
 
 class EpubReader extends HookConsumerWidget {
@@ -296,6 +297,7 @@ class _RenderContent extends ConsumerWidget {
             html,
             buildAsync: false,
             enableCaching: true,
+            factoryBuilder: () => CachedImageFactory(context),
             customStylesBuilder: (element) {
               final s = Map<String, String>.from(
                 styles[element.localName] ?? {},
