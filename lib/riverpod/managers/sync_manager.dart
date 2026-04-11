@@ -5,6 +5,7 @@ import 'package:kover/riverpod/providers/connectivity.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/riverpod/repository/book_repository.dart';
 import 'package:kover/riverpod/repository/chapters_repository.dart';
+import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/riverpod/repository/libraries_repository.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
@@ -181,23 +182,24 @@ class SyncManager extends _$SyncManager {
   }
 
   void _listenUser() {
-    ref.listen(currentUserProvider, (prev, next) {
+    ref.listen(currentUserProvider, (prev, next) async {
       _hasUser = next.hasValue;
       if (next.hasError) return;
-      if (next.hasValue && prev?.value != next.value) {
-        fullSync();
+      if (prev != null && next.hasValue && prev.value != next.value) {
+        await ref.read(databaseProvider).clearDb();
+        await fullSync();
       }
     });
   }
 
   void _listenConnectivity() {
     ref.listen(hasConnectionProvider, (prev, next) {
-      next.whenData((good) {
+      next.whenData((good) async {
         _hasConnection = good;
 
         // skip update on first event as we are syncing already
         if (prev != null && good && good != prev.value) {
-          fullSync();
+          await fullSync();
         }
       });
     });

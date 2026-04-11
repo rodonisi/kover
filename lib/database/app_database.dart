@@ -22,6 +22,7 @@ import 'package:kover/database/tables/volumes.dart';
 import 'package:kover/database/tables/want_to_read.dart';
 import 'package:kover/models/enums/format.dart';
 import 'package:kover/models/enums/library_type.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'app_database.g.dart';
@@ -66,6 +67,18 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   int get schemaVersion => 1;
+
+  /// Clear all content data from the database. Does not clear app state data (e.g. credentials, settings).
+  /// Useful e.g. when switching user.
+  Future<void> clearDb() {
+    log.i('Clearing database');
+    return transaction(() async {
+      await delete(chapters).go();
+      await delete(volumes).go();
+      await delete(series).go();
+      await delete(libraries).go();
+    });
+  }
 
   static QueryExecutor _openConnection() {
     return driftDatabase(

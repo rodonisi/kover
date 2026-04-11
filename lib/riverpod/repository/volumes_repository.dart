@@ -2,7 +2,7 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/models/volume_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
-import 'package:kover/riverpod/providers/settings/settings.dart';
+import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/volume_sync_operations.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

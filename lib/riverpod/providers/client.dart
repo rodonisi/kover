@@ -1,6 +1,6 @@
 import 'package:chopper/chopper.dart';
 import 'package:kover/api/openapi.swagger.dart';
-import 'package:kover/riverpod/providers/settings/settings.dart';
+import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'client.g.dart';
@@ -20,7 +20,7 @@ ChopperClient getChopperClient(Uri uri, String apiKey) {
 
 @Riverpod(keepAlive: true)
 ChopperClient authenticatedClient(Ref ref) {
-  final settings = ref.watch(settingsProvider).value;
+  final settings = ref.watch(credentialsProvider).value;
   final key = ref.watch(apiKeyProvider);
 
   if (settings?.url == null || settings?.apiKey == null) {

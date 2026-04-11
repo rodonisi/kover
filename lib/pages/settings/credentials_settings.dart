@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/auth.dart';
-import 'package:kover/riverpod/providers/settings/settings.dart';
+import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -12,7 +12,7 @@ class CredentialsSettings extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.watch(credentialsProvider);
     final currentUser = ref.watch(currentUserProvider);
     final loginStatus = ref.watch(loginStatusProvider);
 
@@ -108,9 +108,9 @@ class CredentialsSettings extends HookConsumerWidget {
                     FilledButton.icon(
                       onPressed: () {
                         ref
-                            .read(settingsProvider.notifier)
-                            .updateSetting(
-                              SettingsState(
+                            .read(credentialsProvider.notifier)
+                            .updateCredentials(
+                              CredentialsState(
                                 url: urlController.text,
                                 apiKey: apiKeyController.text,
                               ),

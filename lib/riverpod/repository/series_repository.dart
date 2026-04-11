@@ -3,7 +3,7 @@ import 'package:kover/database/dao/series_metadata_dao.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/models/series_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
-import 'package:kover/riverpod/providers/settings/settings.dart';
+import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/chapter_sync_operations.dart';
 import 'package:kover/sync/series_sync_operations.dart';

@@ -5,44 +5,44 @@ import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'settings.freezed.dart';
-part 'settings.g.dart';
+part 'credentials.freezed.dart';
+part 'credentials.g.dart';
 
 @freezed
-sealed class SettingsState with _$SettingsState {
-  const factory SettingsState({
+sealed class CredentialsState with _$CredentialsState {
+  const factory CredentialsState({
     String? url,
     String? apiKey,
-  }) = _SettingsState;
+  }) = _CredentialsState;
 
-  factory SettingsState.fromJson(Map<String, Object?> json) =>
-      _$SettingsStateFromJson(json);
+  factory CredentialsState.fromJson(Map<String, Object?> json) =>
+      _$CredentialsStateFromJson(json);
 }
 
 @Riverpod(keepAlive: true)
 @JsonPersist()
-class Settings extends _$Settings {
-  static const String settingsKey = 'Settings';
+class Credentials extends _$Credentials {
+  static const String persistKey = 'credentials';
 
   @override
-  Future<SettingsState> build() async {
+  Future<CredentialsState> build() async {
     await persist(
       ref.watch(storageProvider.future),
-      key: settingsKey,
+      key: persistKey,
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
     ).future;
 
-    return state.value ?? const SettingsState();
+    return state.value ?? const CredentialsState();
   }
 
-  void updateSetting(SettingsState settings) {
+  void updateCredentials(CredentialsState settings) {
     state = AsyncValue.data(settings);
   }
 }
 
 @Riverpod(keepAlive: true)
 String? apiKey(Ref ref) {
-  final settings = ref.watch(settingsProvider).value;
+  final settings = ref.watch(credentialsProvider).value;
   return settings?.apiKey;
 }
 
@@ -50,7 +50,7 @@ enum LoginStatus { noCredentials, loading, loggedIn, error }
 
 @riverpod
 LoginStatus loginStatus(Ref ref) {
-  final settings = ref.watch(settingsProvider);
+  final settings = ref.watch(credentialsProvider);
   final user = ref.watch(currentUserProvider);
 
   if (settings.isLoading) return .loading;

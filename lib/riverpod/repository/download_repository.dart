@@ -4,7 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/converters/page_content_converter.dart';
 import 'package:kover/riverpod/providers/client.dart';
-import 'package:kover/riverpod/providers/settings/settings.dart';
+import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/book_sync_operations.dart';
 import 'package:kover/sync/chapter_sync_operations.dart';
