@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
+import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/theme.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
@@ -42,6 +43,10 @@ final _outlinedDarkCardTheme = _cardTheme.copyWith(
 
 final _progressIndicatorTheme = const ProgressIndicatorThemeData(
   strokeCap: .round,
+  borderRadius: BorderRadius.only(
+    bottomRight: Radius.circular(LayoutConstants.smallestBorderRadius),
+    topRight: Radius.circular(LayoutConstants.smallestBorderRadius),
+  ),
 );
 
 @freezed
