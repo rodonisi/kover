@@ -120,6 +120,17 @@ sealed class ThemeModel with _$ThemeModel {
   );
 
   ThemeData get darkTheme => outlined ? _outlinedDarkTheme : _darkTheme;
+
+  ThemeData get theme {
+    return switch (mode) {
+      .light => lightTheme,
+      .dark => darkTheme,
+      .system =>
+        WidgetsBinding.instance.platformDispatcher.platformBrightness == .dark
+            ? darkTheme
+            : lightTheme,
+    };
+  }
 }
 
 @riverpod
