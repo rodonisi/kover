@@ -4,8 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/adaptive_sliver_grid.dart';
-import 'package:kover/widgets/chapter_card.dart';
+import 'package:kover/widgets/chapters_grid.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -35,33 +34,14 @@ class ChaptersPage extends HookConsumerWidget {
       }),
     );
 
-    return Scaffold(
-      extendBody: true,
-      body: SafeArea(
-        bottom: false,
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar.large(
-              title: const Text('Chapters'),
-              actions: [
-                IconButton(
-                  onPressed: () => hideRead.value = !hideRead.value,
-                  tooltip: hideRead.value ? 'Show read' : 'Hide read',
-                  icon: Icon(
-                    hideRead.value ? LucideIcons.eyeOff : LucideIcons.eye,
-                  ),
-                ),
-              ],
-            ),
-            SliverPadding(
-              padding: LayoutConstants.smallEdgeInsets,
-              sliver: ChaptersGrid(
-                seriesId: seriesId,
-                chapters: chapters,
-              ),
-            ),
-            const SliverBottomPadding(),
-          ],
+    return _ChaptersPage(
+      seriesId: seriesId,
+      chapters: chapters,
+      hideReadToggle: IconButton(
+        onPressed: () => hideRead.value = !hideRead.value,
+        tooltip: hideRead.value ? 'Show read' : 'Hide read',
+        icon: Icon(
+          hideRead.value ? LucideIcons.eyeOff : LucideIcons.eye,
         ),
       ),
     );
@@ -82,19 +62,58 @@ class StorylinePage extends ConsumerWidget {
       }),
     );
 
+    return _ChaptersPage(
+      seriesId: seriesId,
+      chapters: chapters,
+    );
+  }
+}
+
+class SpecialsPage extends ConsumerWidget {
+  final int seriesId;
+  const SpecialsPage({super.key, required this.seriesId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final chapters = ref.watch(
+      seriesDetailProvider(
+        seriesId: seriesId,
+      ).select((state) {
+        return state.value?.specials ?? [];
+      }),
+    );
+
+    return _ChaptersPage(
+      seriesId: seriesId,
+      chapters: chapters,
+    );
+  }
+}
+
+class _ChaptersPage extends HookConsumerWidget {
+  final int seriesId;
+  final List<ChapterModel> chapters;
+  final Widget? hideReadToggle;
+  const _ChaptersPage({
+    required this.seriesId,
+    required this.chapters,
+    this.hideReadToggle,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       extendBody: true,
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
           slivers: [
-            const SliverAppBar.large(
-              title: Text('Storyline'),
+            SliverAppBar.large(
+              title: const Text('Chapters'),
+              actions: [?hideReadToggle],
             ),
             SliverPadding(
-              padding: const EdgeInsetsGeometry.symmetric(
-                horizontal: LayoutConstants.smallPadding,
-              ),
+              padding: LayoutConstants.smallEdgeInsets,
               sliver: ChaptersGrid(
                 seriesId: seriesId,
                 chapters: chapters,
@@ -104,30 +123,6 @@ class StorylinePage extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class ChaptersGrid extends ConsumerWidget {
-  final int seriesId;
-  final List<ChapterModel> chapters;
-  const ChaptersGrid({
-    super.key,
-    required this.seriesId,
-    required this.chapters,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return AdaptiveSliverGrid(
-      itemCount: chapters.length,
-      builder: (context, index) {
-        final chapter = chapters[index];
-        return ChapterCard(
-          seriesId: seriesId,
-          chapterId: chapter.id,
-        );
-      },
     );
   }
 }

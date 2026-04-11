@@ -45,9 +45,16 @@ class SeriesDetailPage extends HookConsumerWidget {
                     spacing: LayoutConstants.smallPadding,
                     crossAxisAlignment: .start,
                     children: [
+                      if (detailsData.specials.isNotEmpty)
+                        AppListTile(
+                          title: 'Specials (${detailsData.specials.length})',
+                          onTap: () => SpecialsRoute(seriesId: seriesId).push(
+                            context,
+                          ),
+                        ),
                       if (detailsData.storyline.isNotEmpty)
                         AppListTile(
-                          title: 'Storyline',
+                          title: 'Storyline (${detailsData.storyline.length})',
                           onTap: () => StorylineRoute(
                             seriesId: seriesId,
                           ).push(context),

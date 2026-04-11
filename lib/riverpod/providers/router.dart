@@ -56,6 +56,7 @@ GoRouter router(Ref ref) {
                   ],
                 ),
                 TypedGoRoute<StorylineRoute>(path: 'storyline'),
+                TypedGoRoute<SpecialsRoute>(path: 'specials'),
               ],
             ),
           ],
@@ -186,6 +187,17 @@ class ChaptersRoute extends GoRouteData with $ChaptersRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return ChaptersPage(seriesId: seriesId);
+  }
+}
+
+class SpecialsRoute extends GoRouteData with $SpecialsRoute {
+  const SpecialsRoute({required this.seriesId});
+
+  final int seriesId;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return SpecialsPage(seriesId: seriesId);
   }
 }
 

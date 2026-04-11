@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/pages/series_detail_page/chapters_page/chapters_page.dart';
 import 'package:kover/pages/series_detail_page/series_detail_page.dart';
 import 'package:kover/pages/series_detail_page/volume_detail_page/volume_app_bar.dart';
 import 'package:kover/riverpod/providers/volume.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/widgets/chapters_grid.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
 
 class VolumeDetailPage extends ConsumerWidget {
