@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
+import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/theme.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
@@ -15,13 +16,16 @@ final _theme = MaterialTheme(
   Typography.material2021().black,
 );
 
+final _lightBase = _theme.lightMediumContrast();
+final _darkBase = _theme.dark();
+
 final _lightBorderSide = BorderSide(
-  color: _theme.light().colorScheme.outline,
+  color: _lightBase.colorScheme.outline,
   width: 2.0,
 );
 
 final _darkBorderSide = BorderSide(
-  color: _theme.light().colorScheme.outline,
+  color: _darkBase.colorScheme.outline,
   width: 2.0,
 );
 
@@ -42,6 +46,15 @@ final _outlinedDarkCardTheme = _cardTheme.copyWith(
 
 final _progressIndicatorTheme = const ProgressIndicatorThemeData(
   strokeCap: .round,
+  borderRadius: BorderRadius.only(
+    bottomRight: Radius.circular(LayoutConstants.smallestBorderRadius),
+    topRight: Radius.circular(LayoutConstants.smallestBorderRadius),
+  ),
+);
+
+final _navigationBarTheme = const NavigationBarThemeData(
+  height: 64.0,
+  labelBehavior: .alwaysHide,
 );
 
 @freezed
@@ -55,17 +68,17 @@ sealed class ThemeModel with _$ThemeModel {
   factory ThemeModel.fromJson(Map<String, Object?> json) =>
       _$ThemeModelFromJson(json);
 
-  ThemeData get _lightTheme => _theme.light().copyWith(
+  ThemeData get _lightTheme => _lightBase.copyWith(
     cardTheme: _cardTheme,
     sliderTheme: SliderThemeData(
-      inactiveTrackColor: _theme.light().colorScheme.onSurface.withAlpha(0x55),
-      inactiveTickMarkColor: _theme.light().colorScheme.onSurface,
+      inactiveTrackColor: _lightBase.colorScheme.onSurface.withAlpha(0x55),
+      inactiveTickMarkColor: _lightBase.colorScheme.onSurface,
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) {
-            return _theme.light().colorScheme.surfaceContainer.withValues(
+            return _lightBase.colorScheme.surfaceContainer.withValues(
               alpha: 0.5,
             );
           }
@@ -73,13 +86,14 @@ sealed class ThemeModel with _$ThemeModel {
         }),
         foregroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) {
-            return _theme.light().colorScheme.onSurface.withValues(alpha: 0.5);
+            return _lightBase.colorScheme.onSurface.withValues(alpha: 0.5);
           }
           return null;
         }),
       ),
     ),
     progressIndicatorTheme: _progressIndicatorTheme,
+    navigationBarTheme: _navigationBarTheme,
   );
 
   ThemeData get _outlinedLightTheme => _lightTheme.copyWith(
@@ -88,17 +102,17 @@ sealed class ThemeModel with _$ThemeModel {
 
   ThemeData get lightTheme => outlined ? _outlinedLightTheme : _lightTheme;
 
-  ThemeData get _darkTheme => _theme.dark().copyWith(
+  ThemeData get _darkTheme => _darkBase.copyWith(
     cardTheme: _cardTheme,
     sliderTheme: SliderThemeData(
-      inactiveTrackColor: _theme.dark().colorScheme.onSurface.withAlpha(0x55),
-      inactiveTickMarkColor: _theme.dark().colorScheme.onSurface,
+      inactiveTrackColor: _darkBase.colorScheme.onSurface.withAlpha(0x55),
+      inactiveTickMarkColor: _darkBase.colorScheme.onSurface,
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) {
-            return _theme.dark().colorScheme.surfaceContainer.withValues(
+            return _darkBase.colorScheme.surfaceContainer.withValues(
               alpha: 0.5,
             );
           }
@@ -106,13 +120,14 @@ sealed class ThemeModel with _$ThemeModel {
         }),
         foregroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) {
-            return _theme.dark().colorScheme.onSurface.withValues(alpha: 0.5);
+            return _darkBase.colorScheme.onSurface.withValues(alpha: 0.5);
           }
           return null;
         }),
       ),
     ),
     progressIndicatorTheme: _progressIndicatorTheme,
+    navigationBarTheme: _navigationBarTheme,
   );
 
   ThemeData get _outlinedDarkTheme => _darkTheme.copyWith(
@@ -120,6 +135,17 @@ sealed class ThemeModel with _$ThemeModel {
   );
 
   ThemeData get darkTheme => outlined ? _outlinedDarkTheme : _darkTheme;
+
+  ThemeData get theme {
+    return switch (mode) {
+      .light => lightTheme,
+      .dark => darkTheme,
+      .system =>
+        WidgetsBinding.instance.platformDispatcher.platformBrightness == .dark
+            ? darkTheme
+            : lightTheme,
+    };
+  }
 }
 
 @riverpod

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/series_model.dart';
 import 'package:kover/riverpod/managers/download_manager.dart';
+import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/download.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/router.dart';
@@ -73,6 +74,11 @@ class SeriesAppBar extends HookConsumerWidget {
                           .deleteSeries(seriesId);
                     }
                   : null,
+              onRefreshCovers: () async {
+                await ref
+                    .read(syncManagerProvider.notifier)
+                    .refreshCovers(seriesId: seriesId);
+              },
               child: const Icon(LucideIcons.ellipsisVertical),
             ),
           ],

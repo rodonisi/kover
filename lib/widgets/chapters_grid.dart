@@ -3,11 +3,11 @@ import 'package:kover/models/chapter_model.dart';
 import 'package:kover/widgets/adaptive_sliver_grid.dart';
 import 'package:kover/widgets/chapter_card.dart';
 
-class ChapterGrid extends StatelessWidget {
+class ChaptersGrid extends StatelessWidget {
   final int seriesId;
   final List<ChapterModel> chapters;
 
-  const ChapterGrid({
+  const ChaptersGrid({
     super.key,
     required this.seriesId,
     required this.chapters,

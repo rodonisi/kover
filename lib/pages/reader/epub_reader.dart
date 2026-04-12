@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
+import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/widgets/async_value.dart';
 
 class EpubReader extends HookConsumerWidget {
@@ -76,12 +77,10 @@ class EpubReader extends HookConsumerWidget {
                       allowImplicitScrolling: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
-                        final fromEnd = index < navState.page;
                         return _Page(
                           seriesId: seriesId,
                           chapterId: chapterId,
                           page: index,
-                          fromEnd: fromEnd,
                         );
                       },
                     ),
@@ -104,13 +103,11 @@ class _Page extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
   final int page;
-  final bool fromEnd;
 
   const _Page({
     required this.seriesId,
     required this.chapterId,
     required this.page,
-    this.fromEnd = false,
   });
 
   @override
@@ -127,20 +124,20 @@ class _Page extends HookConsumerWidget {
       chapterId: chapterId,
     );
 
-    return Async(
-      asyncValue: ref.watch(nav),
-      data: (navState) {
-        return Stack(
-          children: [
-            Positioned.fill(
-              child: _MeasureContent(
-                seriesId: seriesId,
-                chapterId: chapterId,
-                page: page,
-              ),
-            ),
-            Positioned.fill(
-              child: Async(
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: _MeasureContent(
+            seriesId: seriesId,
+            chapterId: chapterId,
+            page: page,
+          ),
+        ),
+        Positioned.fill(
+          child: Async(
+            asyncValue: ref.watch(nav),
+            data: (navState) {
+              return Async(
                 asyncValue: reflow,
                 data: (reflowState) {
                   // include buffer spinner page if currently measuring.
@@ -194,26 +191,28 @@ class _Page extends HookConsumerWidget {
                             );
                           }
 
-                          return _RenderContent(
-                            seriesId: seriesId,
-                            html: reflowState.subpages[index].outerHtml,
-                            styles: reflowState.page.styles,
+                          return SingleChildScrollView(
+                            child: _RenderContent(
+                              seriesId: seriesId,
+                              html: reflowState.subpages[index].outerHtml,
+                              styles: reflowState.page.styles,
+                            ),
                           );
                         },
                       );
                     },
                   );
                 },
-              ),
-            ),
-          ],
-        );
-      },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _MeasureContent extends ConsumerWidget {
+class _MeasureContent extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
   final int page;
@@ -225,20 +224,21 @@ class _MeasureContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final key = useState(GlobalKey());
     final provider = epubReflowProvider(
       seriesId: seriesId,
       chapterId: chapterId,
       page: page,
     );
-    final key = GlobalKey();
+    final reflow = ref.watch(provider);
 
     return LayoutBuilder(
       builder: (context, constraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) async {
           await WidgetsBinding.instance.endOfFrame;
           final renderBox =
-              key.currentContext?.findRenderObject() as RenderBox?;
-          if (renderBox == null) {
+              key.value.currentContext?.findRenderObject() as RenderBox?;
+          if (renderBox == null || !renderBox.hasSize) {
             return;
           }
 
@@ -250,14 +250,14 @@ class _MeasureContent extends ConsumerWidget {
         });
 
         return Async(
-          asyncValue: ref.watch(provider),
+          asyncValue: reflow,
           data: (data) => Offstage(
             child: Column(
               mainAxisSize: .min,
               children: [
                 _RenderContent(
                   seriesId: seriesId,
-                  key: key,
+                  key: key.value,
                   styles: data.page.styles,
                   html: data.buffer.outerHtml,
                 ),
@@ -290,37 +290,28 @@ class _RenderContent extends ConsumerWidget {
 
     return Async(
       asyncValue: epubSettings,
-      data: (epubSettings) => Align(
-        alignment: Alignment.topCenter,
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(epubSettings.marginSize),
-            child: GestureDetector(
-              onTap: () {
-                FocusScope.of(context).unfocus();
-              },
-              child: SelectionArea(
-                child: HtmlWidget(
-                  html,
-                  buildAsync: false,
-                  enableCaching: true,
-                  customStylesBuilder: (element) {
-                    final s = Map<String, String>.from(
-                      styles[element.localName] ?? {},
-                    );
+      data: (epubSettings) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(epubSettings.marginSize),
+          child: HtmlWidget(
+            html,
+            buildAsync: false,
+            enableCaching: true,
+            factoryBuilder: () => CachedImageFactory(context),
+            customStylesBuilder: (element) {
+              final s = Map<String, String>.from(
+                styles[element.localName] ?? {},
+              );
 
-                    for (final className in element.classes) {
-                      s.addAll(styles['.$className'] ?? {});
-                    }
+              for (final className in element.classes) {
+                s.addAll(styles['.$className'] ?? {});
+              }
 
-                    return s;
-                  },
-                  textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: epubSettings.fontSize,
-                    height: epubSettings.lineHeight,
-                  ),
-                ),
-              ),
+              return s;
+            },
+            textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: epubSettings.fontSize,
+              height: epubSettings.lineHeight,
             ),
           ),
         ),

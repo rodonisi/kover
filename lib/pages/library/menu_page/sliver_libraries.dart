@@ -58,7 +58,8 @@ class LibraryListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final leading = Icon(switch (lib.type) {
       .book || .lightNovel => LucideIcons.bookText,
-      .manga || .comic => LucideIcons.bookOpen,
+      .manga || .comic || .comicLegacy => LucideIcons.bookOpen,
+      .image => LucideIcons.image,
       _ => LucideIcons.fileQuestionMark,
     });
 

@@ -60,4 +60,8 @@ class SyncEngine {
       chaptersRepo.fetchMissingCovers(),
     ]);
   }
+
+  Future<void> refreshCovers({required int seriesId}) async {
+    await seriesRepo.refreshCovers(seriesId: seriesId);
+  }
 }

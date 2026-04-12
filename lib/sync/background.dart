@@ -36,8 +36,10 @@ void callbackDispatcher() {
       final client = Openapi.create(client: chopper);
 
       final seriesRepo = SeriesRepository(
-        db,
-        SeriesSyncOperations(client: client, apiKey: apiKey),
+        db: db,
+        client: SeriesSyncOperations(client: client, apiKey: apiKey),
+        volumeClient: VolumeSyncOperations(client: client, apiKey: apiKey),
+        chapterClient: ChapterSyncOperations(client: client, apiKey: apiKey),
       );
       final bookRepo = BookRepository(
         db,

@@ -29,6 +29,7 @@ class NavigatorContainer extends ConsumerWidget {
           child: Async(
             asyncValue: ref.watch(themeProvider),
             data: (theme) => Card(
+              margin: EdgeInsets.zero,
               clipBehavior: .hardEdge,
               shape: RoundedRectangleBorder(
                 side: theme.outlined

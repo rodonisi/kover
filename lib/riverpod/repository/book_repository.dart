@@ -4,7 +4,7 @@ import 'package:kover/models/book_chapter_model.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/models/page_content.dart';
 import 'package:kover/riverpod/providers/client.dart';
-import 'package:kover/riverpod/providers/settings/settings.dart';
+import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/book_sync_operations.dart';
 import 'package:kover/utils/logging.dart';

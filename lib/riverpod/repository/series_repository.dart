@@ -3,9 +3,11 @@ import 'package:kover/database/dao/series_metadata_dao.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/models/series_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
-import 'package:kover/riverpod/providers/settings/settings.dart';
+import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
+import 'package:kover/sync/chapter_sync_operations.dart';
 import 'package:kover/sync/series_sync_operations.dart';
+import 'package:kover/sync/volume_sync_operations.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'series_repository.g.dart';
@@ -19,14 +21,37 @@ SeriesRepository seriesRepository(Ref ref) {
     client: restClient,
     apiKey: apiKey ?? '',
   );
-  return SeriesRepository(db, client);
+  final volumeClient = VolumeSyncOperations(
+    client: restClient,
+    apiKey: apiKey ?? '',
+  );
+  final chapterClient = ChapterSyncOperations(
+    client: restClient,
+    apiKey: apiKey ?? '',
+  );
+  return SeriesRepository(
+    db: db,
+    client: client,
+    volumeClient: volumeClient,
+    chapterClient: chapterClient,
+  );
 }
 
 class SeriesRepository {
   final AppDatabase _db;
   final SeriesSyncOperations _client;
+  final VolumeSyncOperations _volumeClient;
+  final ChapterSyncOperations _chapterClient;
 
-  const SeriesRepository(this._db, this._client);
+  const SeriesRepository({
+    required AppDatabase db,
+    required SeriesSyncOperations client,
+    required VolumeSyncOperations volumeClient,
+    required ChapterSyncOperations chapterClient,
+  }) : _db = db,
+       _client = client,
+       _volumeClient = volumeClient,
+       _chapterClient = chapterClient;
 
   /// Watch series [seriesId]
   Stream<SeriesModel> watchSeries(int seriesId) {
@@ -171,6 +196,29 @@ class SeriesRepository {
     for (final id in missingIds) {
       final seriesCover = await _client.getSeriesCover(id);
       await _db.seriesDao.upsertSeriesCover(seriesCover);
+    }
+  }
+
+  /// Refresh all covers for series [seriesId], including volume and chapter covers.
+  Future<void> refreshCovers({required int seriesId}) async {
+    final seriesCover = await _client.getSeriesCover(seriesId);
+    await _db.seriesDao.upsertSeriesCover(seriesCover);
+    final details = await _client.getSeriesDetail(seriesId);
+    final volumeIds = details.volumes.map((v) => v.volume.id.value).toList();
+
+    for (final volumeId in volumeIds) {
+      final volumeCover = await _volumeClient.getVolumeCover(volumeId);
+      await _db.volumesDao.upsertVolumeCover(volumeCover);
+    }
+
+    final chapters = details.volumes.expand((v) => v.chapters).toList();
+    chapters.addAll(details.chapters);
+    chapters.addAll(details.storyline);
+    final chapterIds = chapters.map((c) => c.id.value).toSet();
+
+    for (final chapterId in chapterIds) {
+      final chapterCover = await _chapterClient.getChapterCover(chapterId);
+      await _db.chaptersDao.upsertChapterCover(chapterCover);
     }
   }
 }

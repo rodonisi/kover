@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/series_detail_page/chapter_detail_page/chapter_app_bar.dart';
-import 'package:kover/pages/series_detail_page/series_detail_page.dart';
 import 'package:kover/riverpod/providers/chapter.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/widgets/async_value.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
+import 'package:kover/widgets/summary.dart';
 
 class ChapterDetailPage extends ConsumerWidget {
   final int chapterId;
@@ -16,9 +17,7 @@ class ChapterDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chapter = ref.watch(chapterProvider(chapterId: chapterId)).value;
-
-    if (chapter == null) return const SizedBox.shrink();
+    final chapter = ref.watch(chapterProvider(chapterId: chapterId));
 
     return Scaffold(
       body: CustomScrollView(
@@ -35,8 +34,11 @@ class ChapterDetailPage extends ConsumerWidget {
             sliver: SliverToBoxAdapter(
               child: Column(
                 children: [
-                  Summary(
-                    summary: chapter.summary,
+                  Async(
+                    asyncValue: chapter,
+                    data: (chapter) => Summary(
+                      summary: chapter.summary,
+                    ),
                   ),
                 ],
               ),

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 
-extension ColorExtensions on String {
-  Color toColor() {
-    final buffer = StringBuffer();
-    if (length == 6 || length == 7) buffer.write('ff');
-    buffer.write(replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
+extension ColorExtensions on Color {
+  String toCssRgba() {
+    final red = _toArgbRange(r);
+    final green = _toArgbRange(g);
+    final blue = _toArgbRange(b);
+
+    return 'rgba($red, $green, $blue, $a)';
   }
+
+  static int _toArgbRange(double color) =>
+      (color * 255.0).round().clamp(0, 255);
 }

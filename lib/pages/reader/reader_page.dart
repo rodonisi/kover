@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/epub_reader.dart';
 import 'package:kover/pages/reader/image_reader.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
+import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/async_value.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ReaderPage extends HookConsumerWidget {
   final int seriesId;
@@ -43,7 +46,23 @@ class ReaderPage extends HookConsumerWidget {
                   chapterId: data.chapter.id,
                 ),
                 _ => Center(
-                  child: Text('Unsupported format: ${data.series.format}'),
+                  child: Column(
+                    mainAxisAlignment: .center,
+                    crossAxisAlignment: .center,
+                    spacing: LayoutConstants.mediumPadding,
+                    children: [
+                      Icon(
+                        LucideIcons.circleX,
+                        size: LayoutConstants.largeIcon,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      Text('Unsupported format: ${data.series.format}'),
+                      FilledButton(
+                        onPressed: () => context.pop(),
+                        child: const Text('Back'),
+                      ),
+                    ],
+                  ),
                 ),
               };
             },

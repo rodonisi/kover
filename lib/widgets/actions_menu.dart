@@ -10,6 +10,7 @@ class ActionsContextMenu extends StatelessWidget {
   final void Function()? onRemoveWantToRead;
   final void Function()? onDownload;
   final void Function()? onRemoveDownload;
+  final VoidCallback? onRefreshCovers;
   final Widget child;
 
   const ActionsContextMenu({
@@ -20,6 +21,7 @@ class ActionsContextMenu extends StatelessWidget {
     this.onRemoveWantToRead,
     this.onDownload,
     this.onRemoveDownload,
+    this.onRefreshCovers,
     required this.child,
   });
 
@@ -33,6 +35,7 @@ class ActionsContextMenu extends StatelessWidget {
         onRemoveWantToRead: onRemoveWantToRead,
         onDownload: onDownload,
         onRemoveDownload: onRemoveDownload,
+        onRefreshCovers: onRefreshCovers,
       ),
       child: child,
     );
@@ -44,6 +47,7 @@ class ActionsMenuButton extends StatelessWidget {
   final void Function()? onMarkUnread;
   final void Function()? onDownload;
   final void Function()? onRemoveDownload;
+  final VoidCallback? onRefreshCovers;
   final Widget child;
 
   const ActionsMenuButton({
@@ -52,6 +56,7 @@ class ActionsMenuButton extends StatelessWidget {
     this.onMarkUnread,
     this.onDownload,
     this.onRemoveDownload,
+    this.onRefreshCovers,
     required this.child,
   });
 
@@ -63,6 +68,7 @@ class ActionsMenuButton extends StatelessWidget {
         onMarkUnread: onMarkUnread,
         onDownload: onDownload,
         onRemoveDownload: onRemoveDownload,
+        onRefreshCovers: onRefreshCovers,
       ),
       child: child,
     );
@@ -122,29 +128,51 @@ class _LocalContextMenuButton extends StatelessWidget {
 }
 
 ContextMenu _getContextMenu({
-  void Function()? onMarkRead,
-  void Function()? onMarkUnread,
-  void Function()? onAddWantToRead,
-  void Function()? onRemoveWantToRead,
-  void Function()? onDownload,
-  void Function()? onRemoveDownload,
+  VoidCallback? onMarkRead,
+  VoidCallback? onMarkUnread,
+  VoidCallback? onAddWantToRead,
+  VoidCallback? onRemoveWantToRead,
+  VoidCallback? onDownload,
+  VoidCallback? onRemoveDownload,
+  VoidCallback? onRefreshCovers,
 }) {
-  return ContextMenu(
-    entries: [
-      ..._wantToReadEntries(
-        onAddWantToRead: onAddWantToRead,
-        onRemoveWantToRead: onRemoveWantToRead,
-      ),
-      ..._markReadEntries(
-        onMarkRead: onMarkRead,
-        onMarkUnread: onMarkUnread,
-      ),
-      ..._downloadEntries(
-        onDownload: onDownload,
-        onRemoveDownload: onRemoveDownload,
-      ),
-    ],
+  final wantToReadEntries = _wantToReadEntries(
+    onAddWantToRead: onAddWantToRead,
+    onRemoveWantToRead: onRemoveWantToRead,
   );
+  final markReadEntries = _markReadEntries(
+    onMarkRead: onMarkRead,
+    onMarkUnread: onMarkUnread,
+  );
+  final downloadEntries = _downloadEntries(
+    onDownload: onDownload,
+    onRemoveDownload: onRemoveDownload,
+  );
+  final refreshEntries = _refreshEntries(
+    onRefreshCovers: onRefreshCovers,
+  );
+  return ContextMenu(
+    entries: _withDividers(
+      [
+        wantToReadEntries,
+        markReadEntries,
+        downloadEntries,
+        refreshEntries,
+      ],
+    ),
+  );
+}
+
+List<ContextMenuEntry> _withDividers(List<List<ContextMenuEntry>> entries) {
+  final nonEmptyEntries = entries.where((e) => e.isNotEmpty).toList();
+  final result = <ContextMenuEntry>[];
+  for (var i = 0; i < nonEmptyEntries.length; i++) {
+    result.addAll(nonEmptyEntries[i]);
+    if (i < nonEmptyEntries.length - 1) {
+      result.add(const MenuDivider());
+    }
+  }
+  return result;
 }
 
 List<ContextMenuEntry> _wantToReadEntries({
@@ -164,8 +192,6 @@ List<ContextMenuEntry> _wantToReadEntries({
         icon: const Icon(LucideIcons.starOff),
         onSelected: (_) => onRemoveWantToRead(),
       ),
-    if (onAddWantToRead != null || onRemoveWantToRead != null)
-      const MenuDivider(),
   ];
 }
 
@@ -186,7 +212,6 @@ List<ContextMenuEntry> _markReadEntries({
         icon: const Icon(LucideIcons.bookX),
         onSelected: (_) => onMarkUnread(),
       ),
-    if (onMarkRead != null || onMarkUnread != null) const MenuDivider(),
   ];
 }
 
@@ -206,6 +231,19 @@ List<ContextMenuEntry> _downloadEntries({
         label: const Text('Remove Download'),
         icon: const Icon(LucideIcons.trash2),
         onSelected: (_) => onRemoveDownload(),
+      ),
+  ];
+}
+
+List<ContextMenuEntry> _refreshEntries({
+  VoidCallback? onRefreshCovers,
+}) {
+  return [
+    if (onRefreshCovers != null)
+      MenuItem(
+        label: const Text('Refresh Covers'),
+        icon: const Icon(LucideIcons.imageDown),
+        onSelected: (_) => onRefreshCovers(),
       ),
   ];
 }

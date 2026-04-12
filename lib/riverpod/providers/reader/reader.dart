@@ -137,6 +137,6 @@ Future<ReadDirection> readDirection(
     .archive => (await ref.watch(
       imageReaderSettingsProvider(seriesId: seriesId).future,
     )).readDirection,
-    .unknown => .rightToLeft,
+    _=> .rightToLeft,
   };
 }

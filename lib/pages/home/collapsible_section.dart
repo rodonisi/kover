@@ -22,6 +22,10 @@ class CollapsibleSection extends HookConsumerWidget {
     final total = series.length;
     final toShow = showAll.value ? total : 1;
 
+    if (series.isEmpty) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
     return SliverMainAxisGroup(
       slivers: [
         SliverPadding(

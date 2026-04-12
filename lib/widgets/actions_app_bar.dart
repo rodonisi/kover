@@ -6,17 +6,19 @@ import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-String _phaseLabel(SyncPhase phase) => switch (phase) {
-  SyncPhase.allSeries => 'Syncing series',
-  SyncPhase.seriesDetails => 'Syncing series details',
-  SyncPhase.metadata => 'Syncing metadata',
-  SyncPhase.libraries => 'Syncing libraries',
-  SyncPhase.recentlyAdded => 'Syncing recently added',
-  SyncPhase.recentlyUpdated => 'Syncing recently updated',
-  SyncPhase.progress => 'Syncing progress',
-  SyncPhase.covers => 'Syncing covers',
-  SyncPhase.none => 'Syncing',
-};
+String _phaseLabel(SyncPhase phase) {
+  return phase.when(
+    allSeries: () => 'Syncing all series',
+    seriesDetails: () => 'Syncing series details',
+    metadata: () => 'Syncing metadata',
+    recentlyAdded: () => 'Syncing recently added',
+    recentlyUpdated: () => 'Syncing recently updated',
+    libraries: () => 'Syncing libraries',
+    progress: () => 'Syncing progress',
+    covers: () => 'Syncing covers',
+    refreshCovers: (seriesId) => 'Refreshing covers for series $seriesId',
+  );
+}
 
 class ActionsAppBar extends StatelessWidget {
   const ActionsAppBar({super.key});

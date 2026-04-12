@@ -49,6 +49,32 @@ class NodeCursor {
     return root;
   }
 
+  /// Returns whether the current iterator position can be split. This is the case if the current node is an element
+  /// with children that would result in a non-empty page after splitting.
+  bool canSplit() {
+    // If we are splitting inside a child, we can split only if:
+    // 1) there is already something before the current top-level node, or
+    // 2) the child itself can split.
+    if (childCursor != null) {
+      return root.children.length > 1 || childCursor!.canSplit();
+    }
+
+    // Split between siblings (before current node) if page already has previous content.
+    if (root.children.length > 1) {
+      return true;
+    }
+
+    if (!hasNext) {
+      return false;
+    }
+
+    // Otherwise we can split only inside current node.
+    final current = iterator.current;
+    return current is Element &&
+        current.localName != 'p' &&
+        current.children.isNotEmpty;
+  }
+
   /// Return the root node up to and not including the current iterator position. The root children are cleared and the
   /// next page is started.
   Node split() {
