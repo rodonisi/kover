@@ -16,7 +16,7 @@ final _theme = MaterialTheme(
   Typography.material2021().black,
 );
 
-final _lightBase = _theme.lightMediumContrast();
+final _lightBase = _theme.light();
 final _darkBase = _theme.dark();
 
 final _lightBorderSide = BorderSide(
@@ -46,10 +46,6 @@ final _outlinedDarkCardTheme = _cardTheme.copyWith(
 
 final _progressIndicatorTheme = const ProgressIndicatorThemeData(
   strokeCap: .round,
-  borderRadius: BorderRadius.only(
-    bottomRight: Radius.circular(LayoutConstants.smallestBorderRadius),
-    topRight: Radius.circular(LayoutConstants.smallestBorderRadius),
-  ),
 );
 
 final _navigationBarTheme = const NavigationBarThemeData(
