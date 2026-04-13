@@ -135,7 +135,7 @@ class ContinuePointButton extends ConsumerWidget {
 
     return Card(
       margin: EdgeInsets.zero,
-      color: theme.colorScheme.secondaryContainer,
+      color: theme.colorScheme.primaryContainer,
       clipBehavior: .antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusGeometry.circular(
@@ -168,14 +168,14 @@ class ContinuePointButton extends ConsumerWidget {
                     Text(
                       'Continue Reading',
                       style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.colorScheme.onSecondaryContainer,
+                        color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
                     if (title != null)
                       Text(
                         title!,
                         style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.onSecondaryContainer,
+                          color: theme.colorScheme.onPrimaryContainer,
                         ),
                         maxLines: 1,
                         overflow: .ellipsis,
@@ -191,7 +191,8 @@ class ContinuePointButton extends ConsumerWidget {
                         child: CircularProgressIndicator(
                           strokeWidth: 10,
                           strokeCap: .round,
-                          backgroundColor: theme.colorScheme.onSecondaryFixed,
+                          backgroundColor: theme.colorScheme.onPrimaryFixed,
+                          color: theme.colorScheme.primaryFixedDim,
                           value: progress,
                         ),
                       )
@@ -225,7 +226,7 @@ class ContinueButtonImage extends ConsumerWidget {
             Icons.play_arrow_rounded,
             size: LayoutConstants.largeIcon,
             shadows: const [Shadow(blurRadius: 3)],
-            color: Theme.of(context).colorScheme.primary,
+            color: Theme.of(context).colorScheme.primaryFixedDim,
           ),
         ),
       ],
