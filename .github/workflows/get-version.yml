@@ -5,10 +5,10 @@ on:
     outputs:
       version:
         description: "The semantic version"
-        value: ${{ jobs.version.outputs.version }}
+        value: ${{ jobs.semantic-version.outputs.version }}
       build_number:
         description: "The build number"
-        value: ${{ jobs.version.outputs.build_number }}
+        value: ${{ jobs.semantic-version.outputs.build_number }}
 
 jobs:
   semantic-version:
