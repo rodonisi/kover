@@ -64,8 +64,6 @@ class NodeCursor {
   /// Return the root node up to and not including the current iterator position. The root children are cleared and the
   /// next page is started.
   Node commitSplit() {
-    // Element? removed;
-
     final childSplit = childCursor?.commitSplit();
 
     if (childSplit != null) {
