@@ -38,7 +38,6 @@ sealed class EpubReflowState with _$EpubReflowState {
 @riverpod
 class EpubReflow extends _$EpubReflow {
   bool _processingRender = false;
-  bool _processingOverflow = false;
 
   // The scroll-id to seek to on resume. Set once from the DB on the very
   // first build and cleared as soon as we reach a Display state, so that
@@ -106,18 +105,10 @@ class EpubReflow extends _$EpubReflow {
       _processingRender = true;
 
       final current = await future;
-      if (page == 0)
-        log.d(
-          'adding element to reflow, force: $force, buffer is null: ${current.buffer == null}, subpages: ${current.subpages.length}, processingRender: $_processingRender',
-        );
 
       final next = _cursor.next();
 
       if (next == null) {
-        if (page == 0)
-          log.d(
-            'no next element, all elements measured, buffer: ${current.buffer != null}, subpages: ${current.subpages.length}',
-          );
         final newSubpages = [
           ...current.subpages,
           ?current.buffer,
@@ -137,11 +128,6 @@ class EpubReflow extends _$EpubReflow {
         return;
       }
 
-      if (page == 0)
-        log.d(
-          'added element to buffer ${next.toString()}, subpages: ${current.subpages.length}',
-        );
-
       state = AsyncData(
         current.copyWith(
           buffer: DocumentFragment()..append(next),
@@ -155,17 +141,12 @@ class EpubReflow extends _$EpubReflow {
   Future<void> overflow() async {
     _processingRender = true;
     try {
-      if (page == 0)
-        log.d('checking for overflow, processingRender: $_processingRender');
       _processingRender = true;
       final current = await future;
 
       if (current.status == .done) return;
 
-      if (page == 0) log.d('overflow detected');
-
       if (_cursor.splitChild()) {
-        log.d('splitting child node for overflow');
         await addElement(force: true);
         return;
       }

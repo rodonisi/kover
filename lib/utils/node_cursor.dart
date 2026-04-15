@@ -12,6 +12,8 @@ class NodeCursor {
   /// Iterator over the children of the root provided during initialization
   final Iterator<Node> iterator;
 
+  Node? reprocess;
+
   /// Recursive child cursor if a child requires splitting
   NodeCursor? childCursor;
 
@@ -45,6 +47,12 @@ class NodeCursor {
 
     childCursor = null;
 
+    if (reprocess != null) {
+      root.append(reprocess!);
+      reprocess = null;
+      return root;
+    }
+
     if (!iterator.moveNext()) {
       _exhausted = true;
       log.d(
@@ -59,44 +67,21 @@ class NodeCursor {
 
   /// Return the root node up to and not including the current iterator position. The root children are cleared and the
   /// next page is started.
-  ///
-  /// When a [childCursor] is active and its split yields an empty node (nothing
-  /// fit inside the child), we back out: discard the child cursor, treat the
-  /// entire child as the overflow element, and move it to the next subpage.
   Node commitSplit() {
-    Element? removed;
+    // Element? removed;
 
     final childSplit = childCursor?.commitSplit();
 
-    if (childSplit != null && root.children.isNotEmpty) {
+    if (childSplit != null) {
       // Partial content fit inside the child — keep it in this subpage.
       root.children.last.replaceWith(childSplit);
     } else if (root.children.length > 1) {
-      removed = root.children.removeLast();
+      reprocess = root.children.removeLast();
     }
-
-    // if (childCursor != null && root.children.isNotEmpty) {
-    //   final childSplit = childCursor!.commitSplit();
-    //
-    //   if (childSplit.hasChildNodes()) {
-    //     // Partial content fit inside the child — keep it in this subpage.
-    //     root.children.last.replaceWith(childSplit);
-    //   } else {
-    //     // Nothing fit inside the child — back out to parent level.
-    //     // The whole child becomes the overflow element for the next subpage.
-    //     removed = root.children.removeLast();
-    //     childCursor = null;
-    //   }
-    // } else if (root.children.isNotEmpty) {
-    //   removed = root.children.removeLast();
-    // }
 
     final committed = root.clone(true);
-    root.children.clear();
 
-    if (removed != null) {
-      root.append(removed);
-    }
+    root.children.clear();
 
     return committed;
   }
