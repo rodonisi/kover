@@ -139,6 +139,7 @@ class EpubReflow extends _$EpubReflow {
   }
 
   Future<void> overflow() async {
+    if (_processingRender) return;
     _processingRender = true;
     try {
       _processingRender = true;

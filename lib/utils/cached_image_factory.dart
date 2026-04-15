@@ -21,7 +21,6 @@ class CachedImageFactory extends WidgetFactory {
     final hash = Object.hash(src.url, src.url.length);
 
     final provider = _cache[hash] ??= MemoryImage(bytes);
-    //precacheImage(provider, context);
 
     return Image(
       key: ValueKey(hash),

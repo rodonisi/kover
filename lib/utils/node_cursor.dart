@@ -97,10 +97,18 @@ class NodeCursor {
     }
 
     final current = iterator.current;
-    if (current is Element) {
-      childCursor = NodeCursor(root: current);
+    if (_canSplit(current)) {
+      childCursor = NodeCursor(root: current as Element);
 
       return true;
+    }
+
+    return false;
+  }
+
+  static bool _canSplit(Node node) {
+    if (node is Element) {
+      return node.localName != null && !_leafTags.contains(node.localName);
     }
 
     return false;
