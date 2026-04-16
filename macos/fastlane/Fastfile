@@ -56,7 +56,7 @@ platform :mac do
       use_automatic_signing: false,
       path: 'Runner.xcodeproj',
       code_sign_identity: 'Apple Distribution',
-      profile_name: lane_context[:MATCH_PROVISIONING_PROFILE_MAPPING]['com.rodonisi.kover'],
+      profile_name: lane_context[:MATCH_PROVISIONING_PROFILE_MAPPING]['com.rodonisi.kover']
     )
 
     build(
@@ -68,7 +68,9 @@ platform :mac do
     upload_to_testflight(
       api_key: lane_context[SharedValues::APP_STORE_CONNECT_API_KEY],
       skip_waiting_for_build_processing: false,
-      changelog: 'Updates'
+      changelog: 'Updates',
+      distribute_external: true,
+      groups: ['public']
     )
   end
 end
