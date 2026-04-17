@@ -88,3 +88,60 @@ jobs:
           RELEASE_NAME="Kover-${{ needs.version.outputs.version }}.apk"
           mv build/app/outputs/flutter-apk/app-release.apk "$RELEASE_NAME"
           gh release upload ${{ needs.version.outputs.version }} "$RELEASE_NAME"
+
+  get-release-body:
+    name: Get Release Body
+    needs:
+      - version
+      - create-release
+    runs-on: ubuntu-latest
+    outputs:
+      release_body: ${{ steps.get-body.outputs.body }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Get Release Body
+        id: get-body
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BODY=$(gh release view ${{ needs.version.outputs.version }} --json body --jq '.body')
+
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$BODY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  promote-ios-public:
+    name: Promote iOS Public Testflight
+    needs: get-release-body
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Promote Testflight Public
+        run: |
+          cd ios
+          fastlane public_beta changelog='${{ needs.get-release-body.outputs.release_body }}'
+        env:
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+
+  promote-macos-public:
+    name: Promote MacOS Public Testflight
+    needs: get-release-body
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Promote Testflight Public
+        run: |
+          cd macos
+          fastlane public_beta changelog='${{ needs.get-release-body.outputs.release_body }}'
+        env:
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
