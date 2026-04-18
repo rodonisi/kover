@@ -35,6 +35,7 @@ class ChaptersPage extends HookConsumerWidget {
     );
 
     return _ChaptersPage(
+      title: 'Chapters',
       seriesId: seriesId,
       chapters: chapters,
       hideReadToggle: IconButton(
@@ -63,6 +64,7 @@ class StorylinePage extends ConsumerWidget {
     );
 
     return _ChaptersPage(
+      title: 'Storyline',
       seriesId: seriesId,
       chapters: chapters,
     );
@@ -84,6 +86,7 @@ class SpecialsPage extends ConsumerWidget {
     );
 
     return _ChaptersPage(
+      title: 'Specials',
       seriesId: seriesId,
       chapters: chapters,
     );
@@ -91,10 +94,12 @@ class SpecialsPage extends ConsumerWidget {
 }
 
 class _ChaptersPage extends HookConsumerWidget {
+  final String title;
   final int seriesId;
   final List<ChapterModel> chapters;
   final Widget? hideReadToggle;
   const _ChaptersPage({
+    required this.title,
     required this.seriesId,
     required this.chapters,
     this.hideReadToggle,
@@ -109,7 +114,7 @@ class _ChaptersPage extends HookConsumerWidget {
         child: CustomScrollView(
           slivers: [
             SliverAppBar.large(
-              title: const Text('Chapters'),
+              title: Text(title),
               actions: [?hideReadToggle],
             ),
             SliverPadding(
