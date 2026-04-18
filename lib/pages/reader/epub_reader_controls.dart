@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/read_direction.dart';
+import 'package:kover/pages/settings/switch_settings_entry.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/async_value.dart';
@@ -123,6 +124,15 @@ class _ReaderSettingsBottomSheet extends ConsumerWidget {
                     ? () async =>
                           await ref.read(provider.notifier).increaseLineHeight()
                     : null,
+              ),
+              SwitchSettingsEntry(
+                title: 'Highlight resume point',
+                value: settings.highlightResumePoint,
+                onChanged: (value) async {
+                  await ref
+                      .read(provider.notifier)
+                      .setHighlightResumePoint(value);
+                },
               ),
               Row(
                 spacing: LayoutConstants.mediumPadding,

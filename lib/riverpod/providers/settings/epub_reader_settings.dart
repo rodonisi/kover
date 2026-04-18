@@ -17,6 +17,7 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
     @Default(14.0) double fontSize,
     @Default(1.5) double lineHeight,
     @Default(ReadDirection.leftToRight) ReadDirection readDirection,
+    @Default(true) bool highlightResumePoint,
   }) = _EpubReaderSettingsState;
 
   factory EpubReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -152,6 +153,14 @@ class EpubReaderSettings extends _$EpubReaderSettings {
 
     state = AsyncData(
       current.copyWith(lineHeight: current.lineHeight - _lineHeightStep),
+    );
+  }
+
+  Future<void> setHighlightResumePoint(bool value) async {
+    final current = await future;
+
+    state = AsyncData(
+      current.copyWith(highlightResumePoint: value),
     );
   }
 
