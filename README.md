@@ -3,7 +3,7 @@
 
 # Kover
 
-An unofficial cross-platform Kavita frontend.
+An unofficial cross-platform Kavita client.
 
 </div>
 
@@ -18,6 +18,18 @@ An unofficial cross-platform Kavita frontend.
   (because why not) web
 
 ## Getting Started
+
+### Installation
+
+#### iOS & MacOS
+
+The app is currently available on TestFlight as a public beta. The beta can be joined by following this link: <https://testflight.apple.com/join/UsCtQUeY>
+
+#### Android
+
+The app is currently on a closed beta on the Play Store. A public beta and join link may be setup in the future.
+
+An APK build is also available in the [releases](https://github.com/rodonisi/kover/releases/latest) section of this repository.
 
 ### Building from Source
 
