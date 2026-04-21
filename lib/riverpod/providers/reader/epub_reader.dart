@@ -227,9 +227,15 @@ class EpubNavigation extends _$EpubNavigation {
   }
 
   void _handleSettingsChanges() {
-    ref.listen(epubReaderSettingsProvider(seriesId: seriesId), (prev, next) {
+    ref.listen(epubReaderSettingsProvider(seriesId: seriesId), (
+      prev,
+      next,
+    ) async {
       _resumed = false;
-      ref.invalidateSelf(asReload: true);
+      final current = await future;
+      state = AsyncData(
+        current.copyWith(ready: false, subpage: 0),
+      );
     });
   }
 
