@@ -5,5 +5,9 @@ part 'database.g.dart';
 
 @Riverpod(keepAlive: true)
 AppDatabase database(Ref ref) {
-  return AppDatabase();
+  final db = AppDatabase();
+  ref.onDispose(() {
+    db.close();
+  });
+  return db;
 }
