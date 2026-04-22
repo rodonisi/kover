@@ -147,3 +147,29 @@ jobs:
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+
+  promote-google-play-alpha:
+    name: Promote Google Play Alpha
+    needs: get-release-body
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Authenticate with Google Play
+        uses: "google-github-actions/auth@v3"
+        with:
+          project_id: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
+          create_credentials_file: true
+
+      - name: Write Changelog
+        run: |
+          mkdir -p android/fastlane/metadata/en-US/changelogs
+          echo "${{ needs.get-release-body.outputs.release_body }}" > android/fastlane/metadata/en-US/changelogs/default.txt
+
+      - name: Promote Google Play
+        run: |
+          cd android
+          fastlane promote_alpha
