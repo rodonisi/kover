@@ -100,6 +100,7 @@ class TocEntry extends ConsumerWidget {
           contentPadding: depth > 0
               ? EdgeInsetsGeometry.only(
                   left: depth * LayoutConstants.largePadding,
+                  right: LayoutConstants.mediumPadding,
                 )
               : null,
           title: Text(chapter.title),
