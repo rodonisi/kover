@@ -168,12 +168,9 @@ jobs:
           service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
           create_credentials_file: true
 
-      - name: Write Changelog
-        run: |
-          mkdir -p android/fastlane/metadata/android/en-US/changelogs
-          echo "${{ needs.get-release-body.outputs.release_body }}" > android/fastlane/metadata/android/en-US/changelogs/default.txt
-
       - name: Promote Google Play
         run: |
           cd android
           fastlane promote_alpha
+        env:
+          CHANGELOG: ${{ needs.get-release-body.outputs.release_body }}
