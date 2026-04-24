@@ -43,6 +43,8 @@ class ChaptersRepository {
     int? volumeId,
     int? seriesId,
   }) async {
+    if (query.isEmpty) return [];
+
     final results = await _db.chaptersDao.searchChapters(
       query,
       volumeId: volumeId,

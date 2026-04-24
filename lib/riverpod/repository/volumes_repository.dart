@@ -40,6 +40,8 @@ class VolumesRepository {
     String query, {
     int? seriesId,
   }) async {
+    if (query.isEmpty) return [];
+
     final results = await _db.volumesDao.searchVolumes(
       query,
       seriesId: seriesId,

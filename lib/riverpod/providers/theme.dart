@@ -63,6 +63,10 @@ final _segmentedButtonTheme = SegmentedButtonThemeData(
   ),
 );
 
+final _searchViewTheme = SearchViewThemeData(
+  padding: EdgeInsets.symmetric(horizontal: LayoutConstants.largePadding),
+);
+
 @freezed
 sealed class ThemeModel with _$ThemeModel {
   const ThemeModel._();
@@ -101,6 +105,7 @@ sealed class ThemeModel with _$ThemeModel {
     progressIndicatorTheme: _progressIndicatorTheme,
     navigationBarTheme: _navigationBarTheme,
     segmentedButtonTheme: _segmentedButtonTheme,
+    searchViewTheme: _searchViewTheme,
   );
 
   ThemeData get _outlinedLightTheme => _lightTheme.copyWith(
@@ -136,6 +141,7 @@ sealed class ThemeModel with _$ThemeModel {
     progressIndicatorTheme: _progressIndicatorTheme,
     navigationBarTheme: _navigationBarTheme,
     segmentedButtonTheme: _segmentedButtonTheme,
+    searchViewTheme: _searchViewTheme,
   );
 
   ThemeData get _outlinedDarkTheme => _darkTheme.copyWith(
