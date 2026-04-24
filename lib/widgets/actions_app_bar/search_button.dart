@@ -25,7 +25,7 @@ class SearchButton extends HookConsumerWidget {
     return SearchAnchor(
       searchController: controller,
       isFullScreen: true,
-      headerHeight: 40.0, // Reduced from 56.0
+      headerHeight: 45.0,
       headerTextStyle: Theme.of(context).textTheme.bodyLarge,
       viewLeading: IconButton(
         style: IconButton.styleFrom(visualDensity: .compact),
@@ -47,8 +47,11 @@ class SearchButton extends HookConsumerWidget {
       ],
       builder: (BuildContext context, SearchController controller) {
         return IconButton(
-          style: IconButton.styleFrom(visualDensity: .compact),
-          icon: const Icon(LucideIcons.search, size: LayoutConstants.smallIcon),
+          style: IconButton.styleFrom(visualDensity: .comfortable),
+          icon: const Icon(
+            LucideIcons.search,
+            size: LayoutConstants.smallIcon,
+          ),
           onPressed: () {
             controller.openView(); // Manually opens the search view
           },
@@ -68,8 +71,9 @@ class SearchButton extends HookConsumerWidget {
 
         if (seriesResults.isEmpty &&
             volumesResults.isEmpty &&
-            chaptersResults.isEmpty)
+            chaptersResults.isEmpty) {
           return [];
+        }
 
         return [
           if (seriesResults.isNotEmpty) ...[
