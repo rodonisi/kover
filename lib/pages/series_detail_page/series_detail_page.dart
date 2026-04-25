@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/pages/library/menu_page/app_list_tile.dart';
+import 'package:kover/pages/menu_page/app_list_tile.dart';
 import 'package:kover/pages/series_detail_page/series_app_bar.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/series.dart';

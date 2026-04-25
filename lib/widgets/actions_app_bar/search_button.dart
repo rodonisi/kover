@@ -41,7 +41,7 @@ class SearchButton extends HookConsumerWidget {
           icon: const Icon(
             LucideIcons.x,
             size: LayoutConstants.mediumIcon,
-          ), // Shrink trailing icon
+          ),
           onPressed: () => controller.clear(),
         ),
       ],

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/pages/library/menu_page/app_list_tile.dart';
-import 'package:kover/pages/library/menu_page/sliver_libraries.dart';
-import 'package:kover/pages/library/menu_page/sliver_section.dart';
+import 'package:kover/pages/menu_page/app_list_tile.dart';
+import 'package:kover/pages/menu_page/sliver_libraries.dart';
+import 'package:kover/pages/menu_page/sliver_section.dart';
 import 'package:kover/riverpod/managers/download_manager.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/auth.dart';
