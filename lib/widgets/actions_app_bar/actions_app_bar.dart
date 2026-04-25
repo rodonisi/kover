@@ -16,13 +16,9 @@ class ActionsAppBar extends StatelessWidget {
       forceMaterialTransparency: true,
       elevation: 0,
       scrolledUnderElevation: 0,
+      actionsPadding: LayoutConstants.smallerEdgeInsets,
       actions: [
-        Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: LayoutConstants.smallPadding,
-          ),
-          child: _ActionsBar(),
-        ),
+        _ActionsBar(),
       ],
     );
   }
