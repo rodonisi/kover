@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/chapter_model.dart';
+import 'package:kover/models/enums/sort_direction.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/widgets/context_menu/context_menu_button.dart';
 import 'package:kover/widgets/details/filter_input_field.dart';
 import 'package:kover/widgets/lists/chapters_grid.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
@@ -17,6 +20,7 @@ class ChaptersPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hideRead = useState(false);
+    final sortDirection = useState(SortDirection.ascending);
     final chapters = ref.watch(
       seriesDetailProvider(
         seriesId: seriesId,
@@ -35,27 +39,29 @@ class ChaptersPage extends HookConsumerWidget {
       }),
     );
 
+    final toShow = sortDirection.value == .descending
+        ? chapters.reversed.toList()
+        : chapters;
+
     return _ChaptersPage(
       title: 'Chapters',
       seriesId: seriesId,
-      chapters: chapters,
-      hideReadToggle: IconButton(
-        onPressed: () => hideRead.value = !hideRead.value,
-        tooltip: hideRead.value ? 'Show read' : 'Hide read',
-        icon: Icon(
-          hideRead.value ? LucideIcons.eyeOff : LucideIcons.eye,
-        ),
+      chapters: toShow,
+      action: ContextMenuButton(
+        icon: const Icon(LucideIcons.listFilter),
+        menu: _getMenu(hideRead: hideRead, sortDirection: sortDirection),
       ),
     );
   }
 }
 
-class StorylinePage extends ConsumerWidget {
+class StorylinePage extends HookConsumerWidget {
   final int seriesId;
   const StorylinePage({super.key, required this.seriesId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final sortDirection = useState(SortDirection.ascending);
     final chapters = ref.watch(
       seriesDetailProvider(
         seriesId: seriesId,
@@ -64,20 +70,29 @@ class StorylinePage extends ConsumerWidget {
       }),
     );
 
+    final toShow = sortDirection.value == .descending
+        ? chapters.reversed.toList()
+        : chapters;
+
     return _ChaptersPage(
       title: 'Storyline',
       seriesId: seriesId,
-      chapters: chapters,
+      chapters: toShow,
+      action: ContextMenuButton(
+        icon: const Icon(LucideIcons.listFilter),
+        menu: _getMenu(sortDirection: sortDirection),
+      ),
     );
   }
 }
 
-class SpecialsPage extends ConsumerWidget {
+class SpecialsPage extends HookConsumerWidget {
   final int seriesId;
   const SpecialsPage({super.key, required this.seriesId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final sortDirection = useState(SortDirection.ascending);
     final chapters = ref.watch(
       seriesDetailProvider(
         seriesId: seriesId,
@@ -86,10 +101,18 @@ class SpecialsPage extends ConsumerWidget {
       }),
     );
 
+    final toShow = sortDirection.value == .descending
+        ? chapters.reversed.toList()
+        : chapters;
+
     return _ChaptersPage(
       title: 'Specials',
       seriesId: seriesId,
-      chapters: chapters,
+      chapters: toShow,
+      action: ContextMenuButton(
+        icon: const Icon(LucideIcons.listFilter),
+        menu: _getMenu(sortDirection: sortDirection),
+      ),
     );
   }
 }
@@ -98,12 +121,12 @@ class _ChaptersPage extends HookConsumerWidget {
   final String title;
   final int seriesId;
   final List<ChapterModel> chapters;
-  final Widget? hideReadToggle;
+  final Widget? action;
   const _ChaptersPage({
     required this.title,
     required this.seriesId,
     required this.chapters,
-    this.hideReadToggle,
+    this.action,
   });
 
   @override
@@ -128,7 +151,10 @@ class _ChaptersPage extends HookConsumerWidget {
           slivers: [
             SliverAppBar.large(
               title: Text(title),
-              actions: [?hideReadToggle],
+              actions: [
+                ?action,
+                const SizedBox.square(dimension: LayoutConstants.mediumPadding),
+              ],
             ),
             SliverPadding(
               padding: const EdgeInsets.symmetric(
@@ -151,4 +177,39 @@ class _ChaptersPage extends HookConsumerWidget {
       ),
     );
   }
+}
+
+ContextMenu<dynamic> _getMenu({
+  ValueNotifier<bool>? hideRead,
+  ValueNotifier<SortDirection>? sortDirection,
+}) {
+  return ContextMenu(
+    entries: [
+      if (hideRead != null) ...[
+        const MenuHeader(text: 'Filter'),
+        MenuItem(
+          icon: hideRead.value ? const Icon(LucideIcons.check) : null,
+          label: const Text('Hide Read'),
+          onSelected: (_) => hideRead.value = !hideRead.value,
+        ),
+      ],
+      if (sortDirection != null) ...[
+        const MenuHeader(text: 'Sort Direction'),
+        MenuItem(
+          icon: sortDirection.value == SortDirection.ascending
+              ? const Icon(LucideIcons.check)
+              : null,
+          label: const Text('Ascending'),
+          onSelected: (_) => sortDirection.value = SortDirection.ascending,
+        ),
+        MenuItem(
+          icon: sortDirection.value == SortDirection.descending
+              ? const Icon(LucideIcons.check)
+              : null,
+          label: const Text('Descending'),
+          onSelected: (_) => sortDirection.value = SortDirection.descending,
+        ),
+      ],
+    ],
+  );
 }

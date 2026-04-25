@@ -7,7 +7,7 @@ import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/riverpod/providers/want_to_read.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/actions_menu.dart';
+import 'package:kover/widgets/context_menu/actions_menu.dart';
 import 'package:kover/widgets/async_value.dart';
 import 'package:kover/widgets/cards/cover_card.dart';
 import 'package:kover/widgets/cards/cover_image.dart';

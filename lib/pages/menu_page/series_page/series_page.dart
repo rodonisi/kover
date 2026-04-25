@@ -2,25 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/models/enums/series_sort_option.dart';
+import 'package:kover/models/enums/sort_direction.dart';
 import 'package:kover/riverpod/providers/library.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/async_value.dart';
+import 'package:kover/widgets/context_menu/context_menu_button.dart';
 import 'package:kover/widgets/details/filter_input_field.dart';
 import 'package:kover/widgets/lists/series_sliver_grid.dart';
 import 'package:kover/widgets/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart' show LucideIcons;
-
-enum _SeriesSortOption {
-  name,
-  dateAdded,
-  lastModified,
-}
-
-enum _SeriesSortDirection {
-  ascending,
-  descending,
-}
 
 class AllSeriesPage extends StatelessWidget {
   const AllSeriesPage({super.key});
@@ -67,8 +59,8 @@ class SeriesPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sortOption = useState(_SeriesSortOption.name);
-    final sortDirection = useState(_SeriesSortDirection.ascending);
+    final sortOption = useState(SeriesSortOption.name);
+    final sortDirection = useState(SortDirection.ascending);
     final controller = useTextEditingController();
 
     final allSeries = ref.watch(
@@ -99,22 +91,13 @@ class SeriesPage extends HookConsumerWidget {
           SliverAppBar.large(
             title: Text(title),
             actions: [
-              InkWell(
-                customBorder: const CircleBorder(),
-                onTapUp: (details) async {
-                  await showContextMenu(
-                    context,
-                    contextMenu: _menu(
-                      sortOption,
-                      sortDirection,
-                      details.globalPosition,
-                    ),
-                  );
-                },
-                child: const Padding(
-                  padding: LayoutConstants.smallEdgeInsets,
-                  child: Icon(LucideIcons.arrowDownNarrowWide),
+              ContextMenuButton(
+                icon: Icon(
+                  sortDirection.value == .ascending
+                      ? LucideIcons.arrowDownNarrowWide
+                      : LucideIcons.arrowDownWideNarrow,
                 ),
+                menu: _menu(sortOption, sortDirection),
               ),
               const SizedBox.square(
                 dimension: LayoutConstants.smallPadding,
@@ -152,13 +135,11 @@ class SeriesPage extends HookConsumerWidget {
     );
   }
 
-  ContextMenu<dynamic> _menu(
-    ValueNotifier<_SeriesSortOption> sortOption,
-    ValueNotifier<_SeriesSortDirection> sortDirection,
-    Offset? position,
+  ContextMenu _menu(
+    ValueNotifier<SeriesSortOption> sortOption,
+    ValueNotifier<SortDirection> sortDirection,
   ) {
     return ContextMenu(
-      position: position,
       entries: <ContextMenuEntry>[
         const MenuHeader(text: 'Sort by'),
         MenuItem(
