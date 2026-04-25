@@ -298,8 +298,14 @@ class SubpageProgress extends ConsumerWidget {
     );
 
     final screenWidth = MediaQuery.sizeOf(context).width;
-    final stepWidth = screenWidth / reader.value!.totalPages;
-    final offset = stepWidth * reader.value!.page;
+    final stepWidth =
+        reader.whenOrNull(
+          data: (data) => screenWidth / data.totalPages,
+        ) ??
+        0.0;
+    final offset = reader.whenOrNull(
+      data: (data) => stepWidth * data.page,
+    );
 
     return SizedBox(
       height: 4.0,
@@ -316,7 +322,6 @@ class SubpageProgress extends ConsumerWidget {
               width: stepWidth,
               child: LinearProgressIndicator(
                 value: subpageProgress,
-                // color: theme.colorScheme.primary.withAlpha(180),
                 backgroundColor: theme.colorScheme.tertiaryContainer,
               ),
             ),
