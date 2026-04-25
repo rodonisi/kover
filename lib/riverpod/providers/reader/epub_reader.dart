@@ -200,6 +200,7 @@ sealed class EpubNavigationState with _$EpubNavigationState {
     required int page,
     required int totalPages,
     required int subpage,
+    required int totalSubpages,
     @Default(false) bool ready,
   }) = _EpubNavigationState;
 }
@@ -227,6 +228,7 @@ class EpubNavigation extends _$EpubNavigation {
       page: reader.initialPage,
       totalPages: reader.totalPages,
       subpage: 0,
+      totalSubpages: 0,
     );
   }
 
@@ -328,6 +330,7 @@ class EpubNavigation extends _$EpubNavigation {
               state = AsyncData(
                 current.copyWith(
                   subpage: data.subpages.length - 1,
+                  totalSubpages: data.subpages.length,
                   ready: true,
                 ),
               );
@@ -339,13 +342,18 @@ class EpubNavigation extends _$EpubNavigation {
           if (!_resumed && data.resumeSubpage != null) {
             _resumed = true;
             state = AsyncData(
-              current.copyWith(subpage: data.resumeSubpage!, ready: true),
+              current.copyWith(
+                subpage: data.resumeSubpage!,
+                totalSubpages: data.subpages.length,
+                ready: true,
+              ),
             );
             return;
           }
 
           state = AsyncData(
             current.copyWith(
+              totalSubpages: data.subpages.length,
               ready: data.status == .done || data.scrollId == null,
             ),
           );

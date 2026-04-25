@@ -8,6 +8,7 @@ import 'package:kover/pages/reader/reader_header.dart';
 import 'package:kover/pages/reader/toc_drawer.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
+import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -123,11 +124,20 @@ class ReaderOverlay extends HookConsumerWidget {
                       mainAxisSize: .min,
                       children: [
                         Expanded(child: child),
-                        ReaderProgress(seriesId: seriesId, chapterId: chapterId)
-                            .animate(
-                              target: uiVisible.value ? 0.0 : 1.0,
-                            )
-                            .fadeIn(duration: 200.ms),
+                        if (state.series.format == .epub)
+                          SubpageProgress(
+                            seriesId: seriesId,
+                            chapterId: chapterId,
+                          )
+                        else
+                          ReaderProgress(
+                                seriesId: seriesId,
+                                chapterId: chapterId,
+                              )
+                              .animate(
+                                target: uiVisible.value ? 0.0 : 1.0,
+                              )
+                              .fadeIn(duration: 200.ms),
                       ],
                     ),
                   ),
@@ -259,6 +269,65 @@ class ReaderProgress extends ConsumerWidget {
 
     return LinearProgressIndicator(
       value: progress,
+    );
+  }
+}
+
+class SubpageProgress extends ConsumerWidget {
+  final int seriesId;
+  final int chapterId;
+  const SubpageProgress({
+    super.key,
+    required this.seriesId,
+    required this.chapterId,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final reader = ref.watch(
+      epubNavigationProvider(seriesId: seriesId, chapterId: chapterId),
+    );
+
+    final progress = reader.whenOrNull(
+      data: (data) => (data.page + 1) / data.totalPages,
+    );
+
+    final subpageProgress = reader.whenOrNull(
+      data: (data) => (data.subpage + 0) / data.totalSubpages,
+    );
+
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final stepWidth =
+        reader.whenOrNull(
+          data: (data) => screenWidth / data.totalPages,
+        ) ??
+        0.0;
+    final offset = reader.whenOrNull(
+      data: (data) => stepWidth * data.page,
+    );
+
+    return SizedBox(
+      height: 4.0,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: LinearProgressIndicator(
+              value: progress,
+            ),
+          ),
+          Positioned(
+            left: offset,
+            child: SizedBox(
+              width: stepWidth,
+              child: LinearProgressIndicator(
+                value: subpageProgress,
+                backgroundColor: theme.colorScheme.tertiaryContainer,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
