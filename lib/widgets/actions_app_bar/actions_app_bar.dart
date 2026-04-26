@@ -29,11 +29,13 @@ class _ActionsBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final shape = theme.cardTheme.shape as RoundedRectangleBorder?;
     return Card.filled(
       color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadiusDirectional.all(
-          Radius.circular(LayoutConstants.mediumPadding),
+      shape: shape?.copyWith(
+        borderRadius: const BorderRadiusGeometry.all(
+          Radius.circular(LayoutConstants.mediumBorderRadius),
         ),
       ),
       child: const Padding(
