@@ -79,6 +79,7 @@ dart run tools/fetch_web_dependencies.dart
   <img src="screenshots/home.png" alt="Screenshot" width="220" />
   <img src="screenshots/series_details.png" alt="Screenshot" width="220" />
   <img src="screenshots/series_details2.png" alt="Screenshot" width="220" />
+  <img src="screenshots/all_series.png" alt="Screenshot" width="220" />
   <img src="screenshots/want_to_read.png" alt="Screenshot" width="220" />
   <img src="screenshots/menu.png" alt="Screenshot" width="220" />
 </p>
