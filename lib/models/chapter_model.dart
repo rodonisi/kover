@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/models/enums/format.dart';
+import 'package:kover/utils/data_constants.dart';
 
 part 'chapter_model.freezed.dart';
 part 'chapter_model.g.dart';
@@ -43,6 +44,13 @@ sealed class ChapterModel with _$ChapterModel {
   }
 
   static String _cleanedTitle(Chapter table) {
+    if (table.title != null &&
+        RegExp(
+          '^(Chapter|Book) ${DataConstants.singleVolumeChapterMinNumber.toInt()}',
+        ).hasMatch(table.title!)) {
+      return table.titleName ?? 'Single Volume';
+    }
+
     final titles = [
       table.title,
       table.titleName,
@@ -50,8 +58,8 @@ sealed class ChapterModel with _$ChapterModel {
 
     if (titles.isEmpty) {
       return switch (table.format) {
-        .epub => 'Book ${table.minNumber}',
-        .image || .archive => 'Chapter ${table.minNumber}',
+        .epub => 'Book ${table.minNumber.toInt()}',
+        .image || .archive => 'Chapter ${table.minNumber.toInt()}',
         _ => 'Untitled',
       };
     }
