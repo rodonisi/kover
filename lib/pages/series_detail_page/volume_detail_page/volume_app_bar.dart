@@ -36,7 +36,10 @@ class VolumeAppBar extends ConsumerWidget {
       data: (data) => DetailAppBar(
         title: data.name,
         progress: progress.value,
-        cover: VolumeCoverImage(volumeId: data.id),
+        cover: VolumeCoverImage(
+          volumeId: data.id,
+          usePlaceholder: false,
+        ),
         info: _VolumeInfo(volume: data),
         primaryColor: data.primaryColor,
         secondaryColor: data.secondaryColor,
@@ -103,7 +106,10 @@ class _VolumeContinueButtonImage extends ConsumerWidget {
     return Async(
       asyncValue: continuePoint,
       data: (data) => ContinueButtonImage(
-        image: ChapterCoverImage(chapterId: data.id),
+        image: ChapterCoverImage(
+          chapterId: data.id,
+          usePlaceholder: false,
+        ),
       ),
     );
   }

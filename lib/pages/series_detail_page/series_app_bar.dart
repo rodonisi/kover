@@ -84,7 +84,10 @@ class SeriesAppBar extends HookConsumerWidget {
           ],
           primaryColor: data.primaryColor,
           secondaryColor: data.secondaryColor,
-          cover: SeriesCoverImage(seriesId: seriesId),
+          cover: SeriesCoverImage(
+            seriesId: seriesId,
+            usePlaceholder: false,
+          ),
           info: _Metadata(series: data),
           collapsedContinueButton: _SeriesTitleContinueButton(
             seriesId: seriesId,
@@ -109,7 +112,10 @@ class _SeriesContinueButtonImage extends ConsumerWidget {
     return Async(
       asyncValue: continuePoint,
       data: (data) => ContinueButtonImage(
-        image: ChapterCoverImage(chapterId: data.id),
+        image: ChapterCoverImage(
+          chapterId: data.id,
+          usePlaceholder: false,
+        ),
       ),
     );
   }

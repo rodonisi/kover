@@ -43,7 +43,6 @@ class DetailAppBar extends HookConsumerWidget {
         child: LinearProgressIndicator(value: progress),
       ),
       actions: actions,
-
       background: SeriesInfoBackground(
         primaryColor: primaryColor,
         secondaryColor: secondaryColor,

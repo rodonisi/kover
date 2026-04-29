@@ -33,7 +33,8 @@ class DataManagementSettings extends ConsumerWidget {
               BooleanOption(
                 title: 'Automatically Download Covers',
                 description:
-                    'If disabled, covers will only be downloaded together with chapters',
+                    'If disabled, covers will only be downloaded together with chapters.\n'
+                    'Covers will still be fetched from the server if not downloaded and a connection is available.',
                 icon: LucideIcons.imageDownDir,
                 value: data.downloadCovers,
                 onChanged: (value) async {

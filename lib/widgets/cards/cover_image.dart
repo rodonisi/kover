@@ -13,12 +13,14 @@ class SeriesCoverImage extends ConsumerWidget {
   final double? height;
   final BoxFit fit;
   final BorderRadius? borderRadius;
+  final bool usePlaceholder;
 
   const SeriesCoverImage({
     super.key,
     required this.seriesId,
     this.width,
     this.height,
+    this.usePlaceholder = true,
     this.fit = BoxFit.cover,
     this.borderRadius,
   });
@@ -32,6 +34,7 @@ class SeriesCoverImage extends ConsumerWidget {
         fit: fit,
         height: height,
         width: width,
+        usePlaceholder: usePlaceholder,
       ),
     );
   }
@@ -41,6 +44,7 @@ class VolumeCoverImage extends ConsumerWidget {
   final int volumeId;
   final double? width;
   final double? height;
+  final bool usePlaceholder;
   final BoxFit fit;
   final BorderRadius? borderRadius;
 
@@ -49,6 +53,7 @@ class VolumeCoverImage extends ConsumerWidget {
     required this.volumeId,
     this.width,
     this.height,
+    this.usePlaceholder = true,
     this.fit = BoxFit.cover,
     this.borderRadius,
   });
@@ -63,6 +68,7 @@ class VolumeCoverImage extends ConsumerWidget {
           fit: fit,
           height: height,
           width: width,
+          usePlaceholder: usePlaceholder,
         ),
       ),
     );
@@ -73,6 +79,7 @@ class ChapterCoverImage extends ConsumerWidget {
   final int chapterId;
   final double? width;
   final double? height;
+  final bool usePlaceholder;
   final BoxFit fit;
   final BorderRadius? borderRadius;
 
@@ -81,6 +88,7 @@ class ChapterCoverImage extends ConsumerWidget {
     required this.chapterId,
     this.width,
     this.height,
+    this.usePlaceholder = true,
     this.fit = BoxFit.cover,
     this.borderRadius,
   });
@@ -95,6 +103,7 @@ class ChapterCoverImage extends ConsumerWidget {
           fit: fit,
           height: height,
           width: width,
+          usePlaceholder: usePlaceholder,
         ),
       ),
     );
@@ -105,6 +114,7 @@ class PlaceholderCoverImage extends StatelessWidget {
   final ImageModel? image;
   final double? width;
   final double? height;
+  final bool usePlaceholder;
   final BoxFit fit;
   const PlaceholderCoverImage({
     super.key,
@@ -112,12 +122,21 @@ class PlaceholderCoverImage extends StatelessWidget {
     this.width,
     this.height,
     this.fit = BoxFit.cover,
+    this.usePlaceholder = true,
   });
 
   @override
   Widget build(BuildContext context) {
     if (image == null) {
-      return const Center(child: Icon(LucideIcons.image));
+      return usePlaceholder
+          ? SizedBox(
+              width: width,
+              height: height,
+              child: const Center(
+                child: Icon(LucideIcons.image),
+              ),
+            )
+          : const SizedBox.shrink();
     }
 
     return Image.memory(

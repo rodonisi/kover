@@ -36,7 +36,10 @@ class ChapterAppBar extends ConsumerWidget {
       data: (data) => DetailAppBar(
         title: data.title,
         progress: progress.value,
-        cover: ChapterCoverImage(chapterId: data.id),
+        cover: ChapterCoverImage(
+          chapterId: data.id,
+          usePlaceholder: false,
+        ),
         info: _ChapterInfo(chapterId: chapterId),
         primaryColor: data.primaryColor,
         secondaryColor: data.secondaryColor,
@@ -97,7 +100,10 @@ class _ChapterContinueButtonImage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ContinueButtonImage(
-      image: ChapterCoverImage(chapterId: chapterId),
+      image: ChapterCoverImage(
+        chapterId: chapterId,
+        usePlaceholder: false,
+      ),
     );
   }
 }
