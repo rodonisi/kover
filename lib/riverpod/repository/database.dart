@@ -23,9 +23,9 @@ AppDatabase database(Ref ref) {
 
 @riverpod
 Future<int> databaseSize(Ref ref) async {
-  ref.watch(clearOperationProvider);
-  ref.watch(syncManagerProvider);
-  ref.watch(downloadManagerProvider);
+  ref.listen(clearOperationProvider, (_, _) => ref.invalidateSelf());
+  ref.listen(syncManagerProvider, (_, _) => ref.invalidateSelf());
+  ref.listen(downloadManagerProvider, (_, _) => ref.invalidateSelf());
 
   final applicationSubbportDir = await getApplicationSupportDirectory();
   final dbFile = File(
