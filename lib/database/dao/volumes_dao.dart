@@ -66,9 +66,7 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
 
   /// Get [SingleOrNullSelectable] cover for volume [volumeId]. If no cover is present, returns null.
   SingleOrNullSelectable<VolumeCover?> volumeCover({required int volumeId}) {
-    return (select(
-      volumeCovers,
-    )..where((row) => row.volumeId.equals(volumeId)));
+    return managers.volumeCovers.filter((f) => f.volumeId.id(volumeId));
   }
 
   /// Get all volume ids missing a cover

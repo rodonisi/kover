@@ -12,9 +12,7 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
 
   /// Get [SingleSelectable] for chapter [chapterId]
   SingleSelectable<Chapter> chapter(int chapterId) {
-    return (select(
-      chapters,
-    )..where((row) => row.id.equals(chapterId)));
+    return managers.chapters.filter((f) => f.id.equals(chapterId));
   }
 
   /// Search chapters by [query]. Optionally filter by [volumeId] and/or [seriesId]
@@ -59,9 +57,7 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
 
   /// Get [SingleOrNullSelectable] cover for chapter [chapterId]. Returns null if no cover is present
   SingleOrNullSelectable<ChapterCover?> chapterCover({required int chapterId}) {
-    return (select(
-      chapterCovers,
-    )..where((row) => row.chapterId.equals(chapterId)));
+    return managers.chapterCovers.filter((f) => f.chapterId.id(chapterId));
   }
 
   /// Get the list chapter ids missing a cover
