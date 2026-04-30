@@ -41,11 +41,11 @@ class SeriesSyncOperations {
 
   Future<Iterable<SeriesCompanion>> getRecentlyAdded() async {
     final res = await _client.apiSeriesRecentlyAddedV2Post(
-      body: FilterV2Dto(
+      body: const SeriesFilterV2Dto(
         id: 0,
-        combination: FilterV2DtoCombination.value_0.value,
-        sortOptions: SortOptions(
-          sortField: SortOptionsSortField.value_1.value,
+        combination: FilterCombination.and,
+        sortOptions: SeriesSortOptionDto(
+          sortField: SeriesSortField.sortname,
           isAscending: false,
         ),
         limitTo: 0,
@@ -175,19 +175,19 @@ class SeriesSyncOperations {
 
   Future<List<SeriesDto>> _fetchAllSeries({int? libraryId}) async {
     final res = await _client.apiSeriesV2Post(
-      body: FilterV2Dto(
+      body: SeriesFilterV2Dto(
         id: 0,
-        combination: FilterV2DtoCombination.value_0.value,
-        sortOptions: SortOptions(
-          sortField: SortOptionsSortField.value_1.value,
+        combination: FilterCombination.and,
+        sortOptions: const SeriesSortOptionDto(
+          sortField: SeriesSortField.sortname,
           isAscending: false,
         ),
         limitTo: 0,
         statements: [
           if (libraryId != null)
-            FilterStatementDto(
-              comparison: FilterStatementDtoComparison.value_0.value,
-              field: FilterStatementDtoField.value_19.value,
+            SeriesFilterStatementDto(
+              comparison: FilterComparison.equal,
+              field: SeriesFilterField.libraries,
               value: libraryId.toString(),
             ),
         ],
