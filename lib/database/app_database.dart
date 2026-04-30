@@ -107,7 +107,7 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  Future<void> defragment() async {
+  Future<void> vacuum() async {
     await customStatement('VACUUM');
   }
 

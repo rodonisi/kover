@@ -212,7 +212,7 @@ class ClearOperation extends _$ClearOperation {
         await operation();
       }
       state = AsyncData(newState.copyWith(status: .reclaimingSpace));
-      await ref.read(databaseProvider).defragment();
+      await ref.read(databaseProvider).vacuum();
       state = const AsyncData(ClearOperationState());
     } catch (e) {
       state = AsyncData(newState.copyWith(status: .error));
