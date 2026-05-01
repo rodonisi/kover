@@ -4,8 +4,8 @@ import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'two_page_reader.freezed.dart';
-part 'two_page_reader.g.dart';
+part 'image_spreads_reader.freezed.dart';
+part 'image_spreads_reader.g.dart';
 
 @freezed
 sealed class SpreadsState with _$SpreadsState {
@@ -39,14 +39,14 @@ class Spreads extends _$Spreads {
 }
 
 @freezed
-sealed class ImageTwoPageNavigationState with _$ImageTwoPageNavigationState {
-  const factory ImageTwoPageNavigationState({
+sealed class ImageSpreadsNavigationState with _$ImageSpreadsNavigationState {
+  const factory ImageSpreadsNavigationState({
     required int currentSpread,
-  }) = _ImageTwoPageNavigationState;
+  }) = _ImageSpreadsNavigationState;
 }
 
 @riverpod
-class ImageTwoPageReaderNavigation extends _$ImageTwoPageReaderNavigation {
+class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
   ReaderProvider get _readerProvider => readerProvider(
     seriesId: seriesId,
     chapterId: chapterId,
@@ -58,7 +58,7 @@ class ImageTwoPageReaderNavigation extends _$ImageTwoPageReaderNavigation {
       );
 
   @override
-  Future<ImageTwoPageNavigationState> build({
+  Future<ImageSpreadsNavigationState> build({
     required int seriesId,
     required int chapterId,
   }) async {
@@ -76,7 +76,7 @@ class ImageTwoPageReaderNavigation extends _$ImageTwoPageReaderNavigation {
       _readerProvider.future,
     );
 
-    return ImageTwoPageNavigationState(
+    return ImageSpreadsNavigationState(
       currentSpread: reader.initialPage ~/ 2,
     );
   }

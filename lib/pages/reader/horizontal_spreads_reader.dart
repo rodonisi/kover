@@ -4,15 +4,15 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/reader_overlay.dart';
 import 'package:kover/riverpod/providers/book.dart';
-import 'package:kover/riverpod/providers/reader/two_page_reader.dart';
+import 'package:kover/riverpod/providers/reader/image_spreads_reader.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/widgets/async_value.dart';
 
-class HorizontalTwoPagedReader extends HookConsumerWidget {
+class HorizontalSpreadsReader extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
 
-  const HorizontalTwoPagedReader({
+  const HorizontalSpreadsReader({
     super.key,
     required this.seriesId,
     required this.chapterId,
@@ -22,7 +22,7 @@ class HorizontalTwoPagedReader extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(imageReaderSettingsProvider(seriesId: seriesId));
 
-    final navProvider = imageTwoPageReaderNavigationProvider(
+    final navProvider = imageSpreadsReaderNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
     );
@@ -39,14 +39,21 @@ class HorizontalTwoPagedReader extends HookConsumerWidget {
       onJumpToPage: (page) {
         ref.read(navProvider.notifier).jumpToPage(page);
       },
-      isLastPage: (page) => ref.read(spreadsProvider(seriesId: seriesId, chapterId: chapterId)).value?.spreads.last.contains(page) ?? false,
+      isLastPage: (page) =>
+          ref
+              .read(spreadsProvider(seriesId: seriesId, chapterId: chapterId))
+              .value
+              ?.spreads
+              .last
+              .contains(page) ??
+          false,
       child: Async(
         asyncValue: ref.watch(navProvider),
         data: (navState) {
           return Async(
             asyncValue: ref.watch(
-      spreadsProvider(seriesId: seriesId, chapterId: chapterId),
-    ),
+              spreadsProvider(seriesId: seriesId, chapterId: chapterId),
+            ),
             data: (spreads) {
               return Async(
                 asyncValue: settings,

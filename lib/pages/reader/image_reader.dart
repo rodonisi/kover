@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/horizontal_paged_reader.dart';
-import 'package:kover/pages/reader/horizontal_two_paged_reader.dart';
+import 'package:kover/pages/reader/horizontal_spreads_reader.dart';
 import 'package:kover/pages/reader/reader_overlay.dart';
 import 'package:kover/pages/reader/vertical_continuous_reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
@@ -31,7 +31,7 @@ class ImageReader extends ConsumerWidget {
         );
 
         if (settings.readerMode == .twoPage) {
-          return HorizontalTwoPagedReader(
+          return HorizontalSpreadsReader(
             seriesId: seriesId,
             chapterId: chapterId,
           );
