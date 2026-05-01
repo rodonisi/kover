@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/pages/reader/reader_controls.dart';
-import 'package:kover/pages/reader/reader_header.dart';
+import 'package:kover/pages/reader/overlay/reader_controls.dart';
+import 'package:kover/pages/reader/overlay/reader_header.dart';
 import 'package:kover/pages/reader/toc_drawer.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
@@ -35,6 +35,7 @@ class ReaderOverlay extends HookConsumerWidget {
   final void Function()? onNextPage;
   final void Function()? onPreviousPage;
   final void Function(int page)? onJumpToPage;
+  final bool Function(int page)? isLastPage;
   final int seriesId;
   final int chapterId;
   final Widget child;
@@ -44,6 +45,7 @@ class ReaderOverlay extends HookConsumerWidget {
     this.onNextPage,
     this.onPreviousPage,
     this.onJumpToPage,
+    this.isLastPage,
     required this.chapterId,
     required this.seriesId,
     required this.child,
@@ -83,8 +85,8 @@ class ReaderOverlay extends HookConsumerWidget {
             (previous, next) {
               if (next <= 0 && prevChapter.value != null) {
                 showSnackbar.value = .previous;
-              } else if (next >= state.totalPages - 1 &&
-                  nextChapter.value != null) {
+              } else if (isLastPage?.call(next) ??
+                  next >= state.totalPages - 1 && nextChapter.value != null) {
                 showSnackbar.value = .next;
               } else {
                 showSnackbar.value = .none;

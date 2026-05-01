@@ -15,6 +15,7 @@ enum ImageScaleType {
 
 enum ReaderMode {
   horizontal,
+  spread,
   vertical,
 }
 
@@ -26,6 +27,10 @@ sealed class ImageReaderSettingsLimits {
   static const double verticalReaderPaddingMin = 0.0;
   static const double verticalReaderPaddingMax = 128.0;
   static const double verticalReaderPaddingStep = 4.0;
+
+  static const double spreadReaderGapMin = 0.0;
+  static const double spreadReaderGapMax = 64.0;
+  static const double spreadReaderGapStep = 4.0;
 }
 
 @freezed
@@ -36,6 +41,8 @@ sealed class ImageReaderSettingsState with _$ImageReaderSettingsState {
     @Default(ReaderMode.horizontal) ReaderMode readerMode,
     @Default(0.0) double verticalReaderGap,
     @Default(0.0) double verticalReaderPadding,
+    @Default(0.0) double spreadReaderGap,
+    @Default(true) bool spreadCoverPage,
   }) = _ImageReaderSettingsState;
 
   factory ImageReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -82,23 +89,22 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     );
   }
 
-  Future<void> toggleReadDirection() async {
+  Future<void> setReadDirection(ReadDirection direction) async {
     final current = await future;
+
     state = AsyncData(
       current.copyWith(
-        readDirection: current.readDirection == .leftToRight
-            ? .rightToLeft
-            : .leftToRight,
+        readDirection: direction,
       ),
     );
   }
 
-  Future<void> toggleReaderMode() async {
+  Future<void> setReaderMode(ReaderMode mode) async {
     final current = await future;
 
     state = AsyncData(
       current.copyWith(
-        readerMode: current.readerMode == .horizontal ? .vertical : .horizontal,
+        readerMode: mode,
       ),
     );
   }
@@ -127,6 +133,25 @@ class ImageReaderSettings extends _$ImageReaderSettings {
         ),
       ),
     );
+  }
+
+  Future<void> setSpreadReaderGap(double gap) async {
+    final current = await future;
+
+    state = AsyncData(
+      current.copyWith(
+        spreadReaderGap: gap.clamp(
+          ImageReaderSettingsLimits.spreadReaderGapMin,
+          ImageReaderSettingsLimits.spreadReaderGapMax,
+        ),
+      ),
+    );
+  }
+
+  Future<void> setSpreadCoverPage(bool value) async {
+    final current = await future;
+
+    state = AsyncData(current.copyWith(spreadCoverPage: value));
   }
 
   Future<void> reset() async {

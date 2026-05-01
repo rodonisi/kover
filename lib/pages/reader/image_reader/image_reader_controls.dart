@@ -4,6 +4,7 @@ import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/async_value.dart';
+import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/choice_option.dart';
 import 'package:kover/widgets/settings/numeric_option.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -20,8 +21,8 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
       asyncValue: ref.watch(provider),
       data: (settings) {
         return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: .min,
+          crossAxisAlignment: .start,
           children: [
             Flexible(
               child: SingleChildScrollView(
@@ -32,8 +33,8 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                     bottom: LayoutConstants.largePadding,
                   ),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: .min,
+                    crossAxisAlignment: .start,
                     spacing: LayoutConstants.largePadding,
                     children: [
                       Text(
@@ -47,65 +48,68 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                             : LucideIcons.chevronsLeft,
                         options: const [
                           ChoiceOptionEntry(
-                            value: ReadDirection.leftToRight,
+                            value: .leftToRight,
                             label: 'Left to Right',
                             icon: LucideIcons.chevronsRight,
                           ),
                           ChoiceOptionEntry(
-                            value: ReadDirection.rightToLeft,
+                            value: .rightToLeft,
                             label: 'Right to Left',
                             icon: LucideIcons.chevronsLeft,
                           ),
                         ],
                         value: settings.readDirection,
                         onChanged: (newValue) async {
-                          if (newValue != settings.readDirection) {
-                            await ref
-                                .read(provider.notifier)
-                                .toggleReadDirection();
-                          }
+                          await ref
+                              .read(provider.notifier)
+                              .setReadDirection(newValue);
                         },
                       ),
                       ChoiceOption<ReaderMode>(
                         title: 'Reader Mode',
-                        icon: settings.readerMode == ReaderMode.vertical
-                            ? LucideIcons.moveVertical
-                            : LucideIcons.moveHorizontal,
+                        icon: switch (settings.readerMode) {
+                          .horizontal => LucideIcons.moveHorizontal,
+                          .vertical => LucideIcons.moveVertical,
+                          .spread => LucideIcons.columns2,
+                        },
                         options: const [
                           ChoiceOptionEntry(
-                            value: ReaderMode.horizontal,
+                            value: .horizontal,
                             label: 'Horizontal',
                             icon: LucideIcons.moveHorizontal,
                           ),
                           ChoiceOptionEntry(
-                            value: ReaderMode.vertical,
+                            value: .vertical,
                             label: 'Vertical',
                             icon: LucideIcons.moveVertical,
+                          ),
+                          ChoiceOptionEntry(
+                            value: .spread,
+                            label: 'Two Page',
+                            icon: LucideIcons.columns2,
                           ),
                         ],
                         value: settings.readerMode,
                         onChanged: (newValue) async {
-                          if (newValue != settings.readerMode) {
-                            await ref
-                                .read(provider.notifier)
-                                .toggleReaderMode();
-                          }
+                          await ref
+                              .read(provider.notifier)
+                              .setReaderMode(newValue);
                         },
                       ),
                       if (settings.readerMode == .horizontal) ...[
                         ChoiceOption<ImageScaleType>(
                           title: 'Fit Direction',
-                          icon: settings.scaleType == ImageScaleType.fitWidth
+                          icon: settings.scaleType == .fitWidth
                               ? LucideIcons.chevronsLeftRight
                               : LucideIcons.chevronsUpDown,
                           options: const [
                             ChoiceOptionEntry(
-                              value: ImageScaleType.fitWidth,
+                              value: .fitWidth,
                               label: 'Fit Width',
                               icon: LucideIcons.chevronsLeftRight,
                             ),
                             ChoiceOptionEntry(
-                              value: ImageScaleType.fitHeight,
+                              value: .fitHeight,
                               label: 'Fit Height',
                               icon: LucideIcons.chevronsUpDown,
                             ),
@@ -145,6 +149,30 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                           onChanged: (newValue) async => await ref
                               .read(provider.notifier)
                               .setVerticalReaderGap(newValue),
+                        ),
+                      ],
+                      if (settings.readerMode == .spread) ...[
+                        NumericOption(
+                          title: 'Page Gap',
+                          icon: LucideIcons.unfoldHorizontal,
+                          value: settings.spreadReaderGap,
+                          min: ImageReaderSettingsLimits.spreadReaderGapMin,
+                          max: ImageReaderSettingsLimits.spreadReaderGapMax,
+                          step: ImageReaderSettingsLimits.spreadReaderGapStep,
+                          decimalPlaces: 0,
+                          onChanged: (newValue) async => await ref
+                              .read(provider.notifier)
+                              .setSpreadReaderGap(newValue),
+                        ),
+                        BooleanOption(
+                          title: 'Cover Page',
+                          description:
+                              'Treat the first page as the cover, showing it as a single page',
+                          icon: LucideIcons.bookImage,
+                          value: settings.spreadCoverPage,
+                          onChanged: (newValue) async => await ref
+                              .read(provider.notifier)
+                              .setSpreadCoverPage(newValue),
                         ),
                       ],
                     ],

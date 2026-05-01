@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/pages/reader/epub_reader_controls.dart';
-import 'package:kover/pages/reader/image_reader_controls.dart';
-import 'package:kover/pages/reader/page_slider.dart';
+import 'package:kover/pages/reader/epub_reader/epub_reader_controls.dart';
+import 'package:kover/pages/reader/image_reader/image_reader_controls.dart';
+import 'package:kover/pages/reader/overlay/page_slider.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -85,6 +85,7 @@ class ReaderSettingsButton extends StatelessWidget {
           useSafeArea: true,
           constraints: BoxConstraints(
             maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+            maxWidth: Breakpoints.medium,
           ),
           builder: (context) => child,
         );
