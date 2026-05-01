@@ -38,7 +38,7 @@ extension ChapterDtoMappings on ChapterDto {
       minHoursToRead: Value.absentIfNull(minHoursToRead),
       maxHoursToRead: Value.absentIfNull(maxHoursToRead),
       avgHoursToRead: Value.absentIfNull(avgHoursToRead),
-      ageRating: Value.absentIfNull(ageRating),
+      ageRating: Value.absentIfNull(ageRating?.value),
       primaryColor: Value.absentIfNull(primaryColor),
       secondaryColor: Value.absentIfNull(secondaryColor),
       isSpecial: Value.absentIfNull(isSpecial),

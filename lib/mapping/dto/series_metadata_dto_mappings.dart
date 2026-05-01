@@ -16,7 +16,7 @@ extension SeriesMetadataDtoMappings on SeriesMetadataDto {
         id: Value(metadataId),
         seriesId: Value(seriesId!),
         summary: Value(summary),
-        ageRating: Value(ageRating ?? -1),
+        ageRating: Value.absentIfNull(ageRating?.value),
         releaseYear: Value(releaseYear ?? 0),
         language: Value(language ?? ''),
         lastUpdated: Value(DateTime.timestamp()),

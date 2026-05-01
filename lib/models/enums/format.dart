@@ -1,3 +1,5 @@
+import 'package:kover/api/openapi.swagger.dart';
+
 enum Format {
   image,
   archive,
@@ -6,13 +8,13 @@ enum Format {
   unknown
   ;
 
-  factory Format.fromDtoFormat(int value) {
+  factory Format.fromDtoFormat(MangaFormat value) {
     return switch (value) {
-      0 => .image,
-      1 => Format.archive,
-      3 => Format.epub,
-      4 => Format.pdf,
-      _ => Format.unknown,
+      .image => .image,
+      .archive => .archive,
+      .epub => .epub,
+      .pdf => .pdf,
+      _ => .unknown,
     };
   }
 }

@@ -10,18 +10,18 @@ class WantToReadSyncOperations {
   /// Get the series in the want to read list
   Future<Iterable<SeriesCompanion>> getWantToReadList() async {
     final res = await _client.apiWantToReadV2Post(
-      body: FilterV2Dto(
+      body: const SeriesFilterV2Dto(
         id: 0,
         limitTo: 0,
-        combination: FilterV2DtoCombination.value_1.value,
-        sortOptions: SortOptions(
-          sortField: SortOptionsSortField.value_1.value,
+        combination: FilterCombination.and,
+        sortOptions: SeriesSortOptionDto(
+          sortField: SeriesSortField.sortname,
           isAscending: true,
         ),
         statements: [
-          FilterStatementDto(
-            comparison: FilterStatementDtoComparison.value_0.value,
-            field: FilterStatementDtoField.value_26.value,
+          SeriesFilterStatementDto(
+            comparison: FilterComparison.equal,
+            field: SeriesFilterField.wanttoread,
             value: 'true',
           ),
         ],

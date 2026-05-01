@@ -6,7 +6,7 @@
 
 set -e
 
-VERSION="${1:-v0.8.9}"
+VERSION="${1:-v0.9.0}"
 URL="https://raw.githubusercontent.com/Kareadita/Kavita/refs/tags/${VERSION}/openapi.json"
 OUTPUT="swaggers/openapi.json"
 

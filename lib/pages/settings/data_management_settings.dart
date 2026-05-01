@@ -23,7 +23,7 @@ class DataManagementSettings extends ConsumerWidget {
           asyncValue: settings,
           data: (data) => Column(
             mainAxisSize: .min,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: .start,
             spacing: LayoutConstants.largePadding,
             children: [
               Text(
@@ -57,50 +57,57 @@ class DataManagementSettings extends ConsumerWidget {
                       .setConcurrentDownloads(value.round());
                 },
               ),
-              Wrap(
-                spacing: LayoutConstants.mediumPadding,
-                runSpacing: LayoutConstants.mediumPadding,
-                alignment: .center,
+              Row(
+                mainAxisAlignment: .center,
                 children: [
-                  DatabaseClearOperationButton(
-                    asyncValue: ref.watch(reclaimSpaceProvider),
-                    startText: 'Reclaim Space',
-                    startIcon: const Icon(LucideIcons.databaseZap),
-                    onStart: () async {
-                      await ref
-                          .read(reclaimSpaceProvider.notifier)
-                          .reclaimSpace();
-                    },
-                  ),
-                  DatabaseClearOperationButton(
-                    asyncValue: ref.watch(clearDownloadsProvider),
-                    startText: 'Clear Downloads',
-                    startIcon: const Icon(Icons.file_download_off),
-                    onStart: () async {
-                      await ref
-                          .read(clearDownloadsProvider.notifier)
-                          .clearDownloads();
-                    },
-                  ),
-                  DatabaseClearOperationButton(
-                    asyncValue: ref.watch(clearCoversProvider),
-                    startText: 'Clear Covers',
-                    startIcon: const Icon(LucideIcons.imageOff),
-                    onStart: () async {
-                      await ref
-                          .read(clearCoversProvider.notifier)
-                          .clearCovers();
-                    },
-                  ),
-                  DatabaseClearOperationButton(
-                    asyncValue: ref.watch(clearDatabaseProvider),
-                    startText: 'Clear Database',
-                    startIcon: const Icon(LucideIcons.trash),
-                    onStart: () async {
-                      await ref
-                          .read(clearDatabaseProvider.notifier)
-                          .clearDatabase();
-                    },
+                  Expanded(
+                    child: Wrap(
+                      spacing: LayoutConstants.mediumPadding,
+                      runSpacing: LayoutConstants.mediumPadding,
+                      alignment: .center,
+                      children: [
+                        DatabaseClearOperationButton(
+                          asyncValue: ref.watch(reclaimSpaceProvider),
+                          text: 'Reclaim Space',
+                          icon: const Icon(LucideIcons.databaseZap),
+                          onPressed: () async {
+                            await ref
+                                .read(reclaimSpaceProvider.notifier)
+                                .reclaimSpace();
+                          },
+                        ),
+                        DatabaseClearOperationButton(
+                          asyncValue: ref.watch(clearDownloadsProvider),
+                          text: 'Clear Downloads',
+                          icon: const Icon(Icons.file_download_off),
+                          onPressed: () async {
+                            await ref
+                                .read(clearDownloadsProvider.notifier)
+                                .clearDownloads();
+                          },
+                        ),
+                        DatabaseClearOperationButton(
+                          asyncValue: ref.watch(clearCoversProvider),
+                          text: 'Clear Covers',
+                          icon: const Icon(LucideIcons.imageOff),
+                          onPressed: () async {
+                            await ref
+                                .read(clearCoversProvider.notifier)
+                                .clearCovers();
+                          },
+                        ),
+                        DatabaseClearOperationButton(
+                          asyncValue: ref.watch(clearDatabaseProvider),
+                          text: 'Clear Database',
+                          icon: const Icon(LucideIcons.trash),
+                          onPressed: () async {
+                            await ref
+                                .read(clearDatabaseProvider.notifier)
+                                .clearDatabase();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -120,16 +127,16 @@ class DataManagementSettings extends ConsumerWidget {
 
 class DatabaseClearOperationButton extends ConsumerWidget {
   final AsyncValue<ClearOperationStatus> asyncValue;
-  final String startText;
-  final Icon? startIcon;
-  final VoidCallback onStart;
+  final String text;
+  final Icon? icon;
+  final VoidCallback onPressed;
 
   const DatabaseClearOperationButton({
     super.key,
     required this.asyncValue,
-    required this.startText,
-    required this.onStart,
-    this.startIcon,
+    required this.text,
+    required this.onPressed,
+    this.icon,
   });
 
   @override
@@ -140,48 +147,40 @@ class DatabaseClearOperationButton extends ConsumerWidget {
         return switch (status) {
           .idle => FilledButton.icon(
             onPressed: () {
-              onStart();
+              onPressed();
             },
-            icon: startIcon,
-            label: Text(startText),
+            icon: icon,
+            label: Text(text),
           ),
           .busy => Tooltip(
             message: 'Database busy...',
             triggerMode: .tap,
             child: FilledButton.icon(
               onPressed: null,
-              icon: const SizedBox.square(
-                dimension: LayoutConstants.smallIcon,
+              icon: icon,
+              label: Text(text),
+            ),
+          ),
+          .inProgress || .reclaimingSpace => FilledButton.icon(
+            onPressed: null,
+            icon: const SizedBox.square(
+              dimension: LayoutConstants.mediumIcon,
+              child: Padding(
+                padding: LayoutConstants.smallerEdgeInsets,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
-              label: Text(startText),
             ),
-          ),
-          .inProgress => FilledButton.icon(
-            onPressed: null,
-            icon: const SizedBox.square(
-              dimension: LayoutConstants.smallIcon,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            label: const Text('Executing'),
-          ),
-          .reclaimingSpace => FilledButton.icon(
-            onPressed: null,
-            icon: const SizedBox.square(
-              dimension: LayoutConstants.smallIcon,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            label: const Text('Reclaiming Space'),
+            label: Text(text),
           ),
           .error => FilledButton.icon(
             onPressed: () async {
-              onStart();
+              onPressed();
             },
             icon: Icon(
               LucideIcons.circleX,
               color: Theme.of(context).colorScheme.error,
             ),
-            label: const Text('Retry'),
+            label: Text(text),
           ),
         };
       },

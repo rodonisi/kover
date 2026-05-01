@@ -1,3 +1,5 @@
+import 'package:kover/api/openapi.swagger.dart' as api;
+
 enum LibraryType {
   unknown,
   book,
@@ -8,13 +10,13 @@ enum LibraryType {
   manga
   ;
 
-  factory LibraryType.fromDtoType(int type) => switch (type) {
-    0 => .manga,
-    1 => .comic,
-    2 => .book,
-    3 => .image,
-    4 => .lightNovel,
-    5 => .comicLegacy,
+  factory LibraryType.fromDtoType(api.LibraryType type) => switch (type) {
+    .manga => .manga,
+    .comic => .comic,
+    .book => .book,
+    .image => .image,
+    .lightnovel => .lightNovel,
+    .comicvine => .comicLegacy,
     _ => .unknown,
   };
 }
