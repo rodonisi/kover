@@ -100,7 +100,7 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
       chapterId: chapterId,
     );
 
-    var settings = ref.watch(
+    final settings = ref.watch(
       imageReaderSettingsProvider(seriesId: seriesId),
     );
     final spreads = ref.watch(

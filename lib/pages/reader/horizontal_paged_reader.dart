@@ -27,6 +27,7 @@ class HorizontalPagedReader extends HookConsumerWidget {
       seriesId: seriesId,
       chapterId: chapterId,
     );
+
     final navState = ref.watch(navProvider);
 
     final pageController = usePageController(initialPage: navState.currentPage);
