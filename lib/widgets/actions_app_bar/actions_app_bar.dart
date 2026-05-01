@@ -16,7 +16,7 @@ class ActionsAppBar extends StatelessWidget {
       forceMaterialTransparency: true,
       elevation: 0,
       scrolledUnderElevation: 0,
-      actionsPadding: LayoutConstants.smallerEdgeInsets,
+      actionsPadding: LayoutConstants.smallEdgeInsets,
       actions: [
         _ActionsBar(),
       ],
@@ -33,6 +33,7 @@ class _ActionsBar extends ConsumerWidget {
     final shape = theme.cardTheme.shape as RoundedRectangleBorder?;
     return Card.filled(
       color: Theme.of(context).colorScheme.surfaceContainerHigh,
+      margin: EdgeInsets.zero,
       shape: shape?.copyWith(
         borderRadius: const BorderRadiusGeometry.all(
           Radius.circular(LayoutConstants.mediumBorderRadius),
