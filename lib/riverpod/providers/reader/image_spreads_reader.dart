@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'image_spreads_reader.freezed.dart';
@@ -21,20 +22,70 @@ class Spreads extends _$Spreads {
     required int seriesId,
     required int chapterId,
   }) async {
+    final reader = await ref.read(
+      readerProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+      ).future,
+    );
+    final spreads = [
+      [0],
+      ..._generateSpreads(1, reader.totalPages),
+    ];
+
+    log.d('Initial spreads generated: $spreads');
+    return SpreadsState(spreads: spreads);
+  }
+
+  // Mark a page as landscape, putting it in its own spread respread the remainder pages
+  Future<void> markLandscape(int page) async {
+    final current = state.value;
+    if (current == null) return;
+
     final readerNavigation = ref.read(
       readerNavigationProvider(
         seriesId: seriesId,
         chapterId: chapterId,
       ),
     );
-    final spreads = [
-      [0],
-      ...List.generate(
-        readerNavigation.totalPages ~/ 2,
-        (index) => [index * 2 + 1, index * 2 + 2],
-      ),
+
+    final targetSpreadIndex = current.spreads.indexWhere(
+      (spread) => spread.contains(page),
+    );
+
+    if (targetSpreadIndex == -1) return;
+
+    final targetSpread = current.spreads[targetSpreadIndex];
+    final isFirstPage = targetSpread.first == page;
+
+    final previousSpreads = current.spreads.take(targetSpreadIndex);
+
+    final remainingSpreads = _generateSpreads(
+      page + 1,
+      readerNavigation.totalPages,
+    );
+
+    final newSpreads = [
+      ...previousSpreads,
+      if (!isFirstPage) [targetSpread.first],
+      [page],
+      ...remainingSpreads,
     ];
-    return SpreadsState(spreads: spreads);
+
+    log.d('Marked page $page as landscape, new spreads: $newSpreads');
+    state = AsyncData(
+      SpreadsState(
+        spreads: newSpreads,
+      ),
+    );
+  }
+
+  static List<List<int>> _generateSpreads(int startIndex, int totalPages) {
+    final spreads = <List<int>>[];
+    for (int i = startIndex; i < totalPages; i += 2) {
+      spreads.add([i, i + 1].where((page) => page < totalPages).toList());
+    }
+    return spreads;
   }
 }
 
@@ -63,25 +114,62 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
     required int chapterId,
   }) async {
     ref.listen(_readerNavigationProvider, (prev, next) async {
-      final current = await future;
+      log.d('Reader navigation changed: ${next.currentPage}');
 
       final targetSpread = await _getSpreadForPage(next.currentPage);
 
       state = AsyncData(
-        current.copyWith(currentSpread: targetSpread),
+        ImageSpreadsNavigationState(currentSpread: targetSpread),
       );
+      log.d('Updated spread to $targetSpread');
     });
 
-    final reader = await ref.read(
-      _readerProvider.future,
-    );
+    ref.listen(spreadsProvider(seriesId: seriesId, chapterId: chapterId), (
+      prev,
+      next,
+    ) {
+      next.whenData((spreadsState) {
+        log.d('Spreads updated, checking if current page is still visible');
+        final current = state.value;
+        if (current == null) return;
 
-    return ImageSpreadsNavigationState(
-      currentSpread: reader.initialPage ~/ 2,
-    );
+        final readerNavigation = ref.read(
+          readerNavigationProvider(
+            seriesId: seriesId,
+            chapterId: chapterId,
+          ),
+        );
+
+        if (spreadsState.spreads[current.currentSpread].contains(
+          readerNavigation.currentPage,
+        )) {
+          return;
+        }
+
+        final targetSpread = spreadsState.spreads.indexWhere(
+          (spread) => spread.contains(readerNavigation.currentPage),
+        );
+
+        if (targetSpread == -1) return;
+
+        state = AsyncData(
+          current.copyWith(currentSpread: targetSpread),
+        );
+        log.d(
+          'Current page is in spread $targetSpread, updated navigation state accordingly',
+        );
+      });
+    });
+
+    final reader = await ref.read(_readerProvider.future);
+
+    final initialSpread = await _getSpreadForPage(reader.initialPage);
+
+    return ImageSpreadsNavigationState(currentSpread: initialSpread);
   }
 
   Future<void> nextPage() async {
+    log.d('Next page requested');
     final current = await future;
     final settings = await ref.read(
       imageReaderSettingsProvider(seriesId: seriesId).future,
@@ -92,6 +180,7 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
         : current.currentSpread - 1;
 
     await jumpToSpread(nextSpread);
+    log.d('Next page done');
   }
 
   Future<void> previousPage() async {
@@ -129,10 +218,12 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
       spreadsProvider(seriesId: seriesId, chapterId: chapterId).future,
     );
 
-    if (spread < 0 || spread >= spreadsState.spreads.length) return;
+    if (spread < 0 || spread >= spreadsState.spreads.length) {
+      return;
+    }
 
-    final spreadPages = spreadsState.spreads[spread].first;
-    ref.read(_readerNavigationProvider.notifier).jumpToPage(spreadPages);
+    final spreadPage = spreadsState.spreads[spread].first;
+    ref.read(_readerNavigationProvider.notifier).jumpToPage(spreadPage);
     await ref
         .read(_readerProvider.notifier)
         .saveProgress(page: spreadsState.spreads[spread].last);
