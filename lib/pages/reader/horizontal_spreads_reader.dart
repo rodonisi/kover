@@ -30,7 +30,7 @@ class HorizontalSpreadsReader extends HookConsumerWidget {
 
     return Async(
       asyncValue: ref.watch(navProvider),
-      data: (data) => ReaderOverlay(
+      data: (navState) => ReaderOverlay(
         chapterId: chapterId,
         seriesId: seriesId,
         onNextPage: () {
@@ -50,10 +50,27 @@ class HorizontalSpreadsReader extends HookConsumerWidget {
                 .last
                 .contains(page) ??
             false,
-        child: _ImageSpreadsReaderContent(
-          seriesId: seriesId,
-          chapterId: chapterId,
-          initialSpread: data.currentSpread,
+        child: Stack(
+          children: [
+            if (navState.ready)
+              _ImageSpreadsReaderContent(
+                seriesId: seriesId,
+                chapterId: chapterId,
+                initialSpread: navState.currentSpread,
+              )
+            else ...[
+              Offstage(
+                child: _RenderPreviousPages(
+                  seriesId: seriesId,
+                  chapterId: chapterId,
+                  currentSpread: navState.currentSpread,
+                ),
+              ),
+              const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -74,6 +91,7 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = usePageController(initialPage: initialSpread);
+    final ready = useState(false);
     final navProvider = imageSpreadsReaderNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
@@ -81,6 +99,8 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
 
     ref.listen(navProvider, (prev, next) {
       next.whenData((next) {
+        ready.value = next.ready;
+
         if (controller.hasClients &&
             controller.page?.round() != next.currentSpread) {
           final isSequential =
@@ -151,36 +171,12 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
                         : (width / 2).toInt();
 
                     return Expanded(
-                      child: Async(
-                        asyncValue: ref.watch(
-                          imagePageProvider(
-                            chapterId: chapterId,
-                            page: page,
-                          ),
-                        ),
-                        data: (data) {
-                          return _OrientationDetector(
-                            alignment: alignment,
-                            image: Image.memory(
-                              data.data,
-                              fit: .contain,
-                              alignment: alignment,
-                              cacheWidth: imageCacheWidth,
-                            ),
-                            onLandscape: () {
-                              if (spread.length == 1) return;
-
-                              ref
-                                  .read(
-                                    spreadsProvider(
-                                      seriesId: seriesId,
-                                      chapterId: chapterId,
-                                    ).notifier,
-                                  )
-                                  .markLandscape(page);
-                            },
-                          );
-                        },
+                      child: _RenderPage(
+                        chapterId: chapterId,
+                        seriesId: seriesId,
+                        page: page,
+                        alignment: alignment,
+                        imageCacheWidth: imageCacheWidth,
                       ),
                     );
                   }).toList(),
@@ -194,14 +190,117 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
   }
 }
 
+class _RenderPreviousPages extends ConsumerWidget {
+  final int seriesId;
+  final int chapterId;
+  final int currentSpread;
+
+  const _RenderPreviousPages({
+    required this.seriesId,
+    required this.chapterId,
+    required this.currentSpread,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Async(
+      asyncValue: ref.watch(
+        spreadsProvider(seriesId: seriesId, chapterId: chapterId),
+      ),
+      data: (spreads) {
+        final pagesToRender = spreads.spreads
+            .take(currentSpread)
+            .expand((spread) => spread)
+            .toList();
+
+        final cacheWidth =
+            (MediaQuery.of(context).size.width *
+                MediaQuery.of(context).devicePixelRatio) ~/
+            2;
+
+        return Stack(
+          children: pagesToRender.map((page) {
+            return _RenderPage(
+              seriesId: seriesId,
+              chapterId: chapterId,
+              page: page,
+              alignment: .center,
+              imageCacheWidth: cacheWidth,
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+}
+
+class _RenderPage extends ConsumerWidget {
+  final int seriesId;
+  final int chapterId;
+  final int page;
+  final Alignment alignment;
+  final int? imageCacheWidth;
+
+  const _RenderPage({
+    required this.seriesId,
+    required this.chapterId,
+    required this.page,
+    this.imageCacheWidth,
+    this.alignment = .center,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Async(
+      asyncValue: ref.watch(
+        imagePageProvider(
+          chapterId: chapterId,
+          page: page,
+        ),
+      ),
+      data: (data) {
+        return _OrientationDetector(
+          alignment: alignment,
+          image: Image.memory(
+            data.data,
+            fit: .contain,
+            alignment: alignment,
+            cacheWidth: imageCacheWidth,
+          ),
+          onRendered: (size) async {
+            await ref
+                .read(
+                  spreadsProvider(
+                    seriesId: seriesId,
+                    chapterId: chapterId,
+                  ).notifier,
+                )
+                .markRendered(page);
+            if (size.width > size.height) {
+              await ref
+                  .read(
+                    spreadsProvider(
+                      seriesId: seriesId,
+                      chapterId: chapterId,
+                    ).notifier,
+                  )
+                  .markLandscape(page);
+            }
+          },
+        );
+      },
+    );
+  }
+}
+
 class _OrientationDetector extends HookWidget {
   final Image image;
-  final VoidCallback onLandscape;
+  final void Function(Size size) onRendered;
   final Alignment alignment;
 
   const _OrientationDetector({
     required this.image,
-    required this.onLandscape,
+    required this.onRendered,
     this.alignment = Alignment.center,
   });
 
@@ -210,9 +309,12 @@ class _OrientationDetector extends HookWidget {
     useEffect(() {
       final stream = image.image.resolve(const ImageConfiguration());
       final listener = ImageStreamListener((ImageInfo info, bool sync) {
-        if (info.image.width > info.image.height) {
-          onLandscape();
-        }
+        onRendered(
+          Size(
+            info.image.width.toDouble(),
+            info.image.height.toDouble(),
+          ),
+        );
       });
 
       stream.addListener(listener);

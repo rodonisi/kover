@@ -2,7 +2,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
-import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'image_spreads_reader.freezed.dart';
@@ -12,6 +11,7 @@ part 'image_spreads_reader.g.dart';
 sealed class SpreadsState with _$SpreadsState {
   const factory SpreadsState({
     required List<List<int>> spreads,
+    required Set<int> checkedPages,
   }) = _SpreadsState;
 }
 
@@ -33,14 +33,12 @@ class Spreads extends _$Spreads {
       ..._generateSpreads(1, reader.totalPages),
     ];
 
-    log.d('Initial spreads generated: $spreads');
-    return SpreadsState(spreads: spreads);
+    return SpreadsState(spreads: spreads, checkedPages: {});
   }
 
   // Mark a page as landscape, putting it in its own spread respread the remainder pages
   Future<void> markLandscape(int page) async {
-    final current = state.value;
-    if (current == null) return;
+    final current = await future;
 
     final readerNavigation = ref.read(
       readerNavigationProvider(
@@ -56,6 +54,8 @@ class Spreads extends _$Spreads {
     if (targetSpreadIndex == -1) return;
 
     final targetSpread = current.spreads[targetSpreadIndex];
+    if (targetSpread.length == 1) return;
+
     final isFirstPage = targetSpread.first == page;
 
     final previousSpreads = current.spreads.take(targetSpreadIndex);
@@ -72,11 +72,22 @@ class Spreads extends _$Spreads {
       ...remainingSpreads,
     ];
 
-    log.d('Marked page $page as landscape, new spreads: $newSpreads');
     state = AsyncData(
-      SpreadsState(
+      current.copyWith(
         spreads: newSpreads,
       ),
+    );
+  }
+
+  Future<void> markRendered(int page) async {
+    final current = await future;
+
+    if (current.checkedPages.contains(page)) return;
+
+    final newCheckedPages = {...current.checkedPages, page};
+
+    state = AsyncData(
+      current.copyWith(checkedPages: newCheckedPages),
     );
   }
 
@@ -93,6 +104,7 @@ class Spreads extends _$Spreads {
 sealed class ImageSpreadsNavigationState with _$ImageSpreadsNavigationState {
   const factory ImageSpreadsNavigationState({
     required int currentSpread,
+    required bool ready,
   }) = _ImageSpreadsNavigationState;
 }
 
@@ -114,14 +126,13 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
     required int chapterId,
   }) async {
     ref.listen(_readerNavigationProvider, (prev, next) async {
-      log.d('Reader navigation changed: ${next.currentPage}');
-
+      final current = await future;
       final targetSpread = await _getSpreadForPage(next.currentPage);
+      final ready = await _isReadyForPage(next.currentPage);
 
       state = AsyncData(
-        ImageSpreadsNavigationState(currentSpread: targetSpread),
+        current.copyWith(currentSpread: targetSpread, ready: ready),
       );
-      log.d('Updated spread to $targetSpread');
     });
 
     ref.listen(spreadsProvider(seriesId: seriesId, chapterId: chapterId), (
@@ -129,7 +140,6 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
       next,
     ) {
       next.whenData((spreadsState) {
-        log.d('Spreads updated, checking if current page is still visible');
         final current = state.value;
         if (current == null) return;
 
@@ -140,12 +150,6 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
           ),
         );
 
-        if (spreadsState.spreads[current.currentSpread].contains(
-          readerNavigation.currentPage,
-        )) {
-          return;
-        }
-
         final targetSpread = spreadsState.spreads.indexWhere(
           (spread) => spread.contains(readerNavigation.currentPage),
         );
@@ -153,10 +157,13 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
         if (targetSpread == -1) return;
 
         state = AsyncData(
-          current.copyWith(currentSpread: targetSpread),
-        );
-        log.d(
-          'Current page is in spread $targetSpread, updated navigation state accordingly',
+          current.copyWith(
+            currentSpread: targetSpread,
+            ready: _containsAllPrevious(
+              set: spreadsState.checkedPages,
+              page: readerNavigation.currentPage,
+            ),
+          ),
         );
       });
     });
@@ -164,12 +171,15 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
     final reader = await ref.read(_readerProvider.future);
 
     final initialSpread = await _getSpreadForPage(reader.initialPage);
+    final ready = await _isReadyForPage(reader.initialPage);
 
-    return ImageSpreadsNavigationState(currentSpread: initialSpread);
+    return ImageSpreadsNavigationState(
+      currentSpread: initialSpread,
+      ready: ready,
+    );
   }
 
   Future<void> nextPage() async {
-    log.d('Next page requested');
     final current = await future;
     final settings = await ref.read(
       imageReaderSettingsProvider(seriesId: seriesId).future,
@@ -180,7 +190,6 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
         : current.currentSpread - 1;
 
     await jumpToSpread(nextSpread);
-    log.d('Next page done');
   }
 
   Future<void> previousPage() async {
@@ -194,18 +203,6 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
         : current.currentSpread + 1;
 
     await jumpToSpread(nextSpread);
-  }
-
-  Future<int> _getSpreadForPage(int page) async {
-    final spreadsState = await ref.read(
-      spreadsProvider(seriesId: seriesId, chapterId: chapterId).future,
-    );
-
-    final targetSpread = spreadsState.spreads.indexWhere(
-      (spread) => spread.contains(page),
-    );
-
-    return targetSpread.clamp(0, spreadsState.spreads.length - 1);
   }
 
   Future<void> jumpToPage(int page) async {
@@ -227,5 +224,32 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
     await ref
         .read(_readerProvider.notifier)
         .saveProgress(page: spreadsState.spreads[spread].last);
+  }
+
+  Future<int> _getSpreadForPage(int page) async {
+    final spreadsState = await ref.read(
+      spreadsProvider(seriesId: seriesId, chapterId: chapterId).future,
+    );
+
+    final targetSpread = spreadsState.spreads.indexWhere(
+      (spread) => spread.contains(page),
+    );
+
+    return targetSpread.clamp(0, spreadsState.spreads.length - 1);
+  }
+
+  Future<bool> _isReadyForPage(int page) async {
+    final spreadsState = await ref.read(
+      spreadsProvider(seriesId: seriesId, chapterId: chapterId).future,
+    );
+
+    return _containsAllPrevious(set: spreadsState.checkedPages, page: page);
+  }
+
+  static bool _containsAllPrevious({required Set<int> set, required int page}) {
+    for (int i = 0; i < page; i++) {
+      if (!set.contains(i)) return false;
+    }
+    return true;
   }
 }
