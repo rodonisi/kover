@@ -54,8 +54,13 @@ class ReaderOverlay extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final uiVisible = useState(false);
+    final snackbarDismissed = useState(false);
     final showSnackbar = useState(ShowSnackbar.none);
     final provider = readerProvider(seriesId: seriesId, chapterId: chapterId);
+
+    final shouldShowSnackbar =
+        showSnackbar.value != ShowSnackbar.none &&
+        (!snackbarDismissed.value || uiVisible.value);
 
     return Async(
       asyncValue: ref.watch(provider),
@@ -195,9 +200,14 @@ class ReaderOverlay extends HookConsumerWidget {
                                   chapterId: prevChapter.value!.id,
                                 ).replace(context);
                               },
+                              onDismiss: snackbarDismissed.value
+                                  ? null
+                                  : () => snackbarDismissed.value = true,
                             )
                             .animate(
-                              target: showSnackbar.value == .previous
+                              target:
+                                  shouldShowSnackbar &&
+                                      showSnackbar.value == .previous
                                   ? 1.0
                                   : 0.0,
                             )
@@ -220,9 +230,16 @@ class ReaderOverlay extends HookConsumerWidget {
                                   chapterId: nextChapter.value!.id,
                                 ).replace(context);
                               },
+                              onDismiss: snackbarDismissed.value
+                                  ? null
+                                  : () => snackbarDismissed.value = true,
                             )
                             .animate(
-                              target: showSnackbar.value == .next ? 1.0 : 0.0,
+                              target:
+                                  shouldShowSnackbar &&
+                                      showSnackbar.value == .next
+                                  ? 1.0
+                                  : 0.0,
                             )
                             .show(duration: 10.ms, maintain: false)
                             .fade(duration: 100.ms)
@@ -336,8 +353,15 @@ class SubpageProgress extends ConsumerWidget {
 
 class ChapterSnackbar extends StatelessWidget {
   final String title;
-  final void Function()? onNavigate;
-  const ChapterSnackbar({super.key, required this.title, this.onNavigate});
+  final VoidCallback? onNavigate;
+  final VoidCallback? onDismiss;
+
+  const ChapterSnackbar({
+    super.key,
+    required this.title,
+    this.onNavigate,
+    this.onDismiss,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -347,6 +371,7 @@ class ChapterSnackbar extends StatelessWidget {
         padding: LayoutConstants.mediumEdgeInsets,
         child: Row(
           mainAxisAlignment: .spaceBetween,
+          spacing: LayoutConstants.smallPadding,
           children: [
             Expanded(
               child: Text(
@@ -354,6 +379,8 @@ class ChapterSnackbar extends StatelessWidget {
                 overflow: .ellipsis,
               ),
             ),
+            if (onDismiss != null)
+              TextButton(onPressed: onDismiss, child: const Text('Dismiss')),
             FilledButton(
               onPressed: onNavigate,
               child: const Text('Go'),
