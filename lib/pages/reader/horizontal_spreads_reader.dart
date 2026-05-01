@@ -6,6 +6,7 @@ import 'package:kover/pages/reader/reader_overlay.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/image_spreads_reader.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
+import 'package:kover/utils/extensions/iterable.dart';
 import 'package:kover/widgets/async_value.dart';
 
 class HorizontalSpreadsReader extends HookConsumerWidget {
@@ -52,13 +53,15 @@ class HorizontalSpreadsReader extends HookConsumerWidget {
             false,
         child: Stack(
           children: [
-            if (navState.ready)
-              _ImageSpreadsReaderContent(
+            Offstage(
+              offstage: !navState.ready,
+              child: _ImageSpreadsReaderContent(
                 seriesId: seriesId,
                 chapterId: chapterId,
                 initialSpread: navState.currentSpread,
-              )
-            else ...[
+              ),
+            ),
+            if (!navState.ready) ...[
               Offstage(
                 child: _RenderPreviousPages(
                   seriesId: seriesId,
@@ -97,6 +100,13 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
       chapterId: chapterId,
     );
 
+    var settings = ref.watch(
+      imageReaderSettingsProvider(seriesId: seriesId),
+    );
+    final spreads = ref.watch(
+      spreadsProvider(seriesId: seriesId, chapterId: chapterId),
+    );
+
     ref.listen(navProvider, (prev, next) {
       next.whenData((next) {
         ready.value = next.ready;
@@ -120,14 +130,10 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
     });
 
     return Async(
-      asyncValue: ref.watch(
-        imageReaderSettingsProvider(seriesId: seriesId),
-      ),
+      asyncValue: settings,
       data: (settings) {
         return Async(
-          asyncValue: ref.watch(
-            spreadsProvider(seriesId: seriesId, chapterId: chapterId),
-          ),
+          asyncValue: spreads,
           data: (spreads) {
             return PageView.builder(
               controller: controller,
@@ -146,40 +152,47 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
                   textDirection: settings.readDirection == .rightToLeft
                       ? .rtl
                       : .ltr,
-                  children: spread.map((page) {
-                    Alignment alignment;
+                  children: spread
+                      .map<Widget>((page) {
+                        Alignment alignment;
 
-                    if (spread.length == 1) {
-                      alignment = .center;
-                    } else if (settings.readDirection == .rightToLeft) {
-                      alignment = page == spread.first
-                          ? .centerLeft
-                          : .centerRight;
-                    } else {
-                      alignment = page == spread.first
-                          ? .centerRight
-                          : .centerLeft;
-                    }
+                        if (spread.length == 1) {
+                          alignment = .center;
+                        } else if (settings.readDirection == .rightToLeft) {
+                          alignment = page == spread.first
+                              ? .centerLeft
+                              : .centerRight;
+                        } else {
+                          alignment = page == spread.first
+                              ? .centerRight
+                              : .centerLeft;
+                        }
 
-                    final width =
-                        (MediaQuery.of(context).size.width *
-                                MediaQuery.of(context).devicePixelRatio)
-                            .toInt();
+                        final width =
+                            (MediaQuery.of(context).size.width *
+                                    MediaQuery.of(context).devicePixelRatio)
+                                .toInt();
 
-                    final imageCacheWidth = spread.length == 1
-                        ? width
-                        : (width / 2).toInt();
+                        final imageCacheWidth = spread.length == 1
+                            ? width
+                            : width ~/ 2;
 
-                    return Expanded(
-                      child: _RenderPage(
-                        chapterId: chapterId,
-                        seriesId: seriesId,
-                        page: page,
-                        alignment: alignment,
-                        imageCacheWidth: imageCacheWidth,
-                      ),
-                    );
-                  }).toList(),
+                        return Expanded(
+                          child: _RenderPage(
+                            chapterId: chapterId,
+                            seriesId: seriesId,
+                            page: page,
+                            alignment: alignment,
+                            imageCacheWidth: imageCacheWidth,
+                          ),
+                        );
+                      })
+                      .interleave(
+                        SizedBox.square(
+                          dimension: settings.spreadReaderGap,
+                        ),
+                      )
+                      .toList(),
                 );
               },
             );

@@ -4,6 +4,7 @@ import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/async_value.dart';
+import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/choice_option.dart';
 import 'package:kover/widgets/settings/numeric_option.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -59,18 +60,18 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                         ],
                         value: settings.readDirection,
                         onChanged: (newValue) async {
-                          if (newValue != settings.readDirection) {
-                            await ref
-                                .read(provider.notifier)
-                                .toggleReadDirection();
-                          }
+                          await ref
+                              .read(provider.notifier)
+                              .setReadDirection(newValue);
                         },
                       ),
                       ChoiceOption<ReaderMode>(
                         title: 'Reader Mode',
-                        icon: settings.readerMode == .vertical
-                            ? LucideIcons.moveVertical
-                            : LucideIcons.moveHorizontal,
+                        icon: switch (settings.readerMode) {
+                          ReaderMode.horizontal => LucideIcons.moveHorizontal,
+                          ReaderMode.vertical => LucideIcons.moveVertical,
+                          ReaderMode.spread => LucideIcons.columns2,
+                        },
                         options: const [
                           ChoiceOptionEntry(
                             value: .horizontal,
@@ -83,9 +84,9 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                             icon: LucideIcons.moveVertical,
                           ),
                           ChoiceOptionEntry(
-                            value: .twoPage,
+                            value: .spread,
                             label: 'Two Page',
-                            icon: LucideIcons.moveVertical,
+                            icon: LucideIcons.columns2,
                           ),
                         ],
                         value: settings.readerMode,
@@ -148,6 +149,30 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                           onChanged: (newValue) async => await ref
                               .read(provider.notifier)
                               .setVerticalReaderGap(newValue),
+                        ),
+                      ],
+                      if (settings.readerMode == .spread) ...[
+                        NumericOption(
+                          title: 'Page Gap',
+                          icon: LucideIcons.unfoldHorizontal,
+                          value: settings.spreadReaderGap,
+                          min: ImageReaderSettingsLimits.spreadReaderGapMin,
+                          max: ImageReaderSettingsLimits.spreadReaderGapMax,
+                          step: ImageReaderSettingsLimits.spreadReaderGapStep,
+                          decimalPlaces: 0,
+                          onChanged: (newValue) async => await ref
+                              .read(provider.notifier)
+                              .setSpreadReaderGap(newValue),
+                        ),
+                        BooleanOption(
+                          title: 'Cover Page',
+                          description:
+                              'Treat the first page as the cover, showing it as a single page',
+                          icon: LucideIcons.bookImage,
+                          value: settings.spreadCoverPage,
+                          onChanged: (newValue) async => await ref
+                              .read(provider.notifier)
+                              .setSpreadCoverPage(newValue),
                         ),
                       ],
                     ],

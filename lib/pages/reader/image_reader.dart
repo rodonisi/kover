@@ -30,7 +30,7 @@ class ImageReader extends ConsumerWidget {
           chapterId: chapterId,
         );
 
-        if (settings.readerMode == .twoPage) {
+        if (settings.readerMode == .spread) {
           return HorizontalSpreadsReader(
             seriesId: seriesId,
             chapterId: chapterId,

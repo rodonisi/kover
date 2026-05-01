@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'image_spreads_reader.freezed.dart';
@@ -28,15 +29,22 @@ class Spreads extends _$Spreads {
         chapterId: chapterId,
       ).future,
     );
+
+    final useCoverPage = await ref.watch(
+      imageReaderSettingsProvider(
+        seriesId: seriesId,
+      ).selectAsync((s) => s.spreadCoverPage),
+    );
+
     final spreads = [
-      [0],
-      ..._generateSpreads(1, reader.totalPages),
+      if (useCoverPage) [0],
+      ..._generateSpreads(useCoverPage ? 1 : 0, reader.totalPages),
     ];
 
     return SpreadsState(spreads: spreads, checkedPages: {});
   }
 
-  // Mark a page as landscape, putting it in its own spread respread the remainder pages
+  /// Mark a page as landscape, putting it in its own spread respread the remainder pages
   Future<void> markLandscape(int page) async {
     final current = await future;
 
@@ -79,6 +87,7 @@ class Spreads extends _$Spreads {
     );
   }
 
+  /// Mark a page as rendered, allowing navigation to it and subsequent pages
   Future<void> markRendered(int page) async {
     final current = await future;
 
@@ -142,6 +151,11 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
       next.whenData((spreadsState) {
         final current = state.value;
         if (current == null) return;
+
+        log.d(
+          'Spreads updated, checking if current page is still valid ${spreadsState.spreads}',
+        );
+        log.d('Checked pages: ${spreadsState.checkedPages}');
 
         final readerNavigation = ref.read(
           readerNavigationProvider(
