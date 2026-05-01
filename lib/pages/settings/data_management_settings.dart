@@ -13,6 +13,7 @@ class DataManagementSettings extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final settings = ref.watch(downloadSettingsProvider);
 
     return Card(
@@ -101,9 +102,45 @@ class DataManagementSettings extends ConsumerWidget {
                           text: 'Clear Database',
                           icon: const Icon(LucideIcons.trash),
                           onPressed: () async {
-                            await ref
-                                .read(clearDatabaseProvider.notifier)
-                                .clearDatabase();
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Are you sure?'),
+                                  content: const Text(
+                                    'This will clear the entire local database, including any unsynced progress and downloaded data. This action cannot be undone.',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(
+                                        context,
+                                      ).pop(false), // Returns false
+                                      child: const Text('Cancel'),
+                                    ),
+                                    FilledButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            theme.colorScheme.error,
+                                        foregroundColor:
+                                            theme.colorScheme.onError,
+                                      ),
+                                      onPressed: () => Navigator.of(
+                                        context,
+                                      ).pop(true), // Returns true
+                                      child: const Text(
+                                        'Delete',
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                            if (confirmed == true) {
+                              await ref
+                                  .read(clearDatabaseProvider.notifier)
+                                  .clearDatabase();
+                            }
                           },
                         ),
                       ],
