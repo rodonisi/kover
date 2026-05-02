@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/async_value.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/choice_option.dart';
+import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class GeneralSettings extends ConsumerWidget {

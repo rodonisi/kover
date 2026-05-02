@@ -6,11 +6,11 @@ import 'package:kover/riverpod/providers/download.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/context_menu/actions_menu.dart';
-import 'package:kover/widgets/async_value.dart';
 import 'package:kover/widgets/cards/cover_image.dart';
+import 'package:kover/widgets/context_menu/actions_menu.dart';
 import 'package:kover/widgets/details/detail_app_bar.dart';
 import 'package:kover/widgets/details/info_widgets.dart';
+import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ChapterAppBar extends ConsumerWidget {

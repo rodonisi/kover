@@ -13,7 +13,7 @@ import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/logging.dart';
-import 'package:kover/widgets/async_value.dart';
+import 'package:kover/widgets/util/async_value.dart';
 
 enum ShowSnackbar {
   previous,

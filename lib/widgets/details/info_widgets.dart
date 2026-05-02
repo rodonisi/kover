@@ -3,7 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/want_to_read.dart';
 import 'package:kover/utils/extensions/int.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/async_value.dart';
+import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class LimitedList extends StatelessWidget {

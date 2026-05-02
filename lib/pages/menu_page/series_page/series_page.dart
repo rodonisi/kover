@@ -7,11 +7,11 @@ import 'package:kover/models/enums/sort_direction.dart';
 import 'package:kover/riverpod/providers/library.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/async_value.dart';
 import 'package:kover/widgets/context_menu/context_menu_button.dart';
 import 'package:kover/widgets/details/filter_input_field.dart';
 import 'package:kover/widgets/lists/series_sliver_grid.dart';
-import 'package:kover/widgets/sliver_bottom_padding.dart';
+import 'package:kover/widgets/util/async_value.dart';
+import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart' show LucideIcons;
 
 class AllSeriesPage extends StatelessWidget {

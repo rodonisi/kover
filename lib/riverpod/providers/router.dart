@@ -12,7 +12,7 @@ import 'package:kover/pages/series_detail_page/volume_detail_page/volume_detail_
 import 'package:kover/pages/series_detail_page/volumes_page/volumes_page.dart';
 import 'package:kover/pages/settings/settings_page.dart';
 import 'package:kover/pages/want_to_read_page/want_to_read_page.dart';
-import 'package:kover/widgets/navigator_container.dart';
+import 'package:kover/widgets/util/navigator_container.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'router.g.dart';

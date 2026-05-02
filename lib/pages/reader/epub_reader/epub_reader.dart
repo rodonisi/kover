@@ -8,7 +8,7 @@ import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
-import 'package:kover/widgets/async_value.dart';
+import 'package:kover/widgets/util/async_value.dart';
 
 class EpubReader extends HookConsumerWidget {
   final int seriesId;

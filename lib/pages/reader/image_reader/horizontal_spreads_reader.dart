@@ -7,7 +7,7 @@ import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/image_spreads_reader.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/utils/extensions/iterable.dart';
-import 'package:kover/widgets/async_value.dart';
+import 'package:kover/widgets/util/async_value.dart';
 
 class HorizontalSpreadsReader extends HookConsumerWidget {
   final int seriesId;

@@ -9,7 +9,7 @@ import 'package:kover/widgets/cards/volume_card.dart';
 import 'package:kover/widgets/context_menu/context_menu_button.dart';
 import 'package:kover/widgets/details/filter_input_field.dart';
 import 'package:kover/widgets/lists/adaptive_sliver_grid.dart';
-import 'package:kover/widgets/sliver_bottom_padding.dart';
+import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class VolumesPage extends HookConsumerWidget {

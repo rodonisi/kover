@@ -10,7 +10,7 @@ import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/actions_app_bar/actions_app_bar.dart';
-import 'package:kover/widgets/sliver_bottom_padding.dart';
+import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class MenuPage extends ConsumerWidget {

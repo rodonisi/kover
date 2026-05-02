@@ -6,7 +6,7 @@ import 'package:kover/pages/reader/image_reader/vertical_continuous_reader.dart'
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
-import 'package:kover/widgets/async_value.dart';
+import 'package:kover/widgets/util/async_value.dart';
 
 class ImageReader extends ConsumerWidget {
   final int seriesId;

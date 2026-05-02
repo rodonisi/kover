@@ -4,7 +4,7 @@ import 'package:kover/models/image_model.dart';
 import 'package:kover/riverpod/providers/chapter.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/riverpod/providers/volume.dart';
-import 'package:kover/widgets/async_value.dart';
+import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SeriesCoverImage extends ConsumerWidget {

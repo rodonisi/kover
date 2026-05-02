@@ -4,9 +4,9 @@ import 'package:kover/riverpod/providers/settings/download_settings.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/safe_platform.dart';
-import 'package:kover/widgets/async_value.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/numeric_option.dart';
+import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class DataManagementSettings extends ConsumerWidget {

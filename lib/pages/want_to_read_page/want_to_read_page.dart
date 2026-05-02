@@ -4,10 +4,10 @@ import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/want_to_read.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/actions_app_bar/actions_app_bar.dart';
-import 'package:kover/widgets/async_value.dart';
 import 'package:kover/widgets/lists/series_sliver_grid.dart';
-import 'package:kover/widgets/login_guard.dart';
-import 'package:kover/widgets/sliver_bottom_padding.dart';
+import 'package:kover/widgets/util/async_value.dart';
+import 'package:kover/widgets/util/login_guard.dart';
+import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 
 class WantToReadPage extends ConsumerWidget {
   const WantToReadPage({super.key});
