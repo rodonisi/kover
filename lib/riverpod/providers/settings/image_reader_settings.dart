@@ -40,6 +40,7 @@ sealed class ImageReaderSettingsState with _$ImageReaderSettingsState {
     @Default(ImageScaleType.fitWidth) ImageScaleType scaleType,
     @Default(ReadDirection.leftToRight) ReadDirection readDirection,
     @Default(ReaderMode.horizontal) ReaderMode readerMode,
+    @Default(false) bool hadSpread,
     @Default(0.0) double verticalReaderGap,
     @Default(0.0) double verticalReaderPadding,
     @Default(0.0) double spreadReaderGap,
@@ -78,9 +79,16 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     ).future;
     final defaults = await ref.watch(defaultImageReaderSettingsProvider.future);
     ref.listen(breakpointsProvider, (prev, next) {
-      if (next == .compact && state.value?.readerMode == .spread) {
+      final current = state.value;
+      if (current == null) return;
+
+      if (next == .compact && current.readerMode == .spread) {
         state = AsyncData(
-          state.value!.copyWith(readerMode: .horizontal),
+          current.copyWith(readerMode: .horizontal),
+        );
+      } else if (next != .compact && current.hadSpread) {
+        state = AsyncData(
+          current.copyWith(readerMode: .spread),
         );
       }
     });
@@ -114,6 +122,7 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     state = AsyncData(
       current.copyWith(
         readerMode: mode,
+        hadSpread: mode == .spread,
       ),
     );
   }
