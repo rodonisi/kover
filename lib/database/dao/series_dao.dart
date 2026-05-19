@@ -4,6 +4,7 @@ import 'package:kover/database/dao/volumes_dao.dart';
 import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/progress.dart';
 import 'package:kover/database/tables/series.dart';
+import 'package:kover/database/tables/server_settings.dart';
 import 'package:kover/database/tables/volumes.dart';
 import 'package:kover/database/tables/want_to_read.dart';
 import 'package:kover/utils/data_constants.dart';
@@ -20,6 +21,7 @@ part 'series_dao.g.dart';
     Chapters,
     ReadingProgress,
     WantToRead,
+    ServerSettings,
   ],
 )
 class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
@@ -273,15 +275,24 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   ///   - A chapter was added within [DataConstants.onDeckUpdateDays] days
   ///
   /// Ordered by most recent reading activity, then most recently updated.
-  Stream<List<SeriesData>> watchOnDeck() {
+  Stream<List<SeriesData>> watchOnDeck() async* {
     final totalPagesRead = readingProgress.pagesRead.sum();
     final latestReadDate = readingProgress.lastModified.max();
 
+    final settings = await managers.serverSettings
+        .filter((f) => f.key.equals(DataConstants.serverSettingsKey))
+        .getSingleOrNull();
+
+    final progressDays =
+        settings?.onDeckProgressDays ?? DataConstants.onDeckProgressDays;
+    final updateDays =
+        settings?.onDeckUpdateDays ?? DataConstants.onDeckUpdateDays;
+
     final cutoffProgress = DateTime.now().subtract(
-      const Duration(days: DataConstants.onDeckProgressDays),
+      Duration(days: progressDays),
     );
     final cutoffLastAdded = DateTime.now().subtract(
-      const Duration(days: DataConstants.onDeckUpdateDays),
+      Duration(days: updateDays),
     );
 
     final query =
@@ -307,7 +318,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
             OrderingTerm.desc(series.lastChapterAdded),
           ]);
 
-    return query.map((row) => row.readTable(series)).watch();
+    yield* query.map((row) => row.readTable(series)).watch();
   }
 
   /// Watch recently updated series
