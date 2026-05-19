@@ -9,6 +9,7 @@ import 'package:kover/database/dao/reader_dao.dart';
 import 'package:kover/database/dao/riverpod_dao.dart';
 import 'package:kover/database/dao/series_dao.dart';
 import 'package:kover/database/dao/series_metadata_dao.dart';
+import 'package:kover/database/dao/server_settings_dao.dart';
 import 'package:kover/database/dao/storage_dao.dart';
 import 'package:kover/database/dao/volumes_dao.dart';
 import 'package:kover/database/tables/book_info.dart';
@@ -64,6 +65,7 @@ part 'app_database.g.dart';
     BookDao,
     DownloadDao,
     RiverpodDao,
+    ServerSettingsDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {

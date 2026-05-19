@@ -8,6 +8,7 @@ import 'package:kover/riverpod/repository/chapters_repository.dart';
 import 'package:kover/riverpod/repository/libraries_repository.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
+import 'package:kover/riverpod/repository/server_settings_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
 import 'package:kover/riverpod/repository/want_to_read_repository.dart';
 import 'package:kover/sync/sync_engine.dart';
@@ -34,6 +35,7 @@ sealed class SyncPhase with _$SyncPhase {
       RefreshMetadata;
   const factory SyncPhase.refreshCovers({required int seriesId}) =
       RefreshCovers;
+  const factory SyncPhase.refreshServerSettings() = RefreshServerSettings;
 
   factory SyncPhase.fromJson(Map<String, dynamic> json) =>
       _$SyncPhaseFromJson(json);
@@ -65,6 +67,7 @@ class SyncManager extends _$SyncManager {
     final readerRepo = ref.read(readerRepositoryProvider);
     final volumesRepo = ref.read(volumesRepositoryProvider);
     final chaptersRepo = ref.read(chaptersRepositoryProvider);
+    final serverSettingsRepo = ref.read(serverSettingsRepositoryProvider);
 
     return SyncEngine(
       seriesRepo: seriesRepo,
@@ -74,6 +77,7 @@ class SyncManager extends _$SyncManager {
       readerRepo: readerRepo,
       volumesRepo: volumesRepo,
       chaptersRepo: chaptersRepo,
+      serverSettingsRepo: serverSettingsRepo,
     );
   }
 
@@ -99,6 +103,7 @@ class SyncManager extends _$SyncManager {
       syncLibraries(),
       syncProgress(),
       _syncMetadata(),
+      _refreshServerSettings(),
     ]);
 
     final settings = await ref.read(downloadSettingsProvider.future);
@@ -158,6 +163,12 @@ class SyncManager extends _$SyncManager {
   Future<void> refreshCovers({required int seriesId}) async {
     await _runPhase(.refreshCovers(seriesId: seriesId), () async {
       await _engine.refreshCovers(seriesId: seriesId);
+    });
+  }
+
+  Future<void> _refreshServerSettings() async {
+    await _runPhase(const .refreshServerSettings(), () async {
+      await _engine.refreshServerSettings();
     });
   }
 

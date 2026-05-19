@@ -3,6 +3,7 @@ import 'package:kover/riverpod/repository/chapters_repository.dart';
 import 'package:kover/riverpod/repository/libraries_repository.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
+import 'package:kover/riverpod/repository/server_settings_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
 import 'package:kover/riverpod/repository/want_to_read_repository.dart';
 
@@ -14,6 +15,7 @@ class SyncEngine {
   final ReaderRepository readerRepo;
   final VolumesRepository volumesRepo;
   final ChaptersRepository chaptersRepo;
+  final ServerSettingsRepository serverSettingsRepo;
 
   const SyncEngine({
     required this.seriesRepo,
@@ -23,6 +25,7 @@ class SyncEngine {
     required this.readerRepo,
     required this.volumesRepo,
     required this.chaptersRepo,
+    required this.serverSettingsRepo,
   });
 
   Future<void> syncAllSeries() async {
@@ -67,5 +70,9 @@ class SyncEngine {
 
   Future<void> refreshCovers({required int seriesId}) async {
     await seriesRepo.refreshCovers(seriesId: seriesId);
+  }
+
+  Future<void> refreshServerSettings() async {
+    await serverSettingsRepo.refreshServerSettings();
   }
 }
