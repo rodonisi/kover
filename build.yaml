@@ -12,6 +12,10 @@ targets:
       - lib/**
       - swaggers/**
     builders:
+      drift_dev:
+        options:
+          databases:
+            app_database: lib/database/app_database.dart
       swagger_dart_code_generator:
         options:
           input_folder: swaggers/
