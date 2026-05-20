@@ -60,9 +60,12 @@ jobs:
       - name: Code Generation 🧬
         run: dart run build_runner build --delete-conflicting-outputs
 
-      - name: Remove WASM module
+      - name: Remove WASM module 🧹
         if: matrix.platform != 'web'
         run: dart run pdfrx:remove_wasm_modules
+
+      - name: Check Format 🎨
+        run: dart format --output=none --set-exit-if-changed .
 
       - name: Analyze 🔍
         run: flutter analyze
