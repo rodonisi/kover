@@ -70,7 +70,7 @@ jobs:
         if: matrix.platform != 'macos'
         run: flutter build ${{ matrix.platform }}
 
-      - name: Build macOS
+      - name: Build macOS Without Code Signing 🏗️
         if: matrix.platform == 'macos'
         run: |
           flutter build macos -t lib/main.dart -- \
