@@ -70,10 +70,12 @@ jobs:
         if: matrix.platform == 'macos'
         run: |
           flutter build macos -t lib/main.dart -- \
-                CODE_SIGNING_ALLOWED=NO \
-                CODE_SIGNING_REQUIRED=NO \
-                CODE_SIGN_IDENTITY="" \
-                EXPANDED_CODE_SIGN_IDENTITY=""
+                 CODE_SIGNING_ALLOWED=NO \
+                 CODE_SIGNING_REQUIRED=NO \
+                 CODE_SIGN_IDENTITY="" \
+                 EXPANDED_CODE_SIGN_IDENTITY="" \
+                 PROVISIONING_PROFILE_SPECIFIER="" \
+                 PROVISIONING_PROFILE=""
 
       - name: Test 🧪
         run: flutter test
