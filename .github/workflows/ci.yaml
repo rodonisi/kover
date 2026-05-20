@@ -56,10 +56,6 @@ jobs:
           dart run drift_dev make-migrations
           git diff --exit-code -- lib test drift_schemas
 
-      - name: Remove WASM module 🧹
-        if: matrix.platform != 'web'
-        run: dart run pdfrx:remove_wasm_modules
-
       - name: Check Format 🎨
         run: dart format --output=none --set-exit-if-changed .
 
