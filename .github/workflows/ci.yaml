@@ -47,16 +47,6 @@ jobs:
         if: matrix.platform == 'web'
         run: dart run tools/fetch_web_dependencies.dart
 
-      - name: MacOS Code Signing 🍎
-        if: matrix.platform == 'macos'
-        run: |
-          cd macos
-          fastlane setup_match > /dev/null 2>&1 || (echo "Fastlane failed" && exit 1)
-        env:
-          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
-          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
-
       - name: Code Generation 🧬
         run: dart run build_runner build --delete-conflicting-outputs
 
@@ -77,7 +67,17 @@ jobs:
         run: flutter analyze
 
       - name: Build 🏗️
+        if: matrich.platform != 'macos'
         run: flutter build ${{ matrix.platform }}
+
+      - name: Build macOS
+        if: matrix.platform == 'macos'
+        run: |
+          flutter build macos -t lib/main.dart -- \
+                CODE_SIGNING_ALLOWED=NO \
+                CODE_SIGNING_REQUIRED=NO \
+                CODE_SIGN_IDENTITY="" \
+                EXPANDED_CODE_SIGN_IDENTITY=""
 
       - name: Test 🧪
         run: flutter test
