@@ -25,7 +25,7 @@ class PageSlider extends HookConsumerWidget {
       ),
     );
     final max = navState.totalPages - 1;
-    final divisions = max > 0 ? max  : null;
+    final divisions = max > 0 ? max : null;
     final currentPage = navState.currentPage.clamp(0, max);
     final sliderValue = useState(currentPage.toDouble());
 

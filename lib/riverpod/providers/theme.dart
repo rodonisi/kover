@@ -65,7 +65,9 @@ final _segmentedButtonTheme = SegmentedButtonThemeData(
 
 final _inputDecorationTheme = const InputDecorationTheme(
   border: OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(LayoutConstants.smallerBorderRadius)),
+    borderRadius: BorderRadius.all(
+      Radius.circular(LayoutConstants.smallerBorderRadius),
+    ),
   ),
   isDense: true,
 );

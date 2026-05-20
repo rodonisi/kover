@@ -7,8 +7,7 @@ enum LibraryType {
   comicLegacy,
   image,
   lightNovel,
-  manga
-  ;
+  manga;
 
   factory LibraryType.fromDtoType(api.LibraryType type) => switch (type) {
     .manga => .manga,

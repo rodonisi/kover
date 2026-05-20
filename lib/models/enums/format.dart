@@ -5,8 +5,7 @@ enum Format {
   archive,
   epub,
   pdf,
-  unknown
-  ;
+  unknown;
 
   factory Format.fromDtoFormat(MangaFormat value) {
     return switch (value) {
