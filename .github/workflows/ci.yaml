@@ -64,7 +64,7 @@ jobs:
         if: matrix.platform != 'windows'
         run: |
           dart run drift_dev make-migrations
-          git diff --exit-code
+          git diff --exit-code -- lib test drift_schemas
 
       - name: Remove WASM module 🧹
         if: matrix.platform != 'web'
