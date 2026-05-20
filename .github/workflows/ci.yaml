@@ -62,7 +62,9 @@ jobs:
 
       - name: Validate DB Schema 🗄️
         if: matrix.platform != 'windows'
-        run: dart run drift_dev make-migrations
+        run: |
+          dart run drift_dev make-migrations
+          git diff --exit-code
 
       - name: Remove WASM module 🧹
         if: matrix.platform != 'web'
