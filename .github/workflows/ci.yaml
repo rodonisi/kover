@@ -67,7 +67,7 @@ jobs:
         run: flutter analyze
 
       - name: Build 🏗️
-        if: matrich.platform != 'macos'
+        if: matrix.platform != 'macos'
         run: flutter build ${{ matrix.platform }}
 
       - name: Build macOS
