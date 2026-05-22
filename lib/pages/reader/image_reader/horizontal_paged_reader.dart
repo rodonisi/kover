@@ -20,6 +20,7 @@ class HorizontalPagedReader extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isPanning = useState(false);
     final provider = readerProvider(seriesId: seriesId, chapterId: chapterId);
 
     final settings = ref.watch(imageReaderSettingsProvider(seriesId: seriesId));
@@ -59,6 +60,9 @@ class HorizontalPagedReader extends HookConsumerWidget {
           reverse: settings.readDirection == .rightToLeft,
           itemCount: reader.totalPages,
           pageSnapping: true,
+          physics: isPanning.value
+              ? const NeverScrollableScrollPhysics()
+              : const BouncingScrollPhysics(),
           onPageChanged: (index) {
             ref.read(navProvider.notifier).jumpToPage(index);
           },
@@ -71,13 +75,24 @@ class HorizontalPagedReader extends HookConsumerWidget {
                 ),
               ),
               data: (data) {
-                return Image.memory(
-                  data.data,
-                  fit: switch (settings.scaleType) {
-                    .contain => .contain,
-                    .fitWidth => .fitWidth,
-                    .fitHeight => .fitHeight,
+                return InteractiveViewer(
+                  panEnabled: isPanning.value,
+                  onInteractionStart: (details) {
+                    if (details.pointerCount == 2) {
+                      isPanning.value = true;
+                    }
                   },
+                  onInteractionEnd: (details) {
+                    isPanning.value = false;
+                  },
+                  child: Image.memory(
+                    data.data,
+                    fit: switch (settings.scaleType) {
+                      .contain => .contain,
+                      .fitWidth => .fitWidth,
+                      .fitHeight => .fitHeight,
+                    },
+                  ),
                 );
               },
             );
