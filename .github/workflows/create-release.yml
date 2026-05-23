@@ -164,8 +164,8 @@ jobs:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
 
-  promote-google-play-alpha:
-    name: Promote Google Play Alpha
+  promote-google-play-beta:
+    name: Promote Google Play Beta Tracks
     needs: get-release-body
     runs-on: ubuntu-latest
     permissions:
@@ -187,6 +187,6 @@ jobs:
       - name: Promote Google Play
         run: |
           cd android
-          fastlane promote_alpha
+          fastlane promote_beta_tracks
         env:
           CHANGELOG: ${{ needs.get-release-body.outputs.release_body }}
