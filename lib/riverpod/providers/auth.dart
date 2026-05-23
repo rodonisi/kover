@@ -31,6 +31,8 @@ class CurrentUser extends _$CurrentUser {
     final apiKey = ref.watch(apiKeyProvider);
     if (apiKey == null || apiKey.isEmpty) throw NoCredentialsException();
 
+    if (state.hasValue) state = AsyncData(state.value!);
+
     try {
       final client = ref.watch(restClientProvider);
       final res = await client.apiPluginAuthenticatePost(
