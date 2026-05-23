@@ -118,7 +118,7 @@ graph LR
 - **Providers**: thin Riverpod providers that manage state and expose data to the UI.
 - **Managers**: classes managing more complex background operations, such as server synchronization or downloads.
 - **Repositories**: classes responsible for data access, abstracting away the source (local database or remote API).
-- **SyncOperations**: classes that handle synchronization logic between the local database and the remote server.
+- **SyncOperations**: API wrappers handling HTTP requests and responses, including DTO mapping.
 - **Database**: Drift database schema and queries.
 
 ### Codestyle guidelines
