@@ -38,7 +38,7 @@ sealed class ImageReaderSettingsLimits {
 @freezed
 sealed class ImageReaderSettingsState with _$ImageReaderSettingsState {
   const factory ImageReaderSettingsState({
-    @Default(ImageScaleType.fitWidth) ImageScaleType scaleType,
+    @Default(ImageScaleType.contain) ImageScaleType scaleType,
     @Default(ReadDirection.leftToRight) ReadDirection readDirection,
     @Default(ReaderMode.horizontal) ReaderMode readerMode,
     @Default(false) bool hadSpread,

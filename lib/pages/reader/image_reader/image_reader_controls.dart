@@ -110,6 +110,11 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                           },
                           options: const [
                             ChoiceOptionEntry(
+                              value: .contain,
+                              label: 'Contain',
+                              icon: KoverIcons.fitContain,
+                            ),
+                            ChoiceOptionEntry(
                               value: .fitWidth,
                               label: 'Width',
                               icon: KoverIcons.fitWidth,
@@ -118,11 +123,6 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                               value: .fitHeight,
                               label: 'Height',
                               icon: KoverIcons.fitHeight,
-                            ),
-                            ChoiceOptionEntry(
-                              value: .contain,
-                              label: 'Contain',
-                              icon: KoverIcons.fitContain,
                             ),
                           ],
                           value: settings.scaleType,
