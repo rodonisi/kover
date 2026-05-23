@@ -188,5 +188,3 @@ jobs:
         run: |
           cd android
           fastlane promote_beta_tracks
-        env:
-          CHANGELOG: ${{ needs.get-release-body.outputs.release_body }}
