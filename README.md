@@ -24,14 +24,13 @@ An unofficial cross-platform [Kavita](https://www.kavitareader.com/) client.
 
 #### iOS & MacOS
 
-The app is currently available in open beta on TestFlight, which can be joined [here](https://testflight.apple.com/join/UsCtQUeY).
+The app is available in open beta on TestFlight, which can be joined [here](https://testflight.apple.com/join/UsCtQUeY).
 
 #### Android
 
-The app is currently on a closed beta on the Play Store. To join:
-
-1. Join the [Kover Testers Google Group](https://groups.google.com/g/kover-testers) with the same email used for the Play Store account
-2. Visit the Play Store listing either through the [Android Link](https://play.google.com/store/apps/details?id=com.rodonisi.kover) or the [Web Link](https://play.google.com/apps/testing/com.rodonisi.kover)
+The app is available in open beta on the Play Store, which can be joined [here](https://play.google.com/apps/testing/com.rodonisi.kover).
+Thanks to everyone joining the closed beta and enabling Kover to apply for open beta! Releases will still be
+pushed to the closed beta track, so there is no need for existing testers to swap tracks.
 
 An APK build is also available in the [releases](https://github.com/rodonisi/kover/releases/latest) section of this repository.
 
