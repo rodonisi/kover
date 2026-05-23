@@ -31,9 +31,9 @@ platform :android do
     )
   end
 
-  desc 'Promote latest build to alpha track'
-  lane :promote_alpha do
-    changelog = ENV['CHANGELOG'] || 'Updates'
+  desc 'Promote latest build to alpha and beta tracks'
+  lane :promote_beta_tracks do
+    changelog = "Latest updates and bug fixes.\nThe full changelog can be found in the GitHub release notes."
 
     setup_ci
 
@@ -54,6 +54,7 @@ platform :android do
       track: 'internal',
       version_code: version_code,
       track_promote_to: 'alpha',
+      metadata_path: 'metadata/android',
       skip_upload_apk: true,
       skip_upload_aab: true,
       skip_upload_metadata: false,
