@@ -284,28 +284,32 @@ class EpubNavigation extends _$EpubNavigation {
       readerNavigationProvider(
         seriesId: seriesId,
         chapterId: chapterId,
-      ).select((state) => state.value?.currentPage),
+      ).select((state) => state.whenData((state) => state.currentPage)),
       (prev, next) async {
-        if (next == null) return;
+        next.whenData(
+          (next) async {
+            final current = await future;
 
-        final current = await future;
+            if (prev != null &&
+                prev.hasValue &&
+                (next - prev.value!).abs() > 1) {
+              _fromLastSubpage = false;
+            }
 
-        if (prev != null && (next - prev).abs() > 1) {
-          _fromLastSubpage = false;
-        }
+            state = AsyncData(
+              current.copyWith(
+                page: next,
+                subpage: 0,
+                ready: false,
+              ),
+            );
 
-        state = AsyncData(
-          current.copyWith(
-            page: next,
-            subpage: 0,
-            ready: false,
-          ),
-        );
-
-        _handleReflowChanges(
-          seriesId: seriesId,
-          chapterId: chapterId,
-          page: next,
+            _handleReflowChanges(
+              seriesId: seriesId,
+              chapterId: chapterId,
+              page: next,
+            );
+          },
         );
       },
       fireImmediately: true,
