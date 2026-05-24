@@ -74,13 +74,13 @@ class SeriesAppBar extends HookConsumerWidget {
                           .deleteSeries(seriesId);
                     }
                   : null,
-              onRefreshMetadata: () async {
-                await ref
+              onRefreshMetadata: ()  {
+                ref
                     .read(syncManagerProvider.notifier)
                     .refreshMetadataAndDetails(seriesId: seriesId);
               },
-              onRefreshCovers: () async {
-                await ref
+              onRefreshCovers: ()  {
+                ref
                     .read(syncManagerProvider.notifier)
                     .refreshCovers(seriesId: seriesId);
               },

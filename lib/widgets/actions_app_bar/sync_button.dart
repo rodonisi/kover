@@ -38,13 +38,16 @@ class SyncButton extends HookConsumerWidget {
       ),
     );
 
-    final overlayPortal = OverlayPortal(
+    return OverlayPortal(
       controller: overlayController,
       overlayChildBuilder: (_) => CompositedTransformFollower(
         link: layerLink,
         targetAnchor: Alignment.bottomRight,
         followerAnchor: Alignment.topRight,
-        offset: const Offset(0, LayoutConstants.smallerPadding),
+        offset: const Offset(
+          LayoutConstants.smallPadding,
+          LayoutConstants.smallPadding,
+        ),
         child: const Align(
           alignment: Alignment.topRight,
           child: SyncMenuOverlay(),
@@ -75,8 +78,6 @@ class SyncButton extends HookConsumerWidget {
         ),
       ),
     );
-
-    return overlayPortal;
   }
 }
 
@@ -87,16 +88,16 @@ class SyncMenuOverlay extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final syncState = ref.watch(syncManagerProvider);
 
-    final entries = syncState.whenOrNull(
-      syncing: (phases) => [
-        for (final phase in phases)
-          (
-            label: _phaseLabel(phase),
-          ),
-      ],
-    );
-
-    if (entries == null || entries.isEmpty) return const SizedBox.shrink();
+    final entries =
+        syncState.whenOrNull(
+          syncing: (phases) => [
+            for (final phase in phases)
+              (
+                label: _phaseLabel(phase),
+              ),
+          ],
+        ) ??
+        [];
 
     return Card(
       margin: EdgeInsets.zero,
@@ -105,6 +106,17 @@ class SyncMenuOverlay extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (entries.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: LayoutConstants.smallPadding,
+                  vertical: LayoutConstants.smallPadding,
+                ),
+                child: Text(
+                  'No active sync operations',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
             for (final entry in entries)
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -135,7 +147,6 @@ class SyncMenuOverlay extends ConsumerWidget {
 String _phaseLabel(SyncPhase phase) {
   return phase.when(
     allSeries: () => 'Syncing all series',
-    seriesDetails: () => 'Syncing series details',
     metadata: () => 'Syncing metadata',
     recentlyAdded: () => 'Syncing recently added',
     recentlyUpdated: () => 'Syncing recently updated',

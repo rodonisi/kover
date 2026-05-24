@@ -24,18 +24,17 @@ sealed class SyncPhase with _$SyncPhase {
   const SyncPhase._();
 
   const factory SyncPhase.allSeries() = AllSeries;
-  const factory SyncPhase.seriesDetails() = SeriesDetails;
   const factory SyncPhase.metadata() = Metadata;
   const factory SyncPhase.recentlyAdded() = RecentlyAdded;
   const factory SyncPhase.recentlyUpdated() = RecentlyUpdated;
   const factory SyncPhase.libraries() = Libraries;
   const factory SyncPhase.progress() = Progress;
   const factory SyncPhase.covers() = Covers;
+  const factory SyncPhase.refreshServerSettings() = RefreshServerSettings;
   const factory SyncPhase.refreshMetadata({required int seriesId}) =
       RefreshMetadata;
   const factory SyncPhase.refreshCovers({required int seriesId}) =
       RefreshCovers;
-  const factory SyncPhase.refreshServerSettings() = RefreshServerSettings;
 
   factory SyncPhase.fromJson(Map<String, dynamic> json) =>
       _$SyncPhaseFromJson(json);
@@ -58,7 +57,9 @@ sealed class SyncState with _$SyncState {
 class SyncManager extends _$SyncManager {
   bool _hasUser = false;
   bool _hasConnection = false;
+  final List<Set<SyncPhase>> _queuedPhases = [];
   final Set<SyncPhase> _runningPhases = {};
+
   SyncEngine get _engine {
     final seriesRepo = ref.read(seriesRepositoryProvider);
     final bookRepo = ref.read(bookRepositoryProvider);
@@ -81,6 +82,29 @@ class SyncManager extends _$SyncManager {
     );
   }
 
+  Future<void> Function() _getCallback(SyncPhase phase) => phase.when(
+    allSeries: () =>
+        () async => await _engine.syncAllSeries(),
+    metadata: () =>
+        () async => await _engine.syncMetadata(),
+    recentlyAdded: () =>
+        () async => await _engine.syncRecentlyAdded(),
+    recentlyUpdated: () =>
+        () async => await _engine.syncRecentlyUpdated(),
+    libraries: () =>
+        () async => await _engine.syncLibraries(),
+    progress: () =>
+        () async => await _engine.syncProgress(),
+    covers: () =>
+        () async => await _engine.syncCovers(),
+    refreshServerSettings: () =>
+        () async => await _engine.refreshServerSettings(),
+    refreshMetadata: (seriesId) =>
+        () async => await _engine.refreshMetadataAndDetails(seriesId: seriesId),
+    refreshCovers: (seriesId) =>
+        () async => await _engine.refreshCovers(seriesId: seriesId),
+  );
+
   @override
   SyncState build() {
     _hasUser = ref.read(currentUserProvider).hasValue;
@@ -95,81 +119,60 @@ class SyncManager extends _$SyncManager {
 
   /// Perform full sync with server
   Future<void> fullSync() async {
-    await _syncAllSeries();
-
-    await Future.wait([
-      _syncRecentlyUpdated(),
-      _syncRecentlyAdded(),
-      syncLibraries(),
-      syncProgress(),
-      _syncMetadata(),
-      _refreshServerSettings(),
-    ]);
-
     final settings = await ref.read(downloadSettingsProvider.future);
-    if (settings.downloadCovers) await _syncCovers();
+
+    _enqueuePhases({const .allSeries()});
+    _enqueuePhases({
+      const .libraries(),
+      const .progress(),
+      const .allSeries(),
+      const .metadata(),
+      const .recentlyUpdated(),
+      const .recentlyAdded(),
+      const .refreshServerSettings(),
+      if (settings.downloadCovers) const .covers(),
+    });
   }
 
   /// Sync libraries
-  Future<void> syncLibraries() async {
-    await _runPhase(const .libraries(), () async {
-      await _engine.syncLibraries();
-    });
+  void syncLibraries() {
+    _enqueuePhases({const .libraries()});
   }
 
   /// Sync progress
-  Future<void> syncProgress() async {
-    await _runPhase(const .progress(), () async {
-      await _engine.syncProgress();
-    });
+  void syncProgress() {
+    _enqueuePhases({const .progress()});
   }
 
-  Future<void> _syncAllSeries() async {
-    await _runPhase(const .allSeries(), () async {
-      await _engine.syncAllSeries();
-    });
+  /// Refresh metadata and details for series [seriesId]
+  void refreshMetadataAndDetails({required int seriesId}) {
+    _enqueuePhases({SyncPhase.refreshMetadata(seriesId: seriesId)});
   }
 
-  Future<void> _syncMetadata() async {
-    await _runPhase(const .metadata(), () async {
-      await _engine.syncMetadata();
-    });
+  /// Refresh covers for series [seriesId]
+  void refreshCovers({required int seriesId}) {
+    _enqueuePhases({SyncPhase.refreshCovers(seriesId: seriesId)});
   }
 
-  Future<void> _syncRecentlyUpdated() async {
-    await _runPhase(const .recentlyUpdated(), () async {
-      await _engine.syncRecentlyUpdated();
-    });
+  void _enqueuePhases(Set<SyncPhase> phases) {
+    _queuedPhases.add(phases);
+    _processQueue();
   }
 
-  Future<void> _syncRecentlyAdded() async {
-    await _runPhase(const .recentlyAdded(), () async {
-      await _engine.syncRecentlyAdded();
-    });
-  }
+  Future<void> _processQueue() async {
+    if (_runningPhases.isNotEmpty || _queuedPhases.isEmpty) return;
 
-  Future<void> _syncCovers() async {
-    await _runPhase(const .covers(), () async {
-      await _engine.syncCovers();
-    });
-  }
+    while (_queuedPhases.isNotEmpty) {
+      final nextPhases = _queuedPhases.removeAt(0);
+      await Future.wait(
+        nextPhases.map((phase) async {
+          final callback = _getCallback(phase);
+          await _runPhase(phase, callback);
+        }),
+      );
+    }
 
-  Future<void> refreshMetadataAndDetails({required int seriesId}) async {
-    await _runPhase(.refreshMetadata(seriesId: seriesId), () async {
-      await _engine.refreshMetadataAndDetails(seriesId: seriesId);
-    });
-  }
-
-  Future<void> refreshCovers({required int seriesId}) async {
-    await _runPhase(.refreshCovers(seriesId: seriesId), () async {
-      await _engine.refreshCovers(seriesId: seriesId);
-    });
-  }
-
-  Future<void> _refreshServerSettings() async {
-    await _runPhase(const .refreshServerSettings(), () async {
-      await _engine.refreshServerSettings();
-    });
+    state = const SyncState.idle();
   }
 
   Future<void> _runPhase(
@@ -190,12 +193,8 @@ class SyncManager extends _$SyncManager {
       state = SyncState.error(phase: phase, error: e);
     } finally {
       _runningPhases.remove(phase);
-      if (!failed) {
-        if (_runningPhases.isEmpty) {
-          state = const SyncState.idle();
-        } else {
-          state = SyncState.syncing(phases: Set.unmodifiable(_runningPhases));
-        }
+      if (!failed && _runningPhases.isNotEmpty) {
+        state = SyncState.syncing(phases: Set.unmodifiable(_runningPhases));
       }
     }
   }

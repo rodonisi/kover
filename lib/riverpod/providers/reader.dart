@@ -132,7 +132,7 @@ class MarkSeriesRead extends _$MarkSeriesRead {
     final syncManager = ref.read(syncManagerProvider.notifier);
 
     await repo.markSeriesRead(seriesId);
-    await syncManager.syncProgress();
+    syncManager.syncProgress();
   }
 
   Future<void> markUnread() async {
@@ -140,7 +140,7 @@ class MarkSeriesRead extends _$MarkSeriesRead {
     final syncManager = ref.read(syncManagerProvider.notifier);
 
     await repo.markSeriesUnread(seriesId);
-    await syncManager.syncProgress();
+    syncManager.syncProgress();
   }
 }
 
@@ -154,7 +154,7 @@ class MarkVolumeRead extends _$MarkVolumeRead {
     final syncManager = ref.read(syncManagerProvider.notifier);
 
     await repo.markVolumeRead(volumeId);
-    await syncManager.syncProgress();
+    syncManager.syncProgress();
   }
 
   Future<void> markUnread() async {
@@ -162,7 +162,7 @@ class MarkVolumeRead extends _$MarkVolumeRead {
     final syncManager = ref.read(syncManagerProvider.notifier);
 
     await repo.markVolumeUnread(volumeId);
-    await syncManager.syncProgress();
+    syncManager.syncProgress();
   }
 }
 
@@ -176,7 +176,7 @@ class MarkChapterRead extends _$MarkChapterRead {
     final syncManager = ref.read(syncManagerProvider.notifier);
 
     await repo.markChapterRead(chapterId);
-    await syncManager.syncProgress();
+    syncManager.syncProgress();
   }
 
   Future<void> markUnread() async {
@@ -184,6 +184,6 @@ class MarkChapterRead extends _$MarkChapterRead {
     final syncManager = ref.read(syncManagerProvider.notifier);
 
     await repo.markChapterUnread(chapterId);
-    await syncManager.syncProgress();
+    syncManager.syncProgress();
   }
 }
