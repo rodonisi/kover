@@ -33,77 +33,96 @@ class HorizontalPagedReader extends HookConsumerWidget {
 
     final navState = ref.watch(navProvider);
 
-    final pageController = usePageController(initialPage: navState.currentPage);
-
-    ref.listen(navProvider.select((s) => s.currentPage), (previous, next) {
-      if (pageController.hasClients && pageController.page?.round() != next) {
-        final isSequential = previous != null && (next - previous).abs() == 1;
-
-        isSequential
-            ? pageController.animateToPage(
-                next,
-                duration: 200.ms,
-                curve: Curves.easeInOut,
-              )
-            : pageController.jumpToPage(next);
-      }
-    });
-
-    return Async2(
+    return Async3(
       asyncValue1: reader,
       asyncValue2: settings,
-      data: (reader, settings) {
-        final content = PageView.builder(
-          controller: pageController,
-          allowImplicitScrolling: true,
-          scrollDirection: .horizontal,
-          reverse: settings.readDirection == .rightToLeft,
-          itemCount: reader.totalPages,
-          pageSnapping: true,
-          physics: isPanning.value
-              ? const NeverScrollableScrollPhysics()
-              : const BouncingScrollPhysics(),
-          onPageChanged: (index) {
-            ref.read(navProvider.notifier).jumpToPage(index);
-          },
-          itemBuilder: (context, index) {
-            return Async(
-              asyncValue: ref.watch(
-                imagePageProvider(
-                  chapterId: chapterId,
-                  page: index,
-                ),
-              ),
-              data: (data) {
-                return InteractiveViewer(
-                  panEnabled: isPanning.value,
-                  onInteractionStart: (details) {
-                    if (details.pointerCount == 2) {
-                      isPanning.value = true;
-                    }
-                  },
-                  onInteractionEnd: (details) {
-                    isPanning.value = false;
-                  },
-                  child: Image.memory(
-                    data.data,
-                    fit: switch (settings.scaleType) {
-                      .contain => .contain,
-                      .fitWidth => .fitWidth,
-                      .fitHeight => .fitHeight,
-                    },
+      asyncValue3: navState,
+      data: (reader, settings, navState) {
+        return HookConsumer(
+          builder: (context, ref, _) {
+            final pageController = usePageController(
+              initialPage: navState.currentPage,
+            );
+
+            ref.listen(
+              navProvider.select((s) => s.whenData((s) => s.currentPage)),
+              (
+                previous,
+                next,
+              ) {
+                next.whenData((next) {
+                  if (pageController.hasClients &&
+                      pageController.page?.round() != next) {
+                    final isSequential =
+                        previous != null &&
+                        previous.value != null &&
+                        (next - previous.value!).abs() == 1;
+
+                    isSequential
+                        ? pageController.animateToPage(
+                            next,
+                            duration: 200.ms,
+                            curve: Curves.easeInOut,
+                          )
+                        : pageController.jumpToPage(next);
+                  }
+                });
+              },
+            );
+
+            final content = PageView.builder(
+              controller: pageController,
+              allowImplicitScrolling: true,
+              scrollDirection: .horizontal,
+              reverse: settings.readDirection == .rightToLeft,
+              itemCount: reader.totalPages,
+              pageSnapping: true,
+              physics: isPanning.value
+                  ? const NeverScrollableScrollPhysics()
+                  : const BouncingScrollPhysics(),
+              onPageChanged: (index) {
+                ref.read(navProvider.notifier).jumpToPage(index);
+              },
+              itemBuilder: (context, index) {
+                return Async(
+                  asyncValue: ref.watch(
+                    imagePageProvider(
+                      chapterId: chapterId,
+                      page: index,
+                    ),
                   ),
+                  data: (data) {
+                    return InteractiveViewer(
+                      panEnabled: isPanning.value,
+                      onInteractionStart: (details) {
+                        if (details.pointerCount == 2) {
+                          isPanning.value = true;
+                        }
+                      },
+                      onInteractionEnd: (details) {
+                        isPanning.value = false;
+                      },
+                      child: Image.memory(
+                        data.data,
+                        fit: switch (settings.scaleType) {
+                          .contain => .contain,
+                          .fitWidth => .fitWidth,
+                          .fitHeight => .fitHeight,
+                        },
+                      ),
+                    );
+                  },
                 );
               },
             );
+
+            if (settings.ignoreSafeAreas) {
+              return content;
+            }
+
+            return SafeArea(child: content);
           },
         );
-
-        if (settings.ignoreSafeAreas) {
-          return content;
-        }
-
-        return SafeArea(child: content);
       },
     );
   }

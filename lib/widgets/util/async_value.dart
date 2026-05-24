@@ -72,6 +72,59 @@ class Async2<T1, T2> extends StatelessWidget {
   }
 }
 
+class Async3<T1, T2, T3> extends StatelessWidget {
+  final AsyncValue<T1> asyncValue1;
+  final AsyncValue<T2> asyncValue2;
+  final AsyncValue<T3> asyncValue3;
+  final Widget Function(T1, T2, T3) data;
+  final Widget Function()? loading;
+  final Widget Function(Object, StackTrace)? error;
+
+  const Async3({
+    super.key,
+    required this.asyncValue1,
+    required this.asyncValue2,
+    required this.asyncValue3,
+    required this.data,
+    this.loading,
+    this.error,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (asyncValue1.isLoading ||
+        asyncValue2.isLoading ||
+        asyncValue3.isLoading) {
+      return loading?.call() ??
+          const Center(child: CircularProgressIndicator());
+    } else if (asyncValue1.hasError) {
+      return error?.call(asyncValue1.error!, asyncValue1.stackTrace!) ??
+          _Error(
+            error: asyncValue1.error!,
+            stacktrace: asyncValue1.stackTrace!,
+          );
+    } else if (asyncValue2.hasError) {
+      return error?.call(asyncValue2.error!, asyncValue2.stackTrace!) ??
+          _Error(
+            error: asyncValue2.error!,
+            stacktrace: asyncValue2.stackTrace!,
+          );
+    } else if (asyncValue3.hasError) {
+      return error?.call(asyncValue3.error!, asyncValue3.stackTrace!) ??
+          _Error(
+            error: asyncValue3.error!,
+            stacktrace: asyncValue3.stackTrace!,
+          );
+    }
+
+    return data(
+      asyncValue1.value as T1,
+      asyncValue2.value as T2,
+      asyncValue3.value as T3,
+    );
+  }
+}
+
 class AsyncSliver<T> extends StatelessWidget {
   final AsyncValue<T> asyncValue;
   final Widget Function(T) data;

@@ -11,7 +11,6 @@ sealed class ReaderNavigationState with _$ReaderNavigationState {
     required int currentPage,
     required int totalPages,
     required bool fromObserver,
-    required bool initialized,
   }) = _ReaderNavigationState;
 }
 
@@ -19,40 +18,46 @@ sealed class ReaderNavigationState with _$ReaderNavigationState {
 class ReaderNavigation extends _$ReaderNavigation {
   bool _jumping = false;
   @override
-  ReaderNavigationState build({
+  Future<ReaderNavigationState> build({
     required int seriesId,
     int? chapterId,
-  }) {
+  }) async {
     // Initialize from reader state's last saved page
-    final readerState = ref.watch(
-      readerProvider(seriesId: seriesId, chapterId: chapterId),
+    final readerState = await ref.watch(
+      readerProvider(seriesId: seriesId, chapterId: chapterId).future,
     );
 
-    listenSelf((prev, next) async {
+    listenSelf((prev, next) {
       if (prev == null) return;
-      await saveProgress(next.currentPage);
+
+      next.whenData((next) async {
+        await saveProgress(next.currentPage);
+      });
     });
 
     return ReaderNavigationState(
-      currentPage: readerState.value?.initialPage ?? 0,
-      totalPages: readerState.value?.totalPages ?? 0,
+      currentPage: readerState.initialPage,
+      totalPages: readerState.totalPages,
       fromObserver: false,
-      initialized: readerState.hasValue,
     );
   }
 
-  void jumpToPage(int page, {bool fromObserver = false}) {
+  Future<void> jumpToPage(int page, {bool fromObserver = false}) async {
+    final current = await future;
+
     if (!fromObserver) {
       _jumping = true;
-    } else if (fromObserver && page == state.currentPage) {
+    } else if (fromObserver && page == current.currentPage) {
       _jumping = false;
     }
 
     if (fromObserver && _jumping) return;
 
-    state = state.copyWith(
-      currentPage: page.clamp(0, state.totalPages - 1),
-      fromObserver: fromObserver,
+    state = AsyncData(
+      current.copyWith(
+        currentPage: page.clamp(0, current.totalPages - 1),
+        fromObserver: fromObserver,
+      ),
     );
   }
 
@@ -67,6 +72,15 @@ class ReaderNavigation extends _$ReaderNavigation {
         .saveProgress(page: page);
   }
 
-  void nextPage() => jumpToPage(state.currentPage + 1);
-  void previousPage() => jumpToPage(state.currentPage - 1);
+  Future<void> nextPage() async {
+    final current = await future;
+
+    return jumpToPage(current.currentPage + 1);
+  }
+
+  Future<void> previousPage() async {
+    final current = await future;
+
+    return jumpToPage(current.currentPage - 1);
+  }
 }

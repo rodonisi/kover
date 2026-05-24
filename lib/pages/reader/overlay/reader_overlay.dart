@@ -91,16 +91,18 @@ class ReaderOverlay extends HookConsumerWidget {
             readerNavigationProvider(
               seriesId: seriesId,
               chapterId: chapterId,
-            ).select((state) => state.currentPage),
+            ).select((state) => state.whenData((state) => state.currentPage)),
             (previous, next) {
-              if (next <= 0 && prevChapter.value != null) {
-                showSnackbar.value = .previous;
-              } else if (isLastPage?.call(next) ??
-                  next >= state.totalPages - 1 && nextChapter.value != null) {
-                showSnackbar.value = .next;
-              } else {
-                showSnackbar.value = .none;
-              }
+              next.whenData((next) {
+                if (next <= 0 && prevChapter.value != null) {
+                  showSnackbar.value = .previous;
+                } else if (isLastPage?.call(next) ??
+                    next >= state.totalPages - 1 && nextChapter.value != null) {
+                  showSnackbar.value = .next;
+                } else {
+                  showSnackbar.value = .none;
+                }
+              });
             },
           );
 
@@ -292,8 +294,8 @@ class ReaderProgress extends ConsumerWidget {
       readerNavigationProvider(seriesId: seriesId, chapterId: chapterId ?? 0),
     );
 
-    final progress = navState.initialized
-        ? navState.currentPage / (navState.totalPages - 1)
+    final progress = navState.hasValue
+        ? navState.value!.currentPage / (navState.value!.totalPages - 1)
         : null;
 
     return LinearProgressIndicator(

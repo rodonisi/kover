@@ -101,42 +101,47 @@ class TocEntry extends ConsumerWidget {
       readerNavigationProvider(seriesId: seriesId, chapterId: chapterId),
     );
 
-    final isSelected = nav.currentPage == chapter.page;
+    return Async(
+      asyncValue: nav,
+      data: (nav) {
+        final isSelected = nav.currentPage == chapter.page;
 
-    return Column(
-      mainAxisSize: .min,
-      children: [
-        ListTile(
-          key: isSelected ? selectedKey : null,
-          selected: isSelected,
-          contentPadding: depth > 0
-              ? EdgeInsetsGeometry.only(
-                  left: depth * LayoutConstants.mediumPadding,
-                  right: LayoutConstants.mediumPadding,
-                )
-              : null,
-          title: Text(chapter.title),
-          onTap: () {
-            ref
-                .read(
-                  readerNavigationProvider(
-                    chapterId: chapterId,
-                    seriesId: seriesId,
-                  ).notifier,
-                )
-                .jumpToPage(chapter.page);
-          },
-        ),
-        ...chapter.children.map<Widget>(
-          (child) => TocEntry(
-            chapterId: chapterId,
-            seriesId: seriesId,
-            chapter: child,
-            depth: depth + 1,
-            selectedKey: selectedKey,
-          ),
-        ),
-      ],
+        return Column(
+          mainAxisSize: .min,
+          children: [
+            ListTile(
+              key: isSelected ? selectedKey : null,
+              selected: isSelected,
+              contentPadding: depth > 0
+                  ? EdgeInsetsGeometry.only(
+                      left: depth * LayoutConstants.mediumPadding,
+                      right: LayoutConstants.mediumPadding,
+                    )
+                  : null,
+              title: Text(chapter.title),
+              onTap: () {
+                ref
+                    .read(
+                      readerNavigationProvider(
+                        chapterId: chapterId,
+                        seriesId: seriesId,
+                      ).notifier,
+                    )
+                    .jumpToPage(chapter.page);
+              },
+            ),
+            ...chapter.children.map<Widget>(
+              (child) => TocEntry(
+                chapterId: chapterId,
+                seriesId: seriesId,
+                chapter: child,
+                depth: depth + 1,
+                selectedKey: selectedKey,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

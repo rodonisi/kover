@@ -284,7 +284,7 @@ class EpubNavigation extends _$EpubNavigation {
       readerNavigationProvider(
         seriesId: seriesId,
         chapterId: chapterId,
-      ).select((state) => state.initialized ? state.currentPage : null),
+      ).select((state) => state.value?.currentPage),
       (prev, next) async {
         if (next == null) return;
 
@@ -371,7 +371,7 @@ class EpubNavigation extends _$EpubNavigation {
 
     if (!current.ready) return;
 
-    ref
+    await ref
         .read(
           readerNavigationProvider(
             seriesId: seriesId,

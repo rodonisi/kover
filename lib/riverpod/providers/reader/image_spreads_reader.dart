@@ -47,11 +47,11 @@ class Spreads extends _$Spreads {
   Future<void> markLandscape(int page) async {
     final current = await future;
 
-    final readerNavigation = ref.read(
+    final readerNavigation = await ref.read(
       readerNavigationProvider(
         seriesId: seriesId,
         chapterId: chapterId,
-      ),
+      ).future,
     );
 
     final targetSpreadIndex = current.spreads.indexWhere(
@@ -135,27 +135,29 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
   }) async {
     ref.listen(_readerNavigationProvider, (prev, next) async {
       final current = await future;
-      final targetSpread = await _getSpreadForPage(next.currentPage);
-      final ready = await _isReadyForPage(next.currentPage);
+      next.whenData((next) async {
+        final targetSpread = await _getSpreadForPage(next.currentPage);
+        final ready = await _isReadyForPage(next.currentPage);
 
-      state = AsyncData(
-        current.copyWith(currentSpread: targetSpread, ready: ready),
-      );
+        state = AsyncData(
+          current.copyWith(currentSpread: targetSpread, ready: ready),
+        );
+      });
     });
 
     ref.listen(spreadsProvider(seriesId: seriesId, chapterId: chapterId), (
       prev,
       next,
     ) {
-      next.whenData((spreadsState) {
+      next.whenData((spreadsState) async {
         final current = state.value;
         if (current == null) return;
 
-        final readerNavigation = ref.read(
+        final readerNavigation = await ref.read(
           readerNavigationProvider(
             seriesId: seriesId,
             chapterId: chapterId,
-          ),
+          ).future,
         );
 
         final targetSpread = spreadsState.spreads.indexWhere(
@@ -228,7 +230,7 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
     }
 
     final spreadPage = spreadsState.spreads[spread].last;
-    ref.read(_readerNavigationProvider.notifier).jumpToPage(spreadPage);
+    await ref.read(_readerNavigationProvider.notifier).jumpToPage(spreadPage);
     await ref
         .read(_readerProvider.notifier)
         .saveProgress(page: spreadsState.spreads[spread].last);

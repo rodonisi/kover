@@ -25,25 +25,20 @@ class VerticalContinuousReader extends ConsumerStatefulWidget {
       _VerticalContinuousReaderState();
 }
 
-/// How many pages on each side of the current page render their image.
-/// Pages outside this window are replaced with a same-height coloured
-/// placeholder so the decoded bitmap is not kept in memory.
-const int _visiblePageRadius = 3;
-
 class _VerticalContinuousReaderState
     extends ConsumerState<VerticalContinuousReader> {
+  /// How many pages on each side of the current page render their image.
+  /// Pages outside this window are replaced with a same-height coloured
+  /// placeholder so the decoded bitmap is not kept in memory.
+  static const int _visiblePageRadius = 3;
+
+  bool _initialized = false;
   late ScrollController _scrollController;
   late SliverObserverController _observerController;
   final Map<int, double> _cachedHeights = {};
   BuildContext? _sliverContext;
   int? _totalPages;
   int _currentPage = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeState();
-  }
 
   /// Emit last-page progress when scrolled to bottom edge.
   void _handleScrollEnd() {
@@ -56,12 +51,14 @@ class _VerticalContinuousReaderState
         seriesId: widget.seriesId,
         chapterId: widget.chapterId,
       );
-      if (ref.read(navProvider).currentPage != lastIndex) {
-        log.d('Scrolled to bottom edge, ensuring last page $lastIndex');
-        ref
-            .read(navProvider.notifier)
-            .jumpToPage(lastIndex, fromObserver: true);
-      }
+      ref.read(navProvider).whenData((navState) {
+        if (navState.currentPage != lastIndex) {
+          log.d('Scrolled to bottom edge, ensuring last page $lastIndex');
+          ref
+              .read(navProvider.notifier)
+              .jumpToPage(lastIndex, fromObserver: true);
+        }
+      });
     }
   }
 
@@ -72,19 +69,11 @@ class _VerticalContinuousReaderState
     super.dispose();
   }
 
-  void _initializeState() {
+  void _initializeState(int initialPage) {
+    if (_initialized) return;
+
     _scrollController = ScrollController();
     _scrollController.addListener(_handleScrollEnd);
-
-    // Get initial page from navigation state
-    final initialPage = ref
-        .read(
-          readerNavigationProvider(
-            seriesId: widget.seriesId,
-            chapterId: widget.chapterId,
-          ),
-        )
-        .currentPage;
 
     _currentPage = initialPage;
 
@@ -95,6 +84,8 @@ class _VerticalContinuousReaderState
           ..cacheJumpIndexOffset = false
           ..initialIndexModelBlock = () =>
               ObserverIndexPositionModel(index: initialPage);
+
+    _initialized = true;
   }
 
   void _handleObserve(ObserveModel model) {
@@ -196,44 +187,54 @@ class _VerticalContinuousReaderState
       imageReaderSettingsProvider(seriesId: widget.seriesId),
     );
 
+    final nav = ref.watch(
+      readerNavigationProvider(
+        seriesId: widget.seriesId,
+        chapterId: widget.chapterId,
+      ),
+    );
+
     ref.listen(
       readerNavigationProvider(
         seriesId: widget.seriesId,
         chapterId: widget.chapterId,
       ),
-      (previous, next) async {
-        setState(() {
-          _totalPages ??= next.totalPages;
-          _currentPage = next.currentPage;
+      (previous, next) {
+        next.whenData((next) async {
+          setState(() {
+            _totalPages ??= next.totalPages;
+            _currentPage = next.currentPage;
+          });
+
+          if (!_scrollController.hasClients ||
+              previous?.value?.currentPage == next.currentPage) {
+            return;
+          }
+
+          // If the new page matches what we just observed from scrolling, ignore it
+          // This prevents the circular feedback loop
+          if (next.fromObserver) {
+            log.d('Ignoring observer update');
+            return;
+          }
+
+          final isSequential =
+              previous != null &&
+              previous.hasValue &&
+              (next.currentPage - previous.value!.currentPage).abs() == 1;
+
+          if (isSequential) {
+            log.d('Animating to page $next');
+            await _observerController.animateTo(
+              index: next.currentPage,
+              duration: 200.ms,
+              curve: Curves.easeInOut,
+            );
+          } else {
+            log.d('Jumping to page $next');
+            await _observerController.jumpTo(index: next.currentPage);
+          }
         });
-
-        if (!_scrollController.hasClients ||
-            previous?.currentPage == next.currentPage) {
-          return;
-        }
-
-        // If the new page matches what we just observed from scrolling, ignore it
-        // This prevents the circular feedback loop
-        if (next.fromObserver) {
-          log.d('Ignoring observer update');
-          return;
-        }
-
-        final isSequential =
-            previous != null &&
-            (next.currentPage - previous.currentPage).abs() == 1;
-
-        if (isSequential) {
-          log.d('Animating to page $next');
-          await _observerController.animateTo(
-            index: next.currentPage,
-            duration: 200.ms,
-            curve: Curves.easeInOut,
-          );
-        } else {
-          log.d('Jumping to page $next');
-          await _observerController.jumpTo(index: next.currentPage);
-        }
       },
     );
 
@@ -250,9 +251,12 @@ class _VerticalContinuousReaderState
       },
     );
 
-    return Async(
-      asyncValue: settings,
-      data: (settings) {
+    return Async2(
+      asyncValue1: settings,
+      asyncValue2: nav,
+      data: (settings, nav) {
+        _initializeState(nav.currentPage);
+
         final content = SliverViewObserver(
           controller: _observerController,
           sliverContexts: () => [?_sliverContext],

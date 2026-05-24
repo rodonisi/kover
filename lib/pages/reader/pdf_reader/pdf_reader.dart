@@ -63,12 +63,14 @@ class PdfReader extends HookConsumerWidget {
     final pdf = ref.watch(pdfProvider(chapterId: chapterId));
 
     ref.listen(navProvider, (previous, next) async {
-      if (!controller.isReady || next.fromObserver) return;
+      next.whenData((next) async {
+        if (!controller.isReady || next.fromObserver) return;
 
-      if (previous?.currentPage != next.currentPage) {
-        lastUpdateFromProvider.value = true;
-        await controller.goToPage(pageNumber: next.currentPage + 1);
-      }
+        if (previous?.value?.currentPage != next.currentPage) {
+          lastUpdateFromProvider.value = true;
+          await controller.goToPage(pageNumber: next.currentPage + 1);
+        }
+      });
     });
 
     return Async2(
