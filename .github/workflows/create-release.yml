@@ -72,9 +72,6 @@ jobs:
         run: |
           dart run build_runner build --delete-conflicting-outputs
 
-      - name: Remove WASM modules
-        run: dart run pdfrx:remove_wasm_modules
-
       - name: Build
         run: |
           flutter build apk --release --build-name=${{ needs.version.outputs.version }} --build-number=${{ needs.version.outputs.build_number }}

@@ -37,7 +37,6 @@ jobs:
       - name: Install dependencies
         run: |
           flutter pub get
-          dart run pdfrx:remove_wasm_modules
           flutter build ios --config-only
 
       - name: Codegen
@@ -79,7 +78,6 @@ jobs:
       - name: Install dependencies
         run: |
           flutter pub get
-          dart run pdfrx:remove_wasm_modules
           flutter build macos --config-only
 
       - name: Codegen
@@ -135,9 +133,6 @@ jobs:
       - name: Codegen
         run: |
           dart run build_runner build --delete-conflicting-outputs
-
-      - name: Remove WASM modules
-        run: dart run pdfrx:remove_wasm_modules
 
       - name: Build
         run: |
