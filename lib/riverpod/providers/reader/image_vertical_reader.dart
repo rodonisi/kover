@@ -8,7 +8,6 @@ part 'image_vertical_reader.g.dart';
 sealed class VerticalReaderCacheState with _$VerticalReaderCacheState {
   const factory VerticalReaderCacheState({
     required Map<int, double> cachedHeights,
-    @Default(false) bool ready,
   }) = _VerticalReaderCacheState;
 }
 
@@ -37,7 +36,7 @@ class VerticalReaderCache extends _$VerticalReaderCache {
 
   void clearCache() {
     state = const AsyncValue.data(
-      VerticalReaderCacheState(cachedHeights: {}, ready: false),
+      VerticalReaderCacheState(cachedHeights: {}),
     );
   }
 }
