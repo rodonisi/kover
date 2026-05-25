@@ -132,8 +132,6 @@ class VerticalContinuousReader extends HookConsumerWidget {
                     return;
                   }
 
-                  // If the new page matches what we just observed from scrolling, ignore it
-                  // This prevents the circular feedback loop
                   if (next.fromObserver) {
                     return;
                   }
