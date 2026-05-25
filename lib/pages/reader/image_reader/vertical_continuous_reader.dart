@@ -114,11 +114,9 @@ class VerticalContinuousReader extends HookConsumerWidget {
                   chapterId: chapterId,
                 );
                 ref.read(navProvider).whenData((navState) {
-                  if (navState.currentPage != lastIndex) {
                     ref
                         .read(navProvider.notifier)
                         .jumpToPage(lastIndex, fromObserver: true);
-                  }
                 });
               }
             }
