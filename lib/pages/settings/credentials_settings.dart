@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/auth.dart';
+import 'package:kover/riverpod/providers/server_settings.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
@@ -13,7 +14,6 @@ class CredentialsSettings extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(credentialsProvider);
-    final currentUser = ref.watch(currentUserProvider);
     final loginStatus = ref.watch(loginStatusProvider);
 
     final obscureKey = useState(true);
@@ -71,36 +71,7 @@ class CredentialsSettings extends HookConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: .spaceBetween,
                   children: [
-                    Async(
-                      asyncValue: currentUser,
-                      data: (user) {
-                        final name = user.username;
-                        final initials = name.isNotEmpty
-                            ? name[0].toUpperCase()
-                            : '?';
-
-                        return Row(
-                          children: [
-                            CircleAvatar(child: Text(initials)),
-                            const SizedBox(width: LayoutConstants.smallPadding),
-                            Text(
-                              name,
-                              style: Theme.of(
-                                context,
-                              ).textTheme.titleMedium,
-                            ),
-                          ],
-                        );
-                      },
-                      loading: () => const SizedBox.square(
-                        dimension: LayoutConstants.mediumIcon,
-                        child: CircularProgressIndicator(),
-                      ),
-                      error: (_, _) => Icon(
-                        LucideIcons.circleX,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
+                    const _User(),
                     FilledButton.icon(
                       onPressed: () {
                         ref
@@ -121,6 +92,66 @@ class CredentialsSettings extends HookConsumerWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _User extends ConsumerWidget {
+  const _User();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final currentUser = ref.watch(currentUserProvider);
+    final serverVersion = ref.watch(serverVersionProvider);
+
+    return Async2(
+      asyncValue1: currentUser,
+      asyncValue2: serverVersion,
+      data: (user, version) {
+        final name = user.username;
+        final initials = name.isNotEmpty ? name[0].toUpperCase() : '?';
+
+        return Row(
+          spacing: LayoutConstants.smallPadding,
+          children: [
+            CircleAvatar(child: Text(initials)),
+            Text(
+              name,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium,
+            ),
+            if (version != null)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: LayoutConstants.smallPadding,
+                  vertical: LayoutConstants.smallerPadding,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(
+                    LayoutConstants.smallPadding,
+                  ),
+                ),
+                child: Text(
+                  'v$version',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+      loading: () => const SizedBox.square(
+        dimension: LayoutConstants.mediumIcon,
+        child: CircularProgressIndicator(),
+      ),
+      error: (_, _) => Icon(
+        LucideIcons.circleX,
+        color: Theme.of(context).colorScheme.error,
       ),
     );
   }

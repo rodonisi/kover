@@ -26,6 +26,10 @@ class ServerSettingsRepository {
   }) : _db = db,
        _client = client;
 
+  Stream<String?> watchServerVersion() {
+    return _db.serverSettingsDao.watchServerVersion();
+  }
+
   /// Fetch server settings from the server and store them in the database
   Future<void> refreshServerSettings() async {
     final settingsCompanion = await _client.getServerSettings();
