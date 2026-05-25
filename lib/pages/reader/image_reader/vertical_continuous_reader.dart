@@ -159,7 +159,7 @@ class VerticalContinuousReader extends HookConsumerWidget {
               },
             );
 
-            return Stack(
+            final content = Stack(
               children: [
                 Offstage(
                   child: _RenderPreviousPages(
@@ -211,6 +211,12 @@ class VerticalContinuousReader extends HookConsumerWidget {
                 ),
               ],
             );
+
+            if (settings.ignoreSafeAreas) {
+              return content;
+            }
+
+            return SafeArea(child: content);
           },
         );
       },
