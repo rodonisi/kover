@@ -112,9 +112,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     final baseChaptersManager = managers.chapters
         .filter((f) => f.seriesId.id(seriesId))
         .orderBy(
-          (o) =>
-              o.volumeId.minNumber.asc() &
-              o.sortOrder.asc(),
+          (o) => o.volumeId.minNumber.asc() & o.sortOrder.asc(),
         );
 
     final chaptersStream = baseChaptersManager
