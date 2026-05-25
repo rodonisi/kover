@@ -22,7 +22,7 @@ sealed class LayoutConstants {
   static const double mediumIcon = 24.0;
   static const double largeIcon = 32.0;
   static const double largerIcon = 48.0;
-  static const double largestIcon = 64.0;
+  static const double largestIcon = 60.0;
 
   static const double chapterCardAspectRatio = 3 / 5;
   static const double coverAspectRatio = 2 / 3;

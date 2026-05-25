@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/settings/credentials_settings.dart';
 import 'package:kover/pages/settings/data_management_settings.dart';
 import 'package:kover/pages/settings/general_settings.dart';
+import 'package:kover/pages/settings/version_label.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -22,6 +23,9 @@ class SettingsPage extends ConsumerWidget {
             SliverToBoxAdapter(child: CredentialsSettings()),
             SliverToBoxAdapter(child: GeneralSettings()),
             SliverToBoxAdapter(child: DataManagementSettings()),
+            SliverToBoxAdapter(
+              child: Center(child: VersionLabel()),
+            ),
             SliverBottomPadding(),
           ],
         ),
