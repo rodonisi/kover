@@ -35,6 +35,7 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
 
     q.orderBy(
       (o) =>
+          o.volumeId.minNumber.asc() &
           o.sortOrder.asc() &
           o.seriesId.id.asc() &
           o.titleName.asc() &
