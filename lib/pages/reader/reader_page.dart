@@ -18,13 +18,18 @@ class ReaderPage extends HookConsumerWidget {
 
   const ReaderPage({super.key, required this.seriesId, this.chapterId});
 
+  Future<void> _restoreSystemUI() async {
+    await SystemChrome.setEnabledSystemUIMode(.edgeToEdge);
+    await SystemChrome.restoreSystemUIOverlays();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     useEffect(() {
       SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
 
-      return () {
-        SystemChrome.setEnabledSystemUIMode(.edgeToEdge);
+      return () async {
+        await _restoreSystemUI();
       };
     }, const []);
 
@@ -37,9 +42,11 @@ class ReaderPage extends HookConsumerWidget {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) return;
 
-        // Schedules the sync to happen right after the pop is processed
         Future.microtask(
-          () => ref.read(syncManagerProvider.notifier).syncProgress(),
+          () {
+            _restoreSystemUI();
+            ref.read(syncManagerProvider.notifier).syncProgress();
+          },
         );
       },
       child: Async(
