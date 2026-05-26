@@ -93,6 +93,9 @@ class ReaderOverlay extends HookConsumerWidget {
               chapterId: chapterId,
             ).select((state) => state.whenData((state) => state.currentPage)),
             (previous, next) {
+              // Avoid showing the snackbar on initial load
+              if (previous == null || previous.isLoading) return;
+
               next.whenData((next) {
                 if (next <= 0 && prevChapter.value != null) {
                   showSnackbar.value = .previous;
