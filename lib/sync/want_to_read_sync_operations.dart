@@ -5,7 +5,7 @@ import 'package:kover/mapping/dto/series_dto_mappings.dart';
 class WantToReadSyncOperations {
   final Openapi _client;
 
-  const WantToReadSyncOperations({required Openapi client}) : _client = client;
+  const WantToReadSyncOperations({required this._client});
 
   /// Get the series in the want to read list
   Future<Iterable<SeriesCompanion>> getWantToReadList() async {

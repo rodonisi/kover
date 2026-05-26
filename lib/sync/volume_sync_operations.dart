@@ -8,10 +8,9 @@ class VolumeSyncOperations {
   final String _apiKey;
 
   const VolumeSyncOperations({
-    required Openapi client,
-    required String apiKey,
-  }) : _client = client,
-       _apiKey = apiKey;
+    required this._client,
+    required this._apiKey,
+  });
 
   /// Get cover for volume [volumeId]
   Future<VolumeCoversCompanion?> getVolumeCover(int volumeId) async {

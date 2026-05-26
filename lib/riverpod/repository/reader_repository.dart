@@ -35,12 +35,10 @@ class ReaderRepository {
   final SeriesSyncOperations _seriesClient;
 
   ReaderRepository({
-    required AppDatabase db,
-    required ReaderSyncOperations readerClient,
-    required SeriesSyncOperations seriesClient,
-  }) : _db = db,
-       _readerClient = readerClient,
-       _seriesClient = seriesClient;
+    required this._db,
+    required this._readerClient,
+    required this._seriesClient,
+  });
 
   /// Get continue point for [seriesId]
   Future<ChapterModel> getContinuePoint({required int seriesId}) async {

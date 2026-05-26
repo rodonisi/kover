@@ -45,14 +45,11 @@ class SeriesRepository {
   final ChapterSyncOperations _chapterClient;
 
   const SeriesRepository({
-    required AppDatabase db,
-    required SeriesSyncOperations client,
-    required VolumeSyncOperations volumeClient,
-    required ChapterSyncOperations chapterClient,
-  }) : _db = db,
-       _client = client,
-       _volumeClient = volumeClient,
-       _chapterClient = chapterClient;
+    required this._db,
+    required this._client,
+    required this._volumeClient,
+    required this._chapterClient,
+  });
 
   /// Watch series [seriesId]
   Stream<SeriesModel> watchSeries(int seriesId) {

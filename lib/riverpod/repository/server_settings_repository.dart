@@ -21,10 +21,9 @@ class ServerSettingsRepository {
   final ServerSettingsSyncOperations _client;
 
   ServerSettingsRepository({
-    required AppDatabase db,
-    required ServerSettingsSyncOperations client,
-  }) : _db = db,
-       _client = client;
+    required this._db,
+    required this._client,
+  });
 
   Stream<String?> watchServerVersion() {
     return _db.serverSettingsDao.watchServerVersion();

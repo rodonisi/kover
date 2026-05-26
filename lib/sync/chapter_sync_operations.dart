@@ -9,10 +9,9 @@ class ChapterSyncOperations {
   final String _apiKey;
 
   const ChapterSyncOperations({
-    required Openapi client,
-    required String apiKey,
-  }) : _client = client,
-       _apiKey = apiKey;
+    required this._client,
+    required this._apiKey,
+  });
 
   /// Fetch chapter [chapterId]
   Future<ChaptersCompanion> getChapter(int chapterId) async {

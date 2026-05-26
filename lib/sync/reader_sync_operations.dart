@@ -6,7 +6,7 @@ import 'package:kover/mapping/tables/reading_progress_data.dart';
 class ReaderSyncOperations {
   final Openapi _client;
 
-  const ReaderSyncOperations({required Openapi client}) : _client = client;
+  const ReaderSyncOperations({required this._client});
 
   /// Fetch continue point for [seriesId]
   Future<int> getContinuePoint(int seriesId) async {

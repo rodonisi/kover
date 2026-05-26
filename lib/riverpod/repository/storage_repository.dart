@@ -17,7 +17,7 @@ Future<Storage<String, String>> storage(Ref ref) async {
 final class StorageRepository extends Storage<String, String> {
   final AppDatabase _db;
 
-  StorageRepository({required AppDatabase db}) : _db = db;
+  StorageRepository({required this._db});
 
   FutureOr<void> clear() async {
     await _db.storageDao.clear();

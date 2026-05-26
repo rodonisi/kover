@@ -23,10 +23,9 @@ class LibrariesRepository {
   final LibrariesSyncOperations _client;
 
   const LibrariesRepository({
-    required AppDatabase db,
-    required LibrariesSyncOperations client,
-  }) : _db = db,
-       _client = client;
+    required this._db,
+    required this._client,
+  });
 
   /// Watch library [id]
   Stream<LibraryModel> watchLibrary(int id) {

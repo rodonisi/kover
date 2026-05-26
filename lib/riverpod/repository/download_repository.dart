@@ -38,16 +38,12 @@ class DownloadRepository {
   final SeriesSyncOperations _seriesClient;
 
   DownloadRepository({
-    required AppDatabase db,
-    required BookSyncOperations bookClient,
-    required ChapterSyncOperations chapterClient,
-    required VolumeSyncOperations volumeClient,
-    required SeriesSyncOperations seriesClient,
-  }) : _db = db,
-       _bookClient = bookClient,
-       _chapterClient = chapterClient,
-       _volumeClient = volumeClient,
-       _seriesClient = seriesClient;
+    required this._db,
+    required this._bookClient,
+    required this._chapterClient,
+    required this._volumeClient,
+    required this._seriesClient,
+  });
 
   /// Whether every page of [chapterId] is persisted locally.
   Future<bool> isChapterDownloaded({required int chapterId}) {

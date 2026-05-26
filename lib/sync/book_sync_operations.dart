@@ -14,9 +14,7 @@ class BookSyncOperations {
   final Openapi _client;
   final String _apiKey;
 
-  const BookSyncOperations({required Openapi client, required String apiKey})
-    : _client = client,
-      _apiKey = apiKey;
+  const BookSyncOperations({required this._client, required this._apiKey});
 
   /// Get the book chapter to page mapping (aka TOC) for [chapterId].
   Future<Iterable<BookChaptersTableCompanion>> getBookChapters(

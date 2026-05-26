@@ -6,8 +6,8 @@ class ServerSettingsSyncOperations {
   final Openapi _client;
 
   const ServerSettingsSyncOperations({
-    required Openapi client,
-  }) : _client = client;
+    required this._client,
+  });
 
   /// Fetch server settings
   Future<ServerSettingsCompanion> getServerSettings() async {

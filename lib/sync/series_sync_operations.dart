@@ -15,10 +15,9 @@ class SeriesSyncOperations {
   final String _apiKey;
 
   const SeriesSyncOperations({
-    required Openapi client,
-    required String apiKey,
-  }) : _client = client,
-       _apiKey = apiKey;
+    required this._client,
+    required this._apiKey,
+  });
 
   Future<Iterable<SeriesCompanion>> getAllSeries({int? libraryId}) async {
     final res = await _fetchAllSeries(libraryId: libraryId);
