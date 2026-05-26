@@ -18,7 +18,7 @@ class ReaderPage extends HookConsumerWidget {
 
   const ReaderPage({super.key, required this.seriesId, this.chapterId});
 
-  Future<void> _restoreSystemUI() async {
+  Future<void> _exitImmersiveMode() async {
     await SystemChrome.setEnabledSystemUIMode(.edgeToEdge);
     await SystemChrome.restoreSystemUIOverlays();
   }
@@ -29,7 +29,7 @@ class ReaderPage extends HookConsumerWidget {
       SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
 
       return () async {
-        await _restoreSystemUI();
+        await _exitImmersiveMode();
       };
     }, const []);
 
@@ -44,7 +44,7 @@ class ReaderPage extends HookConsumerWidget {
 
         Future.microtask(
           () {
-            _restoreSystemUI();
+            _exitImmersiveMode();
             ref.read(syncManagerProvider.notifier).syncProgress();
           },
         );
