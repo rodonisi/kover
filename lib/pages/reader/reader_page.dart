@@ -30,8 +30,8 @@ class ReaderPage extends HookConsumerWidget {
     useEffect(() {
       SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
 
-      return () async {
-        await _exitImmersiveMode();
+      return () {
+        _exitImmersiveMode();
       };
     }, const []);
 
