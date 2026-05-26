@@ -124,11 +124,10 @@ class SyncManager extends _$SyncManager {
     _enqueuePhases({const .allSeries()});
     _enqueuePhases({
       const .libraries(),
-      const .progress(),
-      const .allSeries(),
       const .metadata(),
       const .recentlyUpdated(),
       const .recentlyAdded(),
+      const .progress(),
       const .refreshServerSettings(),
       if (settings.downloadCovers) const .covers(),
     });
