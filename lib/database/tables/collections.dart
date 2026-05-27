@@ -7,7 +7,7 @@ class Collections extends Table {
   TextColumn get summary => text().nullable()();
   TextColumn get primaryColor => text().nullable()();
   TextColumn get secondaryColor => text().nullable()();
-  TextColumn get ownerId => text()();
+  TextColumn get owner => text()();
   DateTimeColumn get lastSynced => dateTime()();
   DateTimeColumn get created => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get lastModified =>

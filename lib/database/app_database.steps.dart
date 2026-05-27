@@ -1677,8 +1677,8 @@ class Shape19 extends i0.VersionedTable {
       columnsByName['primary_color']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<String> get secondaryColor =>
       columnsByName['secondary_color']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get ownerId =>
-      columnsByName['owner_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get owner =>
+      columnsByName['owner']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<int> get lastSynced =>
       columnsByName['last_synced']! as i1.GeneratedColumn<int>;
   i1.GeneratedColumn<int> get created =>
@@ -1689,7 +1689,7 @@ class Shape19 extends i0.VersionedTable {
 
 i1.GeneratedColumn<String> _column_74(String aliasedName) =>
     i1.GeneratedColumn<String>(
-      'owner_id',
+      'owner',
       aliasedName,
       false,
       type: i1.DriftSqlType.string,

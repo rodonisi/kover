@@ -2045,8 +2045,8 @@
             "dsl_features": []
           },
           {
-            "name": "owner_id",
-            "getter_name": "ownerId",
+            "name": "owner",
+            "getter_name": "owner",
             "moor_type": "string",
             "nullable": false,
             "customConstraints": null,
@@ -2408,7 +2408,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"collections\" (\"id\" INTEGER NOT NULL, \"title\" TEXT NOT NULL, \"summary\" TEXT NULL, \"primary_color\" TEXT NULL, \"secondary_color\" TEXT NULL, \"owner_id\" TEXT NOT NULL, \"last_synced\" INTEGER NOT NULL, \"created\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), \"last_modified\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"collections\" (\"id\" INTEGER NOT NULL, \"title\" TEXT NOT NULL, \"summary\" TEXT NULL, \"primary_color\" TEXT NULL, \"secondary_color\" TEXT NULL, \"owner\" TEXT NOT NULL, \"last_synced\" INTEGER NOT NULL, \"created\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), \"last_modified\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), PRIMARY KEY (\"id\"));"
         }
       ]
     },

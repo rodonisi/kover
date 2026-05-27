@@ -5,6 +5,7 @@ import 'package:kover/riverpod/providers/connectivity.dart';
 import 'package:kover/riverpod/providers/settings/download_settings.dart';
 import 'package:kover/riverpod/repository/book_repository.dart';
 import 'package:kover/riverpod/repository/chapters_repository.dart';
+import 'package:kover/riverpod/repository/collections_repository.dart';
 import 'package:kover/riverpod/repository/libraries_repository.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
@@ -30,6 +31,7 @@ sealed class SyncPhase with _$SyncPhase {
   const factory SyncPhase.libraries() = Libraries;
   const factory SyncPhase.progress() = Progress;
   const factory SyncPhase.covers() = Covers;
+  const factory SyncPhase.collections() = Collections;
   const factory SyncPhase.refreshServerSettings() = RefreshServerSettings;
   const factory SyncPhase.refreshMetadata({required int seriesId}) =
       RefreshMetadata;
@@ -69,6 +71,7 @@ class SyncManager extends _$SyncManager {
     final volumesRepo = ref.read(volumesRepositoryProvider);
     final chaptersRepo = ref.read(chaptersRepositoryProvider);
     final serverSettingsRepo = ref.read(serverSettingsRepositoryProvider);
+    final collectionsRepo = ref.read(collectionsRepositoryProvider);
 
     return SyncEngine(
       seriesRepo: seriesRepo,
@@ -79,6 +82,7 @@ class SyncManager extends _$SyncManager {
       volumesRepo: volumesRepo,
       chaptersRepo: chaptersRepo,
       serverSettingsRepo: serverSettingsRepo,
+      collectionsRepo: collectionsRepo,
     );
   }
 
@@ -97,6 +101,8 @@ class SyncManager extends _$SyncManager {
         () async => await _engine.syncProgress(),
     covers: () =>
         () async => await _engine.syncCovers(),
+    collections: () =>
+        () async => await _engine.syncCollections(),
     refreshServerSettings: () =>
         () async => await _engine.refreshServerSettings(),
     refreshMetadata: (seriesId) =>
@@ -129,6 +135,7 @@ class SyncManager extends _$SyncManager {
       const .recentlyAdded(),
       const .progress(),
       const .refreshServerSettings(),
+      const .collections(),
       if (settings.downloadCovers) const .covers(),
     });
   }

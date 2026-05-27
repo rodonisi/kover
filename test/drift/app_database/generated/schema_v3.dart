@@ -6943,8 +6943,8 @@ class Collections extends Table with TableInfo<Collections, CollectionsData> {
     requiredDuringInsert: false,
     $customConstraints: 'NULL',
   );
-  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
-    'owner_id',
+  late final GeneratedColumn<String> owner = GeneratedColumn<String>(
+    'owner',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -6990,7 +6990,7 @@ class Collections extends Table with TableInfo<Collections, CollectionsData> {
     summary,
     primaryColor,
     secondaryColor,
-    ownerId,
+    owner,
     lastSynced,
     created,
     lastModified,
@@ -7026,9 +7026,9 @@ class Collections extends Table with TableInfo<Collections, CollectionsData> {
         DriftSqlType.string,
         data['${effectivePrefix}secondary_color'],
       ),
-      ownerId: attachedDatabase.typeMapping.read(
+      owner: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}owner_id'],
+        data['${effectivePrefix}owner'],
       )!,
       lastSynced: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -7062,7 +7062,7 @@ class CollectionsData extends DataClass implements Insertable<CollectionsData> {
   final String? summary;
   final String? primaryColor;
   final String? secondaryColor;
-  final String ownerId;
+  final String owner;
   final int lastSynced;
   final int created;
   final int lastModified;
@@ -7072,7 +7072,7 @@ class CollectionsData extends DataClass implements Insertable<CollectionsData> {
     this.summary,
     this.primaryColor,
     this.secondaryColor,
-    required this.ownerId,
+    required this.owner,
     required this.lastSynced,
     required this.created,
     required this.lastModified,
@@ -7091,7 +7091,7 @@ class CollectionsData extends DataClass implements Insertable<CollectionsData> {
     if (!nullToAbsent || secondaryColor != null) {
       map['secondary_color'] = Variable<String>(secondaryColor);
     }
-    map['owner_id'] = Variable<String>(ownerId);
+    map['owner'] = Variable<String>(owner);
     map['last_synced'] = Variable<int>(lastSynced);
     map['created'] = Variable<int>(created);
     map['last_modified'] = Variable<int>(lastModified);
@@ -7111,7 +7111,7 @@ class CollectionsData extends DataClass implements Insertable<CollectionsData> {
       secondaryColor: secondaryColor == null && nullToAbsent
           ? const Value.absent()
           : Value(secondaryColor),
-      ownerId: Value(ownerId),
+      owner: Value(owner),
       lastSynced: Value(lastSynced),
       created: Value(created),
       lastModified: Value(lastModified),
@@ -7129,7 +7129,7 @@ class CollectionsData extends DataClass implements Insertable<CollectionsData> {
       summary: serializer.fromJson<String?>(json['summary']),
       primaryColor: serializer.fromJson<String?>(json['primaryColor']),
       secondaryColor: serializer.fromJson<String?>(json['secondaryColor']),
-      ownerId: serializer.fromJson<String>(json['ownerId']),
+      owner: serializer.fromJson<String>(json['owner']),
       lastSynced: serializer.fromJson<int>(json['lastSynced']),
       created: serializer.fromJson<int>(json['created']),
       lastModified: serializer.fromJson<int>(json['lastModified']),
@@ -7144,7 +7144,7 @@ class CollectionsData extends DataClass implements Insertable<CollectionsData> {
       'summary': serializer.toJson<String?>(summary),
       'primaryColor': serializer.toJson<String?>(primaryColor),
       'secondaryColor': serializer.toJson<String?>(secondaryColor),
-      'ownerId': serializer.toJson<String>(ownerId),
+      'owner': serializer.toJson<String>(owner),
       'lastSynced': serializer.toJson<int>(lastSynced),
       'created': serializer.toJson<int>(created),
       'lastModified': serializer.toJson<int>(lastModified),
@@ -7157,7 +7157,7 @@ class CollectionsData extends DataClass implements Insertable<CollectionsData> {
     Value<String?> summary = const Value.absent(),
     Value<String?> primaryColor = const Value.absent(),
     Value<String?> secondaryColor = const Value.absent(),
-    String? ownerId,
+    String? owner,
     int? lastSynced,
     int? created,
     int? lastModified,
@@ -7169,7 +7169,7 @@ class CollectionsData extends DataClass implements Insertable<CollectionsData> {
     secondaryColor: secondaryColor.present
         ? secondaryColor.value
         : this.secondaryColor,
-    ownerId: ownerId ?? this.ownerId,
+    owner: owner ?? this.owner,
     lastSynced: lastSynced ?? this.lastSynced,
     created: created ?? this.created,
     lastModified: lastModified ?? this.lastModified,
@@ -7185,7 +7185,7 @@ class CollectionsData extends DataClass implements Insertable<CollectionsData> {
       secondaryColor: data.secondaryColor.present
           ? data.secondaryColor.value
           : this.secondaryColor,
-      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      owner: data.owner.present ? data.owner.value : this.owner,
       lastSynced: data.lastSynced.present
           ? data.lastSynced.value
           : this.lastSynced,
@@ -7204,7 +7204,7 @@ class CollectionsData extends DataClass implements Insertable<CollectionsData> {
           ..write('summary: $summary, ')
           ..write('primaryColor: $primaryColor, ')
           ..write('secondaryColor: $secondaryColor, ')
-          ..write('ownerId: $ownerId, ')
+          ..write('owner: $owner, ')
           ..write('lastSynced: $lastSynced, ')
           ..write('created: $created, ')
           ..write('lastModified: $lastModified')
@@ -7219,7 +7219,7 @@ class CollectionsData extends DataClass implements Insertable<CollectionsData> {
     summary,
     primaryColor,
     secondaryColor,
-    ownerId,
+    owner,
     lastSynced,
     created,
     lastModified,
@@ -7233,7 +7233,7 @@ class CollectionsData extends DataClass implements Insertable<CollectionsData> {
           other.summary == this.summary &&
           other.primaryColor == this.primaryColor &&
           other.secondaryColor == this.secondaryColor &&
-          other.ownerId == this.ownerId &&
+          other.owner == this.owner &&
           other.lastSynced == this.lastSynced &&
           other.created == this.created &&
           other.lastModified == this.lastModified);
@@ -7245,7 +7245,7 @@ class CollectionsCompanion extends UpdateCompanion<CollectionsData> {
   final Value<String?> summary;
   final Value<String?> primaryColor;
   final Value<String?> secondaryColor;
-  final Value<String> ownerId;
+  final Value<String> owner;
   final Value<int> lastSynced;
   final Value<int> created;
   final Value<int> lastModified;
@@ -7255,7 +7255,7 @@ class CollectionsCompanion extends UpdateCompanion<CollectionsData> {
     this.summary = const Value.absent(),
     this.primaryColor = const Value.absent(),
     this.secondaryColor = const Value.absent(),
-    this.ownerId = const Value.absent(),
+    this.owner = const Value.absent(),
     this.lastSynced = const Value.absent(),
     this.created = const Value.absent(),
     this.lastModified = const Value.absent(),
@@ -7266,12 +7266,12 @@ class CollectionsCompanion extends UpdateCompanion<CollectionsData> {
     this.summary = const Value.absent(),
     this.primaryColor = const Value.absent(),
     this.secondaryColor = const Value.absent(),
-    required String ownerId,
+    required String owner,
     required int lastSynced,
     this.created = const Value.absent(),
     this.lastModified = const Value.absent(),
   }) : title = Value(title),
-       ownerId = Value(ownerId),
+       owner = Value(owner),
        lastSynced = Value(lastSynced);
   static Insertable<CollectionsData> custom({
     Expression<int>? id,
@@ -7279,7 +7279,7 @@ class CollectionsCompanion extends UpdateCompanion<CollectionsData> {
     Expression<String>? summary,
     Expression<String>? primaryColor,
     Expression<String>? secondaryColor,
-    Expression<String>? ownerId,
+    Expression<String>? owner,
     Expression<int>? lastSynced,
     Expression<int>? created,
     Expression<int>? lastModified,
@@ -7290,7 +7290,7 @@ class CollectionsCompanion extends UpdateCompanion<CollectionsData> {
       if (summary != null) 'summary': summary,
       if (primaryColor != null) 'primary_color': primaryColor,
       if (secondaryColor != null) 'secondary_color': secondaryColor,
-      if (ownerId != null) 'owner_id': ownerId,
+      if (owner != null) 'owner': owner,
       if (lastSynced != null) 'last_synced': lastSynced,
       if (created != null) 'created': created,
       if (lastModified != null) 'last_modified': lastModified,
@@ -7303,7 +7303,7 @@ class CollectionsCompanion extends UpdateCompanion<CollectionsData> {
     Value<String?>? summary,
     Value<String?>? primaryColor,
     Value<String?>? secondaryColor,
-    Value<String>? ownerId,
+    Value<String>? owner,
     Value<int>? lastSynced,
     Value<int>? created,
     Value<int>? lastModified,
@@ -7314,7 +7314,7 @@ class CollectionsCompanion extends UpdateCompanion<CollectionsData> {
       summary: summary ?? this.summary,
       primaryColor: primaryColor ?? this.primaryColor,
       secondaryColor: secondaryColor ?? this.secondaryColor,
-      ownerId: ownerId ?? this.ownerId,
+      owner: owner ?? this.owner,
       lastSynced: lastSynced ?? this.lastSynced,
       created: created ?? this.created,
       lastModified: lastModified ?? this.lastModified,
@@ -7339,8 +7339,8 @@ class CollectionsCompanion extends UpdateCompanion<CollectionsData> {
     if (secondaryColor.present) {
       map['secondary_color'] = Variable<String>(secondaryColor.value);
     }
-    if (ownerId.present) {
-      map['owner_id'] = Variable<String>(ownerId.value);
+    if (owner.present) {
+      map['owner'] = Variable<String>(owner.value);
     }
     if (lastSynced.present) {
       map['last_synced'] = Variable<int>(lastSynced.value);
@@ -7362,7 +7362,7 @@ class CollectionsCompanion extends UpdateCompanion<CollectionsData> {
           ..write('summary: $summary, ')
           ..write('primaryColor: $primaryColor, ')
           ..write('secondaryColor: $secondaryColor, ')
-          ..write('ownerId: $ownerId, ')
+          ..write('owner: $owner, ')
           ..write('lastSynced: $lastSynced, ')
           ..write('created: $created, ')
           ..write('lastModified: $lastModified')

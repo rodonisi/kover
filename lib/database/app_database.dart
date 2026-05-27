@@ -3,6 +3,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:kover/database/app_database.steps.dart';
 import 'package:kover/database/dao/book_dao.dart';
 import 'package:kover/database/dao/chapters_dao.dart';
+import 'package:kover/database/dao/collections_dao.dart';
 import 'package:kover/database/dao/download_dao.dart';
 import 'package:kover/database/dao/libraries_dao.dart';
 import 'package:kover/database/dao/reader_dao.dart';
@@ -70,6 +71,7 @@ part 'app_database.g.dart';
     DownloadDao,
     RiverpodDao,
     ServerSettingsDao,
+    CollectionsDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {

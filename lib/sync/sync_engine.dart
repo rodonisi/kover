@@ -1,5 +1,6 @@
 import 'package:kover/riverpod/repository/book_repository.dart';
 import 'package:kover/riverpod/repository/chapters_repository.dart';
+import 'package:kover/riverpod/repository/collections_repository.dart';
 import 'package:kover/riverpod/repository/libraries_repository.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
@@ -16,6 +17,7 @@ class SyncEngine {
   final VolumesRepository volumesRepo;
   final ChaptersRepository chaptersRepo;
   final ServerSettingsRepository serverSettingsRepo;
+  final CollectionsRepository collectionsRepo;
 
   const SyncEngine({
     required this.seriesRepo,
@@ -26,6 +28,7 @@ class SyncEngine {
     required this.volumesRepo,
     required this.chaptersRepo,
     required this.serverSettingsRepo,
+    required this.collectionsRepo,
   });
 
   Future<void> syncAllSeries() async {
@@ -56,11 +59,16 @@ class SyncEngine {
     await readerRepo.mergeProgress();
   }
 
+  Future<void> syncCollections() async {
+    await collectionsRepo.refreshCollections();
+  }
+
   Future<void> syncCovers() async {
     await Future.wait([
       seriesRepo.fetchMissingCovers(),
       volumesRepo.fetchMissingCovers(),
       chaptersRepo.fetchMissingCovers(),
+      collectionsRepo.fetchMissingCovers(),
     ]);
   }
 

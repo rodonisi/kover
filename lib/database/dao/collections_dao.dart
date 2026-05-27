@@ -14,6 +14,10 @@ class CollectionsDao extends DatabaseAccessor<AppDatabase>
     return managers.collections.filter((f) => f.id.equals(collectionId));
   }
 
+  Selectable<Collection> allCollections() {
+    return managers.collections.orderBy((o) => o.title.asc());
+  }
+
   /// Search collections by [query]
   Future<List<Collection>> searchCollections(String query) {
     return managers.collections
@@ -22,8 +26,22 @@ class CollectionsDao extends DatabaseAccessor<AppDatabase>
         .get();
   }
 
+  /// Get all collection ids missing covers.
+  Future<List<int>> getMissingCovers() async {
+    final query = select(collections).join([
+      leftOuterJoin(
+        collectionCovers,
+        collectionCovers.collectionId.equalsExp(collections.id),
+      ),
+    ]);
+
+    query.where(collectionCovers.collectionId.isNull());
+
+    return await query.map((row) => row.readTable(collections).id).get();
+  }
+
   /// Upsert a batch of collections.
-  Future<void> upsertCollectionBatch(
+  Future<void> upsertCollectionsBatch(
     Iterable<CollectionsCompanion> entries,
   ) async {
     await batch((batch) {

@@ -8,6 +8,7 @@ extension CollectionDtoMappings on AppUserCollectionDto {
   CollectionsCompanion toCollectionsCompanion() {
     return CollectionsCompanion(
       id: Value(id!),
+      owner: Value(owner!),
       title: Value(title!),
       summary: Value.absentIfNull(summary),
       lastSynced: Value.absentIfNull(lastSyncUtc?.normalizeUtc()),
