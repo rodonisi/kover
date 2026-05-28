@@ -38,6 +38,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   Future<List<SeriesData>> searchSeries(
     String query, {
     int? libraryId,
+    int? collectionId,
     bool orderByName = false,
     bool orderByRecentlyAdded = false,
     bool orderByRecentlyUpdated = false,
@@ -54,6 +55,16 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
 
     if (libraryId != null) {
       q.where((table) => table.libraryId.equals(libraryId));
+    }
+
+    if (collectionId != null) {
+      q.where(
+        (table) => table.id.isInQuery(
+          selectOnly(db.collectionSeries)
+            ..addColumns([db.collectionSeries.seriesId])
+            ..where(db.collectionSeries.collectionId.equals(collectionId)),
+        ),
+      );
     }
 
     q.orderBy([
@@ -170,6 +181,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   /// Get all series stored in the database, optionally filtering by [libraryId]
   MultiSelectable<SeriesData> allSeries({
     int? libraryId,
+    int? collectionId,
     bool orderByName = false,
     bool orderByRecentlyAdded = false,
     bool orderByRecentlyUpdated = false,
@@ -179,6 +191,16 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
 
     if (libraryId != null) {
       query.where((table) => table.libraryId.equals(libraryId));
+    }
+
+    if (collectionId != null) {
+      query.where(
+        (table) => table.id.isInQuery(
+          selectOnly(db.collectionSeries)
+            ..addColumns([db.collectionSeries.seriesId])
+            ..where(db.collectionSeries.collectionId.equals(collectionId)),
+        ),
+      );
     }
 
     query.orderBy([

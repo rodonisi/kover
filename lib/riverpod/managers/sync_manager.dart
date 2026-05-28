@@ -142,7 +142,7 @@ class SyncManager extends _$SyncManager {
 
   /// Sync libraries
   void syncLibraries() {
-    _enqueuePhases({const .libraries()});
+    _enqueuePhases({const .libraries(), const .collections()});
   }
 
   /// Sync progress

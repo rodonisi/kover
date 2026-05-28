@@ -17,6 +17,7 @@ Future<List<SeriesModel>> searchSeries(
   Ref ref,
   String query, {
   int? libraryId,
+  int? collectionId,
   bool orderByName = false,
   bool orderByRecentlyAdded = false,
   bool orderByRecentlyUpdated = false,
@@ -26,6 +27,7 @@ Future<List<SeriesModel>> searchSeries(
   return repo.searchSeries(
     query,
     libraryId: libraryId,
+    collectionId: collectionId,
     orderByName: orderByName,
     orderByRecentlyAdded: orderByRecentlyAdded,
     orderByRecentlyUpdated: orderByRecentlyUpdated,
@@ -58,6 +60,7 @@ Stream<ImageModel?> seriesCover(Ref ref, {required int seriesId}) async* {
 Stream<List<SeriesModel>> allSeries(
   Ref ref, {
   int? libraryId,
+  int? collectionId,
   bool orderByName = false,
   bool orderByRecentlyAdded = false,
   bool orderByRecentlyUpdated = false,
@@ -67,6 +70,7 @@ Stream<List<SeriesModel>> allSeries(
   yield* repo
       .watchAllSeries(
         libraryId: libraryId,
+        collectionId: collectionId,
         orderByName: orderByName,
         orderByRecentlyAdded: orderByRecentlyAdded,
         orderByRecentlyUpdated: orderByRecentlyUpdated,

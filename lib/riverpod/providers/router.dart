@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kover/pages/download_queue/download_queue_page.dart';
 import 'package:kover/pages/home/home_page.dart';
 import 'package:kover/pages/menu_page/menu_page.dart';
+import 'package:kover/pages/menu_page/series_page/collections_page.dart';
 import 'package:kover/pages/menu_page/series_page/series_page.dart';
 import 'package:kover/pages/reader/reader_page.dart';
 import 'package:kover/pages/series_detail_page/chapter_detail_page/chapter_detail_page.dart';
@@ -76,8 +77,14 @@ GoRouter router(Ref ref) {
             TypedGoRoute<AllSeriesRoute>(
               path: 'all-series',
             ),
+            TypedGoRoute<CollectionsRoute>(
+              path: 'collections',
+            ),
             TypedGoRoute<SeriesRoute>(
               path: 'library/:libraryId',
+            ),
+            TypedGoRoute<CollectionSeriesRoute>(
+              path: 'collection/:collectionId',
             ),
             TypedGoRoute<DownloadQueueRoute>(
               path: 'download-queue',
@@ -144,6 +151,24 @@ class AllSeriesRoute extends GoRouteData with $AllSeriesRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const AllSeriesPage();
+}
+
+class CollectionsRoute extends GoRouteData with $CollectionsRoute {
+  const CollectionsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const CollectionsPage();
+}
+
+class CollectionSeriesRoute extends GoRouteData with $CollectionSeriesRoute {
+  final int collectionId;
+
+  const CollectionSeriesRoute({required this.collectionId});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      CollectionSeriesPage(collectionId: collectionId);
 }
 
 class SeriesRoute extends GoRouteData with $SeriesRoute {

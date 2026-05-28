@@ -19,4 +19,9 @@ sealed class KoverIcons {
 
   static const IconData save = LucideIcons.save;
   static const IconData reset = LucideIcons.rotateCcw;
+
+  static const IconData ascending = LucideIcons.arrowDownNarrowWide;
+  static const IconData descending = LucideIcons.arrowDownWideNarrow;
+
+  static const IconData collection = LucideIcons.layoutGrid;
 }

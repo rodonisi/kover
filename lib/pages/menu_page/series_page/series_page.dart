@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/enums/series_sort_option.dart';
 import 'package:kover/models/enums/sort_direction.dart';
+import 'package:kover/riverpod/providers/collections.dart';
 import 'package:kover/riverpod/providers/library.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -46,15 +47,43 @@ class LibrarySeriesPage extends ConsumerWidget {
   }
 }
 
+class CollectionSeriesPage extends ConsumerWidget {
+  final int collectionId;
+
+  const CollectionSeriesPage({
+    super.key,
+    required this.collectionId,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final collection = ref.watch(
+      collectionProvider(collectionId: collectionId),
+    );
+    return Async(
+      asyncValue: collection,
+      data: (data) {
+        return SeriesPage(
+          title: data.title,
+          collectionId: data.id,
+        );
+      },
+    );
+  }
+}
+
 class SeriesPage extends HookConsumerWidget {
   final String title;
   final String? subtitle;
   final int? libraryId;
+  final int? collectionId;
+
   const SeriesPage({
     super.key,
     required this.title,
     this.subtitle,
     this.libraryId,
+    this.collectionId,
   });
 
   @override
@@ -66,6 +95,7 @@ class SeriesPage extends HookConsumerWidget {
     final allSeries = ref.watch(
       allSeriesProvider(
         libraryId: libraryId,
+        collectionId: collectionId,
         orderByName: sortOption.value == .name,
         orderByRecentlyAdded: sortOption.value == .dateAdded,
         orderByRecentlyUpdated: sortOption.value == .lastModified,
@@ -76,6 +106,7 @@ class SeriesPage extends HookConsumerWidget {
       searchSeriesProvider(
         controller.text,
         libraryId: libraryId,
+        collectionId: collectionId,
         orderByName: sortOption.value == .name,
         orderByRecentlyAdded: sortOption.value == .dateAdded,
         orderByRecentlyUpdated: sortOption.value == .lastModified,

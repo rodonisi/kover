@@ -14,6 +14,14 @@ class CollectionsDao extends DatabaseAccessor<AppDatabase>
     return managers.collections.filter((f) => f.id.equals(collectionId));
   }
 
+  SingleOrNullSelectable<CollectionCover?> collectionCover({
+    required int collectionId,
+  }) {
+    return managers.collectionCovers.filter(
+      (f) => f.collectionId.id(collectionId),
+    );
+  }
+
   Selectable<Collection> allCollections() {
     return managers.collections.orderBy((o) => o.title.asc());
   }

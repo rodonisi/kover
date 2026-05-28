@@ -62,6 +62,7 @@ class SeriesRepository {
   Future<List<SeriesModel>> searchSeries(
     String query, {
     int? libraryId,
+    int? collectionId,
     bool orderByName = false,
     bool orderByRecentlyAdded = false,
     bool orderByRecentlyUpdated = false,
@@ -74,6 +75,7 @@ class SeriesRepository {
     final result = await _db.seriesDao.searchSeries(
       query,
       libraryId: libraryId,
+      collectionId: collectionId,
       orderByName: orderByName,
       orderByRecentlyAdded: orderByRecentlyAdded,
       orderByRecentlyUpdated: orderByRecentlyUpdated,
@@ -145,6 +147,7 @@ class SeriesRepository {
   /// Watch the list of all series, optionally filterying by [libraryId]
   Stream<List<SeriesModel>> watchAllSeries({
     int? libraryId,
+    int? collectionId,
     bool orderByName = false,
     bool orderByRecentlyAdded = false,
     bool orderByRecentlyUpdated = false,
@@ -153,6 +156,7 @@ class SeriesRepository {
     return _db.seriesDao
         .allSeries(
           libraryId: libraryId,
+          collectionId: collectionId,
           orderByName: orderByName,
           orderByRecentlyAdded: orderByRecentlyAdded,
           orderByRecentlyUpdated: orderByRecentlyUpdated,

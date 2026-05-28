@@ -7,7 +7,7 @@ part 'collection_model.g.dart';
 @freezed
 sealed class CollectionModel with _$CollectionModel {
   const factory CollectionModel({
-    required String id,
+    required int id,
     required String title,
     required String? summary,
   }) = _CollectionModel;
@@ -17,7 +17,7 @@ sealed class CollectionModel with _$CollectionModel {
 
   factory CollectionModel.fromDatabaseModel(Collection collection) {
     return CollectionModel(
-      id: collection.id.toString(),
+      id: collection.id,
       title: collection.title,
       summary: collection.summary,
     );

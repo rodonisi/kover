@@ -8,6 +8,7 @@ import 'package:kover/riverpod/managers/download_manager.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/router.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/actions_app_bar/actions_app_bar.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
@@ -41,12 +42,28 @@ class MenuPage extends ConsumerWidget {
             const ActionsAppBar(),
             if (loggedIn) ...[
               SliverPadding(
-                padding: LayoutConstants.mediumEdgeInsets,
+                padding: const EdgeInsets.symmetric(
+                  vertical: LayoutConstants.smallerPadding,
+                  horizontal: LayoutConstants.mediumPadding,
+                ),
                 sliver: SliverToBoxAdapter(
                   child: AppListTile(
                     title: 'All Series',
                     icon: const Icon(LucideIcons.list),
                     onTap: () => const AllSeriesRoute().push(context),
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: LayoutConstants.smallerPadding,
+                  horizontal: LayoutConstants.mediumPadding,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: AppListTile(
+                    title: 'Collections',
+                    icon: const Icon(KoverIcons.collection),
+                    onTap: () => const CollectionsRoute().push(context),
                   ),
                 ),
               ),
