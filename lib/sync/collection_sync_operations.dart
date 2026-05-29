@@ -24,6 +24,7 @@ class CollectionSyncOperations {
         [];
   }
 
+  /// Fetch all series in collection [collectionId]
   Future<Iterable<CollectionSeriesCompanion>> getCollectionSeries(
     int collectionId,
   ) async {
@@ -61,6 +62,7 @@ class CollectionSyncOperations {
         [];
   }
 
+  /// Fetch collection cover for [collectionId]
   Future<CollectionCoversCompanion?> getCollectionCover(
     int collectionId,
   ) async {

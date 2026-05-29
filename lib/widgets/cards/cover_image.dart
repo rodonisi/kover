@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/riverpod/providers/chapter.dart';
+import 'package:kover/riverpod/providers/collections.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/riverpod/providers/volume.dart';
 import 'package:kover/widgets/util/async_value.dart';
@@ -97,6 +98,43 @@ class ChapterCoverImage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Async(
       asyncValue: ref.watch(chapterCoverProvider(chapterId: chapterId)),
+      data: (imageData) => ClipRRect(
+        child: PlaceholderCoverImage(
+          image: imageData,
+          fit: fit,
+          height: height,
+          width: width,
+          usePlaceholder: usePlaceholder,
+        ),
+      ),
+    );
+  }
+}
+
+class CollectionCoverImage extends ConsumerWidget {
+  final int collectionId;
+  final double? width;
+  final double? height;
+  final bool usePlaceholder;
+  final BoxFit fit;
+  final BorderRadius? borderRadius;
+
+  const CollectionCoverImage({
+    super.key,
+    required this.collectionId,
+    this.width,
+    this.height,
+    this.usePlaceholder = true,
+    this.fit = BoxFit.cover,
+    this.borderRadius,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Async(
+      asyncValue: ref.watch(
+        collectionCoverProvider(collectionId: collectionId),
+      ),
       data: (imageData) => ClipRRect(
         child: PlaceholderCoverImage(
           image: imageData,

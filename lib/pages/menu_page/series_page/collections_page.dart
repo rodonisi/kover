@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/collection_model.dart';
 import 'package:kover/models/enums/sort_direction.dart';
+import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/collections.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -24,6 +25,10 @@ class CollectionsPage extends HookConsumerWidget {
     final collections = ref.watch(collectionsProvider);
 
     useListenable(controller);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(syncManagerProvider.notifier).syncCollections();
+    });
 
     return Scaffold(
       body: CustomScrollView(

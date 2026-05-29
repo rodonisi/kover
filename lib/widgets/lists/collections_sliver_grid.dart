@@ -17,7 +17,7 @@ class CollectionsSliverGrid extends StatelessWidget {
       itemCount: collections.length,
       builder: (context, index) {
         final collection = collections[index];
-        return CollectionCard(collection: collection);
+        return CollectionCard(collectionId: collection.id);
       },
     );
   }

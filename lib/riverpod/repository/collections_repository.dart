@@ -28,6 +28,7 @@ class CollectionsRepository {
 
   CollectionsRepository({required this._db, required this._client});
 
+  /// Watch all collections.
   Stream<List<CollectionModel>> watchCollections() {
     return _db.collectionsDao.allCollections().watch().map(
       (collections) =>
@@ -35,6 +36,7 @@ class CollectionsRepository {
     );
   }
 
+  /// Watch collection by [collectionId].
   Stream<CollectionModel> watchCollection(int collectionId) {
     return _db.collectionsDao
         .collection(collectionId)
@@ -42,6 +44,7 @@ class CollectionsRepository {
         .map(CollectionModel.fromDatabaseModel);
   }
 
+  /// Watch collection cover by [collectionId]. Falls back to remote if not in database.
   Stream<ImageModel?> watchCollectionCover(int collectionId) {
     return _db.collectionsDao
         .collectionCover(collectionId: collectionId)

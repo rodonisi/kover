@@ -14,6 +14,7 @@ class CollectionsDao extends DatabaseAccessor<AppDatabase>
     return managers.collections.filter((f) => f.id.equals(collectionId));
   }
 
+  /// Get [Selectable] for series in collection [collectionId]
   SingleOrNullSelectable<CollectionCover?> collectionCover({
     required int collectionId,
   }) {
@@ -22,6 +23,7 @@ class CollectionsDao extends DatabaseAccessor<AppDatabase>
     );
   }
 
+  /// Get [Selectable] for all collections.
   Selectable<Collection> allCollections() {
     return managers.collections.orderBy((o) => o.title.asc());
   }
