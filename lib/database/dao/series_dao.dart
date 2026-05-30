@@ -343,7 +343,12 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
                     readingProgress,
                     readingProgress.seriesId.equalsExp(series.id),
                   ),
+                  innerJoin(
+                    libraries,
+                    libraries.id.equalsExp(series.libraryId),
+                  ),
                 ])
+                ..where(libraries.includeInDashboard.equals(true))
                 ..addColumns([totalPagesRead, latestReadDate])
                 ..groupBy(
                   [series.id],
