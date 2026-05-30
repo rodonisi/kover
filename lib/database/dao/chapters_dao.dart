@@ -1,11 +1,21 @@
 import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/tables/chapters.dart';
+import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/progress.dart';
+import 'package:kover/database/tables/series.dart';
 
 part 'chapters_dao.g.dart';
 
-@DriftAccessor(tables: [Chapters, ChapterCovers, ReadingProgress])
+@DriftAccessor(
+  tables: [
+    Chapters,
+    ChapterCovers,
+    ReadingProgress,
+    Series,
+    Libraries,
+  ],
+)
 class ChaptersDao extends DatabaseAccessor<AppDatabase>
     with _$ChaptersDaoMixin {
   ChaptersDao(super.attachedDatabase);
@@ -21,9 +31,11 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     int? volumeId,
     int? seriesId,
   }) {
-    final q = managers.chapters.filter(
-      (f) => f.titleName.contains(query) | f.titleName.contains(query),
-    );
+    final q = managers.chapters
+        .filter((f) => f.seriesId.libraryId.includeInSearch(true))
+        .filter(
+          (f) => f.titleName.contains(query) | f.titleName.contains(query),
+        );
 
     if (volumeId != null) {
       q.filter((f) => f.volumeId.id(volumeId));

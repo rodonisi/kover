@@ -1,12 +1,23 @@
 import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/tables/chapters.dart';
+import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/progress.dart';
+import 'package:kover/database/tables/series.dart';
 import 'package:kover/database/tables/volumes.dart';
 
 part 'volumes_dao.g.dart';
 
-@DriftAccessor(tables: [Volumes, VolumeCovers, Chapters, ReadingProgress])
+@DriftAccessor(
+  tables: [
+    Volumes,
+    VolumeCovers,
+    Chapters,
+    ReadingProgress,
+    Series,
+    Libraries,
+  ],
+)
 class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
   VolumesDao(super.attachedDatabase);
 
@@ -35,6 +46,7 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
         .withReferences(
           (prefetch) => prefetch(chaptersRefs: true),
         )
+        .filter((f) => f.seriesId.libraryId.includeInSearch(true))
         .filter((f) => f.name.contains(query));
 
     if (seriesId != null) {

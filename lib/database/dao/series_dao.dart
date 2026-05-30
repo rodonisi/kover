@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/dao/volumes_dao.dart';
 import 'package:kover/database/tables/chapters.dart';
+import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/progress.dart';
 import 'package:kover/database/tables/series.dart';
 import 'package:kover/database/tables/server_settings.dart';
@@ -22,6 +23,7 @@ part 'series_dao.g.dart';
     ReadingProgress,
     WantToRead,
     ServerSettings,
+    Libraries,
   ],
 )
 class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
@@ -44,22 +46,24 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     bool orderByRecentlyUpdated = false,
     bool ascending = true,
   }) async {
-    final q = select(series)
-      ..where(
-        (table) =>
-            table.name.contains(query) |
-            table.sortName.contains(query) |
-            table.localizedName.contains(query) |
-            table.originalName.contains(query),
-      );
+    final q =
+        select(series).join([
+          innerJoin(libraries, libraries.id.equalsExp(series.libraryId)),
+        ])..where(
+          libraries.includeInSearch.equals(true) &
+              (series.name.contains(query) |
+                  series.sortName.contains(query) |
+                  series.localizedName.contains(query) |
+                  series.originalName.contains(query)),
+        );
 
     if (libraryId != null) {
-      q.where((table) => table.libraryId.equals(libraryId));
+      q.where(series.libraryId.equals(libraryId));
     }
 
     if (collectionId != null) {
       q.where(
-        (table) => table.id.isInQuery(
+        series.id.isInQuery(
           selectOnly(db.collectionSeries)
             ..addColumns([db.collectionSeries.seriesId])
             ..where(db.collectionSeries.collectionId.equals(collectionId)),
@@ -69,25 +73,25 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
 
     q.orderBy([
       if (orderByName)
-        (table) => OrderingTerm(
-          expression: table.sortName,
+        OrderingTerm(
+          expression: series.sortName,
           mode: ascending ? .asc : .desc,
         ),
 
       if (orderByRecentlyAdded)
-        (table) => OrderingTerm(
-          expression: table.created,
+        OrderingTerm(
+          expression: series.created,
           mode: ascending ? .asc : .desc,
         ),
 
       if (orderByRecentlyUpdated)
-        (table) => OrderingTerm(
-          expression: table.lastChapterAdded,
+        OrderingTerm(
+          expression: series.lastChapterAdded,
           mode: ascending ? .asc : .desc,
         ),
     ]);
 
-    return await q.get();
+    return await q.map((result) => result.readTable(series)).get();
   }
 
   Stream<SeriesData> watchSeriesForChapter(int chapterId) {
