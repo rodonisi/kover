@@ -13,7 +13,13 @@ Stream<SeriesModel> series(Ref ref, {required int seriesId}) async* {
 }
 
 @riverpod
-Future<List<SeriesModel>> searchSeries(
+Future<List<SeriesModel>> searchSeries(Ref ref, String query) {
+  final repo = ref.watch(seriesRepositoryProvider);
+  return repo.searchSeries(query);
+}
+
+@riverpod
+Future<List<SeriesModel>> filterSeries(
   Ref ref,
   String query, {
   int? libraryId,
@@ -24,7 +30,7 @@ Future<List<SeriesModel>> searchSeries(
   bool ascending = true,
 }) {
   final repo = ref.watch(seriesRepositoryProvider);
-  return repo.searchSeries(
+  return repo.filterSeries(
     query,
     libraryId: libraryId,
     collectionId: collectionId,

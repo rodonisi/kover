@@ -58,8 +58,21 @@ class SeriesRepository {
         .map(SeriesModel.fromDatabaseModel);
   }
 
-  /// Search series by [query]. Optionally filter by [libraryId]
-  Future<List<SeriesModel>> searchSeries(
+  /// Search series by [query].
+  Future<List<SeriesModel>> searchSeries(String query) async {
+    if (query.isEmpty) {
+      return [];
+    }
+
+    final result = await _db.seriesDao.searchSeries(
+      query,
+    );
+
+    return result.map(SeriesModel.fromDatabaseModel).toList();
+  }
+
+  /// Filter series by [query]. Optionally filter by [libraryId]
+  Future<List<SeriesModel>> filterSeries(
     String query, {
     int? libraryId,
     int? collectionId,
@@ -72,7 +85,7 @@ class SeriesRepository {
       return [];
     }
 
-    final result = await _db.seriesDao.searchSeries(
+    final result = await _db.seriesDao.filterSeries(
       query,
       libraryId: libraryId,
       collectionId: collectionId,

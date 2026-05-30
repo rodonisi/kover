@@ -36,8 +36,24 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         .watchSingle(distinct: true);
   }
 
-  /// Search series by [query]. Optionally filter by [libraryId]
-  Future<List<SeriesData>> searchSeries(
+  /// Search series by [query].
+  Future<List<SeriesData>> searchSeries(String query) async {
+    final q = managers.series
+        .filter((f) => f.libraryId.includeInSearch(true))
+        .filter(
+          (f) =>
+              f.name.contains(query) |
+              f.sortName.contains(query) |
+              f.localizedName.contains(query) |
+              f.originalName.contains(query),
+        )
+        .orderBy((o) => o.sortName.asc());
+
+    return await q.get();
+  }
+
+  /// Filter series by [query]. Optionally filter by [libraryId]
+  Future<List<SeriesData>> filterSeries(
     String query, {
     int? libraryId,
     int? collectionId,
@@ -46,24 +62,22 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     bool orderByRecentlyUpdated = false,
     bool ascending = true,
   }) async {
-    final q =
-        select(series).join([
-          innerJoin(libraries, libraries.id.equalsExp(series.libraryId)),
-        ])..where(
-          libraries.includeInSearch.equals(true) &
-              (series.name.contains(query) |
-                  series.sortName.contains(query) |
-                  series.localizedName.contains(query) |
-                  series.originalName.contains(query)),
-        );
+    final q = select(series)
+      ..where(
+        (table) =>
+            table.name.contains(query) |
+            table.sortName.contains(query) |
+            table.localizedName.contains(query) |
+            table.originalName.contains(query),
+      );
 
     if (libraryId != null) {
-      q.where(series.libraryId.equals(libraryId));
+      q.where((table) => table.libraryId.equals(libraryId));
     }
 
     if (collectionId != null) {
       q.where(
-        series.id.isInQuery(
+        (table) => table.id.isInQuery(
           selectOnly(db.collectionSeries)
             ..addColumns([db.collectionSeries.seriesId])
             ..where(db.collectionSeries.collectionId.equals(collectionId)),
@@ -73,25 +87,25 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
 
     q.orderBy([
       if (orderByName)
-        OrderingTerm(
+        (table) => OrderingTerm(
           expression: series.sortName,
           mode: ascending ? .asc : .desc,
         ),
 
       if (orderByRecentlyAdded)
-        OrderingTerm(
+        (table) => OrderingTerm(
           expression: series.created,
           mode: ascending ? .asc : .desc,
         ),
 
       if (orderByRecentlyUpdated)
-        OrderingTerm(
+        (table) => OrderingTerm(
           expression: series.lastChapterAdded,
           mode: ascending ? .asc : .desc,
         ),
     ]);
 
-    return await q.map((result) => result.readTable(series)).get();
+    return await q.get();
   }
 
   Stream<SeriesData> watchSeriesForChapter(int chapterId) {

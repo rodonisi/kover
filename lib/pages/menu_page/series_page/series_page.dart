@@ -103,7 +103,7 @@ class SeriesPage extends HookConsumerWidget {
       ),
     );
     final query = ref.watch(
-      searchSeriesProvider(
+      filterSeriesProvider(
         controller.text,
         libraryId: libraryId,
         collectionId: collectionId,
