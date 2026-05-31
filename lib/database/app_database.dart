@@ -19,6 +19,7 @@ import 'package:kover/database/tables/collections.dart';
 import 'package:kover/database/tables/download.dart';
 import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/progress.dart';
+import 'package:kover/database/tables/reading_lists.dart';
 import 'package:kover/database/tables/riverpod_storage.dart';
 import 'package:kover/database/tables/series.dart';
 import 'package:kover/database/tables/series_metadata.dart';
@@ -58,6 +59,9 @@ part 'app_database.g.dart';
     Collections,
     CollectionSeries,
     CollectionCovers,
+    ReadingLists,
+    ReadingListChapters,
+    ReadingListCovers,
   ],
   daos: [
     StorageDao,
@@ -80,7 +84,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   /// Clear all content data from the database. Does not clear app state data (e.g. credentials, settings).
   /// Useful e.g. when switching user.
@@ -150,6 +154,11 @@ class AppDatabase extends _$AppDatabase {
               ],
             ),
           );
+        },
+        from4To5: (m, schema) async {
+          await m.createTable(schema.readingLists);
+          await m.createTable(schema.readingListChapters);
+          await m.createTable(schema.readingListCovers);
         },
       ),
       beforeOpen: (details) async {
