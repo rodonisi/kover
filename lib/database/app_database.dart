@@ -7,6 +7,7 @@ import 'package:kover/database/dao/collections_dao.dart';
 import 'package:kover/database/dao/download_dao.dart';
 import 'package:kover/database/dao/libraries_dao.dart';
 import 'package:kover/database/dao/reader_dao.dart';
+import 'package:kover/database/dao/reading_lists_dao.dart';
 import 'package:kover/database/dao/riverpod_dao.dart';
 import 'package:kover/database/dao/series_dao.dart';
 import 'package:kover/database/dao/series_metadata_dao.dart';
@@ -76,6 +77,7 @@ part 'app_database.g.dart';
     RiverpodDao,
     ServerSettingsDao,
     CollectionsDao,
+    ReadingListsDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -102,6 +104,10 @@ class AppDatabase extends _$AppDatabase {
       await delete(people).go();
       await delete(genres).go();
       await delete(tags).go();
+      await delete(collections).go();
+      await delete(collectionSeries).go();
+      await delete(readingLists).go();
+      await delete(readingListChapters).go();
       await clearDownloads();
       await clearCovers();
     });
@@ -120,6 +126,8 @@ class AppDatabase extends _$AppDatabase {
       await delete(chapterCovers).go();
       await delete(volumeCovers).go();
       await delete(seriesCovers).go();
+      await delete(collectionCovers).go();
+      await delete(readingListCovers).go();
     });
   }
 
