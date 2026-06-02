@@ -4,6 +4,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/image_model.dart';
+import 'package:kover/pages/reader/image_reader/vertical_reader_gesture_controller.dart';
+import 'package:kover/pages/reader/image_reader/zoomable_vertical_scroll_view.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/image_vertical_reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
@@ -99,10 +101,15 @@ class VerticalContinuousReader extends HookConsumerWidget {
         return HookConsumer(
           builder: (context, ref, _) {
             final scrollController = useScrollController();
+            final gestureController = useMemoized(
+              VerticalReaderGestureController.new,
+            );
             final observerController = useSliverObserverController(
               controller: scrollController,
               initialIndex: nav.currentPage,
             );
+
+            useEffect(() => gestureController.dispose, [gestureController]);
 
             /// Emit last-page progress when scrolled to bottom edge.
             void handleScrollEnd() {
@@ -164,45 +171,59 @@ class VerticalContinuousReader extends HookConsumerWidget {
                     currentPage: nav.currentPage,
                   ),
                 ),
-                SliverViewObserver(
-                  controller: observerController,
-                  onObserve: (ObserveModel model) {
-                    if (model is! ListViewObserveModel) return;
+                ZoomableVerticalScrollView(
+                  scrollController: scrollController,
+                  gestureController: gestureController,
+                  child: SliverViewObserver(
+                    controller: observerController,
+                    onObserve: (ObserveModel model) {
+                      if (model is! ListViewObserveModel) return;
 
-                    final firstVisibleIndex = model.firstChild?.index;
-                    if (firstVisibleIndex == null) return;
+                      final firstVisibleIndex = model.firstChild?.index;
+                      if (firstVisibleIndex == null) return;
 
-                    ref
-                        .read(navProvider.notifier)
-                        .jumpToPage(firstVisibleIndex, fromObserver: true);
-                  },
-                  child: CustomScrollView(
-                    controller: scrollController,
-                    scrollCacheExtent: const ScrollCacheExtent.viewport(5),
-                    scrollBehavior: ScrollConfiguration.of(context).copyWith(
-                      scrollbars: false,
-                    ),
-                    slivers: [
-                      SliverSafeArea(
-                        sliver: SliverPadding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: settings.verticalReaderPadding,
-                          ),
-                          sliver: SliverList.separated(
-                            itemCount: nav.totalPages,
-
-                            itemBuilder: (context, index) =>
-                                _VerticalReaderItem(
-                                  chapterId: chapterId,
-                                  seriesId: seriesId,
-                                  page: index,
-                                ),
-                            separatorBuilder: (context, index) =>
-                                SizedBox(height: settings.verticalReaderGap),
-                          ),
-                        ),
+                      ref
+                          .read(navProvider.notifier)
+                          .jumpToPage(firstVisibleIndex, fromObserver: true);
+                    },
+                    child: CustomScrollView(
+                      controller: scrollController,
+                      scrollCacheExtent: const ScrollCacheExtent.viewport(5),
+                      scrollBehavior: ScrollConfiguration.of(context).copyWith(
+                        scrollbars: false,
                       ),
-                    ],
+                      slivers: [
+                        AnimatedBuilder(
+                          animation: gestureController,
+                          builder: (context, _) {
+                            return SliverSafeArea(
+                              sliver: SliverPadding(
+                                padding: EdgeInsets.fromLTRB(
+                                  settings.verticalReaderPadding,
+                                  gestureController.verticalScrollPadding,
+                                  settings.verticalReaderPadding,
+                                  gestureController.verticalScrollPadding,
+                                ),
+                                sliver: SliverList.separated(
+                                  itemCount: nav.totalPages,
+
+                                  itemBuilder: (context, index) =>
+                                      _VerticalReaderItem(
+                                        chapterId: chapterId,
+                                        seriesId: seriesId,
+                                        page: index,
+                                      ),
+                                  separatorBuilder: (context, index) =>
+                                      SizedBox(
+                                        height: settings.verticalReaderGap,
+                                      ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
