@@ -11,6 +11,7 @@ import 'package:kover/riverpod/repository/chapters_repository.dart';
 import 'package:kover/riverpod/repository/collections_repository.dart';
 import 'package:kover/riverpod/repository/libraries_repository.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
+import 'package:kover/riverpod/repository/reading_lists_repository.dart';
 import 'package:kover/riverpod/repository/secure_storage.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
 import 'package:kover/riverpod/repository/server_settings_repository.dart';
@@ -21,6 +22,7 @@ import 'package:kover/sync/chapter_sync_operations.dart';
 import 'package:kover/sync/collection_sync_operations.dart';
 import 'package:kover/sync/libraries_sync_operations.dart';
 import 'package:kover/sync/reader_sync_operations.dart';
+import 'package:kover/sync/reading_list_sync_operations.dart';
 import 'package:kover/sync/series_sync_operations.dart';
 import 'package:kover/sync/server_settings_sync_operations.dart';
 import 'package:kover/sync/sync_engine.dart';
@@ -89,6 +91,10 @@ void callbackDispatcher() {
         db: db,
         client: CollectionSyncOperations(client: client, apiKey: apiKey),
       );
+      final readingListsRepo = ReadingListsRepository(
+        db: db,
+        client: ReadingListSyncOperations(client: client, apiKey: apiKey),
+      );
 
       final engine = SyncEngine(
         seriesRepo: seriesRepo,
@@ -100,6 +106,7 @@ void callbackDispatcher() {
         chaptersRepo: chaptersRepo,
         serverSettingsRepo: serverSettingsRepo,
         collectionsRepo: collectionsRepo,
+        readingListsRepo: readingListsRepo,
       );
 
       await engine.syncAllSeries();

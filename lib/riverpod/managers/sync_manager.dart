@@ -8,6 +8,7 @@ import 'package:kover/riverpod/repository/chapters_repository.dart';
 import 'package:kover/riverpod/repository/collections_repository.dart';
 import 'package:kover/riverpod/repository/libraries_repository.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
+import 'package:kover/riverpod/repository/reading_lists_repository.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
 import 'package:kover/riverpod/repository/server_settings_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
@@ -32,6 +33,7 @@ sealed class SyncPhase with _$SyncPhase {
   const factory SyncPhase.progress() = Progress;
   const factory SyncPhase.covers() = Covers;
   const factory SyncPhase.collections() = Collections;
+  const factory SyncPhase.readingLists() = ReadingLists;
   const factory SyncPhase.refreshServerSettings() = RefreshServerSettings;
   const factory SyncPhase.refreshMetadata({required int seriesId}) =
       RefreshMetadata;
@@ -72,6 +74,7 @@ class SyncManager extends _$SyncManager {
     final chaptersRepo = ref.read(chaptersRepositoryProvider);
     final serverSettingsRepo = ref.read(serverSettingsRepositoryProvider);
     final collectionsRepo = ref.read(collectionsRepositoryProvider);
+    final readingListsRepo = ref.read(readingListsRepositoryProvider);
 
     return SyncEngine(
       seriesRepo: seriesRepo,
@@ -83,6 +86,7 @@ class SyncManager extends _$SyncManager {
       chaptersRepo: chaptersRepo,
       serverSettingsRepo: serverSettingsRepo,
       collectionsRepo: collectionsRepo,
+      readingListsRepo: readingListsRepo,
     );
   }
 
@@ -103,6 +107,8 @@ class SyncManager extends _$SyncManager {
         () async => await _engine.syncCovers(),
     collections: () =>
         () async => await _engine.syncCollections(),
+    readingLists: () =>
+        () async => await _engine.syncReadingLists(),
     refreshServerSettings: () =>
         () async => await _engine.refreshServerSettings(),
     refreshMetadata: (seriesId) =>
@@ -136,6 +142,7 @@ class SyncManager extends _$SyncManager {
       const .progress(),
       const .refreshServerSettings(),
       const .collections(),
+      const .readingLists(),
       if (settings.downloadCovers) const .covers(),
     });
   }
@@ -148,6 +155,11 @@ class SyncManager extends _$SyncManager {
   /// Sync collections
   void syncCollections() {
     _enqueuePhases({const .collections()});
+  }
+
+  /// Sync reading lists
+  void syncReadingLists() {
+    _enqueuePhases({const .readingLists()});
   }
 
   /// Sync progress

@@ -3,6 +3,7 @@ import 'package:kover/riverpod/repository/chapters_repository.dart';
 import 'package:kover/riverpod/repository/collections_repository.dart';
 import 'package:kover/riverpod/repository/libraries_repository.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
+import 'package:kover/riverpod/repository/reading_lists_repository.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
 import 'package:kover/riverpod/repository/server_settings_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
@@ -18,6 +19,7 @@ class SyncEngine {
   final ChaptersRepository chaptersRepo;
   final ServerSettingsRepository serverSettingsRepo;
   final CollectionsRepository collectionsRepo;
+  final ReadingListsRepository readingListsRepo;
 
   const SyncEngine({
     required this.seriesRepo,
@@ -29,6 +31,7 @@ class SyncEngine {
     required this.chaptersRepo,
     required this.serverSettingsRepo,
     required this.collectionsRepo,
+    required this.readingListsRepo,
   });
 
   Future<void> syncAllSeries() async {
@@ -63,12 +66,17 @@ class SyncEngine {
     await collectionsRepo.refreshCollections();
   }
 
+  Future<void> syncReadingLists() async {
+    await readingListsRepo.refreshReadingLists();
+  }
+
   Future<void> syncCovers() async {
     await Future.wait([
       seriesRepo.fetchMissingCovers(),
       volumesRepo.fetchMissingCovers(),
       chaptersRepo.fetchMissingCovers(),
       collectionsRepo.fetchMissingCovers(),
+      readingListsRepo.fetchMissingCovers(),
     ]);
   }
 

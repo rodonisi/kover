@@ -1,0 +1,90 @@
+import 'package:drift/drift.dart';
+import 'package:kover/api/openapi.swagger.dart';
+import 'package:kover/database/app_database.dart';
+import 'package:kover/mapping/dto/reading_list_dto_mappings.dart';
+import 'package:kover/utils/logging.dart';
+
+class ReadingListSyncOperations {
+  final Openapi _client;
+  final String _apiKey;
+
+  const ReadingListSyncOperations({
+    required this._client,
+    required this._apiKey,
+  });
+
+  /// Fetch all collections
+  Future<Iterable<ReadingListsCompanion>> getReadingLists() async {
+    final res = await _client.apiReadingListAllPost(
+      body: const ReadingListFilterDto(
+        id: 0,
+        combination: .and,
+        entityType: .readinglist,
+        limitTo: 0,
+        sortOptions: ReadingListSortOptionDto(
+          sortField: .title,
+          isAscending: true,
+        ),
+        statements: [
+          ReadingListFilterStatementDto(
+            comparison: .equal,
+            field: .title,
+            value: '',
+          ),
+        ],
+      ),
+    );
+
+    if (!res.isSuccessful) {
+      throw Exception('Failed to fetch reading lists: ${res.error}');
+    }
+
+    return res.body?.map(
+          (readingList) => readingList.toReadingListCompanion(),
+        ) ??
+        [];
+  }
+
+  /// Fetch all series in collection [readingListId]
+  Future<Iterable<ReadingListChaptersCompanion>> getReadingListChapters(
+    int readingListId,
+  ) async {
+    final res = await _client.apiReadingListItemsGet(
+      readingListId: readingListId,
+    );
+
+    if (!res.isSuccessful) {
+      throw Exception('Failed to fetch collection series: ${res.error}');
+    }
+
+    return res.body?.map(
+          (item) => ReadingListChaptersCompanion(
+            readingListId: Value(readingListId),
+            chapterId: Value(item.chapterId!),
+          ),
+        ) ??
+        [];
+  }
+
+  /// Fetch collection cover for [readingListId]
+  Future<ReadingListCoversCompanion?> getReadingListCover(
+    int readingListId,
+  ) async {
+    final res = await _client.apiImageReadinglistCoverGet(
+      readingListId: readingListId,
+      apiKey: _apiKey,
+    );
+
+    if (!res.isSuccessful) {
+      log.e(
+        'Failed to fetch reading list cover for $readingListId: ${res.error}',
+      );
+      return null;
+    }
+
+    return ReadingListCoversCompanion.insert(
+      readingListId: Value(readingListId),
+      image: res.bodyBytes,
+    );
+  }
+}
