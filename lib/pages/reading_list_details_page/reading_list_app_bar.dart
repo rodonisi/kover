@@ -25,6 +25,9 @@ class ReadingListAppBar extends HookConsumerWidget {
         (value) => value.whenData((chapters) => chapters.length),
       ),
     );
+    final progress = ref.watch(
+      readingListProgressProvider(readingListId: readingListId),
+    );
 
     return AsyncSliver(
       asyncValue: readingList,
@@ -33,7 +36,7 @@ class ReadingListAppBar extends HookConsumerWidget {
           title: readingList.title,
           primaryColor: readingList.primaryColor,
           secondaryColor: readingList.secondaryColor,
-          progress: 0,
+          progress: progress.value,
           cover: ReadingListCoverImage(
             readingListId: readingListId,
             usePlaceholder: false,

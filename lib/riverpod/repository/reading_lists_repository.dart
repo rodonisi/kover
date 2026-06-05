@@ -57,6 +57,12 @@ class ReadingListsRepository {
         );
   }
 
+  Stream<double> watchReadingListProgress({required int readingListId}) {
+    return _db.readingListsDao
+        .readingListProgress(readingListId: readingListId)
+        .watchSingle();
+  }
+
   Stream<ImageModel?> watchReadingListCover({required int readingListId}) {
     return _db.readingListsDao
         .readingListCover(readingListId: readingListId)

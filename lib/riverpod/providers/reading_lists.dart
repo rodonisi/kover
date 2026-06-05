@@ -30,6 +30,14 @@ Stream<List<ChapterModel>> readingListChapters(
 }
 
 @riverpod
+Stream<double> readingListProgress(Ref ref, {required int readingListId}) {
+  final readingListsRepository = ref.watch(readingListsRepositoryProvider);
+  return readingListsRepository.watchReadingListProgress(
+    readingListId: readingListId,
+  );
+}
+
+@riverpod
 Stream<ImageModel?> readingListCover(Ref ref, {required int readingListId}) {
   final readingListsRepository = ref.watch(readingListsRepositoryProvider);
   return readingListsRepository.watchReadingListCover(

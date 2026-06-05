@@ -1,10 +1,18 @@
 import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
+import 'package:kover/database/tables/progress.dart';
 import 'package:kover/database/tables/reading_lists.dart';
 
 part 'reading_lists_dao.g.dart';
 
-@DriftAccessor(tables: [ReadingLists, ReadingListsChapters, ReadingListCovers])
+@DriftAccessor(
+  tables: [
+    ReadingLists,
+    ReadingListsChapters,
+    ReadingListCovers,
+    ReadingProgress,
+  ],
+)
 class ReadingListsDao extends DatabaseAccessor<AppDatabase>
     with _$ReadingListsDaoMixin {
   ReadingListsDao(super.attachedDatabase);
@@ -47,6 +55,37 @@ class ReadingListsDao extends DatabaseAccessor<AppDatabase>
           ]);
 
     return q.map((row) => row.readTable(chapters));
+  }
+
+  /// Get progress for a reading list by [readingListId].
+  SingleSelectable<double> readingListProgress({
+    required int readingListId,
+  }) {
+    final totalPagesSum = chapters.pages.sum();
+    final totalPagesReadSum = readingProgress.pagesRead.sum();
+
+    final progressExpression =
+        (totalPagesReadSum.cast<double>() / totalPagesSum.cast<double>());
+
+    final query =
+        select(readingListsChapters).join([
+            innerJoin(
+              chapters,
+              chapters.id.equalsExp(readingListsChapters.chapterId),
+            ),
+            leftOuterJoin(
+              readingProgress,
+              readingProgress.chapterId.equalsExp(chapters.id),
+            ),
+          ])
+          ..where(readingListsChapters.readingListId.equals(readingListId))
+          ..addColumns([
+            progressExpression,
+          ]);
+
+    return query.map((row) {
+      return row.read(progressExpression) ?? 0.0;
+    });
   }
 
   /// Get the cover for a reading list by [readingListId].
