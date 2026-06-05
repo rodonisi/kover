@@ -198,11 +198,10 @@ class VerticalContinuousReader extends HookConsumerWidget {
                           builder: (context, _) {
                             return SliverSafeArea(
                               sliver: SliverPadding(
-                                padding: EdgeInsets.fromLTRB(
-                                  settings.verticalReaderPadding,
-                                  gestureController.verticalScrollPadding,
-                                  settings.verticalReaderPadding,
-                                  gestureController.verticalScrollPadding,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: settings.verticalReaderPadding,
+                                  vertical:
+                                      gestureController.verticalScrollPadding,
                                 ),
                                 sliver: SliverList.separated(
                                   itemCount: nav.totalPages,

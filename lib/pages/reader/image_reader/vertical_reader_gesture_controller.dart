@@ -3,18 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class VerticalReaderGestureController extends ChangeNotifier {
-  static const double defaultMinScale = 1.0;
-  static const double defaultMaxScale = 4.0;
+  static const double _minScale = 1.0;
+  static const double _maxScale = 4.0;
 
-  final double minScale;
-  final double maxScale;
-
-  VerticalReaderGestureController({
-    this.minScale = defaultMinScale,
-    this.maxScale = defaultMaxScale,
-  }) : assert(minScale > 0),
-       assert(maxScale >= minScale),
-       _scale = minScale;
+  VerticalReaderGestureController() : _scale = _minScale;
 
   Size _viewportSize = Size.zero;
   double _scale;
@@ -23,7 +15,7 @@ class VerticalReaderGestureController extends ChangeNotifier {
   double get scale => _scale;
   Offset get translation => Offset(_horizontalTranslation, 0.0);
   double get verticalScrollPadding =>
-      _viewportSize.height * (_scale - minScale) / (2 * _scale);
+      _viewportSize.height * (_scale - _minScale) / (2 * _scale);
 
   void configureViewport(Size viewportSize) {
     if (_viewportSize == viewportSize) return;
@@ -58,7 +50,7 @@ class VerticalReaderGestureController extends ChangeNotifier {
     }
 
     final nextScale = (_scale * scaleFactor)
-        .clamp(minScale, maxScale)
+        .clamp(_minScale, _maxScale)
         .toDouble();
     final appliedFactor = nextScale / _scale;
     final previousFocalPoint = focalPoint - focalPointDelta;
