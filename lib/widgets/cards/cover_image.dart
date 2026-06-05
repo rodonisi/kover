@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/riverpod/providers/chapter.dart';
 import 'package:kover/riverpod/providers/collections.dart';
+import 'package:kover/riverpod/providers/reading_lists.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/riverpod/providers/volume.dart';
 import 'package:kover/widgets/util/async_value.dart';
@@ -134,6 +135,43 @@ class CollectionCoverImage extends ConsumerWidget {
     return Async(
       asyncValue: ref.watch(
         collectionCoverProvider(collectionId: collectionId),
+      ),
+      data: (imageData) => ClipRRect(
+        child: PlaceholderCoverImage(
+          image: imageData,
+          fit: fit,
+          height: height,
+          width: width,
+          usePlaceholder: usePlaceholder,
+        ),
+      ),
+    );
+  }
+}
+
+class ReadingListCoverImage extends ConsumerWidget {
+  final int readingListId;
+  final double? width;
+  final double? height;
+  final bool usePlaceholder;
+  final BoxFit fit;
+  final BorderRadius? borderRadius;
+
+  const ReadingListCoverImage({
+    super.key,
+    required this.readingListId,
+    this.width,
+    this.height,
+    this.usePlaceholder = true,
+    this.fit = BoxFit.cover,
+    this.borderRadius,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Async(
+      asyncValue: ref.watch(
+        readingListCoverProvider(readingListId: readingListId),
       ),
       data: (imageData) => ClipRRect(
         child: PlaceholderCoverImage(

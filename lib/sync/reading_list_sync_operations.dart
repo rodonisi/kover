@@ -46,7 +46,7 @@ class ReadingListSyncOperations {
   }
 
   /// Fetch all series in collection [readingListId]
-  Future<Iterable<ReadingListChaptersCompanion>> getReadingListChapters(
+  Future<Iterable<ReadingListsChaptersCompanion>> getReadingListChapters(
     int readingListId,
   ) async {
     final res = await _client.apiReadingListItemsGet(
@@ -58,9 +58,10 @@ class ReadingListSyncOperations {
     }
 
     return res.body?.map(
-          (item) => ReadingListChaptersCompanion(
-            readingListId: Value(readingListId),
-            chapterId: Value(item.chapterId!),
+          (item) => ReadingListsChaptersCompanion.insert(
+            readingListId: readingListId,
+            chapterId: item.chapterId!,
+            order: item.order!,
           ),
         ) ??
         [];

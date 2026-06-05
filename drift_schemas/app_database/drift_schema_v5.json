@@ -2408,7 +2408,7 @@
       ],
       "type": "table",
       "data": {
-        "name": "reading_list_chapters",
+        "name": "reading_lists_chapters",
         "was_declared_in_moor": false,
         "columns": [
           {
@@ -2462,6 +2462,16 @@
                 }
               }
             ]
+          },
+          {
+            "name": "order",
+            "getter_name": "order",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
           }
         ],
         "is_virtual": false,
@@ -2747,11 +2757,11 @@
       ]
     },
     {
-      "name": "reading_list_chapters",
+      "name": "reading_lists_chapters",
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"reading_list_chapters\" (\"reading_list_id\" INTEGER NOT NULL REFERENCES reading_lists (id) ON DELETE CASCADE, \"chapter_id\" INTEGER NOT NULL REFERENCES chapters (id) ON DELETE CASCADE, PRIMARY KEY (\"reading_list_id\", \"chapter_id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"reading_lists_chapters\" (\"reading_list_id\" INTEGER NOT NULL REFERENCES reading_lists (id) ON DELETE CASCADE, \"chapter_id\" INTEGER NOT NULL REFERENCES chapters (id) ON DELETE CASCADE, \"order\" INTEGER NOT NULL, PRIMARY KEY (\"reading_list_id\", \"chapter_id\"));"
         }
       ]
     },

@@ -1,4 +1,7 @@
 import 'package:kover/database/app_database.dart';
+import 'package:kover/models/chapter_model.dart';
+import 'package:kover/models/image_model.dart';
+import 'package:kover/models/reading_list_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
@@ -25,6 +28,58 @@ class ReadingListsRepository {
   final ReadingListSyncOperations _client;
 
   ReadingListsRepository({required this._db, required this._client});
+
+  Stream<List<ReadingListModel>> watchReadingLists() {
+    return _db.readingListsDao.allReadingLists().watch().map(
+      (lists) => lists
+          .map((list) => ReadingListModel.fromDatabaseModel(list))
+          .toList(),
+    );
+  }
+
+  Stream<ReadingListModel> watchReadingList({required int readingListId}) {
+    return _db.readingListsDao
+        .readingList(readingListId)
+        .watchSingle()
+        .map(
+          (entry) => ReadingListModel.fromDatabaseModel(entry),
+        );
+  }
+
+  Stream<List<ChapterModel>> watchReadingListChapters({
+    required int readingListId,
+  }) {
+    return _db.readingListsDao
+        .readingListChapters(readingListId: readingListId)
+        .watch()
+        .map(
+          (chapters) => chapters.map(ChapterModel.fromDatabaseModel).toList(),
+        );
+  }
+
+  Stream<ImageModel?> watchReadingListCover({required int readingListId}) {
+    return _db.readingListsDao
+        .readingListCover(readingListId: readingListId)
+        .watchSingleOrNull()
+        .asyncMap((cover) async {
+          if (cover != null) {
+            return ImageModel(data: cover.image);
+          }
+
+          try {
+            final remoteCover = await _client.getReadingListCover(
+              readingListId,
+            );
+            if (remoteCover != null) {
+              return ImageModel(data: remoteCover.image.value);
+            }
+          } catch (_) {
+            return null;
+          }
+
+          return null;
+        });
+  }
 
   /// Refresh all reading lists.
   Future<void> refreshReadingLists() async {

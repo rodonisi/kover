@@ -2209,7 +2209,7 @@ final class Schema5 extends i0.VersionedSchema {
     collectionSeries,
     collectionCovers,
     readingLists,
-    readingListChapters,
+    readingListsChapters,
     readingListCovers,
   ];
   late final Shape0 riverpodStorage = Shape0(
@@ -2588,13 +2588,13 @@ final class Schema5 extends i0.VersionedSchema {
     ),
     alias: null,
   );
-  late final Shape24 readingListChapters = Shape24(
+  late final Shape24 readingListsChapters = Shape24(
     source: i0.VersionedTable(
-      entityName: 'reading_list_chapters',
+      entityName: 'reading_lists_chapters',
       withoutRowId: false,
       isStrict: false,
       tableConstraints: ['PRIMARY KEY(reading_list_id, chapter_id)'],
-      columns: [_column_83, _column_56],
+      columns: [_column_83, _column_56, _column_84],
       attachedDatabase: database,
     ),
     alias: null,
@@ -2651,6 +2651,8 @@ class Shape24 extends i0.VersionedTable {
       columnsByName['reading_list_id']! as i1.GeneratedColumn<int>;
   i1.GeneratedColumn<int> get chapterId =>
       columnsByName['chapter_id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get order =>
+      columnsByName['order']! as i1.GeneratedColumn<int>;
 }
 
 i1.GeneratedColumn<int> _column_83(String aliasedName) =>
@@ -2661,6 +2663,14 @@ i1.GeneratedColumn<int> _column_83(String aliasedName) =>
       type: i1.DriftSqlType.int,
       $customConstraints:
           'NOT NULL REFERENCES reading_lists(id)ON DELETE CASCADE',
+    );
+i1.GeneratedColumn<int> _column_84(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'order',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL',
     );
 
 class Shape25 extends i0.VersionedTable {

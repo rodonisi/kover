@@ -4,10 +4,59 @@ import 'package:kover/database/tables/reading_lists.dart';
 
 part 'reading_lists_dao.g.dart';
 
-@DriftAccessor(tables: [ReadingLists, ReadingListChapters, ReadingListCovers])
+@DriftAccessor(tables: [ReadingLists, ReadingListsChapters, ReadingListCovers])
 class ReadingListsDao extends DatabaseAccessor<AppDatabase>
     with _$ReadingListsDaoMixin {
   ReadingListsDao(super.attachedDatabase);
+
+  /// Get a single reading list by [readingListId].
+  SingleSelectable<ReadingList> readingList(int readingListId) {
+    return managers.readingLists.filter((f) => f.id.equals(readingListId));
+  }
+
+  /// Get all reading lists, ordered by title.
+  Selectable<ReadingList> allReadingLists() {
+    return managers.readingLists.orderBy((o) => o.title.asc());
+  }
+
+  /// Get all chapters for a reading list by [readingListId].
+  Selectable<Chapter> readingListChapters({
+    required int readingListId,
+  }) {
+    final q =
+        select(readingListsChapters).join([
+            innerJoin(
+              chapters,
+              chapters.id.equalsExp(readingListsChapters.chapterId),
+            ),
+          ])
+          ..where(readingListsChapters.readingListId.equals(readingListId))
+          ..orderBy([
+            OrderingTerm(
+              expression: readingListsChapters.order,
+              mode: OrderingMode.asc,
+            ),
+            OrderingTerm(
+              expression: chapters.sortOrder,
+              mode: OrderingMode.asc,
+            ),
+            OrderingTerm(
+              expression: chapters.title,
+              mode: OrderingMode.asc,
+            ),
+          ]);
+
+    return q.map((row) => row.readTable(chapters));
+  }
+
+  /// Get the cover for a reading list by [readingListId].
+  SingleOrNullSelectable<ReadingListCover> readingListCover({
+    required int readingListId,
+  }) {
+    return managers.readingListCovers.filter(
+      (f) => f.readingListId.id(readingListId),
+    );
+  }
 
   /// Upsert a batch of reading lists. Removes all entries not present in the batch.
   Future<void> upsertReadingListsBatch(
@@ -31,11 +80,11 @@ class ReadingListsDao extends DatabaseAccessor<AppDatabase>
 
   /// Upsert a batch of reading list chapters.
   Future<void> upsertReadingListChaptersBatch(
-    Iterable<ReadingListChaptersCompanion> entries,
+    Iterable<ReadingListsChaptersCompanion> entries,
   ) async {
     await batch((batch) {
       batch.insertAllOnConflictUpdate(
-        readingListChapters,
+        readingListsChapters,
         entries.toList(),
       );
     });

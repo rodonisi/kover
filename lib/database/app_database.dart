@@ -61,7 +61,7 @@ part 'app_database.g.dart';
     CollectionSeries,
     CollectionCovers,
     ReadingLists,
-    ReadingListChapters,
+    ReadingListsChapters,
     ReadingListCovers,
   ],
   daos: [
@@ -107,7 +107,7 @@ class AppDatabase extends _$AppDatabase {
       await delete(collections).go();
       await delete(collectionSeries).go();
       await delete(readingLists).go();
-      await delete(readingListChapters).go();
+      await delete(readingListsChapters).go();
       await clearDownloads();
       await clearCovers();
     });
@@ -165,7 +165,7 @@ class AppDatabase extends _$AppDatabase {
         },
         from4To5: (m, schema) async {
           await m.createTable(schema.readingLists);
-          await m.createTable(schema.readingListChapters);
+          await m.createTable(schema.readingListsChapters);
           await m.createTable(schema.readingListCovers);
         },
       ),

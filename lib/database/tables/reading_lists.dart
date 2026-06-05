@@ -19,7 +19,7 @@ class ReadingLists extends Table {
   Set<Column<Object>>? get primaryKey => {id};
 }
 
-class ReadingListChapters extends Table {
+class ReadingListsChapters extends Table {
   IntColumn get readingListId => integer().references(
     ReadingLists,
     #id,
@@ -30,6 +30,7 @@ class ReadingListChapters extends Table {
     #id,
     onDelete: KeyAction.cascade,
   )();
+  IntColumn get order => integer()();
 
   @override
   Set<Column<Object>>? get primaryKey => {readingListId, chapterId};

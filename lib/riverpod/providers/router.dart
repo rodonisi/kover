@@ -3,8 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:kover/pages/download_queue/download_queue_page.dart';
 import 'package:kover/pages/home/home_page.dart';
 import 'package:kover/pages/menu_page/menu_page.dart';
-import 'package:kover/pages/menu_page/series_page/collections_page.dart';
-import 'package:kover/pages/menu_page/series_page/series_page.dart';
+import 'package:kover/pages/collections_page/collections_page.dart';
+import 'package:kover/pages/reading_list_details_page/reading_lists_details_page.dart';
+import 'package:kover/pages/reading_lists_page/reading_lists_page.dart';
+import 'package:kover/pages/series_page/series_page.dart';
 import 'package:kover/pages/reader/reader_page.dart';
 import 'package:kover/pages/series_detail_page/chapter_detail_page/chapter_detail_page.dart';
 import 'package:kover/pages/series_detail_page/chapters_page/chapters_page.dart';
@@ -79,12 +81,22 @@ GoRouter router(Ref ref) {
             ),
             TypedGoRoute<CollectionsRoute>(
               path: 'collections',
+              routes: [
+                TypedGoRoute<CollectionSeriesRoute>(
+                  path: ':collectionId',
+                ),
+              ],
+            ),
+            TypedGoRoute<ReadingListsRoute>(
+              path: 'reading-lists',
+              routes: [
+                TypedGoRoute<ReadingListDetailsRoute>(
+                  path: ':readingListId',
+                ),
+              ],
             ),
             TypedGoRoute<SeriesRoute>(
               path: 'library/:libraryId',
-            ),
-            TypedGoRoute<CollectionSeriesRoute>(
-              path: 'collection/:collectionId',
             ),
             TypedGoRoute<DownloadQueueRoute>(
               path: 'download-queue',
@@ -169,6 +181,25 @@ class CollectionSeriesRoute extends GoRouteData with $CollectionSeriesRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       CollectionSeriesPage(collectionId: collectionId);
+}
+
+class ReadingListsRoute extends GoRouteData with $ReadingListsRoute {
+  const ReadingListsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const ReadingListsPage();
+}
+
+class ReadingListDetailsRoute extends GoRouteData
+    with $ReadingListDetailsRoute {
+  final int readingListId;
+
+  const ReadingListDetailsRoute({required this.readingListId});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      ReadingListsDetailsPage(readingListId: readingListId);
 }
 
 class SeriesRoute extends GoRouteData with $SeriesRoute {

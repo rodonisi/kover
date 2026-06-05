@@ -8496,12 +8496,12 @@ class ReadingListsCompanion extends UpdateCompanion<ReadingListsData> {
   }
 }
 
-class ReadingListChapters extends Table
-    with TableInfo<ReadingListChapters, ReadingListChaptersData> {
+class ReadingListsChapters extends Table
+    with TableInfo<ReadingListsChapters, ReadingListsChaptersData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  ReadingListChapters(this.attachedDatabase, [this._alias]);
+  ReadingListsChapters(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<int> readingListId = GeneratedColumn<int>(
     'reading_list_id',
     aliasedName,
@@ -8519,22 +8519,30 @@ class ReadingListChapters extends Table
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL REFERENCES chapters(id)ON DELETE CASCADE',
   );
+  late final GeneratedColumn<int> order = GeneratedColumn<int>(
+    'order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   @override
-  List<GeneratedColumn> get $columns => [readingListId, chapterId];
+  List<GeneratedColumn> get $columns => [readingListId, chapterId, order];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'reading_list_chapters';
+  static const String $name = 'reading_lists_chapters';
   @override
   Set<GeneratedColumn> get $primaryKey => {readingListId, chapterId};
   @override
-  ReadingListChaptersData map(
+  ReadingListsChaptersData map(
     Map<String, dynamic> data, {
     String? tablePrefix,
   }) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ReadingListChaptersData(
+    return ReadingListsChaptersData(
       readingListId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}reading_list_id'],
@@ -8543,12 +8551,16 @@ class ReadingListChapters extends Table
         DriftSqlType.int,
         data['${effectivePrefix}chapter_id'],
       )!,
+      order: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order'],
+      )!,
     );
   }
 
   @override
-  ReadingListChapters createAlias(String alias) {
-    return ReadingListChapters(attachedDatabase, alias);
+  ReadingListsChapters createAlias(String alias) {
+    return ReadingListsChapters(attachedDatabase, alias);
   }
 
   @override
@@ -8559,37 +8571,42 @@ class ReadingListChapters extends Table
   bool get dontWriteConstraints => true;
 }
 
-class ReadingListChaptersData extends DataClass
-    implements Insertable<ReadingListChaptersData> {
+class ReadingListsChaptersData extends DataClass
+    implements Insertable<ReadingListsChaptersData> {
   final int readingListId;
   final int chapterId;
-  const ReadingListChaptersData({
+  final int order;
+  const ReadingListsChaptersData({
     required this.readingListId,
     required this.chapterId,
+    required this.order,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['reading_list_id'] = Variable<int>(readingListId);
     map['chapter_id'] = Variable<int>(chapterId);
+    map['order'] = Variable<int>(order);
     return map;
   }
 
-  ReadingListChaptersCompanion toCompanion(bool nullToAbsent) {
-    return ReadingListChaptersCompanion(
+  ReadingListsChaptersCompanion toCompanion(bool nullToAbsent) {
+    return ReadingListsChaptersCompanion(
       readingListId: Value(readingListId),
       chapterId: Value(chapterId),
+      order: Value(order),
     );
   }
 
-  factory ReadingListChaptersData.fromJson(
+  factory ReadingListsChaptersData.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ReadingListChaptersData(
+    return ReadingListsChaptersData(
       readingListId: serializer.fromJson<int>(json['readingListId']),
       chapterId: serializer.fromJson<int>(json['chapterId']),
+      order: serializer.fromJson<int>(json['order']),
     );
   }
   @override
@@ -8598,78 +8615,96 @@ class ReadingListChaptersData extends DataClass
     return <String, dynamic>{
       'readingListId': serializer.toJson<int>(readingListId),
       'chapterId': serializer.toJson<int>(chapterId),
+      'order': serializer.toJson<int>(order),
     };
   }
 
-  ReadingListChaptersData copyWith({int? readingListId, int? chapterId}) =>
-      ReadingListChaptersData(
-        readingListId: readingListId ?? this.readingListId,
-        chapterId: chapterId ?? this.chapterId,
-      );
-  ReadingListChaptersData copyWithCompanion(ReadingListChaptersCompanion data) {
-    return ReadingListChaptersData(
+  ReadingListsChaptersData copyWith({
+    int? readingListId,
+    int? chapterId,
+    int? order,
+  }) => ReadingListsChaptersData(
+    readingListId: readingListId ?? this.readingListId,
+    chapterId: chapterId ?? this.chapterId,
+    order: order ?? this.order,
+  );
+  ReadingListsChaptersData copyWithCompanion(
+    ReadingListsChaptersCompanion data,
+  ) {
+    return ReadingListsChaptersData(
       readingListId: data.readingListId.present
           ? data.readingListId.value
           : this.readingListId,
       chapterId: data.chapterId.present ? data.chapterId.value : this.chapterId,
+      order: data.order.present ? data.order.value : this.order,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('ReadingListChaptersData(')
+    return (StringBuffer('ReadingListsChaptersData(')
           ..write('readingListId: $readingListId, ')
-          ..write('chapterId: $chapterId')
+          ..write('chapterId: $chapterId, ')
+          ..write('order: $order')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(readingListId, chapterId);
+  int get hashCode => Object.hash(readingListId, chapterId, order);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is ReadingListChaptersData &&
+      (other is ReadingListsChaptersData &&
           other.readingListId == this.readingListId &&
-          other.chapterId == this.chapterId);
+          other.chapterId == this.chapterId &&
+          other.order == this.order);
 }
 
-class ReadingListChaptersCompanion
-    extends UpdateCompanion<ReadingListChaptersData> {
+class ReadingListsChaptersCompanion
+    extends UpdateCompanion<ReadingListsChaptersData> {
   final Value<int> readingListId;
   final Value<int> chapterId;
+  final Value<int> order;
   final Value<int> rowid;
-  const ReadingListChaptersCompanion({
+  const ReadingListsChaptersCompanion({
     this.readingListId = const Value.absent(),
     this.chapterId = const Value.absent(),
+    this.order = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  ReadingListChaptersCompanion.insert({
+  ReadingListsChaptersCompanion.insert({
     required int readingListId,
     required int chapterId,
+    required int order,
     this.rowid = const Value.absent(),
   }) : readingListId = Value(readingListId),
-       chapterId = Value(chapterId);
-  static Insertable<ReadingListChaptersData> custom({
+       chapterId = Value(chapterId),
+       order = Value(order);
+  static Insertable<ReadingListsChaptersData> custom({
     Expression<int>? readingListId,
     Expression<int>? chapterId,
+    Expression<int>? order,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (readingListId != null) 'reading_list_id': readingListId,
       if (chapterId != null) 'chapter_id': chapterId,
+      if (order != null) 'order': order,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  ReadingListChaptersCompanion copyWith({
+  ReadingListsChaptersCompanion copyWith({
     Value<int>? readingListId,
     Value<int>? chapterId,
+    Value<int>? order,
     Value<int>? rowid,
   }) {
-    return ReadingListChaptersCompanion(
+    return ReadingListsChaptersCompanion(
       readingListId: readingListId ?? this.readingListId,
       chapterId: chapterId ?? this.chapterId,
+      order: order ?? this.order,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -8683,6 +8718,9 @@ class ReadingListChaptersCompanion
     if (chapterId.present) {
       map['chapter_id'] = Variable<int>(chapterId.value);
     }
+    if (order.present) {
+      map['order'] = Variable<int>(order.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -8691,9 +8729,10 @@ class ReadingListChaptersCompanion
 
   @override
   String toString() {
-    return (StringBuffer('ReadingListChaptersCompanion(')
+    return (StringBuffer('ReadingListsChaptersCompanion(')
           ..write('readingListId: $readingListId, ')
           ..write('chapterId: $chapterId, ')
+          ..write('order: $order, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -8915,7 +8954,7 @@ class DatabaseAtV5 extends GeneratedDatabase {
   late final CollectionSeries collectionSeries = CollectionSeries(this);
   late final CollectionCovers collectionCovers = CollectionCovers(this);
   late final ReadingLists readingLists = ReadingLists(this);
-  late final ReadingListChapters readingListChapters = ReadingListChapters(
+  late final ReadingListsChapters readingListsChapters = ReadingListsChapters(
     this,
   );
   late final ReadingListCovers readingListCovers = ReadingListCovers(this);
@@ -8948,7 +8987,7 @@ class DatabaseAtV5 extends GeneratedDatabase {
     collectionSeries,
     collectionCovers,
     readingLists,
-    readingListChapters,
+    readingListsChapters,
     readingListCovers,
   ];
   @override
@@ -9056,14 +9095,14 @@ class DatabaseAtV5 extends GeneratedDatabase {
         'reading_lists',
         limitUpdateKind: UpdateKind.delete,
       ),
-      result: [TableUpdate('reading_list_chapters', kind: UpdateKind.delete)],
+      result: [TableUpdate('reading_lists_chapters', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
         'chapters',
         limitUpdateKind: UpdateKind.delete,
       ),
-      result: [TableUpdate('reading_list_chapters', kind: UpdateKind.delete)],
+      result: [TableUpdate('reading_lists_chapters', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(

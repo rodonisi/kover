@@ -67,6 +67,19 @@ class MenuPage extends ConsumerWidget {
                   ),
                 ),
               ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: LayoutConstants.smallerPadding,
+                  horizontal: LayoutConstants.mediumPadding,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: AppListTile(
+                    title: 'Reading Lists',
+                    icon: const Icon(KoverIcons.readingList),
+                    onTap: () => const ReadingListsRoute().push(context),
+                  ),
+                ),
+              ),
               const SliverSection(title: 'Libraries'),
               const SliverLibraries(),
             ],
