@@ -306,7 +306,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
       selectOnly(readingListsChapters)
         ..addColumns([
           readingListsChapters.order,
-        ]) // Or whatever your column name is
+        ]) 
         ..where(
           readingListsChapters.readingListId.equals(readingListId) &
               readingListsChapters.chapterId.equals(chapterId),

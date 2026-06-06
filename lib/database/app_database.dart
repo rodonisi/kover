@@ -140,7 +140,9 @@ class AppDatabase extends _$AppDatabase {
     return MigrationStrategy(
       onUpgrade: stepByStep(
         from1To2: (m, schema) async {
-          await m.createTable(schema.serverSettings);
+          await transaction(() async {
+            await m.createTable(schema.serverSettings);
+          });
         },
         from2To3: (m, schema) async {
           await transaction(() async {
@@ -150,23 +152,27 @@ class AppDatabase extends _$AppDatabase {
           });
         },
         from3To4: (m, schema) async {
-          await m.alterTable(
-            TableMigration(
-              schema.libraries,
-              newColumns: [
-                schema.libraries.includeInDashboard,
-                schema.libraries.includeInRecommended,
-                schema.libraries.includeInSearch,
-                schema.libraries.defaultLanguage,
-                schema.libraries.lastScanned,
-              ],
-            ),
-          );
+          await transaction(() async {
+            await m.alterTable(
+              TableMigration(
+                schema.libraries,
+                newColumns: [
+                  schema.libraries.includeInDashboard,
+                  schema.libraries.includeInRecommended,
+                  schema.libraries.includeInSearch,
+                  schema.libraries.defaultLanguage,
+                  schema.libraries.lastScanned,
+                ],
+              ),
+            );
+          });
         },
         from4To5: (m, schema) async {
-          await m.createTable(schema.readingLists);
-          await m.createTable(schema.readingListsChapters);
-          await m.createTable(schema.readingListCovers);
+          await transaction(() async {
+            await m.createTable(schema.readingLists);
+            await m.createTable(schema.readingListsChapters);
+            await m.createTable(schema.readingListCovers);
+          });
         },
       ),
       beforeOpen: (details) async {
