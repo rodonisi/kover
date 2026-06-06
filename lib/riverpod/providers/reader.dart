@@ -75,6 +75,26 @@ Stream<ChapterModel> volumeContinuePoint(
 }
 
 @riverpod
+Stream<ChapterModel> readingListContinuePoint(
+  Ref ref, {
+  required int readingListId,
+}) async* {
+  final repo = ref.watch(readerRepositoryProvider);
+  yield* repo.watchReadingListContinuePoint(readingListId: readingListId);
+}
+
+@riverpod
+Stream<double> readingListContinuePointProgress(
+  Ref ref, {
+  required int readingListId,
+}) async* {
+  final repo = ref.watch(readerRepositoryProvider);
+  yield* repo.watchReadingListContinuePointProgress(
+    readingListId: readingListId,
+  );
+}
+
+@riverpod
 Future<ProgressModel?> bookProgress(Ref ref, {required int chapterId}) async {
   final repo = ref.watch(readerRepositoryProvider);
   return await repo.getProgress(chapterId);

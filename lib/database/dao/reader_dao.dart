@@ -63,6 +63,37 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
       ..limit(1);
   }
 
+  /// Continue point query for reading list. Orders chapters in the reading list
+  /// by their progress, then by their order in the list.
+  JoinedSelectStatement<HasResultSet, dynamic> _readingListContinuePointQuery({
+    required int readingListId,
+  }) {
+    return select(chapters).join([
+        innerJoin(
+          readingListsChapters,
+          readingListsChapters.chapterId.equalsExp(chapters.id),
+        ),
+        leftOuterJoin(
+          readingProgress,
+          readingProgress.chapterId.equalsExp(chapters.id),
+        ),
+      ])
+      ..where(readingListsChapters.readingListId.equals(readingListId))
+      ..orderBy([
+        OrderingTerm.desc(
+          readingProgress.chapterId.isNotNull() &
+              readingProgress.pagesRead.isBiggerThan(const Constant(0)) &
+              readingProgress.pagesRead.isSmallerThan(chapters.pages),
+        ),
+        OrderingTerm.desc(
+          readingProgress.chapterId.isNull() |
+              readingProgress.pagesRead.equals(0),
+        ),
+        OrderingTerm.asc(readingListsChapters.order),
+      ])
+      ..limit(1);
+  }
+
   /// [SingleSelectable] continue point for series [seriesId]
   SingleSelectable<Chapter> continuePoint({required int seriesId}) {
     return _continuePointQuery(
@@ -80,6 +111,26 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
       seriesId: volume.seriesId,
       volumeId: volumeId,
     ).map((row) => row.readTable(chapters)).watchSingle();
+  }
+
+  /// Watch continue point for reading list [readingListId]
+  Stream<Chapter> watchReadingListContinuePoint({required int readingListId}) {
+    final query = _readingListContinuePointQuery(readingListId: readingListId);
+    return query.map((row) => row.readTable(chapters)).watchSingle();
+  }
+
+  /// Watch progress percent for continue point of reading list [readingListId]
+  Stream<double> watchReadingListContinuePointProgress({
+    required int readingListId,
+  }) {
+    final query = _readingListContinuePointQuery(readingListId: readingListId);
+    return query.watchSingleOrNull().map((row) {
+      if (row == null) return 0.0;
+      final chapter = row.readTable(chapters);
+      final progress = row.readTableOrNull(readingProgress);
+      if (progress == null || chapter.pages == 0) return 0.0;
+      return progress.pagesRead / chapter.pages;
+    });
   }
 
   /// Watch progress percent for continue point of series [seriesId]

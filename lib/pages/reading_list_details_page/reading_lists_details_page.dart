@@ -99,7 +99,7 @@ class ReadingListChapterEntry extends ConsumerWidget {
           contextMenu: ContextMenu(
             entries: [
               MenuItem(
-                label: Text('Go to chapter'),
+                label: const Text('Go to chapter'),
                 icon: const Icon(KoverIcons.chapter),
                 onSelected: (_) {
                   ChapterDetailRoute(
