@@ -17,6 +17,7 @@ import 'package:kover/pages/settings/settings_page.dart';
 import 'package:kover/pages/want_to_read_page/want_to_read_page.dart';
 import 'package:kover/widgets/util/navigator_container.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 part 'router.g.dart';
 
@@ -28,6 +29,7 @@ GoRouter router(Ref ref) {
     navigatorKey: navigatorKey,
     initialLocation: '/',
     routes: $appRoutes,
+    observers: [SentryNavigatorObserver()],
   );
 }
 

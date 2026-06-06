@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/sync/background.dart';
+import 'package:kover/utils/sentry.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/breakpoints.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -11,18 +12,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeBackgroundTask();
 
-  await SentryFlutter.init(
-    (options) {
-      options.dsn =
-          'https://b5a6b68eea23284eb215f1661c8661e2@o4511480670060544.ingest.de.sentry.io/4511480676679760';
-      options.sendDefaultPii = false;
-      options.enableLogs = true;
-      options.tracesSampleRate = 1.0;
-      // ignore: experimental_member_use
-      options.profilesSampleRate = 1.0;
-      options.replay.sessionSampleRate = 0.1;
-      options.replay.onErrorSampleRate = 1.0;
-    },
+  await initializeSentry(
     appRunner: () => runApp(
       ProviderScope(
         child: SentryWidget(
