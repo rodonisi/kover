@@ -12,11 +12,13 @@ import 'package:kover/widgets/util/async_value.dart';
 class HorizontalSpreadsReader extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
+  final int? readingListId;
 
   const HorizontalSpreadsReader({
     super.key,
     required this.seriesId,
     required this.chapterId,
+    this.readingListId,
   });
 
   @override
@@ -36,6 +38,7 @@ class HorizontalSpreadsReader extends HookConsumerWidget {
       data: (showProgressBar) => ReaderOverlay(
         chapterId: chapterId,
         seriesId: seriesId,
+        readingListId: readingListId,
         showProgressBar: showProgressBar,
         onNextPage: () {
           ref.read(navProvider.notifier).nextPage();

@@ -24,6 +24,7 @@ sealed class KoverIcons {
   static const IconData descending = LucideIcons.arrowDownWideNarrow;
 
   static const IconData series = LucideIcons.list;
+  static const IconData chapter = LucideIcons.fileText;
   static const IconData collection = LucideIcons.layoutGrid;
   static const IconData readingList = LucideIcons.layoutList;
 

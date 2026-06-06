@@ -47,7 +47,10 @@ class ReadingListsDetailsPage extends ConsumerWidget {
                     return SliverList.separated(
                       itemBuilder: (context, index) {
                         final chapter = chapters[index];
-                        return ReadingListChapterEntry(chapter: chapter);
+                        return ReadingListChapterEntry(
+                          readingListId: readingListId,
+                          chapter: chapter,
+                        );
                       },
                       separatorBuilder: (context, index) => const SizedBox(
                         height: LayoutConstants.mediumPadding,
@@ -75,8 +78,13 @@ class ReadingListsDetailsPage extends ConsumerWidget {
 }
 
 class ReadingListChapterEntry extends ConsumerWidget {
+  final int readingListId;
   final ChapterModel chapter;
-  const ReadingListChapterEntry({super.key, required this.chapter});
+  const ReadingListChapterEntry({
+    super.key,
+    required this.readingListId,
+    required this.chapter,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -90,6 +98,16 @@ class ReadingListChapterEntry extends ConsumerWidget {
         return ContextMenuRegion(
           contextMenu: ContextMenu(
             entries: [
+              MenuItem(
+                label: Text('Go to chapter'),
+                icon: const Icon(KoverIcons.chapter),
+                onSelected: (_) {
+                  ChapterDetailRoute(
+                    seriesId: chapter.seriesId,
+                    chapterId: chapter.id,
+                  ).push(context);
+                },
+              ),
               MenuItem(
                 label: const Text('Go to series'),
                 icon: const Icon(KoverIcons.series),
@@ -109,9 +127,10 @@ class ReadingListChapterEntry extends ConsumerWidget {
               KoverIcons.chevronRight,
             ),
             onTap: () {
-              ChapterDetailRoute(
-                seriesId: series.id,
+              ReaderRoute(
+                seriesId: chapter.seriesId,
                 chapterId: chapter.id,
+                readingListId: readingListId,
               ).push(context);
             },
           ),

@@ -327,10 +327,12 @@ class DownloadQueueRoute extends GoRouteData with $DownloadQueueRoute {
 class ReaderRoute extends GoRouteData with $ReaderRoute {
   final int seriesId;
   final int? chapterId;
+  final int? readingListId;
 
   const ReaderRoute({
     required this.seriesId,
     this.chapterId,
+    this.readingListId,
   });
 
   @override
@@ -341,6 +343,7 @@ class ReaderRoute extends GoRouteData with $ReaderRoute {
       child: ReaderPage(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
       ),
     );
   }

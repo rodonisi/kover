@@ -28,6 +28,7 @@ sealed class ReaderState with _$ReaderState {
     required int libraryId,
     required SeriesModel series,
     required ChapterModel chapter,
+    int? readingListId,
     required int volumeId,
     required String title,
     required int totalPages,
@@ -44,7 +45,11 @@ class Reader extends _$Reader {
   Timer? _saveProgressDebounce;
 
   @override
-  Future<ReaderState> build({required int seriesId, int? chapterId}) async {
+  Future<ReaderState> build({
+    required int seriesId,
+    int? chapterId,
+    int? readingListId,
+  }) async {
     var chapter = await ref.read(
       continuePointProvider(seriesId: seriesId).future,
     );
@@ -70,6 +75,7 @@ class Reader extends _$Reader {
       series: series,
       volumeId: chapter.volumeId,
       chapter: chapter,
+      readingListId: readingListId,
       title: chapter.title,
       totalPages: chapter.pages,
       initialPage: initialPage.clamp(0, chapter.pages - 1),

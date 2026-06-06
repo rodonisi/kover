@@ -83,12 +83,14 @@ class ReaderRepository {
     required int seriesId,
     int? volumeId,
     required int chapterId,
+    int? readingListId,
   }) {
     return _db.readerDao
         .watchPrevChapter(
           seriesId: seriesId,
           volumeId: volumeId,
           chapterId: chapterId,
+          readingListId: readingListId,
         )
         .map((c) => c != null ? ChapterModel.fromDatabaseModel(c) : null);
   }
@@ -98,12 +100,14 @@ class ReaderRepository {
     required int seriesId,
     int? volumeId,
     required int chapterId,
+    int? readingListId,
   }) {
     return _db.readerDao
         .watchNextChapter(
           seriesId: seriesId,
           volumeId: volumeId,
           chapterId: chapterId,
+          readingListId: readingListId,
         )
         .map((c) => c != null ? ChapterModel.fromDatabaseModel(c) : null);
   }

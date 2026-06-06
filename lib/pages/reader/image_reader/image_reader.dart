@@ -11,11 +11,13 @@ import 'package:kover/widgets/util/async_value.dart';
 class ImageReader extends ConsumerWidget {
   final int seriesId;
   final int chapterId;
+  final int? readingListId;
 
   const ImageReader({
     super.key,
     required this.seriesId,
     required this.chapterId,
+    this.readingListId,
   });
 
   @override
@@ -34,12 +36,14 @@ class ImageReader extends ConsumerWidget {
           return HorizontalSpreadsReader(
             seriesId: seriesId,
             chapterId: chapterId,
+            readingListId: readingListId,
           );
         }
 
         return ReaderOverlay(
           seriesId: seriesId,
           chapterId: chapterId,
+          readingListId: readingListId,
           showProgressBar: settings.showProgressBar,
           onNextPage: () {
             settings.readDirection == .leftToRight

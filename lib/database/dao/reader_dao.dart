@@ -2,13 +2,22 @@ import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/progress.dart';
+import 'package:kover/database/tables/reading_lists.dart';
 import 'package:kover/database/tables/series.dart';
 import 'package:kover/database/tables/volumes.dart';
 import 'package:kover/utils/logging.dart';
 
 part 'reader_dao.g.dart';
 
-@DriftAccessor(tables: [Series, Volumes, Chapters, ReadingProgress])
+@DriftAccessor(
+  tables: [
+    Series,
+    Volumes,
+    Chapters,
+    ReadingProgress,
+    ReadingListsChapters,
+  ],
+)
 class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   ReaderDao(super.attachedDatabase);
 
@@ -220,24 +229,57 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     required int seriesId,
     int? volumeId,
     required int chapterId,
+    int? readingListId,
   }) {
-    final sortOrderOfCurrent = subqueryExpression<double>(
-      selectOnly(chapters)
-        ..addColumns([chapters.sortOrder])
-        ..where(chapters.id.equals(chapterId)),
+    if (readingListId == null) {
+      final sortOrderOfCurrent = subqueryExpression<double>(
+        selectOnly(chapters)
+          ..addColumns([chapters.sortOrder])
+          ..where(chapters.id.equals(chapterId)),
+      );
+
+      final query = select(chapters)
+        ..where((c) {
+          final base =
+              c.seriesId.equals(seriesId) &
+              c.sortOrder.isSmallerThan(sortOrderOfCurrent);
+          return volumeId != null ? base & c.volumeId.equals(volumeId) : base;
+        })
+        ..orderBy([(c) => OrderingTerm.desc(c.sortOrder)])
+        ..limit(1);
+
+      return query.watchSingleOrNull();
+    }
+
+    final orderOfCurrentInList = subqueryExpression<int>(
+      selectOnly(readingListsChapters)
+        ..addColumns([
+          readingListsChapters.order,
+        ]) // Or whatever your column name is
+        ..where(
+          readingListsChapters.readingListId.equals(readingListId) &
+              readingListsChapters.chapterId.equals(chapterId),
+        ),
     );
 
-    final query = select(chapters)
-      ..where((c) {
-        final base =
-            c.seriesId.equals(seriesId) &
-            c.sortOrder.isSmallerThan(sortOrderOfCurrent);
-        return volumeId != null ? base & c.volumeId.equals(volumeId) : base;
-      })
-      ..orderBy([(c) => OrderingTerm.desc(c.sortOrder)])
-      ..limit(1);
+    final joinedQuery = select(chapters).join([
+      innerJoin(
+        readingListsChapters,
+        readingListsChapters.chapterId.equalsExp(chapters.id),
+      ),
+    ]);
 
-    return query.watchSingleOrNull();
+    joinedQuery.where(
+      readingListsChapters.readingListId.equals(readingListId) &
+          readingListsChapters.order.isSmallerThan(orderOfCurrentInList),
+    );
+
+    joinedQuery.orderBy([OrderingTerm.desc(readingListsChapters.order)]);
+    joinedQuery.limit(1);
+
+    return joinedQuery
+        .map((row) => row.readTable(chapters))
+        .watchSingleOrNull();
   }
 
   /// Watch next chapter for chapter [chapterId]
@@ -245,24 +287,55 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     required int seriesId,
     int? volumeId,
     required int chapterId,
+    int? readingListId,
   }) {
-    final sortOrderOfCurrent = subqueryExpression<double>(
-      selectOnly(chapters)
-        ..addColumns([chapters.sortOrder])
-        ..where(chapters.id.equals(chapterId)),
+    if (readingListId == null) {
+      final sortOrderOfCurrent = subqueryExpression<double>(
+        selectOnly(chapters)
+          ..addColumns([chapters.sortOrder])
+          ..where(chapters.id.equals(chapterId)),
+      );
+
+      final query = select(chapters)
+        ..where((c) {
+          final base =
+              c.seriesId.equals(seriesId) &
+              c.sortOrder.isBiggerThan(sortOrderOfCurrent);
+          return volumeId != null ? base & c.volumeId.equals(volumeId) : base;
+        })
+        ..orderBy([(c) => OrderingTerm.asc(c.sortOrder)])
+        ..limit(1);
+
+      return query.watchSingleOrNull();
+    }
+
+    final orderOfCurrentInList = subqueryExpression<int>(
+      selectOnly(readingListsChapters)
+        ..addColumns([readingListsChapters.order])
+        ..where(
+          readingListsChapters.readingListId.equals(readingListId) &
+              readingListsChapters.chapterId.equals(chapterId),
+        ),
     );
 
-    final query = select(chapters)
-      ..where((c) {
-        final base =
-            c.seriesId.equals(seriesId) &
-            c.sortOrder.isBiggerThan(sortOrderOfCurrent);
-        return volumeId != null ? base & c.volumeId.equals(volumeId) : base;
-      })
-      ..orderBy([(c) => OrderingTerm.asc(c.sortOrder)])
-      ..limit(1);
+    final joinedQuery = select(chapters).join([
+      innerJoin(
+        readingListsChapters,
+        readingListsChapters.chapterId.equalsExp(chapters.id),
+      ),
+    ]);
 
-    return query.watchSingleOrNull();
+    joinedQuery.where(
+      readingListsChapters.readingListId.equals(readingListId) &
+          readingListsChapters.order.isBiggerThan(orderOfCurrentInList),
+    );
+
+    joinedQuery.orderBy([OrderingTerm.asc(readingListsChapters.order)]);
+    joinedQuery.limit(1);
+
+    return joinedQuery
+        .map((row) => row.readTable(chapters))
+        .watchSingleOrNull();
   }
 
   /// Mark all chapters for [seriesId] as [isRead]

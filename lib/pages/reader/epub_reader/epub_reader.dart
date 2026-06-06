@@ -14,11 +14,13 @@ import 'package:kover/widgets/util/async_value.dart';
 class EpubReader extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
+  final int? readingListId;
 
   const EpubReader({
     super.key,
     required this.seriesId,
     required this.chapterId,
+    this.readingListId,
   });
 
   @override
@@ -39,6 +41,7 @@ class EpubReader extends HookConsumerWidget {
       data: (showProgressBar) => ReaderOverlay(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
         showProgressBar: showProgressBar,
         onNextPage: () {
           ref.read(nav.notifier).nextPage();

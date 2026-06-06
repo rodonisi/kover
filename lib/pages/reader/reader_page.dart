@@ -15,8 +15,14 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 class ReaderPage extends HookConsumerWidget {
   final int seriesId;
   final int? chapterId;
+  final int? readingListId;
 
-  const ReaderPage({super.key, required this.seriesId, this.chapterId});
+  const ReaderPage({
+    super.key,
+    required this.seriesId,
+    this.chapterId,
+    this.readingListId,
+  });
 
   Future<void> _exitImmersiveMode() async {
     await SystemChrome.setEnabledSystemUIMode(
@@ -38,6 +44,7 @@ class ReaderPage extends HookConsumerWidget {
     final provider = readerProvider(
       seriesId: seriesId,
       chapterId: chapterId,
+      readingListId: readingListId,
     );
 
     return PopScope(
@@ -58,14 +65,17 @@ class ReaderPage extends HookConsumerWidget {
             .archive || .image => ImageReader(
               seriesId: data.series.id,
               chapterId: data.chapter.id,
+              readingListId: data.readingListId,
             ),
             .epub => EpubReader(
               seriesId: data.series.id,
               chapterId: data.chapter.id,
+              readingListId: data.readingListId,
             ),
             .pdf => PdfReader(
               seriesId: data.series.id,
               chapterId: data.chapter.id,
+              readingListId: data.readingListId,
             ),
             _ => Center(
               child: Column(

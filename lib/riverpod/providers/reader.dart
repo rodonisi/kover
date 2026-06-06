@@ -86,6 +86,7 @@ Stream<ChapterModel?> prevChapter(
   int? seriesId,
   int? volumeId,
   int? chapterId,
+  int? readingListId,
 }) async* {
   if (seriesId == null || chapterId == null) {
     yield null;
@@ -97,6 +98,7 @@ Stream<ChapterModel?> prevChapter(
         seriesId: seriesId,
         volumeId: volumeId,
         chapterId: chapterId,
+        readingListId: readingListId,
       )
       .distinct();
 }
@@ -107,6 +109,7 @@ Stream<ChapterModel?> nextChapter(
   int? seriesId,
   int? volumeId,
   int? chapterId,
+  int? readingListId,
 }) async* {
   if (seriesId == null || chapterId == null) {
     yield null;
@@ -118,6 +121,7 @@ Stream<ChapterModel?> nextChapter(
         seriesId: seriesId,
         volumeId: volumeId,
         chapterId: chapterId,
+        readingListId: readingListId,
       )
       .distinct();
 }

@@ -41,8 +41,14 @@ PdfViewerController usePdfViewerController() => use(const PdfControllerHook());
 class PdfReader extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
+  final int? readingListId;
 
-  const PdfReader({super.key, required this.seriesId, required this.chapterId});
+  const PdfReader({
+    super.key,
+    required this.seriesId,
+    required this.chapterId,
+    this.readingListId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -57,7 +63,11 @@ class PdfReader extends HookConsumerWidget {
     );
 
     final reader = ref.watch(
-      readerProvider(seriesId: seriesId, chapterId: chapterId),
+      readerProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: readingListId,
+      ),
     );
     final settings = ref.watch(pdfReaderSettingsProvider(seriesId: seriesId));
     final pdf = ref.watch(pdfProvider(chapterId: chapterId));
@@ -80,6 +90,7 @@ class PdfReader extends HookConsumerWidget {
         return ReaderOverlay(
           chapterId: chapterId,
           seriesId: seriesId,
+          readingListId: readingListId,
           showProgressBar: settings.showProgressBar,
           onNextPage: () {
             if (settings.readDirection == .leftToRight) {

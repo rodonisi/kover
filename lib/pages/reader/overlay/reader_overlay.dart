@@ -37,6 +37,7 @@ class ReaderOverlay extends HookConsumerWidget {
   final bool Function(int page)? isLastPage;
   final int seriesId;
   final int chapterId;
+  final int? readingListId;
   final Widget child;
   final Widget? endDrawer;
   final Widget? extraControls;
@@ -51,6 +52,7 @@ class ReaderOverlay extends HookConsumerWidget {
     this.endDrawer,
     this.extraControls,
     this.showProgressBar = true,
+    this.readingListId,
     required this.chapterId,
     required this.seriesId,
     required this.child,
@@ -61,7 +63,11 @@ class ReaderOverlay extends HookConsumerWidget {
     final uiVisible = useState(false);
     final snackbarDismissed = useState(false);
     final showSnackbar = useState(ShowSnackbar.none);
-    final provider = readerProvider(seriesId: seriesId, chapterId: chapterId);
+    final provider = readerProvider(
+      seriesId: seriesId,
+      chapterId: chapterId,
+      readingListId: readingListId,
+    );
 
     final shouldShowSnackbar =
         showSnackbar.value != ShowSnackbar.none &&
@@ -76,6 +82,7 @@ class ReaderOverlay extends HookConsumerWidget {
               seriesId: seriesId,
               volumeId: state.volumeId,
               chapterId: chapterId,
+              readingListId: readingListId,
             ),
           );
 
@@ -84,6 +91,7 @@ class ReaderOverlay extends HookConsumerWidget {
               seriesId: seriesId,
               volumeId: state.volumeId,
               chapterId: chapterId,
+              readingListId: readingListId,
             ),
           );
 
