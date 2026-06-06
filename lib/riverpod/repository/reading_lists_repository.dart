@@ -29,6 +29,7 @@ class ReadingListsRepository {
 
   ReadingListsRepository({required this._db, required this._client});
 
+  /// Watch all reading lists.
   Stream<List<ReadingListModel>> watchReadingLists() {
     return _db.readingListsDao.allReadingLists().watch().map(
       (lists) => lists
@@ -37,6 +38,7 @@ class ReadingListsRepository {
     );
   }
 
+  /// Watch a single reading list by [readingListId].
   Stream<ReadingListModel> watchReadingList({required int readingListId}) {
     return _db.readingListsDao
         .readingList(readingListId)
@@ -46,6 +48,7 @@ class ReadingListsRepository {
         );
   }
 
+  /// Watch chapters in a reading list by [readingListId].
   Stream<List<ChapterModel>> watchReadingListChapters({
     required int readingListId,
   }) {
@@ -57,12 +60,14 @@ class ReadingListsRepository {
         );
   }
 
+  /// Watch reading progress percent for a reading list by [readingListId].
   Stream<double> watchReadingListProgress({required int readingListId}) {
     return _db.readingListsDao
         .readingListProgress(readingListId: readingListId)
         .watchSingle();
   }
 
+   /// Watch cover for a reading list by [readingListId].
   Stream<ImageModel?> watchReadingListCover({required int readingListId}) {
     return _db.readingListsDao
         .readingListCover(readingListId: readingListId)
