@@ -9,16 +9,18 @@ Future<void> initializeSentry({
   required FutureOr<void> Function() appRunner,
 }) async {
   await SentryFlutter.init(
-    (options) {
-      options.dsn = _sentryDsn;
-      options.sendDefaultPii = false;
-      options.enableLogs = true;
-      options.tracesSampleRate = 1.0;
-      // ignore: experimental_member_use
-      options.profilesSampleRate = 1.0;
-      options.replay.sessionSampleRate = 1.0;
-      options.replay.onErrorSampleRate = 1.0;
-    },
+    sentryOptionsConfiguration,
     appRunner: appRunner,
   );
+}
+
+FutureOr<void> sentryOptionsConfiguration(SentryFlutterOptions options) {
+  options.dsn = _sentryDsn;
+  options.sendDefaultPii = false;
+  options.enableLogs = true;
+  options.tracesSampleRate = 1.0;
+  // ignore: experimental_member_use
+  options.profilesSampleRate = 1.0;
+  options.replay.sessionSampleRate = 1.0;
+  options.replay.onErrorSampleRate = 1.0;
 }

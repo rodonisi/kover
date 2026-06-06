@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/choice_option.dart';
@@ -13,6 +15,7 @@ class GeneralSettings extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
+    final generalSettings = ref.watch(generalSettingsProvider);
 
     return Card(
       margin: LayoutConstants.mediumEdgeInsets,
@@ -60,6 +63,22 @@ class GeneralSettings extends ConsumerWidget {
                 value: theme.outlined,
                 onChanged: (value) =>
                     ref.read(themeProvider.notifier).setOutlined(value),
+              ),
+              Async(
+                asyncValue: generalSettings,
+                data: (generalSettings) => BooleanOption(
+                  title: 'Send anonymous usage statistics',
+                  icon: KoverIcons.analytics,
+                  description:
+                      'Help improve the app by sending anonymous usage '
+                      'statistics and crash reports. The data is uniquely used '
+                      'to improve the app and does not contain any personally '
+                      'identifiable information.',
+                  value: generalSettings.sendUsageData,
+                  onChanged: (value) => ref
+                      .read(generalSettingsProvider.notifier)
+                      .setSendUsageData(value),
+                ),
               ),
             ],
           ),

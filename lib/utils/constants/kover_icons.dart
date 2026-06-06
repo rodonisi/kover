@@ -14,11 +14,10 @@ sealed class KoverIcons {
   static const IconData fitContain = LucideIcons.fullscreen;
 
   static const IconData progressBar = LucideIcons.minus;
-
   static const IconData safeArea = LucideIcons.expand;
-
   static const IconData save = LucideIcons.save;
   static const IconData reset = LucideIcons.rotateCcw;
+  static const IconData analytics = LucideIcons.barChart2;
 
   static const IconData ascending = LucideIcons.arrowDownNarrowWide;
   static const IconData descending = LucideIcons.arrowDownWideNarrow;
