@@ -22,6 +22,7 @@ environment:
   sdk: ^3.12.0
 
 dependencies:
+  sentry_flutter: ^9.21.0
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
@@ -60,6 +61,7 @@ dependencies:
   url_launcher: ^6.3.2
 
 dev_dependencies:
+  sentry_dart_plugin: ^3.4.0
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
@@ -112,3 +114,9 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+sentry:
+  upload_debug_symbols: true
+  upload_source_maps: true
+  project: flutter
+  org: rodonisi
