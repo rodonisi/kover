@@ -67,7 +67,7 @@ class ReadingListsRepository {
         .watchSingle();
   }
 
-   /// Watch cover for a reading list by [readingListId].
+  /// Watch cover for a reading list by [readingListId].
   Stream<ImageModel?> watchReadingListCover({required int readingListId}) {
     return _db.readingListsDao
         .readingListCover(readingListId: readingListId)
