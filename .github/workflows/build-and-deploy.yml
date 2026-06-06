@@ -55,6 +55,12 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
 
+      - name: Upload Debug Symbols to Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          dart run sentry_dart_plugin
+
   build-and-deploy-macos:
     name: Build & Deploy MacOS
     needs: version
@@ -95,6 +101,12 @@ jobs:
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+
+      - name: Upload Debug Symbols to Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          dart run sentry_dart_plugin
 
   build-and-deploy-android:
     name: Build & Deploy Android
@@ -148,6 +160,12 @@ jobs:
           cd android
           fastlane beta
 
+      - name: Upload Debug Symbols to Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          dart run sentry_dart_plugin
+
   build-web:
     name: Build Web
     needs: version
@@ -186,6 +204,12 @@ jobs:
             --build-name ${{ needs.version.outputs.version }} \
             --build-number ${{ needs.version.outputs.build_number }} \
             --wasm
+
+      - name: Upload Debug Symbols to Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          dart run sentry_dart_plugin
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v5
