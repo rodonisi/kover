@@ -50,7 +50,7 @@ class ReadingListAppBar extends HookConsumerWidget {
                 Async(
                   asyncValue: chapterCount,
                   data: (count) => Text(
-                    '$count ${count == 1 ? 'entry' : 'entries'}',
+                    '$count ${count == 1 ? 'item' : 'items'}',
                   ),
                 ),
             ],
