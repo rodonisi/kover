@@ -18,6 +18,7 @@ Future<void> main() async {
       options.sendDefaultPii = false;
       options.enableLogs = true;
       options.tracesSampleRate = 1.0;
+      // ignore: experimental_member_use
       options.profilesSampleRate = 1.0;
       options.replay.sessionSampleRate = 0.1;
       options.replay.onErrorSampleRate = 1.0;
