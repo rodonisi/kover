@@ -23,6 +23,7 @@ SentryRepository sentryRepository(Ref ref) {
 }
 
 class SentryRepository {
+  /// Initialize Sentry if it's not already enabled.
   Future<void> init() async {
     if (Sentry.isEnabled) return;
 
@@ -31,6 +32,8 @@ class SentryRepository {
     );
   }
 
+  /// Disable Sentry by closing the client and preventing further events from
+  /// being sent.
   Future<void> disable() async {
     await Sentry.close();
   }

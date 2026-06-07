@@ -10,7 +10,7 @@ import 'package:kover/widgets/util/breakpoints.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  SentryWidgetsFlutterBinding.ensureInitialized();
   await initializeBackgroundTask();
   await initializeSentry(
     appRunner: () => runApp(
