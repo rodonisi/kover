@@ -50,15 +50,23 @@ class CollectionsDao extends DatabaseAccessor<AppDatabase>
     return await query.map((row) => row.readTable(collections).id).get();
   }
 
-  /// Upsert a batch of collections.
+  /// Upsert a batch of collections. Deletes any collections not in the batch.
   Future<void> upsertCollectionsBatch(
     Iterable<CollectionsCompanion> entries,
   ) async {
-    await batch((batch) {
-      batch.insertAllOnConflictUpdate(
-        collections,
-        entries.toList(),
-      );
+    final ids = entries.map((e) => e.id.value).toList();
+    final delta = await managers.collections
+        .filter((f) => f.id.not.isIn(ids))
+        .map((m) => m.id)
+        .get();
+    await transaction(() async {
+      await (delete(collections)..where((t) => t.id.isIn(delta))).go();
+      await batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          collections,
+          entries.toList(),
+        );
+      });
     });
   }
 
