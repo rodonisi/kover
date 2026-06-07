@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/riverpod/providers/settings/oneoffs.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/util/async_value.dart';
+import 'package:kover/widgets/util/monitoring_opt_out_popup.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class NavigatorContainer extends ConsumerWidget {
@@ -14,6 +16,22 @@ class NavigatorContainer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final oneOffs = ref.watch(oneOffsProvider);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      oneOffs.whenData((oneOffs) async {
+        if (!oneOffs.monitoringOptOutPopupShown) {
+          await showDialog(
+            context: context,
+            builder: (context) => const MonitoringOptOutPopup(),
+          );
+          await ref
+              .read(oneOffsProvider.notifier)
+              .setMonitoringOptOutPopupShown();
+        }
+      });
+    });
+
     return Scaffold(
       extendBody: true,
       body: navigationShell,
