@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -103,6 +104,7 @@ class EpubReaderSettings extends _$EpubReaderSettings {
         ),
       ),
     );
+    log.i('set fontSize to ${state.value!.fontSize}');
   }
 
   Future<void> setMarginSize(double newSize) async {
@@ -116,6 +118,7 @@ class EpubReaderSettings extends _$EpubReaderSettings {
         ),
       ),
     );
+    log.i('set marginSize to ${state.value!.marginSize}');
   }
 
   Future<void> setLineHeight(double newSize) async {
@@ -129,6 +132,7 @@ class EpubReaderSettings extends _$EpubReaderSettings {
         ),
       ),
     );
+    log.i('set lineHeight to ${state.value!.lineHeight}');
   }
 
   Future<void> setWordSpacing(double newSize) async {
@@ -142,6 +146,7 @@ class EpubReaderSettings extends _$EpubReaderSettings {
         ),
       ),
     );
+    log.i('set wordSpacing to ${state.value!.wordSpacing}');
   }
 
   Future<void> setLetterSpacing(double newSize) async {
@@ -155,6 +160,7 @@ class EpubReaderSettings extends _$EpubReaderSettings {
         ),
       ),
     );
+    log.i('set letterSpacing to ${state.value!.letterSpacing}');
   }
 
   Future<void> setHighlightResumePoint(bool value) async {
@@ -163,6 +169,7 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     state = AsyncData(
       current.copyWith(highlightResumePoint: value),
     );
+    log.i('set highlightResumePoint to $value');
   }
 
   Future<void> setShowProgressBar(bool value) async {
@@ -171,15 +178,18 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     state = AsyncData(
       current.copyWith(showProgressBar: value),
     );
+    log.i('set showProgressBar to $value');
   }
 
   Future<void> reset() async {
     final defaults = await ref.read(defaultEpubReaderSettingsProvider.future);
     state = AsyncData(defaults);
+    log.i('set settings to defaults');
   }
 
   Future<void> setDefault() async {
     final current = await future;
     ref.read(defaultEpubReaderSettingsProvider.notifier).setDefault(current);
+    log.i('set current settings as default');
   }
 }

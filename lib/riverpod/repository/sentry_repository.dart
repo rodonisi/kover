@@ -1,4 +1,5 @@
 import 'package:kover/riverpod/providers/settings/general_settings.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:kover/utils/sentry.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -30,11 +31,13 @@ class SentryRepository {
     await SentryFlutter.init(
       sentryOptionsConfiguration,
     );
+    log.i('Sentry initialized');
   }
 
   /// Disable Sentry by closing the client and preventing further events from
   /// being sent.
   Future<void> disable() async {
     await Sentry.close();
+    log.i('Sentry disabled');
   }
 }

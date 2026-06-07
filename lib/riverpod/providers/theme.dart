@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:kover/utils/theme.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
@@ -184,15 +185,18 @@ class Theme extends _$Theme {
     final current = await future;
 
     state = AsyncData(current.copyWith(mode: mode));
+    log.i('set theme mode to $mode');
   }
 
   Future<void> setOutlined(bool value) async {
     final current = await future;
 
     state = AsyncData(current.copyWith(outlined: value));
+    log.i('set outlined theme to $value');
   }
 
   void reset() {
     state = const AsyncData(ThemeModel());
+    log.i('reset theme to default');
   }
 }

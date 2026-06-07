@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -20,13 +21,10 @@ sealed class GeneralSettingsState with _$GeneralSettingsState {
 @riverpod
 @JsonPersist()
 class GeneralSettings extends _$GeneralSettings {
-  static const String persistKey = 'general_settings';
-
   @override
   Future<GeneralSettingsState> build() async {
     await persist(
       ref.watch(storageProvider.future),
-      key: persistKey,
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
     ).future;
 
@@ -35,6 +33,9 @@ class GeneralSettings extends _$GeneralSettings {
 
   Future<void> setSendUsageData(bool value) async {
     final current = await future;
+
+    log.i('set sendUsageData to $value');
+
     state = AsyncData(current.copyWith(sendUsageData: value));
   }
 }

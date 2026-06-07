@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -107,6 +108,7 @@ class ImageReaderSettings extends _$ImageReaderSettings {
         scaleType: type,
       ),
     );
+    log.i('set scaleType to $type');
   }
 
   Future<void> setReadDirection(ReadDirection direction) async {
@@ -117,6 +119,7 @@ class ImageReaderSettings extends _$ImageReaderSettings {
         readDirection: direction,
       ),
     );
+    log.i('set readDirection to $direction');
   }
 
   Future<void> setReaderMode(ReaderMode mode) async {
@@ -128,6 +131,7 @@ class ImageReaderSettings extends _$ImageReaderSettings {
         hadSpread: mode == .spread,
       ),
     );
+    log.i('set readerMode to $mode');
   }
 
   Future<void> setVerticalReaderGap(double gap) async {
@@ -141,6 +145,7 @@ class ImageReaderSettings extends _$ImageReaderSettings {
         ),
       ),
     );
+    log.i('set verticalReaderGap to ${state.value!.verticalReaderGap}');
   }
 
   Future<void> setVerticalReaderPadding(double padding) async {
@@ -154,6 +159,7 @@ class ImageReaderSettings extends _$ImageReaderSettings {
         ),
       ),
     );
+    log.i('set verticalReaderPadding to ${state.value!.verticalReaderPadding}');
   }
 
   Future<void> setSpreadReaderGap(double gap) async {
@@ -167,33 +173,39 @@ class ImageReaderSettings extends _$ImageReaderSettings {
         ),
       ),
     );
+    log.i('set spreadReaderGap to ${state.value!.spreadReaderGap}');
   }
 
   Future<void> setIgnoreSafeAreas(bool ignore) async {
     final current = await future;
 
     state = AsyncData(current.copyWith(ignoreSafeAreas: ignore));
+    log.i('set ignoreSafeAreas to $ignore');
   }
 
   Future<void> setSpreadCoverPage(bool value) async {
     final current = await future;
 
     state = AsyncData(current.copyWith(spreadCoverPage: value));
+    log.i('set spreadCoverPage to $value');
   }
 
   Future<void> setShowProgressBar(bool value) async {
     final current = await future;
 
     state = AsyncData(current.copyWith(showProgressBar: value));
+    log.i('set showProgressBar to $value');
   }
 
   Future<void> reset() async {
     final defaults = await ref.read(defaultImageReaderSettingsProvider.future);
     state = AsyncData(defaults);
+    log.i('reset image reader settings to defaults');
   }
 
   Future<void> setDefault() async {
     final current = await future;
     ref.read(defaultImageReaderSettingsProvider.notifier).setDefault(current);
+    log.i('set current image reader settings as default');
   }
 }

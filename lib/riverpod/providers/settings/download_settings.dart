@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -33,10 +34,12 @@ class DownloadSettings extends _$DownloadSettings {
   Future<void> setConcurrentDownloads(int count) async {
     final current = await future;
     state = AsyncData(current.copyWith(concurrentDownloads: count));
+    log.i('set concurrentDownloads to $count');
   }
 
   Future<void> setDownloadCovers(bool value) async {
     final current = await future;
     state = AsyncData(current.copyWith(downloadCovers: value));
+    log.i('set downloadCovers to $value');
   }
 }
