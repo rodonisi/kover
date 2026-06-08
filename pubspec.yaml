@@ -118,5 +118,5 @@ flutter:
 sentry:
   upload_debug_symbols: true
   upload_source_maps: true
-  project: flutter
+  project: kover
   org: rodonisi
