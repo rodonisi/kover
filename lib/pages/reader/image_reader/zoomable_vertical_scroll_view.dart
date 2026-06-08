@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:kover/pages/reader/image_reader/vertical_reader_gesture_controller.dart';
@@ -156,24 +157,32 @@ class ZoomableVerticalScrollView extends HookWidget {
       builder: (context, constraints) {
         scheduleViewportConfiguration(constraints.biggest);
 
-        return GestureDetector(
-          behavior: .opaque,
-          onScaleStart: handleScaleStart,
-          onScaleUpdate: handleScaleUpdate,
-          onScaleEnd: (details) => unawaited(handleScaleEnd(details)),
-          child: ClipRect(
-            child: AnimatedBuilder(
-              animation: gestureController,
-              child: IgnorePointer(child: child),
-              builder: (context, child) {
-                return Transform.translate(
-                  offset: gestureController.translation,
-                  child: Transform.scale(
-                    scale: gestureController.scale,
-                    child: child,
-                  ),
-                );
-              },
+        return Listener(
+          onPointerSignal: (pointerSignal) {
+            if (pointerSignal is PointerScrollEvent) {
+              scrollByVisualDelta(-pointerSignal.scrollDelta.dy);
+              gestureController.panHorizontally(-pointerSignal.scrollDelta.dx);
+            }
+          },
+          child: GestureDetector(
+            behavior: .opaque,
+            onScaleStart: handleScaleStart,
+            onScaleUpdate: handleScaleUpdate,
+            onScaleEnd: (details) => unawaited(handleScaleEnd(details)),
+            child: ClipRect(
+              child: AnimatedBuilder(
+                animation: gestureController,
+                child: IgnorePointer(child: child),
+                builder: (context, child) {
+                  return Transform.translate(
+                    offset: gestureController.translation,
+                    child: Transform.scale(
+                      scale: gestureController.scale,
+                      child: child,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         );
