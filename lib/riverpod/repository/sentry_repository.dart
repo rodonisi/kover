@@ -12,7 +12,7 @@ SentryRepository sentryRepository(Ref ref) {
 
   ref.listen(generalSettingsProvider, (previous, next) async {
     next.whenData((settings) async {
-      if (settings.sendUsageData) {
+      if (settings.sendDiagnostics) {
         await repo.init();
       } else {
         await repo.disable();

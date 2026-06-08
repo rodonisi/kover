@@ -27,7 +27,9 @@ class MonitoringOptOutPopup extends ConsumerWidget {
       actions: [
         FilledButton(
           onPressed: () {
-            ref.read(generalSettingsProvider.notifier).setSendUsageData(false);
+            ref
+                .read(generalSettingsProvider.notifier)
+                .setSendDiagnostics(false);
             Navigator.of(context).pop();
           },
           style: FilledButton.styleFrom(
@@ -42,7 +44,7 @@ class MonitoringOptOutPopup extends ConsumerWidget {
         ),
         FilledButton(
           onPressed: () {
-            ref.read(generalSettingsProvider.notifier).setSendUsageData(true);
+            ref.read(generalSettingsProvider.notifier).setSendDiagnostics(true);
             Navigator.of(context).pop();
           },
           child: const Text('I\'m in!'),

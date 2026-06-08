@@ -11,7 +11,7 @@ part 'general_settings.g.dart';
 @freezed
 sealed class GeneralSettingsState with _$GeneralSettingsState {
   const factory GeneralSettingsState({
-    @Default(false) bool sendUsageData,
+    @Default(false) bool sendDiagnostics,
   }) = _GeneralSettingsState;
 
   factory GeneralSettingsState.fromJson(Map<String, Object?> json) =>
@@ -31,11 +31,9 @@ class GeneralSettings extends _$GeneralSettings {
     return state.value ?? const GeneralSettingsState();
   }
 
-  Future<void> setSendUsageData(bool value) async {
+  Future<void> setSendDiagnostics(bool value) async {
     final current = await future;
-
-    log.i('set sendUsageData to $value');
-
-    state = AsyncData(current.copyWith(sendUsageData: value));
+    log.i('set sendDiagnostics to $value');
+    state = AsyncData(current.copyWith(sendDiagnostics: value));
   }
 }

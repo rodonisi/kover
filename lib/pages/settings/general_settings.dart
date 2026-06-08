@@ -74,10 +74,10 @@ class GeneralSettings extends ConsumerWidget {
                       'performance statistics. The data does not contain any '
                       'personal information and is uniquely used to improve '
                       'the app.',
-                  value: generalSettings.sendUsageData,
+                  value: generalSettings.sendDiagnostics,
                   onChanged: (value) => ref
                       .read(generalSettingsProvider.notifier)
-                      .setSendUsageData(value),
+                      .setSendDiagnostics(value),
                 ),
               ),
             ],
