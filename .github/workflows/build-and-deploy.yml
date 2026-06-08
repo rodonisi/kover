@@ -57,6 +57,7 @@ jobs:
 
       - name: Upload Debug Symbols to Sentry
         env:
+          SENTRY_RELEASE: kover@${{ needs.version.outputs.version }}+${{ needs.version.outputs.build_number }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
           dart run sentry_dart_plugin
@@ -104,6 +105,7 @@ jobs:
 
       - name: Upload Debug Symbols to Sentry
         env:
+          SENTRY_RELEASE: kover@${{ needs.version.outputs.version }}+${{ needs.version.outputs.build_number }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
           dart run sentry_dart_plugin
@@ -162,6 +164,7 @@ jobs:
 
       - name: Upload Debug Symbols to Sentry
         env:
+          SENTRY_RELEASE: kover@${{ needs.version.outputs.version }}+${{ needs.version.outputs.build_number }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
           dart run sentry_dart_plugin
@@ -207,6 +210,7 @@ jobs:
 
       - name: Upload Debug Symbols to Sentry
         env:
+          SENTRY_RELEASE: kover@${{ needs.version.outputs.version }}+${{ needs.version.outputs.build_number }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
           dart run sentry_dart_plugin
