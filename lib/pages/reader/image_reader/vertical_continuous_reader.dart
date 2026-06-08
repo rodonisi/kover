@@ -182,6 +182,15 @@ class VerticalContinuousReader extends HookConsumerWidget {
                       final firstVisibleIndex = model.firstChild?.index;
                       if (firstVisibleIndex == null) return;
 
+                      if (model.displayingChildIndexList.contains(
+                        nav.totalPages - 1,
+                      )) {
+                        ref
+                            .read(navProvider.notifier)
+                            .jumpToPage(nav.totalPages - 1, fromObserver: true);
+                        return;
+                      }
+
                       ref
                           .read(navProvider.notifier)
                           .jumpToPage(firstVisibleIndex, fromObserver: true);
@@ -205,7 +214,6 @@ class VerticalContinuousReader extends HookConsumerWidget {
                                 ),
                                 sliver: SliverList.separated(
                                   itemCount: nav.totalPages,
-
                                   itemBuilder: (context, index) =>
                                       _VerticalReaderItem(
                                         chapterId: chapterId,
