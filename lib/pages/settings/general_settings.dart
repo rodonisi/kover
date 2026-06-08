@@ -67,13 +67,13 @@ class GeneralSettings extends ConsumerWidget {
               Async(
                 asyncValue: generalSettings,
                 data: (generalSettings) => BooleanOption(
-                  title: 'Send anonymous usage statistics',
+                  title: 'Send anonymous crash reports and diagnostics',
                   icon: KoverIcons.analytics,
                   description:
-                      'Help improve the app by sending anonymous usage '
-                      'statistics and crash reports. The data is uniquely used '
-                      'to improve the app and does not contain any personally '
-                      'identifiable information.',
+                      'Help improve the app by sending anonymous error and '
+                      'performance statistics. The data does not contain any '
+                      'personal information and is uniquely used to improve '
+                      'the app.',
                   value: generalSettings.sendUsageData,
                   onChanged: (value) => ref
                       .read(generalSettingsProvider.notifier)

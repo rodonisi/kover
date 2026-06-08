@@ -9,17 +9,17 @@ class MonitoringOptOutPopup extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return AlertDialog(
-      title: const Text('Send anonymous usage statistics?'),
+      title: const Text('Send anonymous crash reports and diagnostics?'),
       content: const Column(
         spacing: LayoutConstants.mediumPadding,
         mainAxisSize: .min,
         crossAxisAlignment: .start,
         children: [
           Text(
-            'Help improve the app by sending anonymous usage '
-            'statistics and crash reports. The data is uniquely used '
-            'to improve the app and does not contain any personal '
-            'information.',
+            'Help improve the app by sending anonymous error and '
+            'performance statistics. The data does not contain any '
+            'personal information and is uniquely used to improve '
+            'the app.',
           ),
           Text('This can be changed in the settings at any time.'),
         ],
