@@ -18,6 +18,7 @@ FutureOr<void> sentryOptionsConfiguration(SentryFlutterOptions options) {
   options.dsn = _sentryDsn;
   options.sendDefaultPii = false;
   options.enableLogs = true;
+  options.enableTombstone = true;
   options.tracesSampleRate = 1.0;
   // ignore: experimental_member_use
   options.profilesSampleRate = 1.0;
