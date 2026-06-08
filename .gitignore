@@ -63,4 +63,6 @@ app.*.map.json
 web/drift_worker.js
 web/sqlite3.wasm
 
+# Sentry related
 sentry.properties
+.sentry-native
