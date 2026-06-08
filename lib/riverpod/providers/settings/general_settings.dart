@@ -11,7 +11,7 @@ part 'general_settings.g.dart';
 @freezed
 sealed class GeneralSettingsState with _$GeneralSettingsState {
   const factory GeneralSettingsState({
-    @Default(true) bool sendUsageData,
+    @Default(false) bool sendUsageData,
   }) = _GeneralSettingsState;
 
   factory GeneralSettingsState.fromJson(Map<String, Object?> json) =>
