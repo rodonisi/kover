@@ -48,17 +48,15 @@ platform :android do
     FileUtils.mkdir_p(changelog_dir)
 
     File.write("#{changelog_dir}/default.txt", changelog)
-    File.write("#{changelog_dir}/#{version_code}.txt", changelog)
 
     upload_to_play_store(
       track: 'internal',
       version_code: version_code,
       track_promote_to: 'alpha',
-      metadata_path: 'metadata/android',
+      skip_upload_changelogs: false,
       skip_upload_apk: true,
       skip_upload_aab: true,
       skip_upload_metadata: true,
-      skip_upload_changelogs: false,
       skip_upload_images: true,
       skip_upload_screenshots: true
     )
@@ -67,11 +65,10 @@ platform :android do
       track: 'internal',
       version_code: version_code,
       track_promote_to: 'beta',
-      metadata_path: 'metadata/android',
+      skip_upload_changelogs: false,
       skip_upload_apk: true,
       skip_upload_aab: true,
       skip_upload_metadata: true,
-      skip_upload_changelogs: false,
       skip_upload_images: true,
       skip_upload_screenshots: true
     )
