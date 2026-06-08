@@ -1,46 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
-class MeasuredWidget extends StatefulWidget {
-  final Widget child;
+/// A widget that measures its child's natural (unconstrained) height and
+/// reports it via [onSizeMeasured], while constraining itself to the parent's
+/// bounds so it never causes a RenderFlex overflow.
+class MeasuredWidget extends SingleChildRenderObjectWidget {
   final ValueChanged<Size>? onSizeMeasured;
 
   const MeasuredWidget({
     super.key,
-    required this.child,
+    required super.child,
     this.onSizeMeasured,
   });
 
   @override
-  State<MeasuredWidget> createState() => _MeasuredWidgetState();
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderMeasuredWidget(onSizeMeasured: onSizeMeasured);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderMeasuredWidget renderObject,
+  ) {
+    renderObject.onSizeMeasured = onSizeMeasured;
+  }
 }
 
-class _MeasuredWidgetState extends State<MeasuredWidget> {
-  final _key = GlobalKey();
+class RenderMeasuredWidget extends RenderProxyBox {
+  ValueChanged<Size>? onSizeMeasured;
+
+  RenderMeasuredWidget({this.onSizeMeasured});
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(_measureSize);
-  }
-
-  @override
-  void didUpdateWidget(covariant MeasuredWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    WidgetsBinding.instance.addPostFrameCallback(_measureSize);
-  }
-
-  void _measureSize(_) {
-    final renderBox = _key.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null && renderBox.hasSize) {
-      widget.onSizeMeasured?.call(renderBox.size);
+  void performLayout() {
+    if (child == null) {
+      size = constraints.smallest;
+      return;
     }
+
+    child!.layout(
+      BoxConstraints(
+        minWidth: constraints.minWidth,
+        maxWidth: constraints.maxWidth,
+      ),
+      parentUsesSize: true,
+    );
+
+    final naturalSize = child!.size;
+    onSizeMeasured?.call(naturalSize);
+    size = constraints.constrain(naturalSize);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      key: _key,
-      child: widget.child,
+  void paint(PaintingContext context, Offset offset) {
+    context.pushClipRect(
+      needsCompositing,
+      offset,
+      Offset.zero & size,
+      (context, offset) => super.paint(context, offset),
     );
   }
 }

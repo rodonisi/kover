@@ -70,7 +70,9 @@ class AdaptiveSliverAppBar extends HookConsumerWidget {
                   SafeArea(
                     child: MeasuredWidget(
                       onSizeMeasured: (size) {
-                        infoHeight.value = size.height;
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          infoHeight.value = size.height;
+                        });
                       },
                       child: child,
                     ),
