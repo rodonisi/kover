@@ -64,27 +64,31 @@ class EpubReader extends HookConsumerWidget {
                 initialPage: navState.page,
               );
 
-              ref.listen(nav.selectAsync((s) => s.page), (
+              ref.listen(nav, (
                 previous,
                 next,
               ) async {
-                final previousPage = await previous;
-                final nextPage = await next;
+                next.whenData((next) async {
+                  final previousPage = previous?.value?.page;
+                  final nextPage = next.page;
 
-                if (controller.hasClients &&
-                    controller.page?.round() != nextPage) {
-                  final isSequential =
-                      previousPage != null &&
-                      (nextPage - previousPage).abs() == 1;
+                  if (nextPage == previousPage) return;
 
-                  isSequential
-                      ? controller.animateToPage(
-                          nextPage,
-                          duration: 200.ms,
-                          curve: Curves.easeInOut,
-                        )
-                      : controller.jumpToPage(nextPage);
-                }
+                  if (controller.hasClients &&
+                      controller.page?.round() != nextPage) {
+                    final isSequential =
+                        previousPage != null &&
+                        (nextPage - previousPage).abs() == 1;
+
+                    isSequential
+                        ? controller.animateToPage(
+                            nextPage,
+                            duration: 200.ms,
+                            curve: Curves.easeInOut,
+                          )
+                        : controller.jumpToPage(nextPage);
+                  }
+                });
               });
 
               return Stack(
@@ -97,11 +101,15 @@ class EpubReader extends HookConsumerWidget {
                         itemCount: navState.totalPages,
                         allowImplicitScrolling: true,
                         physics: const NeverScrollableScrollPhysics(),
+                        onPageChanged: (newPage) {
+                          ref.read(nav.notifier).jumpToPage(newPage);
+                        },
                         itemBuilder: (context, index) {
                           return _Page(
                             seriesId: seriesId,
                             chapterId: chapterId,
                             page: index,
+                            outerController: controller,
                           );
                         },
                       ),
@@ -125,11 +133,13 @@ class _Page extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
   final int page;
+  final PageController outerController;
 
   const _Page({
     required this.seriesId,
     required this.chapterId,
     required this.page,
+    required this.outerController,
   });
 
   @override
@@ -178,49 +188,75 @@ class _Page extends HookConsumerWidget {
                         next,
                       ) async {
                         next.whenData((next) async {
-                          if (next.page != page) return;
-
                           final previousSubpage = previous?.value?.subpage;
-                          final newSubpage = next.subpage;
+                          final nextSubpage = next.subpage;
+
+                          if (next.page != page ||
+                              next.fromObserver ||
+                              nextSubpage == previousSubpage) {
+                            return;
+                          }
 
                           if (controller.hasClients &&
-                              controller.page?.round() != newSubpage) {
+                              controller.page?.round() != nextSubpage) {
                             final isSequential =
                                 previousSubpage != null &&
-                                (newSubpage - previousSubpage).abs() == 1;
+                                (nextSubpage - previousSubpage).abs() == 1;
 
                             isSequential
                                 ? controller.animateToPage(
-                                    newSubpage,
+                                    nextSubpage,
                                     duration: 200.ms,
                                     curve: Curves.easeInOut,
                                   )
-                                : controller.jumpToPage(newSubpage);
+                                : controller.jumpToPage(nextSubpage);
                           }
                         });
                       });
 
-                      return PageView.builder(
-                        controller: controller,
-                        allowImplicitScrolling: true,
-                        pageSnapping: true,
-                        itemCount: count,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          if (index >= reflowState.subpages.length) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
+                      return NotificationListener<ScrollNotification>(
+                        onNotification: (notification) {
+                          if (notification is OverscrollNotification) {
+                            outerController.jumpTo(
+                              (outerController.offset + notification.overscroll)
+                                  .clamp(
+                                    0.0,
+                                    outerController.position.maxScrollExtent,
+                                  ),
                             );
                           }
 
-                          return SingleChildScrollView(
-                            child: _RenderContent(
-                              seriesId: seriesId,
-                              html: reflowState.subpages[index].outerHtml,
-                              styles: reflowState.page.styles,
-                            ),
-                          );
+                          return false;
                         },
+                        child: PageView.builder(
+                          controller: controller,
+                          allowImplicitScrolling: true,
+                          pageSnapping: true,
+                          itemCount: count,
+                          physics: const ClampingScrollPhysics(),
+                          onPageChanged: (newPage) {
+                            if (navState.page != page) return;
+
+                            ref
+                                .read(nav.notifier)
+                                .jumpToSubpage(newPage, fromObserver: true);
+                          },
+                          itemBuilder: (context, index) {
+                            if (index >= reflowState.subpages.length) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+
+                            return SingleChildScrollView(
+                              child: _RenderContent(
+                                seriesId: seriesId,
+                                html: reflowState.subpages[index].outerHtml,
+                                styles: reflowState.page.styles,
+                              ),
+                            );
+                          },
+                        ),
                       );
                     },
                   );

@@ -206,6 +206,7 @@ sealed class EpubNavigationState with _$EpubNavigationState {
     required int subpage,
     required int totalSubpages,
     @Default(false) bool ready,
+    @Default(false) bool fromObserver,
   }) = _EpubNavigationState;
 }
 
@@ -373,7 +374,11 @@ class EpubNavigation extends _$EpubNavigation {
   Future<void> jumpToPage(int page) async {
     final current = await future;
 
-    if (!current.ready) return;
+    if (!current.ready || page >= current.totalPages || page < 0) return;
+
+    if (current.page - page == 1) {
+      _fromLastSubpage = true;
+    }
 
     await ref
         .read(
@@ -385,7 +390,7 @@ class EpubNavigation extends _$EpubNavigation {
         .jumpToPage(page);
   }
 
-  Future<void> jumpToSubpage(int subpage) async {
+  Future<void> jumpToSubpage(int subpage, {bool fromObserver = false}) async {
     final current = await future;
 
     if (!current.ready) return;
@@ -398,43 +403,32 @@ class EpubNavigation extends _$EpubNavigation {
       ).future,
     );
 
+    if (subpage < 0) {
+      await jumpToPage(current.page - 1);
+      return;
+    }
+
+    if (reflow.status == .done && subpage >= reflow.subpages.length) {
+      await jumpToPage(current.page + 1);
+      return;
+    }
+
     state = AsyncData(
       current.copyWith(
         subpage: subpage,
         ready: reflow.status == .done || subpage < reflow.subpages.length,
+        fromObserver: fromObserver,
       ),
     );
   }
 
   Future<void> nextPage() async {
     final current = await future;
-    final reflow = await ref.read(
-      epubReflowProvider(
-        seriesId: seriesId,
-        chapterId: chapterId,
-        page: current.page,
-      ).future,
-    );
-
-    if (reflow.status != .done && current.subpage >= reflow.subpages.length) {
-      return;
-    }
-
-    if (current.subpage < reflow.subpages.length - 1 ||
-        reflow.status != .done) {
-      await jumpToSubpage(current.subpage + 1);
-    } else if (current.page < current.totalPages - 1) {
-      await jumpToPage(current.page + 1);
-    }
+    await jumpToSubpage(current.subpage + 1);
   }
 
   Future<void> previousPage() async {
     final current = await future;
-    if (current.subpage > 0) {
-      await jumpToSubpage(current.subpage - 1);
-    } else if (current.page > 0) {
-      _fromLastSubpage = true;
-      await jumpToPage(current.page - 1);
-    }
+    await jumpToSubpage(current.subpage - 1);
   }
 }
