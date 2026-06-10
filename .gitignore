@@ -66,3 +66,6 @@ web/sqlite3.wasm
 # Sentry related
 sentry.properties
 .sentry-native
+
+AGENTS.md
+CLAUDE.md
