@@ -132,7 +132,7 @@ void main() {
 // Scale 2x with the given horizontal translation, for a 300px-wide viewport
 // the pan range is [-300, 0]: 0 == left edge, -300 == right edge.
 Matrix4 _zoomedAt(double translationX) {
-  final matrix = Matrix4.identity()..scale(2.0);
+  final matrix = Matrix4.identity()..scaleByDouble(2.0, 2.0, 2.0, 1.0);
   matrix.setTranslationRaw(translationX, 0, 0);
   return matrix;
 }
