@@ -240,8 +240,7 @@ class _Page extends HookConsumerWidget {
                                 (velocity < 0 &&
                                     metrics.pixels >= metrics.maxScrollExtent);
 
-                            if (velocity != 0 &&
-                                position is ScrollPositionWithSingleContext &&
+                            if (position is ScrollPositionWithSingleContext &&
                                 atBoundary) {
                               position.goBallistic(-velocity);
                             }
