@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: |
           flutter pub get
-          flutter build ios --config-only
+          flutter build ios --config-only --dart-define="SENTRY_DSN=${{ vars.SENTRY_DSN }}"
 
       - name: Codegen
         run: |
@@ -85,7 +85,7 @@ jobs:
       - name: Install dependencies
         run: |
           flutter pub get
-          flutter build macos --config-only
+          flutter build macos --config-only --dart-define="SENTRY_DSN=${{ vars.SENTRY_DSN }}"
 
       - name: Codegen
         run: |
@@ -150,7 +150,7 @@ jobs:
 
       - name: Build
         run: |
-          flutter build appbundle --release --build-name=${{ needs.version.outputs.version }} --build-number=${{ needs.version.outputs.build_number }}
+          flutter build appbundle --release --build-name=${{ needs.version.outputs.version }} --build-number=${{ needs.version.outputs.build_number }} --dart-define="SENTRY_DSN=${{ vars.SENTRY_DSN }}"
         env:
           KEYSTORE_PATH: "upload-keystore.jks"
           KEYSTORE_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEYSTORE_PASSWORD }}
@@ -206,6 +206,7 @@ jobs:
             --base-href /kover/ \
             --build-name ${{ needs.version.outputs.version }} \
             --build-number ${{ needs.version.outputs.build_number }} \
+            --dart-define="SENTRY_DSN=${{ vars.SENTRY_DSN }}" \
             --wasm
 
       - name: Upload Debug Symbols to Sentry
