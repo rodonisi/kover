@@ -54,6 +54,7 @@ app.*.map.json
 *.g.*
 *.freezed.dart
 /lib/api
+/lib/generated
 # openapi.json
 
 # local environment 

@@ -1,0 +1,4 @@
+arb-dir: lib/i18n
+output-dir: lib/generated/i18n
+template-arb-file: en.arb
+nullable-getter: false
