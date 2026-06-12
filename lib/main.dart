@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/riverpod/repository/sentry_repository.dart';
@@ -40,6 +41,8 @@ class App extends ConsumerWidget {
             darkTheme: theme.darkTheme,
             themeMode: theme.mode,
             routerConfig: ref.watch(routerProvider),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
           ),
           loading: () => const SizedBox.shrink(),
         ),
