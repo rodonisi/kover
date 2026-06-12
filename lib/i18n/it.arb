@@ -71,6 +71,9 @@
     "@dataManagement": {
         "description": "Label for the data management section"
     },
+    "@databaseBusy": {
+        "description": "Message shown when the database is busy with an operation"
+    },
     "@databaseSize": {
         "description": "Label for the database size information"
     },
@@ -428,6 +431,7 @@
     "credentials": "",
     "dark": "",
     "dataManagement": "",
+    "databaseBusy": "",
     "databaseSize": "",
     "dateAdded": "",
     "descending": "",
