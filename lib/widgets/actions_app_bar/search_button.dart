@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/models/series_model.dart';
 import 'package:kover/models/volume_model.dart';
@@ -64,6 +65,7 @@ class SearchButton extends HookConsumerWidget {
         );
       },
       suggestionsBuilder: (context, controller) async {
+        final l = AppLocalizations.of(context);
         final theme = Theme.of(context);
         final seriesResults = await ref.read(
           searchSeriesProvider(controller.text).future,
@@ -84,7 +86,7 @@ class SearchButton extends HookConsumerWidget {
         return [
           if (seriesResults.isNotEmpty) ...[
             Text(
-              'Series',
+              l.series,
               style: theme.textTheme.headlineSmall,
             ),
             ...seriesResults.map(
@@ -96,7 +98,7 @@ class SearchButton extends HookConsumerWidget {
           ],
           if (volumesResults.isNotEmpty) ...[
             Text(
-              'Volumes',
+              l.volumes,
               style: theme.textTheme.headlineSmall,
             ),
             ...volumesResults.map(
@@ -108,7 +110,7 @@ class SearchButton extends HookConsumerWidget {
           ],
           if (chaptersResults.isNotEmpty) ...[
             Text(
-              'Chapters',
+              l.chapters,
               style: theme.textTheme.headlineSmall,
             ),
             ...chaptersResults.map(

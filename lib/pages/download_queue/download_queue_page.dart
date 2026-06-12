@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/riverpod/managers/download_manager.dart';
 import 'package:kover/riverpod/providers/chapter.dart';
 import 'package:kover/riverpod/providers/download.dart';
@@ -16,6 +17,7 @@ class DownloadQueuePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final hasDls = ref.watch(
       downloadManagerProvider.select(
         (state) => state.value?.downloadQueue.isNotEmpty ?? false,
@@ -27,7 +29,7 @@ class DownloadQueuePage extends ConsumerWidget {
         physics: hasDls ? null : const NeverScrollableScrollPhysics(),
         slivers: [
           SliverAppBar.large(
-            title: const Text('Download Queue'),
+            title: Text(l.downloadQueue),
             actions: [
               if (hasDls) const CancellAllAction(),
             ],
@@ -52,11 +54,12 @@ class CancellAllAction extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     return TextButton(
       onPressed: () async {
         await ref.read(downloadManagerProvider.notifier).cancelAll();
       },
-      child: const Text('Cancel All'),
+      child: Text(l.cancelAll),
     );
   }
 }
@@ -70,9 +73,10 @@ class DownloadQueueList extends ConsumerWidget {
     return AsyncSliver(
       asyncValue: queued,
       data: (data) {
+        final l = AppLocalizations.of(context);
         if (data.downloadQueue.isEmpty) {
-          return const SliverFillRemaining(
-            child: Center(child: Text('No downloads in queue')),
+          return SliverFillRemaining(
+            child: Center(child: Text(l.noDownloadsInQueue)),
           );
         }
         final queued = data.downloadQueue.toList();

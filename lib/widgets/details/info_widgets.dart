@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/riverpod/providers/want_to_read.dart';
 import 'package:kover/utils/extensions/int.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -19,6 +20,7 @@ class LimitedList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final display = items.take(maxItems);
     return Column(
       mainAxisSize: .min,
@@ -36,7 +38,7 @@ class LimitedList extends StatelessWidget {
               for (final item in display) item,
               if (display.length < items.length)
                 Text(
-                  '+${items.length - display.length} more',
+                  l.moreCount(items.length - display.length),
                   style: Theme.of(context).textTheme.labelMedium,
                 ),
             ],
@@ -82,6 +84,7 @@ class WordCount extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Row(
       mainAxisSize: .min,
       spacing: LayoutConstants.smallPadding,
@@ -91,7 +94,7 @@ class WordCount extends StatelessWidget {
           size: LayoutConstants.smallIcon,
         ),
         Text(
-          '${wordCount.prettyInt()} words',
+          l.wordCount(wordCount.prettyInt()),
         ),
       ],
     );
@@ -131,6 +134,7 @@ class RemainingHours extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Row(
       mainAxisSize: .min,
       spacing: LayoutConstants.smallPadding,
@@ -140,7 +144,7 @@ class RemainingHours extends StatelessWidget {
           size: LayoutConstants.smallIcon,
         ),
         Text(
-          '~${hours.toStringAsFixed(1)} hours',
+          l.hoursCount(hours.toStringAsFixed(1)),
         ),
       ],
     );
@@ -156,6 +160,7 @@ class Pages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Row(
       mainAxisSize: .min,
       spacing: LayoutConstants.smallPadding,
@@ -164,7 +169,7 @@ class Pages extends StatelessWidget {
           LucideIcons.fileStack,
           size: LayoutConstants.smallIcon,
         ),
-        Text('${pages.prettyInt()} pages'),
+        Text(l.pagesCount(pages.prettyInt())),
       ],
     );
   }
