@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/reading_lists.dart';
 import 'package:kover/riverpod/providers/router.dart';
@@ -19,6 +20,7 @@ class ReadingListAppBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final readingList = ref.watch(
       readingListProvider(readingListId: readingListId),
     );
@@ -49,9 +51,7 @@ class ReadingListAppBar extends HookConsumerWidget {
               if (readingList.summary != null)
                 Async(
                   asyncValue: chapterCount,
-                  data: (count) => Text(
-                    '$count ${count == 1 ? 'item' : 'items'}',
-                  ),
+                  data: (count) => Text(l.items(count)),
                 ),
             ],
           ),

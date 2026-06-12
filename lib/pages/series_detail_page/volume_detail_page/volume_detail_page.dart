@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/pages/series_detail_page/volume_detail_page/volume_app_bar.dart';
 import 'package:kover/riverpod/providers/volume.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -17,6 +18,7 @@ class VolumeDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final volume = ref.watch(volumeProvider(volumeId: volumeId)).value;
 
     if (volume == null) return const SizedBox.shrink();
@@ -51,7 +53,7 @@ class VolumeDetailPage extends ConsumerWidget {
             ),
             sliver: SliverToBoxAdapter(
               child: Text(
-                'Chapters',
+                l.chapters,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
             ),

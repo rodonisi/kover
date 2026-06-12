@@ -28,6 +28,7 @@ sealed class KoverIcons {
   static const IconData readingList = LucideIcons.layoutList;
 
   static const IconData check = LucideIcons.check;
+  static const IconData info = LucideIcons.info;
 
   static const IconData chevronRight = LucideIcons.chevronRight;
 }
