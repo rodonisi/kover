@@ -73,10 +73,12 @@ class VolumesRepository {
             if (remoteCover != null) {
               return ImageModel(data: remoteCover.image.value);
             }
-          } catch (e) {
-            log.e(
-              'Failed to fetch series cover for series $volumeId',
+          } catch (e, stacktrace) {
+            log.error(
+              'failed to fetch cover for volume',
               error: e,
+              stacktrace: stacktrace,
+              attributes: {'volume_id': .int(volumeId)},
             );
           }
 

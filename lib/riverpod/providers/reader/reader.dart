@@ -90,8 +90,13 @@ class Reader extends _$Reader {
     _saveProgressDebounce?.cancel();
 
     _saveProgressDebounce = Timer(500.ms, () async {
-      log.d(
-        'Saving progress: page=$page, scrollId=$scrollId, chapter=${current.chapter.id}',
+      log.debug(
+        'saving progress',
+        attributes: {
+          'page': .int(page),
+          'scroll_id': .string(scrollId ?? 'null'),
+          'chapter_id': .int(current.chapter.id),
+        },
       );
 
       if (!ref.mounted) return;

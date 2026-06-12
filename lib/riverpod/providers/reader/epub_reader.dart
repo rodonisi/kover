@@ -87,7 +87,6 @@ class EpubReflow extends _$EpubReflow {
         );
       }
       await loader.load();
-      log.d('loaded font family ${family.key}');
     }
 
     _cursor = ElementCursor(root: pageContent.root.children.first);
@@ -114,7 +113,7 @@ class EpubReflow extends _$EpubReflow {
         ].where((fragment) => fragment.hasVisibleNodes).toList();
 
         if (newSubpages.isEmpty) {
-          log.d('no content to render, add empty page');
+          log.debug('no content to render, add empty page');
           newSubpages.add(DocumentFragment());
         }
 
@@ -170,8 +169,11 @@ class EpubReflow extends _$EpubReflow {
             '[${HtmlConstants.scrollIdAttribute}="${current.scrollId!.cssEscaped}"]',
           );
           if (resumePoint != null && resumePoint.hasChildNodes()) {
-            log.d(
-              'found resume point with scrollId: ${current.scrollId}',
+            log.info(
+              'found resume point',
+              attributes: {
+                'scroll_id': LogAttribute.string(current.scrollId!),
+              },
             );
 
             final settings = await ref.read(
@@ -186,8 +188,12 @@ class EpubReflow extends _$EpubReflow {
               resumeSubpage: newSubpages.length - 1,
             );
           }
-        } catch (e) {
-          log.e('failed to find resume point in new subpage', error: e);
+        } catch (e, stacktrace) {
+          log.error(
+            'failed to find resume point in new subpage',
+            error: e,
+            stacktrace: stacktrace,
+          );
         }
       }
 

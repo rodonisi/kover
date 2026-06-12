@@ -210,10 +210,15 @@ class SyncManager extends _$SyncManager {
     var failed = false;
     try {
       await callback();
-    } catch (e) {
+    } catch (e, stacktrace) {
       failed = true;
-      log.e('failed phase', error: e);
       state = SyncState.error(phase: phase, error: e);
+      log.error(
+        'failed sync phase',
+        error: e,
+        stacktrace: stacktrace,
+        attributes: {'phase': .string(phase.toString())},
+      );
     } finally {
       _runningPhases.remove(phase);
       if (!failed && _runningPhases.isNotEmpty) {

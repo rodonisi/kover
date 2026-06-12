@@ -5,7 +5,6 @@ import 'package:kover/database/tables/progress.dart';
 import 'package:kover/database/tables/reading_lists.dart';
 import 'package:kover/database/tables/series.dart';
 import 'package:kover/database/tables/volumes.dart';
-import 'package:kover/utils/logging.dart';
 
 part 'reader_dao.g.dart';
 
@@ -195,7 +194,6 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   Future<ReadingProgressData> upsertProgress(
     ReadingProgressCompanion entry,
   ) async {
-    log.d('upsert progress chapter=${entry.chapterId.value}');
     return await into(
       readingProgress,
     ).insertReturning(
@@ -270,7 +268,6 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
         }
       }
 
-      log.d('upserting progress batch with ${toWrite.length} entries');
       await batch((b) => b.insertAllOnConflictUpdate(readingProgress, toWrite));
     });
   }

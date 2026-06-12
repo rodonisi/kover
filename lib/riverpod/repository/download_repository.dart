@@ -125,10 +125,12 @@ class DownloadRepository {
           await _db.chaptersDao.upsertChapterCover(remoteCover);
         }
       }
-    } catch (e) {
-      log.e(
-        'Failed to fetch chapter cover for chapter ${chapter.id}',
+    } catch (e, stacktrace) {
+      log.error(
+        'failed to fetch cover for chapter',
         error: e,
+        stacktrace: stacktrace,
+        attributes: {'chapter_id': .int(chapter.id)},
       );
     }
 
@@ -144,10 +146,12 @@ class DownloadRepository {
           await _db.volumesDao.upsertVolumeCover(remoteCover);
         }
       }
-    } catch (e) {
-      log.e(
-        'Failed to fetch series cover for series ${chapter.volumeId}',
+    } catch (e, stacktrace) {
+      log.error(
+        'failed to fetch cover for volume',
         error: e,
+        stacktrace: stacktrace,
+        attributes: {'volume_id': .int(chapter.volumeId)},
       );
     }
 
@@ -163,10 +167,12 @@ class DownloadRepository {
           await _db.seriesDao.upsertSeriesCover(remoteCover);
         }
       }
-    } catch (e) {
-      log.e(
-        'Failed to fetch series cover for series ${chapter.seriesId}',
+    } catch (e, stacktrace) {
+      log.error(
+        'failed to fetch cover for series',
         error: e,
+        stacktrace: stacktrace,
+        attributes: {'series_id': .int(chapter.seriesId)},
       );
     }
   }
@@ -174,7 +180,10 @@ class DownloadRepository {
   /// Removes all locally stored pages for [chapterId].
   Future<void> deleteChapter({required int chapterId}) async {
     await _db.downloadDao.deleteChapter(chapterId: chapterId);
-    log.d('deleted local pages for chapter $chapterId');
+    log.info(
+      'deleted local pages for chapter',
+      attributes: {'chapter_id': .int(chapterId)},
+    );
   }
 
   /// Emits the download progress as a percentage for all chapters belonging to

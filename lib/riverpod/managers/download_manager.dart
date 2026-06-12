@@ -57,6 +57,12 @@ class DownloadManager extends _$DownloadManager {
         downloadQueue: {...current.downloadQueue, chapterId},
       ),
     );
+    log.info(
+      'enqueued chapter for download',
+      attributes: {
+        'chapter_id': .int(chapterId),
+      },
+    );
   }
 
   Future<void> enqueueVolume(int volumeId) async {
@@ -69,6 +75,13 @@ class DownloadManager extends _$DownloadManager {
         downloadQueue: {...current.downloadQueue, ...ids},
       ),
     );
+    log.info(
+      'enqueued volume for download',
+      attributes: {
+        'volume_id': .int(volumeId),
+        'chapter_count': .int(ids.length),
+      },
+    );
   }
 
   Future<void> enqueueSeries(int seriesId) async {
@@ -80,6 +93,13 @@ class DownloadManager extends _$DownloadManager {
       current.copyWith(
         downloadQueue: {...current.downloadQueue, ...ids},
       ),
+    );
+    log.info(
+      'enqueued series for download',
+      attributes: {
+        'series_id': .int(seriesId),
+        'chapter_count': .int(ids.length),
+      },
     );
   }
 
@@ -143,7 +163,12 @@ class DownloadManager extends _$DownloadManager {
 
       if (nextId == null) break;
 
-      log.d('Starting download for chapter $nextId');
+      log.debug(
+        'starting download for chapter',
+        attributes: {
+          'chapter_id': .int(nextId),
+        },
+      );
 
       await _startDownload(nextId);
     }
@@ -171,12 +196,24 @@ class DownloadManager extends _$DownloadManager {
 
     try {
       await task.value;
-    } catch (e) {
-      log.e('Download failed for chapter $chapterId', error: e);
+    } catch (e, stacktrace) {
+      log.error(
+        'download failed for chapter',
+        error: e,
+        stacktrace: stacktrace,
+        attributes: {
+          'chapter_id': .int(chapterId),
+        },
+      );
     } finally {
       _activeTasks.remove(chapterId);
 
-      log.d('Download completed for chapter $chapterId');
+      log.debug(
+        'download completed for chapter',
+        attributes: {
+          'chapterId': .int(chapterId),
+        },
+      );
       final current = await future;
       final newQueue = Set<int>.from(current.downloadQueue)..remove(chapterId);
       state = AsyncData(current.copyWith(downloadQueue: newQueue));

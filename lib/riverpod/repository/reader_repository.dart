@@ -149,8 +149,22 @@ class ReaderRepository {
 
     try {
       await _readerClient.sendProgress(prog);
-    } catch (e) {
-      log.e('could not send progress', error: e);
+    } catch (e, stacktrace) {
+      log.error(
+        'could not send progress',
+        error: e,
+        stacktrace: stacktrace,
+        attributes: {
+          'chapter_id': .int(prog.chapterId),
+          'volume_id': .int(prog.volumeId),
+          'series_id': .int(prog.seriesId),
+          'library_id': .int(prog.libraryId),
+          'pages_read': .int(prog.pagesRead),
+          'book_scroll_id': .string(prog.bookScrollId ?? 'null'),
+          'last_modified': .string(prog.lastModified.toIso8601String()),
+          'dirty': .bool(prog.dirty),
+        },
+      );
     }
   }
 
@@ -190,7 +204,10 @@ class ReaderRepository {
     final dirty = await _db.readerDao.getDirtyProgress();
     if (dirty.isEmpty) return;
 
-    log.d('processing ${dirty.length} progress entries');
+    log.info(
+      'processing proress entries',
+      attributes: {'count': .int(dirty.length)},
+    );
 
     final remoteProgress = <ReadingProgressCompanion>[];
 
@@ -218,8 +235,13 @@ class ReaderRepository {
 
     try {
       await _readerClient.markSeriesRead(seriesId);
-    } catch (e) {
-      log.e('Failed to mark series $seriesId as read', error: e);
+    } catch (e, stacktrace) {
+      log.error(
+        'failed to mark series as read',
+        error: e,
+        stacktrace: stacktrace,
+        attributes: {'series_id': .int(seriesId)},
+      );
     }
   }
 
@@ -231,8 +253,13 @@ class ReaderRepository {
 
     try {
       await _readerClient.markSeriesUnread(seriesId);
-    } catch (e) {
-      log.e('Failed to mark series $seriesId as unread', error: e);
+    } catch (e, stacktrace) {
+      log.error(
+        'failed to mark series as unread',
+        error: e,
+        stacktrace: stacktrace,
+        attributes: {'series_id': .int(seriesId)},
+      );
     }
   }
 
@@ -248,8 +275,13 @@ class ReaderRepository {
         seriesId: volume.volume.seriesId,
         volumeId: volumeId,
       );
-    } catch (e) {
-      log.e('Failed to mark volume $volumeId as read', error: e);
+    } catch (e, stacktrace) {
+      log.error(
+        'failed to mark volume as read',
+        error: e,
+        stacktrace: stacktrace,
+        attributes: {'volume_id': .int(volumeId)},
+      );
     }
   }
 
@@ -265,8 +297,13 @@ class ReaderRepository {
         seriesId: volume.volume.seriesId,
         volumeId: volumeId,
       );
-    } catch (e) {
-      log.e('Failed to mark volume $volumeId as unread', error: e);
+    } catch (e, stacktrace) {
+      log.error(
+        'failed to mark volume as unread',
+        error: e,
+        stacktrace: stacktrace,
+        attributes: {'volume_id': .int(volumeId)},
+      );
     }
   }
 

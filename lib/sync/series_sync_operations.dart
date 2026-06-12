@@ -96,7 +96,14 @@ class SeriesSyncOperations {
     );
 
     if (!res.isSuccessful) {
-      log.e('Failed to download series cover', error: res.error);
+      log.error(
+        'failed to download series cover',
+        error: res.error,
+        attributes: {
+          'series_id': .int(seriesId),
+          'status_code': .int(res.statusCode),
+        },
+      );
       return null;
     }
 

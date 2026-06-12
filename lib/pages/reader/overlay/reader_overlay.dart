@@ -212,8 +212,14 @@ class ReaderOverlay extends HookConsumerWidget {
                         ChapterSnackbar(
                               title: 'Previous: ${prevChapter.value?.title}',
                               onNavigate: () {
-                                log.d(
-                                  'Navigating to prev chapter ${prevChapter.value}',
+                                log.debug(
+                                  'navigating to previous chapter',
+                                  attributes: {
+                                    if (prevChapter.value != null)
+                                      'chapter_id': .int(prevChapter.value!.id)
+                                    else
+                                      'chapter_id': const .string('null'),
+                                  },
                                 );
                                 ReaderRoute(
                                   seriesId: seriesId,
@@ -242,8 +248,14 @@ class ReaderOverlay extends HookConsumerWidget {
                         ChapterSnackbar(
                               title: 'Next: ${nextChapter.value?.title}',
                               onNavigate: () {
-                                log.d(
-                                  'Navigating to next chapter ${nextChapter.value}',
+                                log.debug(
+                                  'navigating to next chapter',
+                                  attributes: {
+                                    if (nextChapter.value != null)
+                                      'chapter_id': .int(nextChapter.value!.id)
+                                    else
+                                      'chapter_id': const .string('null'),
+                                  },
                                 );
                                 ReaderRoute(
                                   seriesId: seriesId,

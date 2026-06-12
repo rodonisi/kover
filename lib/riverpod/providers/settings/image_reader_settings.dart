@@ -108,7 +108,13 @@ class ImageReaderSettings extends _$ImageReaderSettings {
         scaleType: type,
       ),
     );
-    log.i('set scaleType to $type');
+    log.info(
+      'set scale type',
+      attributes: {
+        'value': .string(type.toString()),
+        'reader': const .string('image'),
+      },
+    );
   }
 
   Future<void> setReadDirection(ReadDirection direction) async {
@@ -119,7 +125,13 @@ class ImageReaderSettings extends _$ImageReaderSettings {
         readDirection: direction,
       ),
     );
-    log.i('set readDirection to $direction');
+    log.info(
+      'set read direction',
+      attributes: {
+        'value': .string(direction.toString()),
+        'reader': const .string('image'),
+      },
+    );
   }
 
   Future<void> setReaderMode(ReaderMode mode) async {
@@ -131,7 +143,13 @@ class ImageReaderSettings extends _$ImageReaderSettings {
         hadSpread: mode == .spread,
       ),
     );
-    log.i('set readerMode to $mode');
+    log.info(
+      'set reader mode',
+      attributes: {
+        'value': .string(mode.toString()),
+        'reader': const .string('image'),
+      },
+    );
   }
 
   Future<void> setVerticalReaderGap(double gap) async {
@@ -145,7 +163,13 @@ class ImageReaderSettings extends _$ImageReaderSettings {
         ),
       ),
     );
-    log.i('set verticalReaderGap to ${state.value!.verticalReaderGap}');
+    log.info(
+      'set vertical reader gap',
+      attributes: {
+        'value': .double(state.value!.verticalReaderGap),
+        'reader': const .string('image'),
+      },
+    );
   }
 
   Future<void> setVerticalReaderPadding(double padding) async {
@@ -159,7 +183,13 @@ class ImageReaderSettings extends _$ImageReaderSettings {
         ),
       ),
     );
-    log.i('set verticalReaderPadding to ${state.value!.verticalReaderPadding}');
+    log.info(
+      'set vertical reader padding',
+      attributes: {
+        'value': .double(state.value!.verticalReaderPadding),
+        'reader': const .string('image'),
+      },
+    );
   }
 
   Future<void> setSpreadReaderGap(double gap) async {
@@ -173,39 +203,60 @@ class ImageReaderSettings extends _$ImageReaderSettings {
         ),
       ),
     );
-    log.i('set spreadReaderGap to ${state.value!.spreadReaderGap}');
+    log.info(
+      'set spread reader gap',
+      attributes: {
+        'value': .double(state.value!.spreadReaderGap),
+        'reader': const .string('image'),
+      },
+    );
   }
 
   Future<void> setIgnoreSafeAreas(bool ignore) async {
     final current = await future;
 
     state = AsyncData(current.copyWith(ignoreSafeAreas: ignore));
-    log.i('set ignoreSafeAreas to $ignore');
+    log.info(
+      'set ignore safe areas',
+      attributes: {'value': .bool(ignore), 'reader': const .string('image')},
+    );
   }
 
   Future<void> setSpreadCoverPage(bool value) async {
     final current = await future;
 
     state = AsyncData(current.copyWith(spreadCoverPage: value));
-    log.i('set spreadCoverPage to $value');
+    log.info(
+      'set spread cover page',
+      attributes: {'value': .bool(value), 'reader': const .string('image')},
+    );
   }
 
   Future<void> setShowProgressBar(bool value) async {
     final current = await future;
 
     state = AsyncData(current.copyWith(showProgressBar: value));
-    log.i('set showProgressBar to $value');
+    log.info(
+      'set show progress bar',
+      attributes: {'value': .bool(value), 'reader': const .string('image')},
+    );
   }
 
   Future<void> reset() async {
     final defaults = await ref.read(defaultImageReaderSettingsProvider.future);
     state = AsyncData(defaults);
-    log.i('reset image reader settings to defaults');
+    log.info(
+      'reset reader settings to defaults',
+      attributes: {'reader': const .string('image')},
+    );
   }
 
   Future<void> setDefault() async {
     final current = await future;
     ref.read(defaultImageReaderSettingsProvider.notifier).setDefault(current);
-    log.i('set current image reader settings as default');
+    log.info(
+      'set current reader settings as default',
+      attributes: {'reader': const .string('image')},
+    );
   }
 }

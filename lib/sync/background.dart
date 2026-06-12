@@ -117,8 +117,12 @@ void callbackDispatcher() {
       await engine.syncProgress();
 
       return true;
-    } catch (e) {
-      log.e('failed background fetch', error: e);
+    } catch (e, stacktrace) {
+      log.error(
+        'failed background fetch',
+        error: e,
+        stacktrace: stacktrace,
+      );
     } finally {
       await db.close();
     }

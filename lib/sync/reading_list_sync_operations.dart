@@ -77,8 +77,13 @@ class ReadingListSyncOperations {
     );
 
     if (!res.isSuccessful) {
-      log.e(
-        'Failed to fetch reading list cover for $readingListId: ${res.error}',
+      log.error(
+        'failed to fetch reading list cover',
+        error: res.error,
+        attributes: {
+          'reading_list_id': .int(readingListId),
+          'status_code': .int(res.statusCode),
+        },
       );
       return null;
     }

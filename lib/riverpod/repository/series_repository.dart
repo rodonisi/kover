@@ -139,10 +139,14 @@ class SeriesRepository {
             if (remoteCover != null) {
               return ImageModel(data: remoteCover.image.value);
             }
-          } catch (e) {
-            log.e(
-              'Failed to fetch series cover for series $seriesId',
+          } catch (e, stacktrace) {
+            log.error(
+              'failed to fetch series cover for series',
               error: e,
+              stacktrace: stacktrace,
+              attributes: {
+                'series_id': .int(seriesId),
+              },
             );
           }
 

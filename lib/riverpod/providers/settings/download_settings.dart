@@ -34,12 +34,18 @@ class DownloadSettings extends _$DownloadSettings {
   Future<void> setConcurrentDownloads(int count) async {
     final current = await future;
     state = AsyncData(current.copyWith(concurrentDownloads: count));
-    log.i('set concurrentDownloads to $count');
+    log.info(
+      'set concurrent downloads',
+      attributes: {'value': .int(count)},
+    );
   }
 
   Future<void> setDownloadCovers(bool value) async {
     final current = await future;
     state = AsyncData(current.copyWith(downloadCovers: value));
-    log.i('set downloadCovers to $value');
+    log.info(
+      'set download covers',
+      attributes: {'value': LogAttribute.bool(value)},
+    );
   }
 }

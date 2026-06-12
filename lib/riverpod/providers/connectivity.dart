@@ -51,8 +51,8 @@ Future<bool> ping(Ref ref) async {
   try {
     final res = await client.apiAccountRefreshAccountGet();
     return res.isSuccessful;
-  } catch (e) {
-    log.e('ping error', error: e);
+  } catch (e, stacktrace) {
+    log.error('ping error', error: e, stacktrace: stacktrace);
     return false;
   }
 }

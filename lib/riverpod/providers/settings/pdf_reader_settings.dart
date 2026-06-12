@@ -65,7 +65,13 @@ class PdfReaderSettings extends _$PdfReaderSettings {
     state = AsyncData(
       current.copyWith(readDirection: newDirection),
     );
-    log.i('set readDirection to $newDirection');
+    log.info(
+      'set read direction',
+      attributes: {
+        'value': .string(newDirection.toString()),
+        'reader': const .string('pdf'),
+      },
+    );
   }
 
   Future<void> setReaderMode(PdfReaderMode newMode) async {
@@ -74,7 +80,13 @@ class PdfReaderSettings extends _$PdfReaderSettings {
     state = AsyncData(
       current.copyWith(readerMode: newMode),
     );
-    log.i('set readerMode to $newMode');
+    log.info(
+      'set reader mode',
+      attributes: {
+        'value': .string(newMode.toString()),
+        'reader': const .string('pdf'),
+      },
+    );
   }
 
   Future<void> setIgnoreSafeAreas(bool ignore) async {
@@ -83,7 +95,13 @@ class PdfReaderSettings extends _$PdfReaderSettings {
     state = AsyncData(
       current.copyWith(ignoreSafeAreas: ignore),
     );
-    log.i('set ignoreSafeAreas to $ignore');
+    log.info(
+      'set ignore safe areas',
+      attributes: {
+        'value': .bool(ignore),
+        'reader': const .string('pdf'),
+      },
+    );
   }
 
   Future<void> setShowProgressBar(bool show) async {
@@ -92,18 +110,30 @@ class PdfReaderSettings extends _$PdfReaderSettings {
     state = AsyncData(
       current.copyWith(showProgressBar: show),
     );
-    log.i('set showProgressBar to $show');
+    log.info(
+      'set show progress bar',
+      attributes: {
+        'value': .bool(show),
+        'reader': const .string('pdf'),
+      },
+    );
   }
 
   Future<void> reset() async {
     final defaults = await ref.read(defaultPdfReaderSettingsProvider.future);
     state = AsyncData(defaults);
-    log.i('reset to default settings');
+    log.info(
+      'reset reader to default settings',
+      attributes: {'reader': const .string('pdf')},
+    );
   }
 
   Future<void> setDefault() async {
     final current = await future;
     ref.read(defaultPdfReaderSettingsProvider.notifier).setDefault(current);
-    log.i('set current settings as default');
+    log.info(
+      'set current settings as default',
+      attributes: {'reader': const .string('pdf')},
+    );
   }
 }

@@ -104,7 +104,10 @@ class EpubReaderSettings extends _$EpubReaderSettings {
         ),
       ),
     );
-    log.i('set fontSize to ${state.value!.fontSize}');
+    log.info(
+      'set font size',
+      attributes: {'value': .double(newSize), 'reader': const .string('epub')},
+    );
   }
 
   Future<void> setMarginSize(double newSize) async {
@@ -118,7 +121,10 @@ class EpubReaderSettings extends _$EpubReaderSettings {
         ),
       ),
     );
-    log.i('set marginSize to ${state.value!.marginSize}');
+    log.info(
+      'set margin size',
+      attributes: {'value': .double(newSize), 'reader': const .string('epub')},
+    );
   }
 
   Future<void> setLineHeight(double newSize) async {
@@ -132,7 +138,10 @@ class EpubReaderSettings extends _$EpubReaderSettings {
         ),
       ),
     );
-    log.i('set lineHeight to ${state.value!.lineHeight}');
+    log.info(
+      'set line height',
+      attributes: {'value': .double(newSize), 'reader': const .string('epub')},
+    );
   }
 
   Future<void> setWordSpacing(double newSize) async {
@@ -146,7 +155,10 @@ class EpubReaderSettings extends _$EpubReaderSettings {
         ),
       ),
     );
-    log.i('set wordSpacing to ${state.value!.wordSpacing}');
+    log.info(
+      'set word spacing',
+      attributes: {'value': .double(newSize), 'reader': const .string('epub')},
+    );
   }
 
   Future<void> setLetterSpacing(double newSize) async {
@@ -160,7 +172,13 @@ class EpubReaderSettings extends _$EpubReaderSettings {
         ),
       ),
     );
-    log.i('set letterSpacing to ${state.value!.letterSpacing}');
+    log.info(
+      'set letter spacing',
+      attributes: {
+        'value': .double(newSize),
+        'reader': const .string('epub'),
+      },
+    );
   }
 
   Future<void> setHighlightResumePoint(bool value) async {
@@ -169,7 +187,10 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     state = AsyncData(
       current.copyWith(highlightResumePoint: value),
     );
-    log.i('set highlightResumePoint to $value');
+    log.info(
+      'set highhlight resume point',
+      attributes: {'value': .bool(value), 'reader': const .string('epub')},
+    );
   }
 
   Future<void> setShowProgressBar(bool value) async {
@@ -178,18 +199,27 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     state = AsyncData(
       current.copyWith(showProgressBar: value),
     );
-    log.i('set showProgressBar to $value');
+    log.info(
+      'set show progress bar',
+      attributes: {'value': .bool(value), 'reader': const .string('epub')},
+    );
   }
 
   Future<void> reset() async {
     final defaults = await ref.read(defaultEpubReaderSettingsProvider.future);
     state = AsyncData(defaults);
-    log.i('set settings to defaults');
+    log.info(
+      'set reader settings to defaults',
+      attributes: {'reader': const .string('epub')},
+    );
   }
 
   Future<void> setDefault() async {
     final current = await future;
     ref.read(defaultEpubReaderSettingsProvider.notifier).setDefault(current);
-    log.i('set current settings as default');
+    log.info(
+      'set current reader settings as default',
+      attributes: {'reader': const .string('epub')},
+    );
   }
 }

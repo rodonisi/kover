@@ -47,7 +47,13 @@ extension EpubPagePreprocessor on DocumentFragment {
           map.putIfAbsent(el, () => []).add(rule);
         }
       } catch (e) {
-        log.d('Skipping invalid selector "${rule.selector}": $e');
+        log.warning(
+          'skipping invalid selector',
+          attributes: {
+            'selector': .string(rule.selector),
+            'error': .string(e.toString()),
+          },
+        );
       }
     }
     return map;

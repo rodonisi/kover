@@ -206,8 +206,12 @@ class BookSyncOperations {
         final mimeType = res.headers['content-type'] ?? 'image/png';
         return (bytes: res.bodyBytes, mimeType: mimeType);
       }
-    } catch (e) {
-      log.e('failed to fetch page image', error: e);
+    } catch (e, stacktrace) {
+      log.error(
+        'failed to fetch EPUB page image',
+        error: e,
+        stacktrace: stacktrace,
+      );
     }
 
     return null;
@@ -221,7 +225,10 @@ class BookSyncOperations {
     final res = <String, List<Uint8List>>{};
     for (final entry in visitor.fontMap.entries) {
       for (final url in entry.value) {
-        log.d('Found Font: ${entry.key} at $url');
+        log.debug(
+          'found font',
+          attributes: {'family': .string(entry.key)},
+        );
         final data = await _fetchData(url);
         if (data == null || data.bytes.isEmpty) continue;
         res.putIfAbsent(entry.key, () => []).add(data.bytes);

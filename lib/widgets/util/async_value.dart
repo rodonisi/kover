@@ -169,11 +169,7 @@ class _Error extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    log.e(
-      'Provider errored',
-      error: error,
-      stackTrace: stacktrace,
-    );
+    log.error('provider errored', error: error, stacktrace: stacktrace);
     return Center(
       child: Icon(
         LucideIcons.circleX,

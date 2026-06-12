@@ -185,18 +185,24 @@ class Theme extends _$Theme {
     final current = await future;
 
     state = AsyncData(current.copyWith(mode: mode));
-    log.i('set theme mode to $mode');
+    log.info(
+      'set theme mode',
+      attributes: {'value': .string(mode.toString())},
+    );
   }
 
   Future<void> setOutlined(bool value) async {
     final current = await future;
 
     state = AsyncData(current.copyWith(outlined: value));
-    log.i('set outlined theme to $value');
+    log.info(
+      'set outlined theme',
+      attributes: {'value': .bool(value)},
+    );
   }
 
   void reset() {
     state = const AsyncData(ThemeModel());
-    log.i('reset theme to default');
+    log.info('reset theme to default');
   }
 }

@@ -91,7 +91,7 @@ class AppDatabase extends _$AppDatabase {
   /// Clear all content data from the database. Does not clear app state data (e.g. credentials, settings).
   /// Useful e.g. when switching user.
   Future<void> clearDb() {
-    log.i('Clearing database');
+    log.info('clearing database');
     return transaction(() async {
       await delete(libraries).go();
       await delete(chapters).go();
@@ -114,14 +114,14 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> clearDownloads() {
-    log.i('Clearing downloads from database');
+    log.info('clearing downloads from database');
     return transaction(() async {
       await delete(downloadedPages).go();
     });
   }
 
   Future<void> clearCovers() {
-    log.i('Clearing covers from database');
+    log.info('clearing covers from database');
     return transaction(() async {
       await delete(chapterCovers).go();
       await delete(volumeCovers).go();
@@ -133,6 +133,7 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> vacuum() async {
     await customStatement('VACUUM');
+    log.info('reclaimed database space');
   }
 
   @override

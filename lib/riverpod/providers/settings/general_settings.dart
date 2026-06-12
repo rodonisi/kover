@@ -33,7 +33,7 @@ class GeneralSettings extends _$GeneralSettings {
 
   Future<void> setSendDiagnostics(bool value) async {
     final current = await future;
-    log.i('set sendDiagnostics to $value');
+    log.info('set send diagnostics', attributes: {'value': .bool(value)});
     state = AsyncData(current.copyWith(sendDiagnostics: value));
   }
 }

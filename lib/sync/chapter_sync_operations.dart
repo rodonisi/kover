@@ -32,7 +32,11 @@ class ChapterSyncOperations {
     );
 
     if (!res.isSuccessful) {
-      log.e('Failed to download chapter cover', error: res.error);
+      log.error(
+        'failed to download chapter cover',
+        error: res.error,
+        attributes: {'chapter_id': .int(chapterId)},
+      );
       return null;
     }
 

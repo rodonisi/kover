@@ -9,7 +9,6 @@ import 'package:kover/database/tables/server_settings.dart';
 import 'package:kover/database/tables/volumes.dart';
 import 'package:kover/database/tables/want_to_read.dart';
 import 'package:kover/utils/data_constants.dart';
-import 'package:kover/utils/logging.dart';
 import 'package:rxdart/rxdart.dart';
 
 part 'series_dao.g.dart';
@@ -420,7 +419,6 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
 
   /// Upsert a batch of series
   Future<void> upsertSeriesBatch(Iterable<SeriesCompanion> entries) async {
-    log.d('upserting series batch with ${entries.length} entries');
     await batch((batch) {
       batch.insertAllOnConflictUpdate(series, entries);
     });

@@ -80,10 +80,12 @@ class ChaptersRepository {
             if (remoteCover != null) {
               return ImageModel(data: remoteCover.image.value);
             }
-          } catch (e) {
-            log.e(
-              'Failed to fetch series cover for series $chapterId',
+          } catch (e, stacktrace) {
+            log.error(
+              'failed to fetch series cover for chapter',
               error: e,
+              stacktrace: stacktrace,
+              attributes: {'chapter_id': .int(chapterId)},
             );
           }
 
@@ -97,8 +99,13 @@ class ChaptersRepository {
       if (remoteCover != null) {
         await _db.chaptersDao.upsertChapterCover(remoteCover);
       }
-    } catch (e) {
-      log.e('Failed to fetch series cover for series $chapterId', error: e);
+    } catch (e, stacktrace) {
+      log.error(
+        'failed to fetch cover for chapter',
+        error: e,
+        stacktrace: stacktrace,
+        attributes: {'chapter_id': .int(chapterId)},
+      );
     }
   }
 

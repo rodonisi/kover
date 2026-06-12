@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -34,5 +35,6 @@ class OneOffs extends _$OneOffs {
   Future<void> setMonitoringOptOutPopupShown() async {
     final current = await future;
     state = AsyncData(current.copyWith(monitoringOptOutPopupShown: true));
+    log.info('set monitoring opt-out popup shown');
   }
 }

@@ -31,13 +31,13 @@ class SentryRepository {
     await SentryFlutter.init(
       sentryOptionsConfiguration,
     );
-    log.i('Sentry initialized');
+    log.info('sentry initialized');
   }
 
   /// Disable Sentry by closing the client and preventing further events from
   /// being sent.
   Future<void> disable() async {
     await Sentry.close();
-    log.i('Sentry disabled');
+    log.info('sentry disabled');
   }
 }
