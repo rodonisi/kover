@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/providers/settings/pdf_reader_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
@@ -14,6 +15,7 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final provider = pdfReaderSettingsProvider(seriesId: seriesId);
 
     return Async(
@@ -36,25 +38,25 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                     spacing: LayoutConstants.largePadding,
                     children: [
                       Text(
-                        'Reader Settings',
+                        l.readerSettings,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       ChoiceOption(
-                        title: 'Reading Direction',
+                        title: l.readingDirection,
                         icon: switch (settings.readDirection) {
                           .leftToRight => KoverIcons.readingDirectionLTR,
                           .rightToLeft => KoverIcons.readingDirectionRTL,
                         },
                         value: settings.readDirection,
-                        options: const [
+                        options: [
                           ChoiceOptionEntry<ReadDirection>(
                             value: .leftToRight,
-                            label: 'Left To Right',
+                            label: l.leftToRight,
                             icon: KoverIcons.readingDirectionLTR,
                           ),
                           ChoiceOptionEntry<ReadDirection>(
                             value: .rightToLeft,
-                            label: 'Right To Left',
+                            label: l.rightToLeft,
                             icon: KoverIcons.readingDirectionRTL,
                           ),
                         ],
@@ -65,22 +67,22 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                         },
                       ),
                       ChoiceOption(
-                        title: 'Reader Mode',
+                        title: l.readerMode,
                         icon: switch (settings.readerMode) {
                           PdfReaderMode.vertical => KoverIcons.verticalReader,
                           PdfReaderMode.horizontal =>
                             KoverIcons.horizontalReader,
                         },
                         value: settings.readerMode,
-                        options: const [
+                        options: [
                           ChoiceOptionEntry<PdfReaderMode>(
                             value: .vertical,
-                            label: 'Vertical',
+                            label: l.vertical,
                             icon: KoverIcons.verticalReader,
                           ),
                           ChoiceOptionEntry<PdfReaderMode>(
                             value: .horizontal,
-                            label: 'Horizontal',
+                            label: l.horizontal,
                             icon: KoverIcons.horizontalReader,
                           ),
                         ],
@@ -91,7 +93,7 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                         },
                       ),
                       BooleanOption(
-                        title: 'Ignore Safe Areas',
+                        title: l.ignoreSafeAreas,
                         icon: KoverIcons.safeArea,
                         value: settings.ignoreSafeAreas,
                         onChanged: (newValue) async {
@@ -101,7 +103,7 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                         },
                       ),
                       BooleanOption(
-                        title: 'Show Progress Bar',
+                        title: l.showProgressBar,
                         icon: KoverIcons.progressBar,
                         value: settings.showProgressBar,
                         onChanged: (newValue) async {
@@ -133,7 +135,7 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                       onPressed: () async =>
                           await ref.read(provider.notifier).setDefault(),
                       icon: const Icon(KoverIcons.save),
-                      label: const Text('Set Defaults'),
+                      label: Text(l.setDefaults),
                     ),
                   ),
                   Expanded(
@@ -141,7 +143,7 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                       onPressed: () async =>
                           await ref.read(provider.notifier).reset(),
                       icon: const Icon(KoverIcons.reset),
-                      label: const Text('Reset'),
+                      label: Text(l.reset),
                     ),
                   ),
                 ],
