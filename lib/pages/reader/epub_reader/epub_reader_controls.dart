@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
@@ -16,6 +17,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final provider = epubReaderSettingsProvider(seriesId: seriesId);
 
     return Async(
@@ -38,24 +40,24 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                     spacing: LayoutConstants.largePadding,
                     children: [
                       Text(
-                        'Reader Settings',
+                        l.readerSettings,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       ChoiceOption(
-                        title: 'Reading Direction',
+                        title: l.readingDirection,
                         icon: settings.readDirection == .leftToRight
                             ? LucideIcons.chevronsRight
                             : LucideIcons.chevronsLeft,
                         value: settings.readDirection,
-                        options: const [
+                        options: [
                           ChoiceOptionEntry<ReadDirection>(
                             value: ReadDirection.leftToRight,
-                            label: 'Left To Right',
+                            label: l.leftToRight,
                             icon: LucideIcons.chevronsRight,
                           ),
                           ChoiceOptionEntry<ReadDirection>(
                             value: ReadDirection.rightToLeft,
-                            label: 'Right To Left',
+                            label: l.rightToLeft,
                             icon: LucideIcons.chevronsLeft,
                           ),
                         ],
@@ -68,7 +70,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                         },
                       ),
                       NumericOption(
-                        title: 'Font Size',
+                        title: l.fontSize,
                         icon: LucideIcons.aLargeSmallDir,
                         value: settings.fontSize,
                         min: EpubReaderSettingsLimits.fontSizeMin,
@@ -80,7 +82,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                             .setFontSize(newValue),
                       ),
                       NumericOption(
-                        title: 'Margins',
+                        title: l.margins,
                         icon: LucideIcons.panelLeftDashed,
                         value: settings.marginSize,
                         min: EpubReaderSettingsLimits.marginSizeMin,
@@ -93,7 +95,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                       ),
 
                       NumericOption(
-                        title: 'Line Height',
+                        title: l.lineHeight,
                         icon: LucideIcons.listChevronsUpDown,
                         value: settings.lineHeight,
                         min: EpubReaderSettingsLimits.lineHeightMin,
@@ -105,7 +107,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                       ),
                       NumericOption(
                         value: settings.wordSpacing,
-                        title: 'Word Spacing',
+                        title: l.wordSpacing,
                         min: EpubReaderSettingsLimits.wordSpacingMin,
                         max: EpubReaderSettingsLimits.wordSpacingMax,
                         step: EpubReaderSettingsLimits.wordSpacingStep,
@@ -115,7 +117,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                         icon: LucideIcons.listMinus,
                       ),
                       NumericOption(
-                        title: 'Letter Spacing',
+                        title: l.letterSpacing,
                         icon: LucideIcons.wholeWord,
                         value: settings.letterSpacing,
                         min: EpubReaderSettingsLimits.letterSpacingMin,
@@ -127,7 +129,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                       ),
                       BooleanOption(
                         icon: LucideIcons.highlighter,
-                        title: 'Highlight Resume Paragraph',
+                        title: l.highlightResumeParagraph,
                         value: settings.highlightResumePoint,
                         onChanged: (value) async {
                           await ref
@@ -137,7 +139,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                       ),
                       BooleanOption(
                         icon: KoverIcons.progressBar,
-                        title: 'Show Progress Bar',
+                        title: l.showProgressBar,
                         value: settings.showProgressBar,
                         onChanged: (value) async {
                           await ref
@@ -168,7 +170,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                       onPressed: () async =>
                           await ref.read(provider.notifier).setDefault(),
                       icon: const Icon(LucideIcons.save),
-                      label: const Text('Set Defaults'),
+                      label: Text(l.setDefaults),
                     ),
                   ),
                   Expanded(
@@ -176,7 +178,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                       onPressed: () async =>
                           await ref.read(provider.notifier).reset(),
                       icon: const Icon(LucideIcons.rotateCcw),
-                      label: const Text('Reset'),
+                      label: Text(l.reset),
                     ),
                   ),
                 ],

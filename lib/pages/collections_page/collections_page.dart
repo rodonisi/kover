@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/models/collection_model.dart';
 import 'package:kover/models/enums/sort_direction.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
@@ -20,6 +21,7 @@ class CollectionsPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final sortDirection = useState(SortDirection.ascending);
     final controller = useTextEditingController();
     final collections = ref.watch(collectionsProvider);
@@ -35,7 +37,7 @@ class CollectionsPage extends HookConsumerWidget {
         keyboardDismissBehavior: .onDrag,
         slivers: [
           SliverAppBar.large(
-            title: const Text('Collections'),
+            title: Text(l.collections),
             actionsPadding: const EdgeInsets.symmetric(
               horizontal: LayoutConstants.smallPadding,
             ),
@@ -46,7 +48,7 @@ class CollectionsPage extends HookConsumerWidget {
                       ? KoverIcons.ascending
                       : KoverIcons.descending,
                 ),
-                menu: _menu(sortDirection),
+                menu: _menu(l, sortDirection),
               ),
             ],
           ),
@@ -115,13 +117,14 @@ class CollectionsPage extends HookConsumerWidget {
   }
 
   ContextMenu _menu(
+    AppLocalizations l,
     ValueNotifier<SortDirection> sortDirection,
   ) {
     return ContextMenu(
       entries: <ContextMenuEntry>[
-        const MenuHeader(text: 'Direction'),
+        MenuHeader(text: l.directionLabel),
         MenuItem(
-          label: const Text('Ascending'),
+          label: Text(l.ascending),
           icon: _getItemIcon(
             sortDirection.value == .ascending,
           ),
@@ -130,7 +133,7 @@ class CollectionsPage extends HookConsumerWidget {
           },
         ),
         MenuItem(
-          label: const Text('Descending'),
+          label: Text(l.descending),
           icon: _getItemIcon(
             sortDirection.value == .descending,
           ),

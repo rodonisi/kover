@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
@@ -18,8 +19,10 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final provider = imageReaderSettingsProvider(seriesId: seriesId);
     final breakpoint = ref.watch(breakpointsProvider);
+
     return Async(
       asyncValue: ref.watch(provider),
       data: (settings) {
@@ -41,23 +44,23 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                     spacing: LayoutConstants.largePadding,
                     children: [
                       Text(
-                        'Reader Settings',
+                        l.readerSettings,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       ChoiceOption<ReadDirection>(
-                        title: 'Reading Direction',
+                        title: l.readingDirection,
                         icon: settings.readDirection == .leftToRight
                             ? LucideIcons.chevronsRight
                             : LucideIcons.chevronsLeft,
-                        options: const [
+                        options: [
                           ChoiceOptionEntry(
                             value: .leftToRight,
-                            label: 'Left to Right',
+                            label: l.leftToRight,
                             icon: LucideIcons.chevronsRight,
                           ),
                           ChoiceOptionEntry(
                             value: .rightToLeft,
-                            label: 'Right to Left',
+                            label: l.rightToLeft,
                             icon: LucideIcons.chevronsLeft,
                           ),
                         ],
@@ -69,27 +72,27 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                         },
                       ),
                       ChoiceOption<ReaderMode>(
-                        title: 'Reader Mode',
+                        title: l.readerMode,
                         icon: switch (settings.readerMode) {
                           .horizontal => LucideIcons.moveHorizontal,
                           .vertical => LucideIcons.moveVertical,
                           .spread => LucideIcons.columns2,
                         },
                         options: [
-                          const ChoiceOptionEntry(
+                          ChoiceOptionEntry(
                             value: .horizontal,
-                            label: 'Horizontal',
+                            label: l.horizontal,
                             icon: LucideIcons.moveHorizontal,
                           ),
-                          const ChoiceOptionEntry(
+                          ChoiceOptionEntry(
                             value: .vertical,
-                            label: 'Vertical',
+                            label: l.vertical,
                             icon: LucideIcons.moveVertical,
                           ),
                           if (breakpoint != .compact)
-                            const ChoiceOptionEntry(
+                            ChoiceOptionEntry(
                               value: .spread,
-                              label: 'Two Page',
+                              label: l.twoPage,
                               icon: LucideIcons.columns2,
                             ),
                         ],
@@ -102,26 +105,26 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                       ),
                       if (settings.readerMode == .horizontal) ...[
                         ChoiceOption<ImageScaleType>(
-                          title: 'Fit Direction',
+                          title: l.fitDirection,
                           icon: switch (settings.scaleType) {
                             .fitWidth => KoverIcons.fitWidth,
                             .fitHeight => KoverIcons.fitHeight,
                             .contain => KoverIcons.fitContain,
                           },
-                          options: const [
+                          options: [
                             ChoiceOptionEntry(
                               value: .contain,
-                              label: 'Contain',
+                              label: l.contain,
                               icon: KoverIcons.fitContain,
                             ),
                             ChoiceOptionEntry(
                               value: .fitWidth,
-                              label: 'Width',
+                              label: l.width,
                               icon: KoverIcons.fitWidth,
                             ),
                             ChoiceOptionEntry(
                               value: .fitHeight,
-                              label: 'Height',
+                              label: l.height,
                               icon: KoverIcons.fitHeight,
                             ),
                           ],
@@ -137,7 +140,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                       ],
                       if (settings.readerMode == .vertical) ...[
                         NumericOption(
-                          title: 'Margins',
+                          title: l.margins,
                           icon: LucideIcons.panelLeftDashed,
                           value: settings.verticalReaderPadding,
                           min: ImageReaderSettingsLimits
@@ -151,7 +154,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                               .setVerticalReaderPadding(newValue),
                         ),
                         NumericOption(
-                          title: 'Vertical Gap',
+                          title: l.verticalGap,
                           icon: LucideIcons.unfoldVertical,
                           value: settings.verticalReaderGap,
                           min: ImageReaderSettingsLimits.verticalReaderGapMin,
@@ -164,7 +167,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                       ],
                       if (settings.readerMode == .spread) ...[
                         NumericOption(
-                          title: 'Page Gap',
+                          title: l.pageGap,
                           icon: LucideIcons.unfoldHorizontal,
                           value: settings.spreadReaderGap,
                           min: ImageReaderSettingsLimits.spreadReaderGapMin,
@@ -176,9 +179,8 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                               .setSpreadReaderGap(newValue),
                         ),
                         BooleanOption(
-                          title: 'Cover Page',
-                          description:
-                              'Treat the first page as the cover, showing it as a single page',
+                          title: l.coverPage,
+                          description: l.coverPageDescription,
                           icon: LucideIcons.bookImage,
                           value: settings.spreadCoverPage,
                           onChanged: (newValue) async => await ref
@@ -187,7 +189,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                         ),
                       ],
                       BooleanOption(
-                        title: 'Ignore Safe Areas',
+                        title: l.ignoreSafeAreas,
                         icon: KoverIcons.safeArea,
                         value: settings.ignoreSafeAreas,
                         onChanged: (newValue) async => await ref
@@ -195,7 +197,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                             .setIgnoreSafeAreas(newValue),
                       ),
                       BooleanOption(
-                        title: 'Show Progress Bar',
+                        title: l.showProgressBar,
                         icon: KoverIcons.progressBar,
                         value: settings.showProgressBar,
                         onChanged: (newValue) async => await ref
@@ -225,7 +227,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                       onPressed: () async =>
                           await ref.read(provider.notifier).setDefault(),
                       icon: const Icon(LucideIcons.save),
-                      label: const Text('Set Defaults'),
+                      label: Text(l.setDefaults),
                     ),
                   ),
                   Expanded(
@@ -233,7 +235,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                       onPressed: () async =>
                           await ref.read(provider.notifier).reset(),
                       icon: const Icon(LucideIcons.rotateCcw),
-                      label: const Text('Reset'),
+                      label: Text(l.reset),
                     ),
                   ),
                 ],

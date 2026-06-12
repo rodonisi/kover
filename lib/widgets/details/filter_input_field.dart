@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class FilterInputField extends HookWidget {
@@ -12,11 +13,12 @@ class FilterInputField extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     useListenable(controller);
     return TextField(
       controller: controller,
       decoration: InputDecoration(
-        hintText: 'Filter',
+        hintText: l.filter,
         prefixIcon: const Icon(LucideIcons.listFilter),
         suffixIcon: controller.text.isNotEmpty
             ? IconButton(

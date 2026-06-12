@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -86,6 +87,7 @@ class SyncMenuOverlay extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final syncState = ref.watch(syncManagerProvider);
 
     final entries =
@@ -93,7 +95,7 @@ class SyncMenuOverlay extends ConsumerWidget {
           syncing: (phases) => [
             for (final phase in phases)
               (
-                label: _phaseLabel(phase),
+                label: _phaseLabel(l, phase),
               ),
           ],
         ) ??
@@ -113,7 +115,7 @@ class SyncMenuOverlay extends ConsumerWidget {
                   vertical: LayoutConstants.smallPadding,
                 ),
                 child: Text(
-                  'No active sync operations',
+                  l.noActiveSyncOperations,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
@@ -144,21 +146,21 @@ class SyncMenuOverlay extends ConsumerWidget {
   }
 }
 
-String _phaseLabel(SyncPhase phase) {
+String _phaseLabel(AppLocalizations l, SyncPhase phase) {
   return phase.when(
-    allSeries: () => 'Syncing all series',
-    metadata: () => 'Syncing metadata',
+    allSeries: () => l.syncingAllSeries,
+    metadata: () => l.syncingMetadata,
     tocs: () => 'Syncing chapters TOCs',
-    recentlyAdded: () => 'Syncing recently added',
-    recentlyUpdated: () => 'Syncing recently updated',
-    libraries: () => 'Syncing libraries',
-    progress: () => 'Syncing progress',
-    covers: () => 'Syncing covers',
-    collections: () => 'Syncing collections',
-    readingLists: () => 'Syncing reading lists',
-    refreshMetadata: (seriesId) => 'Refreshing metadata for series $seriesId',
-    refreshCovers: (seriesId) => 'Refreshing covers for series $seriesId',
-    refreshServerSettings: () => 'Refreshing server settings',
+    recentlyAdded: () => l.syncingRecentlyAdded,
+    recentlyUpdated: () => l.syncingRecentlyUpdated,
+    libraries: () => l.syncingLibraries,
+    progress: () => l.syncingProgress,
+    covers: () => l.syncingCovers,
+    collections: () => l.syncingCollections,
+    readingLists: () => l.syncingReadingLists,
+    refreshMetadata: (seriesId) => l.refreshingMetadataForSeries(seriesId),
+    refreshCovers: (seriesId) => l.refreshingCoversForSeries(seriesId),
+    refreshServerSettings: () => l.refreshingServerSettings,
     refreshToc: (chapterId) =>
         'Refreshing table of contents for chapter $chapterId',
   );
