@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/utils/extensions/string.dart';
 import 'package:kover/utils/layout_constants.dart';
 
@@ -17,6 +18,7 @@ class Summary extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final collapsed = useState(true);
 
     if (summary == null || summary!.isEmpty) return const SizedBox.shrink();
@@ -30,13 +32,13 @@ class Summary extends HookConsumerWidget {
           crossAxisAlignment: .center,
           children: [
             Text(
-              'Summary',
+              l.summary,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             TextButton(
               onPressed: () => collapsed.value = !collapsed.value,
               child: Text(
-                collapsed.value ? 'Show More' : 'Show Less',
+                collapsed.value ? l.showMore : l.showLess,
               ),
             ),
           ],
