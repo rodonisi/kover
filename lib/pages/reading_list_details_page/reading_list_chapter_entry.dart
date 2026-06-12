@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/riverpod/providers/chapter.dart';
 import 'package:kover/riverpod/providers/router.dart';
@@ -21,6 +22,7 @@ class ReadingListChapterEntry extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final series = ref.watch(seriesProvider(seriesId: chapter.seriesId));
     final progress = ref.watch(
       chapterProgressProvider(chapterId: chapter.id),
@@ -32,7 +34,7 @@ class ReadingListChapterEntry extends ConsumerWidget {
           contextMenu: ContextMenu(
             entries: [
               MenuItem(
-                label: const Text('Go to chapter'),
+                label: Text(l.goToChapter),
                 icon: const Icon(KoverIcons.chapter),
                 onSelected: (_) {
                   ChapterDetailRoute(
@@ -42,7 +44,7 @@ class ReadingListChapterEntry extends ConsumerWidget {
                 },
               ),
               MenuItem(
-                label: const Text('Go to series'),
+                label: Text(l.goToSeries),
                 icon: const Icon(KoverIcons.series),
                 onSelected: (_) {
                   SeriesDetailRoute(seriesId: series.id).push(context);

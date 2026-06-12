@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/want_to_read.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -14,6 +15,7 @@ class WantToReadPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(syncManagerProvider.notifier).syncLibraries();
     });
@@ -31,7 +33,7 @@ class WantToReadPage extends ConsumerWidget {
                   padding: LayoutConstants.smallEdgeInsets,
                   sliver: SliverToBoxAdapter(
                     child: Text(
-                      "Want to Read",
+                      l.wantToRead,
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/riverpod/providers/settings/oneoffs.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/layout_constants.dart';
@@ -16,6 +17,7 @@ class NavigatorContainer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final oneOffs = ref.watch(oneOffsProvider);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -69,18 +71,18 @@ class NavigatorContainer extends ConsumerWidget {
                       initialLocation: true,
                     );
                   },
-                  destinations: const [
+                  destinations: [
                     NavigationDestination(
-                      icon: Icon(LucideIcons.house),
-                      label: 'Home',
+                      icon: const Icon(LucideIcons.house),
+                      label: l.home,
                     ),
                     NavigationDestination(
-                      icon: Icon(LucideIcons.star),
-                      label: 'Want to Read',
+                      icon: const Icon(LucideIcons.star),
+                      label: l.wantToRead,
                     ),
                     NavigationDestination(
-                      icon: Icon(LucideIcons.library),
-                      label: 'Menu',
+                      icon: const Icon(LucideIcons.library),
+                      label: l.menu,
                     ),
                   ],
                 ),
