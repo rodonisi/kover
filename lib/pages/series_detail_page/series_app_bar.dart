@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/models/series_model.dart';
 import 'package:kover/riverpod/managers/download_manager.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
@@ -174,6 +175,7 @@ class _Metadata extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final metadata = ref.watch(seriesMetadataProvider(seriesId: series.id));
     return Async(
       asyncValue: metadata,
@@ -204,7 +206,7 @@ class _Metadata extends ConsumerWidget {
             alignment: .spaceBetween,
             children: [
               LimitedList(
-                title: 'Writers',
+                title: l.genres,
                 items: metadata.writers
                     .map(
                       (w) => Text(

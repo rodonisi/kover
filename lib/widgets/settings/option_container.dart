@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 
 class OptionContainer extends StatelessWidget {
@@ -51,7 +52,7 @@ class OptionContainer extends StatelessWidget {
                       ),
                       child: const IconButton(
                         icon: Icon(
-                          Icons.info_outline,
+                          KoverIcons.info,
                         ),
                         onPressed: null,
                       ),

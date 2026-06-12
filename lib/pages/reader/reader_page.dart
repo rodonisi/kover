@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/pages/reader/epub_reader/epub_reader.dart';
 import 'package:kover/pages/reader/image_reader/image_reader.dart';
 import 'package:kover/pages/reader/pdf_reader/pdf_reader.dart';
@@ -33,6 +34,8 @@ class ReaderPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+
     useEffect(() {
       SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
 
@@ -88,10 +91,12 @@ class ReaderPage extends HookConsumerWidget {
                     size: LayoutConstants.largeIcon,
                     color: Theme.of(context).colorScheme.error,
                   ),
-                  Text('Unsupported format: ${data.series.format}'),
+                  Text(
+                    l.unsupportedFormat(data.series.format.name.toUpperCase()),
+                  ),
                   FilledButton(
                     onPressed: () => context.pop(),
-                    child: const Text('Back'),
+                    child: Text(l.back),
                   ),
                 ],
               ),

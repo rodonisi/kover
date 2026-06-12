@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/server_settings.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
@@ -13,6 +14,7 @@ class CredentialsSettings extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final settings = ref.watch(credentialsProvider);
     final loginStatus = ref.watch(loginStatusProvider);
 
@@ -34,22 +36,20 @@ class CredentialsSettings extends HookConsumerWidget {
               spacing: LayoutConstants.mediumPadding,
               children: [
                 Text(
-                  'Credentials',
+                  l.credentials,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 TextField(
                   enabled: loginStatus != .loading,
                   controller: urlController,
-                  decoration: const InputDecoration(
-                    labelText: 'Base URL',
-                  ),
+                  decoration: InputDecoration(labelText: l.baseUrl),
                 ),
                 TextField(
                   obscureText: obscureKey.value,
                   enabled: loginStatus != .loading,
                   controller: apiKeyController,
                   decoration: InputDecoration(
-                    labelText: 'API Key',
+                    labelText: l.apiKey,
                     suffixIcon: Padding(
                       padding: const EdgeInsetsGeometry.symmetric(
                         horizontal: LayoutConstants.smallPadding,
@@ -83,7 +83,7 @@ class CredentialsSettings extends HookConsumerWidget {
                               ),
                             );
                       },
-                      label: const Text('Save'),
+                      label: Text(l.save),
                       icon: const Icon(LucideIcons.save),
                     ),
                   ],

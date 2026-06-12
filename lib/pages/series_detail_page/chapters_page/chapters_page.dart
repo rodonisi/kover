@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/models/enums/sort_direction.dart';
 import 'package:kover/riverpod/providers/series.dart';
@@ -19,6 +20,7 @@ class ChaptersPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final hideRead = useState(false);
     final sortDirection = useState(SortDirection.ascending);
     final chapters = ref.watch(
@@ -44,7 +46,7 @@ class ChaptersPage extends HookConsumerWidget {
         : chapters;
 
     return _ChaptersPage(
-      title: 'Chapters',
+      title: l.chapters,
       seriesId: seriesId,
       chapters: toShow,
       action: ContextMenuButton(
@@ -53,7 +55,11 @@ class ChaptersPage extends HookConsumerWidget {
               ? LucideIcons.arrowDownNarrowWide
               : LucideIcons.arrowDownWideNarrow,
         ),
-        menu: _getMenu(hideRead: hideRead, sortDirection: sortDirection),
+        menu: _getMenu(
+          hideRead: hideRead,
+          sortDirection: sortDirection,
+          context: context,
+        ),
       ),
     );
   }
@@ -65,6 +71,7 @@ class StorylinePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final sortDirection = useState(SortDirection.ascending);
     final chapters = ref.watch(
       seriesDetailProvider(
@@ -79,7 +86,7 @@ class StorylinePage extends HookConsumerWidget {
         : chapters;
 
     return _ChaptersPage(
-      title: 'Storyline',
+      title: l.storyline,
       seriesId: seriesId,
       chapters: toShow,
       action: ContextMenuButton(
@@ -88,7 +95,7 @@ class StorylinePage extends HookConsumerWidget {
               ? LucideIcons.arrowDownNarrowWide
               : LucideIcons.arrowDownWideNarrow,
         ),
-        menu: _getMenu(sortDirection: sortDirection),
+        menu: _getMenu(sortDirection: sortDirection, context: context),
       ),
     );
   }
@@ -100,6 +107,7 @@ class SpecialsPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final sortDirection = useState(SortDirection.ascending);
     final chapters = ref.watch(
       seriesDetailProvider(
@@ -114,7 +122,7 @@ class SpecialsPage extends HookConsumerWidget {
         : chapters;
 
     return _ChaptersPage(
-      title: 'Specials',
+      title: l.specials,
       seriesId: seriesId,
       chapters: toShow,
       action: ContextMenuButton(
@@ -123,7 +131,7 @@ class SpecialsPage extends HookConsumerWidget {
               ? LucideIcons.arrowDownNarrowWide
               : LucideIcons.arrowDownWideNarrow,
         ),
-        menu: _getMenu(sortDirection: sortDirection),
+        menu: _getMenu(sortDirection: sortDirection, context: context),
       ),
     );
   }
@@ -197,31 +205,33 @@ class _ChaptersPage extends HookConsumerWidget {
 ContextMenu<dynamic> _getMenu({
   ValueNotifier<bool>? hideRead,
   ValueNotifier<SortDirection>? sortDirection,
+  required BuildContext context,
 }) {
+  final l = AppLocalizations.of(context);
   return ContextMenu(
     entries: [
       if (hideRead != null) ...[
-        const MenuHeader(text: 'Filter'),
+        MenuHeader(text: l.filter),
         MenuItem(
           icon: hideRead.value ? const Icon(LucideIcons.check) : null,
-          label: const Text('Hide Read'),
+          label: Text(l.hideRead),
           onSelected: (_) => hideRead.value = !hideRead.value,
         ),
       ],
       if (sortDirection != null) ...[
-        const MenuHeader(text: 'Sort Direction'),
+        MenuHeader(text: l.sortBy),
         MenuItem(
           icon: sortDirection.value == SortDirection.ascending
               ? const Icon(LucideIcons.check)
               : null,
-          label: const Text('Ascending'),
+          label: Text(l.ascending),
           onSelected: (_) => sortDirection.value = SortDirection.ascending,
         ),
         MenuItem(
           icon: sortDirection.value == SortDirection.descending
               ? const Icon(LucideIcons.check)
               : null,
-          label: const Text('Descending'),
+          label: Text(l.descending),
           onSelected: (_) => sortDirection.value = SortDirection.descending,
         ),
       ],
