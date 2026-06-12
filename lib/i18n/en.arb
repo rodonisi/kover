@@ -1,2 +1,263 @@
 {
+  "onDeck": "On Deck",
+  "@onDeck": {
+    "description": "Label for the home page on deck section"
+  },
+    "recentlyUpdated": "Recently Updated",
+  "@recentlyUpdated": {
+    "description": "Label for the home page recently updated section"
+  },
+  "recentlyAdded": "Recently Added",
+  "@recentlyAdded": {
+    "description": "Label for the home page recently added section"
+  }
+  ,"home": "Home",
+  "@home": {
+    "description": "Label for the home page"  
+  },
+  "wantToRead": "Want To Read",
+  "@wantToRead": {
+    "description": "Label for the want to read shelf"
+  },
+  "menu": "Menu",
+  "@menu": {
+    "description": "Label for the menu button"
+  },
+  "allSeries": "All Series",
+  "@allSeries": {
+    "description": "Label for the all series menu entry"
+  },
+  "collections": "Collections",
+  "@collections": {
+    "description": "Label for the collections menu entry"
+  },
+  "readingLists": "Reading Lists",
+  "@readingLists": {
+    "description": "Label for the reading lists menu entry"
+  },
+  "libraries": "Libraries",
+  "@libraries": {
+    "description": "Label for the libraries menu entry"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Label for the settings menu entry"
+  },
+  "more": "More",
+  "@more": {
+    "description": "Label for the more section"
+  },
+  "downloadQueue": "Download Queue",
+  "@downloadQueue": {
+    "description": "Label for the download queue menu entry"
+  },
+  "general": "General",
+  "@general": {
+    "description": "Label for the general settings section"
+  },
+  "themeMode": "Theme Mode",
+  "@themeMode": {
+    "description": "Label for the theme mode setting"
+  },
+  "system": "System",
+  "@system": {
+    "description": "Label for the system theme mode option"
+  },
+  "light": "Light",
+  "@light": {
+    "description": "Label for the light theme mode option"
+  },
+  "dark": "Dark",
+  "@dark": {
+    "description": "Label for the dark theme mode option"   
+  },
+  "outlinedTheme": "Outlined Theme",
+  "@outlinedTheme": {
+    "description": "Label for the outlined theme setting"
+  },
+  "sendDiagnostics": "Send anonymous crash reports and diagnostics",
+  "@sendDiagnostics": {
+    "description": "Label for the send diagnostics setting"
+  },
+  "sendDiagnosticsDescription": "Help improve the app by sending anonymous error and performance statistics. The data does not contain any personal information and is uniquely used to improve the app.",
+  "@sendDiagnosticsDescription": {
+    "description": "Description for the send diagnostics setting"
+  },
+  "version": "Version: {version} ({buildNumber})",
+  "@version": {
+    "description": "Label for the app version, with placeholders for version and build number"
+  },
+  "github": "GitHub",
+  "@githubLink": {
+    "description": "Label for the GitHub link"
+  },
+
+  "madeWithLove": "Made with ❤️",
+  "@madeWithLove": {
+    "description": "Label for the made with love message"
+  },
+  "dataManagement": "Data Management",
+  "@dataManagement": {
+    "description": "Label for the data management section"
+  },
+  "downloadAllCovers": "Download All Covers",
+  "@downloadAllCovers": {
+    "description": "Label for the download all covers option"
+  },
+  "downloadAllCoversDescription": "If disabled, covers will only be downloaded together with chapters. Covers will still be fetched from the server on demand when not downloaded and a connection is available.",
+  "@downloadAllCoversDescription": {
+    "description": "Description for the download all covers option"
+  },
+  "maxConcurrentDownloads": "Max Concurrent Downloads",
+  "@maxConcurrentDownloads": {
+    "description": "Label for the max concurrent downloads setting"
+  },
+  "reclaimSpace": "Reclaim Space",
+  "@reclaimSpace": {
+    "description": "Label for the reclaim space button"
+  },
+  "clearDownloads": "Clear Downloads",
+  "@clearDownloads": {
+    "description": "Label for the clear downloads button"
+  },
+  "clearCovers": "Clear Covers",
+  "@clearCovers": {
+    "description": "Label for the clear covers button"
+  },
+  "clearDatabase": "Clear Database",
+  "@clearDatabase": {
+    "description": "Label for the clear database button"
+  },
+  "clearDatabaseDialogTitle": "Are you sure?",
+  "@clearDatabaseDialogTitle": {
+    "description": "Title for the clear database confirmation dialog"
+  },
+  "clearDatabaseDialogContent": "This will clear the entire local database, including any unsynced progress and downloaded data. This action cannot be undone.",
+  "@clearDatabaseDialogContent": {
+    "description": "Content for the clear database confirmation dialog"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Label for the cancel button in dialogs"
+  },
+  "databaseBusy": "Database busy...",
+  "@databaseBusy": {
+    "description": "Message shown when the database is busy with an operation"
+  },
+  "databaseSize": "Database Size",
+  "@databaseSize": {
+    "description": "Label for the database size information"
+  },
+
+  "credentials": "Credentials",
+  "@credentials": {
+    "description": "Label for the credentials section in settings"
+  },
+  "baseUrl": "Base URL",
+  "@baseUrl": {
+    "description": "Label for the base URL input field"
+  },
+  "apiKey": "API Key",
+  "@apiKey": {
+    "description": "Label for the API key input field"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Label for the save credentials button"
+  },
+  "sortBy": "Sort By",
+  "@sortBy": {
+    "description": "Label for the sort by option in list"
+  },
+  "name": "Name",
+  "@name": {
+    "description": "Label for sorting by name option"
+  },
+  "dateAdded": "Date Added",
+  "@dateAdded": {
+    "description": "Label for sorting by date added option"
+  },
+  "lastModified": "Last Modified",
+  "@lastModified": {
+    "description": "Label for sorting by last modified option"
+  },
+  "sortDirection": "Sort Direction",
+  "@direction": {
+    "description": "Label for the sort direction option in list"    
+  },
+  "ascending": "Ascending",
+  "@ascending": {
+    "description": "Label for ascending sort direction option"
+  },
+  "descending": "Descending",
+  "@descending": {
+    "description": "Label for descending sort direction option" 
+  },
+  "specials": "Specials",
+  "@specials": {
+    "description": "Label for the specials section in the series details page"
+  },
+  "storyline": "Storyline",
+  "@storyline": {
+    "description": "Label for the storyline section in the series details page"
+  },
+  "volumes": "Volumes",
+  "@volumes": {
+    "description": "Label for the volumes section in the series details page"
+  },
+  "chapters": "Chapters",
+  "@chapters": {
+    "description": "Label for the chapters section in the series details page"
+  },
+  "genres": "Genres",
+  "@genres": {
+    "description": "Label for the genres chips in the series details page"
+  },
+  "writers": "Writers",
+  "@writers": {
+    "description": "Label for the writers metadata in the series details page"
+  },
+  "filter": "Filter",
+  "@filter": {
+    "description": "Label for the filter button in lists"
+  },
+  "hideRead": "Hide Read",
+  "@hideRead": {
+    "description": "Label for the hide read filter option in lists"
+  },
+  "goToChapter": "Go to Chapter",
+  "@goToChapter": {
+    "description": "Label for the go to chapter button in the reading list chapter entry context menu"
+  },
+  "goToSeries": "Go to Series",
+  "@goToSeries": {
+    "description": "Label for the go to series button in the reading list chapter entry context menu"
+  },
+  "markAsRead": "Mark as Read",
+  "@markAsRead": {
+    "description": "Label for the mark as read button in in context menus"
+  },
+  "markAsUnread": "Mark as Unread",
+  "@markAsUnread": {
+    "description": "Label for the mark as unread button in in context menus"
+  },
+  "items": "{count} {count, plural, =0{{count} items} =1{{count} item} other{{count} items}}",
+  "@items": {
+    "description": "Label for the number of items, with pluralization"
+  },
+  "unsupportedFormat": "Unsupported format: {format}",
+  "@unsupportedFormat": {
+    "description": "Message shown when trying to open a chapter in an unsupported format"
+  },
+  "back": "Back",
+  "@back": {
+    "description": "Label for back buttons"
+  },
+  "tableOfContents": "Table of Contents",
+  "@tableOfContents": {
+    "description": "Label for the table of contents drawer in the reader"
+  }
+
+
+
 }

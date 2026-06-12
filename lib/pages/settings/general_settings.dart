@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/constants/kover_icons.dart';
@@ -14,6 +15,7 @@ class GeneralSettings extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final theme = ref.watch(themeProvider);
     final generalSettings = ref.watch(generalSettingsProvider);
 
@@ -29,26 +31,26 @@ class GeneralSettings extends ConsumerWidget {
             spacing: LayoutConstants.largePadding,
             children: [
               Text(
-                'General',
+                l.general,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               ChoiceOption(
-                title: 'Theme Mode',
+                title: l.themeMode,
                 icon: LucideIcons.palette,
-                options: const [
+                options: [
                   ChoiceOptionEntry(
                     value: ThemeMode.system,
-                    label: 'System',
+                    label: l.system,
                     icon: LucideIcons.sunMoon,
                   ),
                   ChoiceOptionEntry(
                     value: ThemeMode.light,
-                    label: 'Light',
+                    label: l.light,
                     icon: LucideIcons.sun,
                   ),
                   ChoiceOptionEntry(
                     value: ThemeMode.dark,
-                    label: 'Dark',
+                    label: l.dark,
                     icon: LucideIcons.moon,
                   ),
                 ],
@@ -58,7 +60,7 @@ class GeneralSettings extends ConsumerWidget {
                 },
               ),
               BooleanOption(
-                title: 'Outlined Theme',
+                title: l.outlinedTheme,
                 icon: LucideIcons.squareDashed,
                 value: theme.outlined,
                 onChanged: (value) =>
@@ -67,13 +69,9 @@ class GeneralSettings extends ConsumerWidget {
               Async(
                 asyncValue: generalSettings,
                 data: (generalSettings) => BooleanOption(
-                  title: 'Send anonymous crash reports and diagnostics',
+                  title: l.sendDiagnostics,
                   icon: KoverIcons.analytics,
-                  description:
-                      'Help improve the app by sending anonymous error and '
-                      'performance statistics. The data does not contain any '
-                      'personal information and is uniquely used to improve '
-                      'the app.',
+                  description: l.sendDiagnosticsDescription,
                   value: generalSettings.sendDiagnostics,
                   onChanged: (value) => ref
                       .read(generalSettingsProvider.notifier)

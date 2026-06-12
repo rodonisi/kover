@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/riverpod/providers/settings/download_settings.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -14,6 +15,7 @@ class DataManagementSettings extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final settings = ref.watch(downloadSettingsProvider);
 
@@ -29,14 +31,12 @@ class DataManagementSettings extends ConsumerWidget {
             spacing: LayoutConstants.largePadding,
             children: [
               Text(
-                'Data Management',
+                l.dataManagement,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               BooleanOption(
-                title: 'Download All Covers',
-                description:
-                    'If disabled, covers will only be downloaded together with chapters. '
-                    'Covers will still be fetched from the server on demand when not downloaded and a connection is available.',
+                title: l.downloadAllCovers,
+                description: l.downloadAllCoversDescription,
                 icon: LucideIcons.imageDownDir,
                 value: data.downloadCovers,
                 onChanged: (value) async {
@@ -46,7 +46,7 @@ class DataManagementSettings extends ConsumerWidget {
                 },
               ),
               NumericOption(
-                title: 'Max Concurrent Downloads',
+                title: l.maxConcurrentDownloads,
                 icon: LucideIcons.download,
                 min: 1,
                 max: 10,
@@ -70,7 +70,7 @@ class DataManagementSettings extends ConsumerWidget {
                       children: [
                         DatabaseClearOperationButton(
                           asyncValue: ref.watch(reclaimSpaceProvider),
-                          text: 'Reclaim Space',
+                          text: l.reclaimSpace,
                           icon: const Icon(LucideIcons.databaseZap),
                           onPressed: () async {
                             await ref
@@ -80,7 +80,7 @@ class DataManagementSettings extends ConsumerWidget {
                         ),
                         DatabaseClearOperationButton(
                           asyncValue: ref.watch(clearDownloadsProvider),
-                          text: 'Clear Downloads',
+                          text: l.clearDownloads,
                           icon: const Icon(Icons.file_download_off),
                           onPressed: () async {
                             await ref
@@ -90,7 +90,7 @@ class DataManagementSettings extends ConsumerWidget {
                         ),
                         DatabaseClearOperationButton(
                           asyncValue: ref.watch(clearCoversProvider),
-                          text: 'Clear Covers',
+                          text: l.clearCovers,
                           icon: const Icon(LucideIcons.imageOff),
                           onPressed: () async {
                             await ref
@@ -100,23 +100,21 @@ class DataManagementSettings extends ConsumerWidget {
                         ),
                         DatabaseClearOperationButton(
                           asyncValue: ref.watch(clearDatabaseProvider),
-                          text: 'Clear Database',
+                          text: l.clearDatabase,
                           icon: const Icon(LucideIcons.trash),
                           onPressed: () async {
                             final confirmed = await showDialog<bool>(
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: const Text('Are you sure?'),
-                                  content: const Text(
-                                    'This will clear the entire local database, including any unsynced progress and downloaded data. This action cannot be undone.',
-                                  ),
+                                  title: Text(l.clearDatabaseDialogTitle),
+                                  content: Text(l.clearDatabaseDialogContent),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.of(
                                         context,
                                       ).pop(false),
-                                      child: const Text('Cancel'),
+                                      child: Text(l.cancel),
                                     ),
                                     FilledButton(
                                       style: ElevatedButton.styleFrom(
@@ -128,9 +126,7 @@ class DataManagementSettings extends ConsumerWidget {
                                       onPressed: () => Navigator.of(
                                         context,
                                       ).pop(true),
-                                      child: const Text(
-                                        'Clear Database',
-                                      ),
+                                      child: Text(l.clearDatabase),
                                     ),
                                   ],
                                 );
@@ -180,6 +176,8 @@ class DatabaseClearOperationButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+
     return Async(
       asyncValue: asyncValue,
       data: (status) {
@@ -192,7 +190,7 @@ class DatabaseClearOperationButton extends ConsumerWidget {
             label: Text(text),
           ),
           .busy => Tooltip(
-            message: 'Database busy...',
+            message: l.databaseBusy,
             triggerMode: .tap,
             child: FilledButton.icon(
               onPressed: null,
@@ -250,11 +248,16 @@ class DatabaseSize extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+
     return Row(
       mainAxisSize: .min,
       mainAxisAlignment: .start,
       children: [
-        Text('Database Size: ', style: Theme.of(context).textTheme.labelMedium),
+        Text(
+          '${l.databaseSize}: ',
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
         Async(
           asyncValue: ref.watch(databaseSizeProvider),
           data: (size) {

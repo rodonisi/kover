@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/generated/i18n/app_localizations.dart';
 import 'package:kover/pages/menu_page/app_list_tile.dart';
 import 'package:kover/pages/series_detail_page/series_app_bar.dart';
 import 'package:kover/riverpod/providers/router.dart';
@@ -16,6 +17,7 @@ class SeriesDetailPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final details = ref.watch(seriesDetailProvider(seriesId: seriesId));
     final summary = ref.watch(
       seriesMetadataProvider(seriesId: seriesId).select(
@@ -43,27 +45,30 @@ class SeriesDetailPage extends HookConsumerWidget {
                     children: [
                       if (detailsData.specials.isNotEmpty)
                         AppListTile(
-                          title: 'Specials (${detailsData.specials.length})',
+                          title:
+                              '${l.specials} (${detailsData.specials.length})',
                           onTap: () => SpecialsRoute(seriesId: seriesId).push(
                             context,
                           ),
                         ),
                       if (detailsData.storyline.isNotEmpty)
                         AppListTile(
-                          title: 'Storyline (${detailsData.storyline.length})',
+                          title:
+                              '${l.storyline} (${detailsData.storyline.length})',
                           onTap: () => StorylineRoute(
                             seriesId: seriesId,
                           ).push(context),
                         ),
                       if (detailsData.volumes.isNotEmpty)
                         AppListTile(
-                          title: 'Volumes (${detailsData.volumes.length})',
+                          title: '${l.volumes} (${detailsData.volumes.length})',
                           onTap: () =>
                               VolumesRoute(seriesId: seriesId).push(context),
                         ),
                       if (detailsData.chapters.isNotEmpty)
                         AppListTile(
-                          title: 'Chapters (${detailsData.chapters.length})',
+                          title:
+                              '${l.chapters} (${detailsData.chapters.length})',
                           onTap: () =>
                               ChaptersRoute(seriesId: seriesId).push(context),
                         ),
@@ -100,6 +105,7 @@ class _Genres extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final metadata = ref.watch(seriesMetadataProvider(seriesId: seriesId));
     final theme = Theme.of(context);
     return Async(
@@ -109,7 +115,7 @@ class _Genres extends ConsumerWidget {
         spacing: LayoutConstants.smallPadding,
         children: [
           Text(
-            'Genres',
+            l.genres,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           Wrap(
