@@ -52,7 +52,9 @@ jobs:
         run: cd macos && fastlane disable_codesign
 
       - name: Code Generation 🧬
-        run: dart run build_runner build --delete-conflicting-outputs
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+          flutter gen-l10n
 
       - name: Validate DB Schema 🗄️
         if: matrix.platform != 'windows'
