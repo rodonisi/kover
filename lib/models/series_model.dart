@@ -33,7 +33,7 @@ sealed class SeriesModel with _$SeriesModel {
     return SeriesModel(
       id: table.id,
       libraryId: table.libraryId,
-      name: table.name,
+      name: table.localizedName ?? table.name,
       format: table.format,
       pages: table.pages,
       avgHoursToRead: table.avgHoursToRead ?? 0,
