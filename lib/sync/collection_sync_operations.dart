@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/mapping/dto/collection_dto_mappings.dart';
+import 'package:kover/utils/logging.dart';
 
 class CollectionSyncOperations {
   final Openapi _client;
@@ -72,6 +73,13 @@ class CollectionSyncOperations {
     );
 
     if (!res.isSuccessful) {
+      log.warning(
+        'failed to download collection cover',
+        attributes: {
+          'collection_id': .int(collectionId),
+          'status_code': .int(res.statusCode),
+        },
+      );
       return null;
     }
 

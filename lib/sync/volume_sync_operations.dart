@@ -20,9 +20,8 @@ class VolumeSyncOperations {
     );
 
     if (!res.isSuccessful) {
-      log.error(
+      log.warning(
         'failed to download volume cover',
-        error: res.error,
         attributes: {
           'volume_id': .int(volumeId),
           'status_code': .int(res.statusCode),

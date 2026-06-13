@@ -96,9 +96,8 @@ class SeriesSyncOperations {
     );
 
     if (!res.isSuccessful) {
-      log.error(
+      log.warning(
         'failed to download series cover',
-        error: res.error,
         attributes: {
           'series_id': .int(seriesId),
           'status_code': .int(res.statusCode),
