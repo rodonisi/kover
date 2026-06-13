@@ -73,7 +73,7 @@ class CollectionSyncOperations {
     );
 
     if (!res.isSuccessful) {
-      log.warning(
+      log.debug(
         'failed to download collection cover',
         attributes: {
           'collection_id': .int(collectionId),

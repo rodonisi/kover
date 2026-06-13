@@ -77,7 +77,7 @@ class ReadingListSyncOperations {
     );
 
     if (!res.isSuccessful) {
-      log.warning(
+      log.debug(
         'failed to fetch reading list cover',
         attributes: {
           'reading_list_id': .int(readingListId),
