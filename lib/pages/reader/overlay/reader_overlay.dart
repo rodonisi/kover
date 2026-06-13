@@ -211,7 +211,9 @@ class ReaderOverlay extends HookConsumerWidget {
                     alignment: .bottomCenter,
                     child:
                         ChapterSnackbar(
-                              title: l.previousChapter(prevChapter.value?.title ?? ''),
+                              title: l.previousChapter(
+                                prevChapter.value?.title ?? '',
+                              ),
                               onNavigate: () {
                                 log.debug(
                                   'navigating to previous chapter',
@@ -247,7 +249,9 @@ class ReaderOverlay extends HookConsumerWidget {
                     alignment: .bottomCenter,
                     child:
                         ChapterSnackbar(
-                              title: l.nextChapter(nextChapter.value?.title ?? ''),
+                              title: l.nextChapter(
+                                nextChapter.value?.title ?? '',
+                              ),
                               onNavigate: () {
                                 log.debug(
                                   'navigating to next chapter',
