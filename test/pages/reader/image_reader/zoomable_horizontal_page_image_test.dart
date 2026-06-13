@@ -10,15 +10,20 @@ final Uint8List _pngBytes = base64Decode(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAen63NgAAAAASUVORK5CYII=',
 );
 
+const _zoomableKey = ValueKey('zoomable-horizontal-page-image');
+
 void main() {
   testWidgets('pinch zooms and reports the zoom state', (tester) async {
     final controller = TransformationController();
     addTearDown(controller.dispose);
+    final pageController = PageController();
+    addTearDown(pageController.dispose);
     var zoomed = false;
 
     await tester.pumpWidget(
       _host(
         controller: controller,
+        pageController: pageController,
         onZoomChanged: (value) => zoomed = value,
       ),
     );
@@ -42,11 +47,14 @@ void main() {
   ) async {
     final controller = TransformationController();
     addTearDown(controller.dispose);
+    final pageController = PageController();
+    addTearDown(pageController.dispose);
     var reportedZoomed = false;
 
     await tester.pumpWidget(
       _host(
         controller: controller,
+        pageController: pageController,
         onZoomChanged: (value) => reportedZoomed |= value,
       ),
     );
@@ -64,68 +72,138 @@ void main() {
     expect(reportedZoomed, isFalse);
   });
 
-  testWidgets('fling past the right edge requests the next page (+1)', (
+  testWidgets('drag overflow at the right edge scrolls the outer PageView', (
     tester,
   ) async {
     final controller = TransformationController()..value = _zoomedAt(-300);
     addTearDown(controller.dispose);
-    int? edge;
+    final pageController = PageController(initialPage: 1);
+    addTearDown(pageController.dispose);
 
     await tester.pumpWidget(
-      _host(controller: controller, onEdgeFling: (value) => edge = value),
+      _pagedHost(controller: controller, pageController: pageController),
+    );
+    await tester.pump();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(_zoomableKey)),
+    );
+    await tester.pump();
+    await gesture.moveBy(const Offset(-60, 0));
+    await tester.pump();
+
+    expect(pageController.offset, greaterThan(300));
+    expect(controller.value.getTranslation().x, closeTo(-300, 1e-6));
+
+    await gesture.up();
+  });
+
+  testWidgets(
+    'inward drag at the right edge pans the image, not the PageView',
+    (
+      tester,
+    ) async {
+      final controller = TransformationController()..value = _zoomedAt(-300);
+      addTearDown(controller.dispose);
+      final pageController = PageController(initialPage: 1);
+      addTearDown(pageController.dispose);
+
+      await tester.pumpWidget(
+        _pagedHost(controller: controller, pageController: pageController),
+      );
+      await tester.pump();
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(_zoomableKey)),
+      );
+      await tester.pump();
+      await gesture.moveBy(const Offset(60, 0));
+      await tester.pump();
+
+      expect(pageController.offset, closeTo(300, 1e-6));
+      expect(controller.value.getTranslation().x, greaterThan(-300));
+
+      await gesture.up();
+    },
+  );
+
+  testWidgets('horizontal drag while zoomed pans before turning pages', (
+    tester,
+  ) async {
+    final controller = TransformationController()..value = _zoomedAt(-150);
+    addTearDown(controller.dispose);
+    final pageController = PageController(initialPage: 1);
+    addTearDown(pageController.dispose);
+
+    await tester.pumpWidget(
+      _pagedHost(controller: controller, pageController: pageController),
+    );
+    await tester.pump();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(_zoomableKey)),
+    );
+    await tester.pump();
+    await gesture.moveBy(const Offset(-60, 0));
+    await tester.pump();
+
+    expect(pageController.offset, closeTo(300, 1e-6));
+    expect(controller.value.getTranslation().x, lessThan(-150));
+
+    await gesture.up();
+  });
+
+  testWidgets('remaining velocity at the right edge is passed to PageView', (
+    tester,
+  ) async {
+    final controller = TransformationController()..value = _zoomedAt(-300);
+    addTearDown(controller.dispose);
+    final pageController = PageController(initialPage: 1);
+    addTearDown(pageController.dispose);
+
+    await tester.pumpWidget(
+      _pagedHost(controller: controller, pageController: pageController),
     );
     await tester.pump();
 
     await tester.fling(
-      find.byType(ZoomableHorizontalPageImage),
+      find.byKey(_zoomableKey),
       const Offset(-150, 0),
       1000,
     );
     await tester.pumpAndSettle();
 
-    expect(edge, 1);
+    expect(pageController.page, closeTo(2, 1e-6));
   });
 
-  testWidgets('fling past the left edge requests the previous page (-1)', (
+  testWidgets('overflow drag respects a reversed outer PageView', (
     tester,
   ) async {
     final controller = TransformationController()..value = _zoomedAt(0);
     addTearDown(controller.dispose);
-    int? edge;
+    final pageController = PageController(initialPage: 1);
+    addTearDown(pageController.dispose);
 
     await tester.pumpWidget(
-      _host(controller: controller, onEdgeFling: (value) => edge = value),
+      _pagedHost(
+        controller: controller,
+        pageController: pageController,
+        reverse: true,
+      ),
     );
     await tester.pump();
 
-    await tester.fling(
-      find.byType(ZoomableHorizontalPageImage),
-      const Offset(150, 0),
-      1000,
-    );
-    await tester.pumpAndSettle();
-
-    expect(edge, -1);
-  });
-
-  testWidgets('slow drag to the edge does not turn the page', (tester) async {
-    final controller = TransformationController()..value = _zoomedAt(-300);
-    addTearDown(controller.dispose);
-    int? edge;
-
-    await tester.pumpWidget(
-      _host(controller: controller, onEdgeFling: (value) => edge = value),
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(_zoomableKey)),
     );
     await tester.pump();
+    await gesture.moveBy(const Offset(60, 0));
+    await tester.pump();
 
-    await tester.timedDrag(
-      find.byType(ZoomableHorizontalPageImage),
-      const Offset(-60, 0),
-      const Duration(seconds: 2),
-    );
-    await tester.pumpAndSettle();
+    expect(pageController.offset, greaterThan(300));
+    expect(controller.value.getTranslation().x, closeTo(0, 1e-6));
 
-    expect(edge, isNull);
+    await gesture.up();
   });
 }
 
@@ -139,8 +217,8 @@ Matrix4 _zoomedAt(double translationX) {
 
 Widget _host({
   required TransformationController controller,
+  required PageController pageController,
   ValueChanged<bool>? onZoomChanged,
-  ValueChanged<int>? onEdgeFling,
 }) {
   return MaterialApp(
     home: Scaffold(
@@ -150,11 +228,50 @@ Widget _host({
           width: 300,
           height: 300,
           child: ZoomableHorizontalPageImage(
+            key: _zoomableKey,
             bytes: _pngBytes,
             fit: BoxFit.contain,
+            outerController: pageController,
             onZoomChanged: onZoomChanged ?? (_) {},
-            onEdgeFling: onEdgeFling ?? (_) {},
             transformationController: controller,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _pagedHost({
+  required TransformationController controller,
+  required PageController pageController,
+  bool reverse = false,
+}) {
+  return MaterialApp(
+    home: Scaffold(
+      body: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 300,
+          height: 300,
+          child: PageView.builder(
+            controller: pageController,
+            reverse: reverse,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: 3,
+            itemBuilder: (context, index) {
+              if (index != 1) {
+                return const SizedBox.expand();
+              }
+
+              return ZoomableHorizontalPageImage(
+                key: _zoomableKey,
+                bytes: _pngBytes,
+                fit: BoxFit.contain,
+                outerController: pageController,
+                onZoomChanged: (_) {},
+                transformationController: controller,
+              );
+            },
           ),
         ),
       ),

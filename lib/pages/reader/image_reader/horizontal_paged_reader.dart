@@ -49,22 +49,6 @@ class HorizontalPagedReader extends HookConsumerWidget {
             // the PageView's drag recognizer steal it as a page swipe.
             final pointerCount = useState(0);
 
-            void turnPage(int imageEdge) {
-              if (!pageController.hasClients) return;
-              final reverse = settings.readDirection == .rightToLeft;
-              // imageEdge +1 = past right edge, -1 = past left edge.
-              final forward = reverse ? imageEdge < 0 : imageEdge > 0;
-              final current =
-                  pageController.page?.round() ?? navState.currentPage;
-              final target = forward ? current + 1 : current - 1;
-              if (target < 0 || target >= reader.totalPages) return;
-              pageController.animateToPage(
-                target,
-                duration: 200.ms,
-                curve: Curves.easeInOut,
-              );
-            }
-
             ref.listen(
               navProvider.select((s) => s.whenData((s) => s.currentPage)),
               (
@@ -122,8 +106,8 @@ class HorizontalPagedReader extends HookConsumerWidget {
                         .fitWidth => .fitWidth,
                         .fitHeight => .fitHeight,
                       },
+                      outerController: pageController,
                       onZoomChanged: (zoomed) => isZoomed.value = zoomed,
-                      onEdgeFling: turnPage,
                     );
                   },
                 );

@@ -8,14 +8,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 ///
 /// While zoomed it reports via [onZoomChanged] so the parent [PageView] can
 /// disable its scroll physics (letting panning own the single-finger gesture);
-/// a fling past a horizontal edge requests a page turn via [onEdgeFling].
+/// drag overflow and remaining velocity at a horizontal edge are forwarded to
+/// the parent [PageView]'s controller.
 class ZoomableHorizontalPageImage extends HookWidget {
   final Uint8List bytes;
   final BoxFit fit;
+  final PageController outerController;
   final ValueChanged<bool> onZoomChanged;
-
-  /// +1 when flung past the right edge, -1 when flung past the left edge.
-  final ValueChanged<int> onEdgeFling;
 
   /// Test seam: when omitted an internal controller is created.
   final TransformationController? transformationController;
@@ -24,14 +23,14 @@ class ZoomableHorizontalPageImage extends HookWidget {
     super.key,
     required this.bytes,
     required this.fit,
+    required this.outerController,
     required this.onZoomChanged,
-    required this.onEdgeFling,
     this.transformationController,
   });
 
   static const double _minScale = 1.0;
   static const double _maxScale = 4.0;
-  static const double _flingVelocity = 400.0;
+  static const double _edgeTolerance = 0.5;
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +39,9 @@ class ZoomableHorizontalPageImage extends HookWidget {
     final hookController = useTransformationController();
     final controller = transformationController ?? hookController;
 
-    // Pointer count from the last scale update. A two-finger pan should not
-    // turn the page on an edge fling; only a single-finger swipe should.
-    final lastPointerCount = useRef(1);
+    final gestureIncludedPinch = useRef(false);
+    final lastFocalX = useRef<double?>(null);
+    final lastTranslationX = useRef<double?>(null);
 
     useEffect(() {
       var wasZoomed = false;
@@ -62,8 +61,73 @@ class ZoomableHorizontalPageImage extends HookWidget {
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth;
 
+        void scrollOuterByDragDelta(
+          double dragDelta, {
+          bool ballistic = false,
+        }) {
+          if (!outerController.hasClients) {
+            return;
+          }
+
+          final position = outerController.position;
+          final scrollDelta = axisDirectionIsReversed(position.axisDirection)
+              ? dragDelta
+              : -dragDelta;
+
+          if (ballistic && position is ScrollPositionWithSingleContext) {
+            position.goBallistic(scrollDelta);
+          } else if (!ballistic && scrollDelta.abs() > _edgeTolerance) {
+            outerController.jumpTo(
+              (position.pixels + scrollDelta)
+                  .clamp(position.minScrollExtent, position.maxScrollExtent)
+                  .toDouble(),
+            );
+          }
+        }
+
+        void handleInteractionStart(ScaleStartDetails details) {
+          gestureIncludedPinch.value = details.pointerCount >= 2;
+          lastFocalX.value = details.localFocalPoint.dx;
+          lastTranslationX.value = controller.value.getTranslation().x;
+        }
+
+        void handleInteractionUpdate(ScaleUpdateDetails details) {
+          final previousFocalX = lastFocalX.value;
+          final previousTranslationX = lastTranslationX.value;
+          final currentTranslationX = controller.value.getTranslation().x;
+
+          if (details.pointerCount >= 2) {
+            gestureIncludedPinch.value = true;
+          }
+
+          final scale = controller.value.getMaxScaleOnAxis();
+          if (scale > _minScale + 1e-3 &&
+              previousFocalX != null &&
+              previousTranslationX != null &&
+              details.pointerCount == 1 &&
+              !gestureIncludedPinch.value) {
+            final focalDelta = details.localFocalPoint.dx - previousFocalX;
+            final minTx = viewportWidth * (1 - scale);
+
+            if ((previousTranslationX <= minTx + _edgeTolerance &&
+                    focalDelta < 0) ||
+                (previousTranslationX >= -_edgeTolerance && focalDelta > 0)) {
+              scrollOuterByDragDelta(focalDelta);
+            }
+          }
+
+          lastFocalX.value = details.localFocalPoint.dx;
+          lastTranslationX.value = currentTranslationX;
+        }
+
         void handleInteractionEnd(ScaleEndDetails details) {
-          if (lastPointerCount.value >= 2) return; // two-finger pan: no turn
+          final endedAfterPinch = gestureIncludedPinch.value;
+          gestureIncludedPinch.value = false;
+          lastFocalX.value = null;
+          lastTranslationX.value = null;
+
+          if (endedAfterPinch) return;
+
           final matrix = controller.value;
           final scale = matrix.getMaxScaleOnAxis();
           if (scale <= _minScale + 1e-3) return; // not zoomed: PageView handles
@@ -72,10 +136,9 @@ class ZoomableHorizontalPageImage extends HookWidget {
           final vx = details.velocity.pixelsPerSecond.dx;
           final minTx = viewportWidth * (1 - scale); // right edge reached
 
-          if (tx <= minTx + 0.5 && vx < -_flingVelocity) {
-            onEdgeFling(1); // flung past right edge
-          } else if (tx >= -0.5 && vx > _flingVelocity) {
-            onEdgeFling(-1); // flung past left edge
+          if ((tx <= minTx + _edgeTolerance && vx < 0) ||
+              (tx >= -_edgeTolerance && vx > 0)) {
+            scrollOuterByDragDelta(vx, ballistic: true);
           }
         }
 
@@ -83,7 +146,8 @@ class ZoomableHorizontalPageImage extends HookWidget {
           minScale: _minScale,
           maxScale: _maxScale,
           transformationController: controller,
-          onInteractionUpdate: (d) => lastPointerCount.value = d.pointerCount,
+          onInteractionStart: handleInteractionStart,
+          onInteractionUpdate: handleInteractionUpdate,
           onInteractionEnd: handleInteractionEnd,
           child: Image.memory(bytes, fit: fit),
         );
