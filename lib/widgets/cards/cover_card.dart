@@ -83,7 +83,9 @@ class CoverCard extends ConsumerWidget {
                                     icon:
                                         actionDisabledIcon ??
                                         const Icon(LucideIcons.wifiOff),
-                                    label: FittedBox(child: Text(effectiveLabel)),
+                                    label: FittedBox(
+                                      child: Text(effectiveLabel),
+                                    ),
                                     onPressed: null,
                                   ),
                                 ),
