@@ -23,4 +23,20 @@ FutureOr<void> sentryOptionsConfiguration(SentryFlutterOptions options) {
   options.profilesSampleRate = 1.0;
   options.replay.sessionSampleRate = 0.1;
   options.replay.onErrorSampleRate = 1.0;
+  options.beforeSend = (event, hint) {
+    final exceptions = event.exceptions;
+    if (exceptions != null) {
+      for (final exception in exceptions) {
+        final value = exception.value;
+        if (value != null) {
+          // scrub URLs from exception messages
+          exception.value = value.replaceAll(
+            RegExp(r'https?://[^\s,]+'),
+            '[scrubbed]',
+          );
+        }
+      }
+    }
+    return event;
+  };
 }
