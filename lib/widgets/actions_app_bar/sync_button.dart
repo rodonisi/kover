@@ -158,5 +158,7 @@ String _phaseLabel(SyncPhase phase) {
     refreshMetadata: (seriesId) => 'Refreshing metadata for series $seriesId',
     refreshCovers: (seriesId) => 'Refreshing covers for series $seriesId',
     refreshServerSettings: () => 'Refreshing server settings',
+    refreshToc: (chapterId) =>
+        'Refreshing table of contents for chapter $chapterId',
   );
 }

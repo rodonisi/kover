@@ -88,6 +88,10 @@ class SyncEngine {
     await seriesRepo.refreshCovers(seriesId: seriesId);
   }
 
+  Future<void> refreshToc({required int chapterId}) async {
+    await bookRepo.refreshChapterToc(chapterId: chapterId);
+  }
+
   Future<void> refreshServerSettings() async {
     await serverSettingsRepo.refreshServerSettings();
   }

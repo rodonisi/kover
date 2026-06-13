@@ -112,6 +112,13 @@ class BookRepository {
     );
   }
 
+  /// Refresh the table of contents for [chapterId] by fetching it from the
+  /// server and updating the local database.
+  Future<void> refreshChapterToc({required int chapterId}) async {
+    final entries = await _client.getBookChapters(chapterId);
+    await _db.bookDao.upsertToc(chapterId, entries);
+  }
+
   /// Fetch the table of contents for all chapters that are missing it.
   Future<void> fetchMissingChaptersTocs() async {
     final chapters = await _db.bookDao.getMissingChapterIds();
