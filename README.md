@@ -6,6 +6,7 @@
 [![CI](https://github.com/rodonisi/kover/actions/workflows/ci.yaml/badge.svg)](https://github.com/rodonisi/kover/actions/workflows/ci.yaml)
 [![Build & Deploy](https://github.com/rodonisi/kover/actions/workflows/build-and-deploy.yml/badge.svg)](https://github.com/rodonisi/kover/actions/workflows/build-and-deploy.yml)
 <a href="https://hosted.weblate.org/engage/kover/"><img src="https://hosted.weblate.org/widget/kover/kover/svg-badge.svg" alt="Translation status"></a>
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/rodonisi/kover/total)
 
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/rodonisi/kover/total)
 
