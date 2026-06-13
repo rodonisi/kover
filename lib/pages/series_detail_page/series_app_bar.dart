@@ -206,7 +206,7 @@ class _Metadata extends ConsumerWidget {
             alignment: .spaceBetween,
             children: [
               LimitedList(
-                title: l.genres,
+                title: l.writers,
                 items: metadata.writers
                     .map(
                       (w) => Text(
