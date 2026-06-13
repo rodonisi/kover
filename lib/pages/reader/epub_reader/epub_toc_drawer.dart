@@ -55,22 +55,24 @@ class EpubTocDrawer extends HookConsumerWidget {
               padding: const EdgeInsets.symmetric(
                 vertical: LayoutConstants.mediumPadding,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                spacing: LayoutConstants.smallPadding,
-                crossAxisAlignment: .start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: LayoutConstants.mediumPadding,
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: LayoutConstants.smallPadding,
+                  crossAxisAlignment: .start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: LayoutConstants.mediumPadding,
+                      ),
+                      child: Text(
+                        'Table of Contents',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
                     ),
-                    child: Text(
-                      'Table of Contents',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                  ),
-                  ...entries,
-                ],
+                    ...entries,
+                  ],
+                ),
               ),
             ),
           );

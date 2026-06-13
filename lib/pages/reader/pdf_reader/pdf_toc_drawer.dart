@@ -55,41 +55,44 @@ class PdfTocDrawer extends HookConsumerWidget {
               padding: const EdgeInsets.symmetric(
                 vertical: LayoutConstants.mediumPadding,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                spacing: LayoutConstants.smallPadding,
-                crossAxisAlignment: .start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: LayoutConstants.mediumPadding,
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: LayoutConstants.smallPadding,
+                  crossAxisAlignment: .start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: LayoutConstants.mediumPadding,
+                      ),
+                      child: Text(
+                        'Table of Contents',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
                     ),
-                    child: Text(
-                      'Table of Contents',
-                      style: Theme.of(context).textTheme.headlineMedium,
+                    ...list.indexed.map(
+                      (entry) {
+                        final (index, item) = entry;
+                        final selected = index == currentDestIndex + 1;
+                        return ListTile(
+                          key: index == currentDestIndex
+                              ? selectedKey.value
+                              : null,
+                          onTap: () => controller.goToDest(item.node.dest),
+                          contentPadding: EdgeInsetsGeometry.only(
+                            left:
+                                item.level + 1 * LayoutConstants.mediumPadding,
+                            right: LayoutConstants.mediumPadding,
+                          ),
+                          selected: selected,
+                          title: Text(
+                            item.node.title,
+                          ),
+                        );
+                      },
                     ),
-                  ),
-                  ...list.indexed.map(
-                    (entry) {
-                      final (index, item) = entry;
-                      final selected = index == currentDestIndex + 1;
-                      return ListTile(
-                        key: index == currentDestIndex
-                            ? selectedKey.value
-                            : null,
-                        onTap: () => controller.goToDest(item.node.dest),
-                        contentPadding: EdgeInsetsGeometry.only(
-                          left: item.level + 1 * LayoutConstants.mediumPadding,
-                          right: LayoutConstants.mediumPadding,
-                        ),
-                        selected: selected,
-                        title: Text(
-                          item.node.title,
-                        ),
-                      );
-                    },
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
