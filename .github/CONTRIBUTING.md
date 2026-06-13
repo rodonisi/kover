@@ -73,6 +73,13 @@ If an idea is not yet clearly defined, consider starting a discussion instead of
 
 ---
 
+## Localizations
+
+Localization contributions are also very welcome and a great way to contribute to Kover. A Weblate project is available
+to anyone interested in increasing Kover's language support. To get started, please visit the project on [Weblate](https://hosted.weblate.org/engage/kover/)
+
+---
+
 ## Developing Kover
 
 ### Codebase Overview
