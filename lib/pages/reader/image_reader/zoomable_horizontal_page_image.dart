@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
@@ -11,8 +9,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 /// drag overflow and remaining velocity at a horizontal edge are forwarded to
 /// the parent [PageView]'s controller.
 class ZoomableHorizontalPageImage extends HookWidget {
-  final Uint8List bytes;
-  final BoxFit fit;
+  final Widget child;
   final PageController outerController;
   final ValueChanged<bool> onZoomChanged;
 
@@ -21,8 +18,7 @@ class ZoomableHorizontalPageImage extends HookWidget {
 
   const ZoomableHorizontalPageImage({
     super.key,
-    required this.bytes,
-    required this.fit,
+    required this.child,
     required this.outerController,
     required this.onZoomChanged,
     this.transformationController,
@@ -149,7 +145,7 @@ class ZoomableHorizontalPageImage extends HookWidget {
           onInteractionStart: handleInteractionStart,
           onInteractionUpdate: handleInteractionUpdate,
           onInteractionEnd: handleInteractionEnd,
-          child: Image.memory(bytes, fit: fit),
+          child: child,
         );
       },
     );

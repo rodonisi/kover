@@ -100,14 +100,16 @@ class HorizontalPagedReader extends HookConsumerWidget {
                   data: (data) {
                     return ZoomableHorizontalPageImage(
                       key: ValueKey(index),
-                      bytes: data.data,
-                      fit: switch (settings.scaleType) {
-                        .contain => .contain,
-                        .fitWidth => .fitWidth,
-                        .fitHeight => .fitHeight,
-                      },
                       outerController: pageController,
                       onZoomChanged: (zoomed) => isZoomed.value = zoomed,
+                      child: Image.memory(
+                        data.data,
+                        fit: switch (settings.scaleType) {
+                          .contain => .contain,
+                          .fitWidth => .fitWidth,
+                          .fitHeight => .fitHeight,
+                        },
+                      ),
                     );
                   },
                 );

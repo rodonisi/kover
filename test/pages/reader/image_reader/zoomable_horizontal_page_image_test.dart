@@ -1,16 +1,9 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kover/pages/reader/image_reader/zoomable_horizontal_page_image.dart';
 
-// A 1x1 transparent PNG so [Image.memory] has decodable bytes.
-final Uint8List _pngBytes = base64Decode(
-  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAen63NgAAAAASUVORK5CYII=',
-);
-
 const _zoomableKey = ValueKey('zoomable-horizontal-page-image');
+const _testChild = SizedBox(width: 300, height: 300);
 
 void main() {
   testWidgets('pinch zooms and reports the zoom state', (tester) async {
@@ -229,11 +222,10 @@ Widget _host({
           height: 300,
           child: ZoomableHorizontalPageImage(
             key: _zoomableKey,
-            bytes: _pngBytes,
-            fit: BoxFit.contain,
             outerController: pageController,
             onZoomChanged: onZoomChanged ?? (_) {},
             transformationController: controller,
+            child: _testChild,
           ),
         ),
       ),
@@ -265,11 +257,10 @@ Widget _pagedHost({
 
               return ZoomableHorizontalPageImage(
                 key: _zoomableKey,
-                bytes: _pngBytes,
-                fit: BoxFit.contain,
                 outerController: pageController,
                 onZoomChanged: (_) {},
                 transformationController: controller,
+                child: _testChild,
               );
             },
           ),
