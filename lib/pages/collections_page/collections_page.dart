@@ -48,7 +48,7 @@ class CollectionsPage extends HookConsumerWidget {
                       ? KoverIcons.ascending
                       : KoverIcons.descending,
                 ),
-                menu: _menu(l, sortDirection),
+                menu: _menu(sortDirection: sortDirection, context: context),
               ),
             ],
           ),
@@ -116,10 +116,11 @@ class CollectionsPage extends HookConsumerWidget {
     return sorted;
   }
 
-  ContextMenu _menu(
-    AppLocalizations l,
-    ValueNotifier<SortDirection> sortDirection,
-  ) {
+  ContextMenu _menu({
+    required ValueNotifier<SortDirection> sortDirection,
+    required BuildContext context,
+  }) {
+    final l = AppLocalizations.of(context);
     return ContextMenu(
       entries: <ContextMenuEntry>[
         MenuHeader(text: l.directionLabel),
