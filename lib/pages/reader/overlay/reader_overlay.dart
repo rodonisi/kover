@@ -61,10 +61,10 @@ class ReaderOverlay extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final uiVisible = useState(false);
     final snackbarDismissed = useState(false);
     final showSnackbar = useState(ShowSnackbar.none);
-    final l = AppLocalizations.of(context);
     final provider = readerProvider(
       seriesId: seriesId,
       chapterId: chapterId,
