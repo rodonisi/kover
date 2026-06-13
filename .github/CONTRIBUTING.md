@@ -7,13 +7,13 @@ Thank you for your interest in contributing to Kover. This document outlines the
 ## Table of Contents
 
 <!--toc:start-->
-
 - [Contributing to Kover](#contributing-to-kover)
   - [Table of Contents](#table-of-contents)
   - [AI Assistance Disclosure](#ai-assistance-disclosure)
     - [Examples](#examples)
   - [Reporting Issues](#reporting-issues)
   - [Requesting Features & Enhancements](#requesting-features-enhancements)
+  - [Localizations](#localizations)
   - [Developing Kover](#developing-kover)
     - [Codebase Overview](#codebase-overview)
     - [Architecture](#architecture)
@@ -23,7 +23,7 @@ Thank you for your interest in contributing to Kover. This document outlines the
   - [Pull Request Guidelines](#pull-request-guidelines)
   - [Release Process](#release-process)
   - [Getting Help and Community](#getting-help-and-community)
-  <!--toc:end-->
+<!--toc:end-->
 
 ---
 
