@@ -63,11 +63,11 @@ jobs:
       - name: Check Format 🎨
         run: dart format --output=none --set-exit-if-changed .
 
-      - name: Analyze 🔍
-        run: flutter analyze
-
       - name: Build 🏗️
         run: flutter build ${{ matrix.platform }}
+
+      - name: Analyze 🔍
+        run: flutter analyze
 
       - name: Test 🧪
         run: flutter test
