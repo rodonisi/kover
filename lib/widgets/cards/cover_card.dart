@@ -10,7 +10,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 class CoverCard extends ConsumerWidget {
   final String? title;
   final Icon? icon;
-  final String actionLabel;
+  final String? actionLabel;
   final Icon actionIcon;
   final Icon? actionDisabledIcon;
   final bool actionDisabled;
@@ -24,7 +24,7 @@ class CoverCard extends ConsumerWidget {
     super.key,
     this.title,
     this.icon,
-    this.actionLabel = '',
+    this.actionLabel,
     this.actionIcon = const Icon(LucideIcons.bookOpen),
     this.actionDisabledIcon,
     this.actionDisabled = true,
@@ -38,7 +38,8 @@ class CoverCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final effectiveLabel = actionLabel.isNotEmpty ? actionLabel : l.read;
+    final effectiveLabel = actionLabel ?? l.read;
+
     return Card.filled(
       clipBehavior: .antiAlias,
       child: InkWell(
