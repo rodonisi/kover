@@ -27,6 +27,7 @@ sealed class SyncPhase with _$SyncPhase {
 
   const factory SyncPhase.allSeries() = AllSeries;
   const factory SyncPhase.metadata() = Metadata;
+  const factory SyncPhase.tocs() = Tocs;
   const factory SyncPhase.recentlyAdded() = RecentlyAdded;
   const factory SyncPhase.recentlyUpdated() = RecentlyUpdated;
   const factory SyncPhase.libraries() = Libraries;
@@ -98,6 +99,8 @@ class SyncManager extends _$SyncManager {
         () async => await _engine.syncAllSeries(),
     metadata: () =>
         () async => await _engine.syncMetadata(),
+    tocs: () =>
+        () async => await _engine.syncTocs(),
     recentlyAdded: () =>
         () async => await _engine.syncRecentlyAdded(),
     recentlyUpdated: () =>
@@ -142,6 +145,7 @@ class SyncManager extends _$SyncManager {
     _enqueuePhases({
       const .libraries(),
       const .metadata(),
+      const .tocs(),
       const .recentlyUpdated(),
       const .recentlyAdded(),
       const .progress(),

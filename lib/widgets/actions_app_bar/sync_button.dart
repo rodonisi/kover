@@ -148,6 +148,7 @@ String _phaseLabel(SyncPhase phase) {
   return phase.when(
     allSeries: () => 'Syncing all series',
     metadata: () => 'Syncing metadata',
+    tocs: () => 'Syncing chapters TOCs',
     recentlyAdded: () => 'Syncing recently added',
     recentlyUpdated: () => 'Syncing recently updated',
     libraries: () => 'Syncing libraries',

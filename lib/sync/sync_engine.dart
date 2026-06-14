@@ -41,6 +41,9 @@ class SyncEngine {
 
   Future<void> syncMetadata() async {
     await seriesRepo.fetchMissingMetadata();
+  }
+
+  Future<void> syncTocs() async {
     await bookRepo.fetchMissingChaptersTocs();
   }
 
