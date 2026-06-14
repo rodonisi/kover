@@ -75,7 +75,7 @@ class EpubTocDrawer extends HookConsumerWidget {
                         horizontal: LayoutConstants.mediumPadding,
                       ),
                       child: Text(
-                        'Table of Contents',
+                        l.tableOfContents,
                         style: Theme.of(context).textTheme.headlineMedium,
                       ),
                     ),
