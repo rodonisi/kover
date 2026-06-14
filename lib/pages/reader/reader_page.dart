@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/generated/i18n/app_localizations.dart';
+import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/reader/epub_reader/epub_reader.dart';
 import 'package:kover/pages/reader/image_reader/image_reader.dart';
 import 'package:kover/pages/reader/pdf_reader/pdf_reader.dart';

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/generated/i18n/app_localizations.dart';
+import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/collection_model.dart';
 import 'package:kover/models/enums/sort_direction.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
