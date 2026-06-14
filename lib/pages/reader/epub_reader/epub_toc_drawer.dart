@@ -19,7 +19,7 @@ class EpubTocDrawer extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedKey = useState(GlobalKey());
+    final selectedKey = useState<GlobalKey?>(null);
     final hasScrolled = useState(false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -27,9 +27,9 @@ class EpubTocDrawer extends HookConsumerWidget {
           .read(syncManagerProvider.notifier)
           .refreshChapterToc(chapterId: chapterId);
 
-      if (selectedKey.value.currentContext != null && !hasScrolled.value) {
+      if (selectedKey.value?.currentContext != null && !hasScrolled.value) {
         await Scrollable.ensureVisible(
-          selectedKey.value.currentContext!,
+          selectedKey.value!.currentContext!,
           alignment: 0.2,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
@@ -46,7 +46,9 @@ class EpubTocDrawer extends HookConsumerWidget {
               seriesId: seriesId,
               chapterId: chapterId,
               chapter: chapter,
-              selectedKey: selectedKey.value,
+              onSelected: (key) {
+                selectedKey.value = key;
+              },
             );
           }).toList();
         });
@@ -87,23 +89,24 @@ class EpubTocDrawer extends HookConsumerWidget {
   }
 }
 
-class TocEntry extends ConsumerWidget {
+class TocEntry extends HookConsumerWidget {
   final int chapterId;
   final int seriesId;
   final BookChapterModel chapter;
   final int depth;
-  final Key selectedKey;
+  final void Function(GlobalKey) onSelected;
   const TocEntry({
     super.key,
     required this.chapterId,
     required this.seriesId,
     required this.chapter,
-    required this.selectedKey,
+    required this.onSelected,
     this.depth = 0,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final key = useMemoized(() => GlobalKey(), []);
     final nav = ref.watch(
       readerNavigationProvider(seriesId: seriesId, chapterId: chapterId),
     );
@@ -112,12 +115,17 @@ class TocEntry extends ConsumerWidget {
       asyncValue: nav,
       data: (nav) {
         final isSelected = nav.currentPage == chapter.page;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (isSelected) {
+            onSelected(key);
+          }
+        });
 
         return Column(
           mainAxisSize: .min,
           children: [
             ListTile(
-              key: isSelected ? selectedKey : null,
+              key: key,
               selected: isSelected,
               contentPadding: depth > 0
                   ? EdgeInsetsGeometry.only(
@@ -143,7 +151,7 @@ class TocEntry extends ConsumerWidget {
                 seriesId: seriesId,
                 chapter: child,
                 depth: depth + 1,
-                selectedKey: selectedKey,
+                onSelected: onSelected,
               ),
             ),
           ],
