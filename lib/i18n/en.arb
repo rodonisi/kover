@@ -547,5 +547,13 @@
   "read": "Read",
   "@read": {
     "description": "Label for the read action button on cover cards"
+  },
+  "syncingTocs": "Syncing chapters TOCs",
+  "@syncingTocs": {
+    "description": "Label for the syncing chapters TOCs phase"
+  },
+  "refreshingChapterToc": "Syncing chapter TOC for chapter {chapterId}",
+  "@refreshingChapterToc": {
+    "description": "Label for the syncing chapter TOC phase with the chapter ID"
   }
 }
