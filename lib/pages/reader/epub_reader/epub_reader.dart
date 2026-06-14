@@ -30,24 +30,28 @@ class EpubReader extends HookConsumerWidget {
       chapterId: chapterId,
     );
 
-    final showProgressBar = ref.watch(
+    final settings = ref.watch(
       epubReaderSettingsProvider(
         seriesId: seriesId,
-      ).select((s) => s.whenData((data) => data.showProgressBar)),
+      ),
     );
 
     return Async(
-      asyncValue: showProgressBar,
-      data: (showProgressBar) => ReaderOverlay(
+      asyncValue: settings,
+      data: (settings) => ReaderOverlay(
         seriesId: seriesId,
         chapterId: chapterId,
         readingListId: readingListId,
-        showProgressBar: showProgressBar,
+        showProgressBar: settings.showProgressBar,
         onNextPage: () {
-          ref.read(nav.notifier).nextPage();
+          settings.readDirection == .leftToRight
+              ? ref.read(nav.notifier).nextPage()
+              : ref.read(nav.notifier).previousPage();
         },
         onPreviousPage: () {
-          ref.read(nav.notifier).previousPage();
+          settings.readDirection == .leftToRight
+              ? ref.read(nav.notifier).previousPage()
+              : ref.read(nav.notifier).nextPage();
         },
         onJumpToPage: (page) {
           ref.read(nav.notifier).jumpToPage(page);
@@ -100,6 +104,7 @@ class EpubReader extends HookConsumerWidget {
                         controller: controller,
                         itemCount: navState.totalPages,
                         allowImplicitScrolling: true,
+                        reverse: settings.readDirection == .rightToLeft,
                         physics: const NeverScrollableScrollPhysics(),
                         onPageChanged: (newPage) {
                           ref.read(nav.notifier).jumpToPage(newPage);
@@ -109,6 +114,7 @@ class EpubReader extends HookConsumerWidget {
                             seriesId: seriesId,
                             chapterId: chapterId,
                             page: index,
+                            reverse: settings.readDirection == .rightToLeft,
                             outerController: controller,
                           );
                         },
@@ -133,12 +139,14 @@ class _Page extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
   final int page;
+  final bool reverse;
   final PageController outerController;
 
   const _Page({
     required this.seriesId,
     required this.chapterId,
     required this.page,
+    this.reverse = false,
     required this.outerController,
   });
 
@@ -229,20 +237,29 @@ class _Page extends HookConsumerWidget {
                           }
 
                           if (notification is ScrollEndNotification) {
-                            final velocity =
-                                notification.dragDetails?.primaryVelocity ?? 0;
+                            final rawVelocity =
+                                notification.dragDetails?.primaryVelocity ??
+                                0.0;
+
+                            // When reversed, physical velocity direction maps
+                            // to the opposite logical scroll direction.
+                            final dragVelocity = reverse
+                                ? rawVelocity
+                                : -rawVelocity;
+
                             final position = outerController.position;
                             final metrics = notification.metrics;
+
                             final atBoundary =
-                                (velocity > 0 &&
+                                (dragVelocity > 0 &&
                                     metrics.pixels <=
                                         metrics.minScrollExtent) ||
-                                (velocity < 0 &&
+                                (dragVelocity < 0 &&
                                     metrics.pixels >= metrics.maxScrollExtent);
 
                             if (position is ScrollPositionWithSingleContext &&
                                 atBoundary) {
-                              position.goBallistic(-velocity);
+                              position.goBallistic(dragVelocity);
                             }
                           }
 
@@ -252,6 +269,7 @@ class _Page extends HookConsumerWidget {
                           controller: controller,
                           allowImplicitScrolling: true,
                           pageSnapping: true,
+                          reverse: reverse,
                           itemCount: count,
                           physics: const AlwaysScrollableScrollPhysics(
                             parent: ClampingScrollPhysics(),
