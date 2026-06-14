@@ -203,6 +203,91 @@ void main() {
       expect(res!.outerHtml, equals(expectedNext.outerHtml));
     });
 
+    test('when committing after sentences split, no sentences are lost', () {
+      // <div>
+      //  <p>Hello. There.</p>
+      // </div>
+      final root = Element.tag('div')
+        ..append(Element.tag('p')..append(Text('Hello. There. Sentences.')));
+      final expectedCommit = Element.tag('div')
+        ..append(Element.tag('p')..append(Text(r'Hello. ')));
+      final expectedNext = Element.tag('div')
+        ..append(Element.tag('p')..append(Text('There. Sentences.')));
+
+      final cursor = ElementCursor(root: root);
+
+      cursor.addNext();
+      cursor.splitChild();
+      cursor.addNext();
+      cursor.splitChild();
+      cursor.addNext();
+      cursor.addNext();
+      final commit = cursor.commitSplit();
+      final res = cursor.addNext();
+
+      expect(commit.outerHtml, equals(expectedCommit.outerHtml));
+      expect(res, isNotNull);
+      expect(res!.outerHtml, equals(expectedNext.outerHtml));
+    });
+
+    test('when last sentece does not end with period, then it is not lost', () {
+      // <div>
+      //  <p>Hello. There. Sentences</p>
+      // </div>
+      final root = Element.tag('div')
+        ..append(Element.tag('p')..append(Text('Hello. There. Sentences')));
+      final expectedCommit = Element.tag('div')
+        ..append(Element.tag('p')..append(Text(r'Hello. ')));
+      final expectedNext = Element.tag('div')
+        ..append(Element.tag('p')..append(Text('There. Sentences')));
+
+      final cursor = ElementCursor(root: root);
+
+      cursor.addNext();
+      cursor.splitChild();
+      cursor.addNext();
+      cursor.splitChild();
+      cursor.addNext();
+      cursor.addNext();
+      final commit = cursor.commitSplit();
+      final res = cursor.addNext();
+
+      expect(commit.outerHtml, equals(expectedCommit.outerHtml));
+      expect(res, isNotNull);
+      expect(res!.outerHtml, equals(expectedNext.outerHtml));
+    });
+
+    test('when sentences end in quote, then they split correctly', () {
+      // <div>
+      //  <p>Hello. "There."</p>
+      // </div>
+      final root =
+          Element.tag(
+            'div',
+          )..append(
+            Element.tag('p')..append(Text('"Hello." "There."')),
+          );
+      final expectedCommit = Element.tag('div')
+        ..append(Element.tag('p')..append(Text(r'"Hello." ')));
+      final expectedNext = Element.tag('div')
+        ..append(Element.tag('p')..append(Text('"There."')));
+
+      final cursor = ElementCursor(root: root);
+
+      cursor.addNext();
+      cursor.splitChild();
+      cursor.addNext();
+      cursor.splitChild();
+      cursor.addNext();
+      cursor.addNext();
+      final commit = cursor.commitSplit();
+      final res = cursor.addNext();
+
+      expect(commit.outerHtml, equals(expectedCommit.outerHtml));
+      expect(res, isNotNull);
+      expect(res!.outerHtml, equals(expectedNext.outerHtml));
+    });
+
     test('complete split run', () {
       // <div>
       //   <p>sit aliqua labore incididunt</p>

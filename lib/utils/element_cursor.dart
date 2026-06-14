@@ -87,7 +87,7 @@ class ElementCursor {
     final text = child.text;
 
     // Split by sentences, keeping the delimiters and trailing whitespaces.
-    final sentencesReg = RegExp(r'[\s\S]+?[.!?]+(?:\s+|$)');
+    final sentencesReg = RegExp(r'.*?[.!?]+(?:\s+|$)|.+?$');
 
     final sentences = sentencesReg
         .allMatches(text)
