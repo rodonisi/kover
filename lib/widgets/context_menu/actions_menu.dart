@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
-import 'package:kover/generated/i18n/app_localizations.dart';
+import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/utils/extensions/iterable.dart';
 import 'package:kover/widgets/context_menu/context_menu_button.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';

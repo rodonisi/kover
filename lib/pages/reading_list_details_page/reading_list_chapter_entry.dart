@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/generated/i18n/app_localizations.dart';
+import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/riverpod/providers/chapter.dart';
 import 'package:kover/riverpod/providers/router.dart';
