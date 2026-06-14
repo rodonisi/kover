@@ -1,4 +1,4 @@
-arb-dir: lib/i18n
-output-dir: lib/generated/i18n
+arb-dir: lib/l10n
+output-dir: lib/generated/l10n
 template-arb-file: en.arb
 nullable-getter: false
