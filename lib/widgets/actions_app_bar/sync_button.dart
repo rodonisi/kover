@@ -150,7 +150,7 @@ String _phaseLabel(AppLocalizations l, SyncPhase phase) {
   return phase.when(
     allSeries: () => l.syncingAllSeries,
     metadata: () => l.syncingMetadata,
-    tocs: () => 'Syncing chapters TOCs',
+    tocs: () => l.syncingTocs,
     recentlyAdded: () => l.syncingRecentlyAdded,
     recentlyUpdated: () => l.syncingRecentlyUpdated,
     libraries: () => l.syncingLibraries,
@@ -161,7 +161,6 @@ String _phaseLabel(AppLocalizations l, SyncPhase phase) {
     refreshMetadata: (seriesId) => l.refreshingMetadataForSeries(seriesId),
     refreshCovers: (seriesId) => l.refreshingCoversForSeries(seriesId),
     refreshServerSettings: () => l.refreshingServerSettings,
-    refreshToc: (chapterId) =>
-        'Refreshing table of contents for chapter $chapterId',
+    refreshToc: (chapterId) => l.refreshingChapterToc(chapterId),
   );
 }
