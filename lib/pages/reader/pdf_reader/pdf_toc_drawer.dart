@@ -21,7 +21,7 @@ class PdfTocDrawer extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedKey = useState(GlobalKey());
+    final selectedKey = useState<GlobalKey?>(null);
     final hasScrolled = useState(false);
 
     final list = _getOutlineList(toc, 0).toList();
@@ -38,10 +38,10 @@ class PdfTocDrawer extends HookConsumerWidget {
           );
 
           WidgetsBinding.instance.addPostFrameCallback((_) async {
-            if (selectedKey.value.currentContext != null &&
+            if (selectedKey.value?.currentContext != null &&
                 !hasScrolled.value) {
               await Scrollable.ensureVisible(
-                selectedKey.value.currentContext!,
+                selectedKey.value!.currentContext!,
                 alignment: 0.2,
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
@@ -73,21 +73,14 @@ class PdfTocDrawer extends HookConsumerWidget {
                     ...list.indexed.map(
                       (entry) {
                         final (index, item) = entry;
-                        final selected = index == currentDestIndex + 1;
-                        return ListTile(
-                          key: index == currentDestIndex
-                              ? selectedKey.value
-                              : null,
-                          onTap: () => controller.goToDest(item.node.dest),
-                          contentPadding: EdgeInsetsGeometry.only(
-                            left:
-                                item.level + 1 * LayoutConstants.mediumPadding,
-                            right: LayoutConstants.mediumPadding,
-                          ),
-                          selected: selected,
-                          title: Text(
-                            item.node.title,
-                          ),
+                        return _TocEntry(
+                          index: index,
+                          currentDestIndex: currentDestIndex,
+                          controller: controller,
+                          item: item,
+                          onSelected: (key) {
+                            selectedKey.value = key;
+                          },
                         );
                       },
                     ),
@@ -111,5 +104,46 @@ class PdfTocDrawer extends HookConsumerWidget {
       yield (node: node, level: level);
       yield* _getOutlineList(node.children, level + 1);
     }
+  }
+}
+
+class _TocEntry extends HookWidget {
+  final int index;
+  final int currentDestIndex;
+  final PdfViewerController controller;
+  final ({int level, PdfOutlineNode node}) item;
+  final void Function(GlobalKey) onSelected;
+
+  const _TocEntry({
+    required this.index,
+    required this.currentDestIndex,
+    required this.controller,
+    required this.item,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final key = useMemoized(() => GlobalKey(), []);
+    final selected = index == currentDestIndex + 1;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (selected) {
+        onSelected(key);
+      }
+    });
+
+    return ListTile(
+      key: key,
+      onTap: () => controller.goToDest(item.node.dest),
+      contentPadding: EdgeInsetsGeometry.only(
+        left: item.level + 1 * LayoutConstants.mediumPadding,
+        right: LayoutConstants.mediumPadding,
+      ),
+      selected: selected,
+      title: Text(
+        item.node.title,
+      ),
+    );
   }
 }

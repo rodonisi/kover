@@ -27,6 +27,7 @@ sealed class SyncPhase with _$SyncPhase {
 
   const factory SyncPhase.allSeries() = AllSeries;
   const factory SyncPhase.metadata() = Metadata;
+  const factory SyncPhase.tocs() = Tocs;
   const factory SyncPhase.recentlyAdded() = RecentlyAdded;
   const factory SyncPhase.recentlyUpdated() = RecentlyUpdated;
   const factory SyncPhase.libraries() = Libraries;
@@ -39,6 +40,9 @@ sealed class SyncPhase with _$SyncPhase {
       RefreshMetadata;
   const factory SyncPhase.refreshCovers({required int seriesId}) =
       RefreshCovers;
+  const factory SyncPhase.refreshToc({
+    required int chapterId,
+  }) = RefreshToc;
 
   factory SyncPhase.fromJson(Map<String, dynamic> json) =>
       _$SyncPhaseFromJson(json);
@@ -95,6 +99,8 @@ class SyncManager extends _$SyncManager {
         () async => await _engine.syncAllSeries(),
     metadata: () =>
         () async => await _engine.syncMetadata(),
+    tocs: () =>
+        () async => await _engine.syncTocs(),
     recentlyAdded: () =>
         () async => await _engine.syncRecentlyAdded(),
     recentlyUpdated: () =>
@@ -115,6 +121,8 @@ class SyncManager extends _$SyncManager {
         () async => await _engine.refreshMetadataAndDetails(seriesId: seriesId),
     refreshCovers: (seriesId) =>
         () async => await _engine.refreshCovers(seriesId: seriesId),
+    refreshToc: (chapterId) =>
+        () async => await _engine.refreshToc(chapterId: chapterId),
   );
 
   @override
@@ -137,6 +145,7 @@ class SyncManager extends _$SyncManager {
     _enqueuePhases({
       const .libraries(),
       const .metadata(),
+      const .tocs(),
       const .recentlyUpdated(),
       const .recentlyAdded(),
       const .progress(),
@@ -175,6 +184,11 @@ class SyncManager extends _$SyncManager {
   /// Refresh covers for series [seriesId]
   void refreshCovers({required int seriesId}) {
     _enqueuePhases({SyncPhase.refreshCovers(seriesId: seriesId)});
+  }
+
+  /// Refresh chapter toc for chapter [chapterId]
+  void refreshChapterToc({required int chapterId}) {
+    _enqueuePhases({SyncPhase.refreshToc(chapterId: chapterId)});
   }
 
   void _enqueuePhases(Set<SyncPhase> phases) {

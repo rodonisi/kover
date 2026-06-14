@@ -41,6 +41,9 @@ class SyncEngine {
 
   Future<void> syncMetadata() async {
     await seriesRepo.fetchMissingMetadata();
+  }
+
+  Future<void> syncTocs() async {
     await bookRepo.fetchMissingChaptersTocs();
   }
 
@@ -86,6 +89,10 @@ class SyncEngine {
 
   Future<void> refreshCovers({required int seriesId}) async {
     await seriesRepo.refreshCovers(seriesId: seriesId);
+  }
+
+  Future<void> refreshToc({required int chapterId}) async {
+    await bookRepo.refreshChapterToc(chapterId: chapterId);
   }
 
   Future<void> refreshServerSettings() async {

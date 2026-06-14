@@ -148,6 +148,7 @@ String _phaseLabel(SyncPhase phase) {
   return phase.when(
     allSeries: () => 'Syncing all series',
     metadata: () => 'Syncing metadata',
+    tocs: () => 'Syncing chapters TOCs',
     recentlyAdded: () => 'Syncing recently added',
     recentlyUpdated: () => 'Syncing recently updated',
     libraries: () => 'Syncing libraries',
@@ -158,5 +159,7 @@ String _phaseLabel(SyncPhase phase) {
     refreshMetadata: (seriesId) => 'Refreshing metadata for series $seriesId',
     refreshCovers: (seriesId) => 'Refreshing covers for series $seriesId',
     refreshServerSettings: () => 'Refreshing server settings',
+    refreshToc: (chapterId) =>
+        'Refreshing table of contents for chapter $chapterId',
   );
 }
