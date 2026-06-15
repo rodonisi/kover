@@ -1,546 +1,546 @@
 {
+    "addToWantToRead": "Aggiungi a Da Leggere",
     "@addToWantToRead": {
         "description": "Label for the add to want to read context menu item"
     },
+    "allSeries": "Tutte le Serie",
     "@allSeries": {
         "description": "Label for the all series menu entry"
     },
+    "apiKey": "API Key",
     "@apiKey": {
         "description": "Label for the API key input field"
     },
+    "ascending": "Crescente",
     "@ascending": {
         "description": "Label for ascending sort direction option"
     },
+    "back": "Indietro",
     "@back": {
         "description": "Label for back buttons"
     },
+    "baseUrl": "URL Base",
     "@baseUrl": {
         "description": "Label for the base URL input field"
     },
+    "cancel": "Annullare",
     "@cancel": {
         "description": "Label for the cancel button in dialogs"
     },
+    "cancelAll": "Cancella Tutto",
     "@cancelAll": {
         "description": "Label for the cancel all downloads button"
     },
+    "chapters": "Capitoli",
     "@chapters": {
         "description": "Label for the chapters section in the series details page"
     },
+    "clearCovers": "Rimuovi Copertine",
     "@clearCovers": {
         "description": "Label for the clear covers button"
     },
+    "clearDatabase": "Pulisci Database",
     "@clearDatabase": {
         "description": "Label for the clear database button"
     },
+    "clearDatabaseDialogContent": "Questa operazione cancellerà l'intero database locale, inclusi i progressi non sincronizzati e i dati scaricati. Questa azione non può essere annullata.",
     "@clearDatabaseDialogContent": {
         "description": "Content for the clear database confirmation dialog"
     },
+    "clearDatabaseDialogTitle": "Sei sicuro/a?",
     "@clearDatabaseDialogTitle": {
         "description": "Title for the clear database confirmation dialog"
     },
+    "clearDownloads": "Rimuovi Downloads",
     "@clearDownloads": {
         "description": "Label for the clear downloads button"
     },
+    "collections": "Collezioni",
     "@collections": {
         "description": "Label for the collections menu entry"
     },
+    "connectionError": "Errore di Connessione",
     "@connectionError": {
         "description": "Heading text when a connection error occurs"
     },
+    "connectionErrorDescription": "Impossibile recuperare l'utente. Verifica le tue credenziali o riprova.",
     "@connectionErrorDescription": {
         "description": "Description text when a connection error occurs"
     },
+    "contain": "Contieni",
     "@contain": {
         "description": "Label for the contain image fit option"
     },
+    "continueReading": "Continua a Leggere",
     "@continueReading": {
         "description": "Label for the continue reading button"
     },
+    "coverPage": "Pagina di copertina",
     "@coverPage": {
         "description": "Label for the cover page setting"
     },
+    "coverPageDescription": "Trattare la prima pagina come copertina, visualizzandola come una pagina singola",
     "@coverPageDescription": {
         "description": "Description for the cover page setting"
     },
+    "credentials": "Credenziali",
     "@credentials": {
         "description": "Label for the credentials section in settings"
     },
+    "dark": "Scuro",
     "@dark": {
         "description": "Label for the dark theme mode option"
     },
+    "dataManagement": "Gestione dei Dati",
     "@dataManagement": {
         "description": "Label for the data management section"
     },
+    "databaseBusy": "Database occupato…",
     "@databaseBusy": {
         "description": "Message shown when the database is busy with an operation"
     },
+    "databaseSize": "Dimensione Database",
     "@databaseSize": {
         "description": "Label for the database size information"
     },
+    "dateAdded": "Data Aggiunta",
     "@dateAdded": {
         "description": "Label for sorting by date added option"
     },
+    "descending": "Decrescente",
     "@descending": {
         "description": "Label for descending sort direction option"
     },
+    "directionLabel": "Direzione",
     "@directionLabel": {
         "description": "Label for the sort direction menu header"
     },
+    "dismiss": "Chiudi",
     "@dismiss": {
         "description": "Label for the dismiss button in chapter snackbar"
     },
+    "download": "Scarica",
     "@download": {
         "description": "Label for the download context menu item"
     },
+    "downloadAllCovers": "Scarica Tutte le Copertine",
     "@downloadAllCovers": {
         "description": "Label for the download all covers option"
     },
+    "downloadAllCoversDescription": "Se disattivata, le copertine verranno scaricate solo insieme ai capitoli. Le copertine non scaricate verranno comunque recuperate dal server su richiesta, se è disponibile una connessione.",
     "@downloadAllCoversDescription": {
         "description": "Description for the download all covers option"
     },
+    "downloadQueue": "Coda Download",
     "@downloadQueue": {
         "description": "Label for the download queue menu entry"
     },
+    "filter": "Filtro",
     "@filter": {
         "description": "Label for the filter button in lists"
     },
+    "fitDirection": "Direzione adattamento",
     "@fitDirection": {
         "description": "Label for the image fit direction setting"
     },
+    "fontSize": "Dimensione carattere",
     "@fontSize": {
         "description": "Label for the font size setting"
     },
+    "general": "Generali",
     "@general": {
         "description": "Label for the general settings section"
     },
+    "genres": "Generi",
     "@genres": {
         "description": "Label for the genres chips in the series details page"
     },
+    "github": "GitHub",
     "@github": {
         "description": "Label for the GitHub link"
     },
+    "go": "Vai",
     "@go": {
         "description": "Label for the go button in chapter snackbar"
     },
+    "goToChapter": "Vai al Capitolo",
     "@goToChapter": {
         "description": "Label for the go to chapter button in the reading list chapter entry context menu"
     },
+    "goToSeries": "Vai alla Serie",
     "@goToSeries": {
         "description": "Label for the go to series button in the reading list chapter entry context menu"
     },
+    "height": "Altezza",
     "@height": {
         "description": "Label for the fit height image option"
     },
+    "hideRead": "Nascondi Letti",
     "@hideRead": {
         "description": "Label for the hide read filter option in lists"
     },
+    "highlightResumeParagraph": "Evidenzia paragrafo di ripresa",
     "@highlightResumeParagraph": {
         "description": "Label for the highlight resume paragraph setting"
     },
+    "home": "Panoramica",
     "@home": {
         "description": "Label for the home page"
     },
+    "horizontal": "Orizzontale",
     "@horizontal": {
         "description": "Label for the horizontal reader mode option"
     },
+    "hoursCount": "~{hours} ore",
     "@hoursCount": {
         "description": "Label for the estimated reading time in hours"
     },
+    "ignoreSafeAreas": "Ignora aree sicure",
     "@ignoreSafeAreas": {
         "description": "Label for the ignore safe areas setting"
     },
+    "imIn": "Ci sto!",
     "@imIn": {
         "description": "Label for the accept button in the monitoring opt-out dialog"
     },
+    "items": "{count} {count, plural, =0{{count} elementi} =1{{count} elemento} other{{count} elementi}}",
     "@items": {
         "description": "Label for the number of items, with pluralization"
     },
+    "lastModified": "Ultima Modifica",
     "@lastModified": {
         "description": "Label for sorting by last modified option"
     },
+    "leftToRight": "Sinistra a Destra",
     "@leftToRight": {
         "description": "Label for the left to right reading direction option"
     },
+    "letterSpacing": "Spaziatura lettere",
     "@letterSpacing": {
         "description": "Label for the letter spacing setting"
     },
+    "libraries": "Librerie",
     "@libraries": {
         "description": "Label for the libraries menu entry"
     },
+    "light": "Chiaro",
     "@light": {
         "description": "Label for the light theme mode option"
     },
+    "lineHeight": "Altezza della linea",
     "@lineHeight": {
         "description": "Label for the line height setting"
     },
+    "madeWithLove": "Realizzato con ❤️",
     "@madeWithLove": {
         "description": "Label for the made with love message"
     },
+    "margins": "Margini",
     "@margins": {
         "description": "Label for the margins setting"
     },
+    "markAsRead": "Segna Come Letto",
     "@markAsRead": {
         "description": "Label for the mark as read button in context menus"
     },
+    "markAsUnread": "Segna Come Non Letto",
     "@markAsUnread": {
         "description": "Label for the mark as unread button in context menus"
     },
+    "maxConcurrentDownloads": "Download Simultanei",
     "@maxConcurrentDownloads": {
         "description": "Label for the max concurrent downloads setting"
     },
+    "menu": "Menu",
     "@menu": {
         "description": "Label for the menu button"
     },
+    "more": "Altro",
     "@more": {
         "description": "Label for the more section"
     },
+    "moreCount": "+{count} in più",
     "@moreCount": {
         "description": "Label indicating there are more items beyond the displayed count"
     },
+    "name": "Nome",
     "@name": {
         "description": "Label for sorting by name option"
     },
+    "nextChapter": "Il prossimo: {chapterTitle}",
     "@nextChapter": {
         "description": "Label for the next chapter snackbar with the chapter title"
     },
+    "noActiveSyncOperations": "Nessuna operazione di sincronizzazione attiva",
     "@noActiveSyncOperations": {
         "description": "Message shown when there are no active sync operations"
     },
+    "noCredentialsDescription": "Nessuna configurazione delle credenziali. Si prega di aggiungere l'URL del server e la chiave API in Impostazioni.",
     "@noCredentialsDescription": {
         "description": "Description text when no credentials are configured"
     },
+    "noDownloadsInQueue": "Nessun download in coda",
     "@noDownloadsInQueue": {
         "description": "Message shown when there are no downloads in the queue"
     },
+    "noThanks": "No, grazie",
     "@noThanks": {
         "description": "Label for the decline button in the monitoring opt-out dialog"
     },
+    "notSignedIn": "Non Connesso",
     "@notSignedIn": {
         "description": "Heading text when user is not signed in"
     },
+    "onDeck": "In Primo Piano",
     "@onDeck": {
         "description": "Label for the home page on deck section"
     },
+    "openSettings": "Apri impostazioni",
     "@openSettings": {
         "description": "Label for the button to open settings"
     },
+    "outlinedTheme": "Tema Delineato",
     "@outlinedTheme": {
         "description": "Label for the outlined theme setting"
     },
+    "pageGap": "Spazio tra pagine",
     "@pageGap": {
         "description": "Label for the page gap setting"
     },
+    "pagesCount": "{pages} pagine",
     "@pagesCount": {
         "description": "Label for the page count of a chapter"
     },
+    "previousChapter": "Precedente: {chapterTitle}",
     "@previousChapter": {
         "description": "Label for the previous chapter snackbar with the chapter title"
     },
+    "read": "Leggi",
     "@read": {
         "description": "Label for the read action button on cover cards"
     },
+    "readerMode": "Modalità Lettore",
     "@readerMode": {
         "description": "Label for the reader mode setting"
     },
+    "readerSettings": "Impostazioni Lettore",
     "@readerSettings": {
         "description": "Label for the reader settings bottom sheet title"
     },
+    "readingDirection": "Direzione Lettura",
     "@readingDirection": {
         "description": "Label for the reading direction setting"
     },
+    "readingLists": "Liste di Lettura",
     "@readingLists": {
         "description": "Label for the reading lists menu entry"
     },
+    "recentlyAdded": "Aggiunto Recentemente",
     "@recentlyAdded": {
         "description": "Label for the home page recently added section"
     },
+    "recentlyUpdated": "Aggiornato Recentemente",
     "@recentlyUpdated": {
         "description": "Label for the home page recently updated section"
     },
+    "reclaimSpace": "Recupera Spazio",
     "@reclaimSpace": {
         "description": "Label for the reclaim space button"
     },
+    "refreshCovers": "Aggiorna Copertine",
     "@refreshCovers": {
         "description": "Label for the refresh covers context menu item"
     },
+    "refreshMetadata": "Aggiorna Metadati",
     "@refreshMetadata": {
         "description": "Label for the refresh metadata context menu item"
     },
+    "refreshingCoversForSeries": "Aggiornamento copertine per serie {seriesId}",
     "@refreshingCoversForSeries": {
         "description": "Label for the refreshing covers phase with the series ID"
     },
+    "refreshingMetadataForSeries": "Aggiornamento metadati per serie {seriesId}",
     "@refreshingMetadataForSeries": {
         "description": "Label for the refreshing metadata phase with the series ID"
     },
+    "refreshingServerSettings": "Aggiornamento impostazioni del server",
     "@refreshingServerSettings": {
         "description": "Label for the refreshing server settings phase"
     },
+    "removeDownload": "Rimuovi Download",
     "@removeDownload": {
         "description": "Label for the remove download context menu item"
     },
+    "removeFromWantToRead": "Rimuovi da Da Leggere",
     "@removeFromWantToRead": {
         "description": "Label for the remove from want to read context menu item"
     },
+    "reset": "Resetta",
     "@reset": {
         "description": "Label for the reset button"
     },
+    "retry": "Riprova",
     "@retry": {
         "description": "Label for the retry button"
     },
+    "rightToLeft": "Destra a Sinistra",
     "@rightToLeft": {
         "description": "Label for the right to left reading direction option"
     },
+    "save": "Salva",
     "@save": {
         "description": "Label for the save credentials button"
     },
+    "sendDiagnostics": "Invia statistiche anonime di arresto e diagnostica",
     "@sendDiagnostics": {
         "description": "Label for the send diagnostics setting"
     },
+    "sendDiagnosticsChangeable": "Questo può essere modificato nelle impostazioni in qualsiasi momento.",
     "@sendDiagnosticsChangeable": {
         "description": "Message shown in the monitoring opt-out dialog indicating the setting can be changed later"
     },
+    "sendDiagnosticsDescription": "Aiutaci a migliorare l'app inviando statistiche anonime sugli errori e sulle prestazioni. I dati non contengono informazioni personali e vengono utilizzati esclusivamente per migliorare l'applicazione.",
     "@sendDiagnosticsDescription": {
         "description": "Description for the send diagnostics setting"
     },
+    "sendDiagnosticsDialogTitle": "Invia statistiche anonime di arresto e diagnostica?",
     "@sendDiagnosticsDialogTitle": {
         "description": "Title for the monitoring opt-out dialog"
     },
+    "series": "Serie",
     "@series": {
         "description": "Label for the series search section header"
     },
+    "setDefaults": "Impostare i default",
     "@setDefaults": {
         "description": "Label for the set defaults button"
     },
+    "settings": "Impostazioni",
     "@settings": {
         "description": "Label for the settings menu entry"
     },
+    "showLess": "Mostra di Meno",
     "@showLess": {
         "description": "Label for the show less button"
     },
+    "showMore": "Mostra di Più",
     "@showMore": {
         "description": "Label for the show more button"
     },
+    "showProgressBar": "Mostra barra di progresso",
     "@showProgressBar": {
         "description": "Label for the show progress bar setting"
     },
+    "sortBy": "Ordina Per",
     "@sortBy": {
         "description": "Label for the sort by option in list"
     },
+    "sortDirection": "Ordine",
     "@sortDirection": {
         "description": "Label for the sort direction option in list"
     },
+    "specials": "Speciali",
     "@specials": {
         "description": "Label for the specials section in the series details page"
     },
+    "storyline": "Trama",
     "@storyline": {
         "description": "Label for the storyline section in the series details page"
     },
+    "summary": "Sinossi",
     "@summary": {
         "description": "Label for the summary section heading"
     },
+    "syncingAllSeries": "Sincronizzazione di tutte le serie",
     "@syncingAllSeries": {
         "description": "Label for the syncing all series phase"
     },
+    "syncingCollections": "Sincronizzazione collezioni",
     "@syncingCollections": {
         "description": "Label for the syncing collections phase"
     },
+    "syncingCovers": "Sincronizzazione copertine",
     "@syncingCovers": {
         "description": "Label for the syncing covers phase"
     },
+    "syncingLibraries": "Sincronizzazione delle librerie",
     "@syncingLibraries": {
         "description": "Label for the syncing libraries phase"
     },
+    "syncingMetadata": "Sincronizzazione dei metadati",
     "@syncingMetadata": {
         "description": "Label for the syncing metadata phase"
     },
+    "syncingProgress": "Sincronizzazione dei progressi",
     "@syncingProgress": {
         "description": "Label for the syncing progress phase"
     },
+    "syncingReadingLists": "Sincronizzazione liste di lettura",
     "@syncingReadingLists": {
         "description": "Label for the syncing reading lists phase"
     },
+    "syncingRecentlyAdded": "Sincronizzazione recentemente aggiunti",
     "@syncingRecentlyAdded": {
         "description": "Label for the syncing recently added phase"
     },
+    "syncingRecentlyUpdated": "Sincronizzazione recentemente aggiornati",
     "@syncingRecentlyUpdated": {
         "description": "Label for the syncing recently updated phase"
     },
+    "system": "Sistema",
     "@system": {
         "description": "Label for the system theme mode option"
     },
+    "tableOfContents": "Indice",
     "@tableOfContents": {
         "description": "Label for the table of contents drawer in the reader"
     },
+    "themeMode": "Modalità Tema",
     "@themeMode": {
         "description": "Label for the theme mode setting"
     },
+    "twoPage": "Due Pagine",
     "@twoPage": {
         "description": "Label for the two page reader mode option"
     },
+    "unsupportedFormat": "Formato non supportato: {format}",
     "@unsupportedFormat": {
         "description": "Message shown when trying to open a chapter in an unsupported format"
     },
+    "version": "Versione: {version} ({buildNumber})",
     "@version": {
         "description": "Label for the app version, with placeholders for version and build number"
     },
+    "vertical": "Verticale",
     "@vertical": {
         "description": "Label for the vertical reader mode option"
     },
+    "verticalGap": "Distanza verticale",
     "@verticalGap": {
         "description": "Label for the vertical gap setting"
     },
+    "volumes": "Volumi",
     "@volumes": {
         "description": "Label for the volumes section in the series details page"
     },
+    "wantToRead": "Da Leggere",
     "@wantToRead": {
         "description": "Label for the want to read shelf"
     },
+    "width": "Larghezza",
     "@width": {
         "description": "Label for the fit width image option"
     },
+    "wordCount": "{wordCount} parole",
     "@wordCount": {
         "description": "Label for the word count of a chapter"
     },
+    "wordSpacing": "Spaziatura delle parole",
     "@wordSpacing": {
         "description": "Label for the word spacing setting"
     },
+    "writers": "Scrittori",
     "@writers": {
         "description": "Label for the writers metadata in the series details page"
-    },
-    "addToWantToRead": "Aggiungi a Da Leggere",
-    "allSeries": "Tutte le Serie",
-    "apiKey": "API Key",
-    "ascending": "Crescente",
-    "back": "Indietro",
-    "baseUrl": "URL Base",
-    "cancel": "Annullare",
-    "cancelAll": "Cancella Tutto",
-    "chapters": "Capitoli",
-    "clearCovers": "Rimuovi Copertine",
-    "clearDatabase": "Pulisci Database",
-    "clearDatabaseDialogContent": "Questa operazione cancellerà l'intero database locale, inclusi i progressi non sincronizzati e i dati scaricati. Questa azione non può essere annullata.",
-    "clearDatabaseDialogTitle": "Sei sicuro/a?",
-    "clearDownloads": "Rimuovi Downloads",
-    "collections": "Collezioni",
-    "connectionError": "Errore di Connessione",
-    "connectionErrorDescription": "Impossibile recuperare l'utente. Verifica le tue credenziali o riprova.",
-    "contain": "Contieni",
-    "continueReading": "Continua a Leggere",
-    "coverPage": "Pagina di copertina",
-    "coverPageDescription": "Trattare la prima pagina come copertina, visualizzandola come una pagina singola",
-    "credentials": "Credenziali",
-    "dark": "Scuro",
-    "dataManagement": "Gestione dei Dati",
-    "databaseBusy": "Database occupato…",
-    "databaseSize": "Dimensione Database",
-    "dateAdded": "Data Aggiunta",
-    "descending": "Decrescente",
-    "directionLabel": "Direzione",
-    "dismiss": "Chiudi",
-    "download": "Scarica",
-    "downloadAllCovers": "Scarica Tutte le Copertine",
-    "downloadAllCoversDescription": "Se disattivata, le copertine verranno scaricate solo insieme ai capitoli. Le copertine non scaricate verranno comunque recuperate dal server su richiesta, se è disponibile una connessione.",
-    "downloadQueue": "Coda Download",
-    "filter": "Filtro",
-    "fitDirection": "Direzione adattamento",
-    "fontSize": "Dimensione carattere",
-    "general": "Generali",
-    "genres": "Generi",
-    "github": "GitHub",
-    "go": "Vai",
-    "goToChapter": "Vai al Capitolo",
-    "goToSeries": "Vai alla Serie",
-    "height": "Altezza",
-    "hideRead": "Nascondi Letti",
-    "highlightResumeParagraph": "Evidenzia paragrafo di ripresa",
-    "home": "Panoramica",
-    "horizontal": "Orizzontale",
-    "hoursCount": "~{hours} ore",
-    "ignoreSafeAreas": "Ignora aree sicure",
-    "imIn": "Ci sto!",
-    "items": "{count} {count, plural, =0{{count} elementi} =1{{count} elemento} other{{count} elementi}}",
-    "lastModified": "Ultima Modifica",
-    "leftToRight": "Sinistra a Destra",
-    "letterSpacing": "Spaziatura lettere",
-    "libraries": "Librerie",
-    "light": "Chiaro",
-    "lineHeight": "Altezza della linea",
-    "madeWithLove": "Realizzato con ❤️",
-    "margins": "Margini",
-    "markAsRead": "Segna Come Letto",
-    "markAsUnread": "Segna Come Non Letto",
-    "maxConcurrentDownloads": "Download Simultanei",
-    "menu": "Menu",
-    "more": "Altro",
-    "moreCount": "+{count} in più",
-    "name": "Nome",
-    "nextChapter": "Il prossimo: {chapterTitle}",
-    "noActiveSyncOperations": "Nessuna operazione di sincronizzazione attiva",
-    "noCredentialsDescription": "Nessuna configurazione delle credenziali. Si prega di aggiungere l'URL del server e la chiave API in Impostazioni.",
-    "noDownloadsInQueue": "Nessun download in coda",
-    "noThanks": "No, grazie",
-    "notSignedIn": "Non Connesso",
-    "onDeck": "In Primo Piano",
-    "openSettings": "Apri impostazioni",
-    "outlinedTheme": "Tema Delineato",
-    "pageGap": "Spazio tra pagine",
-    "pagesCount": "{pages} pagine",
-    "previousChapter": "Precedente: {chapterTitle}",
-    "read": "Leggi",
-    "readerMode": "Modalità Lettore",
-    "readerSettings": "Impostazioni Lettore",
-    "readingDirection": "Direzione Lettura",
-    "readingLists": "Liste di Lettura",
-    "recentlyAdded": "Aggiunto Recentemente",
-    "recentlyUpdated": "Aggiornato Recentemente",
-    "reclaimSpace": "Recupera Spazio",
-    "refreshCovers": "Aggiorna Copertine",
-    "refreshMetadata": "Aggiorna Metadati",
-    "refreshingCoversForSeries": "Aggiornamento copertine per serie {seriesId}",
-    "refreshingMetadataForSeries": "Aggiornamento metadati per serie {seriesId}",
-    "refreshingServerSettings": "Aggiornamento impostazioni del server",
-    "removeDownload": "Rimuovi Download",
-    "removeFromWantToRead": "Rimuovi da Da Leggere",
-    "reset": "Resetta",
-    "retry": "Riprova",
-    "rightToLeft": "Destra a Sinistra",
-    "save": "Salva",
-    "sendDiagnostics": "Invia statistiche anonime di arresto e diagnostica",
-    "sendDiagnosticsChangeable": "Questo può essere modificato nelle impostazioni in qualsiasi momento.",
-    "sendDiagnosticsDescription": "Aiutaci a migliorare l'app inviando statistiche anonime sugli errori e sulle prestazioni. I dati non contengono informazioni personali e vengono utilizzati esclusivamente per migliorare l'applicazione.",
-    "sendDiagnosticsDialogTitle": "Invia statistiche anonime di arresto e diagnostica?",
-    "series": "Serie",
-    "setDefaults": "Impostare i default",
-    "settings": "Impostazioni",
-    "showLess": "Mostra di Meno",
-    "showMore": "Mostra di Più",
-    "showProgressBar": "Mostra barra di progresso",
-    "sortBy": "Ordina Per",
-    "sortDirection": "Ordine",
-    "specials": "Speciali",
-    "storyline": "Trama",
-    "summary": "Sinossi",
-    "syncingAllSeries": "Sincronizzazione di tutte le serie",
-    "syncingCollections": "Sincronizzazione collezioni",
-    "syncingCovers": "Sincronizzazione copertine",
-    "syncingLibraries": "Sincronizzazione delle librerie",
-    "syncingMetadata": "Sincronizzazione dei metadati",
-    "syncingProgress": "Sincronizzazione dei progressi",
-    "syncingReadingLists": "Sincronizzazione liste di lettura",
-    "syncingRecentlyAdded": "Sincronizzazione recentemente aggiunti",
-    "syncingRecentlyUpdated": "Sincronizzazione recentemente aggiornati",
-    "system": "Sistema",
-    "tableOfContents": "Indice",
-    "themeMode": "Modalità Tema",
-    "twoPage": "Due Pagine",
-    "unsupportedFormat": "Formato non supportato: {format}",
-    "version": "Versione: {version} ({buildNumber})",
-    "vertical": "Verticale",
-    "verticalGap": "Distanza verticale",
-    "volumes": "Volumi",
-    "wantToRead": "Da Leggere",
-    "width": "Larghezza",
-    "wordCount": "{wordCount} parole",
-    "wordSpacing": "Spaziatura delle parole",
-    "writers": "Scrittori"
+    }
 }
