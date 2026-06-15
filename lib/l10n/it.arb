@@ -543,11 +543,11 @@
     "@writers": {
         "description": "Label for the writers metadata in the series details page"
     },
-    "refreshingChapterToc": "",
+    "refreshingChapterToc": "Aggiornamento indice per capitolo {chapterId}",
     "@refreshingChapterToc": {
         "description": "Label for the syncing chapter TOC phase with the chapter ID"
     },
-    "syncingTocs": "",
+    "syncingTocs": "Sincronizzazione indici capitoli",
     "@syncingTocs": {
         "description": "Label for the syncing chapters TOCs phase"
     }
