@@ -546,5 +546,9 @@
     "downloadAllCoversDescription": "",
     "@downloadAllCoversDescription": {
         "description": "Description for the download all covers option"
+    },
+    "refreshingChapterToc": "",
+    "@refreshingChapterToc": {
+        "description": "Label for the syncing chapter TOC phase with the chapter ID"
     }
 }
