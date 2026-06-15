@@ -542,5 +542,13 @@
     "writers": "Scrittori",
     "@writers": {
         "description": "Label for the writers metadata in the series details page"
+    },
+    "refreshingChapterToc": "",
+    "@refreshingChapterToc": {
+        "description": "Label for the syncing chapter TOC phase with the chapter ID"
+    },
+    "syncingTocs": "",
+    "@syncingTocs": {
+        "description": "Label for the syncing chapters TOCs phase"
     }
 }
