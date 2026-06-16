@@ -194,7 +194,12 @@ class SyncManager extends _$SyncManager {
   }
 
   void _enqueuePhases(Set<SyncPhase> phases) {
-    _queuedPhases.add(phases);
+    final missingPhases = phases.where(
+      (phase) =>
+          !_runningPhases.contains(phase) &&
+          !_queuedPhases.any((queued) => queued.contains(phase)),
+    );
+    _queuedPhases.add(missingPhases.toSet());
     _processQueue();
   }
 
