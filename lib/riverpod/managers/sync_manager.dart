@@ -63,6 +63,8 @@ sealed class SyncState with _$SyncState {
 
 @Riverpod(keepAlive: true)
 class SyncManager extends _$SyncManager {
+  static const _maxConcurrentPhases = 4;
+
   bool _hasUser = false;
   bool _hasConnection = false;
   final List<Set<SyncPhase>> _queuedPhases = [];
@@ -201,8 +203,14 @@ class SyncManager extends _$SyncManager {
 
     while (_queuedPhases.isNotEmpty) {
       final nextPhases = _queuedPhases.removeAt(0);
+      final batch = nextPhases.take(_maxConcurrentPhases);
+      final remaining = nextPhases.skip(_maxConcurrentPhases);
+      if (remaining.isNotEmpty) {
+        _queuedPhases.insert(0, remaining.toSet());
+      }
+
       await Future.wait(
-        nextPhases.map((phase) async {
+        batch.map((phase) async {
           final callback = _getCallback(phase);
           await _runPhase(phase, callback);
         }),
