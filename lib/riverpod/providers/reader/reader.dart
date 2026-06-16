@@ -87,11 +87,6 @@ class Reader extends _$Reader {
     if (state.isLoading) return;
     final current = await future;
 
-    if (_saveProgressDebounce != null && _saveProgressDebounce!.isActive) {
-      log.debug(
-        'cancelling pending save progress',
-      );
-    }
     _saveProgressDebounce?.cancel();
 
     _saveProgressDebounce = Timer(200.ms, () async {
