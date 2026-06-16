@@ -270,7 +270,13 @@ class EpubNavigation extends _$EpubNavigation {
             )
             .value;
 
-        if (reflow == null || reflow.subpages.length <= data.subpage) return;
+        final isAheadReflow =
+            reflow == null || reflow.subpages.length <= data.subpage;
+        final isSamePosition =
+            prev?.value?.page == data.page &&
+            prev?.value?.subpage == data.subpage;
+
+        if (isAheadReflow || isSamePosition) return;
 
         final scrollId = reflow.subpages[data.subpage].paragraphScrollId();
 
