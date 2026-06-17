@@ -9,6 +9,7 @@ import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
 class EpubReader extends HookConsumerWidget {
@@ -244,8 +245,8 @@ class _Page extends HookConsumerWidget {
                             // When reversed, physical velocity direction maps
                             // to the opposite logical scroll direction.
                             final dragVelocity = reverse
-                                ? rawVelocity
-                                : -rawVelocity;
+                                ? -rawVelocity
+                                : rawVelocity;
 
                             final position = outerController.position;
                             final metrics = notification.metrics;
@@ -259,7 +260,7 @@ class _Page extends HookConsumerWidget {
 
                             if (position is ScrollPositionWithSingleContext &&
                                 atBoundary) {
-                              position.goBallistic(dragVelocity);
+                              position.goBallistic(-dragVelocity);
                             }
                           }
 
