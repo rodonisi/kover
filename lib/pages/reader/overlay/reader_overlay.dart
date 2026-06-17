@@ -68,6 +68,9 @@ class ReaderOverlay extends HookConsumerWidget {
     final showSnackbar = useState(ShowSnackbar.none);
     final isDimming = useState(false);
     final dimHideTimer = useRef<Timer?>(null);
+    useEffect(() {
+      return () => dimHideTimer.value?.cancel();
+    }, const []);
     final provider = readerProvider(
       seriesId: seriesId,
       chapterId: chapterId,
@@ -149,32 +152,7 @@ class ReaderOverlay extends HookConsumerWidget {
               },
               child: Stack(
                 children: [
-                  Positioned.fill(
-                    child: Column(
-                      mainAxisSize: .min,
-                      children: [
-                        Expanded(child: child),
-                        if (showProgressBar && state.series.format == .epub)
-                          SubpageProgress(
-                                seriesId: seriesId,
-                                chapterId: chapterId,
-                              )
-                              .animate(
-                                target: uiVisible.value ? 0.0 : 1.0,
-                              )
-                              .fadeIn(duration: 200.ms)
-                        else if (showProgressBar)
-                          ReaderProgress(
-                                seriesId: seriesId,
-                                chapterId: chapterId,
-                              )
-                              .animate(
-                                target: uiVisible.value ? 0.0 : 1.0,
-                              )
-                              .fadeIn(duration: 200.ms),
-                      ],
-                    ),
-                  ),
+                  Positioned.fill(child: child),
                   if (dimLevel > 0)
                     Positioned.fill(
                       child: IgnorePointer(
@@ -183,13 +161,41 @@ class ReaderOverlay extends HookConsumerWidget {
                         ),
                       ),
                     ),
+                  if (showProgressBar && state.series.format == .epub)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: SubpageProgress(
+                            seriesId: seriesId,
+                            chapterId: chapterId,
+                          )
+                          .animate(
+                            target: uiVisible.value ? 0.0 : 1.0,
+                          )
+                          .fadeIn(duration: 200.ms),
+                    )
+                  else if (showProgressBar)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: ReaderProgress(
+                            seriesId: seriesId,
+                            chapterId: chapterId,
+                          )
+                          .animate(
+                            target: uiVisible.value ? 0.0 : 1.0,
+                          )
+                          .fadeIn(duration: 200.ms),
+                    ),
                   Positioned.fill(
                     child: Row(
                       children: [
                         Flexible(
                           flex: 1,
                           child: GestureDetector(
-                            behavior: .opaque,
+                            behavior: .translucent,
                             onTap: onPreviousPage,
                             onVerticalDragStart: (_) {
                               dimHideTimer.value?.cancel();
@@ -359,7 +365,7 @@ class ReaderOverlay extends HookConsumerWidget {
                                   '${(dimLevel * 100).round()}%',
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 12,
+                                    fontSize: LayoutConstants.smallerIcon,
                                   ),
                                 ),
                               ],

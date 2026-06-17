@@ -3,11 +3,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
-import 'package:kover/riverpod/providers/settings/reader_dim_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/choice_option.dart';
+import 'package:kover/widgets/settings/dim_option.dart';
 import 'package:kover/widgets/settings/numeric_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -21,8 +21,6 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = imageReaderSettingsProvider(seriesId: seriesId);
     final breakpoint = ref.watch(breakpointsProvider);
-    final dimLevel =
-        ref.watch(readerDimSettingsProvider).valueOrNull?.dimLevel ?? 0.0;
     return Async(
       asyncValue: ref.watch(provider),
       data: (settings) {
@@ -205,18 +203,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                             .read(provider.notifier)
                             .setShowProgressBar(newValue),
                       ),
-                      NumericOption(
-                        title: 'Screen Dimming',
-                        icon: LucideIcons.sunMedium,
-                        value: dimLevel * 100,
-                        min: 0,
-                        max: 90,
-                        step: ReaderDimSettingsLimits.dimStep,
-                        decimalPlaces: 0,
-                        onChanged: (newValue) async => await ref
-                            .read(readerDimSettingsProvider.notifier)
-                            .setDimLevel(newValue / 100),
-                      ),
+                      const DimOption(),
                     ],
                   ),
                 ),

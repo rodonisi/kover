@@ -47,6 +47,10 @@ class ReaderDimSettings extends _$ReaderDimSettings {
         ),
       ),
     );
+    log.info(
+      'adjust dim level',
+      attributes: {'value': .double(state.value!.dimLevel)},
+    );
   }
 
   Future<void> setDimLevel(double level) async {
