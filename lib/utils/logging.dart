@@ -47,7 +47,7 @@ class KoverLogger {
   }) {
     if (level > .debug) return;
 
-    _logMessage(.debug, message);
+    _logMessage(.debug, message, attributes: attributes);
     Sentry.logger.debug(
       message.toString(),
       attributes: _mapSentryAttributes(attributes),

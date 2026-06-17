@@ -314,6 +314,7 @@ class EpubNavigation extends _$EpubNavigation {
                 page: next,
                 subpage: 0,
                 ready: false,
+                fromObserver: false,
               ),
             );
 

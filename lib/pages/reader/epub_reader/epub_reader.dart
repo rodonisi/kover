@@ -174,131 +174,140 @@ class _Page extends HookConsumerWidget {
           ),
         ),
         Positioned.fill(
-          child: Async(
-            asyncValue: ref.watch(nav),
-            data: (navState) {
-              return Async(
-                asyncValue: reflow,
-                data: (reflowState) {
-                  // include buffer spinner page if currently measuring.
-                  final count = reflowState.status == .measuring
-                      ? reflowState.subpages.length + 1
-                      : reflowState.subpages.length;
+          child: Async2(
+            asyncValue1: ref.watch(nav),
+            asyncValue2: reflow,
+            data: (navState, reflowState) {
+              // include buffer spinner page if currently measuring.
+              final count = reflowState.status == .measuring
+                  ? reflowState.subpages.length + 1
+                  : reflowState.subpages.length;
 
-                  return HookConsumer(
-                    builder: (context, ref, child) {
-                      final controller = usePageController(
-                        initialPage: navState.subpage,
-                      );
+              return HookConsumer(
+                builder: (context, ref, child) {
+                  final controller = usePageController(
+                    initialPage: navState.subpage,
+                  );
 
-                      ref.listen(nav, (
-                        previous,
-                        next,
-                      ) async {
-                        next.whenData((next) async {
-                          final previousSubpage = previous?.value?.subpage;
-                          final nextSubpage = next.subpage;
+                  ref.listen(nav, (
+                    previous,
+                    next,
+                  ) async {
+                    next.whenData((next) async {
+                      final previousSubpage = previous?.value?.subpage;
+                      final nextSubpage = next.subpage;
 
-                          if (next.page != page ||
-                              next.fromObserver ||
-                              nextSubpage == previousSubpage) {
-                            return;
-                          }
+                      if (next.page != page ||
+                          next.fromObserver ||
+                          nextSubpage == previousSubpage) {
+                        return;
+                      }
 
-                          if (controller.hasClients &&
-                              controller.page?.round() != nextSubpage) {
-                            final isSequential =
-                                previousSubpage != null &&
-                                (nextSubpage - previousSubpage).abs() == 1;
+                      if (controller.hasClients &&
+                          controller.page?.round() != nextSubpage) {
+                        final isSequential =
+                            previousSubpage != null &&
+                            (nextSubpage - previousSubpage).abs() == 1;
 
-                            isSequential
-                                ? controller.animateToPage(
-                                    nextSubpage,
-                                    duration: 200.ms,
-                                    curve: Curves.easeInOut,
-                                  )
-                                : controller.jumpToPage(nextSubpage);
-                          }
-                        });
-                      });
+                        isSequential
+                            ? controller.animateToPage(
+                                nextSubpage,
+                                duration: 200.ms,
+                                curve: Curves.easeInOut,
+                              )
+                            : controller.jumpToPage(nextSubpage);
+                      }
+                    });
+                  });
 
-                      return NotificationListener<ScrollNotification>(
-                        onNotification: (notification) {
-                          if (!outerController.hasClients) return false;
+                  return Stack(
+                    children: [
+                      Offstage(
+                        offstage: navState.page > page,
+                        child: NotificationListener<ScrollNotification>(
+                          onNotification: (notification) {
+                            if (!outerController.hasClients) return false;
 
-                          if (notification is OverscrollNotification) {
-                            outerController.jumpTo(
-                              (outerController.offset + notification.overscroll)
-                                  .clamp(
-                                    0.0,
-                                    outerController.position.maxScrollExtent,
-                                  ),
-                            );
-                          }
-
-                          if (notification is ScrollEndNotification) {
-                            final rawVelocity =
-                                notification.dragDetails?.primaryVelocity ??
-                                0.0;
-
-                            // When reversed, physical velocity direction maps
-                            // to the opposite logical scroll direction.
-                            final dragVelocity = reverse
-                                ? -rawVelocity
-                                : rawVelocity;
-
-                            final position = outerController.position;
-                            final metrics = notification.metrics;
-
-                            final atBoundary =
-                                (dragVelocity > 0 &&
-                                    metrics.pixels <=
-                                        metrics.minScrollExtent) ||
-                                (dragVelocity < 0 &&
-                                    metrics.pixels >= metrics.maxScrollExtent);
-
-                            if (position is ScrollPositionWithSingleContext &&
-                                atBoundary) {
-                              position.goBallistic(-dragVelocity);
-                            }
-                          }
-
-                          return false;
-                        },
-                        child: PageView.builder(
-                          controller: controller,
-                          allowImplicitScrolling: true,
-                          pageSnapping: true,
-                          reverse: reverse,
-                          itemCount: count,
-                          physics: const AlwaysScrollableScrollPhysics(
-                            parent: ClampingScrollPhysics(),
-                          ),
-                          onPageChanged: (newPage) {
-                            if (navState.page != page) return;
-
-                            ref
-                                .read(nav.notifier)
-                                .jumpToSubpage(newPage, fromObserver: true);
-                          },
-                          itemBuilder: (context, index) {
-                            if (index >= reflowState.subpages.length) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
+                            if (notification is OverscrollNotification) {
+                              outerController.jumpTo(
+                                (outerController.offset +
+                                        notification.overscroll)
+                                    .clamp(
+                                      0.0,
+                                      outerController.position.maxScrollExtent,
+                                    ),
                               );
                             }
 
-                            return SingleChildScrollView(
-                              child: _RenderContent(
-                                seriesId: seriesId,
-                                html: reflowState.subpages[index].outerHtml,
-                                styles: reflowState.page.styles,
-                              ),
-                            );
+                            if (notification is ScrollEndNotification) {
+                              final rawVelocity =
+                                  notification.dragDetails?.primaryVelocity ??
+                                  0.0;
+
+                              // When reversed, physical velocity direction maps
+                              // to the opposite logical scroll direction.
+                              final dragVelocity = reverse
+                                  ? -rawVelocity
+                                  : rawVelocity;
+
+                              final position = outerController.position;
+                              final metrics = notification.metrics;
+
+                              final atBoundary =
+                                  (dragVelocity > 0 &&
+                                      metrics.pixels <=
+                                          metrics.minScrollExtent) ||
+                                  (dragVelocity < 0 &&
+                                      metrics.pixels >=
+                                          metrics.maxScrollExtent);
+
+                              if (position is ScrollPositionWithSingleContext &&
+                                  atBoundary) {
+                                position.goBallistic(-dragVelocity);
+                              }
+                            }
+
+                            return false;
                           },
+                          child: PageView.builder(
+                            controller: controller,
+                            allowImplicitScrolling: true,
+                            pageSnapping: true,
+                            reverse: reverse,
+                            itemCount: count,
+                            physics: const AlwaysScrollableScrollPhysics(
+                              parent: ClampingScrollPhysics(),
+                            ),
+                            onPageChanged: (newPage) {
+                              if (navState.page != page) return;
+
+                              ref
+                                  .read(nav.notifier)
+                                  .jumpToSubpage(newPage, fromObserver: true);
+                            },
+                            itemBuilder: (context, index) {
+                              if (index >= reflowState.subpages.length) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+
+                              return SingleChildScrollView(
+                                child: _RenderContent(
+                                  seriesId: seriesId,
+                                  html: reflowState.subpages[index].outerHtml,
+                                  styles: reflowState.page.styles,
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                      );
-                    },
+                      ),
+                      if (navState.page > page)
+                        const Positioned.fill(
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                    ],
                   );
                 },
               );
