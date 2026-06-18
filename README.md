@@ -122,11 +122,14 @@ To connect Kover to a Kavita instance:
 
 ## Thanks
 
-<a href="https://sentry.io/"><img src="./docs/assets/sentry.svg" height="30" /></a>
+<p align="center">
+  <a href="https://sentry.io">
+    <img src="./docs/assets/sentry.svg" height="50" width="169" alt="Sentry" />
+  </a>
+  <a href="https://weblate.org">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Weblate_logo.svg/1280px-Weblate_logo.svg.png" height="50" alt="Weblate" />
+  </a>
+</p>
 
-[Sentry](https://sentry.io/) for providing an open source license for their error reporting software.
-
-<a href="https://weblate.org"></a><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Weblate_logo.svg/1280px-Weblate_logo.svg.png"
-  alt="File:Weblate logo.svg" height="50"></img>
-
-[Weblate](https://weblate.org/) for providing free hosting to support translations.
+- [Sentry](https://sentry.io/) for providing an open source license for their error reporting software.
+- [Weblate](https://weblate.org/) for providing free hosting to support translations.
