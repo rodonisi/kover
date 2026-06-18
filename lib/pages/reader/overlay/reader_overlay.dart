@@ -96,8 +96,9 @@ class ReaderOverlay extends HookConsumerWidget {
             ),
           );
 
-          final dimLevel =
-              ref.watch(readerDimSettingsProvider).maybeWhen(
+          final dimLevel = ref
+              .watch(readerDimSettingsProvider)
+              .maybeWhen(
                 data: (state) => state.dimLevel,
                 orElse: () => 0.0,
               );
@@ -162,28 +163,30 @@ class ReaderOverlay extends HookConsumerWidget {
                       bottom: 0,
                       left: 0,
                       right: 0,
-                      child: SubpageProgress(
-                            seriesId: seriesId,
-                            chapterId: chapterId,
-                          )
-                          .animate(
-                            target: uiVisible.value ? 0.0 : 1.0,
-                          )
-                          .fadeIn(duration: 200.ms),
+                      child:
+                          SubpageProgress(
+                                seriesId: seriesId,
+                                chapterId: chapterId,
+                              )
+                              .animate(
+                                target: uiVisible.value ? 0.0 : 1.0,
+                              )
+                              .fadeIn(duration: 200.ms),
                     )
                   else if (showProgressBar)
                     Positioned(
                       bottom: 0,
                       left: 0,
                       right: 0,
-                      child: ReaderProgress(
-                            seriesId: seriesId,
-                            chapterId: chapterId,
-                          )
-                          .animate(
-                            target: uiVisible.value ? 0.0 : 1.0,
-                          )
-                          .fadeIn(duration: 200.ms),
+                      child:
+                          ReaderProgress(
+                                seriesId: seriesId,
+                                chapterId: chapterId,
+                              )
+                              .animate(
+                                target: uiVisible.value ? 0.0 : 1.0,
+                              )
+                              .fadeIn(duration: 200.ms),
                     ),
                   Positioned.fill(
                     child: Row(

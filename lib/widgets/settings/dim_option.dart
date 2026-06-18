@@ -9,8 +9,9 @@ class DimOption extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dimLevel =
-        ref.watch(readerDimSettingsProvider).maybeWhen(
+    final dimLevel = ref
+        .watch(readerDimSettingsProvider)
+        .maybeWhen(
           data: (state) => state.dimLevel,
           orElse: () => 0.0,
         );
@@ -23,8 +24,9 @@ class DimOption extends ConsumerWidget {
       max: 90,
       step: ReaderDimSettingsLimits.dimStep,
       decimalPlaces: 0,
-      onChanged: (newValue) =>
-          ref.read(readerDimSettingsProvider.notifier).setDimLevel(newValue / 100),
+      onChanged: (newValue) => ref
+          .read(readerDimSettingsProvider.notifier)
+          .setDimLevel(newValue / 100),
     );
   }
 }
