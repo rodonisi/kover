@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -66,11 +64,6 @@ class ReaderOverlay extends HookConsumerWidget {
     final uiVisible = useState(false);
     final snackbarDismissed = useState(false);
     final showSnackbar = useState(ShowSnackbar.none);
-    final isDimming = useState(false);
-    final dimHideTimer = useRef<Timer?>(null);
-    useEffect(() {
-      return () => dimHideTimer.value?.cancel();
-    }, const []);
     final provider = readerProvider(
       seriesId: seriesId,
       chapterId: chapterId,
@@ -200,26 +193,6 @@ class ReaderOverlay extends HookConsumerWidget {
                           child: GestureDetector(
                             behavior: .translucent,
                             onTap: onPreviousPage,
-                            onVerticalDragStart: (_) {
-                              dimHideTimer.value?.cancel();
-                              isDimming.value = true;
-                            },
-                            onVerticalDragUpdate: (details) {
-                              final screenHeight =
-                                  MediaQuery.sizeOf(context).height;
-                              final delta =
-                                  (details.delta.dy / screenHeight) * 0.9;
-                              ref
-                                  .read(readerDimSettingsProvider.notifier)
-                                  .adjustDimLevel(delta);
-                            },
-                            onVerticalDragEnd: (_) {
-                              dimHideTimer.value?.cancel();
-                              dimHideTimer.value = Timer(
-                                const Duration(milliseconds: 600),
-                                () => isDimming.value = false,
-                              );
-                            },
                           ),
                         ),
                         Flexible(
@@ -335,48 +308,6 @@ class ReaderOverlay extends HookConsumerWidget {
                             .animate(target: uiVisible.value ? 1.0 : 0.0)
                             .show(duration: 10.ms, maintain: false)
                             .fade(duration: 100.ms),
-                  ),
-                  IgnorePointer(
-                    child: AnimatedOpacity(
-                      opacity: isDimming.value ? 1.0 : 0.0,
-                      duration: const Duration(milliseconds: 200),
-                      child: Align(
-                        alignment: .centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            left: LayoutConstants.largePadding,
-                          ),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: LayoutConstants.mediumPadding,
-                              vertical: LayoutConstants.mediumPadding,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black54,
-                              borderRadius: BorderRadius.circular(
-                                LayoutConstants.mediumPadding,
-                              ),
-                            ),
-                            child: Column(
-                              mainAxisSize: .min,
-                              children: [
-                                const Icon(
-                                  Icons.brightness_6,
-                                  color: Colors.white,
-                                ),
-                                Text(
-                                  '${(dimLevel * 100).round()}%',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: LayoutConstants.smallerIcon,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
                   ),
                 ],
               ),
