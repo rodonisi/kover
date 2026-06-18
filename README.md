@@ -125,3 +125,5 @@ To connect Kover to a Kavita instance:
 <a href="https://sentry.io/"><img src="./docs/assets/sentry.svg" height="30" /></a>
 
 [Sentry](https://sentry.io/) for providing an open source license for their error reporting software.
+
+[Weblate](https://weblate.org/) for providing free hosting to support translations.
