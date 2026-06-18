@@ -8,7 +8,7 @@ import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class CredentialsSettings extends HookConsumerWidget {
+class CredentialsSettings extends ConsumerWidget {
   const CredentialsSettings({super.key});
 
   @override
@@ -16,143 +16,175 @@ class CredentialsSettings extends HookConsumerWidget {
     final settings = ref.watch(credentialsProvider);
     final loginStatus = ref.watch(loginStatusProvider);
 
-    final obscureKey = useState(true);
-
     return Card(
       margin: LayoutConstants.mediumEdgeInsets,
       child: Padding(
         padding: LayoutConstants.mediumEdgeInsets,
         child: Async(
           asyncValue: settings,
-          data: (data) {
-            final urlController = TextEditingController(text: data.url);
-            final apiKeyController = TextEditingController(text: data.apiKey);
-
-            return Column(
-              mainAxisSize: .min,
-              crossAxisAlignment: .start,
-              spacing: LayoutConstants.mediumPadding,
-              children: [
-                Text(
-                  'Credentials',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                TextField(
-                  enabled: loginStatus != .loading,
-                  controller: urlController,
-                  decoration: const InputDecoration(
-                    labelText: 'Base URL',
-                  ),
-                ),
-                TextField(
-                  obscureText: obscureKey.value,
-                  enabled: loginStatus != .loading,
-                  controller: apiKeyController,
-                  decoration: InputDecoration(
-                    labelText: 'API Key',
-                    suffixIcon: Padding(
-                      padding: const EdgeInsetsGeometry.symmetric(
-                        horizontal: LayoutConstants.smallPadding,
-                      ),
-                      child: IconButton(
-                        onPressed: () {
-                          obscureKey.value = !obscureKey.value;
-                        },
-                        icon: Icon(
-                          obscureKey.value
-                              ? LucideIcons.eye
-                              : LucideIcons.eyeOff,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: .spaceBetween,
-                  children: [
-                    const _User(),
-                    FilledButton.icon(
-                      onPressed: () {
-                        ref
-                            .read(credentialsProvider.notifier)
-                            .updateCredentials(
-                              CredentialsState(
-                                url: urlController.text,
-                                apiKey: apiKeyController.text,
-                              ),
-                            );
-                      },
-                      label: const Text('Save'),
-                      icon: const Icon(LucideIcons.save),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
+          data: (data) => _CredentialsForm(
+            data: data,
+            loginStatus: loginStatus,
+          ),
         ),
       ),
     );
   }
 }
 
+class _CredentialsForm extends HookConsumerWidget {
+  final CredentialsState data;
+  final LoginStatus loginStatus;
+
+  const _CredentialsForm({required this.data, required this.loginStatus});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final obscureKey = useState(true);
+    final urlController = useTextEditingController(text: data.url ?? '');
+    final apiKeyController = useTextEditingController(text: data.apiKey ?? '');
+
+    return Column(
+      mainAxisSize: .min,
+      crossAxisAlignment: .start,
+      spacing: LayoutConstants.mediumPadding,
+      children: [
+        Text(
+          'Credentials',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        TextField(
+          enabled: loginStatus != .loading,
+          controller: urlController,
+          decoration: const InputDecoration(
+            labelText: 'Base URL',
+          ),
+        ),
+        TextField(
+          obscureText: obscureKey.value,
+          enabled: loginStatus != .loading,
+          controller: apiKeyController,
+          decoration: InputDecoration(
+            labelText: 'API Key',
+            suffixIcon: Padding(
+              padding: const EdgeInsetsGeometry.symmetric(
+                horizontal: LayoutConstants.smallPadding,
+              ),
+              child: IconButton(
+                onPressed: () {
+                  obscureKey.value = !obscureKey.value;
+                },
+                icon: Icon(
+                  obscureKey.value ? LucideIcons.eye : LucideIcons.eyeOff,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: .spaceBetween,
+          children: [
+            _User(loginStatus: loginStatus),
+            FilledButton.icon(
+              onPressed: loginStatus == LoginStatus.loading
+                  ? null
+                  : () {
+                      ref
+                          .read(credentialsProvider.notifier)
+                          .updateCredentials(
+                            CredentialsState(
+                              url: urlController.text,
+                              apiKey: apiKeyController.text,
+                            ),
+                          );
+                    },
+              label: const Text('Save'),
+              icon: const Icon(LucideIcons.save),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 class _User extends ConsumerWidget {
-  const _User();
+  final LoginStatus loginStatus;
+
+  const _User({required this.loginStatus});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return switch (loginStatus) {
+      LoginStatus.noCredentials => const SizedBox.shrink(),
+      LoginStatus.loading => const SizedBox.square(
+        dimension: LayoutConstants.mediumIcon,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      ),
+      LoginStatus.error => Icon(
+        LucideIcons.circleX,
+        color: Theme.of(context).colorScheme.error,
+      ),
+      LoginStatus.loggedIn => const _LoggedInUser(),
+    };
+  }
+}
+
+class _LoggedInUser extends ConsumerWidget {
+  const _LoggedInUser();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final currentUser = ref.watch(currentUserProvider);
-    final serverVersion = ref.watch(serverVersionProvider);
+    final user = ref.watch(currentUserProvider).valueOrNull;
+    final version = ref.watch(serverVersionProvider).valueOrNull;
 
-    return Async2(
-      asyncValue1: currentUser,
-      asyncValue2: serverVersion,
-      data: (user, version) {
-        final name = user.username;
-        final initials = name.isNotEmpty ? name[0].toUpperCase() : '?';
-
-        return Row(
-          spacing: LayoutConstants.smallPadding,
-          children: [
-            CircleAvatar(child: Text(initials)),
-            Text(
-              name,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium,
-            ),
-            if (version != null)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: LayoutConstants.smallPadding,
-                  vertical: LayoutConstants.smallerPadding,
-                ),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(
-                    LayoutConstants.smallPadding,
-                  ),
-                ),
-                child: Text(
-                  'v$version',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer,
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
-      loading: () => const SizedBox.square(
+    if (user == null) {
+      return const SizedBox.square(
         dimension: LayoutConstants.mediumIcon,
-        child: CircularProgressIndicator(),
-      ),
-      error: (_, _) => Icon(
-        LucideIcons.circleX,
-        color: Theme.of(context).colorScheme.error,
-      ),
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    final name = user.username;
+    final initials = name.isNotEmpty ? name[0].toUpperCase() : '?';
+
+    return Row(
+      spacing: LayoutConstants.smallPadding,
+      children: [
+        Icon(
+          LucideIcons.check,
+          color: theme.colorScheme.primary,
+          size: LayoutConstants.mediumIcon,
+        ),
+        CircleAvatar(child: Text(initials)),
+        Text(
+          name,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium,
+        ),
+        if (version != null)
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: LayoutConstants.smallPadding,
+              vertical: LayoutConstants.smallerPadding,
+            ),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(
+                LayoutConstants.smallPadding,
+              ),
+            ),
+            child: Text(
+              'v$version',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
