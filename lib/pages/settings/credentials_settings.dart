@@ -122,9 +122,20 @@ class _User extends ConsumerWidget {
         dimension: LayoutConstants.mediumIcon,
         child: CircularProgressIndicator(strokeWidth: 2),
       ),
-      LoginStatus.error => Icon(
-        LucideIcons.circleX,
-        color: Theme.of(context).colorScheme.error,
+      LoginStatus.error => Row(
+        spacing: LayoutConstants.smallPadding,
+        children: [
+          Icon(
+            LucideIcons.circleX,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          Text(
+            'Invalid credentials',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ),
+        ],
       ),
       LoginStatus.loggedIn => const _LoggedInUser(),
     };

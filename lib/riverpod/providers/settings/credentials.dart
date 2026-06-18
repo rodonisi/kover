@@ -37,6 +37,8 @@ class Credentials extends _$Credentials {
 
   void updateCredentials(CredentialsState settings) {
     state = AsyncValue.data(settings);
+    // Trigger re-validation by invalidating the current user provider
+    ref.invalidate(currentUserProvider);
   }
 }
 

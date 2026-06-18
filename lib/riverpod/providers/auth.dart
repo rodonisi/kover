@@ -33,19 +33,14 @@ class CurrentUser extends _$CurrentUser {
 
     if (state.hasValue) state = AsyncData(state.value!);
 
-    try {
-      final client = ref.watch(restClientProvider);
-      final res = await client.apiPluginAuthenticatePost(
-        apiKey: apiKey,
-        pluginName: 'kover',
-      );
-      if (!res.isSuccessful || res.body == null) {
-        throw Exception('Failed to authenticate: ${res.error}');
-      }
-      return UserModel.fromUserDto(res.body!);
-    } catch (e) {
-      if (state.hasValue) return state.value!;
-      rethrow;
+    final client = ref.watch(restClientProvider);
+    final res = await client.apiPluginAuthenticatePost(
+      apiKey: apiKey,
+      pluginName: 'kover',
+    );
+    if (!res.isSuccessful || res.body == null) {
+      throw Exception('Failed to authenticate: ${res.error}');
     }
+    return UserModel.fromUserDto(res.body!);
   }
 }
