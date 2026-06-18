@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:kover/models/user_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
@@ -11,9 +14,14 @@ part 'auth.g.dart';
 class NoCredentialsException implements Exception {}
 
 Duration? _retry(int retryCount, Object error) {
-  if (error is NoCredentialsException || retryCount >= 3) {
-    return null;
-  }
+  // Never retry missing credentials
+  if (error is NoCredentialsException) return null;
+
+  // Never retry network errors (offline) - fail fast
+  if (error is SocketException || error is TimeoutException) return null;
+
+  // Retry other errors up to 3 times
+  if (retryCount >= 3) return null;
 
   return Duration(milliseconds: 200 * (1 << retryCount));
 }
