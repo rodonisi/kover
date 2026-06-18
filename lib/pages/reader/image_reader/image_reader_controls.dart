@@ -151,6 +151,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                               .read(provider.notifier)
                               .setVerticalReaderPadding(newValue),
                         ),
+                        const DimOption(),
                         NumericOption(
                           title: 'Vertical Gap',
                           icon: LucideIcons.unfoldVertical,
@@ -203,7 +204,6 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                             .read(provider.notifier)
                             .setShowProgressBar(newValue),
                       ),
-                      const DimOption(),
                     ],
                   ),
                 ),

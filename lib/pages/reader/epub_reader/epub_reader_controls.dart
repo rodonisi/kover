@@ -92,6 +92,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                             .read(provider.notifier)
                             .setMarginSize(newValue),
                       ),
+                      const DimOption(),
 
                       NumericOption(
                         title: 'Line Height',
@@ -146,7 +147,6 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                               .setShowProgressBar(value);
                         },
                       ),
-                      const DimOption(),
                     ],
                   ),
                 ),
