@@ -148,14 +148,18 @@ class _LoggedInUser extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final user = ref.watch(currentUserProvider).maybeWhen(
-      data: (user) => user,
-      orElse: () => null,
-    );
-    final version = ref.watch(serverVersionProvider).maybeWhen(
-      data: (version) => version,
-      orElse: () => null,
-    );
+    final user = ref
+        .watch(currentUserProvider)
+        .maybeWhen(
+          data: (user) => user,
+          orElse: () => null,
+        );
+    final version = ref
+        .watch(serverVersionProvider)
+        .maybeWhen(
+          data: (version) => version,
+          orElse: () => null,
+        );
 
     if (user == null) {
       return const SizedBox.square(
