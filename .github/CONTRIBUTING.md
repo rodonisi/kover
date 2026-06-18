@@ -7,6 +7,7 @@ Thank you for your interest in contributing to Kover. This document outlines the
 ## Table of Contents
 
 <!--toc:start-->
+
 - [Contributing to Kover](#contributing-to-kover)
   - [Table of Contents](#table-of-contents)
   - [AI Assistance Disclosure](#ai-assistance-disclosure)
@@ -23,7 +24,7 @@ Thank you for your interest in contributing to Kover. This document outlines the
   - [Pull Request Guidelines](#pull-request-guidelines)
   - [Release Process](#release-process)
   - [Getting Help and Community](#getting-help-and-community)
-<!--toc:end-->
+  <!--toc:end-->
 
 ---
 
@@ -141,6 +142,8 @@ graph LR
 - Avoid manually modifying generated code.
 - Avoid violating the architecture layer boundaries.
   - For example, UI code should not directly access the database or API, but rather go through providers and managers.
+- New text strings exposed in the UI should be added to the English localization file `lib/l10n/en.arb` and accompanied by a description for the string in
+  the respective `@` entry. No other localization files should be manually edited as those are managed through Weblate.
 
 ### Setting Up Your Development Environment
 
