@@ -10,7 +10,10 @@ class DimOption extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dimLevel =
-        ref.watch(readerDimSettingsProvider).valueOrNull?.dimLevel ?? 0.0;
+        ref.watch(readerDimSettingsProvider).maybeWhen(
+          data: (state) => state.dimLevel,
+          orElse: () => 0.0,
+        );
 
     return NumericOption(
       title: 'Screen Dimming',

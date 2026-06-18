@@ -104,7 +104,10 @@ class ReaderOverlay extends HookConsumerWidget {
           );
 
           final dimLevel =
-              ref.watch(readerDimSettingsProvider).valueOrNull?.dimLevel ?? 0.0;
+              ref.watch(readerDimSettingsProvider).maybeWhen(
+                data: (state) => state.dimLevel,
+                orElse: () => 0.0,
+              );
 
           ref.listen(
             readerNavigationProvider(
