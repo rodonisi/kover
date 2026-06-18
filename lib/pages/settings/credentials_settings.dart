@@ -82,12 +82,12 @@ class _CredentialsForm extends HookConsumerWidget {
           ),
         ),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: .center,
           mainAxisAlignment: .spaceBetween,
           children: [
             _User(loginStatus: loginStatus),
             FilledButton.icon(
-              onPressed: loginStatus == LoginStatus.loading
+              onPressed: loginStatus == .loading
                   ? null
                   : () {
                       ref
