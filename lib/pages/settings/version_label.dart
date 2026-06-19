@@ -23,7 +23,7 @@ class VersionLabel extends ConsumerWidget {
             showAboutDialog(
               context: context,
               applicationName: info.appName,
-              applicationVersion: l.version(info.buildNumber, info.version),
+              applicationVersion: l.version(info.version, info.buildNumber),
               applicationIcon: Container(
                 width: LayoutConstants.largestIcon,
                 height: LayoutConstants.largestIcon,

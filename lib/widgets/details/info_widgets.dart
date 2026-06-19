@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/riverpod/providers/want_to_read.dart';
-import 'package:kover/utils/extensions/int.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -94,7 +93,7 @@ class WordCount extends StatelessWidget {
           size: LayoutConstants.smallIcon,
         ),
         Text(
-          l.wordCount(wordCount.prettyInt()),
+          l.wordCount(wordCount),
         ),
       ],
     );
@@ -144,7 +143,7 @@ class RemainingHours extends StatelessWidget {
           size: LayoutConstants.smallIcon,
         ),
         Text(
-          l.hoursCount(hours.toStringAsFixed(1)),
+          l.hoursCount(hours),
         ),
       ],
     );
@@ -169,7 +168,7 @@ class Pages extends StatelessWidget {
           LucideIcons.fileStack,
           size: LayoutConstants.smallIcon,
         ),
-        Text(l.pagesCount(pages.prettyInt())),
+        Text(l.pagesCount(pages)),
       ],
     );
   }
