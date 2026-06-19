@@ -446,7 +446,7 @@
       "hours": {
         "description": "The estimated amount of hours",
         "type": "double",
-        "format": "decimalPattern",
+        "format": "decimalPatternDigits",
         "optionalParameters": {
           "decimalDigits": 1
         },
