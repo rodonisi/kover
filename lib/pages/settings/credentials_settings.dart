@@ -59,7 +59,7 @@ class _CredentialsForm extends HookConsumerWidget {
           enabled: loginStatus != .loading,
           controller: urlController,
           decoration: const InputDecoration(
-            labelText:l.baseUrl,
+            labelText: l.baseUrl,
           ),
         ),
         TextField(
