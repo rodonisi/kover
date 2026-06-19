@@ -111,10 +111,6 @@
     "@descending": {
         "description": "Label for descending sort direction option"
     },
-    "directionLabel": "Direzione",
-    "@directionLabel": {
-        "description": "Label for the sort direction menu header"
-    },
     "dismiss": "Chiudi",
     "@dismiss": {
         "description": "Label for the dismiss button in chapter snackbar"
