@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/riverpod/providers/router.dart';
+import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/riverpod/repository/sentry_repository.dart';
 import 'package:kover/sync/background.dart';
@@ -30,6 +31,12 @@ class App extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
+    final locale = ref.watch(
+      generalSettingsProvider.select(
+        (t) => t.whenOrNull(data: (data) => data.locale),
+      ),
+    );
+
     return EagerProviders(
       child: BreakpointsWatcher(
         child: Async(
@@ -43,6 +50,7 @@ class App extends ConsumerWidget {
             routerConfig: ref.watch(routerProvider),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
+            locale: locale,
           ),
           loading: () => const SizedBox.shrink(),
         ),

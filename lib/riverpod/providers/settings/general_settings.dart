@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
@@ -10,12 +12,17 @@ part 'general_settings.g.dart';
 
 @freezed
 sealed class GeneralSettingsState with _$GeneralSettingsState {
+  const GeneralSettingsState._();
+
   const factory GeneralSettingsState({
     @Default(false) bool sendDiagnostics,
+    String? localeString,
   }) = _GeneralSettingsState;
 
   factory GeneralSettingsState.fromJson(Map<String, Object?> json) =>
       _$GeneralSettingsStateFromJson(json);
+
+  Locale? get locale => localeString != null ? Locale(localeString!) : null;
 }
 
 @riverpod
@@ -35,5 +42,14 @@ class GeneralSettings extends _$GeneralSettings {
     final current = await future;
     log.info('set send diagnostics', attributes: {'value': .bool(value)});
     state = AsyncData(current.copyWith(sendDiagnostics: value));
+  }
+
+  Future<void> setLocale(Locale? value) async {
+    final current = await future;
+    log.info(
+      'set locale',
+      attributes: {'value': .string(value?.languageCode ?? 'null')},
+    );
+    state = AsyncData(current.copyWith(localeString: value?.languageCode));
   }
 }

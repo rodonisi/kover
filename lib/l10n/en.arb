@@ -1,5 +1,13 @@
 {
   "@@locale": "en",
+  "languageName": "English",
+  "@languageName": {
+      "description": "The localized name of this locale"
+  },
+  "language": "Language",
+  "@language": {
+      "description": "Title for the language settings entry"
+  },
   "onDeck": "On Deck",
   "@onDeck": {
     "description": "Label for the home page on deck section"
