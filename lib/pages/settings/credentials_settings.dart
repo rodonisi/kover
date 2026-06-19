@@ -150,15 +150,13 @@ class _LoggedInUser extends ConsumerWidget {
     final theme = Theme.of(context);
     final user = ref
         .watch(currentUserProvider)
-        .maybeWhen(
+        .whenOrNull(
           data: (user) => user,
-          orElse: () => null,
         );
     final version = ref
         .watch(serverVersionProvider)
-        .maybeWhen(
+        .whenOrNull(
           data: (version) => version,
-          orElse: () => null,
         );
 
     if (user == null) {
