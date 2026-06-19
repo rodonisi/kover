@@ -117,13 +117,13 @@ class _Locale extends ConsumerWidget {
         return SelectOption(
           title: l.language,
           icon: KoverIcons.language,
-          value: generalSettings.locale ?? Locale(Intl.getCurrentLocale()),
+          value: generalSettings.locale,
           options: [
             SelectOptionEntry(
               value: null,
               label: lookupAppLocalizations(
-                Locale(Intl.systemLocale),
-              ).languageName,
+                Locale(Intl.systemLocale.split('_').first),
+              ).system,
             ),
             ...AppLocalizations.supportedLocales.map(
               (locale) {
