@@ -118,6 +118,7 @@ class _User extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     return switch (loginStatus) {
       LoginStatus.noCredentials => const SizedBox.shrink(),
       LoginStatus.loading => const SizedBox.square(
@@ -132,7 +133,7 @@ class _User extends ConsumerWidget {
             color: Theme.of(context).colorScheme.error,
           ),
           Text(
-            'Invalid credentials',
+            l.invalidCredentials,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.error,
             ),

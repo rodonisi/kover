@@ -123,7 +123,7 @@ class CollectionsPage extends HookConsumerWidget {
     final l = AppLocalizations.of(context);
     return ContextMenu(
       entries: <ContextMenuEntry>[
-        MenuHeader(text: l.directionLabel),
+        MenuHeader(text: l.sortDirection),
         MenuItem(
           label: Text(l.ascending),
           icon: _getItemIcon(

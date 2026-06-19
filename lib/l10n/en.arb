@@ -490,10 +490,6 @@
   "@noDownloadsInQueue": {
     "description": "Message shown when there are no downloads in the queue"
   },
-  "directionLabel": "Direction",
-  "@directionLabel": {
-    "description": "Label for the sort direction menu header"
-  },
   "readerSettings": "Reader Settings",
   "@readerSettings": {
     "description": "Label for the reader settings bottom sheet title"
@@ -646,5 +642,9 @@
         "example": "42"
       }
     }
+  },
+  "invalidCredentials": "Invalid Credentials",
+  "@invalidCredentials": {
+    "description": "User display error displayed when credentials are invalid"
   }
 }
