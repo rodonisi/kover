@@ -58,7 +58,7 @@ class _CredentialsForm extends HookConsumerWidget {
         TextField(
           enabled: loginStatus != .loading,
           controller: urlController,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: l.baseUrl,
           ),
         ),
@@ -101,7 +101,7 @@ class _CredentialsForm extends HookConsumerWidget {
                             ),
                           );
                     },
-              label: const Text(l.save),
+              label: Text(l.save),
               icon: const Icon(LucideIcons.save),
             ),
           ],
