@@ -1,13 +1,13 @@
 {
-    "addToWantToRead": "Aggiungi a Da Leggere",
+    "addToWantToRead": "Aggiungi da leggere",
     "@addToWantToRead": {
         "description": "Label for the add to want to read context menu item"
     },
-    "allSeries": "Tutte le Serie",
+    "allSeries": "Tutte le serie",
     "@allSeries": {
         "description": "Label for the all series menu entry"
     },
-    "apiKey": "API Key",
+    "apiKey": "API key",
     "@apiKey": {
         "description": "Label for the API key input field"
     },
@@ -19,7 +19,7 @@
     "@back": {
         "description": "Label for back buttons"
     },
-    "baseUrl": "URL Base",
+    "baseUrl": "URL di base",
     "@baseUrl": {
         "description": "Label for the base URL input field"
     },
@@ -27,7 +27,7 @@
     "@cancel": {
         "description": "Label for the cancel button in dialogs"
     },
-    "cancelAll": "Cancella Tutto",
+    "cancelAll": "Cancella tutto",
     "@cancelAll": {
         "description": "Label for the cancel all downloads button"
     },
@@ -35,11 +35,11 @@
     "@chapters": {
         "description": "Label for the chapters section in the series details page"
     },
-    "clearCovers": "Rimuovi Copertine",
+    "clearCovers": "Rimuovi copertine",
     "@clearCovers": {
         "description": "Label for the clear covers button"
     },
-    "clearDatabase": "Pulisci Database",
+    "clearDatabase": "Pulisci database",
     "@clearDatabase": {
         "description": "Label for the clear database button"
     },
@@ -51,7 +51,7 @@
     "@clearDatabaseDialogTitle": {
         "description": "Title for the clear database confirmation dialog"
     },
-    "clearDownloads": "Rimuovi Downloads",
+    "clearDownloads": "Rimuovi downloads",
     "@clearDownloads": {
         "description": "Label for the clear downloads button"
     },
@@ -59,7 +59,7 @@
     "@collections": {
         "description": "Label for the collections menu entry"
     },
-    "connectionError": "Errore di Connessione",
+    "connectionError": "Errore di connessione",
     "@connectionError": {
         "description": "Heading text when a connection error occurs"
     },
@@ -71,7 +71,7 @@
     "@contain": {
         "description": "Label for the contain image fit option"
     },
-    "continueReading": "Continua a Leggere",
+    "continueReading": "Continua a leggere",
     "@continueReading": {
         "description": "Label for the continue reading button"
     },
@@ -99,11 +99,11 @@
     "@databaseBusy": {
         "description": "Message shown when the database is busy with an operation"
     },
-    "databaseSize": "Dimensione Database",
+    "databaseSize": "Dimensione database",
     "@databaseSize": {
         "description": "Label for the database size information"
     },
-    "dateAdded": "Data Aggiunta",
+    "dateAdded": "Data di aggiunta",
     "@dateAdded": {
         "description": "Label for sorting by date added option"
     },
@@ -123,15 +123,15 @@
     "@download": {
         "description": "Label for the download context menu item"
     },
-    "downloadAllCovers": "Scarica Tutte le Copertine",
+    "downloadAllCovers": "Scarica tutte le copertine",
     "@downloadAllCovers": {
         "description": "Label for the download all covers option"
     },
-    "downloadAllCoversDescription": "Se disattivata, le copertine verranno scaricate solo insieme ai capitoli. Le copertine non scaricate verranno comunque recuperate dal server su richiesta, se è disponibile una connessione.",
+    "downloadAllCoversDescription": "Se disattivata, le copertine verranno scaricate solo insieme ai capitoli. Le copertine non scaricate verranno ancora recuperate dal server su richiesta, se è disponibile una connessione.",
     "@downloadAllCoversDescription": {
         "description": "Description for the download all covers option"
     },
-    "downloadQueue": "Coda Download",
+    "downloadQueue": "Coda download",
     "@downloadQueue": {
         "description": "Label for the download queue menu entry"
     },
@@ -163,11 +163,11 @@
     "@go": {
         "description": "Label for the go button in chapter snackbar"
     },
-    "goToChapter": "Vai al Capitolo",
+    "goToChapter": "Vai al capitolo",
     "@goToChapter": {
         "description": "Label for the go to chapter button in the reading list chapter entry context menu"
     },
-    "goToSeries": "Vai alla Serie",
+    "goToSeries": "Vai alla serie",
     "@goToSeries": {
         "description": "Label for the go to series button in the reading list chapter entry context menu"
     },
@@ -175,7 +175,7 @@
     "@height": {
         "description": "Label for the fit height image option"
     },
-    "hideRead": "Nascondi Letti",
+    "hideRead": "Nascondi letti",
     "@hideRead": {
         "description": "Label for the hide read filter option in lists"
     },
@@ -207,11 +207,11 @@
     "@items": {
         "description": "Label for the number of items, with pluralization"
     },
-    "lastModified": "Ultima Modifica",
+    "lastModified": "Ultima modifica",
     "@lastModified": {
         "description": "Label for sorting by last modified option"
     },
-    "leftToRight": "Sinistra a Destra",
+    "leftToRight": "Sinistra a destra",
     "@leftToRight": {
         "description": "Label for the left to right reading direction option"
     },
@@ -239,15 +239,15 @@
     "@margins": {
         "description": "Label for the margins setting"
     },
-    "markAsRead": "Segna Come Letto",
+    "markAsRead": "Segna come letto",
     "@markAsRead": {
         "description": "Label for the mark as read button in context menus"
     },
-    "markAsUnread": "Segna Come Non Letto",
+    "markAsUnread": "Segna come non letto",
     "@markAsUnread": {
         "description": "Label for the mark as unread button in context menus"
     },
-    "maxConcurrentDownloads": "Download Simultanei",
+    "maxConcurrentDownloads": "Download simultanei",
     "@maxConcurrentDownloads": {
         "description": "Label for the max concurrent downloads setting"
     },
@@ -267,7 +267,7 @@
     "@name": {
         "description": "Label for sorting by name option"
     },
-    "nextChapter": "Il prossimo: {chapterTitle}",
+    "nextChapter": "Prossimo: {chapterTitle}",
     "@nextChapter": {
         "description": "Label for the next chapter snackbar with the chapter title"
     },
@@ -287,11 +287,11 @@
     "@noThanks": {
         "description": "Label for the decline button in the monitoring opt-out dialog"
     },
-    "notSignedIn": "Non Connesso",
+    "notSignedIn": "Non connesso",
     "@notSignedIn": {
         "description": "Heading text when user is not signed in"
     },
-    "onDeck": "In Primo Piano",
+    "onDeck": "In primo piano",
     "@onDeck": {
         "description": "Label for the home page on deck section"
     },
@@ -299,7 +299,7 @@
     "@openSettings": {
         "description": "Label for the button to open settings"
     },
-    "outlinedTheme": "Tema Delineato",
+    "outlinedTheme": "Tema delineato",
     "@outlinedTheme": {
         "description": "Label for the outlined theme setting"
     },
@@ -319,39 +319,39 @@
     "@read": {
         "description": "Label for the read action button on cover cards"
     },
-    "readerMode": "Modalità Lettore",
+    "readerMode": "Modalità lettore",
     "@readerMode": {
         "description": "Label for the reader mode setting"
     },
-    "readerSettings": "Impostazioni Lettore",
+    "readerSettings": "Impostazioni lettore",
     "@readerSettings": {
         "description": "Label for the reader settings bottom sheet title"
     },
-    "readingDirection": "Direzione Lettura",
+    "readingDirection": "Direzione di lettura",
     "@readingDirection": {
         "description": "Label for the reading direction setting"
     },
-    "readingLists": "Liste di Lettura",
+    "readingLists": "Liste di lettura",
     "@readingLists": {
         "description": "Label for the reading lists menu entry"
     },
-    "recentlyAdded": "Aggiunto Recentemente",
+    "recentlyAdded": "Aggiunto recentemente",
     "@recentlyAdded": {
         "description": "Label for the home page recently added section"
     },
-    "recentlyUpdated": "Aggiornato Recentemente",
+    "recentlyUpdated": "Aggiornato recentemente",
     "@recentlyUpdated": {
         "description": "Label for the home page recently updated section"
     },
-    "reclaimSpace": "Recupera Spazio",
+    "reclaimSpace": "Recupera spazio",
     "@reclaimSpace": {
         "description": "Label for the reclaim space button"
     },
-    "refreshCovers": "Aggiorna Copertine",
+    "refreshCovers": "Aggiorna copertine",
     "@refreshCovers": {
         "description": "Label for the refresh covers context menu item"
     },
-    "refreshMetadata": "Aggiorna Metadati",
+    "refreshMetadata": "Aggiorna metadati",
     "@refreshMetadata": {
         "description": "Label for the refresh metadata context menu item"
     },
@@ -367,11 +367,11 @@
     "@refreshingServerSettings": {
         "description": "Label for the refreshing server settings phase"
     },
-    "removeDownload": "Rimuovi Download",
+    "removeDownload": "Rimuovi download",
     "@removeDownload": {
         "description": "Label for the remove download context menu item"
     },
-    "removeFromWantToRead": "Rimuovi da Da Leggere",
+    "removeFromWantToRead": "Rimuovi da leggere",
     "@removeFromWantToRead": {
         "description": "Label for the remove from want to read context menu item"
     },
@@ -383,7 +383,7 @@
     "@retry": {
         "description": "Label for the retry button"
     },
-    "rightToLeft": "Destra a Sinistra",
+    "rightToLeft": "Destra a sinistra",
     "@rightToLeft": {
         "description": "Label for the right to left reading direction option"
     },
@@ -399,7 +399,7 @@
     "@sendDiagnosticsChangeable": {
         "description": "Message shown in the monitoring opt-out dialog indicating the setting can be changed later"
     },
-    "sendDiagnosticsDescription": "Aiutaci a migliorare l'app inviando statistiche anonime sugli errori e sulle prestazioni. I dati non contengono informazioni personali e vengono utilizzati esclusivamente per migliorare l'applicazione.",
+    "sendDiagnosticsDescription": "Aiuta a migliorare l'app inviando statistiche anonime di errore e prestazioni. I dati non contengono alcuna informazione personale e sono utilizzati in unicamente per migliorare l'app.",
     "@sendDiagnosticsDescription": {
         "description": "Description for the send diagnostics setting"
     },
@@ -419,11 +419,11 @@
     "@settings": {
         "description": "Label for the settings menu entry"
     },
-    "showLess": "Mostra di Meno",
+    "showLess": "Mostra di meno",
     "@showLess": {
         "description": "Label for the show less button"
     },
-    "showMore": "Mostra di Più",
+    "showMore": "Mostra di più",
     "@showMore": {
         "description": "Label for the show more button"
     },
@@ -431,11 +431,11 @@
     "@showProgressBar": {
         "description": "Label for the show progress bar setting"
     },
-    "sortBy": "Ordina Per",
+    "sortBy": "Ordina per",
     "@sortBy": {
         "description": "Label for the sort by option in list"
     },
-    "sortDirection": "Ordine",
+    "sortDirection": "Direzione ordine",
     "@sortDirection": {
         "description": "Label for the sort direction option in list"
     },
@@ -495,11 +495,11 @@
     "@tableOfContents": {
         "description": "Label for the table of contents drawer in the reader"
     },
-    "themeMode": "Modalità Tema",
+    "themeMode": "Modalità tema",
     "@themeMode": {
         "description": "Label for the theme mode setting"
     },
-    "twoPage": "Due Pagine",
+    "twoPage": "Due pagine",
     "@twoPage": {
         "description": "Label for the two page reader mode option"
     },
@@ -523,7 +523,7 @@
     "@volumes": {
         "description": "Label for the volumes section in the series details page"
     },
-    "wantToRead": "Da Leggere",
+    "wantToRead": "Da leggere",
     "@wantToRead": {
         "description": "Label for the want to read shelf"
     },
@@ -550,5 +550,9 @@
     "syncingTocs": "Sincronizzazione indici capitoli",
     "@syncingTocs": {
         "description": "Label for the syncing chapters TOCs phase"
+    },
+    "invalidCredentials": "Credenziali non valide",
+    "@invalidCredentials": {
+        "description": "User display error displayed when credentials are invalid"
     }
 }
