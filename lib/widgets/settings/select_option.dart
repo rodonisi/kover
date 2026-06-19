@@ -27,6 +27,10 @@ class SelectOption<T> extends StatelessWidget {
       icon: icon,
       sameRow: true,
       child: DropdownMenu<T>(
+        inputDecorationTheme: const InputDecorationTheme(
+          isDense: true,
+        ),
+        initialSelection: value,
         dropdownMenuEntries: options
             .map(
               (option) => DropdownMenuEntry<T>(
@@ -36,7 +40,6 @@ class SelectOption<T> extends StatelessWidget {
               ),
             )
             .toList(),
-        initialSelection: value,
         onSelected: (T? newValue) {
           onChanged?.call(newValue);
         },
