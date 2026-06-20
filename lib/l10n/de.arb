@@ -1,1 +1,40 @@
-{}
+{
+    "databaseSize": "Datenbankgröße",
+    "@databaseSize": {
+        "description": "Label for the database size information"
+    },
+    "goToChapter": "Zum Kapitel",
+    "@goToChapter": {
+        "description": "Label for the go to chapter button in the reading list chapter entry context menu"
+    },
+    "items": "{count} {count, plural, =0{{count} Items} =1{{count} item} sonstige{{count} Items}}}",
+    "@items": {
+        "description": "Label for the number of items, with pluralization",
+        "placeholders": {
+            "count": {
+                "description": "The amount of items",
+                "type": "int",
+                "example": "2"
+            }
+        }
+    },
+    "unsupportedFormat": "Nicht unterstütztes Format: {format}",
+    "@unsupportedFormat": {
+        "description": "Message shown when trying to open a chapter in an unsupported format",
+        "placeholders": {
+            "format": {
+                "description": "The format enum name for the unsupported format",
+                "type": "String",
+                "example": "epub"
+            }
+        }
+    },
+    "notSignedIn": "Nicht angemeldet",
+    "@notSignedIn": {
+        "description": "Heading text when user is not signed in"
+    },
+    "noCredentialsDescription": "Keine Anmeldeinformationen konfiguriert. Bitte fügen Sie Ihre Server-URL und API-Schlüssel in Einstellungen hinzu.",
+    "@noCredentialsDescription": {
+        "description": "Description text when no credentials are configured"
+    }
+}
