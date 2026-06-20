@@ -14,7 +14,9 @@ class CachedImageFactory extends WidgetFactory {
   ) {
     final bytes = bytesFromDataUri(src.url);
 
-    if (bytes == null) {
+    if (bytes == null ||
+        src.url.endsWith('.svg') ||
+        src.url.startsWith('data:image/svg+xml')) {
       return super.buildImageWidget(meta, src);
     }
 
