@@ -117,12 +117,20 @@ class EpubReflow extends _$EpubReflow {
           newSubpages.add(DocumentFragment());
         }
 
-        state = AsyncData(
-          current.copyWith(
-            subpages: newSubpages,
-            status: .done,
-          ),
+        var newState = current.copyWith(
+          subpages: newSubpages,
+          status: .done,
         );
+
+        if (current.buffer != null) {
+          newState = await _checkResumePoint(
+            current: newState,
+            fragment: current.buffer!,
+            subpage: newSubpages.length - 1,
+          );
+        }
+
+        state = AsyncData(newState);
         return;
       }
 
@@ -163,44 +171,58 @@ class EpubReflow extends _$EpubReflow {
         buffer: null,
       );
 
-      if (current.scrollId != null) {
-        try {
-          final resumePoint = fragment.querySelector(
-            '[${HtmlConstants.scrollIdAttribute}="${current.scrollId!.cssEscaped}"]',
-          );
-          if (resumePoint != null && resumePoint.hasChildNodes()) {
-            log.info(
-              'found resume point',
-              attributes: {
-                'scroll_id': LogAttribute.string(current.scrollId!),
-              },
-            );
-
-            final settings = await ref.read(
-              epubReaderSettingsProvider(seriesId: seriesId).future,
-            );
-            if (settings.highlightResumePoint) {
-              resumePoint.classes.add(HtmlConstants.resumeParagraphClass);
-            }
-
-            newState = newState.copyWith(
-              scrollId: null,
-              resumeSubpage: newSubpages.length - 1,
-            );
-          }
-        } catch (e, stacktrace) {
-          log.error(
-            'failed to find resume point in new subpage',
-            error: e,
-            stacktrace: stacktrace,
-          );
-        }
-      }
+      newState = await _checkResumePoint(
+        current: newState,
+        fragment: fragment,
+        subpage: newSubpages.length - 1,
+      );
 
       state = AsyncData(newState);
     } finally {
       _processingRender = false;
     }
+  }
+
+  Future<EpubReflowState> _checkResumePoint({
+    required EpubReflowState current,
+    required DocumentFragment fragment,
+    required int subpage,
+  }) async {
+    EpubReflowState? newState;
+    if (current.scrollId != null) {
+      try {
+        final resumePoint = fragment.querySelector(
+          '[${HtmlConstants.scrollIdAttribute}="${current.scrollId!.cssEscaped}"]',
+        );
+        if (resumePoint != null && resumePoint.hasChildNodes()) {
+          log.info(
+            'found resume point',
+            attributes: {
+              'scroll_id': LogAttribute.string(current.scrollId!),
+            },
+          );
+
+          final settings = await ref.read(
+            epubReaderSettingsProvider(seriesId: seriesId).future,
+          );
+          if (settings.highlightResumePoint) {
+            resumePoint.classes.add(HtmlConstants.resumeParagraphClass);
+          }
+
+          newState = current.copyWith(
+            scrollId: null,
+            resumeSubpage: subpage,
+          );
+        }
+      } catch (e, stacktrace) {
+        log.error(
+          'failed to find resume point in new subpage',
+          error: e,
+          stacktrace: stacktrace,
+        );
+      }
+    }
+    return newState ?? current;
   }
 }
 
@@ -221,6 +243,7 @@ class EpubNavigation extends _$EpubNavigation {
   ProviderSubscription<AsyncValue<EpubReflowState>>? _reflowSub;
   var _fromLastSubpage = false;
   var _resumed = false;
+  var _aheadReflow = false;
 
   @override
   Future<EpubNavigationState> build({
@@ -273,10 +296,12 @@ class EpubNavigation extends _$EpubNavigation {
         final isAheadReflow =
             reflow == null || reflow.subpages.length <= data.subpage;
         final isSamePosition =
+            _aheadReflow == isAheadReflow &&
             prev?.value?.page == data.page &&
             prev?.value?.subpage == data.subpage;
+        _aheadReflow = isAheadReflow;
 
-        if (isAheadReflow || isSamePosition) return;
+        if (!data.ready || isAheadReflow || isSamePosition) return;
 
         final scrollId = reflow.subpages[data.subpage].paragraphScrollId();
 

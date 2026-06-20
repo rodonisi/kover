@@ -2,7 +2,11 @@ import 'package:html/dom.dart';
 
 extension DocumentFragmentExtensions on DocumentFragment {
   String? paragraphScrollId() {
-    final p = querySelector('p');
+    final p = querySelectorAll('p')
+        .where(
+          (element) => element.hasText,
+        )
+        .firstOrNull;
 
     return p?.attributes['scroll-id'];
   }
@@ -11,6 +15,11 @@ extension DocumentFragmentExtensions on DocumentFragment {
 extension NodeExtensions on Node {
   bool get hasVisibleNodes {
     return isTextOrImage || nodes.any((node) => node.hasVisibleNodes);
+  }
+
+  bool get hasText {
+    return (this is Text && text != null && text!.trim().isNotEmpty) ||
+        (this is Element && nodes.any((node) => node.hasText));
   }
 
   bool get isTextOrImage {

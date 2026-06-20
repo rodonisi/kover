@@ -28,9 +28,13 @@ class ReaderNavigation extends _$ReaderNavigation {
     );
 
     listenSelf((prev, next) {
-      if (prev == null) return;
-
       next.whenData((next) async {
+        if (prev == null ||
+            !prev.hasValue ||
+            prev.value?.currentPage == next.currentPage) {
+          return;
+        }
+
         await saveProgress(next.currentPage);
       });
     });
