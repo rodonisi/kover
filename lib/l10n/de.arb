@@ -7,7 +7,7 @@
     "@goToChapter": {
         "description": "Label for the go to chapter button in the reading list chapter entry context menu"
     },
-    "items": "{count} {count, plural, =0{{count} Einträge} =1{{count} Eintrag} other{{count} Einträge}}}",
+    "items": "{count, plural, =0{{count} Einträge} =1{{count} Eintrag} other{{count} Einträge}}",
     "@items": {
         "description": "Label for the number of items, with pluralization",
         "placeholders": {
@@ -101,7 +101,7 @@
     "@general": {
         "description": "Label for the general settings section"
     },
-    "themeMode": "Thema",
+    "themeMode": "Theme-Modus",
     "@themeMode": {
         "description": "Label for the theme mode setting"
     },
@@ -117,7 +117,7 @@
     "@dark": {
         "description": "Label for the dark theme mode option"
     },
-    "outlinedTheme": "Konturen",
+    "outlinedTheme": "Umrandetes Theme",
     "@outlinedTheme": {
         "description": "Label for the outlined theme setting"
     },
@@ -241,7 +241,7 @@
     "@cancel": {
         "description": "Label for the cancel button in dialogs"
     },
-    "databaseBusy": "Datenbank beschäftigt..",
+    "databaseBusy": "Datenbank beschäftigt…",
     "@databaseBusy": {
         "description": "Message shown when the database is busy with an operation"
     },
@@ -273,7 +273,7 @@
     "@sendDiagnosticsChangeable": {
         "description": "Message shown in the monitoring opt-out dialog indicating the setting can be changed later"
     },
-    "refreshingMetadataForSeries": "Aktualisierung von Metadaten für Serie {seriesId}",
+    "refreshingMetadataForSeries": "Aktualisiere Metadaten für Serie {seriesId}",
     "@refreshingMetadataForSeries": {
         "description": "Label for the refreshing metadata phase with the series ID",
         "placeholders": {
@@ -416,7 +416,7 @@
     "@margins": {
         "description": "Label for the margins setting"
     },
-    "verticalGap": "Vertikaler Abstand:",
+    "verticalGap": "Vertikaler Abstand",
     "@verticalGap": {
         "description": "Label for the vertical gap setting"
     },
@@ -424,7 +424,7 @@
     "@pageGap": {
         "description": "Label for the page gap setting"
     },
-    "fontSize": "Schriftgröße",
+    "fontSize": "Schriftgrösse",
     "@fontSize": {
         "description": "Label for the font size setting"
     },
@@ -494,8 +494,137 @@
     "@ignoreSafeAreas": {
         "description": "Label for the ignore safe areas setting"
     },
-    "lineHeight": "Linie Höhe",
+    "lineHeight": "Zeilenhöhe",
     "@lineHeight": {
         "description": "Label for the line height setting"
+    },
+    "noThanks": "Nein, danke",
+    "@noThanks": {
+        "description": "Label for the decline button in the monitoring opt-out dialog"
+    },
+    "imIn": "Bin dabei!",
+    "@imIn": {
+        "description": "Label for the accept button in the monitoring opt-out dialog"
+    },
+    "syncingAllSeries": "Synchronisiere alle Serien",
+    "@syncingAllSeries": {
+        "description": "Label for the syncing all series phase"
+    },
+    "syncingMetadata": "Synchronisiere Metadaten",
+    "@syncingMetadata": {
+        "description": "Label for the syncing metadata phase"
+    },
+    "syncingRecentlyAdded": "Synchronisiere zulezt hinzugefügt",
+    "@syncingRecentlyAdded": {
+        "description": "Label for the syncing recently added phase"
+    },
+    "syncingRecentlyUpdated": "Synchronisiere zulezt aktualisiert",
+    "@syncingRecentlyUpdated": {
+        "description": "Label for the syncing recently updated phase"
+    },
+    "syncingLibraries": "Synchronisiere Bibliotheken",
+    "@syncingLibraries": {
+        "description": "Label for the syncing libraries phase"
+    },
+    "syncingProgress": "Synchronisiere Lesefortschritt",
+    "@syncingProgress": {
+        "description": "Label for the syncing progress phase"
+    },
+    "syncingCovers": "Synchronisiere Covers",
+    "@syncingCovers": {
+        "description": "Label for the syncing covers phase"
+    },
+    "syncingCollections": "Synchronisiere Sammlungen",
+    "@syncingCollections": {
+        "description": "Label for the syncing collections phase"
+    },
+    "syncingReadingLists": "Synchronisiere Leselisten",
+    "@syncingReadingLists": {
+        "description": "Label for the syncing reading lists phase"
+    },
+    "refreshingCoversForSeries": "Aktualisiere Covers für Serie {seriesId}",
+    "@refreshingCoversForSeries": {
+        "description": "Label for the refreshing covers phase with the series ID",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series which covers are being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "refreshingServerSettings": "Aktualisiere Servereinstellungen",
+    "@refreshingServerSettings": {
+        "description": "Label for the refreshing server settings phase"
+    },
+    "noDownloadsInQueue": "Keine Downloads in der Warteschlange",
+    "@noDownloadsInQueue": {
+        "description": "Message shown when there are no downloads in the queue"
+    },
+    "rightToLeft": "Rechts nach Links",
+    "@rightToLeft": {
+        "description": "Label for the right to left reading direction option"
+    },
+    "contain": "Einpassen",
+    "@contain": {
+        "description": "Label for the contain image fit option"
+    },
+    "coverPage": "Cover-Seite",
+    "@coverPage": {
+        "description": "Label for the cover page setting"
+    },
+    "coverPageDescription": "Behandelt die erste Seite als Cover und zeigt sie als einzelne Seite an",
+    "@coverPageDescription": {
+        "description": "Description for the cover page setting"
+    },
+    "showProgressBar": "Fortschrittsbalken anzeigen",
+    "@showProgressBar": {
+        "description": "Label for the show progress bar setting"
+    },
+    "setDefaults": "Standardwerte festlegen",
+    "@setDefaults": {
+        "description": "Label for the set defaults button"
+    },
+    "reset": "Zurücksetzen",
+    "@reset": {
+        "description": "Label for the reset button"
+    },
+    "letterSpacing": "Zeichenabstand",
+    "@letterSpacing": {
+        "description": "Label for the letter spacing setting"
+    },
+    "highlightResumeParagraph": "Letzten Absatz markieren",
+    "@highlightResumeParagraph": {
+        "description": "Label for the highlight resume paragraph setting"
+    },
+    "dismiss": "Ausblenden",
+    "@dismiss": {
+        "description": "Label for the dismiss button in chapter snackbar"
+    },
+    "previousChapter": "Vorheriges: {chapterTitle}",
+    "@previousChapter": {
+        "description": "Label for the previous chapter snackbar with the chapter title",
+        "placeholders": {
+            "chapterTitle": {
+                "description": "The title of the previous chapter",
+                "type": "String",
+                "example": "Chapter 2"
+            }
+        }
+    },
+    "syncingTocs": "Synchronisiere Inhaltsverzeichnisse",
+    "@syncingTocs": {
+        "description": "Label for the syncing chapters TOCs phase"
+    },
+    "refreshingChapterToc": "Aktualisiere Inhaltsverzeichnis für Kapitel {chapterId}",
+    "@refreshingChapterToc": {
+        "description": "Label for the syncing chapter TOC phase with the chapter ID",
+        "placeholders": {
+            "chapterId": {
+                "description": "The ID of the chapter which TOC is being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
     }
 }
