@@ -427,5 +427,75 @@
     "fontSize": "Schriftgröße",
     "@fontSize": {
         "description": "Label for the font size setting"
+    },
+    "moreCount": "+{count} mehr",
+    "@moreCount": {
+        "description": "Label indicating there are more items beyond the displayed amount",
+        "placeholders": {
+            "count": {
+                "description": "The count of items beyond the displayed amount",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "wordCount": "{wordCount} Wörter",
+    "@wordCount": {
+        "description": "Label for the word count of a book entry",
+        "placeholders": {
+            "wordCount": {
+                "description": "The amount of words",
+                "type": "int",
+                "format": "compact",
+                "example": "42000"
+            }
+        }
+    },
+    "hoursCount": "~{hours} Stunden",
+    "@hoursCount": {
+        "description": "Label for the estimated reading time in hours",
+        "placeholders": {
+            "hours": {
+                "description": "The estimated amount of hours",
+                "type": "double",
+                "format": "decimalPatternDigits",
+                "optionalParameters": {
+                    "decimalDigits": 1
+                },
+                "example": "4.2"
+            }
+        }
+    },
+    "pagesCount": "{pages} Seiten",
+    "@pagesCount": {
+        "description": "Label for the page count of a an entry",
+        "placeholders": {
+            "pages": {
+                "description": "The amount of pages",
+                "type": "int",
+                "format": "compact",
+                "example": "42000"
+            }
+        }
+    },
+    "readerMode": "Lesemodus",
+    "@readerMode": {
+        "description": "Label for the reader mode setting"
+    },
+    "twoPage": "Zwei Seiten",
+    "@twoPage": {
+        "description": "Label for the two page reader mode option"
+    },
+    "fitDirection": "Passende Richtung",
+    "@fitDirection": {
+        "description": "Label for the image fit direction setting"
+    },
+    "ignoreSafeAreas": "Sichere Gebiete ignorieren",
+    "@ignoreSafeAreas": {
+        "description": "Label for the ignore safe areas setting"
+    },
+    "lineHeight": "Linie Höhe",
+    "@lineHeight": {
+        "description": "Label for the line height setting"
     }
 }
