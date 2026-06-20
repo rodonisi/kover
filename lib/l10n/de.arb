@@ -268,5 +268,20 @@
     "goToSeries": "Gehe zu Serie",
     "@goToSeries": {
         "description": "Label for the go to series button in the reading list chapter entry context menu"
+    },
+    "sendDiagnosticsChangeable": "Dies kann jederzeit in den Einstellungen geändert werden.",
+    "@sendDiagnosticsChangeable": {
+        "description": "Message shown in the monitoring opt-out dialog indicating the setting can be changed later"
+    },
+    "refreshingMetadataForSeries": "Aktualisierung von Metadaten für Serie {seriesId}",
+    "@refreshingMetadataForSeries": {
+        "description": "Label for the refreshing metadata phase with the series ID",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
     }
 }
