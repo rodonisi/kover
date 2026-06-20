@@ -243,7 +243,7 @@ class EpubNavigation extends _$EpubNavigation {
   ProviderSubscription<AsyncValue<EpubReflowState>>? _reflowSub;
   var _fromLastSubpage = false;
   var _resumed = false;
-  var _aheadReflow = false;
+  var _wasAheadReflow = false;
 
   @override
   Future<EpubNavigationState> build({
@@ -296,10 +296,10 @@ class EpubNavigation extends _$EpubNavigation {
         final isAheadReflow =
             reflow == null || reflow.subpages.length <= data.subpage;
         final isSamePosition =
-            _aheadReflow == isAheadReflow &&
+            _wasAheadReflow == isAheadReflow &&
             prev?.value?.page == data.page &&
             prev?.value?.subpage == data.subpage;
-        _aheadReflow = isAheadReflow;
+        _wasAheadReflow = isAheadReflow;
 
         if (!data.ready || isAheadReflow || isSamePosition) return;
 
