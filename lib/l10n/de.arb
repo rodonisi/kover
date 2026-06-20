@@ -1,13 +1,13 @@
 {
-    "databaseSize": "Datenbankgröße",
+    "databaseSize": "Datenbankgrösse",
     "@databaseSize": {
         "description": "Label for the database size information"
     },
-    "goToChapter": "Zum Kapitel",
+    "goToChapter": "Gehe zu Kapitel",
     "@goToChapter": {
         "description": "Label for the go to chapter button in the reading list chapter entry context menu"
     },
-    "items": "{count} {count, plural, =0{{count} Items} =1{{count} item} sonstige{{count} Items}}}",
+    "items": "{count} {count, plural, =0{{count} Einträge} =1{{count} Eintrag} other{{count} Einträge}}}",
     "@items": {
         "description": "Label for the number of items, with pluralization",
         "placeholders": {
@@ -33,8 +33,240 @@
     "@notSignedIn": {
         "description": "Heading text when user is not signed in"
     },
-    "noCredentialsDescription": "Keine Anmeldeinformationen konfiguriert. Bitte fügen Sie Ihre Server-URL und API-Schlüssel in Einstellungen hinzu.",
+    "noCredentialsDescription": "Keine Zugangsdaten konfiguriert. Bitte Server-URL und API-Schlüssel in den Einstellungen hinzufügen.",
     "@noCredentialsDescription": {
         "description": "Description text when no credentials are configured"
+    },
+    "languageName": "Deutsch",
+    "@languageName": {
+        "description": "The localized name of this locale"
+    },
+    "language": "Sprache",
+    "@language": {
+        "description": "Title for the language settings entry"
+    },
+    "onDeck": "Weiterlesen",
+    "@onDeck": {
+        "description": "Label for the home page on deck section"
+    },
+    "recentlyUpdated": "Zuletzt aktualisiert",
+    "@recentlyUpdated": {
+        "description": "Label for the home page recently updated section"
+    },
+    "recentlyAdded": "Zuletzt hinzugefügt",
+    "@recentlyAdded": {
+        "description": "Label for the home page recently added section"
+    },
+    "home": "Start",
+    "@home": {
+        "description": "Label for the home page"
+    },
+    "wantToRead": "Möchte lesen",
+    "@wantToRead": {
+        "description": "Label for the want to read shelf"
+    },
+    "menu": "Menü",
+    "@menu": {
+        "description": "Label for the menu button"
+    },
+    "allSeries": "Alle Serien",
+    "@allSeries": {
+        "description": "Label for the all series menu entry"
+    },
+    "collections": "Sammlungen",
+    "@collections": {
+        "description": "Label for the collections menu entry"
+    },
+    "readingLists": "Leselisten",
+    "@readingLists": {
+        "description": "Label for the reading lists menu entry"
+    },
+    "libraries": "Bibliotheken",
+    "@libraries": {
+        "description": "Label for the libraries menu entry"
+    },
+    "settings": "Einstellungen",
+    "@settings": {
+        "description": "Label for the settings menu entry"
+    },
+    "more": "Mehr",
+    "@more": {
+        "description": "Label for the more section"
+    },
+    "downloadQueue": "Download-Warteschlange",
+    "@downloadQueue": {
+        "description": "Label for the download queue menu entry"
+    },
+    "general": "Allgemeines",
+    "@general": {
+        "description": "Label for the general settings section"
+    },
+    "themeMode": "Thema",
+    "@themeMode": {
+        "description": "Label for the theme mode setting"
+    },
+    "system": "System",
+    "@system": {
+        "description": "Label for the system theme mode option"
+    },
+    "light": "Hell",
+    "@light": {
+        "description": "Label for the light theme mode option"
+    },
+    "dark": "Dunkel",
+    "@dark": {
+        "description": "Label for the dark theme mode option"
+    },
+    "outlinedTheme": "Konturen",
+    "@outlinedTheme": {
+        "description": "Label for the outlined theme setting"
+    },
+    "sendDiagnostics": "Sende anonymen Absturzberichten und Diagnosedaten",
+    "@sendDiagnostics": {
+        "description": "Label for the send diagnostics setting"
+    },
+    "sendDiagnosticsDescription": "Hilf uns dabei, die App zu verbessern, indem du anonyme Fehler- und Leistungsstatistiken sendest. Diese Daten enthalten keine persönlichen Infos und werden nur genutzt, um die App zu verbessern.",
+    "@sendDiagnosticsDescription": {
+        "description": "Description for the send diagnostics setting"
+    },
+    "version": "Version: {version} ({buildNumber})",
+    "@version": {
+        "description": "Label for the app version, with placeholders for version and build number",
+        "placeholders": {
+            "version": {
+                "description": "The version string of the application",
+                "type": "String",
+                "example": "1.0.0"
+            },
+            "buildNumber": {
+                "description": "The build number of the application",
+                "type": "String",
+                "example": "123"
+            }
+        }
+    },
+    "github": "GitHub",
+    "@github": {
+        "description": "Label for the GitHub link"
+    },
+    "madeWithLove": "Hergestellt mit ❤️",
+    "@madeWithLove": {
+        "description": "Label for the made with love message"
+    },
+    "dataManagement": "Datenverwaltung",
+    "@dataManagement": {
+        "description": "Label for the data management section"
+    },
+    "downloadAllCovers": "Alle Covers herunterladen",
+    "@downloadAllCovers": {
+        "description": "Label for the download all covers option"
+    },
+    "downloadAllCoversDescription": "Falls deaktiviert, werden Cover nur zusammen mit den Kapiteln heruntergeladen. Nicht heruntergeladene Cover werden bei Bedarf weiterhin vom Server abgerufen, sofern eine Verbindung besteht.",
+    "@downloadAllCoversDescription": {
+        "description": "Description for the download all covers option"
+    },
+    "maxConcurrentDownloads": "Maximale gleichzeitige Downloads",
+    "@maxConcurrentDownloads": {
+        "description": "Label for the max concurrent downloads setting"
+    },
+    "reclaimSpace": "Speicherplatz freigeben",
+    "@reclaimSpace": {
+        "description": "Label for the reclaim space button"
+    },
+    "clearDownloads": "Downloads löschen",
+    "@clearDownloads": {
+        "description": "Label for the clear downloads button"
+    },
+    "clearCovers": "Covers löschen",
+    "@clearCovers": {
+        "description": "Label for the clear covers button"
+    },
+    "clearDatabase": "Datenbank leeren",
+    "@clearDatabase": {
+        "description": "Label for the clear database button"
+    },
+    "clearDatabaseDialogTitle": "Bist du dir sicher?",
+    "@clearDatabaseDialogTitle": {
+        "description": "Title for the clear database confirmation dialog"
+    },
+    "connectionError": "Verbindungsfehler",
+    "@connectionError": {
+        "description": "Heading text when a connection error occurs"
+    },
+    "connectionErrorDescription": "Benutzer konnte nicht abgerufen werden. Bitte überprüfe deine Anmeldedaten oder versuche es erneut.",
+    "@connectionErrorDescription": {
+        "description": "Description text when a connection error occurs"
+    },
+    "retry": "Erneut versuchen",
+    "@retry": {
+        "description": "Label for the retry button"
+    },
+    "sendDiagnosticsDialogTitle": "Anonyme Absturzberichte und Diagnosedaten senden?",
+    "@sendDiagnosticsDialogTitle": {
+        "description": "Title for the monitoring opt-out dialog"
+    },
+    "addToWantToRead": "Zum Lesewunsch hinzufügen",
+    "@addToWantToRead": {
+        "description": "Label for the add to want to read context menu item"
+    },
+    "removeFromWantToRead": "Aus dem Lesewunsch entfernen",
+    "@removeFromWantToRead": {
+        "description": "Label for the remove from want to read context menu item"
+    },
+    "download": "Herunterladen",
+    "@download": {
+        "description": "Label for the download context menu item"
+    },
+    "removeDownload": "Download löschen",
+    "@removeDownload": {
+        "description": "Label for the remove download context menu item"
+    },
+    "refreshMetadata": "Metadaten aktualisieren",
+    "@refreshMetadata": {
+        "description": "Label for the refresh metadata context menu item"
+    },
+    "refreshCovers": "Cover aktualisieren",
+    "@refreshCovers": {
+        "description": "Label for the refresh covers context menu item"
+    },
+    "noActiveSyncOperations": "Keine aktiven Sync-Operationen",
+    "@noActiveSyncOperations": {
+        "description": "Message shown when there are no active sync operations"
+    },
+    "clearDatabaseDialogContent": "Dies löscht die gesamte lokale Datenbank, einschliesslich aller nicht synchronisierten Fortschritte und heruntergeladenen Daten. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "@clearDatabaseDialogContent": {
+        "description": "Content for the clear database confirmation dialog"
+    },
+    "cancel": "Abbrechen",
+    "@cancel": {
+        "description": "Label for the cancel button in dialogs"
+    },
+    "databaseBusy": "Datenbank beschäftigt..",
+    "@databaseBusy": {
+        "description": "Message shown when the database is busy with an operation"
+    },
+    "storyline": "Handlung",
+    "@storyline": {
+        "description": "Label for the storyline section in the series details page"
+    },
+    "volumes": "Bände",
+    "@volumes": {
+        "description": "Label for the volumes section in the series details page"
+    },
+    "chapters": "Kapiteln",
+    "@chapters": {
+        "description": "Label for the chapters section in the series details page"
+    },
+    "genres": "Genres",
+    "@genres": {
+        "description": "Label for the genres chips in the series details page"
+    },
+    "hideRead": "Gelesene ausblenden",
+    "@hideRead": {
+        "description": "Label for the hide read filter option in lists"
+    },
+    "goToSeries": "Gehe zu Serie",
+    "@goToSeries": {
+        "description": "Label for the go to series button in the reading list chapter entry context menu"
     }
 }
