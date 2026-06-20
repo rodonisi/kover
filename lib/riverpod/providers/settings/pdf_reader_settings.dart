@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
-import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
@@ -18,10 +17,8 @@ enum PdfReaderMode {
 sealed class PdfReaderSettingsState with _$PdfReaderSettingsState {
   const PdfReaderSettingsState._();
   const factory PdfReaderSettingsState({
-    @Default(ReadDirection.leftToRight) ReadDirection readDirection,
     @Default(PdfReaderMode.vertical) PdfReaderMode readerMode,
     @Default(true) bool ignoreSafeAreas,
-    @Default(true) bool showProgressBar,
   }) = _PdfReaderSettingsState;
 
   factory PdfReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -59,21 +56,6 @@ class PdfReaderSettings extends _$PdfReaderSettings {
     return state.value ?? defaults;
   }
 
-  Future<void> setReadDirection(ReadDirection newDirection) async {
-    final current = await future;
-
-    state = AsyncData(
-      current.copyWith(readDirection: newDirection),
-    );
-    log.info(
-      'set read direction',
-      attributes: {
-        'value': .string(newDirection.toString()),
-        'reader': const .string('pdf'),
-      },
-    );
-  }
-
   Future<void> setReaderMode(PdfReaderMode newMode) async {
     final current = await future;
 
@@ -99,21 +81,6 @@ class PdfReaderSettings extends _$PdfReaderSettings {
       'set ignore safe areas',
       attributes: {
         'value': .bool(ignore),
-        'reader': const .string('pdf'),
-      },
-    );
-  }
-
-  Future<void> setShowProgressBar(bool show) async {
-    final current = await future;
-
-    state = AsyncData(
-      current.copyWith(showProgressBar: show),
-    );
-    log.info(
-      'set show progress bar',
-      attributes: {
-        'value': .bool(show),
         'reader': const .string('pdf'),
       },
     );

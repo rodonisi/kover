@@ -6,6 +6,7 @@ import 'package:kover/pages/reader/image_reader/zoomable_horizontal_page_image.d
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
+import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
@@ -24,6 +25,9 @@ class HorizontalPagedReader extends HookConsumerWidget {
     final provider = readerProvider(seriesId: seriesId, chapterId: chapterId);
 
     final settings = ref.watch(imageReaderSettingsProvider(seriesId: seriesId));
+    final commonSettings = ref.watch(
+      commonReaderSettingsProvider(seriesId: seriesId),
+    );
     final reader = ref.watch(provider);
 
     final navProvider = readerNavigationProvider(
@@ -33,11 +37,12 @@ class HorizontalPagedReader extends HookConsumerWidget {
 
     final navState = ref.watch(navProvider);
 
-    return Async3(
+    return Async4(
       asyncValue1: reader,
-      asyncValue2: settings,
-      asyncValue3: navState,
-      data: (reader, settings, navState) {
+      asyncValue2: navState,
+      asyncValue3: settings,
+      asyncValue4: commonSettings,
+      data: (reader, navState, settings, commonSettings) {
         return HookConsumer(
           builder: (context, ref, _) {
             final pageController = usePageController(
@@ -79,7 +84,7 @@ class HorizontalPagedReader extends HookConsumerWidget {
               controller: pageController,
               allowImplicitScrolling: true,
               scrollDirection: .horizontal,
-              reverse: settings.readDirection == .rightToLeft,
+              reverse: commonSettings.readDirection == .rightToLeft,
               itemCount: reader.totalPages,
               pageSnapping: true,
               physics: isZoomed.value || pointerCount.value >= 2

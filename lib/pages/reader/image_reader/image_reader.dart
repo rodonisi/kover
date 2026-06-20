@@ -5,6 +5,7 @@ import 'package:kover/pages/reader/image_reader/horizontal_spreads_reader.dart';
 import 'package:kover/pages/reader/image_reader/vertical_continuous_reader.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
+import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
@@ -22,11 +23,17 @@ class ImageReader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(imageReaderSettingsProvider(seriesId: seriesId));
+    final settings = ref.watch(
+      imageReaderSettingsProvider(seriesId: seriesId),
+    );
+    final commonSettings = ref.watch(
+      commonReaderSettingsProvider(seriesId: seriesId),
+    );
 
-    return Async(
-      asyncValue: settings,
-      data: (settings) {
+    return Async2(
+      asyncValue1: settings,
+      asyncValue2: commonSettings,
+      data: (settings, commonSettings) {
         final navProvider = readerNavigationProvider(
           seriesId: seriesId,
           chapterId: chapterId,
@@ -44,14 +51,13 @@ class ImageReader extends ConsumerWidget {
           seriesId: seriesId,
           chapterId: chapterId,
           readingListId: readingListId,
-          showProgressBar: settings.showProgressBar,
           onNextPage: () {
-            settings.readDirection == .leftToRight
+            commonSettings.readDirection == .leftToRight
                 ? ref.read(navProvider.notifier).nextPage()
                 : ref.read(navProvider.notifier).previousPage();
           },
           onPreviousPage: () {
-            settings.readDirection == .leftToRight
+            commonSettings.readDirection == .leftToRight
                 ? ref.read(navProvider.notifier).previousPage()
                 : ref.read(navProvider.notifier).nextPage();
           },

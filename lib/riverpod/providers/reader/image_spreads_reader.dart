@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
+import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -192,7 +193,7 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
   Future<void> nextPage() async {
     final current = await future;
     final settings = await ref.read(
-      imageReaderSettingsProvider(seriesId: seriesId).future,
+      commonReaderSettingsProvider(seriesId: seriesId).future,
     );
 
     final nextSpread = settings.readDirection == .leftToRight
@@ -205,7 +206,7 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
   Future<void> previousPage() async {
     final current = await future;
     final settings = await ref.read(
-      imageReaderSettingsProvider(seriesId: seriesId).future,
+      commonReaderSettingsProvider(seriesId: seriesId).future,
     );
 
     final nextSpread = settings.readDirection == .leftToRight

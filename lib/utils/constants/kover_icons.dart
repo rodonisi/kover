@@ -36,4 +36,6 @@ sealed class KoverIcons {
   static const IconData unlockedOrientation = LucideIcons.rotateCwSquare;
   static const IconData landscape = LucideIcons.rectangleHorizontal;
   static const IconData portrait = LucideIcons.rectangleVertical;
+  static const IconData ltr = LucideIcons.chevronsRight;
+  static const IconData rtl = LucideIcons.chevronsLeft;
 }

@@ -9,6 +9,7 @@ import 'package:kover/pages/reader/pdf_reader/pdf_toc_drawer.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
+import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/pdf_reader_settings.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
@@ -69,7 +70,12 @@ class PdfReader extends HookConsumerWidget {
         readingListId: readingListId,
       ),
     );
-    final settings = ref.watch(pdfReaderSettingsProvider(seriesId: seriesId));
+    final settings = ref.watch(
+      pdfReaderSettingsProvider(seriesId: seriesId),
+    );
+    final commonSettings = ref.watch(
+      commonReaderSettingsProvider(seriesId: seriesId),
+    );
     final pdf = ref.watch(pdfProvider(chapterId: chapterId));
 
     ref.listen(navProvider, (previous, next) async {
@@ -83,24 +89,24 @@ class PdfReader extends HookConsumerWidget {
       });
     });
 
-    return Async2(
+    return Async3(
       asyncValue1: reader,
       asyncValue2: settings,
-      data: (readerState, settings) {
+      asyncValue3: commonSettings,
+      data: (readerState, settings, commonSettings) {
         return ReaderOverlay(
           chapterId: chapterId,
           seriesId: seriesId,
           readingListId: readingListId,
-          showProgressBar: settings.showProgressBar,
           onNextPage: () {
-            if (settings.readDirection == .leftToRight) {
+            if (commonSettings.readDirection == .leftToRight) {
               ref.read(navProvider.notifier).nextPage();
             } else {
               ref.read(navProvider.notifier).previousPage();
             }
           },
           onPreviousPage: () {
-            if (settings.readDirection == .leftToRight) {
+            if (commonSettings.readDirection == .leftToRight) {
               ref.read(navProvider.notifier).previousPage();
             } else {
               ref.read(navProvider.notifier).nextPage();
@@ -145,7 +151,7 @@ class PdfReader extends HookConsumerWidget {
                     // alwo fires an event with the same page, while the next ones
                     // go back by layout order.
                     final int navIndex;
-                    if (settings.readDirection == .rightToLeft &&
+                    if (commonSettings.readDirection == .rightToLeft &&
                         settings.readerMode == .horizontal) {
                       navIndex = lastUpdateFromProvider.value
                           ? page - 1
@@ -165,7 +171,7 @@ class PdfReader extends HookConsumerWidget {
                     .horizontal => (pages, params) => horizontalLayout(
                       pages,
                       params,
-                      settings.readDirection,
+                      commonSettings.readDirection,
                     ),
                   },
                 ),

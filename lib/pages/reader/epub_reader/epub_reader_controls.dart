@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
-import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
-import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
-import 'package:kover/widgets/settings/choice_option.dart';
 import 'package:kover/widgets/settings/numeric_option.dart';
 import 'package:kover/widgets/settings/reader/orientation_option.dart';
+import 'package:kover/widgets/settings/reader/progress_bar_option.dart';
+import 'package:kover/widgets/settings/reader/read_direction_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -46,32 +45,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                         l.readerSettings,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      ChoiceOption(
-                        title: l.readingDirection,
-                        icon: settings.readDirection == .leftToRight
-                            ? LucideIcons.chevronsRight
-                            : LucideIcons.chevronsLeft,
-                        value: settings.readDirection,
-                        options: [
-                          ChoiceOptionEntry<ReadDirection>(
-                            value: ReadDirection.leftToRight,
-                            label: l.leftToRight,
-                            icon: LucideIcons.chevronsRight,
-                          ),
-                          ChoiceOptionEntry<ReadDirection>(
-                            value: ReadDirection.rightToLeft,
-                            label: l.rightToLeft,
-                            icon: LucideIcons.chevronsLeft,
-                          ),
-                        ],
-                        onChanged: (newValue) async {
-                          if (newValue != settings.readDirection) {
-                            await ref
-                                .read(epubSettings.notifier)
-                                .toggleReadDirection();
-                          }
-                        },
-                      ),
+                      ReadDirectionOption(seriesId: seriesId),
                       NumericOption(
                         title: l.fontSize,
                         icon: LucideIcons.aLargeSmallDir,
@@ -141,16 +115,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                               .setHighlightResumePoint(value);
                         },
                       ),
-                      BooleanOption(
-                        icon: KoverIcons.progressBar,
-                        title: l.showProgressBar,
-                        value: settings.showProgressBar,
-                        onChanged: (value) async {
-                          await ref
-                              .read(epubSettings.notifier)
-                              .setShowProgressBar(value);
-                        },
-                      ),
+                      ProgressBarOption(seriesId: seriesId),
                     ],
                   ),
                 ),

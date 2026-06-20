@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
-import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:kover/utils/logging.dart';
@@ -40,7 +39,6 @@ sealed class ImageReaderSettingsLimits {
 sealed class ImageReaderSettingsState with _$ImageReaderSettingsState {
   const factory ImageReaderSettingsState({
     @Default(ImageScaleType.contain) ImageScaleType scaleType,
-    @Default(ReadDirection.leftToRight) ReadDirection readDirection,
     @Default(ReaderMode.horizontal) ReaderMode readerMode,
     @Default(false) bool hadSpread,
     @Default(0.0) double verticalReaderGap,
@@ -48,7 +46,6 @@ sealed class ImageReaderSettingsState with _$ImageReaderSettingsState {
     @Default(0.0) double spreadReaderGap,
     @Default(true) bool spreadCoverPage,
     @Default(true) bool ignoreSafeAreas,
-    @Default(true) bool showProgressBar,
   }) = _ImageReaderSettingsState;
 
   factory ImageReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -112,23 +109,6 @@ class ImageReaderSettings extends _$ImageReaderSettings {
       'set scale type',
       attributes: {
         'value': .string(type.toString()),
-        'reader': const .string('image'),
-      },
-    );
-  }
-
-  Future<void> setReadDirection(ReadDirection direction) async {
-    final current = await future;
-
-    state = AsyncData(
-      current.copyWith(
-        readDirection: direction,
-      ),
-    );
-    log.info(
-      'set read direction',
-      attributes: {
-        'value': .string(direction.toString()),
         'reader': const .string('image'),
       },
     );
@@ -228,16 +208,6 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     state = AsyncData(current.copyWith(spreadCoverPage: value));
     log.info(
       'set spread cover page',
-      attributes: {'value': .bool(value), 'reader': const .string('image')},
-    );
-  }
-
-  Future<void> setShowProgressBar(bool value) async {
-    final current = await future;
-
-    state = AsyncData(current.copyWith(showProgressBar: value));
-    log.info(
-      'set show progress bar',
       attributes: {'value': .bool(value), 'reader': const .string('image')},
     );
   }

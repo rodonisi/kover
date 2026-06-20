@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
-import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/logging.dart';
@@ -41,9 +40,7 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
     @Default(1.5) double lineHeight,
     @Default(0.0) double wordSpacing,
     @Default(0.0) double letterSpacing,
-    @Default(ReadDirection.leftToRight) ReadDirection readDirection,
     @Default(true) bool highlightResumePoint,
-    @Default(true) bool showProgressBar,
   }) = _EpubReaderSettingsState;
 
   factory EpubReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -79,18 +76,6 @@ class EpubReaderSettings extends _$EpubReaderSettings {
 
     final defaults = await ref.watch(defaultEpubReaderSettingsProvider.future);
     return state.value ?? defaults;
-  }
-
-  Future<void> toggleReadDirection() async {
-    final current = await future;
-
-    state = AsyncData(
-      current.copyWith(
-        readDirection: current.readDirection == ReadDirection.leftToRight
-            ? ReadDirection.rightToLeft
-            : ReadDirection.leftToRight,
-      ),
-    );
   }
 
   Future<void> setFontSize(double newSize) async {
@@ -189,18 +174,6 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     );
     log.info(
       'set highhlight resume point',
-      attributes: {'value': .bool(value), 'reader': const .string('epub')},
-    );
-  }
-
-  Future<void> setShowProgressBar(bool value) async {
-    final current = await future;
-
-    state = AsyncData(
-      current.copyWith(showProgressBar: value),
-    );
-    log.info(
-      'set show progress bar',
       attributes: {'value': .bool(value), 'reader': const .string('epub')},
     );
   }

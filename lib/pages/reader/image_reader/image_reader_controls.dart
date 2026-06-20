@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
-import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
@@ -12,6 +11,8 @@ import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/choice_option.dart';
 import 'package:kover/widgets/settings/numeric_option.dart';
 import 'package:kover/widgets/settings/reader/orientation_option.dart';
+import 'package:kover/widgets/settings/reader/progress_bar_option.dart';
+import 'package:kover/widgets/settings/reader/read_direction_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -51,30 +52,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                         l.readerSettings,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      ChoiceOption<ReadDirection>(
-                        title: l.readingDirection,
-                        icon: settings.readDirection == .leftToRight
-                            ? LucideIcons.chevronsRight
-                            : LucideIcons.chevronsLeft,
-                        options: [
-                          ChoiceOptionEntry(
-                            value: .leftToRight,
-                            label: l.leftToRight,
-                            icon: LucideIcons.chevronsRight,
-                          ),
-                          ChoiceOptionEntry(
-                            value: .rightToLeft,
-                            label: l.rightToLeft,
-                            icon: LucideIcons.chevronsLeft,
-                          ),
-                        ],
-                        value: settings.readDirection,
-                        onChanged: (newValue) async {
-                          await ref
-                              .read(imageSettings.notifier)
-                              .setReadDirection(newValue);
-                        },
-                      ),
+                      ReadDirectionOption(seriesId: seriesId),
                       ChoiceOption<ReaderMode>(
                         title: l.readerMode,
                         icon: switch (settings.readerMode) {
@@ -202,14 +180,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                             .read(imageSettings.notifier)
                             .setIgnoreSafeAreas(newValue),
                       ),
-                      BooleanOption(
-                        title: l.showProgressBar,
-                        icon: KoverIcons.progressBar,
-                        value: settings.showProgressBar,
-                        onChanged: (newValue) async => await ref
-                            .read(imageSettings.notifier)
-                            .setShowProgressBar(newValue),
-                      ),
+                      ProgressBarOption(seriesId: seriesId),
                     ],
                   ),
                 ),

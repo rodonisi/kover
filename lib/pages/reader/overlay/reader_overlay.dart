@@ -11,6 +11,7 @@ import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/router.dart';
+import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:kover/widgets/util/async_value.dart';
@@ -42,7 +43,6 @@ class ReaderOverlay extends HookConsumerWidget {
   final Widget child;
   final Widget? endDrawer;
   final Widget? extraControls;
-  final bool showProgressBar;
 
   const ReaderOverlay({
     super.key,
@@ -52,7 +52,6 @@ class ReaderOverlay extends HookConsumerWidget {
     this.isLastPage,
     this.endDrawer,
     this.extraControls,
-    this.showProgressBar = true,
     this.readingListId,
     required this.chapterId,
     required this.seriesId,
@@ -70,13 +69,17 @@ class ReaderOverlay extends HookConsumerWidget {
       chapterId: chapterId,
       readingListId: readingListId,
     );
+    final settings = ref.watch(
+      commonReaderSettingsProvider(seriesId: seriesId),
+    );
     final shouldShowSnackbar =
         showSnackbar.value != ShowSnackbar.none &&
         (!snackbarDismissed.value || uiVisible.value);
 
-    return Async(
-      asyncValue: ref.watch(provider),
-      data: (state) => Consumer(
+    return Async2(
+      asyncValue1: ref.watch(provider),
+      asyncValue2: settings,
+      data: (state, settings) => Consumer(
         builder: (context, ref, _) {
           final prevChapter = ref.watch(
             prevChapterProvider(
@@ -147,7 +150,8 @@ class ReaderOverlay extends HookConsumerWidget {
                       mainAxisSize: .min,
                       children: [
                         Expanded(child: child),
-                        if (showProgressBar && state.series.format == .epub)
+                        if (settings.showProgressBar &&
+                            state.series.format == .epub)
                           SubpageProgress(
                                 seriesId: seriesId,
                                 chapterId: chapterId,
@@ -156,7 +160,7 @@ class ReaderOverlay extends HookConsumerWidget {
                                 target: uiVisible.value ? 0.0 : 1.0,
                               )
                               .fadeIn(duration: 200.ms)
-                        else if (showProgressBar)
+                        else if (settings.showProgressBar)
                           ReaderProgress(
                                 seriesId: seriesId,
                                 chapterId: chapterId,

@@ -7,6 +7,7 @@ import 'package:html/dom.dart';
 import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
+import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/widgets/util/async_value.dart';
@@ -35,21 +36,24 @@ class EpubReader extends HookConsumerWidget {
         seriesId: seriesId,
       ),
     );
+    final commonSettings = ref.watch(
+      commonReaderSettingsProvider(seriesId: seriesId),
+    );
 
-    return Async(
-      asyncValue: settings,
-      data: (settings) => ReaderOverlay(
+    return Async2(
+      asyncValue1: settings,
+      asyncValue2: commonSettings,
+      data: (settings, commonSettings) => ReaderOverlay(
         seriesId: seriesId,
         chapterId: chapterId,
         readingListId: readingListId,
-        showProgressBar: settings.showProgressBar,
         onNextPage: () {
-          settings.readDirection == .leftToRight
+          commonSettings.readDirection == .leftToRight
               ? ref.read(nav.notifier).nextPage()
               : ref.read(nav.notifier).previousPage();
         },
         onPreviousPage: () {
-          settings.readDirection == .leftToRight
+          commonSettings.readDirection == .leftToRight
               ? ref.read(nav.notifier).previousPage()
               : ref.read(nav.notifier).nextPage();
         },
@@ -104,7 +108,7 @@ class EpubReader extends HookConsumerWidget {
                         controller: controller,
                         itemCount: navState.totalPages,
                         allowImplicitScrolling: true,
-                        reverse: settings.readDirection == .rightToLeft,
+                        reverse: commonSettings.readDirection == .rightToLeft,
                         physics: const NeverScrollableScrollPhysics(),
                         onPageChanged: (newPage) {
                           ref.read(nav.notifier).jumpToPage(newPage);
@@ -114,7 +118,8 @@ class EpubReader extends HookConsumerWidget {
                             seriesId: seriesId,
                             chapterId: chapterId,
                             page: index,
-                            reverse: settings.readDirection == .rightToLeft,
+                            reverse:
+                                commonSettings.readDirection == .rightToLeft,
                             outerController: controller,
                           );
                         },

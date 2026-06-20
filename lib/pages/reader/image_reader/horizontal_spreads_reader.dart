@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/image_spreads_reader.dart';
+import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/utils/extensions/iterable.dart';
 import 'package:kover/widgets/util/async_value.dart';
@@ -27,38 +28,29 @@ class HorizontalSpreadsReader extends HookConsumerWidget {
       seriesId: seriesId,
       chapterId: chapterId,
     );
-    final showProgressBar = ref.watch(
-      imageReaderSettingsProvider(
-        seriesId: seriesId,
-      ).select((s) => s.whenData((settings) => settings.showProgressBar)),
-    );
 
-    return Async(
-      asyncValue: showProgressBar,
-      data: (showProgressBar) => ReaderOverlay(
-        chapterId: chapterId,
-        seriesId: seriesId,
-        readingListId: readingListId,
-        showProgressBar: showProgressBar,
-        onNextPage: () {
-          ref.read(navProvider.notifier).nextPage();
-        },
-        onPreviousPage: () {
-          ref.read(navProvider.notifier).previousPage();
-        },
-        onJumpToPage: (page) {
-          ref.read(navProvider.notifier).jumpToPage(page);
-        },
-        isLastPage: (page) =>
-            ref
-                .read(spreadsProvider(seriesId: seriesId, chapterId: chapterId))
-                .value
-                ?.spreads
-                .last
-                .contains(page) ??
-            false,
-        child: _SpreadsContent(seriesId: seriesId, chapterId: chapterId),
-      ),
+    return ReaderOverlay(
+      chapterId: chapterId,
+      seriesId: seriesId,
+      readingListId: readingListId,
+      onNextPage: () {
+        ref.read(navProvider.notifier).nextPage();
+      },
+      onPreviousPage: () {
+        ref.read(navProvider.notifier).previousPage();
+      },
+      onJumpToPage: (page) {
+        ref.read(navProvider.notifier).jumpToPage(page);
+      },
+      isLastPage: (page) =>
+          ref
+              .read(spreadsProvider(seriesId: seriesId, chapterId: chapterId))
+              .value
+              ?.spreads
+              .last
+              .contains(page) ??
+          false,
+      child: _SpreadsContent(seriesId: seriesId, chapterId: chapterId),
     );
   }
 }
@@ -145,6 +137,9 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
     final settings = ref.watch(
       imageReaderSettingsProvider(seriesId: seriesId),
     );
+    final commonSettings = ref.watch(
+      commonReaderSettingsProvider(seriesId: seriesId),
+    );
     final spreads = ref.watch(
       spreadsProvider(seriesId: seriesId, chapterId: chapterId),
     );
@@ -171,72 +166,69 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
       });
     });
 
-    return Async(
-      asyncValue: settings,
-      data: (settings) {
-        return Async(
-          asyncValue: spreads,
-          data: (spreads) {
-            return PageView.builder(
-              controller: controller,
-              allowImplicitScrolling: true,
-              scrollDirection: Axis.horizontal,
-              reverse: settings.readDirection == .rightToLeft,
-              itemCount: spreads.spreads.length,
-              pageSnapping: true,
-              onPageChanged: (spreadIndex) {
-                ref.read(navProvider.notifier).jumpToSpread(spreadIndex);
-              },
-              itemBuilder: (context, spreadIndex) {
-                final spread = spreads.spreads[spreadIndex];
+    return Async3(
+      asyncValue1: settings,
+      asyncValue2: commonSettings,
+      asyncValue3: spreads,
+      data: (settings, commonSettings, spreads) {
+        return PageView.builder(
+          controller: controller,
+          allowImplicitScrolling: true,
+          scrollDirection: .horizontal,
+          reverse: commonSettings.readDirection == .rightToLeft,
+          itemCount: spreads.spreads.length,
+          pageSnapping: true,
+          onPageChanged: (spreadIndex) {
+            ref.read(navProvider.notifier).jumpToSpread(spreadIndex);
+          },
+          itemBuilder: (context, spreadIndex) {
+            final spread = spreads.spreads[spreadIndex];
 
-                return Row(
-                  textDirection: settings.readDirection == .rightToLeft
-                      ? .rtl
-                      : .ltr,
-                  children: spread
-                      .map<Widget>((page) {
-                        Alignment alignment;
+            return Row(
+              textDirection: commonSettings.readDirection == .rightToLeft
+                  ? .rtl
+                  : .ltr,
+              children: spread
+                  .map<Widget>((page) {
+                    Alignment alignment;
 
-                        if (spread.length == 1) {
-                          alignment = .center;
-                        } else if (settings.readDirection == .rightToLeft) {
-                          alignment = page == spread.first
-                              ? .centerLeft
-                              : .centerRight;
-                        } else {
-                          alignment = page == spread.first
-                              ? .centerRight
-                              : .centerLeft;
-                        }
+                    if (spread.length == 1) {
+                      alignment = .center;
+                    } else if (commonSettings.readDirection == .rightToLeft) {
+                      alignment = page == spread.first
+                          ? .centerLeft
+                          : .centerRight;
+                    } else {
+                      alignment = page == spread.first
+                          ? .centerRight
+                          : .centerLeft;
+                    }
 
-                        final width =
-                            (MediaQuery.of(context).size.width *
-                                    MediaQuery.of(context).devicePixelRatio)
-                                .toInt();
+                    final width =
+                        (MediaQuery.of(context).size.width *
+                                MediaQuery.of(context).devicePixelRatio)
+                            .toInt();
 
-                        final imageCacheWidth = spread.length == 1
-                            ? width
-                            : width ~/ 2;
+                    final imageCacheWidth = spread.length == 1
+                        ? width
+                        : width ~/ 2;
 
-                        return Expanded(
-                          child: _RenderPage(
-                            chapterId: chapterId,
-                            seriesId: seriesId,
-                            page: page,
-                            alignment: alignment,
-                            imageCacheWidth: imageCacheWidth,
-                          ),
-                        );
-                      })
-                      .interleave(
-                        SizedBox.square(
-                          dimension: settings.spreadReaderGap,
-                        ),
-                      )
-                      .toList(),
-                );
-              },
+                    return Expanded(
+                      child: _RenderPage(
+                        chapterId: chapterId,
+                        seriesId: seriesId,
+                        page: page,
+                        alignment: alignment,
+                        imageCacheWidth: imageCacheWidth,
+                      ),
+                    );
+                  })
+                  .interleave(
+                    SizedBox.square(
+                      dimension: settings.spreadReaderGap,
+                    ),
+                  )
+                  .toList(),
             );
           },
         );
