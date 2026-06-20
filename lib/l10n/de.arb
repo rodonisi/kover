@@ -638,5 +638,20 @@
     "invalidCredentials": "Ungültige Zugangsdaten",
     "@invalidCredentials": {
         "description": "User display error displayed when credentials are invalid"
+    },
+    "go": "Los",
+    "@go": {
+        "description": "Label for the go button in chapter snackbar"
+    },
+    "nextChapter": "Nächster: {chapterTitle}",
+    "@nextChapter": {
+        "description": "Label for the next chapter snackbar with the chapter title",
+        "placeholders": {
+            "chapterTitle": {
+                "description": "The title of the next chapter",
+                "type": "String",
+                "example": "Chapter 3"
+            }
+        }
     }
 }
