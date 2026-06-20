@@ -199,7 +199,7 @@
     "@imIn": {
         "description": "Label for the accept button in the monitoring opt-out dialog"
     },
-    "items": "{count} {count, plural, =0{{count} elementi} =1{{count} elemento} other{{count} elementi}}",
+    "items": "{count, plural, =0{{count} elementi} =1{{count} elemento} other{{count} elementi}}",
     "@items": {
         "description": "Label for the number of items, with pluralization"
     },
@@ -550,5 +550,13 @@
     "invalidCredentials": "Credenziali non valide",
     "@invalidCredentials": {
         "description": "User display error displayed when credentials are invalid"
+    },
+    "languageName": "Italiano",
+    "@languageName": {
+        "description": "The localized name of this locale"
+    },
+    "language": "Lingua",
+    "@language": {
+        "description": "Title for the language settings entry"
     }
 }
