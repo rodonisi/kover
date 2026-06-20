@@ -654,5 +654,17 @@
     "invalidCredentials": "Invalid Credentials",
     "@invalidCredentials": {
         "description": "User display error displayed when credentials are invalid"
+    },
+    "orientation": "Orientation",
+    "@orientation": {
+        "description": "Label for the orientation setting"
+    },
+    "portrait": "Portrait",
+    "@portrait": {
+        "description": "Label for the portrait orientation option"
+    },
+    "landscape": "Landscape",
+    "@landscape": {
+        "description": "Label for the landscape orientation option"
     }
 }

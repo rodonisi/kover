@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/read_direction.dart';
+import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/pdf_reader_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/choice_option.dart';
+import 'package:kover/widgets/settings/reader/orientation_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
 class PdfReaderSettingsBottomSheet extends ConsumerWidget {
@@ -16,10 +18,11 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final provider = pdfReaderSettingsProvider(seriesId: seriesId);
+    final pdfSettings = pdfReaderSettingsProvider(seriesId: seriesId);
+    final commonSettings = commonReaderSettingsProvider(seriesId: seriesId);
 
     return Async(
-      asyncValue: ref.watch(provider),
+      asyncValue: ref.watch(pdfSettings),
       data: (settings) {
         return Column(
           mainAxisSize: .min,
@@ -62,7 +65,7 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                         ],
                         onChanged: (newValue) async {
                           await ref
-                              .read(provider.notifier)
+                              .read(pdfSettings.notifier)
                               .setReadDirection(newValue);
                         },
                       ),
@@ -88,17 +91,18 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                         ],
                         onChanged: (newValue) async {
                           await ref
-                              .read(provider.notifier)
+                              .read(pdfSettings.notifier)
                               .setReaderMode(newValue);
                         },
                       ),
+                      OrientationOption(seriesId: seriesId),
                       BooleanOption(
                         title: l.ignoreSafeAreas,
                         icon: KoverIcons.safeArea,
                         value: settings.ignoreSafeAreas,
                         onChanged: (newValue) async {
                           await ref
-                              .read(provider.notifier)
+                              .read(pdfSettings.notifier)
                               .setIgnoreSafeAreas(newValue);
                         },
                       ),
@@ -108,7 +112,7 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                         value: settings.showProgressBar,
                         onChanged: (newValue) async {
                           await ref
-                              .read(provider.notifier)
+                              .read(pdfSettings.notifier)
                               .setShowProgressBar(newValue);
                         },
                       ),
@@ -132,16 +136,21 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: FilledButton.tonalIcon(
-                      onPressed: () async =>
-                          await ref.read(provider.notifier).setDefault(),
+                      onPressed: () async {
+                        await ref.read(pdfSettings.notifier).setDefault();
+                        await ref.read(commonSettings.notifier).setDefault();
+                      },
+
                       icon: const Icon(KoverIcons.save),
                       label: Text(l.setDefaults),
                     ),
                   ),
                   Expanded(
                     child: FilledButton.tonalIcon(
-                      onPressed: () async =>
-                          await ref.read(provider.notifier).reset(),
+                      onPressed: () async {
+                        await ref.read(pdfSettings.notifier).reset();
+                        await ref.read(commonSettings.notifier).reset();
+                      },
                       icon: const Icon(KoverIcons.reset),
                       label: Text(l.reset),
                     ),

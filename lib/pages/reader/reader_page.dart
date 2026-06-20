@@ -8,7 +8,8 @@ import 'package:kover/pages/reader/epub_reader/epub_reader.dart';
 import 'package:kover/pages/reader/image_reader/image_reader.dart';
 import 'package:kover/pages/reader/pdf_reader/pdf_reader.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
-import 'package:kover/riverpod/providers/reader//reader.dart';
+import 'package:kover/riverpod/providers/reader/reader.dart';
+import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -25,24 +26,9 @@ class ReaderPage extends HookConsumerWidget {
     this.readingListId,
   });
 
-  Future<void> _exitImmersiveMode() async {
-    await SystemChrome.setEnabledSystemUIMode(
-      .manual,
-      overlays: SystemUiOverlay.values,
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-
-    useEffect(() {
-      SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
-
-      return () {
-        _exitImmersiveMode();
-      };
-    }, const []);
 
     final provider = readerProvider(
       seriesId: seriesId,
@@ -56,7 +42,6 @@ class ReaderPage extends HookConsumerWidget {
 
         Future.microtask(
           () {
-            _exitImmersiveMode();
             ref.read(syncManagerProvider.notifier).syncProgress();
           },
         );
@@ -64,46 +49,101 @@ class ReaderPage extends HookConsumerWidget {
       child: Async(
         asyncValue: ref.watch(provider),
         data: (data) {
-          return switch (data.series.format) {
-            .archive || .image => ImageReader(
-              seriesId: data.series.id,
-              chapterId: data.chapter.id,
-              readingListId: data.readingListId,
-            ),
-            .epub => EpubReader(
-              seriesId: data.series.id,
-              chapterId: data.chapter.id,
-              readingListId: data.readingListId,
-            ),
-            .pdf => PdfReader(
-              seriesId: data.series.id,
-              chapterId: data.chapter.id,
-              readingListId: data.readingListId,
-            ),
-            _ => Center(
-              child: Column(
-                mainAxisAlignment: .center,
-                crossAxisAlignment: .center,
-                spacing: LayoutConstants.mediumPadding,
-                children: [
-                  Icon(
-                    LucideIcons.circleX,
-                    size: LayoutConstants.largeIcon,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  Text(
-                    l.unsupportedFormat(data.series.format.name.toUpperCase()),
-                  ),
-                  FilledButton(
-                    onPressed: () => context.pop(),
-                    child: Text(l.back),
-                  ),
-                ],
+          return _ReaderSystemChrome(
+            seriesId: seriesId,
+            child: switch (data.series.format) {
+              .archive || .image => ImageReader(
+                seriesId: data.series.id,
+                chapterId: data.chapter.id,
+                readingListId: data.readingListId,
               ),
-            ),
-          };
+              .epub => EpubReader(
+                seriesId: data.series.id,
+                chapterId: data.chapter.id,
+                readingListId: data.readingListId,
+              ),
+              .pdf => PdfReader(
+                seriesId: data.series.id,
+                chapterId: data.chapter.id,
+                readingListId: data.readingListId,
+              ),
+              _ => Center(
+                child: Column(
+                  mainAxisAlignment: .center,
+                  crossAxisAlignment: .center,
+                  spacing: LayoutConstants.mediumPadding,
+                  children: [
+                    Icon(
+                      LucideIcons.circleX,
+                      size: LayoutConstants.largeIcon,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    Text(
+                      l.unsupportedFormat(
+                        data.series.format.name.toUpperCase(),
+                      ),
+                    ),
+                    FilledButton(
+                      onPressed: () => context.pop(),
+                      child: Text(l.back),
+                    ),
+                  ],
+                ),
+              ),
+            },
+          );
         },
       ),
+    );
+  }
+}
+
+class _ReaderSystemChrome extends HookConsumerWidget {
+  final int seriesId;
+  final Widget child;
+  const _ReaderSystemChrome({
+    required this.seriesId,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(
+      commonReaderSettingsProvider(seriesId: seriesId),
+    );
+
+    return Async(
+      asyncValue: settings,
+      data: (data) {
+        return HookBuilder(
+          builder: (context) {
+            final List<DeviceOrientation> orientations =
+                switch (data.orientationLock) {
+                  .portrait => [.portraitUp, .portraitDown],
+                  .landscape => [.landscapeLeft, .landscapeRight],
+                  .none => [],
+                };
+
+            useEffect(() {
+              SystemChrome.setPreferredOrientations(orientations);
+              SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+              return null;
+            }, [data.orientationLock]);
+
+            // On dispose only
+            useEffect(() {
+              return () {
+                SystemChrome.setPreferredOrientations([]);
+                SystemChrome.setEnabledSystemUIMode(
+                  SystemUiMode.manual,
+                  overlays: SystemUiOverlay.values,
+                );
+              };
+            }, []);
+            return child;
+          },
+        );
+      },
     );
   }
 }

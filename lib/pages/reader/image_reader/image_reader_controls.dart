@@ -3,12 +3,15 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/read_direction.dart';
 import 'package:kover/riverpod/providers/breakpoints.dart';
+import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/choice_option.dart';
 import 'package:kover/widgets/settings/numeric_option.dart';
+import 'package:kover/widgets/settings/reader/orientation_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -20,11 +23,12 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final provider = imageReaderSettingsProvider(seriesId: seriesId);
+    final imageSettings = imageReaderSettingsProvider(seriesId: seriesId);
+    final commonSettings = commonReaderSettingsProvider(seriesId: seriesId);
     final breakpoint = ref.watch(breakpointsProvider);
 
     return Async(
-      asyncValue: ref.watch(provider),
+      asyncValue: ref.watch(imageSettings),
       data: (settings) {
         return Column(
           mainAxisSize: .min,
@@ -67,7 +71,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                         value: settings.readDirection,
                         onChanged: (newValue) async {
                           await ref
-                              .read(provider.notifier)
+                              .read(imageSettings.notifier)
                               .setReadDirection(newValue);
                         },
                       ),
@@ -99,7 +103,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                         value: settings.readerMode,
                         onChanged: (newValue) async {
                           await ref
-                              .read(provider.notifier)
+                              .read(imageSettings.notifier)
                               .setReaderMode(newValue);
                         },
                       ),
@@ -132,7 +136,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                           onChanged: (newValue) async {
                             if (newValue != settings.scaleType) {
                               await ref
-                                  .read(provider.notifier)
+                                  .read(imageSettings.notifier)
                                   .setScaleType(newValue);
                             }
                           },
@@ -150,7 +154,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                           step: ImageReaderSettingsLimits
                               .verticalReaderPaddingStep,
                           onChanged: (newValue) async => await ref
-                              .read(provider.notifier)
+                              .read(imageSettings.notifier)
                               .setVerticalReaderPadding(newValue),
                         ),
                         NumericOption(
@@ -161,7 +165,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                           max: ImageReaderSettingsLimits.verticalReaderGapMax,
                           step: ImageReaderSettingsLimits.verticalReaderGapStep,
                           onChanged: (newValue) async => await ref
-                              .read(provider.notifier)
+                              .read(imageSettings.notifier)
                               .setVerticalReaderGap(newValue),
                         ),
                       ],
@@ -175,7 +179,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                           step: ImageReaderSettingsLimits.spreadReaderGapStep,
                           decimalPlaces: 0,
                           onChanged: (newValue) async => await ref
-                              .read(provider.notifier)
+                              .read(imageSettings.notifier)
                               .setSpreadReaderGap(newValue),
                         ),
                         BooleanOption(
@@ -184,16 +188,18 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                           icon: LucideIcons.bookImage,
                           value: settings.spreadCoverPage,
                           onChanged: (newValue) async => await ref
-                              .read(provider.notifier)
+                              .read(imageSettings.notifier)
                               .setSpreadCoverPage(newValue),
                         ),
                       ],
+                      if (SafePlatform.isMobile)
+                        OrientationOption(seriesId: seriesId),
                       BooleanOption(
                         title: l.ignoreSafeAreas,
                         icon: KoverIcons.safeArea,
                         value: settings.ignoreSafeAreas,
                         onChanged: (newValue) async => await ref
-                            .read(provider.notifier)
+                            .read(imageSettings.notifier)
                             .setIgnoreSafeAreas(newValue),
                       ),
                       BooleanOption(
@@ -201,7 +207,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                         icon: KoverIcons.progressBar,
                         value: settings.showProgressBar,
                         onChanged: (newValue) async => await ref
-                            .read(provider.notifier)
+                            .read(imageSettings.notifier)
                             .setShowProgressBar(newValue),
                       ),
                     ],
@@ -224,16 +230,20 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: FilledButton.tonalIcon(
-                      onPressed: () async =>
-                          await ref.read(provider.notifier).setDefault(),
+                      onPressed: () async {
+                        await ref.read(imageSettings.notifier).setDefault();
+                        await ref.read(commonSettings.notifier).setDefault();
+                      },
                       icon: const Icon(LucideIcons.save),
                       label: Text(l.setDefaults),
                     ),
                   ),
                   Expanded(
                     child: FilledButton.tonalIcon(
-                      onPressed: () async =>
-                          await ref.read(provider.notifier).reset(),
+                      onPressed: () async {
+                        await ref.read(imageSettings.notifier).reset();
+                        await ref.read(commonSettings.notifier).reset();
+                      },
                       icon: const Icon(LucideIcons.rotateCcw),
                       label: Text(l.reset),
                     ),
