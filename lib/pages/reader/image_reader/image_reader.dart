@@ -23,9 +23,7 @@ class ImageReader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(
-      imageReaderSettingsProvider(seriesId: seriesId),
-    );
+    final settings = ref.watch(imageReaderSettingsProvider(seriesId: seriesId));
     final commonSettings = ref.watch(
       commonReaderSettingsProvider(seriesId: seriesId),
     );

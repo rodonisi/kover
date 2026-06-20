@@ -31,19 +31,13 @@ class EpubReader extends HookConsumerWidget {
       chapterId: chapterId,
     );
 
-    final settings = ref.watch(
-      epubReaderSettingsProvider(
-        seriesId: seriesId,
-      ),
-    );
     final commonSettings = ref.watch(
       commonReaderSettingsProvider(seriesId: seriesId),
     );
 
-    return Async2(
-      asyncValue1: settings,
-      asyncValue2: commonSettings,
-      data: (settings, commonSettings) => ReaderOverlay(
+    return Async(
+      asyncValue: commonSettings,
+      data: (commonSettings) => ReaderOverlay(
         seriesId: seriesId,
         chapterId: chapterId,
         readingListId: readingListId,

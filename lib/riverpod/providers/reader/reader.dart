@@ -4,12 +4,10 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/models/progress_model.dart';
-import 'package:kover/models/read_direction.dart';
 import 'package:kover/models/series_model.dart';
 import 'package:kover/riverpod/providers/chapter.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/series.dart';
-import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -125,17 +123,4 @@ class Reader extends _$Reader {
         .read(readerRepositoryProvider)
         .markChapterRead(current.chapter.id);
   }
-}
-
-@riverpod
-Future<ReadDirection> readDirection(
-  Ref ref, {
-  required int seriesId,
-  int? chapterId,
-}) async {
-  return await ref.read(
-    commonReaderSettingsProvider(seriesId: seriesId).selectAsync(
-      (settings) => settings.readDirection,
-    ),
-  );
 }

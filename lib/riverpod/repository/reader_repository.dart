@@ -205,7 +205,7 @@ class ReaderRepository {
     if (dirty.isEmpty) return;
 
     log.info(
-      'processing proress entries',
+      'processing progress entries',
       attributes: {'count': .int(dirty.length)},
     );
 
