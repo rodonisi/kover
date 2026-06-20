@@ -97,7 +97,7 @@
     "@downloadQueue": {
         "description": "Label for the download queue menu entry"
     },
-    "general": "Allgemeines",
+    "general": "Allgemein",
     "@general": {
         "description": "Label for the general settings section"
     },
@@ -185,7 +185,7 @@
     "@clearDatabase": {
         "description": "Label for the clear database button"
     },
-    "clearDatabaseDialogTitle": "Bist du dir sicher?",
+    "clearDatabaseDialogTitle": "Bist du sicher?",
     "@clearDatabaseDialogTitle": {
         "description": "Title for the clear database confirmation dialog"
     },
@@ -626,5 +626,17 @@
                 "example": "42"
             }
         }
+    },
+    "wordSpacing": "Wortabstand",
+    "@wordSpacing": {
+        "description": "Label for the word spacing setting"
+    },
+    "read": "Gelesen",
+    "@read": {
+        "description": "Label for the read action button on cover cards"
+    },
+    "invalidCredentials": "Ungültige Zugangsdaten",
+    "@invalidCredentials": {
+        "description": "User display error displayed when credentials are invalid"
     }
 }
