@@ -1,1 +1,657 @@
-{}
+{
+    "sendDiagnosticsDialogTitle": "",
+    "@sendDiagnosticsDialogTitle": {
+        "description": "Title for the monitoring opt-out dialog"
+    },
+    "wordSpacing": "",
+    "@wordSpacing": {
+        "description": "Label for the word spacing setting"
+    },
+    "dismiss": "",
+    "@dismiss": {
+        "description": "Label for the dismiss button in chapter snackbar"
+    },
+    "ascending": "",
+    "@ascending": {
+        "description": "Label for ascending sort direction option"
+    },
+    "continueReading": "",
+    "@continueReading": {
+        "description": "Label for the continue reading button"
+    },
+    "horizontal": "",
+    "@horizontal": {
+        "description": "Label for the horizontal reader mode option"
+    },
+    "syncingLibraries": "",
+    "@syncingLibraries": {
+        "description": "Label for the syncing libraries phase"
+    },
+    "save": "",
+    "@save": {
+        "description": "Label for the save credentials button"
+    },
+    "rightToLeft": "",
+    "@rightToLeft": {
+        "description": "Label for the right to left reading direction option"
+    },
+    "noDownloadsInQueue": "",
+    "@noDownloadsInQueue": {
+        "description": "Message shown when there are no downloads in the queue"
+    },
+    "recentlyAdded": "",
+    "@recentlyAdded": {
+        "description": "Label for the home page recently added section"
+    },
+    "filter": "",
+    "@filter": {
+        "description": "Label for the filter button in lists"
+    },
+    "reset": "",
+    "@reset": {
+        "description": "Label for the reset button"
+    },
+    "syncingRecentlyAdded": "",
+    "@syncingRecentlyAdded": {
+        "description": "Label for the syncing recently added phase"
+    },
+    "sendDiagnosticsDescription": "",
+    "@sendDiagnosticsDescription": {
+        "description": "Description for the send diagnostics setting"
+    },
+    "refreshingChapterToc": "",
+    "@refreshingChapterToc": {
+        "description": "Label for the syncing chapter TOC phase with the chapter ID",
+        "placeholders": {
+            "chapterId": {
+                "description": "The ID of the chapter which TOC is being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "addToWantToRead": "",
+    "@addToWantToRead": {
+        "description": "Label for the add to want to read context menu item"
+    },
+    "notSignedIn": "",
+    "@notSignedIn": {
+        "description": "Heading text when user is not signed in"
+    },
+    "syncingRecentlyUpdated": "",
+    "@syncingRecentlyUpdated": {
+        "description": "Label for the syncing recently updated phase"
+    },
+    "volumes": "",
+    "@volumes": {
+        "description": "Label for the volumes section in the series details page"
+    },
+    "highlightResumeParagraph": "",
+    "@highlightResumeParagraph": {
+        "description": "Label for the highlight resume paragraph setting"
+    },
+    "collections": "",
+    "@collections": {
+        "description": "Label for the collections menu entry"
+    },
+    "coverPageDescription": "",
+    "@coverPageDescription": {
+        "description": "Description for the cover page setting"
+    },
+    "specials": "",
+    "@specials": {
+        "description": "Label for the specials section in the series details page"
+    },
+    "goToChapter": "",
+    "@goToChapter": {
+        "description": "Label for the go to chapter button in the reading list chapter entry context menu"
+    },
+    "syncingReadingLists": "",
+    "@syncingReadingLists": {
+        "description": "Label for the syncing reading lists phase"
+    },
+    "clearDatabaseDialogTitle": "",
+    "@clearDatabaseDialogTitle": {
+        "description": "Title for the clear database confirmation dialog"
+    },
+    "descending": "",
+    "@descending": {
+        "description": "Label for descending sort direction option"
+    },
+    "removeFromWantToRead": "",
+    "@removeFromWantToRead": {
+        "description": "Label for the remove from want to read context menu item"
+    },
+    "height": "",
+    "@height": {
+        "description": "Label for the fit height image option"
+    },
+    "sortBy": "",
+    "@sortBy": {
+        "description": "Label for the sort by option in list"
+    },
+    "lineHeight": "",
+    "@lineHeight": {
+        "description": "Label for the line height setting"
+    },
+    "outlinedTheme": "",
+    "@outlinedTheme": {
+        "description": "Label for the outlined theme setting"
+    },
+    "maxConcurrentDownloads": "",
+    "@maxConcurrentDownloads": {
+        "description": "Label for the max concurrent downloads setting"
+    },
+    "moreCount": "",
+    "@moreCount": {
+        "description": "Label indicating there are more items beyond the displayed amount",
+        "placeholders": {
+            "count": {
+                "description": "The count of items beyond the displayed amount",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "baseUrl": "",
+    "@baseUrl": {
+        "description": "Label for the base URL input field"
+    },
+    "storyline": "",
+    "@storyline": {
+        "description": "Label for the storyline section in the series details page"
+    },
+    "downloadAllCovers": "",
+    "@downloadAllCovers": {
+        "description": "Label for the download all covers option"
+    },
+    "github": "",
+    "@github": {
+        "description": "Label for the GitHub link"
+    },
+    "items": "",
+    "@items": {
+        "description": "Label for the number of items, with pluralization",
+        "placeholders": {
+            "count": {
+                "description": "The amount of items",
+                "type": "int",
+                "example": "2"
+            }
+        }
+    },
+    "readingDirection": "",
+    "@readingDirection": {
+        "description": "Label for the reading direction setting"
+    },
+    "hideRead": "",
+    "@hideRead": {
+        "description": "Label for the hide read filter option in lists"
+    },
+    "dataManagement": "",
+    "@dataManagement": {
+        "description": "Label for the data management section"
+    },
+    "chapters": "",
+    "@chapters": {
+        "description": "Label for the chapters section in the series details page"
+    },
+    "lastModified": "",
+    "@lastModified": {
+        "description": "Label for sorting by last modified option"
+    },
+    "name": "",
+    "@name": {
+        "description": "Label for sorting by name option"
+    },
+    "leftToRight": "",
+    "@leftToRight": {
+        "description": "Label for the left to right reading direction option"
+    },
+    "fitDirection": "",
+    "@fitDirection": {
+        "description": "Label for the image fit direction setting"
+    },
+    "light": "",
+    "@light": {
+        "description": "Label for the light theme mode option"
+    },
+    "showLess": "",
+    "@showLess": {
+        "description": "Label for the show less button"
+    },
+    "back": "",
+    "@back": {
+        "description": "Label for back buttons"
+    },
+    "letterSpacing": "",
+    "@letterSpacing": {
+        "description": "Label for the letter spacing setting"
+    },
+    "menu": "",
+    "@menu": {
+        "description": "Label for the menu button"
+    },
+    "version": "",
+    "@version": {
+        "description": "Label for the app version, with placeholders for version and build number",
+        "placeholders": {
+            "version": {
+                "description": "The version string of the application",
+                "type": "String",
+                "example": "1.0.0"
+            },
+            "buildNumber": {
+                "description": "The build number of the application",
+                "type": "String",
+                "example": "123"
+            }
+        }
+    },
+    "databaseSize": "",
+    "@databaseSize": {
+        "description": "Label for the database size information"
+    },
+    "onDeck": "",
+    "@onDeck": {
+        "description": "Label for the home page on deck section"
+    },
+    "syncingTocs": "",
+    "@syncingTocs": {
+        "description": "Label for the syncing chapters TOCs phase"
+    },
+    "hoursCount": "",
+    "@hoursCount": {
+        "description": "Label for the estimated reading time in hours",
+        "placeholders": {
+            "hours": {
+                "description": "The estimated amount of hours",
+                "type": "double",
+                "format": "decimalPatternDigits",
+                "optionalParameters": {
+                    "decimalDigits": 1
+                },
+                "example": "4.2"
+            }
+        }
+    },
+    "credentials": "",
+    "@credentials": {
+        "description": "Label for the credentials section in settings"
+    },
+    "series": "",
+    "@series": {
+        "description": "Label for the series search section header"
+    },
+    "refreshMetadata": "",
+    "@refreshMetadata": {
+        "description": "Label for the refresh metadata context menu item"
+    },
+    "retry": "",
+    "@retry": {
+        "description": "Label for the retry button"
+    },
+    "connectionErrorDescription": "",
+    "@connectionErrorDescription": {
+        "description": "Description text when a connection error occurs"
+    },
+    "sendDiagnostics": "",
+    "@sendDiagnostics": {
+        "description": "Label for the send diagnostics setting"
+    },
+    "contain": "",
+    "@contain": {
+        "description": "Label for the contain image fit option"
+    },
+    "apiKey": "",
+    "@apiKey": {
+        "description": "Label for the API key input field"
+    },
+    "syncingCovers": "",
+    "@syncingCovers": {
+        "description": "Label for the syncing covers phase"
+    },
+    "download": "",
+    "@download": {
+        "description": "Label for the download context menu item"
+    },
+    "sortDirection": "",
+    "@sortDirection": {
+        "description": "Label for the sort direction option in list"
+    },
+    "refreshCovers": "",
+    "@refreshCovers": {
+        "description": "Label for the refresh covers context menu item"
+    },
+    "readerMode": "",
+    "@readerMode": {
+        "description": "Label for the reader mode setting"
+    },
+    "invalidCredentials": "",
+    "@invalidCredentials": {
+        "description": "User display error displayed when credentials are invalid"
+    },
+    "sendDiagnosticsChangeable": "",
+    "@sendDiagnosticsChangeable": {
+        "description": "Message shown in the monitoring opt-out dialog indicating the setting can be changed later"
+    },
+    "refreshingServerSettings": "",
+    "@refreshingServerSettings": {
+        "description": "Label for the refreshing server settings phase"
+    },
+    "allSeries": "",
+    "@allSeries": {
+        "description": "Label for the all series menu entry"
+    },
+    "madeWithLove": "",
+    "@madeWithLove": {
+        "description": "Label for the made with love message"
+    },
+    "read": "",
+    "@read": {
+        "description": "Label for the read action button on cover cards"
+    },
+    "coverPage": "",
+    "@coverPage": {
+        "description": "Label for the cover page setting"
+    },
+    "themeMode": "",
+    "@themeMode": {
+        "description": "Label for the theme mode setting"
+    },
+    "recentlyUpdated": "",
+    "@recentlyUpdated": {
+        "description": "Label for the home page recently updated section"
+    },
+    "verticalGap": "",
+    "@verticalGap": {
+        "description": "Label for the vertical gap setting"
+    },
+    "more": "",
+    "@more": {
+        "description": "Label for the more section"
+    },
+    "syncingCollections": "",
+    "@syncingCollections": {
+        "description": "Label for the syncing collections phase"
+    },
+    "markAsUnread": "",
+    "@markAsUnread": {
+        "description": "Label for the mark as unread button in context menus"
+    },
+    "clearDatabase": "",
+    "@clearDatabase": {
+        "description": "Label for the clear database button"
+    },
+    "dark": "",
+    "@dark": {
+        "description": "Label for the dark theme mode option"
+    },
+    "width": "",
+    "@width": {
+        "description": "Label for the fit width image option"
+    },
+    "home": "",
+    "@home": {
+        "description": "Label for the home page"
+    },
+    "cancel": "",
+    "@cancel": {
+        "description": "Label for the cancel button in dialogs"
+    },
+    "syncingProgress": "",
+    "@syncingProgress": {
+        "description": "Label for the syncing progress phase"
+    },
+    "showProgressBar": "",
+    "@showProgressBar": {
+        "description": "Label for the show progress bar setting"
+    },
+    "twoPage": "",
+    "@twoPage": {
+        "description": "Label for the two page reader mode option"
+    },
+    "imIn": "",
+    "@imIn": {
+        "description": "Label for the accept button in the monitoring opt-out dialog"
+    },
+    "languageName": "",
+    "@languageName": {
+        "description": "The localized name of this locale"
+    },
+    "previousChapter": "",
+    "@previousChapter": {
+        "description": "Label for the previous chapter snackbar with the chapter title",
+        "placeholders": {
+            "chapterTitle": {
+                "description": "The title of the previous chapter",
+                "type": "String",
+                "example": "Chapter 2"
+            }
+        }
+    },
+    "general": "",
+    "@general": {
+        "description": "Label for the general settings section"
+    },
+    "refreshingMetadataForSeries": "",
+    "@refreshingMetadataForSeries": {
+        "description": "Label for the refreshing metadata phase with the series ID",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "unsupportedFormat": "",
+    "@unsupportedFormat": {
+        "description": "Message shown when trying to open a chapter in an unsupported format",
+        "placeholders": {
+            "format": {
+                "description": "The format enum name for the unsupported format",
+                "type": "String",
+                "example": "epub"
+            }
+        }
+    },
+    "cancelAll": "",
+    "@cancelAll": {
+        "description": "Label for the cancel all downloads button"
+    },
+    "openSettings": "",
+    "@openSettings": {
+        "description": "Label for the button to open settings"
+    },
+    "setDefaults": "",
+    "@setDefaults": {
+        "description": "Label for the set defaults button"
+    },
+    "goToSeries": "",
+    "@goToSeries": {
+        "description": "Label for the go to series button in the reading list chapter entry context menu"
+    },
+    "fontSize": "",
+    "@fontSize": {
+        "description": "Label for the font size setting"
+    },
+    "vertical": "",
+    "@vertical": {
+        "description": "Label for the vertical reader mode option"
+    },
+    "language": "",
+    "@language": {
+        "description": "Title for the language settings entry"
+    },
+    "connectionError": "",
+    "@connectionError": {
+        "description": "Heading text when a connection error occurs"
+    },
+    "removeDownload": "",
+    "@removeDownload": {
+        "description": "Label for the remove download context menu item"
+    },
+    "dateAdded": "",
+    "@dateAdded": {
+        "description": "Label for sorting by date added option"
+    },
+    "refreshingCoversForSeries": "",
+    "@refreshingCoversForSeries": {
+        "description": "Label for the refreshing covers phase with the series ID",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series which covers are being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "noActiveSyncOperations": "",
+    "@noActiveSyncOperations": {
+        "description": "Message shown when there are no active sync operations"
+    },
+    "clearDatabaseDialogContent": "",
+    "@clearDatabaseDialogContent": {
+        "description": "Content for the clear database confirmation dialog"
+    },
+    "showMore": "",
+    "@showMore": {
+        "description": "Label for the show more button"
+    },
+    "nextChapter": "",
+    "@nextChapter": {
+        "description": "Label for the next chapter snackbar with the chapter title",
+        "placeholders": {
+            "chapterTitle": {
+                "description": "The title of the next chapter",
+                "type": "String",
+                "example": "Chapter 3"
+            }
+        }
+    },
+    "wantToRead": "",
+    "@wantToRead": {
+        "description": "Label for the want to read shelf"
+    },
+    "syncingMetadata": "",
+    "@syncingMetadata": {
+        "description": "Label for the syncing metadata phase"
+    },
+    "readerSettings": "",
+    "@readerSettings": {
+        "description": "Label for the reader settings bottom sheet title"
+    },
+    "settings": "",
+    "@settings": {
+        "description": "Label for the settings menu entry"
+    },
+    "libraries": "",
+    "@libraries": {
+        "description": "Label for the libraries menu entry"
+    },
+    "downloadQueue": "",
+    "@downloadQueue": {
+        "description": "Label for the download queue menu entry"
+    },
+    "pageGap": "",
+    "@pageGap": {
+        "description": "Label for the page gap setting"
+    },
+    "tableOfContents": "",
+    "@tableOfContents": {
+        "description": "Label for the table of contents drawer in the reader"
+    },
+    "markAsRead": "",
+    "@markAsRead": {
+        "description": "Label for the mark as read button in context menus"
+    },
+    "genres": "",
+    "@genres": {
+        "description": "Label for the genres chips in the series details page"
+    },
+    "go": "",
+    "@go": {
+        "description": "Label for the go button in chapter snackbar"
+    },
+    "clearCovers": "",
+    "@clearCovers": {
+        "description": "Label for the clear covers button"
+    },
+    "readingLists": "",
+    "@readingLists": {
+        "description": "Label for the reading lists menu entry"
+    },
+    "databaseBusy": "",
+    "@databaseBusy": {
+        "description": "Message shown when the database is busy with an operation"
+    },
+    "reclaimSpace": "",
+    "@reclaimSpace": {
+        "description": "Label for the reclaim space button"
+    },
+    "margins": "",
+    "@margins": {
+        "description": "Label for the margins setting"
+    },
+    "system": "",
+    "@system": {
+        "description": "Label for the system theme mode option"
+    },
+    "noThanks": "",
+    "@noThanks": {
+        "description": "Label for the decline button in the monitoring opt-out dialog"
+    },
+    "summary": "",
+    "@summary": {
+        "description": "Label for the summary section heading"
+    },
+    "ignoreSafeAreas": "",
+    "@ignoreSafeAreas": {
+        "description": "Label for the ignore safe areas setting"
+    },
+    "pagesCount": "",
+    "@pagesCount": {
+        "description": "Label for the page count of a an entry",
+        "placeholders": {
+            "pages": {
+                "description": "The amount of pages",
+                "type": "int",
+                "format": "compact",
+                "example": "42000"
+            }
+        }
+    },
+    "writers": "",
+    "@writers": {
+        "description": "Label for the writers metadata in the series details page"
+    },
+    "clearDownloads": "",
+    "@clearDownloads": {
+        "description": "Label for the clear downloads button"
+    },
+    "noCredentialsDescription": "",
+    "@noCredentialsDescription": {
+        "description": "Description text when no credentials are configured"
+    },
+    "wordCount": "",
+    "@wordCount": {
+        "description": "Label for the word count of a book entry",
+        "placeholders": {
+            "wordCount": {
+                "description": "The amount of words",
+                "type": "int",
+                "format": "compact",
+                "example": "42000"
+            }
+        }
+    },
+    "syncingAllSeries": "",
+    "@syncingAllSeries": {
+        "description": "Label for the syncing all series phase"
+    },
+    "downloadAllCoversDescription": "",
+    "@downloadAllCoversDescription": {
+        "description": "Description for the download all covers option"
+    }
+}
