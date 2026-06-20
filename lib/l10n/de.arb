@@ -283,5 +283,149 @@
                 "example": "42"
             }
         }
+    },
+    "credentials": "Anmeldeinformationen",
+    "@credentials": {
+        "description": "Label for the credentials section in settings"
+    },
+    "baseUrl": "Basis-URL",
+    "@baseUrl": {
+        "description": "Label for the base URL input field"
+    },
+    "apiKey": "API-Schlüssel",
+    "@apiKey": {
+        "description": "Label for the API key input field"
+    },
+    "save": "Speichern",
+    "@save": {
+        "description": "Label for the save credentials button"
+    },
+    "sortBy": "Sortieren nach",
+    "@sortBy": {
+        "description": "Label for the sort by option in list"
+    },
+    "name": "Name",
+    "@name": {
+        "description": "Label for sorting by name option"
+    },
+    "dateAdded": "Datum hinzugefügt",
+    "@dateAdded": {
+        "description": "Label for sorting by date added option"
+    },
+    "lastModified": "Zuletzt geändert",
+    "@lastModified": {
+        "description": "Label for sorting by last modified option"
+    },
+    "sortDirection": "Sortierreihenfolge",
+    "@sortDirection": {
+        "description": "Label for the sort direction option in list"
+    },
+    "ascending": "Aufsteigend",
+    "@ascending": {
+        "description": "Label for ascending sort direction option"
+    },
+    "descending": "Absteigend",
+    "@descending": {
+        "description": "Label for descending sort direction option"
+    },
+    "specials": "Specials",
+    "@specials": {
+        "description": "Label for the specials section in the series details page"
+    },
+    "writers": "Schriftsteller",
+    "@writers": {
+        "description": "Label for the writers metadata in the series details page"
+    },
+    "filter": "Filtern",
+    "@filter": {
+        "description": "Label for the filter button in lists"
+    },
+    "markAsRead": "Als gelesen markieren",
+    "@markAsRead": {
+        "description": "Label for the mark as read button in context menus"
+    },
+    "markAsUnread": "Als ungelesen markieren",
+    "@markAsUnread": {
+        "description": "Label for the mark as unread button in context menus"
+    },
+    "back": "Zurück",
+    "@back": {
+        "description": "Label for back buttons"
+    },
+    "tableOfContents": "Inhaltsverzeichnis",
+    "@tableOfContents": {
+        "description": "Label for the table of contents drawer in the reader"
+    },
+    "openSettings": "Einstellungen öffnen",
+    "@openSettings": {
+        "description": "Label for the button to open settings"
+    },
+    "series": "Serie",
+    "@series": {
+        "description": "Label for the series search section header"
+    },
+    "continueReading": "Weiterlesen",
+    "@continueReading": {
+        "description": "Label for the continue reading button"
+    },
+    "summary": "Zusammenfassung",
+    "@summary": {
+        "description": "Label for the summary section heading"
+    },
+    "showMore": "Mehr anzeigen",
+    "@showMore": {
+        "description": "Label for the show more button"
+    },
+    "showLess": "Weniger anzeigen",
+    "@showLess": {
+        "description": "Label for the show less button"
+    },
+    "cancelAll": "Alle abbrechen",
+    "@cancelAll": {
+        "description": "Label for the cancel all downloads button"
+    },
+    "readerSettings": "Reader-Einstellungen",
+    "@readerSettings": {
+        "description": "Label for the reader settings bottom sheet title"
+    },
+    "readingDirection": "Leserichtung",
+    "@readingDirection": {
+        "description": "Label for the reading direction setting"
+    },
+    "leftToRight": "Links nach Rechts",
+    "@leftToRight": {
+        "description": "Label for the left to right reading direction option"
+    },
+    "vertical": "Vertikal",
+    "@vertical": {
+        "description": "Label for the vertical reader mode option"
+    },
+    "horizontal": "Horizontal",
+    "@horizontal": {
+        "description": "Label for the horizontal reader mode option"
+    },
+    "width": "Breite",
+    "@width": {
+        "description": "Label for the fit width image option"
+    },
+    "height": "Höhe",
+    "@height": {
+        "description": "Label for the fit height image option"
+    },
+    "margins": "Seitenränder",
+    "@margins": {
+        "description": "Label for the margins setting"
+    },
+    "verticalGap": "Vertikaler Abstand:",
+    "@verticalGap": {
+        "description": "Label for the vertical gap setting"
+    },
+    "pageGap": "Seitenumbruch",
+    "@pageGap": {
+        "description": "Label for the page gap setting"
+    },
+    "fontSize": "Schriftgröße",
+    "@fontSize": {
+        "description": "Label for the font size setting"
     }
 }
