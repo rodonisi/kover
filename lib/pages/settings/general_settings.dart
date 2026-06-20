@@ -125,20 +125,25 @@ class _Locale extends ConsumerWidget {
                 Locale(Intl.systemLocale.split('_').first),
               ).system,
             ),
-            ...AppLocalizations.supportedLocales.map(
-              (locale) {
-                final localizedLookup = lookupAppLocalizations(locale);
-                final sourceLocale = lookupAppLocalizations(const Locale('en'));
-                final isUntranslated =
-                    locale.languageCode != 'en' &&
-                    localizedLookup.languageName == sourceLocale.languageName;
-                final localeName = isUntranslated
-                    ? locale.languageCode
-                    : localizedLookup.languageName;
+            ...AppLocalizations.supportedLocales
+                .where((locale) {
+                  final localeLookup = lookupAppLocalizations(locale);
+                  final sourceLocale = lookupAppLocalizations(
+                    const Locale('en'),
+                  );
+                  return locale.languageCode == 'en' ||
+                      localeLookup.languageName != sourceLocale.languageName;
+                })
+                .map(
+                  (locale) {
+                    final localeLookup = lookupAppLocalizations(locale);
 
-                return SelectOptionEntry(value: locale, label: localeName);
-              },
-            ),
+                    return SelectOptionEntry(
+                      value: locale,
+                      label: localeLookup.languageName,
+                    );
+                  },
+                ),
           ],
           onChanged: (value) {
             ref.read(generalSettingsProvider.notifier).setLocale(value);
