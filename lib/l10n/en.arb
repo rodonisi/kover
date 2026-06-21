@@ -666,5 +666,29 @@
     "landscape": "Landscape",
     "@landscape": {
         "description": "Label for the landscape orientation option"
-    }
+    },
+    "manageHeaders": "Manage Headers",
+    "@manageHeaders": {
+        "description": "Label for the manage headers settings entry"
+    },
+  "headerName": "Header Name",
+  "@headerName": {
+    "description": "Label for the header name input field"
+  },
+  "headerValue": "Header Value",
+  "@headerValue": {
+    "description": "Label for the header value input field"
+  },
+  "addHeader": "Add Header",
+  "@addHeader": {
+    "description": "Label for the add header button"
+  },
+  "savedHeaders": "Saved Headers",
+  "@savedHeaders": {
+    "description": "Label for the saved headers section"
+  },
+  "clearAll": "Clear All",
+  "@clearAll": {
+    "description": "Label for the clear all button"
+  }
 }

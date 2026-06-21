@@ -44,11 +44,11 @@ class CustomHeadersSheet extends ConsumerWidget {
                     mainAxisAlignment: .spaceBetween,
                     children: [
                       Text(
-                        'saved headers',
+                        l.save,
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       TextButton.icon(
-                        label: Text('clear all'),
+                        label: Text(l.clearAll),
                         icon: const Icon(KoverIcons.trash),
                         style: TextButton.styleFrom(
                           foregroundColor: Theme.of(context).colorScheme.error,
@@ -138,17 +138,17 @@ class _AddHeaderForm extends HookConsumerWidget {
           children: [
             TextField(
               controller: keyController,
-              decoration: const InputDecoration(labelText: 'header name'),
+              decoration: InputDecoration(labelText: l.headerName),
             ),
             TextField(
               controller: valueController,
-              decoration: const InputDecoration(labelText: 'header value'),
+              decoration: InputDecoration(labelText: l.headerValue),
             ),
             Row(
               mainAxisAlignment: .end,
               children: [
                 FilledButton.icon(
-                  label: const Text('add header'),
+                  label: Text(l.addHeader),
                   icon: const Icon(LucideIcons.plus),
                   onPressed: canAdd
                       ? () {

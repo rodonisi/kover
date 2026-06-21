@@ -86,7 +86,7 @@ class _CredentialsForm extends HookConsumerWidget {
           ),
         ),
         ListTile(
-          title: const Text('manage headers'),
+          title: Text(l.manageHeaders),
           leading: const Icon(KoverIcons.header),
           trailing: const Icon(KoverIcons.chevronRight),
           contentPadding: const EdgeInsets.symmetric(
