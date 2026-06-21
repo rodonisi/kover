@@ -5,6 +5,7 @@ import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/pdf_reader_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/choice_option.dart';
 import 'package:kover/widgets/settings/reader/orientation_option.dart';
@@ -72,7 +73,8 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                               .setReaderMode(newValue);
                         },
                       ),
-                      OrientationOption(seriesId: seriesId),
+                      if (SafePlatform.isMobile)
+                        OrientationOption(seriesId: seriesId),
                       BooleanOption(
                         title: l.ignoreSafeAreas,
                         icon: KoverIcons.safeArea,

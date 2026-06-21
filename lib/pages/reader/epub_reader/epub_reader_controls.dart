@@ -4,6 +4,7 @@ import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/numeric_option.dart';
 import 'package:kover/widgets/settings/reader/orientation_option.dart';
@@ -104,7 +105,8 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                             .read(epubSettings.notifier)
                             .setLetterSpacing(newValue),
                       ),
-                      OrientationOption(seriesId: seriesId),
+                      if (SafePlatform.isMobile)
+                        OrientationOption(seriesId: seriesId),
                       BooleanOption(
                         icon: LucideIcons.highlighter,
                         title: l.highlightResumeParagraph,
