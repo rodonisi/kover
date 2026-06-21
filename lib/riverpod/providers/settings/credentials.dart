@@ -40,26 +40,32 @@ class Credentials extends _$Credentials {
     state = AsyncValue.data(settings);
   }
 
-  void addHeader(String key, String value) {
+  Future<void> addHeader(String key, String value) async {
     final trimmedKey = key.trim();
     final trimmedValue = value.trim();
     if (trimmedKey.isEmpty || trimmedValue.isEmpty) return;
-    final currentState = state.value ?? const CredentialsState();
-    final updatedHeaders = Map<String, String>.from(currentState.customHeaders)
-      ..[trimmedKey] = trimmedValue;
-    updateCredentials(currentState.copyWith(customHeaders: updatedHeaders));
+
+    final current = await future;
+
+    final updatedHeaders = {
+      ...current.customHeaders,
+      trimmedKey: trimmedValue,
+    };
+    updateCredentials(current.copyWith(customHeaders: updatedHeaders));
   }
 
-  void removeHeader(String key) {
-    final currentState = state.value ?? const CredentialsState();
-    final updatedHeaders = Map<String, String>.from(currentState.customHeaders)
+  Future<void> removeHeader(String key) async {
+    final current = await future;
+
+    final updatedHeaders = Map<String, String>.from(current.customHeaders)
       ..remove(key);
-    updateCredentials(currentState.copyWith(customHeaders: updatedHeaders));
+    updateCredentials(current.copyWith(customHeaders: updatedHeaders));
   }
 
-  void removeAllHeaders() {
-    final currentState = state.value ?? const CredentialsState();
-    updateCredentials(currentState.copyWith(customHeaders: {}));
+  Future<void> removeAllHeaders() async {
+    final current = await future;
+
+    updateCredentials(current.copyWith(customHeaders: {}));
   }
 }
 

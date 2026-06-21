@@ -53,8 +53,8 @@ class CustomHeadersSheet extends ConsumerWidget {
                         style: TextButton.styleFrom(
                           foregroundColor: Theme.of(context).colorScheme.error,
                         ),
-                        onPressed: () {
-                          ref
+                        onPressed: () async {
+                          await ref
                               .read(credentialsProvider.notifier)
                               .removeAllHeaders();
                         },
@@ -102,8 +102,10 @@ class _HeaderListEntry extends ConsumerWidget {
             KoverIcons.trash,
             color: Theme.of(context).colorScheme.error,
           ),
-          onPressed: () {
-            ref.read(credentialsProvider.notifier).removeHeader(entry.key);
+          onPressed: () async {
+            await ref
+                .read(credentialsProvider.notifier)
+                .removeHeader(entry.key);
           },
         ),
       ),
@@ -151,8 +153,8 @@ class _AddHeaderForm extends HookConsumerWidget {
                   label: Text(l.addHeader),
                   icon: const Icon(LucideIcons.plus),
                   onPressed: canAdd
-                      ? () {
-                          ref
+                      ? () async {
+                          await ref
                               .read(credentialsProvider.notifier)
                               .addHeader(
                                 keyController.text,
