@@ -27,15 +27,16 @@ sealed class KoverIcons {
   static const IconData collection = LucideIcons.layoutGrid;
   static const IconData readingList = LucideIcons.layoutList;
 
+  static const IconData chevronRight = LucideIcons.chevronRight;
   static const IconData check = LucideIcons.check;
   static const IconData info = LucideIcons.info;
   static const IconData language = LucideIcons.languages;
-
-  static const IconData chevronRight = LucideIcons.chevronRight;
+  static const IconData trash = LucideIcons.trash;
 
   static const IconData unlockedOrientation = LucideIcons.rotateCwSquare;
   static const IconData landscape = LucideIcons.rectangleHorizontal;
   static const IconData portrait = LucideIcons.rectangleVertical;
   static const IconData ltr = LucideIcons.chevronsRight;
   static const IconData rtl = LucideIcons.chevronsLeft;
+  static const IconData header = LucideIcons.listPlus;
 }

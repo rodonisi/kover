@@ -36,6 +36,8 @@ class CurrentUser extends _$CurrentUser {
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
     ).future;
 
+    ref.listen(credentialsProvider, (_, _) => ref.invalidateSelf());
+
     final apiKey = ref.watch(apiKeyProvider);
     if (apiKey == null || apiKey.isEmpty) throw NoCredentialsException();
 

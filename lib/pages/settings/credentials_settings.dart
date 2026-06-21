@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
+import 'package:kover/pages/settings/custom_headers_sheet.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/server_settings.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -82,6 +84,34 @@ class _CredentialsForm extends HookConsumerWidget {
               ),
             ),
           ),
+        ),
+        ListTile(
+          title: const Text('manage headers'),
+          leading: const Icon(KoverIcons.header),
+          trailing: const Icon(KoverIcons.chevronRight),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: LayoutConstants.smallPadding,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(
+              LayoutConstants.smallerBorderRadius,
+            ),
+          ),
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              showDragHandle: true,
+              isScrollControlled: true,
+              useSafeArea: true,
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+                maxWidth: LayoutBreakpoints.medium,
+              ),
+              builder: ((context) {
+                return const CustomHeadersSheet();
+              }),
+            );
+          },
         ),
         Row(
           crossAxisAlignment: .center,

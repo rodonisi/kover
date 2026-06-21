@@ -38,8 +38,28 @@ class Credentials extends _$Credentials {
 
   void updateCredentials(CredentialsState settings) {
     state = AsyncValue.data(settings);
-    // Trigger re-validation by invalidating the current user provider
-    ref.invalidate(currentUserProvider);
+  }
+
+  void addHeader(String key, String value) {
+    final trimmedKey = key.trim();
+    final trimmedValue = value.trim();
+    if (trimmedKey.isEmpty || trimmedValue.isEmpty) return;
+    final currentState = state.value ?? const CredentialsState();
+    final updatedHeaders = Map<String, String>.from(currentState.customHeaders)
+      ..[trimmedKey] = trimmedValue;
+    updateCredentials(currentState.copyWith(customHeaders: updatedHeaders));
+  }
+
+  void removeHeader(String key) {
+    final currentState = state.value ?? const CredentialsState();
+    final updatedHeaders = Map<String, String>.from(currentState.customHeaders)
+      ..remove(key);
+    updateCredentials(currentState.copyWith(customHeaders: updatedHeaders));
+  }
+
+  void removeAllHeaders() {
+    final currentState = state.value ?? const CredentialsState();
+    updateCredentials(currentState.copyWith(customHeaders: {}));
   }
 }
 
