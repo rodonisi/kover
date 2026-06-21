@@ -49,7 +49,11 @@ void callbackDispatcher() {
       final settings = CredentialsState.fromJson(jsonDecode(decoded.value));
 
       final apiKey = settings.apiKey!;
-      final chopper = getChopperClient(Uri.parse(settings.url!), apiKey);
+      final chopper = getChopperClient(
+        Uri.parse(settings.url!),
+        apiKey,
+        customHeaders: settings.customHeaders,
+      );
       final client = Openapi.create(client: chopper);
 
       final seriesRepo = SeriesRepository(

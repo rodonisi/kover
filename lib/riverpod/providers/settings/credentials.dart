@@ -13,6 +13,7 @@ sealed class CredentialsState with _$CredentialsState {
   const factory CredentialsState({
     String? url,
     String? apiKey,
+    @Default({}) Map<String, String> customHeaders,
   }) = _CredentialsState;
 
   factory CredentialsState.fromJson(Map<String, Object?> json) =>

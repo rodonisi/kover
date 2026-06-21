@@ -5,13 +5,18 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'client.g.dart';
 
-ChopperClient getChopperClient(Uri uri, String apiKey) {
+ChopperClient getChopperClient(
+  Uri uri,
+  String apiKey, {
+  Map<String, String> customHeaders = const {},
+}) {
   return ChopperClient(
     baseUrl: uri,
     interceptors: [
       HeadersInterceptor({
         'x-api-key': apiKey,
         "Content-Type": "application/json",
+        ...customHeaders,
       }),
     ],
     converter: $JsonSerializableConverter(),
@@ -38,6 +43,7 @@ ChopperClient authenticatedClient(Ref ref) {
       HeadersInterceptor({
         'x-api-key': key!,
         "Content-Type": "application/json",
+        ...settings.customHeaders,
       }),
     ],
     converter: $JsonSerializableConverter(),
