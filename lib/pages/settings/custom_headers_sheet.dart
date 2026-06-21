@@ -44,7 +44,7 @@ class CustomHeadersSheet extends ConsumerWidget {
                     mainAxisAlignment: .spaceBetween,
                     children: [
                       Text(
-                        l.save,
+                        l.savedHeaders,
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       TextButton.icon(
