@@ -653,5 +653,41 @@
                 "example": "Chapter 3"
             }
         }
+    },
+    "orientation": "Ausrichtung",
+    "@orientation": {
+        "description": "Label for the orientation setting"
+    },
+    "portrait": "Hochformat",
+    "@portrait": {
+        "description": "Label for the portrait orientation option"
+    },
+    "landscape": "Querformat",
+    "@landscape": {
+        "description": "Label for the landscape orientation option"
+    },
+    "manageHeaders": "Header verwalten",
+    "@manageHeaders": {
+        "description": "Label for the manage headers settings entry"
+    },
+    "headerName": "Header-Name",
+    "@headerName": {
+        "description": "Label for the header name input field"
+    },
+    "headerValue": "Header-Wert",
+    "@headerValue": {
+        "description": "Label for the header value input field"
+    },
+    "addHeader": "Header hinzufügen",
+    "@addHeader": {
+        "description": "Label for the add header button"
+    },
+    "savedHeaders": "Gespeicherte Header",
+    "@savedHeaders": {
+        "description": "Label for the saved headers section"
+    },
+    "clearAll": "Alle löschen",
+    "@clearAll": {
+        "description": "Label for the clear all button"
     }
 }

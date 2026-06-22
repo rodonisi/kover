@@ -558,5 +558,41 @@
     "language": "Lingua",
     "@language": {
         "description": "Title for the language settings entry"
+    },
+    "orientation": "Orientamento",
+    "@orientation": {
+        "description": "Label for the orientation setting"
+    },
+    "portrait": "Verticale",
+    "@portrait": {
+        "description": "Label for the portrait orientation option"
+    },
+    "landscape": "Orizzontale",
+    "@landscape": {
+        "description": "Label for the landscape orientation option"
+    },
+    "manageHeaders": "Gestisci headers",
+    "@manageHeaders": {
+        "description": "Label for the manage headers settings entry"
+    },
+    "headerName": "Nome header",
+    "@headerName": {
+        "description": "Label for the header name input field"
+    },
+    "headerValue": "Valore header",
+    "@headerValue": {
+        "description": "Label for the header value input field"
+    },
+    "addHeader": "Aggiungi header",
+    "@addHeader": {
+        "description": "Label for the add header button"
+    },
+    "savedHeaders": "Headers salvati",
+    "@savedHeaders": {
+        "description": "Label for the saved headers section"
+    },
+    "clearAll": "Rimuvi tutto",
+    "@clearAll": {
+        "description": "Label for the clear all button"
     }
 }
