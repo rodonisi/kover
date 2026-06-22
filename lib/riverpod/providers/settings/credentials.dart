@@ -42,7 +42,7 @@ class Credentials extends _$Credentials {
   }) async {
     final current = await future;
 
-    state = .data(current.copyWith(url: url, apiKey: key));
+    state = .data(current.copyWith(url: url, apiKey: apiKey));
   }
 
   Future<void> addHeader(String key, String value) async {
