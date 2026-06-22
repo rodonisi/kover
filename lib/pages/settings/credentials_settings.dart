@@ -121,14 +121,12 @@ class _CredentialsForm extends HookConsumerWidget {
             FilledButton.icon(
               onPressed: loginStatus == .loading
                   ? null
-                  : () {
-                      ref
+                  : () async {
+                      await ref
                           .read(credentialsProvider.notifier)
                           .updateCredentials(
-                            CredentialsState(
-                              url: urlController.text,
-                              apiKey: apiKeyController.text,
-                            ),
+                            url: urlController.text,
+                            apiKey: apiKeyController.text,
                           );
                     },
               label: Text(l.save),

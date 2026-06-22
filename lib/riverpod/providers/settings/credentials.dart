@@ -36,8 +36,13 @@ class Credentials extends _$Credentials {
     return state.value ?? const CredentialsState();
   }
 
-  void updateCredentials(CredentialsState settings) {
-    state = AsyncValue.data(settings);
+  Future<void> updateCredentials({
+    required String url,
+    required String apiKey,
+  }) async {
+    final current = await future;
+
+    state = .data(current.copyWith(url: url, apiKey: key));
   }
 
   Future<void> addHeader(String key, String value) async {
@@ -51,7 +56,7 @@ class Credentials extends _$Credentials {
       ...current.customHeaders,
       trimmedKey: trimmedValue,
     };
-    updateCredentials(current.copyWith(customHeaders: updatedHeaders));
+    state = .data(current.copyWith(customHeaders: updatedHeaders));
   }
 
   Future<void> removeHeader(String key) async {
@@ -59,13 +64,13 @@ class Credentials extends _$Credentials {
 
     final updatedHeaders = Map<String, String>.from(current.customHeaders)
       ..remove(key);
-    updateCredentials(current.copyWith(customHeaders: updatedHeaders));
+    state = .data(current.copyWith(customHeaders: updatedHeaders));
   }
 
   Future<void> removeAllHeaders() async {
     final current = await future;
 
-    updateCredentials(current.copyWith(customHeaders: {}));
+    state = .data(current.copyWith(customHeaders: {}));
   }
 }
 
