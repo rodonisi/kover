@@ -175,10 +175,15 @@ class DownloadManager extends _$DownloadManager {
   }
 
   Future<void> _clearActiveTasks() async {
-    for (final task in _activeTasks.values) {
+    final tasks = _activeTasks.values.toList();
+
+    // Clear the active tasks map before awaiting cancellation to avoid
+    // modifying the map while iterating.
+    _activeTasks.clear();
+
+    for (final task in tasks) {
       await task.cancel();
     }
-    _activeTasks.clear();
   }
 
   Future<void> _startDownload(int chapterId) async {
