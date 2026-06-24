@@ -5,13 +5,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'library.g.dart';
 
 @riverpod
-Stream<LibraryModel> library(Ref ref, {required int libraryId}) async* {
+Stream<LibraryModel> library(Ref ref, {required int libraryId}) {
   final repo = ref.watch(librariesRepositoryProvider);
-  yield* repo.watchLibrary(libraryId).distinct();
+  return repo.watchLibrary(libraryId).distinct();
 }
 
 @riverpod
-Stream<List<LibraryModel>> libraries(Ref ref) async* {
+Stream<List<LibraryModel>> libraries(Ref ref) {
   final repo = ref.watch(librariesRepositoryProvider);
-  yield* repo.watchLibraries().distinct();
+  return repo.watchLibraries().distinct();
 }

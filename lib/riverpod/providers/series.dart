@@ -7,9 +7,9 @@ import 'package:rxdart/rxdart.dart';
 part 'series.g.dart';
 
 @riverpod
-Stream<SeriesModel> series(Ref ref, {required int seriesId}) async* {
+Stream<SeriesModel> series(Ref ref, {required int seriesId}) {
   final repo = ref.watch(seriesRepositoryProvider);
-  yield* repo.watchSeries(seriesId).distinct();
+  return repo.watchSeries(seriesId).distinct();
 }
 
 @riverpod
@@ -42,24 +42,24 @@ Future<List<SeriesModel>> filterSeries(
 }
 
 @riverpod
-Stream<SeriesModel> seriesForChapter(Ref ref, {required int chapterId}) async* {
+Stream<SeriesModel> seriesForChapter(Ref ref, {required int chapterId}) {
   final repo = ref.watch(seriesRepositoryProvider);
-  yield* repo.watchSeriesForChapter(chapterId).distinct();
+  return repo.watchSeriesForChapter(chapterId).distinct();
 }
 
 @riverpod
-Stream<double> seriesProgress(Ref ref, {required int seriesId}) async* {
+Stream<double> seriesProgress(Ref ref, {required int seriesId}) {
   final repo = ref.watch(seriesRepositoryProvider);
   final series = repo.watchSeries(seriesId);
   final pagesRead = repo.watchPagesRead(seriesId: seriesId);
 
-  yield* Rx.combineLatest2(series, pagesRead, (s, n) => n / s.pages).distinct();
+  return Rx.combineLatest2(series, pagesRead, (s, n) => n / s.pages).distinct();
 }
 
 @riverpod
-Stream<ImageModel?> seriesCover(Ref ref, {required int seriesId}) async* {
+Stream<ImageModel?> seriesCover(Ref ref, {required int seriesId}) {
   final repo = ref.watch(seriesRepositoryProvider);
-  yield* repo.watchSeriesCover(seriesId).distinct();
+  return repo.watchSeriesCover(seriesId).distinct();
 }
 
 @riverpod
@@ -71,9 +71,10 @@ Stream<List<SeriesModel>> allSeries(
   bool orderByRecentlyAdded = false,
   bool orderByRecentlyUpdated = false,
   bool ascending = true,
-}) async* {
+}) {
   final repo = ref.watch(seriesRepositoryProvider);
-  yield* repo
+
+  return repo
       .watchAllSeries(
         libraryId: libraryId,
         collectionId: collectionId,
@@ -89,34 +90,34 @@ Stream<List<SeriesModel>> allSeries(
 Stream<SeriesDetailModel> seriesDetail(
   Ref ref, {
   required int seriesId,
-}) async* {
+}) {
   final repo = ref.watch(seriesRepositoryProvider);
-  yield* repo.watchSeriesDetails(seriesId).distinct();
+  return repo.watchSeriesDetails(seriesId).distinct();
 }
 
 @riverpod
 Stream<SeriesMetadataModel> seriesMetadata(
   Ref ref, {
   required int seriesId,
-}) async* {
+}) {
   final repo = ref.watch(seriesRepositoryProvider);
-  yield* repo.watchSeriesMetadata(seriesId).distinct();
+  return repo.watchSeriesMetadata(seriesId).distinct();
 }
 
 @riverpod
-Stream<List<SeriesModel>> onDeck(Ref ref) async* {
+Stream<List<SeriesModel>> onDeck(Ref ref) {
   final repo = ref.watch(seriesRepositoryProvider);
-  yield* repo.watchOnDeck().distinct();
+  return repo.watchOnDeck().distinct();
 }
 
 @riverpod
-Stream<List<SeriesModel>> recentlyUpdated(Ref ref) async* {
+Stream<List<SeriesModel>> recentlyUpdated(Ref ref) {
   final repo = ref.watch(seriesRepositoryProvider);
-  yield* repo.watchRecentlyUpdated().distinct();
+  return repo.watchRecentlyUpdated().distinct();
 }
 
 @riverpod
-Stream<List<SeriesModel>> recentlyAdded(Ref ref) async* {
+Stream<List<SeriesModel>> recentlyAdded(Ref ref) {
   final repo = ref.watch(seriesRepositoryProvider);
-  yield* repo.watchRecentlyAdded().distinct();
+  return repo.watchRecentlyAdded().distinct();
 }

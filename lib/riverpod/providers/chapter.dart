@@ -10,9 +10,9 @@ part 'chapter.g.dart';
 Stream<ChapterModel> chapter(
   Ref ref, {
   required int chapterId,
-}) async* {
+})  {
   final repo = ref.watch(chaptersRepositoryProvider);
-  yield* repo.watchChapter(chapterId: chapterId).distinct();
+  return repo.watchChapter(chapterId: chapterId).distinct();
 }
 
 @riverpod
@@ -31,12 +31,12 @@ Future<List<ChapterModel>> searchChapters(
 }
 
 @riverpod
-Stream<double> chapterProgress(Ref ref, {required int chapterId}) async* {
+Stream<double> chapterProgress(Ref ref, {required int chapterId})  {
   final repo = ref.watch(chaptersRepositoryProvider);
   final chapter = repo.watchChapter(chapterId: chapterId);
   final pagesRead = repo.watchPagesRead(chapterId: chapterId);
 
-  yield* Rx.combineLatest2(
+  return Rx.combineLatest2(
     chapter,
     pagesRead,
     (c, n) => n / c.pages,
@@ -44,7 +44,7 @@ Stream<double> chapterProgress(Ref ref, {required int chapterId}) async* {
 }
 
 @riverpod
-Stream<ImageModel?> chapterCover(Ref ref, {required int chapterId}) async* {
+Stream<ImageModel?> chapterCover(Ref ref, {required int chapterId})  {
   final repo = ref.watch(chaptersRepositoryProvider);
-  yield* repo.watchChapterCover(chapterId).distinct();
+  return repo.watchChapterCover(chapterId).distinct();
 }

@@ -27,7 +27,7 @@ class WantToRead extends _$WantToRead {
 }
 
 @riverpod
-Stream<List<SeriesModel>> wantToReadList(Ref ref) async* {
+Stream<List<SeriesModel>> wantToReadList(Ref ref) {
   final repo = ref.watch(wantToReadRepositoryProvider);
-  yield* repo.watchWantToReadList().distinct();
+  return repo.watchWantToReadList().distinct();
 }

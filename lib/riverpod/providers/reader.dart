@@ -103,17 +103,13 @@ Future<ProgressModel?> bookProgress(Ref ref, {required int chapterId}) async {
 @riverpod
 Stream<ChapterModel?> prevChapter(
   Ref ref, {
-  int? seriesId,
+  required int seriesId,
   int? volumeId,
-  int? chapterId,
+  required int chapterId,
   int? readingListId,
-}) async* {
-  if (seriesId == null || chapterId == null) {
-    yield null;
-    return;
-  }
+}) {
   final repo = ref.watch(readerRepositoryProvider);
-  yield* repo
+  return repo
       .watchPrevChapter(
         seriesId: seriesId,
         volumeId: volumeId,
@@ -126,17 +122,13 @@ Stream<ChapterModel?> prevChapter(
 @riverpod
 Stream<ChapterModel?> nextChapter(
   Ref ref, {
-  int? seriesId,
+  required int seriesId,
   int? volumeId,
-  int? chapterId,
+  required int chapterId,
   int? readingListId,
-}) async* {
-  if (seriesId == null || chapterId == null) {
-    yield null;
-    return;
-  }
+}) {
   final repo = ref.watch(readerRepositoryProvider);
-  yield* repo
+  return repo
       .watchNextChapter(
         seriesId: seriesId,
         volumeId: volumeId,

@@ -15,9 +15,9 @@ part 'book.g.dart';
 Stream<List<BookChapterModel>> bookChapters(
   Ref ref, {
   required int chapterId,
-}) async* {
+}) {
   final repo = ref.watch(bookRepositoryProvider);
-  yield* repo.watchBookChapters(chapterId).distinct();
+  return repo.watchBookChapters(chapterId).distinct();
 }
 
 @riverpod
