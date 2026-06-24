@@ -239,7 +239,18 @@ class SeriesRepository {
 
     final metadata = <SeriesMetadataCompanions>[];
     for (final id in series) {
-      metadata.add(await _client.getSeriesMetadata(id));
+      try {
+        metadata.add(await _client.getSeriesMetadata(id));
+      } catch (e) {
+        log.warning(
+          'failed to fetch series metadata for series',
+          attributes: {
+            'series_id': .int(id),
+            'error_type': .string(e.runtimeType.toString()),
+            'error_message': .string(e.toString()),
+          },
+        );
+      }
     }
 
     await _db.seriesMetadataDao.upsertMetadataBatch(metadata);
@@ -269,10 +280,21 @@ class SeriesRepository {
   /// Refresh series details for a list of series
   Future<void> refreshSeriesDetails(Iterable<int> seriesIds) async {
     for (final id in seriesIds) {
-      final details = await _client.getSeriesDetail(id);
-      await _db.seriesDao.mergeSeriesDetails(
-        details,
-      );
+      try {
+        final details = await _client.getSeriesDetail(id);
+        await _db.seriesDao.mergeSeriesDetails(
+          details,
+        );
+      } catch (e) {
+        log.warning(
+          'failed to fetch series details for series',
+          attributes: {
+            'series_id': .int(id),
+            'error_type': .string(e.runtimeType.toString()),
+            'error_message': .string(e.toString()),
+          },
+        );
+      }
     }
   }
 

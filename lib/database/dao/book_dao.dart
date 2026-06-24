@@ -19,7 +19,7 @@ class BookDao extends DatabaseAccessor<AppDatabase> with _$BookDaoMixin {
 
   /// Returns the chapter ids for all chapters that can have a TOC but are
   /// missing one
-  Future<List<int>> getMissingChapterIds() async {
+  Future<List<int>> getMissingTocChapterIds() async {
     final query =
         select(chapters).join([
             leftOuterJoin(
@@ -37,15 +37,16 @@ class BookDao extends DatabaseAccessor<AppDatabase> with _$BookDaoMixin {
     }).get();
   }
 
-  /// Upsert TOC for [chapterId]
-  Future<void> upsertToc(
-    int chapterId,
+  /// Upsert TOC entries. Deletes any existing entries for the chapters.
+  Future<void> upsertTocBatch(
     Iterable<BookChaptersTableCompanion> entries,
   ) async {
+    final chapterIds = entries.map((e) => e.chapterId.value).toSet();
+
     await transaction(() async {
       await (delete(
         bookChaptersTable,
-      )..where((row) => row.chapterId.equals(chapterId))).go();
+      )..where((row) => row.chapterId.isIn(chapterIds))).go();
       await batch(
         (b) => b.insertAllOnConflictUpdate(bookChaptersTable, entries),
       );

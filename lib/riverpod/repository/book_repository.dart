@@ -116,16 +116,31 @@ class BookRepository {
   /// server and updating the local database.
   Future<void> refreshChapterToc({required int chapterId}) async {
     final entries = await _client.getBookChapters(chapterId);
-    await _db.bookDao.upsertToc(chapterId, entries);
+    await _db.bookDao.upsertTocBatch(entries);
   }
 
   /// Fetch the table of contents for all chapters that are missing it.
   Future<void> fetchMissingChaptersTocs() async {
-    final chapters = await _db.bookDao.getMissingChapterIds();
+    final chapters = await _db.bookDao.getMissingTocChapterIds();
+    final tocs = <BookChaptersTableCompanion>[];
+
     for (final id in chapters) {
-      final entries = await _client.getBookChapters(id);
-      await _db.bookDao.upsertToc(id, entries);
+      try {
+        final entries = await _client.getBookChapters(id);
+        tocs.addAll(entries);
+      } catch (e) {
+        log.warning(
+          'failed to fetch toc for chapter',
+          attributes: {
+            'chapter_id': .int(id),
+            'error_type': .string(e.runtimeType.toString()),
+            'error_message': .string(e.toString()),
+          },
+        );
+      }
     }
+
+    await _db.bookDao.upsertTocBatch(tocs);
   }
 
   static List<BookChapterModel> _buildTree(
