@@ -43,6 +43,7 @@ class DownloadManager extends _$DownloadManager {
     _listenConnectivity();
     _listenAppLifecycle();
     _listenSyncManager();
+    _listenDownloadSettings();
 
     await persist(ref.watch(storageProvider.future)).future;
 
@@ -275,5 +276,19 @@ class DownloadManager extends _$DownloadManager {
     );
     WidgetsBinding.instance.addObserver(observer);
     ref.onDispose(() => WidgetsBinding.instance.removeObserver(observer));
+  }
+
+  void _listenDownloadSettings() {
+    ref.listen(
+      downloadSettingsProvider,
+      (prev, next) async {
+        next.whenData((next) async {
+          if (next.concurrentDownloads != prev?.value?.concurrentDownloads) {
+            await _clearActiveTasks();
+            await _processQueue();
+          }
+        });
+      },
+    );
   }
 }
