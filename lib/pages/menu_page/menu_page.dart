@@ -41,8 +41,8 @@ class MenuPage extends ConsumerWidget {
         bottom: false,
         child: CustomScrollView(
           slivers: [
-            const ActionsAppBar(),
             if (loggedIn) ...[
+              const ActionsAppBar(),
               SliverPadding(
                 padding: const EdgeInsets.symmetric(
                   vertical: LayoutConstants.smallerPadding,
