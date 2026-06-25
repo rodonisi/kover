@@ -153,9 +153,11 @@ class DownloadManager extends _$DownloadManager {
 
     final current = await future;
 
-    final concurrentDownloads = (await ref.watch(
-      downloadSettingsProvider.future,
-    )).concurrentDownloads;
+    final concurrentDownloads = await ref.read(
+      downloadSettingsProvider.selectAsync(
+        (state) => state.concurrentDownloads,
+      ),
+    );
 
     final activeCount = _activeTasks.length;
 
