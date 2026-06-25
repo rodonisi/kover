@@ -21,8 +21,6 @@ FutureOr<void> sentryOptionsConfiguration(SentryFlutterOptions options) {
   options.tracesSampleRate = 1.0;
   // ignore: experimental_member_use
   options.profilesSampleRate = 1.0;
-  options.replay.sessionSampleRate = 0.1;
-  options.replay.onErrorSampleRate = 1.0;
   options.beforeSend = (event, hint) {
     _scrubExceptions(event.exceptions ?? []);
     _scrubMessage(event.message);
