@@ -151,26 +151,27 @@ class DownloadManager extends _$DownloadManager {
       return;
     }
 
+    final current = await future;
+
     final concurrentDownloads = (await ref.watch(
       downloadSettingsProvider.future,
     )).concurrentDownloads;
 
-    while (_activeTasks.length < concurrentDownloads &&
-        (state.value?.downloadQueue.isNotEmpty ?? false)) {
-      final nextId = state.value!.downloadQueue
-          .where((i) => !_activeTasks.containsKey(i))
-          .firstOrNull;
+    final activeCount = _activeTasks.length;
 
-      if (nextId == null) break;
+    final toStart = current.downloadQueue
+        .where((i) => !_activeTasks.containsKey(i))
+        .take(concurrentDownloads - activeCount);
 
-      log.debug(
+    for (final chapterId in toStart) {
+      log.info(
         'starting download for chapter',
         attributes: {
-          'chapter_id': .int(nextId),
+          'chapter_id': .int(chapterId),
         },
       );
 
-      await _startDownload(nextId);
+      unawaited(_startDownload(chapterId));
     }
   }
 
@@ -213,15 +214,18 @@ class DownloadManager extends _$DownloadManager {
     } finally {
       _activeTasks.remove(chapterId);
 
-      log.debug(
-        'download completed for chapter',
-        attributes: {
-          'chapterId': .int(chapterId),
-        },
-      );
-      final current = await future;
-      final newQueue = Set<int>.from(current.downloadQueue)..remove(chapterId);
-      state = AsyncData(current.copyWith(downloadQueue: newQueue));
+      if (!task.isCanceled) {
+        log.info(
+          'download completed for chapter',
+          attributes: {
+            'chapterId': .int(chapterId),
+          },
+        );
+        final current = await future;
+        final newQueue = Set<int>.from(current.downloadQueue)
+          ..remove(chapterId);
+        state = AsyncData(current.copyWith(downloadQueue: newQueue));
+      }
     }
   }
 
