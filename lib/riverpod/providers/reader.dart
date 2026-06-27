@@ -52,16 +52,16 @@ Future<ChapterModel> continuePoint(Ref ref, {required int seriesId}) async {
 Stream<ChapterModel> continuePointStream(
   Ref ref, {
   required int seriesId,
-}) async* {
+}) {
   final repo = ref.watch(readerRepositoryProvider);
-  yield* repo.watchContinuePoint(seriesId: seriesId);
+  return repo.watchContinuePoint(seriesId: seriesId);
 }
 
 /// Watch the progress of the continue point for the given [seriesId]
 @riverpod
-Stream<double> continuePointProgress(Ref ref, {required int seriesId}) async* {
+Stream<double> continuePointProgress(Ref ref, {required int seriesId}) {
   final repo = ref.watch(readerRepositoryProvider);
-  yield* repo.watchContinuePointProgress(seriesId: seriesId).distinct();
+  return repo.watchContinuePointProgress(seriesId: seriesId).distinct();
 }
 
 /// Watch continue point for the given volume [volumeId]
@@ -69,27 +69,27 @@ Stream<double> continuePointProgress(Ref ref, {required int seriesId}) async* {
 Stream<ChapterModel> volumeContinuePoint(
   Ref ref, {
   required int volumeId,
-}) async* {
+}) {
   final repo = ref.watch(readerRepositoryProvider);
-  yield* repo.watchVolumeContinuePoint(volumeId: volumeId);
+  return repo.watchVolumeContinuePoint(volumeId: volumeId);
 }
 
 @riverpod
 Stream<ChapterModel> readingListContinuePoint(
   Ref ref, {
   required int readingListId,
-}) async* {
+}) {
   final repo = ref.watch(readerRepositoryProvider);
-  yield* repo.watchReadingListContinuePoint(readingListId: readingListId);
+  return repo.watchReadingListContinuePoint(readingListId: readingListId);
 }
 
 @riverpod
 Stream<double> readingListContinuePointProgress(
   Ref ref, {
   required int readingListId,
-}) async* {
+}) {
   final repo = ref.watch(readerRepositoryProvider);
-  yield* repo.watchReadingListContinuePointProgress(
+  return repo.watchReadingListContinuePointProgress(
     readingListId: readingListId,
   );
 }
