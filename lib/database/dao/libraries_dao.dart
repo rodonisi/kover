@@ -25,7 +25,11 @@ class LibrariesDao extends DatabaseAccessor<AppDatabase>
         select(
             libraries,
           ).join([
-            leftOuterJoin(sidenav, sidenav.libraryId.equalsExp(libraries.id)),
+            leftOuterJoin(
+              sidenav,
+              sidenav.libraryId.equalsExp(libraries.id) &
+                  sidenav.streamType.equalsValue(.library),
+            ),
           ])
           ..orderBy([
             OrderingTerm.asc(sidenav.order),
