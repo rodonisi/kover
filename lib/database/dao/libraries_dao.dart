@@ -21,7 +21,20 @@ class LibrariesDao extends DatabaseAccessor<AppDatabase>
 
   /// Watch all libraries stored in the db
   Stream<List<Library>> watchLibraries() {
-    return managers.libraries.watch();
+    final q =
+        select(
+            libraries,
+          ).join([
+            leftOuterJoin(sidenav, sidenav.libraryId.equalsExp(libraries.id)),
+          ])
+          ..orderBy([
+            OrderingTerm.asc(sidenav.order),
+            OrderingTerm.asc(libraries.name),
+          ]);
+
+    return q.watch().map((rows) {
+      return rows.map((row) => row.readTable(libraries)).toList();
+    });
   }
 
   /// Upsert [entries] and remove all libraries not present in [entries]
