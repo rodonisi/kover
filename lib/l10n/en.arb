@@ -394,6 +394,10 @@
     "@syncingReadingLists": {
         "description": "Label for the syncing reading lists phase"
     },
+    "syncingSidenav": "Syncing sidenav order",
+    "@syncingSidenav": {
+        "description": "Label for the sidenav syncing phase"
+    },
     "refreshingMetadataForSeries": "Refreshing metadata for series {seriesId}",
     "@refreshingMetadataForSeries": {
         "description": "Label for the refreshing metadata phase with the series ID",

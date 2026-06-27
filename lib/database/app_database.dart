@@ -30,6 +30,7 @@ import 'package:kover/database/tables/volumes.dart';
 import 'package:kover/database/tables/want_to_read.dart';
 import 'package:kover/models/enums/format.dart';
 import 'package:kover/models/enums/library_type.dart';
+import 'package:kover/models/enums/sidenav_stream_type.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:path_provider/path_provider.dart';

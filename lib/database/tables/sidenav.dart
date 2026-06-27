@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:kover/models/enums/stream_type.dart';
+import 'package:kover/models/enums/sidenav_stream_type.dart';
 
 class Sidenav extends Table {
   IntColumn get id => integer()();

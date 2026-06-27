@@ -158,6 +158,7 @@ String _phaseLabel(AppLocalizations l, SyncPhase phase) {
     covers: () => l.syncingCovers,
     collections: () => l.syncingCollections,
     readingLists: () => l.syncingReadingLists,
+    sidenav: () => l.syncingSidenav,
     refreshMetadata: (seriesId) => l.refreshingMetadataForSeries(seriesId),
     refreshCovers: (seriesId) => l.refreshingCoversForSeries(seriesId),
     refreshServerSettings: () => l.refreshingServerSettings,

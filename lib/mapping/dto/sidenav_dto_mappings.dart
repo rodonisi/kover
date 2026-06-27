@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
-import 'package:kover/models/enums/stream_type.dart';
+import 'package:kover/models/enums/sidenav_stream_type.dart';
 
 extension SidenavStreamDtoMappings on SideNavStreamDto {
   SidenavCompanion toSidenavCompanion() {
