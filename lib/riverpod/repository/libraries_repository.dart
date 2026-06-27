@@ -44,7 +44,7 @@ class LibrariesRepository {
   /// Refresh all libraries
   Future<void> refreshLibraries() async {
     final libraries = await _client.getLibraries();
-    await _db.librariesDao.mergeLibraries(libraries);
+    await _db.librariesDao.upsertLibraries(libraries);
   }
 
   /// Refresh the sidenav ordering

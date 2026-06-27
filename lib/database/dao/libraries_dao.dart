@@ -38,7 +38,7 @@ class LibrariesDao extends DatabaseAccessor<AppDatabase>
   }
 
   /// Upsert [entries] and remove all libraries not present in [entries]
-  Future<void> mergeLibraries(Iterable<LibrariesCompanion> entries) async {
+  Future<void> upsertLibraries(Iterable<LibrariesCompanion> entries) async {
     final ids = entries.map((e) => e.id.value).toList();
     await batch((batch) {
       batch.deleteWhere(libraries, (t) => t.id.isNotIn(ids));
