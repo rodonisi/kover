@@ -46,4 +46,10 @@ class LibrariesRepository {
     final libraries = await _client.getLibraries();
     await _db.librariesDao.mergeLibraries(libraries);
   }
+
+  /// Refresh the sidenav ordering
+  Future<void> refreshSidenav() async {
+    final sidenav = await _client.getSidenav();
+    await _db.librariesDao.upsertSidenav(sidenav);
+  }
 }

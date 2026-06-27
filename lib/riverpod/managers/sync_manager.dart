@@ -35,6 +35,7 @@ sealed class SyncPhase with _$SyncPhase {
   const factory SyncPhase.covers() = Covers;
   const factory SyncPhase.collections() = Collections;
   const factory SyncPhase.readingLists() = ReadingLists;
+  const factory SyncPhase.sidenav() = Sidenav;
   const factory SyncPhase.refreshServerSettings() = RefreshServerSettings;
   const factory SyncPhase.refreshMetadata({required int seriesId}) =
       RefreshMetadata;
@@ -117,6 +118,8 @@ class SyncManager extends _$SyncManager {
         () async => await _engine.syncCollections(),
     readingLists: () =>
         () async => await _engine.syncReadingLists(),
+    sidenav: () =>
+        () async => await _engine.syncSidenav(),
     refreshServerSettings: () =>
         () async => await _engine.refreshServerSettings(),
     refreshMetadata: (seriesId) =>
@@ -154,6 +157,7 @@ class SyncManager extends _$SyncManager {
       const .refreshServerSettings(),
       const .collections(),
       const .readingLists(),
+      const .sidenav(),
       if (settings.downloadCovers) const .covers(),
     });
   }

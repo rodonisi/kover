@@ -83,6 +83,10 @@ class SyncEngine {
     ]);
   }
 
+  Future<void> syncSidenav() async {
+    await librariesRepo.refreshSidenav();
+  }
+
   Future<void> refreshMetadataAndDetails({required int seriesId}) async {
     await seriesRepo.refreshMetadataAndDetails(seriesId: seriesId);
   }
