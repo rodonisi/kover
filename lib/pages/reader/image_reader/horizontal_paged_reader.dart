@@ -48,7 +48,8 @@ class HorizontalPagedReader extends HookConsumerWidget {
             final pageController = usePageController(
               initialPage: navState.currentPage,
             );
-            final isZoomed = useState(false);
+            final currentPage = useState(navState.currentPage);
+            final zoomedPageIndexes = useState(<int>{});
             // Number of touch pointers down. With 2+ fingers we hand the
             // gesture to the InteractiveViewer (pinch-zoom) instead of letting
             // the PageView's drag recognizer steal it as a page swipe.
@@ -87,11 +88,13 @@ class HorizontalPagedReader extends HookConsumerWidget {
               reverse: commonSettings.readDirection == .rightToLeft,
               itemCount: reader.totalPages,
               pageSnapping: true,
-              physics: isZoomed.value || pointerCount.value >= 2
+              physics:
+                  zoomedPageIndexes.value.contains(currentPage.value) ||
+                      pointerCount.value >= 2
                   ? const NeverScrollableScrollPhysics()
                   : const BouncingScrollPhysics(),
               onPageChanged: (index) {
-                isZoomed.value = false; // new page starts unzoomed (ValueKey)
+                currentPage.value = index;
                 ref.read(navProvider.notifier).jumpToPage(index);
               },
               itemBuilder: (context, index) {
@@ -106,7 +109,15 @@ class HorizontalPagedReader extends HookConsumerWidget {
                     return ZoomableHorizontalPageImage(
                       key: ValueKey(index),
                       outerController: pageController,
-                      onZoomChanged: (zoomed) => isZoomed.value = zoomed,
+                      onZoomChanged: (zoomed) {
+                        final nextZoomedPageIndexes = {
+                          ...zoomedPageIndexes.value,
+                        };
+                        zoomed
+                            ? nextZoomedPageIndexes.add(index)
+                            : nextZoomedPageIndexes.remove(index);
+                        zoomedPageIndexes.value = nextZoomedPageIndexes;
+                      },
                       child: Image.memory(
                         data.data,
                         fit: switch (settings.scaleType) {

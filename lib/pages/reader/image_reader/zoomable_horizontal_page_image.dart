@@ -40,9 +40,14 @@ class ZoomableHorizontalPageImage extends HookWidget {
     final lastTranslationX = useRef<double?>(null);
 
     useEffect(() {
-      var wasZoomed = false;
+      bool isZoomed() =>
+          controller.value.getMaxScaleOnAxis() > _minScale + 1e-3;
+
+      var wasZoomed = isZoomed();
+      onZoomChanged(wasZoomed);
+
       void onChange() {
-        final zoomed = controller.value.getMaxScaleOnAxis() > _minScale + 1e-3;
+        final zoomed = isZoomed();
         if (zoomed != wasZoomed) {
           wasZoomed = zoomed;
           onZoomChanged(zoomed);

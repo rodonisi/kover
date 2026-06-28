@@ -35,6 +35,26 @@ void main() {
     expect(zoomed, isTrue);
   });
 
+  testWidgets('initially zoomed controller reports the zoom state', (
+    tester,
+  ) async {
+    final controller = TransformationController()..value = _zoomedAt(-150);
+    addTearDown(controller.dispose);
+    final pageController = PageController();
+    addTearDown(pageController.dispose);
+    bool? zoomed;
+
+    await tester.pumpWidget(
+      _host(
+        controller: controller,
+        pageController: pageController,
+        onZoomChanged: (value) => zoomed = value,
+      ),
+    );
+    await tester.pump();
+
+    expect(zoomed, isTrue);
+  });
   testWidgets('single-finger drag at base scale neither zooms nor pans', (
     tester,
   ) async {
