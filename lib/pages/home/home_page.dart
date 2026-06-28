@@ -9,11 +9,11 @@ import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/login_guard.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return const Scaffold(
       extendBody: true,
       body: LoginGuard(child: HomePageContent()),
@@ -26,23 +26,20 @@ class HomePageContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      extendBody: true,
-      body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
-          onRefresh: () async {
-            await ref.read(syncManagerProvider.notifier).fullSync();
-          },
-          child: const CustomScrollView(
-            slivers: [
-              ActionsAppBar(),
-              OnDeck(),
-              RecentlyUpdated(),
-              RecentlyAdded(),
-              SliverBottomPadding(),
-            ],
-          ),
+    return SafeArea(
+      bottom: false,
+      child: RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(syncManagerProvider.notifier).fullSync();
+        },
+        child: const CustomScrollView(
+          slivers: [
+            ActionsAppBar(),
+            OnDeck(),
+            RecentlyUpdated(),
+            RecentlyAdded(),
+            SliverBottomPadding(),
+          ],
         ),
       ),
     );
