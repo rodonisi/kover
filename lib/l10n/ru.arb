@@ -1,1 +1,254 @@
-{}
+{
+    "languageName": "Русский",
+    "@languageName": {
+        "description": "The localized name of this locale"
+    },
+    "language": "Язык",
+    "@language": {
+        "description": "Title for the language settings entry"
+    },
+    "settings": "Настройки",
+    "@settings": {
+        "description": "Label for the settings menu entry"
+    },
+    "menu": "Меню",
+    "@menu": {
+        "description": "Label for the menu button"
+    },
+    "light": "Светлая",
+    "@light": {
+        "description": "Label for the light theme mode option"
+    },
+    "dark": "Тёмная",
+    "@dark": {
+        "description": "Label for the dark theme mode option"
+    },
+    "github": "GitHub",
+    "@github": {
+        "description": "Label for the GitHub link"
+    },
+    "baseUrl": "Базовый URL",
+    "@baseUrl": {
+        "description": "Label for the base URL input field"
+    },
+    "apiKey": "API ключ",
+    "@apiKey": {
+        "description": "Label for the API key input field"
+    },
+    "save": "Сохранить",
+    "@save": {
+        "description": "Label for the save credentials button"
+    },
+    "libraries": "Библиотеки",
+    "@libraries": {
+        "description": "Label for the libraries menu entry"
+    },
+    "collections": "Коллекции",
+    "@collections": {
+        "description": "Label for the collections menu entry"
+    },
+    "madeWithLove": "Сделано с ❤️",
+    "@madeWithLove": {
+        "description": "Label for the made with love message"
+    },
+    "version": "Версия: {version} ({buildNumber})",
+    "@version": {
+        "description": "Label for the app version, with placeholders for version and build number",
+        "placeholders": {
+            "version": {
+                "description": "The version string of the application",
+                "type": "String",
+                "example": "1.0.0"
+            },
+            "buildNumber": {
+                "description": "The build number of the application",
+                "type": "String",
+                "example": "123"
+            }
+        }
+    },
+    "cancel": "Отмена",
+    "@cancel": {
+        "description": "Label for the cancel button in dialogs"
+    },
+    "sendDiagnosticsDescription": "Помогите улучшить приложение, отправляя анонимную статистику об ошибках и производительности. Эти данные не содержат личной информации и используются исключительно для улучшения приложения.",
+    "@sendDiagnosticsDescription": {
+        "description": "Description for the send diagnostics setting"
+    },
+    "more": "Больше",
+    "@more": {
+        "description": "Label for the more section"
+    },
+    "downloadQueue": "Очередь загрузок",
+    "@downloadQueue": {
+        "description": "Label for the download queue menu entry"
+    },
+    "general": "Общие",
+    "@general": {
+        "description": "Label for the general settings section"
+    },
+    "themeMode": "Режим темы",
+    "@themeMode": {
+        "description": "Label for the theme mode setting"
+    },
+    "system": "Системная",
+    "@system": {
+        "description": "Label for the system theme mode option"
+    },
+    "onDeck": "На очереди",
+    "@onDeck": {
+        "description": "Label for the home page on deck section"
+    },
+    "recentlyUpdated": "Недавно обновлённые",
+    "@recentlyUpdated": {
+        "description": "Label for the home page recently updated section"
+    },
+    "recentlyAdded": "Недавно добавленные",
+    "@recentlyAdded": {
+        "description": "Label for the home page recently added section"
+    },
+    "home": "Главная",
+    "@home": {
+        "description": "Label for the home page"
+    },
+    "wantToRead": "Хочу прочитать",
+    "@wantToRead": {
+        "description": "Label for the want to read shelf"
+    },
+    "outlinedTheme": "Контурная тема",
+    "@outlinedTheme": {
+        "description": "Label for the outlined theme setting"
+    },
+    "readingLists": "Списки для чтения",
+    "@readingLists": {
+        "description": "Label for the reading lists menu entry"
+    },
+    "sendDiagnostics": "Отправлять анонимные отчёты о сбоях и диагностику",
+    "@sendDiagnostics": {
+        "description": "Label for the send diagnostics setting"
+    },
+    "clearAll": "Очистить всё",
+    "@clearAll": {
+        "description": "Label for the clear all button"
+    },
+    "showMore": "Показать ещё",
+    "@showMore": {
+        "description": "Label for the show more button"
+    },
+    "showLess": "Свернуть",
+    "@showLess": {
+        "description": "Label for the show less button"
+    },
+    "cancelAll": "Отменить всё",
+    "@cancelAll": {
+        "description": "Label for the cancel all downloads button"
+    },
+    "allSeries": "Все серии",
+    "@allSeries": {
+        "description": "Label for the all series menu entry"
+    },
+    "dataManagement": "Управление данными",
+    "@dataManagement": {
+        "description": "Label for the data management section"
+    },
+    "downloadAllCovers": "Загрузить все обложки",
+    "@downloadAllCovers": {
+        "description": "Label for the download all covers option"
+    },
+    "downloadAllCoversDescription": "Если отключено, обложки будут загружаться только вместе с главами. Необложенные обложки по-прежнему будут запрашиваться с сервера по мере необходимости при наличии подключения.",
+    "@downloadAllCoversDescription": {
+        "description": "Description for the download all covers option"
+    },
+    "maxConcurrentDownloads": "Максимум одновременных загрузок",
+    "@maxConcurrentDownloads": {
+        "description": "Label for the max concurrent downloads setting"
+    },
+    "reclaimSpace": "Освободить место",
+    "@reclaimSpace": {
+        "description": "Label for the reclaim space button"
+    },
+    "clearDownloads": "Очистить загрузки",
+    "@clearDownloads": {
+        "description": "Label for the clear downloads button"
+    },
+    "clearCovers": "Очистить обложки",
+    "@clearCovers": {
+        "description": "Label for the clear covers button"
+    },
+    "clearDatabase": "Очистить базу данных",
+    "@clearDatabase": {
+        "description": "Label for the clear database button"
+    },
+    "clearDatabaseDialogTitle": "Вы уверены?",
+    "@clearDatabaseDialogTitle": {
+        "description": "Title for the clear database confirmation dialog"
+    },
+    "clearDatabaseDialogContent": "Это полностью очистит локальную базу данных, включая несинхронизированный прогресс и загруженные данные. Это действие нельзя отменить.",
+    "@clearDatabaseDialogContent": {
+        "description": "Content for the clear database confirmation dialog"
+    },
+    "databaseBusy": "База данных занята…",
+    "@databaseBusy": {
+        "description": "Message shown when the database is busy with an operation"
+    },
+    "databaseSize": "Размер базы данных",
+    "@databaseSize": {
+        "description": "Label for the database size information"
+    },
+    "credentials": "Учётные данные",
+    "@credentials": {
+        "description": "Label for the credentials section in settings"
+    },
+    "sortBy": "Сортировать по",
+    "@sortBy": {
+        "description": "Label for the sort by option in list"
+    },
+    "name": "Названию",
+    "@name": {
+        "description": "Label for sorting by name option"
+    },
+    "dateAdded": "Дате добавления",
+    "@dateAdded": {
+        "description": "Label for sorting by date added option"
+    },
+    "lastModified": "Дате изменения",
+    "@lastModified": {
+        "description": "Label for sorting by last modified option"
+    },
+    "sortDirection": "Направление сортировки",
+    "@sortDirection": {
+        "description": "Label for the sort direction option in list"
+    },
+    "ascending": "По возрастанию",
+    "@ascending": {
+        "description": "Label for ascending sort direction option"
+    },
+    "descending": "По убыванию",
+    "@descending": {
+        "description": "Label for descending sort direction option"
+    },
+    "specials": "Спецвыпуски",
+    "@specials": {
+        "description": "Label for the specials section in the series details page"
+    },
+    "storyline": "Сюжетная линия",
+    "@storyline": {
+        "description": "Label for the storyline section in the series details page"
+    },
+    "volumes": "Тома",
+    "@volumes": {
+        "description": "Label for the volumes section in the series details page"
+    },
+    "back": "Назад",
+    "@back": {
+        "description": "Label for back buttons"
+    },
+    "download": "Загрузить",
+    "@download": {
+        "description": "Label for the download context menu item"
+    },
+    "removeDownload": "Удалить загрузку",
+    "@removeDownload": {
+        "description": "Label for the remove download context menu item"
+    }
+}
