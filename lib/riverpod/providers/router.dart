@@ -71,14 +71,14 @@ GoRouter router(Ref ref) {
         ),
       ],
     ),
-    TypedStatefulShellBranch<WantToReadBranch>(
-      routes: [
-        TypedGoRoute<WantToReadRoute>(path: '/want-to-read'),
-      ],
-    ),
     TypedStatefulShellBranch<AllSeriesBranch>(
       routes: [
         TypedGoRoute<AllSeriesRoute>(path: '/all-series'),
+      ],
+    ),
+    TypedStatefulShellBranch<WantToReadBranch>(
+      routes: [
+        TypedGoRoute<WantToReadRoute>(path: '/want-to-read'),
       ],
     ),
     TypedStatefulShellBranch<CollectionsBranch>(

@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -22,7 +23,7 @@ enum NavbarDestinations {
 @freezed
 sealed class NavbarState with _$NavbarState {
   const factory NavbarState({
-    @Default(<NavbarDestinations>[.home, .collections])
+    @Default(<NavbarDestinations>[.home, .wantToRead])
     List<NavbarDestinations> destinations,
   }) = _NavbarState;
 
@@ -42,7 +43,7 @@ class Navbar extends _$Navbar {
     return state.value ?? const NavbarState();
   }
 
-  Future<void> setDestinationIndex({
+  Future<void> setDestinations({
     required List<NavbarDestinations> destinations,
   }) async {
     final current = await future;
@@ -51,9 +52,14 @@ class Navbar extends _$Navbar {
         destinations: destinations,
       ),
     );
+    log.info(
+      'set navbar destinations',
+      attributes: {'destinations': .string(destinations.toString())},
+    );
   }
 
   Future<void> resetDestinations() async {
     state = const AsyncData(NavbarState());
+    log.info('reset navbar destinations');
   }
 }

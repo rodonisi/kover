@@ -694,5 +694,13 @@
     "clearAll": "Clear All",
     "@clearAll": {
       "description": "Label for the clear all button"
+    },
+    "reorderNavigationBar": "Reorder Navigation Bar",
+    "@reorderNavigationBar": {
+        "description": "Label for the reorder navigation bar settings entry"
+    },
+    "availableDestinations": "Available Destinations",
+    "@availableDestinations": {
+        "description": "Label for the available destinations section"
     }
 }
