@@ -250,5 +250,29 @@
     "removeDownload": "Удалить загрузку",
     "@removeDownload": {
         "description": "Label for the remove download context menu item"
+    },
+    "chapters": "Главы",
+    "@chapters": {
+        "description": "Label for the chapters section in the series details page"
+    },
+    "genres": "Жанры",
+    "@genres": {
+        "description": "Label for the genres chips in the series details page"
+    },
+    "writers": "Авторы",
+    "@writers": {
+        "description": "Label for the writers metadata in the series details page"
+    },
+    "filter": "Фильтр",
+    "@filter": {
+        "description": "Label for the filter button in lists"
+    },
+    "hideRead": "Скрыть прочитанные",
+    "@hideRead": {
+        "description": "Label for the hide read filter option in lists"
+    },
+    "goToChapter": "Перейти к главе",
+    "@goToChapter": {
+        "description": "Label for the go to chapter button in the reading list chapter entry context menu"
     }
 }
