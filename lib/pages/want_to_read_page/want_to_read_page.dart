@@ -10,8 +10,20 @@ import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/login_guard.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 
-class WantToReadPage extends ConsumerWidget {
+class WantToReadPage extends StatelessWidget {
   const WantToReadPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      extendBody: true,
+      body: LoginGuard(child: WantToReadPageContent()),
+    );
+  }
+}
+
+class WantToReadPageContent extends ConsumerWidget {
+  const WantToReadPageContent({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,31 +32,21 @@ class WantToReadPage extends ConsumerWidget {
       ref.read(syncManagerProvider.notifier).syncLibraries();
     });
 
-    return Scaffold(
-      extendBody: true,
-      body: LoginGuard(
-        child: SafeArea(
-          child: RefreshIndicator(
-            onRefresh: () async => await ref.refresh(wantToReadListProvider),
-            child: CustomScrollView(
-              slivers: [
-                const ActionsAppBar(),
-                SliverPadding(
-                  padding: LayoutConstants.smallEdgeInsets,
-                  sliver: SliverToBoxAdapter(
-                    child: Text(
-                      l.wantToRead,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                  ),
-                ),
-                const WantToReadGrid(),
-                const SliverBottomPadding(),
-              ],
+    return CustomScrollView(
+      slivers: [
+        const ActionsAppBar(),
+        SliverPadding(
+          padding: LayoutConstants.smallEdgeInsets,
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              l.wantToRead,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ),
         ),
-      ),
+        const WantToReadGrid(),
+        const SliverBottomPadding(),
+      ],
     );
   }
 }
