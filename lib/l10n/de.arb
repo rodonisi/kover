@@ -689,5 +689,17 @@
     "clearAll": "Alle löschen",
     "@clearAll": {
         "description": "Label for the clear all button"
+    },
+    "syncingSidenav": "Synchronisiere Reihenfolge der Seitennavigation",
+    "@syncingSidenav": {
+        "description": "Label for the sidenav syncing phase"
+    },
+    "reorderNavigationBar": "Navigationsleiste anordnen",
+    "@reorderNavigationBar": {
+        "description": "Label for the reorder navigation bar settings entry"
+    },
+    "availableDestinations": "Verfügbare Ziele",
+    "@availableDestinations": {
+        "description": "Label for the available destinations section"
     }
 }
