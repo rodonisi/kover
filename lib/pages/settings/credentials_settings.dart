@@ -88,7 +88,7 @@ class _CredentialsForm extends HookConsumerWidget {
         ),
         BottomSheetOption(
           title: l.manageHeaders,
-          leadingIcon: const Icon(KoverIcons.header),
+          leadingIcon: KoverIcons.header,
           bottomSheetBuilder: ((context) => const CustomHeadersSheet()),
         ),
         Row(

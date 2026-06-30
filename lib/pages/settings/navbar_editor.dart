@@ -18,7 +18,7 @@ class NavbarEditor extends StatelessWidget {
 
     return BottomSheetOption(
       title: l.reorderNavigationBar,
-      leadingIcon: const Icon(KoverIcons.navbar),
+      leadingIcon: KoverIcons.navbar,
       bottomSheetBuilder: (context) => const _NavbarEditorSheet(),
     );
   }

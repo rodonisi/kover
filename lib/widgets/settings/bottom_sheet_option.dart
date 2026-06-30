@@ -4,7 +4,7 @@ import 'package:kover/utils/layout_constants.dart';
 
 class BottomSheetOption extends StatelessWidget {
   final String title;
-  final Widget leadingIcon;
+  final IconData? leadingIcon;
   final Widget Function(BuildContext) bottomSheetBuilder;
   const BottomSheetOption({
     super.key,
@@ -16,8 +16,16 @@ class BottomSheetOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(title),
-      leading: leadingIcon,
+      title: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: LayoutConstants.smallerPadding,
+        ),
+        child: Text(title),
+      ),
+      titleTextStyle: Theme.of(context).textTheme.titleSmall,
+      horizontalTitleGap: LayoutConstants.smallPadding,
+      leading: leadingIcon != null ? Icon(leadingIcon) : null,
+      iconColor: Theme.of(context).colorScheme.onSurface,
       trailing: const Icon(KoverIcons.chevronRight),
       contentPadding: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
