@@ -274,5 +274,73 @@
     "goToChapter": "Перейти к главе",
     "@goToChapter": {
         "description": "Label for the go to chapter button in the reading list chapter entry context menu"
+    },
+    "goToSeries": "Перейти к серии",
+    "@goToSeries": {
+        "description": "Label for the go to series button in the reading list chapter entry context menu"
+    },
+    "markAsRead": "Отметить прочитанным",
+    "@markAsRead": {
+        "description": "Label for the mark as read button in context menus"
+    },
+    "markAsUnread": "Отметить непрочитанным",
+    "@markAsUnread": {
+        "description": "Label for the mark as unread button in context menus"
+    },
+    "noCredentialsDescription": "Учётные данные не настроены. Пожалуйста, укажите URL сервера и API-ключ в настройках.",
+    "@noCredentialsDescription": {
+        "description": "Description text when no credentials are configured"
+    },
+    "openSettings": "Открыть настройки",
+    "@openSettings": {
+        "description": "Label for the button to open settings"
+    },
+    "connectionError": "Ошибка подключения",
+    "@connectionError": {
+        "description": "Heading text when a connection error occurs"
+    },
+    "connectionErrorDescription": "Не удалось получить данные пользователя. Проверьте учётные данные или повторите попытку.",
+    "@connectionErrorDescription": {
+        "description": "Description text when a connection error occurs"
+    },
+    "retry": "Повторить",
+    "@retry": {
+        "description": "Label for the retry button"
+    },
+    "sendDiagnosticsDialogTitle": "Отправлять анонимные отчёты о сбоях и диагностику?",
+    "@sendDiagnosticsDialogTitle": {
+        "description": "Title for the monitoring opt-out dialog"
+    },
+    "sendDiagnosticsChangeable": "Можно поменять в настройках в любое время.",
+    "@sendDiagnosticsChangeable": {
+        "description": "Message shown in the monitoring opt-out dialog indicating the setting can be changed later"
+    },
+    "noThanks": "Нет, спасибо",
+    "@noThanks": {
+        "description": "Label for the decline button in the monitoring opt-out dialog"
+    },
+    "imIn": "Согласен!",
+    "@imIn": {
+        "description": "Label for the accept button in the monitoring opt-out dialog"
+    },
+    "addToWantToRead": "Добавить в «Хочу прочитать»",
+    "@addToWantToRead": {
+        "description": "Label for the add to want to read context menu item"
+    },
+    "removeFromWantToRead": "Убрать из «Хочу прочитать»",
+    "@removeFromWantToRead": {
+        "description": "Label for the remove from want to read context menu item"
+    },
+    "refreshMetadata": "Обновить метаданные",
+    "@refreshMetadata": {
+        "description": "Label for the refresh metadata context menu item"
+    },
+    "notSignedIn": "Вход не выполнен",
+    "@notSignedIn": {
+        "description": "Heading text when user is not signed in"
+    },
+    "tableOfContents": "Содержание",
+    "@tableOfContents": {
+        "description": "Label for the table of contents drawer in the reader"
     }
 }
