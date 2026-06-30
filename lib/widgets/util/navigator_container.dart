@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
-import 'package:kover/riverpod/providers/settings/navbar.dart';
+import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/riverpod/providers/settings/oneoffs.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
-import 'package:kover/utils/constants/kover_icons.dart';
+import 'package:kover/utils/extensions/navbar_destination.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/util/async_value.dart';
@@ -22,9 +22,9 @@ class NavigatorContainer extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final oneOffs = ref.watch(oneOffsProvider);
     final destinations = ref.watch(
-      navbarProvider.select(
+      generalSettingsProvider.select(
         (value) => value.whenData(
-          (value) => value.destinations,
+          (value) => value.navbarDestinations,
         ),
       ),
     );
@@ -91,37 +91,11 @@ class NavigatorContainer extends ConsumerWidget {
                     },
                     destinations: [
                       ...destinations.map((destination) {
-                        return switch (destination) {
-                          .home => NavigationDestination(
-                            icon: const Icon(KoverIcons.home),
-                            label: l.home,
-                          ),
-                          .wantToRead => NavigationDestination(
-                            icon: const Icon(KoverIcons.wantToRead),
-                            label: l.wantToRead,
-                          ),
-                          .allSeries => NavigationDestination(
-                            icon: const Icon(KoverIcons.series),
-                            label: l.allSeries,
-                          ),
-                          .collections => NavigationDestination(
-                            icon: const Icon(KoverIcons.collection),
-                            label: l.collections,
-                          ),
-                          .readingLists => NavigationDestination(
-                            icon: const Icon(KoverIcons.readingList),
-                            label: l.readingLists,
-                          ),
-                        };
+                        return NavigationDestination(
+                          icon: Icon(destination.icon),
+                          label: destination.getLabel(l),
+                        );
                       }),
-                      // NavigationDestination(
-                      //   icon: const Icon(LucideIcons.house),
-                      //   label: l.home,
-                      // ),
-                      // NavigationDestination(
-                      //   icon: const Icon(LucideIcons.star),
-                      //   label: l.wantToRead,
-                      // ),
                       NavigationDestination(
                         icon: const Icon(LucideIcons.library),
                         label: l.menu,

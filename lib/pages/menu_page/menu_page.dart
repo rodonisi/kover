@@ -9,7 +9,7 @@ import 'package:kover/riverpod/managers/download_manager.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/router.dart';
-import 'package:kover/riverpod/providers/settings/navbar.dart';
+import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/utils/extensions/navbar_destination.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/actions_app_bar/actions_app_bar.dart';
@@ -38,10 +38,13 @@ class MenuPage extends ConsumerWidget {
     );
 
     final hiddenDestinations = ref.watch(
-      navbarProvider.select(
+      generalSettingsProvider.select(
         (state) => state.whenData(
-          (value) => NavbarDestinations.values
-              .where((destination) => !value.destinations.contains(destination))
+          (state) => NavbarDestinations.values
+              .where(
+                (destination) =>
+                    !state.navbarDestinations.contains(destination),
+              )
               .toSet(),
         ),
       ),

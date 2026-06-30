@@ -19,9 +19,7 @@ class BottomSheetOption extends StatelessWidget {
       title: Text(title),
       leading: leadingIcon,
       trailing: const Icon(KoverIcons.chevronRight),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: LayoutConstants.smallPadding,
-      ),
+      contentPadding: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(
           LayoutConstants.smallerBorderRadius,

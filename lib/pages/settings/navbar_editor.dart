@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
-import 'package:kover/riverpod/providers/settings/navbar.dart';
+import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/extensions/navbar_destination.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -30,17 +30,21 @@ class _NavbarEditorSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final navbar = ref.watch(navbarProvider);
+    final navbar = ref.watch(
+      generalSettingsProvider.select(
+        (state) => state.whenData((state) => state.navbarDestinations),
+      ),
+    );
 
     return Async(
       asyncValue: navbar,
-      data: (navbarState) {
+      data: (destinations) {
         final hiddenEtries = NavbarDestinations.values
             .where(
-              (destination) => !navbarState.destinations.contains(destination),
+              (destination) => !destinations.contains(destination),
             )
             .toList();
-        final canReorder = navbarState.destinations.length > 1;
+        final canReorder = destinations.length > 1;
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: .start,
@@ -63,9 +67,9 @@ class _NavbarEditorSheet extends ConsumerWidget {
                   shrinkWrap: true,
                   buildDefaultDragHandles: false,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: navbarState.destinations.length,
+                  itemCount: destinations.length,
                   itemBuilder: (context, index) {
-                    final destination = navbarState.destinations[index];
+                    final destination = destinations[index];
 
                     return ReorderableDragStartListener(
                       key: ValueKey(destination),
@@ -83,18 +87,18 @@ class _NavbarEditorSheet extends ConsumerWidget {
                                     : null,
                               ),
                               onPressed: canReorder
-                                  ? () {
+                                  ? () async {
                                       final updatedList =
                                           List<NavbarDestinations>.from(
-                                            navbarState.destinations,
+                                            destinations,
                                           );
                                       updatedList.removeAt(index);
 
-                                      ref
-                                          .read(navbarProvider.notifier)
-                                          .setDestinations(
-                                            destinations: updatedList,
-                                          );
+                                      await ref
+                                          .read(
+                                            generalSettingsProvider.notifier,
+                                          )
+                                          .setNavbarDestinations(updatedList);
                                     }
                                   : null,
                             ),
@@ -104,16 +108,16 @@ class _NavbarEditorSheet extends ConsumerWidget {
                       ),
                     );
                   },
-                  onReorderItem: (oldIndex, newIndex) {
+                  onReorderItem: (oldIndex, newIndex) async {
                     final updatedList = List<NavbarDestinations>.from(
-                      navbarState.destinations,
+                      destinations,
                     );
                     final item = updatedList.removeAt(oldIndex);
                     updatedList.insert(newIndex, item);
 
-                    ref
-                        .read(navbarProvider.notifier)
-                        .setDestinations(destinations: updatedList);
+                    await ref
+                        .read(generalSettingsProvider.notifier)
+                        .setNavbarDestinations(updatedList);
                   },
                 ),
               ),
@@ -139,17 +143,15 @@ class _NavbarEditorSheet extends ConsumerWidget {
                           destination: destination,
                           trailing: IconButton(
                             icon: const Icon(Icons.add_rounded),
-                            onPressed: () {
+                            onPressed: () async {
                               final updatedShown = [
-                                ...navbarState.destinations,
+                                ...destinations,
                                 destination,
                               ];
 
-                              ref
-                                  .read(navbarProvider.notifier)
-                                  .setDestinations(
-                                    destinations: updatedShown,
-                                  );
+                              await ref
+                                  .read(generalSettingsProvider.notifier)
+                                  .setNavbarDestinations(updatedShown);
                             },
                           ),
                         );
@@ -168,8 +170,8 @@ class _NavbarEditorSheet extends ConsumerWidget {
                     FilledButton.icon(
                       onPressed: () async {
                         await ref
-                            .read(navbarProvider.notifier)
-                            .resetDestinations();
+                            .read(generalSettingsProvider.notifier)
+                            .resetNavbarDestinations();
                       },
                       icon: const Icon(KoverIcons.reset),
                       label: Text(l.reset),
