@@ -11,6 +11,7 @@ import 'package:kover/riverpod/repository/download_repository.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
+import 'package:kover/utils/cancellation_token.dart';
 import 'package:kover/utils/lifecycle.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
@@ -37,8 +38,8 @@ class DownloadManager extends _$DownloadManager {
 
   @override
   Future<DownloadManagerState> build() async {
-    listenSelf((previous, next) async {
-      await _processQueue();
+    listenSelf((previous, next) {
+      _processQueue();
     });
     _listenConnectivity();
     _listenAppLifecycle();
@@ -112,6 +113,10 @@ class DownloadManager extends _$DownloadManager {
 
     final newQueue = Set<int>.from(current.downloadQueue)..remove(chapterId);
     state = AsyncData(current.copyWith(downloadQueue: newQueue));
+    log.info(
+      'canceled download for chapter',
+      attributes: {'chapter_id': .int(chapterId)},
+    );
   }
 
   Future<void> cancelAll() async {
@@ -120,6 +125,10 @@ class DownloadManager extends _$DownloadManager {
     await _clearActiveTasks();
 
     state = AsyncData(current.copyWith(downloadQueue: {}));
+    log.info(
+      'canceled all downloads',
+      attributes: {'count': .int(current.downloadQueue.length)},
+    );
   }
 
   Future<void> deleteChapter(int chapterId) async {
@@ -152,8 +161,6 @@ class DownloadManager extends _$DownloadManager {
       return;
     }
 
-    final current = await future;
-
     final concurrentDownloads = await ref.read(
       downloadSettingsProvider.selectAsync(
         (state) => state.concurrentDownloads,
@@ -161,6 +168,8 @@ class DownloadManager extends _$DownloadManager {
     );
 
     final activeCount = _activeTasks.length;
+
+    final current = await future;
 
     final toStart = current.downloadQueue
         .where((i) => !_activeTasks.containsKey(i))
@@ -192,13 +201,20 @@ class DownloadManager extends _$DownloadManager {
 
   Future<void> _startDownload(int chapterId) async {
     final repo = ref.read(downloadRepositoryProvider);
+    final cancellationToken = CancellationToken();
 
     final task = CancelableOperation.fromFuture(
       repo
-          .downloadChapter(chapterId: chapterId)
+          .downloadChapter(
+            chapterId: chapterId,
+            cancellationToken: cancellationToken,
+          )
           .timeout(
-            const Duration(minutes: 10),
+            const Duration(minutes: 5),
           ),
+      onCancel: () {
+        cancellationToken.cancel();
+      },
     );
 
     _activeTasks[chapterId] = task;

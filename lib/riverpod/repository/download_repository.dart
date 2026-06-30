@@ -10,6 +10,7 @@ import 'package:kover/sync/book_sync_operations.dart';
 import 'package:kover/sync/chapter_sync_operations.dart';
 import 'package:kover/sync/series_sync_operations.dart';
 import 'package:kover/sync/volume_sync_operations.dart';
+import 'package:kover/utils/cancellation_token.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -69,7 +70,10 @@ class DownloadRepository {
   /// - Progress is observable via [watchDownloadedPageCount].
   /// - Any page that is already stored in the DB is skipped so that partial
   ///   downloads can be resumed.
-  Future<void> downloadChapter({required int chapterId}) async {
+  Future<void> downloadChapter({
+    required int chapterId,
+    CancellationToken? cancellationToken,
+  }) async {
     final chapter = await _db.chaptersDao.chapter(chapterId).getSingle();
     final format = chapter.format;
     final totalPages = switch (format) {
@@ -86,6 +90,7 @@ class DownloadRepository {
     );
 
     for (var page = resumePoint; page < totalPages; page++) {
+      cancellationToken?.throwIfCancelled();
       final blob = switch (format) {
         .epub => pageContentConverter.toSql(
           await _bookClient.getPageContent(chapterId: chapterId, page: page),
