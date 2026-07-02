@@ -2,10 +2,16 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'secure_storage.freezed.dart';
 part 'secure_storage.g.dart';
+
+const secureStorageIOSOptions = IOSOptions(
+  accessibility: KeychainAccessibility.first_unlock_this_device,
+  synchronizable: true,
+);
 
 @freezed
 sealed class SecureStorageEntry with _$SecureStorageEntry {
@@ -26,7 +32,9 @@ Storage<String, String> secureStorage(Ref ref) {
 }
 
 final class SecureStorageRepository extends Storage<String, String> {
-  final storage = const FlutterSecureStorage();
+  final storage = const FlutterSecureStorage(
+    iOptions: secureStorageIOSOptions,
+  );
 
   SecureStorageRepository();
 
@@ -37,14 +45,24 @@ final class SecureStorageRepository extends Storage<String, String> {
 
   @override
   Future<void> deleteOutOfDate() async {
-    final entries = await storage.readAll();
-    final now = DateTime.timestamp();
-    for (final entry in entries.entries) {
-      final storageEntry = SecureStorageEntry.fromJson(jsonDecode(entry.value));
-      if (storageEntry.expireAt != null &&
-          storageEntry.expireAt!.isBefore(now)) {
-        await storage.delete(key: entry.key);
+    try {
+      final entries = await storage.readAll();
+      final now = DateTime.timestamp();
+      for (final entry in entries.entries) {
+        final storageEntry = SecureStorageEntry.fromJson(
+          jsonDecode(entry.value),
+        );
+        if (storageEntry.expireAt != null &&
+            storageEntry.expireAt!.isBefore(now)) {
+          await storage.delete(key: entry.key);
+        }
       }
+    } catch (e, stacktrace) {
+      log.error(
+        'Failed to delete out-of-date entries',
+        error: e,
+        stacktrace: stacktrace,
+      );
     }
   }
 
