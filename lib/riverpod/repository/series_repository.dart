@@ -210,10 +210,10 @@ class SeriesRepository {
   /// Refresh all series and align the local library to the remote.
   /// Note: this deletes all series not present on the server anymore.
   Future<void> refreshAllSeries() async {
+    final rows = await _db.seriesDao.allSeries().get();
     final series = await _client.getAllSeries();
     await _db.seriesDao.mergeSeries(series);
     final seriesById = {for (final s in series) s.id.value: s};
-    final rows = await _db.seriesDao.allSeries().get();
 
     final detailsToFetch = rows
         .where(
@@ -223,14 +223,26 @@ class SeriesRepository {
               return false;
             }
 
-            return r.lastSynced == null ||
-                (companion.lastChapterAdded.value != null &&
+            final neverSynced = r.lastSynced == null;
+            final hasNewChapter =
+                companion.lastChapterAdded.value != null &&
+                (r.lastSynced == null ||
                     r.lastSynced!.isBefore(companion.lastChapterAdded.value!));
+            final hasNewProgress =
+                companion.remoteLastRead.value != null &&
+                (r.lastSynced == null ||
+                    r.lastSynced!.isBefore(companion.remoteLastRead.value!));
+
+            return neverSynced || hasNewChapter || hasNewProgress;
           },
         )
         .map((r) => r.id);
 
-    await refreshSeriesDetails(detailsToFetch);
+    final newSeriesIds = seriesById.keys.toSet().difference(
+      rows.map((r) => r.id).toSet(),
+    );
+
+    await refreshSeriesDetails([...detailsToFetch, ...newSeriesIds]);
   }
 
   /// Fetch missing metadata for all series
