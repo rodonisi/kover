@@ -159,14 +159,20 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
 
   /// Get all chapter ids with outdated progress
   Future<List<int>> getOutdatedChapterIds() async {
-    return managers.readingProgress
-        .filter(
-          (f) => f.lastModified.column.isSmallerThan(
-            f.chapterId.remoteLastRead.column,
-          ),
-        )
-        .map((e) => e.chapterId)
-        .get();
+    final q = selectOnly(chapters, distinct: true)
+      ..addColumns([chapters.id])
+      ..join([
+        leftOuterJoin(
+          readingProgress,
+          readingProgress.chapterId.equalsExp(chapters.id),
+        ),
+      ])
+      ..where(
+        readingProgress.chapterId.isNull() |
+            readingProgress.lastModified.isSmallerThan(chapters.remoteLastRead),
+      );
+
+    return await q.map((row) => row.read(chapters.id)!).get();
   }
 
   /// Get last read date per series for all series that have progress entries
