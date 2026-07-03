@@ -37,5 +37,5 @@ Stream<double> volumeProgress(Ref ref, {required int volumeId}) {
 @riverpod
 Stream<ImageModel?> volumeCover(Ref ref, {required int volumeId}) {
   final repo = ref.watch(volumesRepositoryProvider);
-  return repo.watchVolumeCover(volumeId);
+  return repo.watchVolumeCover(volumeId).distinct();
 }
