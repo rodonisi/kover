@@ -20,5 +20,5 @@ Stream<CollectionModel> collection(Ref ref, {required int collectionId}) {
 @riverpod
 Stream<ImageModel?> collectionCover(Ref ref, {required int collectionId}) {
   final repository = ref.watch(collectionsRepositoryProvider);
-  return repository.watchCollectionCover(collectionId).distinct();
+  return repository.watchCollectionCover(collectionId);
 }

@@ -46,5 +46,5 @@ Stream<double> chapterProgress(Ref ref, {required int chapterId}) {
 @riverpod
 Stream<ImageModel?> chapterCover(Ref ref, {required int chapterId}) {
   final repo = ref.watch(chaptersRepositoryProvider);
-  return repo.watchChapterCover(chapterId).distinct();
+  return repo.watchChapterCover(chapterId);
 }

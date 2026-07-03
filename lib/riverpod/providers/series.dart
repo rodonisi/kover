@@ -59,7 +59,7 @@ Stream<double> seriesProgress(Ref ref, {required int seriesId}) {
 @riverpod
 Stream<ImageModel?> seriesCover(Ref ref, {required int seriesId}) {
   final repo = ref.watch(seriesRepositoryProvider);
-  return repo.watchSeriesCover(seriesId).distinct();
+  return repo.watchSeriesCover(seriesId);
 }
 
 @riverpod
