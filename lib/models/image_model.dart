@@ -16,4 +16,12 @@ sealed class ImageModel with _$ImageModel {
 
   factory ImageModel.fromJson(Map<String, Object?> json) =>
       _$ImageModelFromJson(json);
+
+  /// Use identity comparison to avoid expensive byte-by-byte [DeepCollectionEquality]
+  /// diffing of [data].
+  @override
+  bool operator ==(Object other) => identical(this, other);
+
+  @override
+  int get hashCode => identityHashCode(this);
 }
