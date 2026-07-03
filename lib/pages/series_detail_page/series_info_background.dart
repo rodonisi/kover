@@ -14,7 +14,10 @@ class SeriesInfoBackground extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (primaryColor == null || secondaryColor == null) {
+    final primary = primaryColor?.toColor();
+    final secondary = secondaryColor?.toColor();
+
+    if (primary == null || secondary == null) {
       return Container();
     }
 
@@ -25,10 +28,7 @@ class SeriesInfoBackground extends ConsumerWidget {
           gradient: LinearGradient(
             begin: .topLeft,
             end: .bottomRight,
-            colors: [
-              primaryColor!.toColor(),
-              secondaryColor!.toColor(),
-            ],
+            colors: [primary, secondary],
           ),
         ),
       ),

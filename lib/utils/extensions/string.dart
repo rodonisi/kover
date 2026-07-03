@@ -8,10 +8,12 @@ extension StringExtensions on String {
     return fragment.children.isNotEmpty;
   }
 
-  Color toColor() {
+  Color? toColor() {
+    final stripped = replaceFirst('#', '');
+    if (!RegExp(r'^[0-9a-fA-F]{6,8}$').hasMatch(stripped)) return null;
     final buffer = StringBuffer();
-    if (length == 6 || length == 7) buffer.write('ff');
-    buffer.write(replaceFirst('#', ''));
+    if (stripped.length == 6) buffer.write('ff');
+    buffer.write(stripped);
     return Color(int.parse(buffer.toString(), radix: 16));
   }
 
