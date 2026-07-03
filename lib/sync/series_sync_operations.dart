@@ -157,24 +157,12 @@ class SeriesSyncOperations {
       (v) => v.toVolumeCompanion(),
     );
 
-    final allChapters = <ChapterDto>{
-      ...dto.chapters ?? [],
-      ...dto.specials ?? [],
-      ...dto.storylineChapters ?? [],
-      ...dto.volumes?.map((v) => v.chapters).expand((l) => l ?? []) ?? [],
-    };
-
-    final progress = allChapters.map(
-      (c) => c.toPartialReadingProgressCompanion(),
-    );
-
     return SeriesDetailCompanions(
       seriesId: seriesId,
       storyline: storyline,
       specials: specials,
       chapters: chapters,
       volumes: volumes,
-      progress: progress,
     );
   }
 

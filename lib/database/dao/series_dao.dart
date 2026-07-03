@@ -491,20 +491,6 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         batch.insertAllOnConflictUpdate(chapters, csMap.values);
       });
 
-      final s = await (select(
-        series,
-      )..where((tbl) => tbl.id.equals(entry.seriesId))).getSingle();
-
-      final progress = entry.progress.map(
-        (c) => c.copyWith(
-          seriesId: Value(entry.seriesId),
-          libraryId: Value(s.libraryId),
-          dirty: const Value(false),
-        ),
-      );
-
-      await db.readerDao.upsertCleanProgressBatch(progress);
-
       await managers.series
           .filter((f) => f.id(entry.seriesId))
           .update((f) => f(lastSynced: Value(DateTime.timestamp())));
@@ -608,7 +594,6 @@ class SeriesDetailCompanions {
   final Iterable<ChaptersCompanion> specials;
   final Iterable<ChaptersCompanion> chapters;
   final Iterable<VolumeWithChaptersCompanion> volumes;
-  final Iterable<ReadingProgressCompanion> progress;
 
   const SeriesDetailCompanions({
     required this.seriesId,
@@ -616,6 +601,5 @@ class SeriesDetailCompanions {
     required this.specials,
     required this.chapters,
     required this.volumes,
-    required this.progress,
   });
 }

@@ -5,18 +5,6 @@ import 'package:kover/models/enums/format.dart';
 import 'package:kover/utils/extensions/date_time.dart';
 
 extension ChapterDtoMappings on ChapterDto {
-  /// Map available to a [ReadingProgressCompanion].
-  /// seriesId, libraryId, scrollId will missing from the companion.
-  ReadingProgressCompanion toPartialReadingProgressCompanion() {
-    return ReadingProgressCompanion(
-      chapterId: Value(id!),
-      volumeId: Value(volumeId!),
-      pagesRead: Value(pagesRead!),
-      totalReads: Value(totalReads!),
-      lastModified: Value.absentIfNull(lastReadingProgressUtc?.normalizeUtc()),
-    );
-  }
-
   ChaptersCompanion toChapterCompanion() {
     return ChaptersCompanion(
       id: Value(id!),

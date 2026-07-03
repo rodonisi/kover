@@ -79,7 +79,6 @@ void callbackDispatcher() {
       final readerRepo = ReaderRepository(
         db: db,
         readerClient: ReaderSyncOperations(client: client),
-        seriesClient: SeriesSyncOperations(client: client, apiKey: apiKey),
       );
       final volumesRepo = VolumesRepository(
         db,

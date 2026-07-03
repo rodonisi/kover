@@ -157,18 +157,16 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     return await managers.readingProgress.filter((f) => f.dirty(true)).get();
   }
 
-  /// Get last read date for all chapters of series [seriesId]
-  Future<Map<int, DateTime?>> getLastReadDatePerSeriesChapters({
-    required int seriesId,
-  }) async {
-    final result = await _chaptersWithProgressQuery(seriesId: seriesId).get();
-
-    return {
-      for (final entry in result)
-        entry.readTable(chapters).id: entry
-            .readTableOrNull(readingProgress)
-            ?.lastModified,
-    };
+  /// Get all chapter ids with outdated progress
+  Future<List<int>> getOutdatedChapterIds() async {
+    return managers.readingProgress
+        .filter(
+          (f) => f.lastModified.column.isSmallerThan(
+            f.chapterId.remoteLastRead.column,
+          ),
+        )
+        .map((e) => e.chapterId)
+        .get();
   }
 
   /// Get last read date per series for all series that have progress entries
@@ -238,38 +236,6 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     await managers.readingProgress
         .filter((f) => f.chapterId.id.isIn(chapterIds))
         .update((u) => u(dirty: const Value(false)));
-  }
-
-  /// Upsert chapter progress batch only where the existing progress is not
-  /// dirty
-  Future<void> upsertCleanProgressBatch(
-    Iterable<ReadingProgressCompanion> incoming,
-  ) async {
-    await transaction(() async {
-      if (incoming.isEmpty) return;
-
-      final ids = incoming.map((e) => e.chapterId.value).toList();
-
-      final existing = {
-        for (final row in await (select(
-          readingProgress,
-        )..where((r) => r.chapterId.isIn(ids))).get())
-          row.chapterId: row,
-      };
-
-      final toWrite = <ReadingProgressCompanion>[];
-      for (final entry in incoming) {
-        final local = existing[entry.chapterId.value];
-
-        final localWins = local != null && local.dirty;
-
-        if (!localWins) {
-          toWrite.add(entry);
-        }
-      }
-
-      await batch((b) => b.insertAllOnConflictUpdate(readingProgress, toWrite));
-    });
   }
 
   /// Watch previous chapter for chapter [chapterId]

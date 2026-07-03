@@ -50,10 +50,10 @@ void main() {
 
       final entries = [
         SeriesCompanion(
-          id: Value(1),
-          libraryId: Value(1),
-          name: Value('name'),
-          format: Value(.epub),
+          id: const Value(1),
+          libraryId: const Value(1),
+          name: const Value('name'),
+          format: const Value(.epub),
           created: Value(DateTime.now()),
           lastChapterAdded: Value(DateTime.now()),
         ),
@@ -84,10 +84,10 @@ void main() {
 
       final entries = [
         SeriesCompanion(
-          id: Value(1),
-          libraryId: Value(1),
-          name: Value('name'),
-          format: Value(.epub),
+          id: const Value(1),
+          libraryId: const Value(1),
+          name: const Value('name'),
+          format: const Value(.epub),
           created: Value(now),
           lastChapterAdded: Value(now),
         ),
@@ -135,10 +135,10 @@ void main() {
 
       final entries = [
         SeriesCompanion(
-          id: Value(1),
-          libraryId: Value(1),
-          name: Value('name'),
-          format: Value(.epub),
+          id: const Value(1),
+          libraryId: const Value(1),
+          name: const Value('name'),
+          format: const Value(.epub),
           created: Value(yesterday),
           lastChapterAdded: Value(yesterday),
           remoteLastRead: Value(now),
@@ -185,10 +185,10 @@ void main() {
 
       final entries = [
         SeriesCompanion(
-          id: Value(1),
-          libraryId: Value(1),
-          name: Value('name'),
-          format: Value(.epub),
+          id: const Value(1),
+          libraryId: const Value(1),
+          name: const Value('name'),
+          format: const Value(.epub),
           created: Value(now),
           lastChapterAdded: Value(now),
           remoteLastRead: Value(now),
