@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:chopper/chopper.dart';
 import 'package:fake_async/fake_async.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -12,7 +11,6 @@ import 'package:kover/models/user_model.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
-import 'package:kover/riverpod/repository/secure_storage.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -22,7 +20,7 @@ import 'auth_test.mocks.dart';
 
 void main() {
   setUpAll(() {
-    final dummyUser = UserDto();
+    final dummyUser = const UserDto();
     provideDummy<Response<UserDto>>(
       Response(http.Response('', 200), dummyUser),
     );
@@ -92,7 +90,7 @@ void main() {
           ],
         );
 
-        final userDto = UserDto(
+        final userDto = const UserDto(
           id: 0,
           username: 'test_user',
         );
@@ -120,7 +118,7 @@ void main() {
       () {
         fakeAsync((async) {
           final mockOpenapi = MockOpenapi();
-          final storedUser = UserModel(id: 0, username: 'stored_user');
+          final storedUser = const UserModel(id: 0, username: 'stored_user');
           final container = ProviderContainer.test(
             overrides: [
               storageProvider.overrideWith(
@@ -166,7 +164,7 @@ void main() {
       () {
         fakeAsync((async) {
           final mockOpenapi = MockOpenapi();
-          final storedUser = UserModel(id: 0, username: 'stored_user');
+          final storedUser = const UserModel(id: 0, username: 'stored_user');
           final container = ProviderContainer.test(
             overrides: [
               storageProvider.overrideWith(
@@ -192,7 +190,7 @@ void main() {
             ],
           );
 
-          final userDto = UserDto(
+          final userDto = const UserDto(
             id: 1,
             username: 'fetched_user',
           );
@@ -207,7 +205,7 @@ void main() {
           );
 
           final updates = <UserModel>[];
-          final sub = container.listen(currentUserProvider, (_, next) {
+          container.listen(currentUserProvider, (_, next) {
             next.whenData((user) => updates.add(user));
           });
 
@@ -222,7 +220,7 @@ void main() {
       () {
         fakeAsync((async) {
           final mockOpenapi = MockOpenapi();
-          final storedUser = UserModel(id: 0, username: 'stored_user');
+          final storedUser = const UserModel(id: 0, username: 'stored_user');
           var credentials = const CredentialsState(
             url: 'https://example.com',
             apiKey: 'valid_api_key',
@@ -283,7 +281,7 @@ void main() {
       () {
         fakeAsync((async) {
           final mockOpenapi = MockOpenapi();
-          final storedUser = UserModel(id: 0, username: 'stored_user');
+          final storedUser = const UserModel(id: 0, username: 'stored_user');
           final container = ProviderContainer.test(
             overrides: [
               storageProvider.overrideWith(
