@@ -20,6 +20,7 @@ class CollapsibleSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final showAll = useState(false);
+    final showCollapseButton = useState(true);
 
     final total = series.length;
     final toShow = showAll.value ? total : 1;
@@ -36,16 +37,19 @@ class CollapsibleSection extends HookConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.headlineMedium,
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    showAll.value = !showAll.value;
-                  },
-                  child: Text(showAll.value ? l.showLess : l.showMore),
-                ),
+                if (showCollapseButton.value)
+                  TextButton(
+                    onPressed: () {
+                      showAll.value = !showAll.value;
+                    },
+                    child: Text(showAll.value ? l.showLess : l.showMore),
+                  ),
               ],
             ),
           ),
@@ -54,7 +58,15 @@ class CollapsibleSection extends HookConsumerWidget {
           padding: const EdgeInsetsGeometry.symmetric(
             horizontal: LayoutConstants.smallPadding,
           ),
-          sliver: SeriesSliverGrid(series: series, rowCount: toShow),
+          sliver: SeriesSliverGrid(
+            series: series,
+            rowCount: toShow,
+            onCrossAxisCountChanged: (rowLength) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showCollapseButton.value = total > rowLength;
+              });
+            },
+          ),
         ),
       ],
     );
