@@ -230,8 +230,10 @@ class SeriesRepository {
                     r.lastSynced!.isBefore(companion.lastChapterAdded.value!));
             final hasNewProgress =
                 companion.remoteLastRead.value != null &&
-                (r.lastSynced == null ||
-                    r.lastSynced!.isBefore(companion.remoteLastRead.value!));
+                (r.remoteLastRead == null ||
+                    r.remoteLastRead!.isBefore(
+                      companion.remoteLastRead.value!,
+                    ));
 
             return neverSynced || hasNewChapter || hasNewProgress;
           },

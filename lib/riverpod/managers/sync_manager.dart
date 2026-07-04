@@ -148,15 +148,15 @@ class SyncManager extends _$SyncManager {
 
     _enqueuePhases({const .allSeries()});
     _enqueuePhases({
+      const .progress(),
       const .libraries(),
-      const .metadata(),
-      const .tocs(),
       const .recentlyUpdated(),
       const .recentlyAdded(),
-      const .progress(),
-      const .refreshServerSettings(),
       const .collections(),
       const .readingLists(),
+      const .metadata(),
+      const .tocs(),
+      const .refreshServerSettings(),
       const .sidenav(),
       if (settings.downloadCovers) const .covers(),
     });

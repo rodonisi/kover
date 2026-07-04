@@ -48,6 +48,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.0
+  pool: ^1.5.2
 
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0
