@@ -107,7 +107,7 @@ GoRouter router(Ref ref) {
     ),
     TypedStatefulShellBranch<MenuBranch>(
       routes: [
-        TypedGoRoute<LibraryRoute>(
+        TypedGoRoute<MenuRoute>(
           path: '/menu',
           routes: [
             TypedGoRoute<DownloadQueueRoute>(
@@ -174,8 +174,8 @@ class WantToReadRoute extends GoRouteData with $WantToReadRoute {
       const WantToReadPage();
 }
 
-class LibraryRoute extends GoRouteData with $LibraryRoute {
-  const LibraryRoute();
+class MenuRoute extends GoRouteData with $MenuRoute {
+  const MenuRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const MenuPage();
