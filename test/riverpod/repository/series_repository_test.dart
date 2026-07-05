@@ -191,6 +191,7 @@ void main() {
           format: const Value(.epub),
           created: Value(now),
           lastChapterAdded: Value(now),
+          lastSynced: Value(now),
           remoteLastRead: Value(now),
         ),
       ];
@@ -209,6 +210,7 @@ void main() {
           created: now,
           lastChapterAdded: now,
           lastSynced: now,
+          remoteLastRead: now,
         ),
       ];
 
