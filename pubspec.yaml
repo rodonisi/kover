@@ -54,6 +54,8 @@ dev_dependencies:
   sentry_dart_plugin: ^3.4.0
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   flutter_lints: ^6.0.0
   riverpod_generator: ^4.0.0+1
   build_runner: ^2.11.1
