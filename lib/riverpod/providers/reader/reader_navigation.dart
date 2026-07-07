@@ -11,6 +11,7 @@ sealed class ReaderNavigationState with _$ReaderNavigationState {
     required int currentPage,
     required int totalPages,
     required bool fromObserver,
+    required bool handleCompletion,
   }) = _ReaderNavigationState;
 }
 
@@ -43,6 +44,7 @@ class ReaderNavigation extends _$ReaderNavigation {
       currentPage: readerState.initialPage,
       totalPages: readerState.totalPages,
       fromObserver: false,
+      handleCompletion: true,
     );
   }
 
@@ -66,6 +68,7 @@ class ReaderNavigation extends _$ReaderNavigation {
   }
 
   Future<void> saveProgress(int page) async {
+    final current = await future;
     await ref
         .read(
           readerProvider(
@@ -73,7 +76,10 @@ class ReaderNavigation extends _$ReaderNavigation {
             chapterId: chapterId,
           ).notifier,
         )
-        .saveProgress(page: page);
+        .saveProgress(
+          page: page,
+          handleCompletion: current.handleCompletion,
+        );
   }
 
   Future<void> nextPage() async {
@@ -86,5 +92,15 @@ class ReaderNavigation extends _$ReaderNavigation {
     final current = await future;
 
     return jumpToPage(current.currentPage - 1);
+  }
+
+  Future<void> handleCompletion(bool handle) async {
+    final current = await future;
+
+    state = AsyncData(
+      current.copyWith(
+        handleCompletion: handle,
+      ),
+    );
   }
 }

@@ -282,19 +282,16 @@ class EpubNavigation extends _$EpubNavigation {
 
   void _handleProgress() {
     listenSelf((prev, next) {
-      next.whenData((data) {
-        final reflow = ref
-            .read(
-              epubReflowProvider(
-                seriesId: seriesId,
-                chapterId: chapterId,
-                page: data.page,
-              ),
-            )
-            .value;
+      next.whenData((data) async {
+        final reflow = await ref.read(
+          epubReflowProvider(
+            seriesId: seriesId,
+            chapterId: chapterId,
+            page: data.page,
+          ).future,
+        );
 
-        final isAheadReflow =
-            reflow == null || reflow.subpages.length <= data.subpage;
+        final isAheadReflow = reflow.subpages.length <= data.subpage;
         final isSamePosition =
             _wasAheadReflow == isAheadReflow &&
             prev?.value?.page == data.page &&
@@ -305,14 +302,32 @@ class EpubNavigation extends _$EpubNavigation {
 
         final scrollId = reflow.subpages[data.subpage].paragraphScrollId();
 
-        ref
+        if (reflow.status == .done &&
+            data.page >= data.totalPages - 1 &&
+            data.subpage >= data.totalSubpages - 1) {
+          await ref
+              .read(
+                readerProvider(
+                  seriesId: seriesId,
+                  chapterId: chapterId,
+                ).notifier,
+              )
+              .markComplete();
+          return;
+        }
+
+        await ref
             .read(
               readerProvider(
                 seriesId: seriesId,
                 chapterId: chapterId,
               ).notifier,
             )
-            .saveProgress(page: data.page, scrollId: scrollId);
+            .saveProgress(
+              page: data.page,
+              scrollId: scrollId,
+              handleCompletion: false,
+            );
       });
     });
   }
@@ -353,6 +368,14 @@ class EpubNavigation extends _$EpubNavigation {
       },
       fireImmediately: true,
     );
+    ref
+        .read(
+          readerNavigationProvider(
+            seriesId: seriesId,
+            chapterId: chapterId,
+          ).notifier,
+        )
+        .handleCompletion(false);
   }
 
   void _handleReflowChanges({

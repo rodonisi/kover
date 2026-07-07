@@ -78,25 +78,20 @@ class Reader extends _$Reader {
     );
   }
 
-  Future<void> saveProgress({required int page, String? scrollId}) async {
+  Future<void> saveProgress({
+    required int page,
+    String? scrollId,
+    bool handleCompletion = true,
+  }) async {
     if (state.isLoading) return;
     final current = await future;
 
     _saveProgressDebounce?.cancel();
 
     _saveProgressDebounce = Timer(200.ms, () async {
-      log.debug(
-        'saving progress',
-        attributes: {
-          'page': .int(page),
-          'scroll_id': .string(scrollId ?? 'null'),
-          'chapter_id': .int(current.chapter.id),
-        },
-      );
-
       if (!ref.mounted) return;
 
-      if (page >= current.totalPages - 1) {
+      if (handleCompletion && page >= current.totalPages - 1) {
         await markComplete();
         return;
       }
@@ -113,14 +108,31 @@ class Reader extends _$Reader {
               bookScrollId: scrollId,
             ),
           );
+
+      log.debug(
+        'saved progress',
+        attributes: {
+          'page': .int(page),
+          'scroll_id': .string(scrollId ?? 'null'),
+          'chapter_id': .int(current.chapter.id),
+        },
+      );
     });
   }
 
   Future<void> markComplete() async {
     if (state.isLoading) return;
     final current = await future;
+
     await ref
         .read(readerRepositoryProvider)
         .markChapterRead(current.chapter.id);
+
+    log.debug(
+      'marked chapter as read',
+      attributes: {
+        'chapter_id': .int(current.chapter.id),
+      },
+    );
   }
 }
