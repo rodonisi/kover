@@ -48,7 +48,6 @@ class HorizontalPagedReader extends HookConsumerWidget {
             final pageController = usePageController(
               initialPage: navState.currentPage,
             );
-            final currentPage = useState(navState.currentPage);
             final zoomedPageIndexes = useState(<int>{});
             // Number of touch pointers down. With 2+ fingers we hand the
             // gesture to the InteractiveViewer (pinch-zoom) instead of letting
@@ -89,12 +88,11 @@ class HorizontalPagedReader extends HookConsumerWidget {
               itemCount: reader.totalPages,
               pageSnapping: true,
               physics:
-                  zoomedPageIndexes.value.contains(currentPage.value) ||
+                  zoomedPageIndexes.value.contains(navState.currentPage) ||
                       pointerCount.value >= 2
                   ? const NeverScrollableScrollPhysics()
                   : const BouncingScrollPhysics(),
               onPageChanged: (index) {
-                currentPage.value = index;
                 ref.read(navProvider.notifier).jumpToPage(index);
               },
               itemBuilder: (context, index) {
