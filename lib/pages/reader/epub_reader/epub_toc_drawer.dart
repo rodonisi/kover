@@ -24,11 +24,14 @@ class EpubTocDrawer extends HookConsumerWidget {
     final selectedKey = useState<GlobalKey?>(null);
     final hasScrolled = useState(false);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    useEffect(() {
       ref
           .read(syncManagerProvider.notifier)
           .refreshChapterToc(chapterId: chapterId);
+      return null;
+    }, []);
 
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (selectedKey.value?.currentContext != null && !hasScrolled.value) {
         await Scrollable.ensureVisible(
           selectedKey.value!.currentContext!,
