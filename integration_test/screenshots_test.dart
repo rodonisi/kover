@@ -1,156 +1,317 @@
-import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:kover/main.dart';
+import 'package:kover/riverpod/providers/book.dart';
+import 'package:kover/pages/reader/overlay/reader_controls.dart';
+import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
+import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/router.dart';
+import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
+import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
+import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/oneoffs.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/utils/logging.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
-  for (final brightness in [Brightness.light, Brightness.dark]) {
-    group("screenshots ${brightness.name}", () {
-      setUp(() {
-        binding.platformDispatcher.platformBrightnessTestValue = brightness;
-      });
-      tearDown(() {
-        binding.platformDispatcher.clearPlatformBrightnessTestValue();
-      });
-      testWidgets("page screenshots", (WidgetTester tester) async {
-        final container = await initializeApp(tester);
 
-        await takePageScreenshot(
-          "home",
-          route: const HomeRoute().location,
-          tester: tester,
-          container: container,
-          binding: binding,
-        );
-
-        await takePageScreenshot(
-          "want_to_read",
-          route: const WantToReadRoute().location,
-          tester: tester,
-          container: container,
-          binding: binding,
-        );
-
-        await takePageScreenshot(
-          "menu",
-          route: const MenuRoute().location,
-          tester: tester,
-          container: container,
-          binding: binding,
-        );
-
-        await takePageScreenshot(
-          "settings",
-          route: const SettingsRoute().location,
-          tester: tester,
-          container: container,
-          binding: binding,
-        );
-
-        await takePageScreenshot(
-          'all_series',
-          route: const AllSeriesRoute().location,
-          tester: tester,
-          container: container,
-          binding: binding,
-        );
-
-        await takePageScreenshot(
-          'collections',
-          route: const CollectionsRoute().location,
-          tester: tester,
-          container: container,
-          binding: binding,
-        );
-
-        await takePageScreenshot(
-          'reading_lists',
-          route: const ReadingListsRoute().location,
-          tester: tester,
-          container: container,
-          binding: binding,
-        );
-
-        await takePageScreenshot(
-          'series_details',
-          route: const SeriesDetailRoute(seriesId: 10).location,
-          tester: tester,
-          container: container,
-          binding: binding,
-        );
-      });
+  group('dark mode screenshots', () {
+    setUp(() {
+      binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
     });
-  }
+    tearDown(() {
+      binding.platformDispatcher.clearPlatformBrightnessTestValue();
+    });
 
-  // testWidgets('epub reader screenshot', (tester) async {
-  //   final targetSeries = 1;
-  //   final targetChapter = 38;
-  //   final targetPage = 11;
-  //
-  //   final container = await initializeApp(tester);
-  //   container
-  //       .read(routerProvider)
-  //       .go(
-  //         ReaderRoute(
-  //           seriesId: targetSeries,
-  //           chapterId: targetChapter,
-  //         ).location,
-  //       );
-  //
-  //   await tester.pump(Duration(seconds: 30));
-  //
-  //   var chapterReady = false;
-  //   container.listen(
-  //     epubNavigationProvider(seriesId: targetSeries, chapterId: targetPage),
-  //     (
-  //       previous,
-  //       next,
-  //     ) {
-  //       log.debug('epub navigation state changed: $next');
-  //       next.whenData((data) {
-  //         chapterReady = data.ready;
-  //       });
-  //     },
-  //     fireImmediately: true,
-  //   );
-  //
-  //   await container
-  //       .read(
-  //         epubNavigationProvider(
-  //           seriesId: targetSeries,
-  //           chapterId: targetChapter,
-  //         ).notifier,
-  //       )
-  //       .jumpToPage(targetPage);
-  //
-  //   while (!chapterReady) {
-  //     await tester.pump(const Duration(seconds: 1));
-  //     log.debug('waiting for chapter to be ready');
-  //   }
-  //
-  //   await binding.screenshot(
-  //     tester,
-  //     'epub_reader',
-  //   );
-  // });
+    testWidgets("page screenshots", (WidgetTester tester) async {
+      final container = await initializeApp(tester);
+
+      await takePageScreenshot(
+        "home",
+        route: const HomeRoute().location,
+        tester: tester,
+        container: container,
+        binding: binding,
+      );
+
+      await takePageScreenshot(
+        "want_to_read",
+        route: const WantToReadRoute().location,
+        tester: tester,
+        container: container,
+        binding: binding,
+      );
+
+      await takePageScreenshot(
+        "menu",
+        route: const MenuRoute().location,
+        tester: tester,
+        container: container,
+        binding: binding,
+      );
+
+      await takePageScreenshot(
+        "settings",
+        route: const SettingsRoute().location,
+        tester: tester,
+        container: container,
+        binding: binding,
+      );
+
+      await takePageScreenshot(
+        'all_series',
+        route: const AllSeriesRoute().location,
+        tester: tester,
+        container: container,
+        binding: binding,
+      );
+
+      await takePageScreenshot(
+        'collections',
+        route: const CollectionsRoute().location,
+        tester: tester,
+        container: container,
+        binding: binding,
+      );
+
+      await takePageScreenshot(
+        'reading_lists',
+        route: const ReadingListsRoute().location,
+        tester: tester,
+        container: container,
+        binding: binding,
+      );
+
+      await takePageScreenshot(
+        'series_details',
+        route: const SeriesDetailRoute(seriesId: 10).location,
+        tester: tester,
+        container: container,
+        binding: binding,
+      );
+    });
+
+    testWidgets('image reader screenshot', (tester) async {
+      final targetSeries = 13;
+      final targetChapter = 21;
+      final targetPage = 0;
+
+      final container = await initializeApp(tester);
+
+      container.listen(seriesProvider(seriesId: targetSeries), (_, _) {});
+      container.listen(
+        readerProvider(seriesId: targetSeries, chapterId: targetChapter),
+        (_, _) {},
+      );
+      container.listen(
+        readerNavigationProvider(
+          seriesId: targetSeries,
+          chapterId: targetChapter,
+        ),
+        (_, _) {},
+      );
+      container.listen(
+        commonReaderSettingsProvider(seriesId: targetSeries),
+        (_, _) {},
+      );
+      container.listen(
+        imageReaderSettingsProvider(seriesId: targetSeries),
+        (_, _) {},
+      );
+      container.listen(
+        imagePageProvider(chapterId: targetChapter, page: targetPage),
+        (_, _) {},
+      );
+
+      container
+          .read(routerProvider)
+          .go(
+            ReaderRoute(
+              seriesId: targetSeries,
+              chapterId: targetChapter,
+            ).location,
+          );
+
+      await tester.pumpAndSettle();
+
+      await container
+          .read(
+            readerNavigationProvider(
+              seriesId: targetSeries,
+              chapterId: targetChapter,
+            ).notifier,
+          )
+          .jumpToPage(targetPage);
+
+      await tester.pumpAndSettle();
+
+      await binding.screenshot(tester, 'image_reader');
+
+      final center = tester.getCenter(find.byType(ReaderOverlay));
+      await tester.tapAt(center);
+      await tester.pumpAndSettle();
+      await binding.screenshot(tester, 'image_reader_overlay');
+
+      while (find.byType(ReaderSettingsButton).evaluate().isEmpty) {
+        await tester.pump();
+      }
+      await tester.tap(find.byType(ReaderSettingsButton));
+      await tester.pumpAndSettle();
+      await binding.screenshot(tester, 'image_reader_settings');
+    });
+  });
+
+  group('light mode screenshots', () {
+    setUp(() {
+      binding.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+    });
+    tearDown(() {
+      binding.platformDispatcher.clearPlatformBrightnessTestValue();
+    });
+
+    testWidgets('epub reader screenshot', (tester) async {
+      final targetSeries = 1;
+      final targetChapter = 38;
+      final targetPage = 10;
+
+      final container = await initializeApp(tester);
+      container.listen(seriesProvider(seriesId: targetSeries), (_, _) {});
+      container.listen(
+        readerProvider(seriesId: targetSeries, chapterId: targetChapter),
+        (_, _) {},
+      );
+      container.listen(
+        readerNavigationProvider(
+          seriesId: targetSeries,
+          chapterId: targetChapter,
+        ),
+        (_, _) {},
+      );
+      final sub = container.listen(
+        epubNavigationProvider(
+          seriesId: targetSeries,
+          chapterId: targetChapter,
+        ),
+        (_, _) {},
+      );
+      container
+          .read(routerProvider)
+          .go(
+            ReaderRoute(
+              seriesId: targetSeries,
+              chapterId: targetChapter,
+            ).location,
+          );
+      await tester.pump(5.seconds);
+
+      var chapterReady = false;
+      var targetPageReady = false;
+      var spinner = find.byType(CircularProgressIndicator);
+
+      var counter = 0;
+      while (!chapterReady || spinner.evaluate().isNotEmpty) {
+        if (++counter % 1000 == 0) {
+          log.debug('waiting for chapter to be ready');
+        }
+        await tester.pump();
+        final state = sub.read();
+        chapterReady = state.value?.ready ?? false;
+      }
+      await tester.pump();
+
+      if (sub.read().value?.page != targetPage) {
+        log.debug('jumping to target page $targetPage');
+        await container
+            .read(
+              epubNavigationProvider(
+                seriesId: targetSeries,
+                chapterId: targetChapter,
+              ).notifier,
+            )
+            .jumpToPage(targetPage);
+
+        while (!targetPageReady || spinner.evaluate().isNotEmpty) {
+          if (++counter % 1000 == 0) {
+            log.debug('waiting for target page to be ready');
+          }
+          await tester.pump();
+          final state = sub.read();
+          targetPageReady =
+              state.value?.page == targetPage && (state.value?.ready ?? false);
+        }
+        await tester.pump();
+      }
+
+      if (sub.read().value?.subpage != 0) {
+        log.debug('jumping to subpage 0');
+        await container
+            .read(
+              epubNavigationProvider(
+                seriesId: targetSeries,
+                chapterId: targetChapter,
+              ).notifier,
+            )
+            .jumpToSubpage(0);
+        await tester.pump(1.seconds);
+      }
+
+      await binding.screenshot(tester, 'epub_reader');
+
+      final center = tester.getCenter(find.byType(Scaffold));
+      await tester.tapAt(center);
+      await tester.pump(500.ms);
+      await binding.screenshot(tester, 'epub_reader_overlay');
+
+      await tester.tap(find.byType(ReaderSettingsButton));
+      await tester.pump(1000.ms);
+      await binding.screenshot(tester, 'epub_reader_settings');
+    });
+  });
+
+  group('theme modes screenshots', () {
+    testWidgets('light mode screenshot', (tester) async {
+      await initializeApp(
+        tester,
+        additionalOverrides: [
+          themeProvider.overrideWithBuild(
+            (_, _) => const ThemeModel(mode: ThemeMode.light),
+          ),
+        ],
+      );
+      await binding.screenshot(tester, 'light_mode');
+    });
+
+    testWidgets('outlined theme screenshot', (tester) async {
+      await initializeApp(
+        tester,
+        additionalOverrides: [
+          themeProvider.overrideWithBuild(
+            (_, _) => const ThemeModel(mode: .dark, outlined: true),
+          ),
+        ],
+      );
+      await binding.screenshot(tester, 'outlined_mode');
+    });
+  });
 }
 
-Future<ProviderContainer> initializeApp(WidgetTester tester) async {
+class EpubReaderPage {}
+
+Future<ProviderContainer> initializeApp(
+  WidgetTester tester, {
+  List<Override> additionalOverrides = const [],
+}) async {
   const url = String.fromEnvironment('TEST_URL');
   const apiKey = String.fromEnvironment('TEST_API_KEY');
   final container = ProviderContainer(
@@ -161,12 +322,13 @@ Future<ProviderContainer> initializeApp(WidgetTester tester) async {
       oneOffsProvider.overrideWithBuild(
         (_, _) => const OneOffsState(monitoringOptOutPopupShown: true),
       ),
+      ...additionalOverrides,
     ],
   );
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: GenericDeviceFrame(child: const App()),
+      child: const App(),
     ),
   );
   var fetching = true;
@@ -176,72 +338,14 @@ Future<ProviderContainer> initializeApp(WidgetTester tester) async {
     }
   });
 
+  var count = 0;
   while (fetching) {
-    await tester.pump(const Duration(seconds: 5));
-    log.debug('waiting for sync to finish');
+    await tester.pump();
+    if (++count % 100 == 0) {
+      log.debug('waiting for sync to finish');
+    }
   }
   return container;
-}
-
-class GenericDeviceFrame extends StatelessWidget {
-  final Widget child;
-  final Size
-  screenSize; // e.g., Size(390, 844) for standard mobile aspect ratio
-
-  const GenericDeviceFrame({
-    super.key,
-    required this.child,
-    this.screenSize = const Size(375, 812), // Generic smartphone ratio
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.transparent,
-      child: Padding(
-        padding: LayoutConstants.largeEdgeInsets,
-        child: Directionality(
-          textDirection: .ltr,
-          child: Center(
-            child: Container(
-              // Outer frame decoration (the "bezel")
-              padding: const EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1A1A1A), // Dark matte generic bezel
-                borderRadius: BorderRadius.circular(40),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(50),
-                    blurRadius: 24,
-                    offset: const Offset(0, 12),
-                  ),
-                ],
-              ),
-              child: SizedBox(
-                width: screenSize.width,
-                height: screenSize.height,
-                // Clip the app content to match the bezel's inner curve
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(28),
-                  child: MediaQuery(
-                    // Injects simulated screen metrics into your app
-                    data: MediaQueryData(
-                      size: screenSize,
-                      padding: const EdgeInsets.only(top: 44, bottom: 34),
-                      viewPadding: const EdgeInsets.only(top: 44, bottom: 34),
-                    ),
-                    child: Scaffold(
-                      body: child,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 Future<void> takePageScreenshot(
@@ -265,14 +369,9 @@ extension on IntegrationTestWidgetsFlutterBinding {
       try {
         await convertFlutterSurfaceToImage();
       } catch (_) {}
-      await tester.pumpAndSettle();
+      await tester.pump();
     }
-    final platform = Platform.operatingSystem;
-    final brightness = tester.platformDispatcher.platformBrightness;
-    final mode = brightness == Brightness.dark ? 'dark' : 'light';
 
-    log.debug('taking screenshot $platform/$mode/$screenshotName');
-
-    await takeScreenshot('$platform/$mode/$screenshotName');
+    await takeScreenshot(screenshotName);
   }
 }
