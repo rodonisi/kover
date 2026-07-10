@@ -165,13 +165,14 @@ class _Page extends HookConsumerWidget {
 
     return Stack(
       children: [
-        Positioned.fill(
-          child: _MeasureContent(
-            seriesId: seriesId,
-            chapterId: chapterId,
-            page: page,
+        if (reflow.value?.status != .done)
+          Positioned.fill(
+            child: _MeasureContent(
+              seriesId: seriesId,
+              chapterId: chapterId,
+              page: page,
+            ),
           ),
-        ),
         Positioned.fill(
           child: Async2(
             asyncValue1: ref.watch(nav),
