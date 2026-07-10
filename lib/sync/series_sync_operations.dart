@@ -7,7 +7,6 @@ import 'package:kover/mapping/dto/chapter_dto_mappings.dart';
 import 'package:kover/mapping/dto/series_dto_mappings.dart';
 import 'package:kover/mapping/dto/series_metadata_dto_mappings.dart';
 import 'package:kover/mapping/dto/volume_dto_mappings.dart';
-import 'package:kover/utils/extensions/date_time.dart';
 import 'package:kover/utils/logging.dart';
 
 class SeriesSyncOperations {
@@ -23,19 +22,6 @@ class SeriesSyncOperations {
     final res = await _fetchAllSeries(libraryId: libraryId);
 
     return res.map((dto) => dto.toSeriesCompanion());
-  }
-
-  Future<Map<int, DateTime>> getLastReadForSeries() async {
-    final res = await _fetchAllSeries();
-
-    return Map.fromEntries(
-      res
-          .where((entry) => entry.id != null && entry.latestReadDate != null)
-          .map(
-            (entry) =>
-                MapEntry(entry.id!, entry.latestReadDate!.normalizeUtc()),
-          ),
-    );
   }
 
   Future<Iterable<SeriesCompanion>> getRecentlyAdded() async {
@@ -157,24 +143,12 @@ class SeriesSyncOperations {
       (v) => v.toVolumeCompanion(),
     );
 
-    final allChapters = <ChapterDto>{
-      ...dto.chapters ?? [],
-      ...dto.specials ?? [],
-      ...dto.storylineChapters ?? [],
-      ...dto.volumes?.map((v) => v.chapters).expand((l) => l ?? []) ?? [],
-    };
-
-    final progress = allChapters.map(
-      (c) => c.toPartialReadingProgressCompanion(),
-    );
-
     return SeriesDetailCompanions(
       seriesId: seriesId,
       storyline: storyline,
       specials: specials,
       chapters: chapters,
       volumes: volumes,
-      progress: progress,
     );
   }
 

@@ -6,6 +6,7 @@ import 'package:kover/models/user_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -36,13 +37,37 @@ class CurrentUser extends _$CurrentUser {
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
     ).future;
 
-    ref.listen(credentialsProvider, (_, _) => ref.invalidateSelf());
+    ref.listen(
+      credentialsProvider,
+      (_, _) => ref.invalidateSelf(asReload: true),
+    );
 
     final apiKey = ref.watch(apiKeyProvider);
     if (apiKey == null || apiKey.isEmpty) throw NoCredentialsException();
 
-    if (state.hasValue) state = AsyncData(state.value!);
+    if (state.hasValue) {
+      unawaited(_refreshUser(apiKey: apiKey));
+      return state.requireValue;
+    }
 
+    return await _fetchUser(apiKey: apiKey);
+  }
+
+  Future<void> _refreshUser({required String apiKey}) async {
+    try {
+      final user = await _fetchUser(apiKey: apiKey);
+      state = AsyncValue.data(user);
+    } catch (e) {
+      log.warning(
+        'Failed to refresh user',
+        attributes: {
+          'error': .string(e.toString()),
+        },
+      );
+    }
+  }
+
+  Future<UserModel> _fetchUser({required String apiKey}) async {
     final client = ref.watch(restClientProvider);
     final res = await client.apiPluginAuthenticatePost(
       apiKey: apiKey,

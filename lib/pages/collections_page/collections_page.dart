@@ -13,11 +13,24 @@ import 'package:kover/widgets/context_menu/context_menu_button.dart';
 import 'package:kover/widgets/details/filter_input_field.dart';
 import 'package:kover/widgets/lists/collections_sliver_grid.dart';
 import 'package:kover/widgets/util/async_value.dart';
+import 'package:kover/widgets/util/login_guard.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class CollectionsPage extends HookConsumerWidget {
+class CollectionsPage extends StatelessWidget {
   const CollectionsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      extendBody: true,
+      body: LoginGuard(child: CollectionsPageContent()),
+    );
+  }
+}
+
+class CollectionsPageContent extends HookConsumerWidget {
+  const CollectionsPageContent({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,55 +45,53 @@ class CollectionsPage extends HookConsumerWidget {
       ref.read(syncManagerProvider.notifier).syncCollections();
     });
 
-    return Scaffold(
-      body: CustomScrollView(
-        keyboardDismissBehavior: .onDrag,
-        slivers: [
-          SliverAppBar.large(
-            title: Text(l.collections),
-            actionsPadding: const EdgeInsets.symmetric(
-              horizontal: LayoutConstants.smallPadding,
-            ),
-            actions: [
-              ContextMenuButton(
-                icon: Icon(
-                  sortDirection.value == .ascending
-                      ? KoverIcons.ascending
-                      : KoverIcons.descending,
-                ),
-                menu: _menu(sortDirection: sortDirection, context: context),
+    return CustomScrollView(
+      keyboardDismissBehavior: .onDrag,
+      slivers: [
+        SliverAppBar.large(
+          title: Text(l.collections),
+          actionsPadding: const EdgeInsets.symmetric(
+            horizontal: LayoutConstants.smallPadding,
+          ),
+          actions: [
+            ContextMenuButton(
+              icon: Icon(
+                sortDirection.value == .ascending
+                    ? KoverIcons.ascending
+                    : KoverIcons.descending,
               ),
-            ],
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: LayoutConstants.mediumPadding,
+              menu: _menu(sortDirection: sortDirection, context: context),
             ),
-            sliver: SliverToBoxAdapter(
-              child: FilterInputField(controller: controller),
-            ),
+          ],
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: LayoutConstants.mediumPadding,
           ),
-          AsyncSliver(
-            asyncValue: collections,
-            data: (data) {
-              final filteredData = _filteredCollections(
-                data: data,
-                query: controller.text,
-              );
-              final sortedData = _sortedCollections(
-                data: filteredData,
-                direction: sortDirection.value,
-              );
+          sliver: SliverToBoxAdapter(
+            child: FilterInputField(controller: controller),
+          ),
+        ),
+        AsyncSliver(
+          asyncValue: collections,
+          data: (data) {
+            final filteredData = _filteredCollections(
+              data: data,
+              query: controller.text,
+            );
+            final sortedData = _sortedCollections(
+              data: filteredData,
+              direction: sortDirection.value,
+            );
 
-              return SliverPadding(
-                padding: LayoutConstants.smallEdgeInsets,
-                sliver: CollectionsSliverGrid(collections: sortedData),
-              );
-            },
-          ),
-          const SliverBottomPadding(),
-        ],
-      ),
+            return SliverPadding(
+              padding: LayoutConstants.smallEdgeInsets,
+              sliver: CollectionsSliverGrid(collections: sortedData),
+            );
+          },
+        ),
+        const SliverBottomPadding(),
+      ],
     );
   }
 

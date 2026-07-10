@@ -64,8 +64,16 @@ GoRouter router(Ref ref) {
                 TypedGoRoute<SpecialsRoute>(path: 'specials'),
               ],
             ),
+            TypedGoRoute<SeriesRoute>(
+              path: 'library/:libraryId',
+            ),
           ],
         ),
+      ],
+    ),
+    TypedStatefulShellBranch<AllSeriesBranch>(
+      routes: [
+        TypedGoRoute<AllSeriesRoute>(path: '/all-series'),
       ],
     ),
     TypedStatefulShellBranch<WantToReadBranch>(
@@ -73,33 +81,35 @@ GoRouter router(Ref ref) {
         TypedGoRoute<WantToReadRoute>(path: '/want-to-read'),
       ],
     ),
-    TypedStatefulShellBranch<LibraryBranch>(
+    TypedStatefulShellBranch<CollectionsBranch>(
+      routes: [
+        TypedGoRoute<CollectionsRoute>(
+          path: '/collections',
+          routes: [
+            TypedGoRoute<CollectionSeriesRoute>(
+              path: ':collectionId',
+            ),
+          ],
+        ),
+      ],
+    ),
+    TypedStatefulShellBranch<ReadingListsBranch>(
+      routes: [
+        TypedGoRoute<ReadingListsRoute>(
+          path: '/reading-lists',
+          routes: [
+            TypedGoRoute<ReadingListDetailsRoute>(
+              path: ':readingListId',
+            ),
+          ],
+        ),
+      ],
+    ),
+    TypedStatefulShellBranch<MenuBranch>(
       routes: [
         TypedGoRoute<LibraryRoute>(
           path: '/menu',
           routes: [
-            TypedGoRoute<AllSeriesRoute>(
-              path: 'all-series',
-            ),
-            TypedGoRoute<CollectionsRoute>(
-              path: 'collections',
-              routes: [
-                TypedGoRoute<CollectionSeriesRoute>(
-                  path: ':collectionId',
-                ),
-              ],
-            ),
-            TypedGoRoute<ReadingListsRoute>(
-              path: 'reading-lists',
-              routes: [
-                TypedGoRoute<ReadingListDetailsRoute>(
-                  path: ':readingListId',
-                ),
-              ],
-            ),
-            TypedGoRoute<SeriesRoute>(
-              path: 'library/:libraryId',
-            ),
             TypedGoRoute<DownloadQueueRoute>(
               path: 'download-queue',
             ),
@@ -133,8 +143,20 @@ class WantToReadBranch extends StatefulShellBranchData {
   const WantToReadBranch();
 }
 
-class LibraryBranch extends StatefulShellBranchData {
-  const LibraryBranch();
+class AllSeriesBranch extends StatefulShellBranchData {
+  const AllSeriesBranch();
+}
+
+class CollectionsBranch extends StatefulShellBranchData {
+  const CollectionsBranch();
+}
+
+class ReadingListsBranch extends StatefulShellBranchData {
+  const ReadingListsBranch();
+}
+
+class MenuBranch extends StatefulShellBranchData {
+  const MenuBranch();
 }
 
 class HomeRoute extends GoRouteData with $HomeRoute {

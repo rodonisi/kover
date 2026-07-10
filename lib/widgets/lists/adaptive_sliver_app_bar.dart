@@ -59,6 +59,7 @@ class AdaptiveSliverAppBar extends HookConsumerWidget {
           return Opacity(
             opacity: value.clamp(0.0, 1.0),
             child: FlexibleSpaceBar(
+              collapseMode: .pin,
               background: Stack(
                 children: [
                   if (background != null)

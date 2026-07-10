@@ -9,9 +9,11 @@ import 'package:kover/riverpod/managers/download_manager.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/router.dart';
-import 'package:kover/utils/constants/kover_icons.dart';
+import 'package:kover/riverpod/providers/settings/general_settings.dart';
+import 'package:kover/utils/extensions/navbar_destination.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/actions_app_bar/actions_app_bar.dart';
+import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -35,6 +37,19 @@ class MenuPage extends ConsumerWidget {
       ),
     );
 
+    final hiddenDestinations = ref.watch(
+      generalSettingsProvider.select(
+        (state) => state.whenData(
+          (state) => NavbarDestinations.values
+              .where(
+                (destination) =>
+                    !state.navbarDestinations.contains(destination),
+              )
+              .toSet(),
+        ),
+      ),
+    );
+
     return Scaffold(
       extendBody: true,
       body: SafeArea(
@@ -43,44 +58,33 @@ class MenuPage extends ConsumerWidget {
           slivers: [
             if (loggedIn) ...[
               const ActionsAppBar(),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: LayoutConstants.smallerPadding,
-                  horizontal: LayoutConstants.mediumPadding,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: AppListTile(
-                    title: l.allSeries,
-                    icon: const Icon(LucideIcons.list),
-                    onTap: () => const AllSeriesRoute().push(context),
-                  ),
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: LayoutConstants.smallerPadding,
-                  horizontal: LayoutConstants.mediumPadding,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: AppListTile(
-                    title: l.collections,
-                    icon: const Icon(KoverIcons.collection),
-                    onTap: () => const CollectionsRoute().push(context),
-                  ),
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: LayoutConstants.smallerPadding,
-                  horizontal: LayoutConstants.mediumPadding,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: AppListTile(
-                    title: l.readingLists,
-                    icon: const Icon(KoverIcons.readingList),
-                    onTap: () => const ReadingListsRoute().push(context),
-                  ),
-                ),
+              AsyncSliver(
+                asyncValue: hiddenDestinations,
+                data: (hiddenDestinations) {
+                  if (hiddenDestinations.isEmpty) {
+                    return const SliverToBoxAdapter();
+                  }
+                  return SliverToBoxAdapter(
+                    child: Column(
+                      mainAxisSize: .min,
+                      children: hiddenDestinations.map(
+                        (destination) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: LayoutConstants.smallerPadding,
+                              horizontal: LayoutConstants.mediumPadding,
+                            ),
+                            child: AppListTile(
+                              title: destination.getLabel(l),
+                              icon: Icon(destination.icon),
+                              onTap: () => destination.route.push(context),
+                            ),
+                          );
+                        },
+                      ).toList(),
+                    ),
+                  );
+                },
               ),
               SliverSection(title: l.libraries),
               const SliverLibraries(),

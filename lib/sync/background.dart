@@ -39,7 +39,9 @@ void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
     final db = AppDatabase();
     try {
-      final storage = const FlutterSecureStorage();
+      final storage = const FlutterSecureStorage(
+        iOptions: secureStorageIOSOptions,
+      );
 
       final storageEntry = await storage.read(key: Credentials.persistKey);
 
@@ -77,7 +79,6 @@ void callbackDispatcher() {
       final readerRepo = ReaderRepository(
         db: db,
         readerClient: ReaderSyncOperations(client: client),
-        seriesClient: SeriesSyncOperations(client: client, apiKey: apiKey),
       );
       final volumesRepo = VolumesRepository(
         db,

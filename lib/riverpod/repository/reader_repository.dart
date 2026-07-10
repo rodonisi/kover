@@ -3,10 +3,8 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/models/progress_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
-import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/reader_sync_operations.dart';
-import 'package:kover/sync/series_sync_operations.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -16,28 +14,20 @@ part 'reader_repository.g.dart';
 ReaderRepository readerRepository(Ref ref) {
   final db = ref.watch(databaseProvider);
   final restClient = ref.watch(restClientProvider);
-  final apiKey = ref.watch(apiKeyProvider);
   final readerClient = ReaderSyncOperations(client: restClient);
-  final seriesClient = SeriesSyncOperations(
-    client: restClient,
-    apiKey: apiKey ?? '',
-  );
   return ReaderRepository(
     db: db,
     readerClient: readerClient,
-    seriesClient: seriesClient,
   );
 }
 
 class ReaderRepository {
   final AppDatabase _db;
   final ReaderSyncOperations _readerClient;
-  final SeriesSyncOperations _seriesClient;
 
   ReaderRepository({
     required this._db,
     required this._readerClient,
-    required this._seriesClient,
   });
 
   /// Get continue point for [seriesId]
@@ -172,27 +162,11 @@ class ReaderRepository {
   /// than local
   Future<void> refreshOutdatedProgress() async {
     final batch = <ReadingProgressCompanion>[];
-    final remoteLastRead = await _seriesClient.getLastReadForSeries();
-    final localLastRead = await _db.readerDao.getLastReadDatePerSeries();
+    final outdated = await _db.readerDao.getOutdatedChapterIds();
 
-    final newer = remoteLastRead.entries.where((e) {
-      final local = localLastRead[e.key];
-      return local == null || e.value.isAfter(local);
-    });
-
-    for (final toUpdate in newer) {
-      final chaptersLastRead = await _db.readerDao
-          .getLastReadDatePerSeriesChapters(seriesId: toUpdate.key);
-
-      final outdated = chaptersLastRead.entries.where(
-        (e) => e.value == null || toUpdate.value.isAfter(e.value!),
-      );
-
-      final progress = await Future.wait(
-        outdated.map((c) async => await _readerClient.getProgress(c.key)),
-      );
-
-      batch.addAll(progress);
+    for (final c in outdated) {
+      final progress = await _readerClient.getProgress(c);
+      batch.add(progress);
     }
 
     await _db.readerDao.mergeProgressBatch(batch);

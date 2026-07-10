@@ -89,7 +89,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   /// Clear all content data from the database. Does not clear app state data (e.g. credentials, settings).
   /// Useful e.g. when switching user.
@@ -181,6 +181,26 @@ class AppDatabase extends _$AppDatabase {
         from5To6: (m, schema) async {
           await transaction(() async {
             await m.createTable(schema.sidenav);
+          });
+        },
+        from6To7: (m, schema) async {
+          await transaction(() async {
+            await m.alterTable(
+              TableMigration(
+                schema.chapters,
+                newColumns: [
+                  schema.chapters.remoteLastRead,
+                ],
+              ),
+            );
+            await m.alterTable(
+              TableMigration(
+                schema.series,
+                newColumns: [
+                  schema.series.remoteLastRead,
+                ],
+              ),
+            );
           });
         },
       ),

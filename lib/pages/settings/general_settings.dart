@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
+import 'package:kover/pages/settings/navbar_editor.dart';
 import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/constants/kover_icons.dart';
@@ -34,6 +35,7 @@ class GeneralSettings extends ConsumerWidget {
             ),
             const _ThemeMode(),
             const _OutlinedTheme(),
+            const NavbarEditor(),
             const _Locale(),
             const _SendDiagnostics(),
           ],

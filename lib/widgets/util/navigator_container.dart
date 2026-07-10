@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
+import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/riverpod/providers/settings/oneoffs.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
+import 'package:kover/utils/extensions/navbar_destination.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/util/async_value.dart';
@@ -19,6 +21,13 @@ class NavigatorContainer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final oneOffs = ref.watch(oneOffsProvider);
+    final destinations = ref.watch(
+      generalSettingsProvider.select(
+        (value) => value.whenData(
+          (value) => value.navbarDestinations,
+        ),
+      ),
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       oneOffs.whenData((oneOffs) async {
@@ -49,48 +58,69 @@ class NavigatorContainer extends ConsumerWidget {
             context: context,
             removeBottom: true,
             removeTop: true,
-            child: Async(
-              asyncValue: ref.watch(themeProvider),
-              data: (theme) => Card(
-                margin: EdgeInsets.zero,
-                clipBehavior: .hardEdge,
-                shape: RoundedRectangleBorder(
-                  side: theme.outlined
-                      ? BorderSide(
-                          color: Theme.of(context).colorScheme.outline,
-                          width: 2.0,
-                        )
-                      : BorderSide.none,
-                  borderRadius: BorderRadius.circular(24.0),
-                ),
-                child: NavigationBar(
-                  selectedIndex: navigationShell.currentIndex,
-                  onDestinationSelected: (index) {
-                    navigationShell.goBranch(
-                      index,
-                      initialLocation: true,
-                    );
-                  },
-                  destinations: [
-                    NavigationDestination(
-                      icon: const Icon(LucideIcons.house),
-                      label: l.home,
+            child: Async2(
+              asyncValue1: ref.watch(themeProvider),
+              asyncValue2: destinations,
+              data: (theme, destinations) {
+                final menuIndex = navigationShell.route.branches.length - 1;
+                return Card(
+                  margin: EdgeInsets.zero,
+                  clipBehavior: .hardEdge,
+                  shape: RoundedRectangleBorder(
+                    side: theme.outlined
+                        ? BorderSide(
+                            color: Theme.of(context).colorScheme.outline,
+                            width: 2.0,
+                          )
+                        : BorderSide.none,
+                    borderRadius: BorderRadius.circular(24.0),
+                  ),
+                  child: NavigationBar(
+                    selectedIndex: _mapSelectedIndex(
+                      shellIndex: navigationShell.currentIndex,
+                      destinations: destinations,
                     ),
-                    NavigationDestination(
-                      icon: const Icon(LucideIcons.star),
-                      label: l.wantToRead,
-                    ),
-                    NavigationDestination(
-                      icon: const Icon(LucideIcons.library),
-                      label: l.menu,
-                    ),
-                  ],
-                ),
-              ),
+                    onDestinationSelected: (index) {
+                      final shellIndex = index < destinations.length
+                          ? destinations[index].value
+                          : menuIndex;
+                      navigationShell.goBranch(
+                        shellIndex,
+                        initialLocation: true,
+                      );
+                    },
+                    destinations: [
+                      ...destinations.map((destination) {
+                        return NavigationDestination(
+                          icon: Icon(destination.icon),
+                          label: destination.getLabel(l),
+                        );
+                      }),
+                      NavigationDestination(
+                        icon: const Icon(LucideIcons.library),
+                        label: l.menu,
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ),
       ),
     );
+  }
+
+  static int _mapSelectedIndex({
+    required int shellIndex,
+    required List<NavbarDestinations> destinations,
+  }) {
+    final index = destinations.indexWhere((d) => d.value == shellIndex);
+
+    if (index < 0) {
+      return destinations.length;
+    }
+
+    return index;
   }
 }

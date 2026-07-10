@@ -8,6 +8,7 @@ import 'package:kover/riverpod/repository/series_repository.dart';
 import 'package:kover/riverpod/repository/server_settings_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
 import 'package:kover/riverpod/repository/want_to_read_repository.dart';
+import 'package:pool/pool.dart';
 
 class SyncEngine {
   final SeriesRepository seriesRepo;
@@ -21,7 +22,9 @@ class SyncEngine {
   final CollectionsRepository collectionsRepo;
   final ReadingListsRepository readingListsRepo;
 
-  const SyncEngine({
+  final _pool = Pool(4);
+
+  SyncEngine({
     required this.seriesRepo,
     required this.bookRepo,
     required this.librariesRepo,
@@ -35,71 +38,77 @@ class SyncEngine {
   });
 
   Future<void> syncAllSeries() async {
-    await seriesRepo.refreshAllSeries();
-    await seriesRepo.fetchMissingMetadata();
+    await _pool.withResource(seriesRepo.refreshAllSeries);
+    await _pool.withResource(seriesRepo.fetchMissingMetadata);
   }
 
   Future<void> syncMetadata() async {
-    await seriesRepo.fetchMissingMetadata();
+    await _pool.withResource(seriesRepo.fetchMissingMetadata);
   }
 
   Future<void> syncTocs() async {
-    await bookRepo.fetchMissingChaptersTocs();
+    await _pool.withResource(bookRepo.fetchMissingChaptersTocs);
   }
 
   Future<void> syncLibraries() async {
-    await librariesRepo.refreshLibraries();
-    await wantToReadRepo.mergeWantToRead();
+    await _pool.withResource(librariesRepo.refreshLibraries);
+    await _pool.withResource(wantToReadRepo.mergeWantToRead);
   }
 
   Future<void> syncRecentlyUpdated() async {
-    await seriesRepo.refreshRecentlyUpdated();
+    await _pool.withResource(seriesRepo.refreshRecentlyUpdated);
   }
 
   Future<void> syncRecentlyAdded() async {
-    await seriesRepo.refreshRecentlyAdded();
+    await _pool.withResource(seriesRepo.refreshRecentlyAdded);
   }
 
   Future<void> syncProgress() async {
-    await readerRepo.refreshOutdatedProgress();
-    await readerRepo.mergeProgress();
+    await _pool.withResource(readerRepo.refreshOutdatedProgress);
+    await _pool.withResource(readerRepo.mergeProgress);
   }
 
   Future<void> syncCollections() async {
-    await collectionsRepo.refreshCollections();
+    await _pool.withResource(collectionsRepo.refreshCollections);
   }
 
   Future<void> syncReadingLists() async {
-    await readingListsRepo.refreshReadingLists();
+    await _pool.withResource(readingListsRepo.refreshReadingLists);
   }
 
   Future<void> syncCovers() async {
     await Future.wait([
-      seriesRepo.fetchMissingCovers(),
-      volumesRepo.fetchMissingCovers(),
-      chaptersRepo.fetchMissingCovers(),
-      collectionsRepo.fetchMissingCovers(),
-      readingListsRepo.fetchMissingCovers(),
+      _pool.withResource(seriesRepo.fetchMissingCovers),
+      _pool.withResource(volumesRepo.fetchMissingCovers),
+      _pool.withResource(chaptersRepo.fetchMissingCovers),
+      _pool.withResource(collectionsRepo.fetchMissingCovers),
+      _pool.withResource(readingListsRepo.fetchMissingCovers),
     ]);
   }
 
   Future<void> syncSidenav() async {
-    await librariesRepo.refreshSidenav();
+    await _pool.withResource(librariesRepo.refreshSidenav);
   }
 
   Future<void> refreshMetadataAndDetails({required int seriesId}) async {
-    await seriesRepo.refreshMetadataAndDetails(seriesId: seriesId);
+    await _pool.withResource(
+      () => seriesRepo.refreshMetadataAndDetails(seriesId: seriesId),
+    );
   }
 
   Future<void> refreshCovers({required int seriesId}) async {
-    await seriesRepo.refreshCovers(seriesId: seriesId);
+    await _pool.withResource(
+      () => seriesRepo.refreshCovers(seriesId: seriesId),
+    );
   }
 
   Future<void> refreshToc({required int chapterId}) async {
-    await bookRepo.refreshChapterToc(chapterId: chapterId);
+    await _pool.withResource(
+      () => bookRepo.refreshChapterToc(chapterId: chapterId),
+    );
   }
 
   Future<void> refreshServerSettings() async {
-    await serverSettingsRepo.refreshServerSettings();
+    await _pool.withResource(serverSettingsRepo.refreshServerSettings);
   }
 }

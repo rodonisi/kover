@@ -22,6 +22,8 @@ sealed class KoverIcons {
   static const IconData ascending = LucideIcons.arrowDownNarrowWide;
   static const IconData descending = LucideIcons.arrowDownWideNarrow;
 
+  static const IconData home = LucideIcons.home;
+  static const IconData wantToRead = LucideIcons.star;
   static const IconData series = LucideIcons.list;
   static const IconData chapter = LucideIcons.fileText;
   static const IconData collection = LucideIcons.layoutGrid;
@@ -32,6 +34,11 @@ sealed class KoverIcons {
   static const IconData info = LucideIcons.info;
   static const IconData language = LucideIcons.languages;
   static const IconData trash = LucideIcons.trash;
+  static const IconData minus = LucideIcons.minus;
+  static const IconData plus = LucideIcons.plus;
+  static const IconData dragHandle = LucideIcons.gripHorizontal;
+  static const IconData navbar = LucideIcons.ellipsis;
+  static const IconData hidden = LucideIcons.eyeOff;
 
   static const IconData unlockedOrientation = LucideIcons.rotateCwSquare;
   static const IconData landscape = LucideIcons.rectangleHorizontal;

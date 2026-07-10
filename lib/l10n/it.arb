@@ -594,5 +594,17 @@
     "clearAll": "Rimuvi tutto",
     "@clearAll": {
         "description": "Label for the clear all button"
+    },
+    "syncingSidenav": "Sincronizzazione ordine della barra laterale",
+    "@syncingSidenav": {
+        "description": "Label for the sidenav syncing phase"
+    },
+    "reorderNavigationBar": "Riordina barra di navigazione",
+    "@reorderNavigationBar": {
+        "description": "Label for the reorder navigation bar settings entry"
+    },
+    "availableDestinations": "Destinazioni disponibili",
+    "@availableDestinations": {
+        "description": "Label for the available destinations section"
     }
 }

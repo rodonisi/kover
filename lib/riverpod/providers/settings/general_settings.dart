@@ -10,6 +10,18 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'general_settings.freezed.dart';
 part 'general_settings.g.dart';
 
+enum NavbarDestinations {
+  home(0),
+  allSeries(1),
+  wantToRead(2),
+  collections(3),
+  readingLists(4);
+
+  const NavbarDestinations(this.value);
+
+  final int value;
+}
+
 @freezed
 sealed class GeneralSettingsState with _$GeneralSettingsState {
   const GeneralSettingsState._();
@@ -17,6 +29,8 @@ sealed class GeneralSettingsState with _$GeneralSettingsState {
   const factory GeneralSettingsState({
     @Default(false) bool sendDiagnostics,
     String? localeString,
+    @Default(<NavbarDestinations>[.home, .wantToRead])
+    List<NavbarDestinations> navbarDestinations,
   }) = _GeneralSettingsState;
 
   factory GeneralSettingsState.fromJson(Map<String, Object?> json) =>
@@ -51,5 +65,24 @@ class GeneralSettings extends _$GeneralSettings {
       attributes: {'value': .string(value?.languageCode ?? 'null')},
     );
     state = AsyncData(current.copyWith(localeString: value?.languageCode));
+  }
+
+  Future<void> setNavbarDestinations(List<NavbarDestinations> value) async {
+    final current = await future;
+    log.info(
+      'set navbar destinations',
+      attributes: {'value': .string(value.map((e) => e.name).join(','))},
+    );
+    state = AsyncData(current.copyWith(navbarDestinations: value));
+  }
+
+  Future<void> resetNavbarDestinations() async {
+    final current = await future;
+    log.info('reset navbar destinations');
+    state = AsyncData(
+      current.copyWith(
+        navbarDestinations: const <NavbarDestinations>[.home, .wantToRead],
+      ),
+    );
   }
 }

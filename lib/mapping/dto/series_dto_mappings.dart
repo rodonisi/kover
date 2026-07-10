@@ -24,6 +24,7 @@ extension SeriesDtoMappings on SeriesDto {
       isBlacklisted: Value.absentIfNull(isBlacklisted),
       created: Value.absentIfNull(created?.normalizeUtc()),
       lastChapterAdded: Value.absentIfNull(lastChapterAddedUtc?.normalizeUtc()),
+      remoteLastRead: Value.absentIfNull(latestReadDate),
     );
   }
 }

@@ -34,6 +34,7 @@ class Series extends Table {
   DateTimeColumn get created => dateTime()();
   DateTimeColumn get lastChapterAdded => dateTime().nullable()();
   DateTimeColumn get lastSynced => dateTime().nullable()();
+  DateTimeColumn get remoteLastRead => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

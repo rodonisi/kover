@@ -13,11 +13,24 @@ import 'package:kover/widgets/context_menu/context_menu_button.dart';
 import 'package:kover/widgets/details/filter_input_field.dart';
 import 'package:kover/widgets/lists/series_sliver_grid.dart';
 import 'package:kover/widgets/util/async_value.dart';
+import 'package:kover/widgets/util/login_guard.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart' show LucideIcons;
 
 class AllSeriesPage extends StatelessWidget {
   const AllSeriesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      extendBody: true,
+      body: LoginGuard(child: AllSeriesPageContent()),
+    );
+  }
+}
+
+class AllSeriesPageContent extends StatelessWidget {
+  const AllSeriesPageContent({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +132,7 @@ class SeriesPage extends HookConsumerWidget {
     useListenable(controller);
 
     return Scaffold(
+      extendBody: true,
       body: CustomScrollView(
         keyboardDismissBehavior: .onDrag,
         slivers: [

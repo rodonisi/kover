@@ -1,1 +1,705 @@
-{}
+{
+    "languageName": "简体中文",
+    "@languageName": {
+        "description": "The localized name of this locale"
+    },
+    "language": "语言",
+    "@language": {
+        "description": "Title for the language settings entry"
+    },
+    "onDeck": "继续阅读",
+    "@onDeck": {
+        "description": "Label for the home page on deck section"
+    },
+    "recentlyUpdated": "最近更新",
+    "@recentlyUpdated": {
+        "description": "Label for the home page recently updated section"
+    },
+    "recentlyAdded": "最近加入",
+    "@recentlyAdded": {
+        "description": "Label for the home page recently added section"
+    },
+    "home": "主页",
+    "@home": {
+        "description": "Label for the home page"
+    },
+    "wantToRead": "想读",
+    "@wantToRead": {
+        "description": "Label for the want to read shelf"
+    },
+    "menu": "菜单",
+    "@menu": {
+        "description": "Label for the menu button"
+    },
+    "allSeries": "所有系列",
+    "@allSeries": {
+        "description": "Label for the all series menu entry"
+    },
+    "collections": "收藏",
+    "@collections": {
+        "description": "Label for the collections menu entry"
+    },
+    "readingLists": "阅读列表",
+    "@readingLists": {
+        "description": "Label for the reading lists menu entry"
+    },
+    "libraries": "书库",
+    "@libraries": {
+        "description": "Label for the libraries menu entry"
+    },
+    "settings": "设置",
+    "@settings": {
+        "description": "Label for the settings menu entry"
+    },
+    "more": "更多",
+    "@more": {
+        "description": "Label for the more section"
+    },
+    "downloadQueue": "下载队列",
+    "@downloadQueue": {
+        "description": "Label for the download queue menu entry"
+    },
+    "general": "常规",
+    "@general": {
+        "description": "Label for the general settings section"
+    },
+    "themeMode": "主题模式",
+    "@themeMode": {
+        "description": "Label for the theme mode setting"
+    },
+    "system": "系统",
+    "@system": {
+        "description": "Label for the system theme mode option"
+    },
+    "light": "明亮",
+    "@light": {
+        "description": "Label for the light theme mode option"
+    },
+    "dark": "深色",
+    "@dark": {
+        "description": "Label for the dark theme mode option"
+    },
+    "outlinedTheme": "线框主题",
+    "@outlinedTheme": {
+        "description": "Label for the outlined theme setting"
+    },
+    "sendDiagnostics": "发送匿名崩溃报告和诊断信息",
+    "@sendDiagnostics": {
+        "description": "Label for the send diagnostics setting"
+    },
+    "sendDiagnosticsDescription": "通过发送匿名错误和性能统计数据来帮助改进应用。这些数据不包含任何个人信息，仅用于改进应用。",
+    "@sendDiagnosticsDescription": {
+        "description": "Description for the send diagnostics setting"
+    },
+    "version": "版本：{version}（{buildNumber}）",
+    "@version": {
+        "description": "Label for the app version, with placeholders for version and build number",
+        "placeholders": {
+            "version": {
+                "description": "The version string of the application",
+                "type": "String",
+                "example": "1.0.0"
+            },
+            "buildNumber": {
+                "description": "The build number of the application",
+                "type": "String",
+                "example": "123"
+            }
+        }
+    },
+    "github": "GitHub",
+    "@github": {
+        "description": "Label for the GitHub link"
+    },
+    "madeWithLove": "用❤️制作",
+    "@madeWithLove": {
+        "description": "Label for the made with love message"
+    },
+    "dataManagement": "数据管理",
+    "@dataManagement": {
+        "description": "Label for the data management section"
+    },
+    "downloadAllCovers": "下载所有封面",
+    "@downloadAllCovers": {
+        "description": "Label for the download all covers option"
+    },
+    "downloadAllCoversDescription": "如果禁用，封面将仅随章节一起下载。未下载时，若有可用连接，封面将按需从服务器获取。",
+    "@downloadAllCoversDescription": {
+        "description": "Description for the download all covers option"
+    },
+    "maxConcurrentDownloads": "最大并发下载数",
+    "@maxConcurrentDownloads": {
+        "description": "Label for the max concurrent downloads setting"
+    },
+    "reclaimSpace": "释放空间",
+    "@reclaimSpace": {
+        "description": "Label for the reclaim space button"
+    },
+    "clearDownloads": "清除下载内容",
+    "@clearDownloads": {
+        "description": "Label for the clear downloads button"
+    },
+    "clearCovers": "清除封面",
+    "@clearCovers": {
+        "description": "Label for the clear covers button"
+    },
+    "clearDatabase": "清理数据库",
+    "@clearDatabase": {
+        "description": "Label for the clear database button"
+    },
+    "clearDatabaseDialogTitle": "您确定吗？",
+    "@clearDatabaseDialogTitle": {
+        "description": "Title for the clear database confirmation dialog"
+    },
+    "clearDatabaseDialogContent": "这将清除整个本地数据库，包括所有未同步的进度和已下载的数据。此操作无法撤消。",
+    "@clearDatabaseDialogContent": {
+        "description": "Content for the clear database confirmation dialog"
+    },
+    "cancel": "取消",
+    "@cancel": {
+        "description": "Label for the cancel button in dialogs"
+    },
+    "databaseBusy": "数据库忙碌中……",
+    "@databaseBusy": {
+        "description": "Message shown when the database is busy with an operation"
+    },
+    "databaseSize": "数据库大小",
+    "@databaseSize": {
+        "description": "Label for the database size information"
+    },
+    "credentials": "凭据",
+    "@credentials": {
+        "description": "Label for the credentials section in settings"
+    },
+    "baseUrl": "基础 URL",
+    "@baseUrl": {
+        "description": "Label for the base URL input field"
+    },
+    "apiKey": "API 密钥",
+    "@apiKey": {
+        "description": "Label for the API key input field"
+    },
+    "save": "保存",
+    "@save": {
+        "description": "Label for the save credentials button"
+    },
+    "sortBy": "排序方式",
+    "@sortBy": {
+        "description": "Label for the sort by option in list"
+    },
+    "name": "名称",
+    "@name": {
+        "description": "Label for sorting by name option"
+    },
+    "dateAdded": "添加日期",
+    "@dateAdded": {
+        "description": "Label for sorting by date added option"
+    },
+    "lastModified": "最近修改",
+    "@lastModified": {
+        "description": "Label for sorting by last modified option"
+    },
+    "sortDirection": "排序方向",
+    "@sortDirection": {
+        "description": "Label for the sort direction option in list"
+    },
+    "ascending": "升序",
+    "@ascending": {
+        "description": "Label for ascending sort direction option"
+    },
+    "descending": "降序",
+    "@descending": {
+        "description": "Label for descending sort direction option"
+    },
+    "specials": "特刊",
+    "@specials": {
+        "description": "Label for the specials section in the series details page"
+    },
+    "storyline": "故事线",
+    "@storyline": {
+        "description": "Label for the storyline section in the series details page"
+    },
+    "volumes": "卷",
+    "@volumes": {
+        "description": "Label for the volumes section in the series details page"
+    },
+    "chapters": "章节",
+    "@chapters": {
+        "description": "Label for the chapters section in the series details page"
+    },
+    "genres": "类型",
+    "@genres": {
+        "description": "Label for the genres chips in the series details page"
+    },
+    "writers": "作者",
+    "@writers": {
+        "description": "Label for the writers metadata in the series details page"
+    },
+    "filter": "筛选",
+    "@filter": {
+        "description": "Label for the filter button in lists"
+    },
+    "hideRead": "隐藏已读",
+    "@hideRead": {
+        "description": "Label for the hide read filter option in lists"
+    },
+    "goToChapter": "跳转到章节",
+    "@goToChapter": {
+        "description": "Label for the go to chapter button in the reading list chapter entry context menu"
+    },
+    "goToSeries": "跳转到系列",
+    "@goToSeries": {
+        "description": "Label for the go to series button in the reading list chapter entry context menu"
+    },
+    "markAsRead": "标记为已读",
+    "@markAsRead": {
+        "description": "Label for the mark as read button in context menus"
+    },
+    "markAsUnread": "标记为未读",
+    "@markAsUnread": {
+        "description": "Label for the mark as unread button in context menus"
+    },
+    "items": "{count, plural, =0{{count} 项} =1{{count} 项} other{{count} 项}}",
+    "@items": {
+        "description": "Label for the number of items, with pluralization",
+        "placeholders": {
+            "count": {
+                "description": "The amount of items",
+                "type": "int",
+                "example": "2"
+            }
+        }
+    },
+    "unsupportedFormat": "不支持的格式：{format}",
+    "@unsupportedFormat": {
+        "description": "Message shown when trying to open a chapter in an unsupported format",
+        "placeholders": {
+            "format": {
+                "description": "The format enum name for the unsupported format",
+                "type": "String",
+                "example": "epub"
+            }
+        }
+    },
+    "back": "返回",
+    "@back": {
+        "description": "Label for back buttons"
+    },
+    "tableOfContents": "目录",
+    "@tableOfContents": {
+        "description": "Label for the table of contents drawer in the reader"
+    },
+    "notSignedIn": "未登录",
+    "@notSignedIn": {
+        "description": "Heading text when user is not signed in"
+    },
+    "noCredentialsDescription": "未配置凭据。请在设置中添加服务器 URL 和 API 密钥。",
+    "@noCredentialsDescription": {
+        "description": "Description text when no credentials are configured"
+    },
+    "openSettings": "打开设置",
+    "@openSettings": {
+        "description": "Label for the button to open settings"
+    },
+    "connectionError": "连接错误",
+    "@connectionError": {
+        "description": "Heading text when a connection error occurs"
+    },
+    "connectionErrorDescription": "获取用户信息失败。请检查凭据或重试。",
+    "@connectionErrorDescription": {
+        "description": "Description text when a connection error occurs"
+    },
+    "retry": "重试",
+    "@retry": {
+        "description": "Label for the retry button"
+    },
+    "sendDiagnosticsDialogTitle": "是否发送匿名崩溃报告和诊断信息？",
+    "@sendDiagnosticsDialogTitle": {
+        "description": "Title for the monitoring opt-out dialog"
+    },
+    "sendDiagnosticsChangeable": "可以随时在设置中更改此选项。",
+    "@sendDiagnosticsChangeable": {
+        "description": "Message shown in the monitoring opt-out dialog indicating the setting can be changed later"
+    },
+    "noThanks": "不，谢谢",
+    "@noThanks": {
+        "description": "Label for the decline button in the monitoring opt-out dialog"
+    },
+    "imIn": "好的！",
+    "@imIn": {
+        "description": "Label for the accept button in the monitoring opt-out dialog"
+    },
+    "addToWantToRead": "添加到想读",
+    "@addToWantToRead": {
+        "description": "Label for the add to want to read context menu item"
+    },
+    "removeFromWantToRead": "从想读中移除",
+    "@removeFromWantToRead": {
+        "description": "Label for the remove from want to read context menu item"
+    },
+    "download": "下载",
+    "@download": {
+        "description": "Label for the download context menu item"
+    },
+    "removeDownload": "移除下载内容",
+    "@removeDownload": {
+        "description": "Label for the remove download context menu item"
+    },
+    "refreshMetadata": "刷新元数据",
+    "@refreshMetadata": {
+        "description": "Label for the refresh metadata context menu item"
+    },
+    "refreshCovers": "刷新封面",
+    "@refreshCovers": {
+        "description": "Label for the refresh covers context menu item"
+    },
+    "noActiveSyncOperations": "没有正在进行的同步操作",
+    "@noActiveSyncOperations": {
+        "description": "Message shown when there are no active sync operations"
+    },
+    "syncingAllSeries": "同步所有系列",
+    "@syncingAllSeries": {
+        "description": "Label for the syncing all series phase"
+    },
+    "syncingMetadata": "同步元数据",
+    "@syncingMetadata": {
+        "description": "Label for the syncing metadata phase"
+    },
+    "syncingRecentlyAdded": "同步最近添加",
+    "@syncingRecentlyAdded": {
+        "description": "Label for the syncing recently added phase"
+    },
+    "syncingRecentlyUpdated": "同步最近更新",
+    "@syncingRecentlyUpdated": {
+        "description": "Label for the syncing recently updated phase"
+    },
+    "syncingLibraries": "同步书库",
+    "@syncingLibraries": {
+        "description": "Label for the syncing libraries phase"
+    },
+    "syncingProgress": "同步进度",
+    "@syncingProgress": {
+        "description": "Label for the syncing progress phase"
+    },
+    "syncingCovers": "同步封面",
+    "@syncingCovers": {
+        "description": "Label for the syncing covers phase"
+    },
+    "syncingCollections": "同步收藏",
+    "@syncingCollections": {
+        "description": "Label for the syncing collections phase"
+    },
+    "syncingReadingLists": "同步阅读列表",
+    "@syncingReadingLists": {
+        "description": "Label for the syncing reading lists phase"
+    },
+    "syncingSidenav": "同步侧边导航顺序",
+    "@syncingSidenav": {
+        "description": "Label for the sidenav syncing phase"
+    },
+    "refreshingMetadataForSeries": "正在刷新系列 {seriesId} 的元数据",
+    "@refreshingMetadataForSeries": {
+        "description": "Label for the refreshing metadata phase with the series ID",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "refreshingCoversForSeries": "正在刷新系列 {seriesId} 的封面",
+    "@refreshingCoversForSeries": {
+        "description": "Label for the refreshing covers phase with the series ID",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series which covers are being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "refreshingServerSettings": "刷新服务器设置",
+    "@refreshingServerSettings": {
+        "description": "Label for the refreshing server settings phase"
+    },
+    "series": "系列",
+    "@series": {
+        "description": "Label for the series search section header"
+    },
+    "moreCount": "+{count} 更多",
+    "@moreCount": {
+        "description": "Label indicating there are more items beyond the displayed amount",
+        "placeholders": {
+            "count": {
+                "description": "The count of items beyond the displayed amount",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "wordCount": "{wordCount} 字",
+    "@wordCount": {
+        "description": "Label for the word count of a book entry",
+        "placeholders": {
+            "wordCount": {
+                "description": "The amount of words",
+                "type": "int",
+                "format": "compact",
+                "example": "42000"
+            }
+        }
+    },
+    "hoursCount": "约 {hours} 小时",
+    "@hoursCount": {
+        "description": "Label for the estimated reading time in hours",
+        "placeholders": {
+            "hours": {
+                "description": "The estimated amount of hours",
+                "type": "double",
+                "format": "decimalPatternDigits",
+                "optionalParameters": {
+                    "decimalDigits": 1
+                },
+                "example": "4.2"
+            }
+        }
+    },
+    "pagesCount": "{pages} 页",
+    "@pagesCount": {
+        "description": "Label for the page count of a an entry",
+        "placeholders": {
+            "pages": {
+                "description": "The amount of pages",
+                "type": "int",
+                "format": "compact",
+                "example": "42000"
+            }
+        }
+    },
+    "continueReading": "继续阅读",
+    "@continueReading": {
+        "description": "Label for the continue reading button"
+    },
+    "summary": "概要",
+    "@summary": {
+        "description": "Label for the summary section heading"
+    },
+    "showMore": "显示更多",
+    "@showMore": {
+        "description": "Label for the show more button"
+    },
+    "showLess": "显示更少",
+    "@showLess": {
+        "description": "Label for the show less button"
+    },
+    "cancelAll": "取消全部",
+    "@cancelAll": {
+        "description": "Label for the cancel all downloads button"
+    },
+    "noDownloadsInQueue": "队列中没有下载任务",
+    "@noDownloadsInQueue": {
+        "description": "Message shown when there are no downloads in the queue"
+    },
+    "readerSettings": "阅读器设置",
+    "@readerSettings": {
+        "description": "Label for the reader settings bottom sheet title"
+    },
+    "readingDirection": "阅读方向",
+    "@readingDirection": {
+        "description": "Label for the reading direction setting"
+    },
+    "leftToRight": "从左到右",
+    "@leftToRight": {
+        "description": "Label for the left to right reading direction option"
+    },
+    "rightToLeft": "从右到左",
+    "@rightToLeft": {
+        "description": "Label for the right to left reading direction option"
+    },
+    "readerMode": "阅读模式",
+    "@readerMode": {
+        "description": "Label for the reader mode setting"
+    },
+    "vertical": "垂直",
+    "@vertical": {
+        "description": "Label for the vertical reader mode option"
+    },
+    "horizontal": "水平",
+    "@horizontal": {
+        "description": "Label for the horizontal reader mode option"
+    },
+    "twoPage": "双页",
+    "@twoPage": {
+        "description": "Label for the two page reader mode option"
+    },
+    "fitDirection": "适配方向",
+    "@fitDirection": {
+        "description": "Label for the image fit direction setting"
+    },
+    "contain": "适应",
+    "@contain": {
+        "description": "Label for the contain image fit option"
+    },
+    "width": "宽度",
+    "@width": {
+        "description": "Label for the fit width image option"
+    },
+    "height": "高度",
+    "@height": {
+        "description": "Label for the fit height image option"
+    },
+    "margins": "边距",
+    "@margins": {
+        "description": "Label for the margins setting"
+    },
+    "verticalGap": "垂直间距",
+    "@verticalGap": {
+        "description": "Label for the vertical gap setting"
+    },
+    "pageGap": "页面间距",
+    "@pageGap": {
+        "description": "Label for the page gap setting"
+    },
+    "coverPage": "封面页",
+    "@coverPage": {
+        "description": "Label for the cover page setting"
+    },
+    "coverPageDescription": "将第一页视为封面，以单页形式显示",
+    "@coverPageDescription": {
+        "description": "Description for the cover page setting"
+    },
+    "ignoreSafeAreas": "忽略安全区域",
+    "@ignoreSafeAreas": {
+        "description": "Label for the ignore safe areas setting"
+    },
+    "showProgressBar": "显示进度条",
+    "@showProgressBar": {
+        "description": "Label for the show progress bar setting"
+    },
+    "setDefaults": "设为默认",
+    "@setDefaults": {
+        "description": "Label for the set defaults button"
+    },
+    "reset": "重置",
+    "@reset": {
+        "description": "Label for the reset button"
+    },
+    "fontSize": "字体大小",
+    "@fontSize": {
+        "description": "Label for the font size setting"
+    },
+    "lineHeight": "行高",
+    "@lineHeight": {
+        "description": "Label for the line height setting"
+    },
+    "wordSpacing": "词间距",
+    "@wordSpacing": {
+        "description": "Label for the word spacing setting"
+    },
+    "letterSpacing": "字符间距",
+    "@letterSpacing": {
+        "description": "Label for the letter spacing setting"
+    },
+    "highlightResumeParagraph": "高亮续读段落",
+    "@highlightResumeParagraph": {
+        "description": "Label for the highlight resume paragraph setting"
+    },
+    "dismiss": "忽略",
+    "@dismiss": {
+        "description": "Label for the dismiss button in chapter snackbar"
+    },
+    "go": "前往",
+    "@go": {
+        "description": "Label for the go button in chapter snackbar"
+    },
+    "previousChapter": "上一章：{chapterTitle}",
+    "@previousChapter": {
+        "description": "Label for the previous chapter snackbar with the chapter title",
+        "placeholders": {
+            "chapterTitle": {
+                "description": "The title of the previous chapter",
+                "type": "String",
+                "example": "Chapter 2"
+            }
+        }
+    },
+    "nextChapter": "下一章：{chapterTitle}",
+    "@nextChapter": {
+        "description": "Label for the next chapter snackbar with the chapter title",
+        "placeholders": {
+            "chapterTitle": {
+                "description": "The title of the next chapter",
+                "type": "String",
+                "example": "Chapter 3"
+            }
+        }
+    },
+    "read": "阅读",
+    "@read": {
+        "description": "Label for the read action button on cover cards"
+    },
+    "syncingTocs": "同步章节目录",
+    "@syncingTocs": {
+        "description": "Label for the syncing chapters TOCs phase"
+    },
+    "refreshingChapterToc": "正在刷新章节 {chapterId} 的目录",
+    "@refreshingChapterToc": {
+        "description": "Label for the syncing chapter TOC phase with the chapter ID",
+        "placeholders": {
+            "chapterId": {
+                "description": "The ID of the chapter which TOC is being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "invalidCredentials": "无效的凭据",
+    "@invalidCredentials": {
+        "description": "User display error displayed when credentials are invalid"
+    },
+    "orientation": "方向",
+    "@orientation": {
+        "description": "Label for the orientation setting"
+    },
+    "portrait": "纵向",
+    "@portrait": {
+        "description": "Label for the portrait orientation option"
+    },
+    "landscape": "横向",
+    "@landscape": {
+        "description": "Label for the landscape orientation option"
+    },
+    "manageHeaders": "管理标头",
+    "@manageHeaders": {
+        "description": "Label for the manage headers settings entry"
+    },
+    "headerName": "标头名称",
+    "@headerName": {
+        "description": "Label for the header name input field"
+    },
+    "headerValue": "标头值",
+    "@headerValue": {
+        "description": "Label for the header value input field"
+    },
+    "addHeader": "添加标头",
+    "@addHeader": {
+        "description": "Label for the add header button"
+    },
+    "savedHeaders": "已保存的标头",
+    "@savedHeaders": {
+        "description": "Label for the saved headers section"
+    },
+    "clearAll": "清除全部",
+    "@clearAll": {
+        "description": "Label for the clear all button"
+    },
+    "reorderNavigationBar": "重新排序导航栏",
+    "@reorderNavigationBar": {
+        "description": "Label for the reorder navigation bar settings entry"
+    },
+    "availableDestinations": "可用目的地",
+    "@availableDestinations": {
+        "description": "Label for the available destinations section"
+    }
+}

@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kover/models/enums/format.dart';
 import 'package:kover/models/enums/library_type.dart';
 import 'generated/schema.dart';
 
@@ -13,6 +14,7 @@ import 'generated/schema_v3.dart' as v3;
 import 'generated/schema_v4.dart' as v4;
 import 'generated/schema_v5.dart' as v5;
 import 'generated/schema_v6.dart' as v6;
+import 'generated/schema_v7.dart' as v7;
 
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -69,6 +71,82 @@ void main() {
       expect(libraries.first.includeInSearch, true);
       expect(libraries.first.defaultLanguage, null);
       expect(libraries.first.lastScanned, null);
+
+      await db.close();
+    });
+  });
+
+  group('from 6 to 7', () {
+    test('does not corrupt existing chapters', () async {
+      final schema = await verifier.schemaAt(6);
+      final oldDb = v6.DatabaseAtV6(schema.newConnection());
+      await oldDb
+          .into(oldDb.chapters)
+          .insert(
+            v6.ChaptersCompanion.insert(
+              id: const Value(1),
+              volumeId: 1,
+              seriesId: 1,
+              title: const Value('Test Chapter'),
+              minNumber: 1.0,
+              maxNumber: 1.0,
+              pages: 42,
+              wordCount: 42,
+              sortOrder: 1.0,
+              format: 'epub',
+              releaseDate: DateTime.now().millisecondsSinceEpoch,
+              created: DateTime.now().millisecondsSinceEpoch,
+              lastModified: DateTime.now().millisecondsSinceEpoch,
+            ),
+          );
+      await oldDb.close();
+
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, 7);
+
+      final chapters = await db.select(db.chapters).get();
+      expect(chapters, hasLength(1));
+      expect(chapters.first.id, 1);
+      expect(chapters.first.volumeId, 1);
+      expect(chapters.first.seriesId, 1);
+      expect(chapters.first.title, 'Test Chapter');
+      expect(chapters.first.minNumber, 1.0);
+      expect(chapters.first.maxNumber, 1.0);
+      expect(chapters.first.pages, 42);
+      expect(chapters.first.wordCount, 42);
+      expect(chapters.first.sortOrder, 1.0);
+      expect(chapters.first.format, Format.epub);
+      expect(chapters.first.remoteLastRead, null);
+
+      await db.close();
+    });
+
+    test('does not corrupt existing series', () async {
+      final schema = await verifier.schemaAt(6);
+      final oldDb = v6.DatabaseAtV6(schema.newConnection());
+      await oldDb
+          .into(oldDb.series)
+          .insert(
+            v6.SeriesCompanion.insert(
+              id: const Value(1),
+              libraryId: 1,
+              name: 'Test Series',
+              format: 'epub',
+              created: DateTime.now().millisecondsSinceEpoch,
+            ),
+          );
+      await oldDb.close();
+
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, 7);
+
+      final series = await db.select(db.series).get();
+      expect(series, hasLength(1));
+      expect(series.first.id, 1);
+      expect(series.first.libraryId, 1);
+      expect(series.first.name, 'Test Series');
+      expect(series.first.format, Format.epub);
+      expect(series.first.remoteLastRead, null);
 
       await db.close();
     });

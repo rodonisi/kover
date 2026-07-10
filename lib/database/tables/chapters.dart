@@ -33,6 +33,7 @@ class Chapters extends Table {
   BoolColumn get isStoryline => boolean().withDefault(const Constant(false))();
   DateTimeColumn get releaseDate => dateTime()();
 
+  DateTimeColumn get remoteLastRead => dateTime().nullable()();
   DateTimeColumn get created => dateTime()();
   DateTimeColumn get lastModified => dateTime()();
 

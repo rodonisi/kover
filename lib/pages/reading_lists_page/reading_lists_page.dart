@@ -13,10 +13,23 @@ import 'package:kover/widgets/context_menu/context_menu_button.dart';
 import 'package:kover/widgets/details/filter_input_field.dart';
 import 'package:kover/widgets/lists/reading_lists_sliver_grid.dart';
 import 'package:kover/widgets/util/async_value.dart';
+import 'package:kover/widgets/util/login_guard.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 
-class ReadingListsPage extends HookConsumerWidget {
+class ReadingListsPage extends StatelessWidget {
   const ReadingListsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      extendBody: true,
+      body: LoginGuard(child: ReadingListsPageContent()),
+    );
+  }
+}
+
+class ReadingListsPageContent extends HookConsumerWidget {
+  const ReadingListsPageContent({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,55 +44,53 @@ class ReadingListsPage extends HookConsumerWidget {
       ref.read(syncManagerProvider.notifier).syncReadingLists();
     });
 
-    return Scaffold(
-      body: CustomScrollView(
-        keyboardDismissBehavior: .onDrag,
-        slivers: [
-          SliverAppBar.large(
-            title: Text(l.readingLists),
-            actionsPadding: const EdgeInsets.symmetric(
-              horizontal: LayoutConstants.smallPadding,
-            ),
-            actions: [
-              ContextMenuButton(
-                icon: Icon(
-                  sortDirection.value == .ascending
-                      ? KoverIcons.ascending
-                      : KoverIcons.descending,
-                ),
-                menu: _menu(sortDirection: sortDirection, context: context),
+    return CustomScrollView(
+      keyboardDismissBehavior: .onDrag,
+      slivers: [
+        SliverAppBar.large(
+          title: Text(l.readingLists),
+          actionsPadding: const EdgeInsets.symmetric(
+            horizontal: LayoutConstants.smallPadding,
+          ),
+          actions: [
+            ContextMenuButton(
+              icon: Icon(
+                sortDirection.value == .ascending
+                    ? KoverIcons.ascending
+                    : KoverIcons.descending,
               ),
-            ],
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: LayoutConstants.mediumPadding,
+              menu: _menu(sortDirection: sortDirection, context: context),
             ),
-            sliver: SliverToBoxAdapter(
-              child: FilterInputField(controller: controller),
-            ),
+          ],
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: LayoutConstants.mediumPadding,
           ),
-          AsyncSliver(
-            asyncValue: readingLists,
-            data: (data) {
-              final filteredData = _filteredReadingLists(
-                data: data,
-                query: controller.text,
-              );
-              final sortedData = _sortedReadinglists(
-                data: filteredData,
-                direction: sortDirection.value,
-              );
+          sliver: SliverToBoxAdapter(
+            child: FilterInputField(controller: controller),
+          ),
+        ),
+        AsyncSliver(
+          asyncValue: readingLists,
+          data: (data) {
+            final filteredData = _filteredReadingLists(
+              data: data,
+              query: controller.text,
+            );
+            final sortedData = _sortedReadinglists(
+              data: filteredData,
+              direction: sortDirection.value,
+            );
 
-              return SliverPadding(
-                padding: LayoutConstants.smallEdgeInsets,
-                sliver: ReadingListsSliverGrid(readingLists: sortedData),
-              );
-            },
-          ),
-          const SliverBottomPadding(),
-        ],
-      ),
+            return SliverPadding(
+              padding: LayoutConstants.smallEdgeInsets,
+              sliver: ReadingListsSliverGrid(readingLists: sortedData),
+            );
+          },
+        ),
+        const SliverBottomPadding(),
+      ],
     );
   }
 
