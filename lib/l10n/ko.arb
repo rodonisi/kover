@@ -1,1 +1,705 @@
-{}
+{
+    "languageName": "한국어",
+    "@languageName": {
+        "description": "The localized name of this locale"
+    },
+    "language": "언어",
+    "@language": {
+        "description": "Title for the language settings entry"
+    },
+    "onDeck": "계속 읽기",
+    "@onDeck": {
+        "description": "Label for the home page on deck section"
+    },
+    "recentlyUpdated": "최근 갱신된 책",
+    "@recentlyUpdated": {
+        "description": "Label for the home page recently updated section"
+    },
+    "recentlyAdded": "최근 추가된 책",
+    "@recentlyAdded": {
+        "description": "Label for the home page recently added section"
+    },
+    "home": "홈",
+    "@home": {
+        "description": "Label for the home page"
+    },
+    "wantToRead": "읽고 싶은 책",
+    "@wantToRead": {
+        "description": "Label for the want to read shelf"
+    },
+    "menu": "메뉴",
+    "@menu": {
+        "description": "Label for the menu button"
+    },
+    "allSeries": "모든 책",
+    "@allSeries": {
+        "description": "Label for the all series menu entry"
+    },
+    "collections": "컬렉션",
+    "@collections": {
+        "description": "Label for the collections menu entry"
+    },
+    "readingLists": "읽기 목록",
+    "@readingLists": {
+        "description": "Label for the reading lists menu entry"
+    },
+    "libraries": "나의 서재",
+    "@libraries": {
+        "description": "Label for the libraries menu entry"
+    },
+    "settings": "설정",
+    "@settings": {
+        "description": "Label for the settings menu entry"
+    },
+    "more": "더보기",
+    "@more": {
+        "description": "Label for the more section"
+    },
+    "downloadQueue": "다운로드 대기열",
+    "@downloadQueue": {
+        "description": "Label for the download queue menu entry"
+    },
+    "general": "일반",
+    "@general": {
+        "description": "Label for the general settings section"
+    },
+    "themeMode": "색상 모드",
+    "@themeMode": {
+        "description": "Label for the theme mode setting"
+    },
+    "system": "시스템",
+    "@system": {
+        "description": "Label for the system theme mode option"
+    },
+    "light": "라이트 모드",
+    "@light": {
+        "description": "Label for the light theme mode option"
+    },
+    "dark": "다크 모드",
+    "@dark": {
+        "description": "Label for the dark theme mode option"
+    },
+    "outlinedTheme": "글자 테두리",
+    "@outlinedTheme": {
+        "description": "Label for the outlined theme setting"
+    },
+    "sendDiagnostics": "익명으로 충돌 보고서 보내기",
+    "@sendDiagnostics": {
+        "description": "Label for the send diagnostics setting"
+    },
+    "sendDiagnosticsDescription": "익명의 오류 및 성능 통계 데이터를 전송하여 앱 개선에 기여해 주세요. 이 데이터에는 어떠한 개인정보도 포함되어 있지 않으며, 오로지 앱 개선을 위해서만 사용됩니다.",
+    "@sendDiagnosticsDescription": {
+        "description": "Description for the send diagnostics setting"
+    },
+    "version": "버전: {version} ({buildNumber})",
+    "@version": {
+        "description": "Label for the app version, with placeholders for version and build number",
+        "placeholders": {
+            "version": {
+                "description": "The version string of the application",
+                "type": "String",
+                "example": "1.0.0"
+            },
+            "buildNumber": {
+                "description": "The build number of the application",
+                "type": "String",
+                "example": "123"
+            }
+        }
+    },
+    "github": "깃허브",
+    "@github": {
+        "description": "Label for the GitHub link"
+    },
+    "dataManagement": "데이터 관리",
+    "@dataManagement": {
+        "description": "Label for the data management section"
+    },
+    "downloadAllCovers": "모든 책 표지 다운로드",
+    "@downloadAllCovers": {
+        "description": "Label for the download all covers option"
+    },
+    "downloadAllCoversDescription": "비활성화하면 책 표지는 책을 내려받을 때만 함께 저장됩니다. 책 표지가 저장되어 있지 않아도 인터넷에 연결되어 있으면 서버에서 가져옵니다.",
+    "@downloadAllCoversDescription": {
+        "description": "Description for the download all covers option"
+    },
+    "maxConcurrentDownloads": "최대 동시 다운로드 수",
+    "@maxConcurrentDownloads": {
+        "description": "Label for the max concurrent downloads setting"
+    },
+    "reclaimSpace": "저장공간 정리",
+    "@reclaimSpace": {
+        "description": "Label for the reclaim space button"
+    },
+    "clearDownloads": "내려받은 모든 책 삭제",
+    "@clearDownloads": {
+        "description": "Label for the clear downloads button"
+    },
+    "clearCovers": "모든 책 표지 삭제",
+    "@clearCovers": {
+        "description": "Label for the clear covers button"
+    },
+    "clearDatabase": "모든 읽기 기록 삭제",
+    "@clearDatabase": {
+        "description": "Label for the clear database button"
+    },
+    "clearDatabaseDialogTitle": "정말 삭제하시겠습니까?",
+    "@clearDatabaseDialogTitle": {
+        "description": "Title for the clear database confirmation dialog"
+    },
+    "clearDatabaseDialogContent": "이 작업은 동기화되지 않은 읽은 기록과 내려받은 데이터를 포함해 기기에 저장된 모든 데이터를 삭제합니다. 삭제한 데이터는 복구할 수 없습니다.",
+    "@clearDatabaseDialogContent": {
+        "description": "Content for the clear database confirmation dialog"
+    },
+    "cancel": "취소",
+    "@cancel": {
+        "description": "Label for the cancel button in dialogs"
+    },
+    "databaseBusy": "데이터를 처리하는 중…",
+    "@databaseBusy": {
+        "description": "Message shown when the database is busy with an operation"
+    },
+    "databaseSize": "데이터베이스 크기",
+    "@databaseSize": {
+        "description": "Label for the database size information"
+    },
+    "credentials": "로그인 정보",
+    "@credentials": {
+        "description": "Label for the credentials section in settings"
+    },
+    "baseUrl": "베이스 URL",
+    "@baseUrl": {
+        "description": "Label for the base URL input field"
+    },
+    "save": "저장",
+    "@save": {
+        "description": "Label for the save credentials button"
+    },
+    "sortBy": "정렬 기준",
+    "@sortBy": {
+        "description": "Label for the sort by option in list"
+    },
+    "name": "이름",
+    "@name": {
+        "description": "Label for sorting by name option"
+    },
+    "dateAdded": "최근 추가한 날짜",
+    "@dateAdded": {
+        "description": "Label for sorting by date added option"
+    },
+    "lastModified": "최근 수정한 날짜",
+    "@lastModified": {
+        "description": "Label for sorting by last modified option"
+    },
+    "sortDirection": "정렬 순서",
+    "@sortDirection": {
+        "description": "Label for the sort direction option in list"
+    },
+    "ascending": "오름차순",
+    "@ascending": {
+        "description": "Label for ascending sort direction option"
+    },
+    "descending": "내림차순",
+    "@descending": {
+        "description": "Label for descending sort direction option"
+    },
+    "specials": "특별편",
+    "@specials": {
+        "description": "Label for the specials section in the series details page"
+    },
+    "apiKey": "API 키",
+    "@apiKey": {
+        "description": "Label for the API key input field"
+    },
+    "storyline": "줄거리",
+    "@storyline": {
+        "description": "Label for the storyline section in the series details page"
+    },
+    "volumes": "책 목록",
+    "@volumes": {
+        "description": "Label for the volumes section in the series details page"
+    },
+    "chapters": "목록",
+    "@chapters": {
+        "description": "Label for the chapters section in the series details page"
+    },
+    "genres": "장르",
+    "@genres": {
+        "description": "Label for the genres chips in the series details page"
+    },
+    "writers": "글쓴이",
+    "@writers": {
+        "description": "Label for the writers metadata in the series details page"
+    },
+    "filter": "정렬",
+    "@filter": {
+        "description": "Label for the filter button in lists"
+    },
+    "hideRead": "숨기기",
+    "@hideRead": {
+        "description": "Label for the hide read filter option in lists"
+    },
+    "goToChapter": "해당 권으로 이동",
+    "@goToChapter": {
+        "description": "Label for the go to chapter button in the reading list chapter entry context menu"
+    },
+    "goToSeries": "작품으로 이동",
+    "@goToSeries": {
+        "description": "Label for the go to series button in the reading list chapter entry context menu"
+    },
+    "markAsRead": "읽음으로 표시",
+    "@markAsRead": {
+        "description": "Label for the mark as read button in context menus"
+    },
+    "markAsUnread": "읽지 않음으로 표시",
+    "@markAsUnread": {
+        "description": "Label for the mark as unread button in context menus"
+    },
+    "items": "{count, plural, =0{{count}개} =1{{count}개} other{{count}개}}",
+    "@items": {
+        "description": "Label for the number of items, with pluralization",
+        "placeholders": {
+            "count": {
+                "description": "The amount of items",
+                "type": "int",
+                "example": "2"
+            }
+        }
+    },
+    "unsupportedFormat": "지원하지 않는 형식입니다: {format}",
+    "@unsupportedFormat": {
+        "description": "Message shown when trying to open a chapter in an unsupported format",
+        "placeholders": {
+            "format": {
+                "description": "The format enum name for the unsupported format",
+                "type": "String",
+                "example": "epub"
+            }
+        }
+    },
+    "back": "뒤로가기",
+    "@back": {
+        "description": "Label for back buttons"
+    },
+    "tableOfContents": "목차",
+    "@tableOfContents": {
+        "description": "Label for the table of contents drawer in the reader"
+    },
+    "notSignedIn": "로그인하지 않음",
+    "@notSignedIn": {
+        "description": "Heading text when user is not signed in"
+    },
+    "noCredentialsDescription": "로그인 정보가 설정되지 않았습니다. 설정에서 서버 주소와 API 키를 추가해 주세요.",
+    "@noCredentialsDescription": {
+        "description": "Description text when no credentials are configured"
+    },
+    "openSettings": "설정 열기",
+    "@openSettings": {
+        "description": "Label for the button to open settings"
+    },
+    "connectionError": "연결 오류",
+    "@connectionError": {
+        "description": "Heading text when a connection error occurs"
+    },
+    "connectionErrorDescription": "사용자 정보를 불러오지 못했습니다. 로그인 정보를 확인하거나 다시 시도해 주세요.",
+    "@connectionErrorDescription": {
+        "description": "Description text when a connection error occurs"
+    },
+    "retry": "재시도",
+    "@retry": {
+        "description": "Label for the retry button"
+    },
+    "sendDiagnosticsDialogTitle": "익명 오류 보고서와 진단 정보를 전송하시겠습니까?",
+    "@sendDiagnosticsDialogTitle": {
+        "description": "Title for the monitoring opt-out dialog"
+    },
+    "sendDiagnosticsChangeable": "이 설정은 언제든지 변경할 수 있습니다.",
+    "@sendDiagnosticsChangeable": {
+        "description": "Message shown in the monitoring opt-out dialog indicating the setting can be changed later"
+    },
+    "noThanks": "아니요",
+    "@noThanks": {
+        "description": "Label for the decline button in the monitoring opt-out dialog"
+    },
+    "imIn": "동의합니다!",
+    "@imIn": {
+        "description": "Label for the accept button in the monitoring opt-out dialog"
+    },
+    "addToWantToRead": "읽고 싶은 책에 추가",
+    "@addToWantToRead": {
+        "description": "Label for the add to want to read context menu item"
+    },
+    "removeFromWantToRead": "읽고 싶은 책에서 삭제",
+    "@removeFromWantToRead": {
+        "description": "Label for the remove from want to read context menu item"
+    },
+    "download": "내려받기",
+    "@download": {
+        "description": "Label for the download context menu item"
+    },
+    "removeDownload": "내려받기 제거",
+    "@removeDownload": {
+        "description": "Label for the remove download context menu item"
+    },
+    "refreshMetadata": "책 정보 갱신",
+    "@refreshMetadata": {
+        "description": "Label for the refresh metadata context menu item"
+    },
+    "refreshCovers": "책 표지 새로고침",
+    "@refreshCovers": {
+        "description": "Label for the refresh covers context menu item"
+    },
+    "noActiveSyncOperations": "진행 중인 동기화 작업이 없습니다",
+    "@noActiveSyncOperations": {
+        "description": "Message shown when there are no active sync operations"
+    },
+    "syncingAllSeries": "모든 책 동기화 중",
+    "@syncingAllSeries": {
+        "description": "Label for the syncing all series phase"
+    },
+    "syncingMetadata": "책 정보 동기화 중",
+    "@syncingMetadata": {
+        "description": "Label for the syncing metadata phase"
+    },
+    "syncingRecentlyAdded": "최근 추가된 책 동기화 중",
+    "@syncingRecentlyAdded": {
+        "description": "Label for the syncing recently added phase"
+    },
+    "syncingRecentlyUpdated": "최근 갱신된 책 동기화 중",
+    "@syncingRecentlyUpdated": {
+        "description": "Label for the syncing recently updated phase"
+    },
+    "syncingLibraries": "나의 서재 동기화 중",
+    "@syncingLibraries": {
+        "description": "Label for the syncing libraries phase"
+    },
+    "syncingProgress": "읽은 기록 동기화 중",
+    "@syncingProgress": {
+        "description": "Label for the syncing progress phase"
+    },
+    "syncingCovers": "책 표지 동기화 중",
+    "@syncingCovers": {
+        "description": "Label for the syncing covers phase"
+    },
+    "syncingCollections": "콜렉션 동기화 중",
+    "@syncingCollections": {
+        "description": "Label for the syncing collections phase"
+    },
+    "syncingReadingLists": "읽기 목록 동기화 중",
+    "@syncingReadingLists": {
+        "description": "Label for the syncing reading lists phase"
+    },
+    "syncingSidenav": "사이드 메뉴 순서 동기화 중",
+    "@syncingSidenav": {
+        "description": "Label for the sidenav syncing phase"
+    },
+    "refreshingMetadataForSeries": "{seriesId}의 책 정보 새로고침 중",
+    "@refreshingMetadataForSeries": {
+        "description": "Label for the refreshing metadata phase with the series ID",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "refreshingCoversForSeries": "{seriesId}의 책 표지 새로고침 중",
+    "@refreshingCoversForSeries": {
+        "description": "Label for the refreshing covers phase with the series ID",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series which covers are being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "refreshingServerSettings": "서버 설정 새로고침 중",
+    "@refreshingServerSettings": {
+        "description": "Label for the refreshing server settings phase"
+    },
+    "series": "작품",
+    "@series": {
+        "description": "Label for the series search section header"
+    },
+    "moreCount": "외 {count}개",
+    "@moreCount": {
+        "description": "Label indicating there are more items beyond the displayed amount",
+        "placeholders": {
+            "count": {
+                "description": "The count of items beyond the displayed amount",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "wordCount": "{wordCount}자",
+    "@wordCount": {
+        "description": "Label for the word count of a book entry",
+        "placeholders": {
+            "wordCount": {
+                "description": "The amount of words",
+                "type": "int",
+                "format": "compact",
+                "example": "42000"
+            }
+        }
+    },
+    "hoursCount": "약 {hours}시간",
+    "@hoursCount": {
+        "description": "Label for the estimated reading time in hours",
+        "placeholders": {
+            "hours": {
+                "description": "The estimated amount of hours",
+                "type": "double",
+                "format": "decimalPatternDigits",
+                "optionalParameters": {
+                    "decimalDigits": 1
+                },
+                "example": "4.2"
+            }
+        }
+    },
+    "pagesCount": "{pages}쪽",
+    "@pagesCount": {
+        "description": "Label for the page count of a an entry",
+        "placeholders": {
+            "pages": {
+                "description": "The amount of pages",
+                "type": "int",
+                "format": "compact",
+                "example": "42000"
+            }
+        }
+    },
+    "continueReading": "계속 읽기",
+    "@continueReading": {
+        "description": "Label for the continue reading button"
+    },
+    "summary": "요약",
+    "@summary": {
+        "description": "Label for the summary section heading"
+    },
+    "showMore": "더 보기",
+    "@showMore": {
+        "description": "Label for the show more button"
+    },
+    "showLess": "접기",
+    "@showLess": {
+        "description": "Label for the show less button"
+    },
+    "cancelAll": "모두 취소",
+    "@cancelAll": {
+        "description": "Label for the cancel all downloads button"
+    },
+    "noDownloadsInQueue": "내려받는 책 없음",
+    "@noDownloadsInQueue": {
+        "description": "Message shown when there are no downloads in the queue"
+    },
+    "readerSettings": "읽기 설정",
+    "@readerSettings": {
+        "description": "Label for the reader settings bottom sheet title"
+    },
+    "readingDirection": "읽기 방향",
+    "@readingDirection": {
+        "description": "Label for the reading direction setting"
+    },
+    "leftToRight": "왼쪽에서 오른쪽으로",
+    "@leftToRight": {
+        "description": "Label for the left to right reading direction option"
+    },
+    "rightToLeft": "오른쪽에서 왼쪽으로",
+    "@rightToLeft": {
+        "description": "Label for the right to left reading direction option"
+    },
+    "readerMode": "넘기는 방향",
+    "@readerMode": {
+        "description": "Label for the reader mode setting"
+    },
+    "vertical": "위 아래",
+    "@vertical": {
+        "description": "Label for the vertical reader mode option"
+    },
+    "horizontal": "옆으로",
+    "@horizontal": {
+        "description": "Label for the horizontal reader mode option"
+    },
+    "twoPage": "같이 보기",
+    "@twoPage": {
+        "description": "Label for the two page reader mode option"
+    },
+    "fitDirection": "이미지 맞춤 방식",
+    "@fitDirection": {
+        "description": "Label for the image fit direction setting"
+    },
+    "contain": "화면에 맞춤",
+    "@contain": {
+        "description": "Label for the contain image fit option"
+    },
+    "width": "너비에 맞춤",
+    "@width": {
+        "description": "Label for the fit width image option"
+    },
+    "height": "높이에 맞춤",
+    "@height": {
+        "description": "Label for the fit height image option"
+    },
+    "margins": "여백 설정",
+    "@margins": {
+        "description": "Label for the margins setting"
+    },
+    "verticalGap": "세로 여백",
+    "@verticalGap": {
+        "description": "Label for the vertical gap setting"
+    },
+    "pageGap": "가로 여백",
+    "@pageGap": {
+        "description": "Label for the page gap setting"
+    },
+    "coverPage": "책 표지 설정",
+    "@coverPage": {
+        "description": "Label for the cover page setting"
+    },
+    "showProgressBar": "내려받기 진행도 보이기",
+    "@showProgressBar": {
+        "description": "Label for the show progress bar setting"
+    },
+    "setDefaults": "기본으로 설정",
+    "@setDefaults": {
+        "description": "Label for the set defaults button"
+    },
+    "fontSize": "글자 크기",
+    "@fontSize": {
+        "description": "Label for the font size setting"
+    },
+    "wordSpacing": "글자 간격",
+    "@wordSpacing": {
+        "description": "Label for the word spacing setting"
+    },
+    "lineHeight": "줄 간격",
+    "@lineHeight": {
+        "description": "Label for the line height setting"
+    },
+    "letterSpacing": "공백 간격",
+    "@letterSpacing": {
+        "description": "Label for the letter spacing setting"
+    },
+    "highlightResumeParagraph": "이어 읽을 문단 강조",
+    "@highlightResumeParagraph": {
+        "description": "Label for the highlight resume paragraph setting"
+    },
+    "dismiss": "닫기",
+    "@dismiss": {
+        "description": "Label for the dismiss button in chapter snackbar"
+    },
+    "go": "이동",
+    "@go": {
+        "description": "Label for the go button in chapter snackbar"
+    },
+    "previousChapter": "이전: {chapterTitle}",
+    "@previousChapter": {
+        "description": "Label for the previous chapter snackbar with the chapter title",
+        "placeholders": {
+            "chapterTitle": {
+                "description": "The title of the previous chapter",
+                "type": "String",
+                "example": "Chapter 2"
+            }
+        }
+    },
+    "nextChapter": "다음: {chapterTitle}",
+    "@nextChapter": {
+        "description": "Label for the next chapter snackbar with the chapter title",
+        "placeholders": {
+            "chapterTitle": {
+                "description": "The title of the next chapter",
+                "type": "String",
+                "example": "Chapter 3"
+            }
+        }
+    },
+    "read": "읽기",
+    "@read": {
+        "description": "Label for the read action button on cover cards"
+    },
+    "refreshingChapterToc": "책 {chapterId}의 목차 새로고침 중",
+    "@refreshingChapterToc": {
+        "description": "Label for the syncing chapter TOC phase with the chapter ID",
+        "placeholders": {
+            "chapterId": {
+                "description": "The ID of the chapter which TOC is being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "syncingTocs": "책 목차 동기화 중",
+    "@syncingTocs": {
+        "description": "Label for the syncing chapters TOCs phase"
+    },
+    "invalidCredentials": "로그인 정보가 올바르지 않습니다",
+    "@invalidCredentials": {
+        "description": "User display error displayed when credentials are invalid"
+    },
+    "orientation": "화면 방향",
+    "@orientation": {
+        "description": "Label for the orientation setting"
+    },
+    "portrait": "세로",
+    "@portrait": {
+        "description": "Label for the portrait orientation option"
+    },
+    "landscape": "가로",
+    "@landscape": {
+        "description": "Label for the landscape orientation option"
+    },
+    "manageHeaders": "헤더 관리",
+    "@manageHeaders": {
+        "description": "Label for the manage headers settings entry"
+    },
+    "headerName": "헤더 이름",
+    "@headerName": {
+        "description": "Label for the header name input field"
+    },
+    "headerValue": "헤더 값",
+    "@headerValue": {
+        "description": "Label for the header value input field"
+    },
+    "clearAll": "모두 지우기",
+    "@clearAll": {
+        "description": "Label for the clear all button"
+    },
+    "addHeader": "헤더 추가",
+    "@addHeader": {
+        "description": "Label for the add header button"
+    },
+    "savedHeaders": "저장된 헤더",
+    "@savedHeaders": {
+        "description": "Label for the saved headers section"
+    },
+    "reorderNavigationBar": "탐색 메뉴 순서 변경",
+    "@reorderNavigationBar": {
+        "description": "Label for the reorder navigation bar settings entry"
+    },
+    "availableDestinations": "추가할 수 있는 메뉴",
+    "@availableDestinations": {
+        "description": "Label for the available destinations section"
+    },
+    "coverPageDescription": "첫 장을 책 표지로 인식해 표시합니다",
+    "@coverPageDescription": {
+        "description": "Description for the cover page setting"
+    },
+    "ignoreSafeAreas": "안전 영역 무시",
+    "@ignoreSafeAreas": {
+        "description": "Label for the ignore safe areas setting"
+    },
+    "reset": "초기화",
+    "@reset": {
+        "description": "Label for the reset button"
+    },
+    "madeWithLove": "❤️으로 제작",
+    "@madeWithLove": {
+        "description": "Label for the made with love message"
+    }
+}
