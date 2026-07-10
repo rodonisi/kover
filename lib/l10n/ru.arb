@@ -342,5 +342,179 @@
     "tableOfContents": "Содержание",
     "@tableOfContents": {
         "description": "Label for the table of contents drawer in the reader"
+    },
+    "manageHeaders": "Управление заголовками",
+    "@manageHeaders": {
+        "description": "Label for the manage headers settings entry"
+    },
+    "headerName": "Название заголовка",
+    "@headerName": {
+        "description": "Label for the header name input field"
+    },
+    "headerValue": "Значение заголовка",
+    "@headerValue": {
+        "description": "Label for the header value input field"
+    },
+    "addHeader": "Добавить заголовок",
+    "@addHeader": {
+        "description": "Label for the add header button"
+    },
+    "savedHeaders": "Сохранённые заголовки",
+    "@savedHeaders": {
+        "description": "Label for the saved headers section"
+    },
+    "reorderNavigationBar": "Порядок панели навигации",
+    "@reorderNavigationBar": {
+        "description": "Label for the reorder navigation bar settings entry"
+    },
+    "reset": "Сбросить",
+    "@reset": {
+        "description": "Label for the reset button"
+    },
+    "continueReading": "Продолжить чтение",
+    "@continueReading": {
+        "description": "Label for the continue reading button"
+    },
+    "summary": "Описание",
+    "@summary": {
+        "description": "Label for the summary section heading"
+    },
+    "refreshCovers": "Обновить обложки",
+    "@refreshCovers": {
+        "description": "Label for the refresh covers context menu item"
+    },
+    "pagesCount": "{pages} страниц",
+    "@pagesCount": {
+        "description": "Label for the page count of a an entry",
+        "placeholders": {
+            "pages": {
+                "description": "The amount of pages",
+                "type": "int",
+                "format": "compact",
+                "example": "42000"
+            }
+        }
+    },
+    "noDownloadsInQueue": "Нет загрузок в очереди",
+    "@noDownloadsInQueue": {
+        "description": "Message shown when there are no downloads in the queue"
+    },
+    "hoursCount": "~{hours} часов",
+    "@hoursCount": {
+        "description": "Label for the estimated reading time in hours",
+        "placeholders": {
+            "hours": {
+                "description": "The estimated amount of hours",
+                "type": "double",
+                "format": "decimalPatternDigits",
+                "optionalParameters": {
+                    "decimalDigits": 1
+                },
+                "example": "4.2"
+            }
+        }
+    },
+    "readerSettings": "Настройки чтения",
+    "@readerSettings": {
+        "description": "Label for the reader settings bottom sheet title"
+    },
+    "readingDirection": "Направление чтения",
+    "@readingDirection": {
+        "description": "Label for the reading direction setting"
+    },
+    "leftToRight": "Слева направо",
+    "@leftToRight": {
+        "description": "Label for the left to right reading direction option"
+    },
+    "rightToLeft": "Справа налево",
+    "@rightToLeft": {
+        "description": "Label for the right to left reading direction option"
+    },
+    "readerMode": "Режим чтения",
+    "@readerMode": {
+        "description": "Label for the reader mode setting"
+    },
+    "vertical": "Вертикальный",
+    "@vertical": {
+        "description": "Label for the vertical reader mode option"
+    },
+    "horizontal": "Горизонтальный",
+    "@horizontal": {
+        "description": "Label for the horizontal reader mode option"
+    },
+    "twoPage": "Две страницы",
+    "@twoPage": {
+        "description": "Label for the two page reader mode option"
+    },
+    "fontSize": "Размер шрифта",
+    "@fontSize": {
+        "description": "Label for the font size setting"
+    },
+    "lineHeight": "Высота строки",
+    "@lineHeight": {
+        "description": "Label for the line height setting"
+    },
+    "wordSpacing": "Интервал между слов",
+    "@wordSpacing": {
+        "description": "Label for the word spacing setting"
+    },
+    "letterSpacing": "Интервал между буквами",
+    "@letterSpacing": {
+        "description": "Label for the letter spacing setting"
+    },
+    "highlightResumeParagraph": "Выделять абзац продолжения",
+    "@highlightResumeParagraph": {
+        "description": "Label for the highlight resume paragraph setting"
+    },
+    "portrait": "Книжная",
+    "@portrait": {
+        "description": "Label for the portrait orientation option"
+    },
+    "landscape": "Альбомная",
+    "@landscape": {
+        "description": "Label for the landscape orientation option"
+    },
+    "invalidCredentials": "Неверные учётные данные",
+    "@invalidCredentials": {
+        "description": "User display error displayed when credentials are invalid"
+    },
+    "showProgressBar": "Показывать индикатор прогресса",
+    "@showProgressBar": {
+        "description": "Label for the show progress bar setting"
+    },
+    "setDefaults": "Установить по умолчанию",
+    "@setDefaults": {
+        "description": "Label for the set defaults button"
+    },
+    "margins": "Поля",
+    "@margins": {
+        "description": "Label for the margins setting"
+    },
+    "verticalGap": "Вертикальный отступ",
+    "@verticalGap": {
+        "description": "Label for the vertical gap setting"
+    },
+    "unsupportedFormat": "Неподдерживаемый формат: {format}",
+    "@unsupportedFormat": {
+        "description": "Message shown when trying to open a chapter in an unsupported format",
+        "placeholders": {
+            "format": {
+                "description": "The format enum name for the unsupported format",
+                "type": "String",
+                "example": "epub"
+            }
+        }
+    },
+    "series": "Серии",
+    "@series": {
+        "description": "Label for the series search section header"
+    },
+    "availableDestinations": "Доступные разделы",
+    "@availableDestinations": {
+        "description": "Label for the available destinations section"
+    },
+    "read": "Читать",
+    "@read": {
+        "description": "Label for the read action button on cover cards"
     }
 }
