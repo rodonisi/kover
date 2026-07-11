@@ -37,7 +37,7 @@ class OverlayGestures extends StatelessWidget {
             flex: 1,
             child: GestureDetector(
               behavior: .translucent,
-              onTap: () => onRightTap,
+              onTap: onRightTap,
             ),
           ),
         ],
