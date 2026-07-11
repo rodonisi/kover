@@ -26,6 +26,7 @@ class EpubReader extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final hasSelection = useState(false);
     final nav = epubNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
@@ -41,6 +42,7 @@ class EpubReader extends HookConsumerWidget {
         seriesId: seriesId,
         chapterId: chapterId,
         readingListId: readingListId,
+        disableGestures: hasSelection.value,
         onNextPage: () {
           commonSettings.readDirection == .leftToRight
               ? ref.read(nav.notifier).nextPage()
@@ -115,6 +117,11 @@ class EpubReader extends HookConsumerWidget {
                             reverse:
                                 commonSettings.readDirection == .rightToLeft,
                             outerController: controller,
+                            onSelectionChanged: (selected) {
+                              if (selected != hasSelection.value) {
+                                hasSelection.value = selected;
+                              }
+                            },
                           );
                         },
                       ),
@@ -140,12 +147,14 @@ class _Page extends HookConsumerWidget {
   final int page;
   final bool reverse;
   final PageController outerController;
+  final void Function(bool)? onSelectionChanged;
 
   const _Page({
     required this.seriesId,
     required this.chapterId,
     required this.page,
     this.reverse = false,
+    this.onSelectionChanged,
     required this.outerController,
   });
 
@@ -297,6 +306,7 @@ class _Page extends HookConsumerWidget {
                                   seriesId: seriesId,
                                   html: reflowState.subpages[index].outerHtml,
                                   styles: reflowState.page.styles,
+                                  onSelectionChanged: onSelectionChanged,
                                 ),
                               );
                             },
@@ -385,6 +395,7 @@ class _RenderContent extends ConsumerWidget {
   final String html;
   final Map<String, Map<String, String>> styles;
   final CachedImageFactory? imageCache;
+  final void Function(bool)? onSelectionChanged;
 
   const _RenderContent({
     super.key,
@@ -392,6 +403,7 @@ class _RenderContent extends ConsumerWidget {
     required this.html,
     required this.styles,
     this.imageCache,
+    this.onSelectionChanged,
   });
 
   @override
@@ -405,27 +417,34 @@ class _RenderContent extends ConsumerWidget {
       data: (epubSettings) => SafeArea(
         child: Padding(
           padding: EdgeInsets.all(epubSettings.marginSize),
-          child: HtmlWidget(
-            html,
-            buildAsync: false,
-            enableCaching: true,
-            factoryBuilder: () => imageCache ?? CachedImageFactory(),
-            customStylesBuilder: (element) {
-              final s = Map<String, String>.from(
-                styles[element.localName] ?? {},
+          child: SelectionArea(
+            onSelectionChanged: (selection) {
+              onSelectionChanged?.call(
+                selection != null && selection.plainText.isNotEmpty,
               );
-
-              for (final className in element.classes) {
-                s.addAll(styles['.$className'] ?? {});
-              }
-
-              return s;
             },
-            textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontSize: epubSettings.fontSize,
-              height: epubSettings.lineHeight,
-              wordSpacing: epubSettings.wordSpacing,
-              letterSpacing: epubSettings.letterSpacing,
+            child: HtmlWidget(
+              html,
+              buildAsync: false,
+              enableCaching: true,
+              factoryBuilder: () => imageCache ?? CachedImageFactory(),
+              customStylesBuilder: (element) {
+                final s = Map<String, String>.from(
+                  styles[element.localName] ?? {},
+                );
+
+                for (final className in element.classes) {
+                  s.addAll(styles['.$className'] ?? {});
+                }
+
+                return s;
+              },
+              textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: epubSettings.fontSize,
+                height: epubSettings.lineHeight,
+                wordSpacing: epubSettings.wordSpacing,
+                letterSpacing: epubSettings.letterSpacing,
+              ),
             ),
           ),
         ),

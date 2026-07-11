@@ -4,15 +4,16 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
+import 'package:kover/pages/reader/overlay/chapter_snackbar.dart';
+import 'package:kover/pages/reader/overlay/overlay_gestures.dart';
 import 'package:kover/pages/reader/overlay/reader_controls.dart';
 import 'package:kover/pages/reader/overlay/reader_header.dart';
+import 'package:kover/pages/reader/overlay/reader_progress.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
-import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
-import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
@@ -37,6 +38,7 @@ class ReaderOverlay extends HookConsumerWidget {
   final void Function()? onPreviousPage;
   final void Function(int page)? onJumpToPage;
   final bool Function(int page)? isLastPage;
+  final bool disableGestures;
   final int seriesId;
   final int chapterId;
   final int? readingListId;
@@ -53,6 +55,7 @@ class ReaderOverlay extends HookConsumerWidget {
     this.endDrawer,
     this.extraControls,
     this.readingListId,
+    this.disableGestures = false,
     required this.chapterId,
     required this.seriesId,
     required this.child,
@@ -69,6 +72,7 @@ class ReaderOverlay extends HookConsumerWidget {
       chapterId: chapterId,
       readingListId: readingListId,
     );
+
     final settings = ref.watch(
       commonReaderSettingsProvider(seriesId: seriesId),
     );
@@ -173,30 +177,11 @@ class ReaderOverlay extends HookConsumerWidget {
                     ),
                   ),
                   Positioned.fill(
-                    child: Row(
-                      children: [
-                        Flexible(
-                          flex: 1,
-                          child: GestureDetector(
-                            behavior: .translucent,
-                            onTap: onPreviousPage,
-                          ),
-                        ),
-                        Flexible(
-                          flex: 2,
-                          child: GestureDetector(
-                            behavior: .translucent,
-                            onTap: () => uiVisible.value = !uiVisible.value,
-                          ),
-                        ),
-                        Flexible(
-                          flex: 1,
-                          child: GestureDetector(
-                            behavior: .translucent,
-                            onTap: onNextPage,
-                          ),
-                        ),
-                      ],
+                    child: OverlayGestures(
+                      disableGestures: disableGestures,
+                      onCenterTap: () => uiVisible.value = !uiVisible.value,
+                      onLeftTap: onPreviousPage,
+                      onRightTap: onNextPage,
                     ),
                   ),
                   Align(
@@ -305,135 +290,6 @@ class ReaderOverlay extends HookConsumerWidget {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class ReaderProgress extends ConsumerWidget {
-  final int seriesId;
-  final int? chapterId;
-
-  const ReaderProgress({
-    super.key,
-    required this.seriesId,
-    this.chapterId,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final navState = ref.watch(
-      readerNavigationProvider(seriesId: seriesId, chapterId: chapterId ?? 0),
-    );
-
-    final progress = navState.hasValue
-        ? navState.value!.currentPage / (navState.value!.totalPages - 1)
-        : null;
-
-    return LinearProgressIndicator(
-      value: progress,
-    );
-  }
-}
-
-class SubpageProgress extends ConsumerWidget {
-  final int seriesId;
-  final int chapterId;
-  const SubpageProgress({
-    super.key,
-    required this.seriesId,
-    required this.chapterId,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final reader = ref.watch(
-      epubNavigationProvider(seriesId: seriesId, chapterId: chapterId),
-    );
-
-    final progress = reader.whenOrNull(
-      data: (data) => (data.page + 1) / data.totalPages,
-    );
-
-    final subpageProgress = reader.whenOrNull(
-      data: (data) => (data.subpage + 1) / data.totalSubpages,
-    );
-
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final stepWidth =
-        reader.whenOrNull(
-          data: (data) => screenWidth / data.totalPages,
-        ) ??
-        0.0;
-    final offset = reader.whenOrNull(
-      data: (data) => stepWidth * data.page,
-    );
-
-    return SizedBox(
-      height: 4.0,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: LinearProgressIndicator(
-              value: progress,
-            ),
-          ),
-          Positioned(
-            left: offset,
-            child: SizedBox(
-              width: stepWidth,
-              child: LinearProgressIndicator(
-                value: subpageProgress,
-                backgroundColor: theme.colorScheme.tertiaryContainer,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ChapterSnackbar extends StatelessWidget {
-  final String title;
-  final VoidCallback? onNavigate;
-  final VoidCallback? onDismiss;
-
-  const ChapterSnackbar({
-    super.key,
-    required this.title,
-    this.onNavigate,
-    this.onDismiss,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return SafeArea(
-      child: Card.filled(
-        margin: LayoutConstants.mediumEdgeInsets,
-        child: Padding(
-          padding: LayoutConstants.mediumEdgeInsets,
-          child: Row(
-            mainAxisAlignment: .spaceBetween,
-            spacing: LayoutConstants.smallPadding,
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  overflow: .ellipsis,
-                ),
-              ),
-              if (onDismiss != null)
-                TextButton(onPressed: onDismiss, child: Text(l.dismiss)),
-              FilledButton(
-                onPressed: onNavigate,
-                child: Text(l.go),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
