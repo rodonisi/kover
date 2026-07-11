@@ -57,6 +57,7 @@ class PdfReader extends HookConsumerWidget {
     final toc = useState<List<PdfOutlineNode>>([]);
     final defaultZoom = useState(1.0);
     final lastUpdateFromProvider = useState(false);
+    final hasSelection = useState(false);
 
     final navProvider = readerNavigationProvider(
       seriesId: seriesId,
@@ -98,6 +99,7 @@ class PdfReader extends HookConsumerWidget {
           chapterId: chapterId,
           seriesId: seriesId,
           readingListId: readingListId,
+          disableGestures: hasSelection.value,
           onNextPage: () {
             if (commonSettings.readDirection == .leftToRight) {
               ref.read(navProvider.notifier).nextPage();
@@ -114,6 +116,7 @@ class PdfReader extends HookConsumerWidget {
           },
           onJumpToPage: (page) =>
               ref.read(navProvider.notifier).jumpToPage(page),
+
           endDrawer: toc.value.isNotEmpty
               ? PdfTocDrawer(
                   seriesId: seriesId,
@@ -135,8 +138,12 @@ class PdfReader extends HookConsumerWidget {
                 sourceName: chapterId.toString(),
                 initialPageNumber: readerState.initialPage + 1,
                 params: PdfViewerParams(
-                  textSelectionParams: const PdfTextSelectionParams(
-                    enabled: false,
+                  textSelectionParams: PdfTextSelectionParams(
+                    onTextSelectionChange: (selection) {
+                      if (selection.hasSelectedText != hasSelection.value) {
+                        hasSelection.value = selection.hasSelectedText;
+                      }
+                    },
                   ),
                   onViewerReady: (document, controller) async {
                     toc.value = await document.loadOutline();
