@@ -74,6 +74,15 @@ class ZoomableVerticalScrollView extends HookWidget {
       }
     }
 
+    void handlePointerDown(PointerDownEvent event) {
+      if (scrollController.hasClients) {
+        // Instantly halts any active ballistic scrolling the moment a finger
+        // touches the screen
+        final position = scrollController.position;
+        position.jumpTo(position.pixels);
+      }
+    }
+
     void handleScaleStart(ScaleStartDetails details) {
       gestureActive.value = true;
       gestureIncludedPinch.value = details.pointerCount >= 2;
@@ -158,6 +167,7 @@ class ZoomableVerticalScrollView extends HookWidget {
         scheduleViewportConfiguration(constraints.biggest);
 
         return Listener(
+          onPointerDown: handlePointerDown,
           onPointerSignal: (pointerSignal) {
             if (pointerSignal is PointerScrollEvent) {
               scrollByVisualDelta(-pointerSignal.scrollDelta.dy);
