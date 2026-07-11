@@ -31,7 +31,7 @@ dependencies:
   scrollview_observer: ^1.26.3
   lucide_icons_flutter: ^3.1.9
   flutter_context_menu: ^0.4.1
-  drift: ^2.31.0
+  drift: 2.34.0 # temporary pin due to 2.34.1 being broken and >=2.34.1+1 depending on analyzer ^13.0.0, which clashes with go_router_builder
   drift_flutter: ^0.3.0
   stream_transform: ^2.1.1
   rxdart: ^0.28.0
@@ -64,7 +64,7 @@ dev_dependencies:
   chopper_generator: ^8.5.0
   swagger_dart_code_generator: ^4.1.1
   flutter_launcher_icons: ^0.14.4
-  drift_dev: ^2.31.0
+  drift_dev: 2.34.0 # temporary pin due to 2.34.1 being broken and >=2.34.1+1 depending on analyzer ^13.0.0, which clashes with go_router_builder
   go_router_builder: ^4.2.0
   yaml: ^3.1.3
   mockito: ^5.6.4
