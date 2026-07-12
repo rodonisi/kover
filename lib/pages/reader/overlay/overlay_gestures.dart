@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 
-class OverlayGestures extends StatelessWidget {
+class OverlayGestures extends ConsumerWidget {
+  final int seriesId;
   final VoidCallback? onCenterTap;
   final VoidCallback? onLeftTap;
   final VoidCallback? onRightTap;
@@ -9,6 +12,7 @@ class OverlayGestures extends StatelessWidget {
 
   const OverlayGestures({
     super.key,
+    required this.seriesId,
     this.onCenterTap,
     this.onLeftTap,
     this.onRightTap,
@@ -17,29 +21,43 @@ class OverlayGestures extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final navigationGestures = ref.watch(
+      commonReaderSettingsProvider(
+        seriesId: seriesId,
+      ).select(
+        (value) =>
+            value.whenOrNull(
+              data: (data) => data.navigationGersturesEnabled,
+            ) ??
+            const CommonReaderSettingsState().navigationGersturesEnabled,
+      ),
+    );
+
     return IgnorePointer(
       ignoring: disableGestures,
       child: Row(
         children: [
-          Flexible(
-            flex: 1,
-            child: GestureDetector(
-              behavior: .translucent,
-              onTap: onLeftTap,
+          if (navigationGestures)
+            Flexible(
+              flex: 1,
+              child: GestureDetector(
+                behavior: .translucent,
+                onTap: onLeftTap,
+              ),
             ),
-          ),
           Flexible(
             flex: 2,
             child: GestureDetector(behavior: .translucent, onTap: onCenterTap),
           ),
-          Flexible(
-            flex: 1,
-            child: GestureDetector(
-              behavior: .translucent,
-              onTap: onRightTap,
+          if (navigationGestures)
+            Flexible(
+              flex: 1,
+              child: GestureDetector(
+                behavior: .translucent,
+                onTap: onRightTap,
+              ),
             ),
-          ),
         ],
       ),
     );

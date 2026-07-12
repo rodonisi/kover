@@ -178,6 +178,7 @@ class ReaderOverlay extends HookConsumerWidget {
                   ),
                   Positioned.fill(
                     child: OverlayGestures(
+                      seriesId: seriesId,
                       disableGestures: disableGestures,
                       onCenterTap: () => uiVisible.value = !uiVisible.value,
                       onLeftTap: onPreviousPage,
