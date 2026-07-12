@@ -14,6 +14,7 @@ import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
+import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
@@ -103,6 +104,17 @@ class ReaderOverlay extends HookConsumerWidget {
             ),
           );
 
+          final reduceAnimations = ref.watch(
+            generalSettingsProvider.select(
+              (value) =>
+                  value.whenOrNull(data: (data) => data.reduceAnimations) ??
+                  const GeneralSettingsState().reduceAnimations,
+            ),
+          );
+
+          final progressFadeDuration = reduceAnimations ? 0.ms : 200.ms;
+          final overlayFadeDuration = reduceAnimations ? 0.ms : 100.ms;
+
           ref.listen(
             readerNavigationProvider(
               seriesId: seriesId,
@@ -163,7 +175,7 @@ class ReaderOverlay extends HookConsumerWidget {
                               .animate(
                                 target: uiVisible.value ? 0.0 : 1.0,
                               )
-                              .fadeIn(duration: 200.ms)
+                              .fadeIn(duration: progressFadeDuration)
                         else if (settings.showProgressBar)
                           ReaderProgress(
                                 seriesId: seriesId,
@@ -172,7 +184,7 @@ class ReaderOverlay extends HookConsumerWidget {
                               .animate(
                                 target: uiVisible.value ? 0.0 : 1.0,
                               )
-                              .fadeIn(duration: 200.ms),
+                              .fadeIn(duration: progressFadeDuration),
                       ],
                     ),
                   ),
@@ -195,7 +207,7 @@ class ReaderOverlay extends HookConsumerWidget {
                             )
                             .animate(target: uiVisible.value ? 1.0 : 0.0)
                             .show(duration: 10.ms, maintain: false)
-                            .fadeIn(duration: 100.ms),
+                            .fadeIn(duration: overlayFadeDuration),
                   ),
                   Align(
                     alignment: .bottomCenter,
@@ -233,7 +245,10 @@ class ReaderOverlay extends HookConsumerWidget {
                             .show(duration: 10.ms, maintain: false)
                             .fade(duration: 100.ms)
                             .animate(target: uiVisible.value ? 1.0 : 0.0)
-                            .moveY(end: -snackbarOffset, duration: 100.ms),
+                            .moveY(
+                              end: -snackbarOffset,
+                              duration: overlayFadeDuration,
+                            ),
                   ),
                   Align(
                     alignment: .bottomCenter,
@@ -269,9 +284,12 @@ class ReaderOverlay extends HookConsumerWidget {
                                   : 0.0,
                             )
                             .show(duration: 10.ms, maintain: false)
-                            .fade(duration: 100.ms)
+                            .fade(duration: overlayFadeDuration)
                             .animate(target: uiVisible.value ? 1.0 : 0.0)
-                            .moveY(end: -snackbarOffset, duration: 100.ms),
+                            .moveY(
+                              end: -snackbarOffset,
+                              duration: progressFadeDuration,
+                            ),
                   ),
                   Align(
                     alignment: .bottomCenter,
@@ -284,7 +302,7 @@ class ReaderOverlay extends HookConsumerWidget {
                             )
                             .animate(target: uiVisible.value ? 1.0 : 0.0)
                             .show(duration: 10.ms, maintain: false)
-                            .fade(duration: 100.ms),
+                            .fade(duration: progressFadeDuration),
                   ),
                 ],
               ),
