@@ -706,5 +706,17 @@
     "navigationGestures": "Navigation Gestures",
     "@navigationGestures": {
         "description": "Label for the enable navigation gestures reader option"
+    },
+    "appearance": "Appearance",
+    "@appearance": {
+      "description": "Label for the appearance settings section"
+    },
+    "reduceAnimations": "Reduce Animations",
+    "@reduceAnimations": {
+      "description": "Label for the reduce animation setting"
+    },
+    "reduceAnimationsDescription": "Disables most animations and reader page transitions. Note: swipe gestures in horizontal reader modes will not be available when this option is enabled.",
+    "@reduceAnimationsDescription": {
+      "description": "Description for the reduce animation setting" 
     }
 }

@@ -31,6 +31,7 @@ sealed class GeneralSettingsState with _$GeneralSettingsState {
     String? localeString,
     @Default(<NavbarDestinations>[.home, .wantToRead])
     List<NavbarDestinations> navbarDestinations,
+    @Default(false) bool reduceAnimations,
   }) = _GeneralSettingsState;
 
   factory GeneralSettingsState.fromJson(Map<String, Object?> json) =>
@@ -84,5 +85,11 @@ class GeneralSettings extends _$GeneralSettings {
         navbarDestinations: const <NavbarDestinations>[.home, .wantToRead],
       ),
     );
+  }
+
+  Future<void> setReduceAnimations(bool value) async {
+    final current = await future;
+    log.info('set reduce animations', attributes: {'value': .bool(value)});
+    state = AsyncData(current.copyWith(reduceAnimations: value));
   }
 }

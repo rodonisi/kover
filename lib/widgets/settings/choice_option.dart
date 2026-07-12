@@ -21,10 +21,14 @@ class ChoiceOption<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final selectedIcon = options
+        .firstWhere((option) => option.value == value)
+        .icon;
+
     return OptionContainer(
       title: title,
       description: description,
-      icon: icon,
+      icon: icon ?? selectedIcon,
       child: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(

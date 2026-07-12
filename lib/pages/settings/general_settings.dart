@@ -4,14 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/settings/navbar_editor.dart';
 import 'package:kover/riverpod/providers/settings/general_settings.dart';
-import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
-import 'package:kover/widgets/settings/choice_option.dart';
 import 'package:kover/widgets/settings/select_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class GeneralSettings extends ConsumerWidget {
   const GeneralSettings({super.key});
@@ -33,73 +30,11 @@ class GeneralSettings extends ConsumerWidget {
               l.general,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            const _ThemeMode(),
-            const _OutlinedTheme(),
-            const NavbarEditor(),
             const _Locale(),
+            const NavbarEditor(),
             const _SendDiagnostics(),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ThemeMode extends ConsumerWidget {
-  const _ThemeMode();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final theme = ref.watch(themeProvider);
-
-    return Async(
-      asyncValue: theme,
-      data: (theme) => ChoiceOption(
-        title: l.themeMode,
-        icon: LucideIcons.palette,
-        options: [
-          ChoiceOptionEntry(
-            value: ThemeMode.system,
-            label: l.system,
-            icon: LucideIcons.sunMoon,
-          ),
-          ChoiceOptionEntry(
-            value: ThemeMode.light,
-            label: l.light,
-            icon: LucideIcons.sun,
-          ),
-          ChoiceOptionEntry(
-            value: ThemeMode.dark,
-            label: l.dark,
-            icon: LucideIcons.moon,
-          ),
-        ],
-        value: theme.mode,
-        onChanged: (newValue) async {
-          await ref.read(themeProvider.notifier).setMode(newValue);
-        },
-      ),
-    );
-  }
-}
-
-class _OutlinedTheme extends ConsumerWidget {
-  const _OutlinedTheme();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final theme = ref.watch(themeProvider);
-
-    return Async(
-      asyncValue: theme,
-      data: (theme) => BooleanOption(
-        title: l.outlinedTheme,
-        icon: LucideIcons.squareDashed,
-        value: theme.outlined,
-        onChanged: (value) =>
-            ref.read(themeProvider.notifier).setOutlined(value),
       ),
     );
   }

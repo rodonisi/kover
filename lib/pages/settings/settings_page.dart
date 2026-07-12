@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
+import 'package:kover/pages/settings/appearance_settings.dart';
 import 'package:kover/pages/settings/credentials_settings.dart';
 import 'package:kover/pages/settings/data_management_settings.dart';
 import 'package:kover/pages/settings/general_settings.dart';
@@ -24,6 +25,7 @@ class SettingsPage extends ConsumerWidget {
             ),
             const SliverToBoxAdapter(child: CredentialsSettings()),
             const SliverToBoxAdapter(child: GeneralSettings()),
+            const SliverToBoxAdapter(child: AppearanceSettings()),
             const SliverToBoxAdapter(child: DataManagementSettings()),
             const SliverToBoxAdapter(
               child: Center(child: VersionLabel()),

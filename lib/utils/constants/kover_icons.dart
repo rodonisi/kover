@@ -19,6 +19,11 @@ sealed class KoverIcons {
   static const IconData reset = LucideIcons.rotateCcw;
   static const IconData analytics = LucideIcons.barChart2;
   static const IconData navigationGestures = LucideIcons.pointer;
+  static const IconData animation = Icons.animation_sharp;
+  static const IconData outline = LucideIcons.squareDashed;
+  static const IconData systemTheme = LucideIcons.sunMoon;
+  static const IconData lightTheme = LucideIcons.sun;
+  static const IconData darkTheme = LucideIcons.moon;
 
   static const IconData ascending = LucideIcons.arrowDownNarrowWide;
   static const IconData descending = LucideIcons.arrowDownWideNarrow;
