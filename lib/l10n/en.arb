@@ -702,5 +702,9 @@
     "availableDestinations": "Available Destinations",
     "@availableDestinations": {
         "description": "Label for the available destinations section"
+    },
+    "navigationGestures": "Navigation Gestures",
+    "@navigationGestures": {
+        "description": "Label for the enable navigation gestures reader option"
     }
 }

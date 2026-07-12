@@ -10,6 +10,7 @@ import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/choice_option.dart';
 import 'package:kover/widgets/settings/numeric_option.dart';
+import 'package:kover/widgets/settings/reader/navigation_gestures_option.dart';
 import 'package:kover/widgets/settings/reader/orientation_option.dart';
 import 'package:kover/widgets/settings/reader/progress_bar_option.dart';
 import 'package:kover/widgets/settings/reader/read_direction_option.dart';
@@ -181,6 +182,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                             .setIgnoreSafeAreas(newValue),
                       ),
                       ProgressBarOption(seriesId: seriesId),
+                      NavigationGesturesOption(seriesId: seriesId),
                     ],
                   ),
                 ),
