@@ -79,6 +79,15 @@ class HorizontalPagedReader extends HookConsumerWidget {
                 });
               },
             );
+            final enabledScrollPhysics =
+                zoomedPageIndexes.value.contains(navState.currentPage) ||
+                    pointerCount.value >= 2
+                ? const NeverScrollableScrollPhysics()
+                : const BouncingScrollPhysics();
+
+            final scrollPhysics = commonSettings.navigationGersturesEnabled
+                ? enabledScrollPhysics
+                : const NeverScrollableScrollPhysics();
 
             final content = PageView.builder(
               controller: pageController,
@@ -87,11 +96,7 @@ class HorizontalPagedReader extends HookConsumerWidget {
               reverse: commonSettings.readDirection == .rightToLeft,
               itemCount: reader.totalPages,
               pageSnapping: true,
-              physics:
-                  zoomedPageIndexes.value.contains(navState.currentPage) ||
-                      pointerCount.value >= 2
-                  ? const NeverScrollableScrollPhysics()
-                  : const BouncingScrollPhysics(),
+              physics: scrollPhysics,
               onPageChanged: (index) {
                 ref.read(navProvider.notifier).jumpToPage(index);
               },

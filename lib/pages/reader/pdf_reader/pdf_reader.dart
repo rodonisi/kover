@@ -132,12 +132,18 @@ class PdfReader extends HookConsumerWidget {
           child: Async(
             asyncValue: pdf,
             data: (data) {
+              final scrollPhysics =
+                  commonSettings.navigationGersturesEnabled ||
+                      settings.readerMode == .vertical
+                  ? null
+                  : const NeverScrollableScrollPhysics();
               final content = PdfViewer.data(
                 data.data,
                 controller: controller,
                 sourceName: chapterId.toString(),
                 initialPageNumber: readerState.initialPage + 1,
                 params: PdfViewerParams(
+                  scrollPhysics: scrollPhysics,
                   textSelectionParams: PdfTextSelectionParams(
                     onTextSelectionChange: (selection) {
                       if (selection.hasSelectedText != hasSelection.value) {

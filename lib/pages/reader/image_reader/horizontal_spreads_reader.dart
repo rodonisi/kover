@@ -171,6 +171,9 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
       asyncValue2: commonSettings,
       asyncValue3: spreads,
       data: (settings, commonSettings, spreads) {
+        final scrollPhysics = commonSettings.navigationGersturesEnabled
+            ? null
+            : const NeverScrollableScrollPhysics();
         return PageView.builder(
           controller: controller,
           allowImplicitScrolling: true,
@@ -178,6 +181,7 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
           reverse: commonSettings.readDirection == .rightToLeft,
           itemCount: spreads.spreads.length,
           pageSnapping: true,
+          physics: scrollPhysics,
           onPageChanged: (spreadIndex) {
             ref.read(navProvider.notifier).jumpToSpread(spreadIndex);
           },

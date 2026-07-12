@@ -158,6 +158,40 @@ class _Page extends HookConsumerWidget {
     required this.outerController,
   });
 
+  bool handleScrollNotification(ScrollNotification notification) {
+    if (!outerController.hasClients) return false;
+
+    if (notification is OverscrollNotification) {
+      outerController.jumpTo(
+        (outerController.offset + notification.overscroll).clamp(
+          0.0,
+          outerController.position.maxScrollExtent,
+        ),
+      );
+    }
+
+    if (notification is ScrollEndNotification) {
+      final rawVelocity = notification.dragDetails?.primaryVelocity ?? 0.0;
+
+      // When reversed, physical velocity direction maps
+      // to the opposite logical scroll direction.
+      final dragVelocity = reverse ? -rawVelocity : rawVelocity;
+
+      final position = outerController.position;
+      final metrics = notification.metrics;
+
+      final atBoundary =
+          (dragVelocity > 0 && metrics.pixels <= metrics.minScrollExtent) ||
+          (dragVelocity < 0 && metrics.pixels >= metrics.maxScrollExtent);
+
+      if (position is ScrollPositionWithSingleContext && atBoundary) {
+        position.goBallistic(-dragVelocity);
+      }
+    }
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final reflow = ref.watch(
@@ -171,6 +205,13 @@ class _Page extends HookConsumerWidget {
       seriesId: seriesId,
       chapterId: chapterId,
     );
+    final navigationGestures = ref.watch(
+      commonReaderSettingsProvider(
+        seriesId: seriesId,
+      ).select(
+        (value) => value.whenData((data) => data.navigationGersturesEnabled),
+      ),
+    );
 
     return Stack(
       children: [
@@ -183,10 +224,11 @@ class _Page extends HookConsumerWidget {
             ),
           ),
         Positioned.fill(
-          child: Async2(
+          child: Async3(
             asyncValue1: ref.watch(nav),
             asyncValue2: reflow,
-            data: (navState, reflowState) {
+            asyncValue3: navigationGestures,
+            data: (navState, reflowState, navigationGestures) {
               // include buffer spinner page if currently measuring.
               final count = reflowState.status == .measuring
                   ? reflowState.subpages.length + 1
@@ -197,6 +239,11 @@ class _Page extends HookConsumerWidget {
                   final controller = usePageController(
                     initialPage: navState.subpage,
                   );
+                  final scrollPhysics = navigationGestures
+                      ? const AlwaysScrollableScrollPhysics(
+                          parent: ClampingScrollPhysics(),
+                        )
+                      : const NeverScrollableScrollPhysics();
 
                   ref.listen(nav, (
                     previous,
@@ -234,59 +281,16 @@ class _Page extends HookConsumerWidget {
                       Offstage(
                         offstage: navState.page > page,
                         child: NotificationListener<ScrollNotification>(
-                          onNotification: (notification) {
-                            if (!outerController.hasClients) return false;
-
-                            if (notification is OverscrollNotification) {
-                              outerController.jumpTo(
-                                (outerController.offset +
-                                        notification.overscroll)
-                                    .clamp(
-                                      0.0,
-                                      outerController.position.maxScrollExtent,
-                                    ),
-                              );
-                            }
-
-                            if (notification is ScrollEndNotification) {
-                              final rawVelocity =
-                                  notification.dragDetails?.primaryVelocity ??
-                                  0.0;
-
-                              // When reversed, physical velocity direction maps
-                              // to the opposite logical scroll direction.
-                              final dragVelocity = reverse
-                                  ? -rawVelocity
-                                  : rawVelocity;
-
-                              final position = outerController.position;
-                              final metrics = notification.metrics;
-
-                              final atBoundary =
-                                  (dragVelocity > 0 &&
-                                      metrics.pixels <=
-                                          metrics.minScrollExtent) ||
-                                  (dragVelocity < 0 &&
-                                      metrics.pixels >=
-                                          metrics.maxScrollExtent);
-
-                              if (position is ScrollPositionWithSingleContext &&
-                                  atBoundary) {
-                                position.goBallistic(-dragVelocity);
-                              }
-                            }
-
-                            return false;
-                          },
+                          onNotification: navigationGestures
+                              ? handleScrollNotification
+                              : null,
                           child: PageView.builder(
                             controller: controller,
                             allowImplicitScrolling: true,
                             pageSnapping: true,
                             reverse: reverse,
                             itemCount: count,
-                            physics: const AlwaysScrollableScrollPhysics(
-                              parent: ClampingScrollPhysics(),
-                            ),
+                            physics: scrollPhysics,
                             onPageChanged: (newPage) {
                               if (navState.page != page) return;
 
