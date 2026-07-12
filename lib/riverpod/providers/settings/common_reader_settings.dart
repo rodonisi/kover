@@ -18,6 +18,7 @@ sealed class CommonReaderSettingsState with _$CommonReaderSettingsState {
     @Default(ReadDirection.leftToRight) ReadDirection readDirection,
     @Default(OrientationLock.none) OrientationLock orientationLock,
     @Default(true) bool showProgressBar,
+    @Default(true) bool navigationGersturesEnabled,
   }) = _CommonReaderSettingsState;
 
   factory CommonReaderSettingsState.fromJson(Map<String, dynamic> json) =>
@@ -96,6 +97,21 @@ class CommonReaderSettings extends _$CommonReaderSettings {
       'set orientation lock',
       attributes: {
         'value': .string(newLock.name),
+        'series_format': .string(await _seriesFormat()),
+      },
+    );
+  }
+
+  Future<void> setNavigationGesturesEnabled(bool value) async {
+    final current = await future;
+    state = AsyncData(
+      current.copyWith(navigationGersturesEnabled: value),
+    );
+
+    log.info(
+      'set navigation gestures enabled',
+      attributes: {
+        'value': .bool(value),
         'series_format': .string(await _seriesFormat()),
       },
     );
