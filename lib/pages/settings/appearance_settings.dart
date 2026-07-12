@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
-import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -104,18 +103,17 @@ class _ReduceAnimations extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final generalSettings = ref.watch(generalSettingsProvider);
+    final theme = ref.watch(themeProvider);
 
     return Async(
-      asyncValue: generalSettings,
-      data: (generalSettings) => BooleanOption(
+      asyncValue: theme,
+      data: (theme) => BooleanOption(
         icon: KoverIcons.animation,
         title: l.reduceAnimations,
         description: l.reduceAnimationsDescription,
-        value: generalSettings.reduceAnimations,
-        onChanged: (value) => ref
-            .read(generalSettingsProvider.notifier)
-            .setReduceAnimations(value),
+        value: theme.reduceAnimations,
+        onChanged: (value) =>
+            ref.read(themeProvider.notifier).setReduceAnimations(value),
       ),
     );
   }

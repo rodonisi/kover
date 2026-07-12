@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
+import 'package:kover/utils/instant_transition_builder.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:kover/utils/theme.dart';
@@ -73,12 +74,20 @@ final _inputDecorationTheme = const InputDecorationTheme(
   isDense: true,
 );
 
+final _reduceAnimationsPageTransitionsTheme = PageTransitionsTheme(
+  builders: {
+    for (final platform in TargetPlatform.values)
+      platform: const InstantPageTransitionsBuilder(),
+  },
+);
+
 @freezed
 sealed class ThemeModel with _$ThemeModel {
   const ThemeModel._();
   const factory ThemeModel({
     @Default(ThemeMode.system) ThemeMode mode,
     @Default(false) bool outlined,
+    @Default(false) bool reduceAnimations,
   }) = _ThemeModel;
 
   factory ThemeModel.fromJson(Map<String, Object?> json) =>
@@ -118,7 +127,14 @@ sealed class ThemeModel with _$ThemeModel {
     cardTheme: _outlinedLightCardTheme,
   );
 
-  ThemeData get lightTheme => outlined ? _outlinedLightTheme : _lightTheme;
+  ThemeData get lightTheme {
+    final theme = outlined ? _outlinedLightTheme : _lightTheme;
+    return reduceAnimations
+        ? theme.copyWith(
+            pageTransitionsTheme: _reduceAnimationsPageTransitionsTheme,
+          )
+        : theme;
+  }
 
   ThemeData get _darkTheme => _darkBase.copyWith(
     cardTheme: _cardTheme,
@@ -154,7 +170,14 @@ sealed class ThemeModel with _$ThemeModel {
     cardTheme: _outlinedDarkCardTheme,
   );
 
-  ThemeData get darkTheme => outlined ? _outlinedDarkTheme : _darkTheme;
+  ThemeData get darkTheme {
+    final theme = outlined ? _outlinedDarkTheme : _darkTheme;
+    return reduceAnimations
+        ? theme.copyWith(
+            pageTransitionsTheme: _reduceAnimationsPageTransitionsTheme,
+          )
+        : theme;
+  }
 
   ThemeData get theme {
     return switch (mode) {
@@ -197,6 +220,16 @@ class Theme extends _$Theme {
     state = AsyncData(current.copyWith(outlined: value));
     log.info(
       'set outlined theme',
+      attributes: {'value': .bool(value)},
+    );
+  }
+
+  Future<void> setReduceAnimations(bool value) async {
+    final current = await future;
+
+    state = AsyncData(current.copyWith(reduceAnimations: value));
+    log.info(
+      'set reduce animations',
       attributes: {'value': .bool(value)},
     );
   }

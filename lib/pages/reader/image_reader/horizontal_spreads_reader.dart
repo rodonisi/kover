@@ -6,8 +6,8 @@ import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/image_spreads_reader.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
-import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
+import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/utils/extensions/iterable.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
@@ -145,12 +145,12 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
       spreadsProvider(seriesId: seriesId, chapterId: chapterId),
     );
     final reduceAnimations = ref.watch(
-      generalSettingsProvider.select(
+      themeProvider.select(
         (value) =>
             value.whenOrNull(
               data: (data) => data.reduceAnimations,
             ) ??
-            const GeneralSettingsState().reduceAnimations,
+            const ThemeModel().reduceAnimations,
       ),
     );
 

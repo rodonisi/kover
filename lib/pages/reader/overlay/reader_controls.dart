@@ -8,7 +8,7 @@ import 'package:kover/pages/reader/overlay/page_slider.dart';
 import 'package:kover/pages/reader/pdf_reader/pdf_reader_controls.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
-import 'package:kover/riverpod/providers/settings/general_settings.dart';
+import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -90,10 +90,10 @@ class ReaderSettingsButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final reduceAnimations = ref.watch(
-      generalSettingsProvider.select(
+      themeProvider.select(
         (value) =>
             value.value?.reduceAnimations ??
-            const GeneralSettingsState().reduceAnimations,
+            const ThemeModel().reduceAnimations,
       ),
     );
     final sheetAnimationDuration = reduceAnimations ? 0.ms : 300.ms;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:kover/riverpod/providers/settings/general_settings.dart';
+import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 
@@ -19,12 +19,12 @@ class BottomSheetOption extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final reduceAnimations = ref.watch(
-      generalSettingsProvider.select(
+      themeProvider.select(
         (value) =>
             value.whenOrNull(
               data: (data) => data.reduceAnimations,
             ) ??
-            const GeneralSettingsState().reduceAnimations,
+            const ThemeModel().reduceAnimations,
       ),
     );
 

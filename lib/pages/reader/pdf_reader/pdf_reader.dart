@@ -11,8 +11,8 @@ import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
-import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/riverpod/providers/settings/pdf_reader_settings.dart';
+import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -80,12 +80,12 @@ class PdfReader extends HookConsumerWidget {
       commonReaderSettingsProvider(seriesId: seriesId),
     );
     final reduceAnimations = ref.watch(
-      generalSettingsProvider.select(
+      themeProvider.select(
         (value) =>
             value.whenOrNull(
               data: (data) => data.reduceAnimations,
             ) ??
-            const GeneralSettingsState().reduceAnimations,
+            const ThemeModel().reduceAnimations,
       ),
     );
     final pdf = ref.watch(pdfProvider(chapterId: chapterId));

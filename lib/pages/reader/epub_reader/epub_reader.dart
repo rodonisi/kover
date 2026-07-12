@@ -9,7 +9,7 @@ import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
-import 'package:kover/riverpod/providers/settings/general_settings.dart';
+import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
@@ -38,12 +38,12 @@ class EpubReader extends HookConsumerWidget {
     );
 
     final reduceAnimations = ref.watch(
-      generalSettingsProvider.select(
+      themeProvider.select(
         (value) =>
             value.whenOrNull(
               data: (data) => data.reduceAnimations,
             ) ??
-            const GeneralSettingsState().reduceAnimations,
+            const ThemeModel().reduceAnimations,
       ),
     );
 
@@ -225,8 +225,12 @@ class _Page extends HookConsumerWidget {
     );
 
     final reduceAnimations = ref.watch(
-      generalSettingsProvider.select(
-        (value) => value.whenData((data) => data.reduceAnimations),
+      themeProvider.select(
+        (value) =>
+            value.whenOrNull(
+              data: (data) => data.reduceAnimations,
+            ) ??
+            const ThemeModel().reduceAnimations,
       ),
     );
 
@@ -241,115 +245,111 @@ class _Page extends HookConsumerWidget {
             ),
           ),
         Positioned.fill(
-          child: Async4(
+          child: Async3(
             asyncValue1: ref.watch(nav),
             asyncValue2: reflow,
             asyncValue3: navigationGestures,
-            asyncValue4: reduceAnimations,
-            data:
-                (navState, reflowState, navigationGestures, reduceAnimations) {
-                  // include buffer spinner page if currently measuring.
-                  final count = reflowState.status == .measuring
-                      ? reflowState.subpages.length + 1
-                      : reflowState.subpages.length;
+            data: (navState, reflowState, navigationGestures) {
+              // include buffer spinner page if currently measuring.
+              final count = reflowState.status == .measuring
+                  ? reflowState.subpages.length + 1
+                  : reflowState.subpages.length;
 
-                  return HookConsumer(
-                    builder: (context, ref, child) {
-                      final controller = usePageController(
-                        initialPage: navState.subpage,
-                      );
-                      final scrollPhysics =
-                          navigationGestures && !reduceAnimations
-                          ? const AlwaysScrollableScrollPhysics(
-                              parent: ClampingScrollPhysics(),
-                            )
-                          : const NeverScrollableScrollPhysics();
+              return HookConsumer(
+                builder: (context, ref, child) {
+                  final controller = usePageController(
+                    initialPage: navState.subpage,
+                  );
+                  final scrollPhysics = navigationGestures && !reduceAnimations
+                      ? const AlwaysScrollableScrollPhysics(
+                          parent: ClampingScrollPhysics(),
+                        )
+                      : const NeverScrollableScrollPhysics();
 
-                      ref.listen(nav, (
-                        previous,
-                        next,
-                      ) async {
-                        next.whenData((next) async {
-                          final previousSubpage = previous?.value?.subpage;
-                          final nextSubpage = next.subpage;
+                  ref.listen(nav, (
+                    previous,
+                    next,
+                  ) async {
+                    next.whenData((next) async {
+                      final previousSubpage = previous?.value?.subpage;
+                      final nextSubpage = next.subpage;
 
-                          if (next.page != page ||
-                              next.fromObserver ||
-                              nextSubpage == previousSubpage) {
-                            return;
-                          }
+                      if (next.page != page ||
+                          next.fromObserver ||
+                          nextSubpage == previousSubpage) {
+                        return;
+                      }
 
-                          if (controller.hasClients &&
-                              controller.page?.round() != nextSubpage) {
-                            final isSequential =
-                                previousSubpage != null &&
-                                (nextSubpage - previousSubpage).abs() == 1;
+                      if (controller.hasClients &&
+                          controller.page?.round() != nextSubpage) {
+                        final isSequential =
+                            previousSubpage != null &&
+                            (nextSubpage - previousSubpage).abs() == 1;
 
-                            isSequential && !reduceAnimations
-                                ? controller.animateToPage(
-                                    nextSubpage,
-                                    duration: 200.ms,
-                                    curve: Curves.easeInOut,
-                                  )
-                                : controller.jumpToPage(nextSubpage);
-                          }
-                        });
-                      });
+                        isSequential && !reduceAnimations
+                            ? controller.animateToPage(
+                                nextSubpage,
+                                duration: 200.ms,
+                                curve: Curves.easeInOut,
+                              )
+                            : controller.jumpToPage(nextSubpage);
+                      }
+                    });
+                  });
 
-                      return Stack(
-                        children: [
-                          Offstage(
-                            offstage: navState.page > page,
-                            child: NotificationListener<ScrollNotification>(
-                              onNotification: navigationGestures
-                                  ? handleScrollNotification
-                                  : null,
-                              child: PageView.builder(
-                                controller: controller,
-                                allowImplicitScrolling: true,
-                                pageSnapping: true,
-                                reverse: reverse,
-                                itemCount: count,
-                                physics: scrollPhysics,
-                                onPageChanged: (newPage) {
-                                  if (navState.page != page) return;
+                  return Stack(
+                    children: [
+                      Offstage(
+                        offstage: navState.page > page,
+                        child: NotificationListener<ScrollNotification>(
+                          onNotification: navigationGestures
+                              ? handleScrollNotification
+                              : null,
+                          child: PageView.builder(
+                            controller: controller,
+                            allowImplicitScrolling: true,
+                            pageSnapping: true,
+                            reverse: reverse,
+                            itemCount: count,
+                            physics: scrollPhysics,
+                            onPageChanged: (newPage) {
+                              if (navState.page != page) return;
 
-                                  ref
-                                      .read(nav.notifier)
-                                      .jumpToSubpage(
-                                        newPage,
-                                        fromObserver: true,
-                                      );
-                                },
-                                itemBuilder: (context, index) {
-                                  if (index >= reflowState.subpages.length) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  }
-
-                                  return SingleChildScrollView(
-                                    child: _RenderContent(
-                                      seriesId: seriesId,
-                                      html:
-                                          reflowState.subpages[index].outerHtml,
-                                      styles: reflowState.page.styles,
-                                      onSelectionChanged: onSelectionChanged,
-                                    ),
+                              ref
+                                  .read(nav.notifier)
+                                  .jumpToSubpage(
+                                    newPage,
+                                    fromObserver: true,
                                   );
-                                },
-                              ),
-                            ),
+                            },
+                            itemBuilder: (context, index) {
+                              if (index >= reflowState.subpages.length) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+
+                              return SingleChildScrollView(
+                                child: _RenderContent(
+                                  seriesId: seriesId,
+                                  html: reflowState.subpages[index].outerHtml,
+                                  styles: reflowState.page.styles,
+                                  onSelectionChanged: onSelectionChanged,
+                                ),
+                              );
+                            },
                           ),
-                          if (navState.page > page)
-                            const Positioned.fill(
-                              child: Center(child: CircularProgressIndicator()),
-                            ),
-                        ],
-                      );
-                    },
+                        ),
+                      ),
+                      if (navState.page > page)
+                        const Positioned.fill(
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                    ],
                   );
                 },
+              );
+            },
           ),
         ),
       ],

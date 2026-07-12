@@ -14,7 +14,7 @@ import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
-import 'package:kover/riverpod/providers/settings/general_settings.dart';
+import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
@@ -105,10 +105,10 @@ class ReaderOverlay extends HookConsumerWidget {
           );
 
           final reduceAnimations = ref.watch(
-            generalSettingsProvider.select(
+            themeProvider.select(
               (value) =>
                   value.whenOrNull(data: (data) => data.reduceAnimations) ??
-                  const GeneralSettingsState().reduceAnimations,
+                  const ThemeModel().reduceAnimations,
             ),
           );
 
@@ -138,7 +138,7 @@ class ReaderOverlay extends HookConsumerWidget {
           );
 
           return Scaffold(
-            endDrawerEnableOpenDragGesture: true,
+            endDrawerEnableOpenDragGesture: false,
             endDrawer: endDrawer,
             body: FocusableActionDetector(
               autofocus: true,

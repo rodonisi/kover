@@ -7,8 +7,8 @@ import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
-import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
+import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
 class HorizontalPagedReader extends HookConsumerWidget {
@@ -39,12 +39,12 @@ class HorizontalPagedReader extends HookConsumerWidget {
     final navState = ref.watch(navProvider);
 
     final reduceAnimations = ref.watch(
-      generalSettingsProvider.select(
+      themeProvider.select(
         (value) =>
             value.whenOrNull(
               data: (data) => data.reduceAnimations,
             ) ??
-            const GeneralSettingsState().reduceAnimations,
+            const ThemeModel().reduceAnimations,
       ),
     );
 
