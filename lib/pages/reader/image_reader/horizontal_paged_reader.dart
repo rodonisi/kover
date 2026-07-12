@@ -7,6 +7,7 @@ import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
+import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
@@ -36,6 +37,16 @@ class HorizontalPagedReader extends HookConsumerWidget {
     );
 
     final navState = ref.watch(navProvider);
+
+    final reduceAnimations = ref.watch(
+      generalSettingsProvider.select(
+        (value) =>
+            value.whenOrNull(
+              data: (data) => data.reduceAnimations,
+            ) ??
+            const GeneralSettingsState().reduceAnimations,
+      ),
+    );
 
     return Async4(
       asyncValue1: reader,
@@ -68,7 +79,7 @@ class HorizontalPagedReader extends HookConsumerWidget {
                         previous.value != null &&
                         (next - previous.value!).abs() == 1;
 
-                    isSequential
+                    isSequential && !reduceAnimations
                         ? pageController.animateToPage(
                             next,
                             duration: 200.ms,
@@ -85,7 +96,8 @@ class HorizontalPagedReader extends HookConsumerWidget {
                 ? const NeverScrollableScrollPhysics()
                 : const BouncingScrollPhysics();
 
-            final scrollPhysics = commonSettings.navigationGersturesEnabled
+            final scrollPhysics =
+                commonSettings.navigationGersturesEnabled && !reduceAnimations
                 ? enabledScrollPhysics
                 : const NeverScrollableScrollPhysics();
 
