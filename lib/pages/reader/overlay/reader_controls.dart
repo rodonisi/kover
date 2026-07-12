@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/reader/epub_reader/epub_reader_controls.dart';
@@ -7,6 +8,7 @@ import 'package:kover/pages/reader/overlay/page_slider.dart';
 import 'package:kover/pages/reader/pdf_reader/pdf_reader_controls.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
+import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -80,13 +82,22 @@ class ReaderControls extends HookConsumerWidget {
   }
 }
 
-class ReaderSettingsButton extends StatelessWidget {
+class ReaderSettingsButton extends ConsumerWidget {
   final Widget child;
   const ReaderSettingsButton({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
+    final reduceAnimations = ref.watch(
+      generalSettingsProvider.select(
+        (value) =>
+            value.value?.reduceAnimations ??
+            const GeneralSettingsState().reduceAnimations,
+      ),
+    );
+    final sheetAnimationDuration = reduceAnimations ? 0.ms : 300.ms;
+
     return IconButton(
       icon: const Icon(LucideIcons.slidersHorizontal),
       tooltip: l.readerSettings,
@@ -99,6 +110,10 @@ class ReaderSettingsButton extends StatelessWidget {
           constraints: BoxConstraints(
             maxHeight: MediaQuery.sizeOf(context).height * 0.85,
             maxWidth: LayoutBreakpoints.medium,
+          ),
+          sheetAnimationStyle: AnimationStyle(
+            duration: sheetAnimationDuration,
+            reverseDuration: sheetAnimationDuration,
           ),
           builder: (context) => child,
         );

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 
-class BottomSheetOption extends StatelessWidget {
+class BottomSheetOption extends ConsumerWidget {
   final String title;
   final IconData? leadingIcon;
   final Widget Function(BuildContext) bottomSheetBuilder;
@@ -14,7 +17,19 @@ class BottomSheetOption extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reduceAnimations = ref.watch(
+      generalSettingsProvider.select(
+        (value) =>
+            value.whenOrNull(
+              data: (data) => data.reduceAnimations,
+            ) ??
+            const GeneralSettingsState().reduceAnimations,
+      ),
+    );
+
+    final sheetAnimationDuration = reduceAnimations ? 0.ms : 200.ms;
+
     return ListTile(
       title: Padding(
         padding: const EdgeInsets.symmetric(
@@ -42,6 +57,10 @@ class BottomSheetOption extends StatelessWidget {
           constraints: BoxConstraints(
             maxHeight: MediaQuery.sizeOf(context).height * 0.85,
             maxWidth: LayoutBreakpoints.medium,
+          ),
+          sheetAnimationStyle: AnimationStyle(
+            duration: sheetAnimationDuration,
+            reverseDuration: sheetAnimationDuration,
           ),
           builder: bottomSheetBuilder,
         );
