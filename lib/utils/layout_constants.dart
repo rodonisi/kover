@@ -1,4 +1,5 @@
 import 'package:flutter/rendering.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 sealed class LayoutConstants {
   static const double smallestPadding = 2.0;
@@ -33,6 +34,8 @@ sealed class LayoutConstants {
   static const double mediumBorderRadius = 16.0;
   static const double largeBorderRadius = 32.0;
   static const double largerBorderRadius = 64.0;
+
+  static final Duration pageSlideDuration = 200.ms;
 }
 
 sealed class LayoutBreakpoints {

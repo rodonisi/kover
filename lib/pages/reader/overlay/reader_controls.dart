@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/reader/epub_reader/epub_reader_controls.dart';
@@ -96,7 +95,9 @@ class ReaderSettingsButton extends ConsumerWidget {
             const ThemeModel().reduceAnimations,
       ),
     );
-    final sheetAnimationDuration = reduceAnimations ? 0.ms : 300.ms;
+    final animation = reduceAnimations
+        ? const AnimationStyle(duration: .zero, reverseDuration: .zero)
+        : null;
 
     return IconButton(
       icon: const Icon(LucideIcons.slidersHorizontal),
@@ -111,10 +112,7 @@ class ReaderSettingsButton extends ConsumerWidget {
             maxHeight: MediaQuery.sizeOf(context).height * 0.85,
             maxWidth: LayoutBreakpoints.medium,
           ),
-          sheetAnimationStyle: AnimationStyle(
-            duration: sheetAnimationDuration,
-            reverseDuration: sheetAnimationDuration,
-          ),
+          sheetAnimationStyle: animation,
           builder: (context) => child,
         );
       },

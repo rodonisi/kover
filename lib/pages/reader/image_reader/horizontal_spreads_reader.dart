@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
@@ -9,6 +8,7 @@ import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/utils/extensions/iterable.dart';
+import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
 class HorizontalSpreadsReader extends HookConsumerWidget {
@@ -168,7 +168,7 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
           isSequential && !reduceAnimations
               ? controller.animateToPage(
                   next.currentSpread,
-                  duration: 200.ms,
+                  duration: LayoutConstants.pageSlideDuration,
                   curve: Curves.easeInOut,
                 )
               : controller.jumpToPage(next.currentSpread);

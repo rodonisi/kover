@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/constants/kover_icons.dart';
@@ -28,7 +27,9 @@ class BottomSheetOption extends ConsumerWidget {
       ),
     );
 
-    final sheetAnimationDuration = reduceAnimations ? 0.ms : 200.ms;
+    final animation = reduceAnimations
+        ? const AnimationStyle(duration: .zero, reverseDuration: .zero)
+        : null;
 
     return ListTile(
       title: Padding(
@@ -58,10 +59,7 @@ class BottomSheetOption extends ConsumerWidget {
             maxHeight: MediaQuery.sizeOf(context).height * 0.85,
             maxWidth: LayoutBreakpoints.medium,
           ),
-          sheetAnimationStyle: AnimationStyle(
-            duration: sheetAnimationDuration,
-            reverseDuration: sheetAnimationDuration,
-          ),
+          sheetAnimationStyle: animation,
           builder: bottomSheetBuilder,
         );
       },

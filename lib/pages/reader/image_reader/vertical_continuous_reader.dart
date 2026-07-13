@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/image_model.dart';
@@ -10,6 +9,7 @@ import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/image_vertical_reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
+import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/measured_widget.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
@@ -152,7 +152,7 @@ class VerticalContinuousReader extends HookConsumerWidget {
                   if (isSequential) {
                     await observerController.animateTo(
                       index: next.currentPage,
-                      duration: 200.ms,
+                      duration: LayoutConstants.pageSlideDuration,
                       curve: Curves.easeInOut,
                     );
                   } else {

@@ -288,7 +288,7 @@ class ReaderOverlay extends HookConsumerWidget {
                             .animate(target: uiVisible.value ? 1.0 : 0.0)
                             .moveY(
                               end: -snackbarOffset,
-                              duration: progressFadeDuration,
+                              duration: overlayFadeDuration,
                             ),
                   ),
                   Align(
@@ -302,7 +302,7 @@ class ReaderOverlay extends HookConsumerWidget {
                             )
                             .animate(target: uiVisible.value ? 1.0 : 0.0)
                             .show(duration: 10.ms, maintain: false)
-                            .fade(duration: progressFadeDuration),
+                            .fade(duration: overlayFadeDuration),
                   ),
                 ],
               ),

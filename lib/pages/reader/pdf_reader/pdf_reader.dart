@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/read_direction.dart';
@@ -98,7 +97,9 @@ class PdfReader extends HookConsumerWidget {
           lastUpdateFromProvider.value = true;
           await controller.goToPage(
             pageNumber: next.currentPage + 1,
-            duration: reduceAnimations ? 0.ms : 200.ms,
+            duration: reduceAnimations
+                ? .zero
+                : LayoutConstants.pageSlideDuration,
           );
         }
       });
