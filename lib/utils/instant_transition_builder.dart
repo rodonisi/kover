@@ -11,6 +11,6 @@ class InstantPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return child; 
+    return child;
   }
 }
