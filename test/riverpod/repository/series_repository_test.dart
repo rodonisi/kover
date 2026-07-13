@@ -71,6 +71,56 @@ void main() {
       verify(mockSeriesDao.mergeSeriesDetails(any)).called(1);
     });
 
+    test('fetches details when never synced', () async {
+      final repo = SeriesRepository(
+        db: mockAppDatabase,
+        client: mockSeriesSyncOperations,
+        volumeClient: mockVolumeSyncOperations,
+        chapterClient: mockChapterSyncOperations,
+      );
+
+      final now = DateTime.now();
+
+      final entries = [
+        SeriesCompanion(
+          id: const Value(1),
+          libraryId: const Value(1),
+          name: const Value('name'),
+          format: const Value(.epub),
+          created: Value(now),
+          lastChapterAdded: Value(now),
+        ),
+      ];
+
+      final existingRows = [
+        SeriesData(
+          id: 1,
+          libraryId: 1,
+          name: 'name',
+          format: .epub,
+          pages: 0,
+          wordCount: 0,
+          isBlacklisted: false,
+          isRecentlyAdded: false,
+          isRecentlyUpdated: false,
+          created: now,
+          lastChapterAdded: now,
+          lastSynced: null,
+        ),
+      ];
+
+      when(mockSeriesSyncOperations.getAllSeries()).thenAnswer(
+        (_) async => entries,
+      );
+
+      when(selectable.get()).thenAnswer((_) async => existingRows);
+
+      await repo.refreshAllSeries();
+
+      verify(mockSeriesSyncOperations.getSeriesDetail(any)).called(1);
+      verify(mockSeriesDao.mergeSeriesDetails(any)).called(1);
+    });
+
     test('fetches detail when new chapter added', () async {
       final repo = SeriesRepository(
         db: mockAppDatabase,
@@ -104,9 +154,9 @@ void main() {
           isBlacklisted: false,
           isRecentlyAdded: false,
           isRecentlyUpdated: false,
-          created: yesterday,
+          created: now,
           lastChapterAdded: yesterday,
-          lastSynced: yesterday,
+          lastSynced: now,
         ),
       ];
 
@@ -139,8 +189,8 @@ void main() {
           libraryId: const Value(1),
           name: const Value('name'),
           format: const Value(.epub),
-          created: Value(yesterday),
-          lastChapterAdded: Value(yesterday),
+          created: Value(now),
+          lastChapterAdded: Value(now),
           remoteLastRead: Value(now),
         ),
       ];
@@ -155,9 +205,10 @@ void main() {
           isBlacklisted: false,
           isRecentlyAdded: false,
           isRecentlyUpdated: false,
-          created: yesterday,
-          lastChapterAdded: yesterday,
-          lastSynced: yesterday,
+          created: now,
+          lastChapterAdded: now,
+          lastSynced: now,
+          remoteLastRead: yesterday,
         ),
       ];
 
