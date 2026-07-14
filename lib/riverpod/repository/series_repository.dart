@@ -212,7 +212,6 @@ class SeriesRepository {
   Future<void> refreshAllSeries() async {
     final rows = await _db.seriesDao.allSeries().get();
     final series = await _client.getAllSeries();
-    await _db.seriesDao.mergeSeries(series);
     final seriesById = {for (final s in series) s.id.value: s};
 
     final detailsToFetch = rows
@@ -247,6 +246,7 @@ class SeriesRepository {
     );
 
     await refreshSeriesDetails([...detailsToFetch, ...newSeriesIds]);
+    await _db.seriesDao.mergeSeries(series);
   }
 
   /// Fetch missing metadata for all series
