@@ -606,5 +606,21 @@
     "availableDestinations": "Destinazioni disponibili",
     "@availableDestinations": {
         "description": "Label for the available destinations section"
+    },
+    "navigationGestures": "Gesti di navigazione",
+    "@navigationGestures": {
+        "description": "Label for the enable navigation gestures reader option"
+    },
+    "appearance": "Apparenza",
+    "@appearance": {
+        "description": "Label for the appearance settings section"
+    },
+    "reduceAnimations": "Riduci Animazioni",
+    "@reduceAnimations": {
+        "description": "Label for the reduce animation setting"
+    },
+    "reduceAnimationsDescription": "Disabilita la maggior parte delle animazioni e delle transizioni di pagina del lettore. Nota: i gesti di scorrimento nelle modalità di lettura orizzontali non saranno disponibili quando questa opzione è abilitata.",
+    "@reduceAnimationsDescription": {
+        "description": "Description for the reduce animation setting"
     }
 }
