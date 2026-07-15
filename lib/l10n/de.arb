@@ -701,5 +701,21 @@
     "availableDestinations": "Verfügbare Ziele",
     "@availableDestinations": {
         "description": "Label for the available destinations section"
+    },
+    "navigationGestures": "Navigationsgesten",
+    "@navigationGestures": {
+        "description": "Label for the enable navigation gestures reader option"
+    },
+    "appearance": "Darstellung",
+    "@appearance": {
+        "description": "Label for the appearance settings section"
+    },
+    "reduceAnimations": "Animationen reduzieren",
+    "@reduceAnimations": {
+        "description": "Label for the reduce animation setting"
+    },
+    "reduceAnimationsDescription": "Deaktiviert die meisten Animationen und Seitenübergänge des Readers. Hinweis: Wischgesten in horizontalen Lesemodi sind nicht verfügbar, wenn diese Option aktiviert ist.",
+    "@reduceAnimationsDescription": {
+        "description": "Description for the reduce animation setting"
     }
 }
