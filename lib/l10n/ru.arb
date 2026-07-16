@@ -516,5 +516,76 @@
     "read": "Читать",
     "@read": {
         "description": "Label for the read action button on cover cards"
+    },
+    "reduceAnimations": "Меньше анимаций",
+    "@reduceAnimations": {
+        "description": "Label for the reduce animation setting"
+    },
+    "reduceAnimationsDescription": "Отключает большинство анимаций и переходов между страницами. Примечание: при включении этой опции жесты смахивания в горизонтальных режимах чтения будут недоступны.",
+    "@reduceAnimationsDescription": {
+        "description": "Description for the reduce animation setting"
+    },
+    "orientation": "Ориентация",
+    "@orientation": {
+        "description": "Label for the orientation setting"
+    },
+    "navigationGestures": "Жесты навигации",
+    "@navigationGestures": {
+        "description": "Label for the enable navigation gestures reader option"
+    },
+    "appearance": "Внешний вид",
+    "@appearance": {
+        "description": "Label for the appearance settings section"
+    },
+    "refreshingChapterToc": "Обновление оглавления главы: {chapterId}",
+    "@refreshingChapterToc": {
+        "description": "Label for the syncing chapter TOC phase with the chapter ID",
+        "placeholders": {
+            "chapterId": {
+                "description": "The ID of the chapter which TOC is being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "noActiveSyncOperations": "Нет активных операций синхронизации",
+    "@noActiveSyncOperations": {
+        "description": "Message shown when there are no active sync operations"
+    },
+    "syncingAllSeries": "Синхронизация всех серий",
+    "@syncingAllSeries": {
+        "description": "Label for the syncing all series phase"
+    },
+    "syncingMetadata": "Синхронизация метаданных",
+    "@syncingMetadata": {
+        "description": "Label for the syncing metadata phase"
+    },
+    "syncingRecentlyAdded": "Синхронизация недавно добавленного",
+    "@syncingRecentlyAdded": {
+        "description": "Label for the syncing recently added phase"
+    },
+    "syncingRecentlyUpdated": "Синхронизация недавно обновленного",
+    "@syncingRecentlyUpdated": {
+        "description": "Label for the syncing recently updated phase"
+    },
+    "syncingLibraries": "Синхронизация библиотек",
+    "@syncingLibraries": {
+        "description": "Label for the syncing libraries phase"
+    },
+    "syncingProgress": "Синхронизация прогресса",
+    "@syncingProgress": {
+        "description": "Label for the syncing progress phase"
+    },
+    "syncingCovers": "Синхронизация обложек",
+    "@syncingCovers": {
+        "description": "Label for the syncing covers phase"
+    },
+    "syncingCollections": "Синхронизация коллекций",
+    "@syncingCollections": {
+        "description": "Label for the syncing collections phase"
+    },
+    "syncingReadingLists": "Синхронизация списков чтения",
+    "@syncingReadingLists": {
+        "description": "Label for the syncing reading lists phase"
     }
 }
