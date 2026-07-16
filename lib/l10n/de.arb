@@ -149,7 +149,7 @@
     "@github": {
         "description": "Label for the GitHub link"
     },
-    "madeWithLove": "Hergestellt mit ❤️",
+    "madeWithLove": "Mit ❤️ gemacht",
     "@madeWithLove": {
         "description": "Label for the made with love message"
     },
@@ -631,7 +631,7 @@
     "@wordSpacing": {
         "description": "Label for the word spacing setting"
     },
-    "read": "Gelesen",
+    "read": "Lesen",
     "@read": {
         "description": "Label for the read action button on cover cards"
     },
