@@ -10,10 +10,15 @@ extension EpubPagePreprocessor on DocumentFragment {
     final root = DocumentFragment();
     final wrapper = Element.tag('div')
       ..className = HtmlConstants.kavitaWrapperClass
-      ..append(clone(true));
+      ..append(
+        Element.tag('div')
+          ..className = HtmlConstants.koverWrapperClass
+          ..append(clone(true)),
+      );
     root.append(wrapper);
 
     final rules = _extractAllRules(root);
+
     final elementMap = _matchRulesToElements(root, rules);
     _applyInlinedStyles(elementMap);
     _applyScrollIds(root);

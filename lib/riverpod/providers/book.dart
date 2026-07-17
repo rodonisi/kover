@@ -60,12 +60,19 @@ Future<Map<String, Map<String, String>>> customCss(Ref ref) async {
   final theme = themeState.theme;
 
   final highlightColor = theme.colorScheme.tertiaryContainer.withAlpha(0xe0);
-  final textColor = theme.colorScheme.onTertiaryContainer;
+  final onHighlightColor = theme.colorScheme.onTertiaryContainer;
+
+  final backgroundColor = theme.colorScheme.surface;
+  final onBackgroundColor = theme.colorScheme.onSurface;
 
   return {
     '.${HtmlConstants.resumeParagraphClass}': {
       'background-color': highlightColor.toCssRgba(),
-      'color': textColor.toCssRgba(),
+      'color': onHighlightColor.toCssRgba(),
+    },
+    '.${HtmlConstants.koverWrapperClass}': {
+      'background-color': backgroundColor.toCssRgba(),
+      'color': onBackgroundColor.toCssRgba(),
     },
   };
 }
