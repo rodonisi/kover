@@ -45,6 +45,9 @@ sealed class KoverIcons {
   static const IconData dragHandle = LucideIcons.gripHorizontal;
   static const IconData navbar = LucideIcons.ellipsis;
   static const IconData hidden = LucideIcons.eyeOff;
+  static const IconData play = Icons.play_arrow_rounded;
+  static const IconData noConnection = LucideIcons.wifiOff;
+  static const IconData read = LucideIcons.bookOpen;
 
   static const IconData unlockedOrientation = LucideIcons.rotateCwSquare;
   static const IconData landscape = LucideIcons.rectangleHorizontal;

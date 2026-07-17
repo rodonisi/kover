@@ -99,7 +99,10 @@ class _ChapterContinueButtonImage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final canRead = ref.watch(canReadChapterProvider(chapterId)).value ?? false;
+
     return ContinueButtonImage(
+      enabled: canRead,
       image: ChapterCoverImage(
         chapterId: chapterId,
         usePlaceholder: false,
@@ -119,10 +122,16 @@ class _ChapterTitleContinueButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final canRead = ref.watch(canReadChapterProvider(chapterId)).value ?? false;
+
     return TitleContinueButton(
+      onTap: canRead
+          ? () => ReaderRoute(
+              seriesId: seriesId,
+              chapterId: chapterId,
+            ).push(context)
+          : null,
       child: _ChapterContinueButtonImage(chapterId: chapterId),
-      onTap: () =>
-          ReaderRoute(seriesId: seriesId, chapterId: chapterId).push(context),
     );
   }
 }
@@ -138,7 +147,16 @@ class _ChapterContinuePointButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final canRead =
+        ref
+            .watch(
+              canReadChapterProvider(chapterId),
+            )
+            .value ??
+        false;
+
     return ContinuePointButton(
+      enabled: canRead,
       cover: _ChapterContinueButtonImage(chapterId: chapterId),
       onTap: () =>
           ReaderRoute(seriesId: seriesId, chapterId: chapterId).push(context),

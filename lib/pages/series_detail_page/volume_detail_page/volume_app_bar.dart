@@ -102,12 +102,15 @@ class _VolumeContinueButtonImage extends ConsumerWidget {
     final continuePoint = ref.watch(
       volumeContinuePointProvider(volumeId: volumeId),
     );
+    final canRead = ref.watch(canReadVolumeProvider(volumeId));
 
-    return Async(
-      asyncValue: continuePoint,
-      data: (data) => ContinueButtonImage(
+    return Async2(
+      asyncValue1: continuePoint,
+      asyncValue2: canRead,
+      data: (chapter, canRead) => ContinueButtonImage(
+        enabled: canRead,
         image: ChapterCoverImage(
-          chapterId: data.id,
+          chapterId: chapter.id,
           usePlaceholder: false,
         ),
       ),
@@ -129,13 +132,19 @@ class _VolumeTitleContinueButton extends ConsumerWidget {
     final continuePoint = ref.watch(
       volumeContinuePointProvider(volumeId: volumeId),
     );
+    final canRead = ref.watch(canReadVolumeProvider(volumeId));
 
-    return Async(
-      asyncValue: continuePoint,
-      data: (data) => TitleContinueButton(
+    return Async2(
+      asyncValue1: continuePoint,
+      asyncValue2: canRead,
+      data: (chapter, canRead) => TitleContinueButton(
         child: _VolumeContinueButtonImage(volumeId: volumeId),
-        onTap: () =>
-            ReaderRoute(seriesId: seriesId, chapterId: data.id).push(context),
+        onTap: () => canRead
+            ? ReaderRoute(
+                seriesId: seriesId,
+                chapterId: chapter.id,
+              ).push(context)
+            : null,
       ),
     );
   }
@@ -155,15 +164,24 @@ class _VolumeContinuePointButton extends ConsumerWidget {
     final continuePoint = ref.watch(
       volumeContinuePointProvider(volumeId: volumeId),
     );
+    final canRead = ref.watch(
+      canReadVolumeProvider(volumeId),
+    );
 
-    return Async(
-      asyncValue: continuePoint,
-      data: (data) => ContinuePointButton(
-        title: data.title,
+    return Async2(
+      asyncValue1: continuePoint,
+      asyncValue2: canRead,
+      data: (chapter, canRead) => ContinuePointButton(
+        enabled: canRead,
+        title: chapter.title,
         cover: _VolumeContinueButtonImage(volumeId: volumeId),
-        progress: ref.watch(chapterProgressProvider(chapterId: data.id)).value,
-        onTap: () =>
-            ReaderRoute(seriesId: seriesId, chapterId: data.id).push(context),
+        progress: ref
+            .watch(chapterProgressProvider(chapterId: chapter.id))
+            .value,
+        onTap: () => ReaderRoute(
+          seriesId: seriesId,
+          chapterId: chapter.id,
+        ).push(context),
       ),
     );
   }

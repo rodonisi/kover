@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/series_detail_page/series_info_background.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/lists/adaptive_sliver_app_bar.dart';
 
@@ -115,91 +118,109 @@ class CoverAppBarTitle extends StatelessWidget {
   }
 }
 
-class ContinuePointButton extends ConsumerWidget {
+class ContinuePointButton extends HookWidget {
   final double? progress;
-  final VoidCallback? onTap;
   final String? title;
   final Widget? cover;
+  final bool enabled;
+  final VoidCallback? onTap;
 
   const ContinuePointButton({
     super.key,
     this.progress,
     this.title,
     this.cover,
+    this.enabled = true,
     this.onTap,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final alpha = useState(1.0);
 
-    return Card(
-      margin: EdgeInsets.zero,
-      color: theme.colorScheme.primaryContainer,
-      clipBehavior: .antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(
-          LayoutConstants.mediumBorderRadius,
+    useEffect(() {
+      alpha.value = enabled ? 1.0 : 0.6;
+      return null;
+    }, [enabled]);
+
+    final backgroundColor = enabled
+        ? theme.colorScheme.primaryContainer
+        : theme.colorScheme.surfaceContainer;
+    final textColor = enabled
+        ? theme.colorScheme.onPrimaryContainer
+        : theme.colorScheme.onSurface;
+    return AnimatedOpacity(
+      opacity: alpha.value,
+      duration: 200.ms,
+      child: Card(
+        margin: EdgeInsets.zero,
+        color: backgroundColor,
+        clipBehavior: .hardEdge,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadiusGeometry.circular(
+            LayoutConstants.mediumBorderRadius,
+          ),
         ),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            spacing: LayoutConstants.mediumPadding,
-            mainAxisAlignment: .center,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadiusGeometry.circular(
-                  LayoutConstants.smallBorderRadius,
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              spacing: LayoutConstants.mediumPadding,
+              mainAxisAlignment: .center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadiusGeometry.circular(
+                    LayoutConstants.smallBorderRadius,
+                  ),
+                  child: SizedBox.square(
+                    dimension: LayoutConstants.largerIcon,
+                    child: cover,
+                  ),
                 ),
-                child: SizedBox.square(
-                  dimension: LayoutConstants.largerIcon,
-                  child: cover,
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: .center,
-                  crossAxisAlignment: .center,
-                  mainAxisSize: .min,
-                  children: [
-                    Text(
-                      l.continueReading,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                    if (title != null)
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: .center,
+                    crossAxisAlignment: .center,
+                    mainAxisSize: .min,
+                    children: [
                       Text(
-                        title!,
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.onPrimaryContainer,
+                        l.continueReading,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: textColor,
                         ),
-                        maxLines: 1,
-                        overflow: .ellipsis,
                       ),
-                  ],
-                ),
-              ),
-              SizedBox.square(
-                dimension: LayoutConstants.largerIcon,
-                child: progress != null
-                    ? Padding(
-                        padding: LayoutConstants.smallEdgeInsets,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 10,
-                          strokeCap: .round,
-                          backgroundColor: theme.colorScheme.onPrimaryFixed,
-                          color: theme.colorScheme.primaryFixedDim,
-                          value: progress,
+                      if (title != null)
+                        Text(
+                          title!,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: textColor,
+                          ),
+                          maxLines: 1,
+                          overflow: .ellipsis,
                         ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-            ],
+                    ],
+                  ),
+                ),
+                SizedBox.square(
+                  dimension: LayoutConstants.largerIcon,
+                  child: progress != null
+                      ? Padding(
+                          padding: LayoutConstants.smallEdgeInsets,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 10,
+                            strokeCap: .round,
+                            backgroundColor: theme.colorScheme.onPrimaryFixed,
+                            color: theme.colorScheme.primaryFixedDim,
+                            value: progress,
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -208,11 +229,20 @@ class ContinuePointButton extends ConsumerWidget {
 }
 
 class ContinueButtonImage extends ConsumerWidget {
+  final bool enabled;
   final Widget image;
-  const ContinueButtonImage({super.key, required this.image});
+  const ContinueButtonImage({
+    super.key,
+    this.enabled = true,
+    required this.image,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final icon = enabled ? KoverIcons.play : KoverIcons.noConnection;
+    final iconColor = enabled
+        ? Theme.of(context).colorScheme.primaryFixedDim
+        : Theme.of(context).colorScheme.onSurface.withAlpha(0x80);
     return Stack(
       children: [
         Positioned.fill(
@@ -224,10 +254,10 @@ class ContinueButtonImage extends ConsumerWidget {
         Align(
           alignment: .center,
           child: Icon(
-            Icons.play_arrow_rounded,
+            icon,
             size: LayoutConstants.largeIcon,
             shadows: const [Shadow(blurRadius: 3)],
-            color: Theme.of(context).colorScheme.primaryFixedDim,
+            color: iconColor,
           ),
         ),
       ],
@@ -241,8 +271,8 @@ class TitleContinueButton extends ConsumerWidget {
 
   const TitleContinueButton({
     super.key,
-    required this.child,
     this.onTap,
+    required this.child,
   });
 
   @override

@@ -39,6 +39,48 @@ Stream<bool> canReadSeries(Ref ref, int seriesId) {
       .map((isDownloaded) => isDownloaded || hasConnection);
 }
 
+/// Whether the [readingListId] can be read in the current state.
+/// Returns false if there is no connectivity and the continue point is
+/// not downloaded.
+@riverpod
+Stream<bool> canReadReadingList(Ref ref, int readingListId) {
+  final hasConnection = ref.watch(hasConnectionProvider).value ?? false;
+
+  final chapter = ref
+      .watch(
+        readingListContinuePointProvider(readingListId: readingListId),
+      )
+      .value;
+
+  if (chapter == null) return Stream.value(hasConnection);
+
+  final repo = ref.watch(downloadRepositoryProvider);
+
+  return repo
+      .watchIsChapterDownloaded(chapterId: chapter.id)
+      .map((isDownloaded) => isDownloaded || hasConnection);
+}
+
+/// Whether the [volumeId] can be read in the current state.
+/// Returns false if there is no connectivity and the continue point is
+/// not downloaded.
+@riverpod
+Stream<bool> canReadVolume(Ref ref, int volumeId) {
+  final hasConnection = ref.watch(hasConnectionProvider).value ?? false;
+
+  final chapter = ref
+      .watch(volumeContinuePointProvider(volumeId: volumeId))
+      .value;
+
+  if (chapter == null) return Stream.value(hasConnection);
+
+  final repo = ref.watch(downloadRepositoryProvider);
+
+  return repo
+      .watchIsChapterDownloaded(chapterId: chapter.id)
+      .map((isDownloaded) => isDownloaded || hasConnection);
+}
+
 /// Fetch continue point for [seriesId] asynchronously. Guarantees a value
 /// is returned and does not update until manually invalidated or disposed.
 @riverpod
