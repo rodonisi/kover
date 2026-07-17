@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/reading_lists.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
@@ -21,16 +22,30 @@ class ReadingListCard extends ConsumerWidget {
     final collection = ref.watch(
       readingListProvider(readingListId: readingListId),
     );
+    final continuePoint = ref.watch(
+      readingListContinuePointProvider(readingListId: readingListId),
+    );
+    final canRead = ref.watch(canReadReadingListProvider(readingListId));
 
-    return Async(
-      asyncValue: collection,
-      data: (collection) => CoverCard(
+    return Async3(
+      asyncValue1: collection,
+      asyncValue2: continuePoint,
+      asyncValue3: canRead,
+      data: (collection, continuePoint, canRead) => CoverCard(
         title: collection.title,
         icon: const Icon(
           KoverIcons.readingList,
           size: LayoutConstants.smallIcon,
         ),
         coverImage: ReadingListCoverImage(readingListId: readingListId),
+        actionDisabled: !canRead,
+        onActionTap: () {
+          ReaderRoute(
+            seriesId: continuePoint.seriesId,
+            chapterId: continuePoint.id,
+            readingListId: readingListId,
+          );
+        },
         onTap: () {
           ReadingListDetailsRoute(readingListId: readingListId).push(context);
         },

@@ -4,15 +4,15 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class CoverCard extends ConsumerWidget {
   final String? title;
   final Icon? icon;
   final String? actionLabel;
   final Icon actionIcon;
-  final Icon? actionDisabledIcon;
+  final Icon actionDisabledIcon;
   final bool actionDisabled;
   final double progress;
   final Widget coverImage;
@@ -25,8 +25,8 @@ class CoverCard extends ConsumerWidget {
     this.title,
     this.icon,
     this.actionLabel,
-    this.actionIcon = const Icon(LucideIcons.bookOpen),
-    this.actionDisabledIcon,
+    this.actionIcon = const Icon(KoverIcons.read),
+    this.actionDisabledIcon = const Icon(KoverIcons.noConnection),
     this.actionDisabled = true,
     required this.coverImage,
     this.downloadStatusIcon,
@@ -81,9 +81,7 @@ class CoverCard extends ConsumerWidget {
                                     sigmaY: 10,
                                   ),
                                   child: FilledButton.icon(
-                                    icon:
-                                        actionDisabledIcon ??
-                                        const Icon(LucideIcons.wifiOff),
+                                    icon: actionDisabledIcon,
                                     label: FittedBox(
                                       child: Text(effectiveLabel),
                                     ),
