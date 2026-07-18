@@ -72,6 +72,7 @@ class EpubReflow extends _$EpubReflow {
       _resumeScrollId = readerState.bookScrollId;
     }
 
+    if (!ref.mounted) throw StateError('epubReflowProvider disposed');
     final pageContent = await ref.read(
       epubPageProvider(
         chapterId: chapterId,

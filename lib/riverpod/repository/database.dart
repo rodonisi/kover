@@ -217,6 +217,7 @@ class ClearOperation extends _$ClearOperation {
         await operation();
       }
       state = AsyncData(newState.copyWith(status: .reclaimingSpace));
+      if (!ref.mounted) return;
       await ref.read(databaseProvider).vacuum();
       state = const AsyncData(ClearOperationState());
     } catch (e) {
