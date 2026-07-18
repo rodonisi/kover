@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' hide log;
 
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
@@ -173,7 +174,7 @@ class DownloadManager extends _$DownloadManager {
 
     final toStart = current.downloadQueue
         .where((i) => !_activeTasks.containsKey(i))
-        .take(concurrentDownloads - activeCount);
+        .take(max(0, concurrentDownloads - activeCount));
 
     for (final chapterId in toStart) {
       log.info(
