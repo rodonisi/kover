@@ -62,7 +62,8 @@ platform :ios do
 
     load_asc_api_key
     upload_to_testflight(
-      api_key: lane_context[SharedValues::APP_STORE_CONNECT_API_KEY]
+      api_key: lane_context[SharedValues::APP_STORE_CONNECT_API_KEY],
+      app_platform: 'ios',
     )
   end
 
