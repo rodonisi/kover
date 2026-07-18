@@ -136,7 +136,8 @@ jobs:
       - name: Promote Testflight Public
         run: |
           cd ios
-          fastlane public_beta
+          bundle install
+          bundle exec fastlane public_beta
         env:
           CHANGELOG: ${{ needs.get-release-body.outputs.release_body }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
@@ -154,7 +155,8 @@ jobs:
       - name: Promote Testflight Public
         run: |
           cd macos
-          fastlane public_beta
+          bundle install
+          bundle exec fastlane public_beta
         env:
           CHANGELOG: ${{ needs.get-release-body.outputs.release_body }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
@@ -184,4 +186,5 @@ jobs:
       - name: Promote Google Play
         run: |
           cd android
-          fastlane promote_beta_tracks
+          bundle install
+          bundle exec fastlane promote_beta_tracks
