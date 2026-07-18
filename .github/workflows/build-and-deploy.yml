@@ -34,6 +34,12 @@ jobs:
           channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
           cache: true
 
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0"
+          bundler-cache: true
+          working-directory: ios
+
       - name: Install dependencies
         run: |
           flutter pub get
@@ -46,7 +52,6 @@ jobs:
       - name: Build and Publish Testflight
         run: |
           cd ios
-          bundle install
           bundle exec fastlane beta version:${{ needs.version.outputs.version }} build_number:${{ needs.version.outputs.build_number }} > /dev/null 2>&1 || (echo "Fastlane failed" && exit 1)
         env:
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
@@ -83,6 +88,12 @@ jobs:
           channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
           cache: true
 
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0"
+          bundler-cache: true
+          working-directory: macos
+
       - name: Install dependencies
         run: |
           flutter pub get
@@ -95,7 +106,6 @@ jobs:
       - name: Build and Publish Testflight
         run: |
           cd macos
-          bundle install
           bundle exec fastlane beta version:${{ needs.version.outputs.version }} build_number:${{ needs.version.outputs.build_number }} > /dev/null 2>&1 || (echo "Fastlane failed" && exit 1)
         env:
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
@@ -135,6 +145,12 @@ jobs:
           channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
           cache: true
 
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0"
+          bundler-cache: true
+          working-directory: android
+
       - name: Authenticate with Google Play
         uses: "google-github-actions/auth@v3"
         with:
@@ -162,7 +178,6 @@ jobs:
       - name: Publish Google Play
         run: |
           cd android
-          bundle install
           bundle exec fastlane beta
 
       - name: Upload Debug Symbols to Sentry
