@@ -55,8 +55,8 @@ extension EpubPagePreprocessor on DocumentFragment {
         log.warning(
           'skipping invalid selector',
           attributes: {
-            'selector': .string(rule.selector),
-            'error': .string(e.toString()),
+            'selector': rule.selector,
+            'error': e,
           },
         );
       }

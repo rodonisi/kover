@@ -135,7 +135,7 @@ class DownloadRepository {
         'failed to fetch cover for chapter',
         error: e,
         stacktrace: stacktrace,
-        attributes: {'chapter_id': .int(chapter.id)},
+        attributes: {'chapter_id': chapter.id},
       );
     }
 
@@ -156,7 +156,7 @@ class DownloadRepository {
         'failed to fetch cover for volume',
         error: e,
         stacktrace: stacktrace,
-        attributes: {'volume_id': .int(chapter.volumeId)},
+        attributes: {'volume_id': chapter.volumeId},
       );
     }
 
@@ -177,7 +177,7 @@ class DownloadRepository {
         'failed to fetch cover for series',
         error: e,
         stacktrace: stacktrace,
-        attributes: {'series_id': .int(chapter.seriesId)},
+        attributes: {'series_id': chapter.seriesId},
       );
     }
   }
@@ -187,7 +187,7 @@ class DownloadRepository {
     await _db.downloadDao.deleteChapter(chapterId: chapterId);
     log.info(
       'deleted local pages for chapter',
-      attributes: {'chapter_id': .int(chapterId)},
+      attributes: {'chapter_id': chapterId},
     );
   }
 

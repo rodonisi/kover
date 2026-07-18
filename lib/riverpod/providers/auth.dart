@@ -61,7 +61,7 @@ class CurrentUser extends _$CurrentUser {
       log.warning(
         'Failed to refresh user',
         attributes: {
-          'error': .string(e.toString()),
+          'error': e,
         },
       );
     }

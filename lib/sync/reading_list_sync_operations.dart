@@ -80,8 +80,8 @@ class ReadingListSyncOperations {
       log.debug(
         'failed to fetch reading list cover',
         attributes: {
-          'reading_list_id': .int(readingListId),
-          'status_code': .int(res.statusCode),
+          'reading_list_id': readingListId,
+          'status_code': res.statusCode,
         },
       );
       return null;

@@ -210,7 +210,7 @@ class Theme extends _$Theme {
     state = AsyncData(current.copyWith(mode: mode));
     log.info(
       'set theme mode',
-      attributes: {'value': .string(mode.toString())},
+      attributes: {'value': mode},
     );
   }
 
@@ -220,7 +220,7 @@ class Theme extends _$Theme {
     state = AsyncData(current.copyWith(outlined: value));
     log.info(
       'set outlined theme',
-      attributes: {'value': .bool(value)},
+      attributes: {'value': value},
     );
   }
 
@@ -230,7 +230,7 @@ class Theme extends _$Theme {
     state = AsyncData(current.copyWith(reduceAnimations: value));
     log.info(
       'set reduce animations',
-      attributes: {'value': .bool(value)},
+      attributes: {'value': value},
     );
   }
 

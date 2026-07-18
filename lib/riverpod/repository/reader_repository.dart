@@ -145,14 +145,14 @@ class ReaderRepository {
         error: e,
         stacktrace: stacktrace,
         attributes: {
-          'chapter_id': .int(prog.chapterId),
-          'volume_id': .int(prog.volumeId),
-          'series_id': .int(prog.seriesId),
-          'library_id': .int(prog.libraryId),
-          'pages_read': .int(prog.pagesRead),
-          'book_scroll_id': .string(prog.bookScrollId ?? 'null'),
-          'last_modified': .string(prog.lastModified.toIso8601String()),
-          'dirty': .bool(prog.dirty),
+          'chapter_id': prog.chapterId,
+          'volume_id': prog.volumeId,
+          'series_id': prog.seriesId,
+          'library_id': prog.libraryId,
+          'pages_read': prog.pagesRead,
+          'book_scroll_id': prog.bookScrollId ?? 'null',
+          'last_modified': prog.lastModified.toIso8601String(),
+          'dirty': prog.dirty,
         },
       );
     }
@@ -180,7 +180,7 @@ class ReaderRepository {
 
     log.info(
       'processing progress entries',
-      attributes: {'count': .int(dirty.length)},
+      attributes: {'count': dirty.length},
     );
 
     final remoteProgress = <ReadingProgressCompanion>[];
@@ -214,7 +214,7 @@ class ReaderRepository {
         'failed to mark series as read',
         error: e,
         stacktrace: stacktrace,
-        attributes: {'series_id': .int(seriesId)},
+        attributes: {'series_id': seriesId},
       );
     }
   }
@@ -232,7 +232,7 @@ class ReaderRepository {
         'failed to mark series as unread',
         error: e,
         stacktrace: stacktrace,
-        attributes: {'series_id': .int(seriesId)},
+        attributes: {'series_id': seriesId},
       );
     }
   }
@@ -254,7 +254,7 @@ class ReaderRepository {
         'failed to mark volume as read',
         error: e,
         stacktrace: stacktrace,
-        attributes: {'volume_id': .int(volumeId)},
+        attributes: {'volume_id': volumeId},
       );
     }
   }
@@ -276,7 +276,7 @@ class ReaderRepository {
         'failed to mark volume as unread',
         error: e,
         stacktrace: stacktrace,
-        attributes: {'volume_id': .int(volumeId)},
+        attributes: {'volume_id': volumeId},
       );
     }
   }

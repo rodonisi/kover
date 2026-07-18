@@ -55,7 +55,7 @@ Future<bool> ping(Ref ref) async {
     log.warning(
       'ping error',
       attributes: {
-        'error_type': .string(e.runtimeType.toString()),
+        'error_type': e.runtimeType,
       },
     );
     return false;

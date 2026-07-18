@@ -36,7 +36,7 @@ class DownloadSettings extends _$DownloadSettings {
     state = AsyncData(current.copyWith(concurrentDownloads: count));
     log.info(
       'set concurrent downloads',
-      attributes: {'value': .int(count)},
+      attributes: {'value': count},
     );
   }
 
@@ -45,7 +45,7 @@ class DownloadSettings extends _$DownloadSettings {
     state = AsyncData(current.copyWith(downloadCovers: value));
     log.info(
       'set download covers',
-      attributes: {'value': LogAttribute.bool(value)},
+      attributes: {'value': value},
     );
   }
 }

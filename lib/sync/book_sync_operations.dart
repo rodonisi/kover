@@ -227,7 +227,7 @@ class BookSyncOperations {
       for (final url in entry.value) {
         log.debug(
           'found font',
-          attributes: {'family': .string(entry.key)},
+          attributes: {'family': entry.key},
         );
         final data = await _fetchData(url);
         if (data == null || data.bytes.isEmpty) continue;

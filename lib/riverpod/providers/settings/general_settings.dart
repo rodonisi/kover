@@ -54,7 +54,7 @@ class GeneralSettings extends _$GeneralSettings {
 
   Future<void> setSendDiagnostics(bool value) async {
     final current = await future;
-    log.info('set send diagnostics', attributes: {'value': .bool(value)});
+    log.info('set send diagnostics', attributes: {'value': value});
     state = AsyncData(current.copyWith(sendDiagnostics: value));
   }
 
@@ -62,7 +62,7 @@ class GeneralSettings extends _$GeneralSettings {
     final current = await future;
     log.info(
       'set locale',
-      attributes: {'value': .string(value?.languageCode ?? 'null')},
+      attributes: {'value': value?.languageCode ?? 'null'},
     );
     state = AsyncData(current.copyWith(localeString: value?.languageCode));
   }
@@ -71,7 +71,7 @@ class GeneralSettings extends _$GeneralSettings {
     final current = await future;
     log.info(
       'set navbar destinations',
-      attributes: {'value': .string(value.map((e) => e.name).join(','))},
+      attributes: {'value': value.map((e) => e.name)},
     );
     state = AsyncData(current.copyWith(navbarDestinations: value));
   }

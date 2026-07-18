@@ -23,8 +23,8 @@ class VolumeSyncOperations {
       log.debug(
         'failed to download volume cover',
         attributes: {
-          'volume_id': .int(volumeId),
-          'status_code': .int(res.statusCode),
+          'volume_id': volumeId,
+          'status_code': res.statusCode,
         },
       );
       return null;

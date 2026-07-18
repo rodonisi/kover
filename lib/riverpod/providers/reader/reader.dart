@@ -112,9 +112,9 @@ class Reader extends _$Reader {
       log.debug(
         'saved progress',
         attributes: {
-          'page': .int(page),
-          'scroll_id': .string(scrollId ?? 'null'),
-          'chapter_id': .int(current.chapter.id),
+          'page': page,
+          'scroll_id': scrollId ?? 'null',
+          'chapter_id': current.chapter.id,
         },
       );
     });
@@ -131,7 +131,7 @@ class Reader extends _$Reader {
     log.debug(
       'marked chapter as read',
       attributes: {
-        'chapter_id': .int(current.chapter.id),
+        'chapter_id': current.chapter.id,
       },
     );
   }

@@ -46,8 +46,8 @@ class BookRepository {
       log.debug(
         'using downloaded page for chapter',
         attributes: {
-          'chapter_id': .int(chapterId),
-          'page': .int(page),
+          'chapter_id': chapterId,
+          'page': page,
         },
       );
       final p = await _db.downloadDao
@@ -72,8 +72,8 @@ class BookRepository {
       log.debug(
         'using downloaded page for chapter',
         attributes: {
-          'chapter_id': .int(chapterId),
-          'page': .int(page),
+          'chapter_id': chapterId,
+          'page': page,
         },
       );
       final p = await _db.downloadDao
@@ -97,7 +97,7 @@ class BookRepository {
       log.debug(
         'using downloaded PDF for chapter',
         attributes: {
-          'chapter_id': .int(chapterId),
+          'chapter_id': chapterId,
         },
       );
       final p = await _db.downloadDao
@@ -132,9 +132,9 @@ class BookRepository {
         log.warning(
           'failed to fetch toc for chapter',
           attributes: {
-            'chapter_id': .int(id),
-            'error_type': .string(e.runtimeType.toString()),
-            'error_message': .string(e.toString()),
+            'chapter_id': id,
+            'error_type': e.runtimeType,
+            'error_message': e,
           },
         );
       }

@@ -85,8 +85,8 @@ class SeriesSyncOperations {
       log.debug(
         'failed to download series cover',
         attributes: {
-          'series_id': .int(seriesId),
-          'status_code': .int(res.statusCode),
+          'series_id': seriesId,
+          'status_code': res.statusCode,
         },
       );
       return null;

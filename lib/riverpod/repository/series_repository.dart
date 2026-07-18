@@ -145,7 +145,7 @@ class SeriesRepository {
               error: e,
               stacktrace: stacktrace,
               attributes: {
-                'series_id': .int(seriesId),
+                'series_id': seriesId,
               },
             );
           }
@@ -261,9 +261,9 @@ class SeriesRepository {
         log.warning(
           'failed to fetch series metadata for series',
           attributes: {
-            'series_id': .int(id),
-            'error_type': .string(e.runtimeType.toString()),
-            'error_message': .string(e.toString()),
+            'series_id': id,
+            'error_type': e.runtimeType,
+            'error_message': e,
           },
         );
       }
@@ -305,9 +305,9 @@ class SeriesRepository {
         log.warning(
           'failed to fetch series details for series',
           attributes: {
-            'series_id': .int(id),
-            'error_type': .string(e.runtimeType.toString()),
-            'error_message': .string(e.toString()),
+            'series_id': id,
+            'error_type': e.runtimeType,
+            'error_message': e,
           },
         );
       }

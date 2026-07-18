@@ -35,8 +35,8 @@ class ChapterSyncOperations {
       log.debug(
         'failed to download chapter cover',
         attributes: {
-          'chapter_id': .int(chapterId),
-          'status_code': .int(res.statusCode),
+          'chapter_id': chapterId,
+          'status_code': res.statusCode,
         },
       );
       return null;

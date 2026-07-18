@@ -108,8 +108,8 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     log.info(
       'set scale type',
       attributes: {
-        'value': .string(type.toString()),
-        'reader': const .string('image'),
+        'value': type,
+        'reader': 'image',
       },
     );
   }
@@ -126,8 +126,8 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     log.info(
       'set reader mode',
       attributes: {
-        'value': .string(mode.toString()),
-        'reader': const .string('image'),
+        'value': mode,
+        'reader': 'image',
       },
     );
   }
@@ -146,8 +146,8 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     log.info(
       'set vertical reader gap',
       attributes: {
-        'value': .double(state.value!.verticalReaderGap),
-        'reader': const .string('image'),
+        'value': state.value?.verticalReaderGap,
+        'reader': 'image',
       },
     );
   }
@@ -166,8 +166,8 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     log.info(
       'set vertical reader padding',
       attributes: {
-        'value': .double(state.value!.verticalReaderPadding),
-        'reader': const .string('image'),
+        'value': state.value!.verticalReaderPadding,
+        'reader': 'image',
       },
     );
   }
@@ -186,8 +186,8 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     log.info(
       'set spread reader gap',
       attributes: {
-        'value': .double(state.value!.spreadReaderGap),
-        'reader': const .string('image'),
+        'value': state.value?.spreadReaderGap,
+        'reader': 'image',
       },
     );
   }
@@ -198,7 +198,7 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     state = AsyncData(current.copyWith(ignoreSafeAreas: ignore));
     log.info(
       'set ignore safe areas',
-      attributes: {'value': .bool(ignore), 'reader': const .string('image')},
+      attributes: {'value': ignore, 'reader': 'image'},
     );
   }
 
@@ -208,7 +208,7 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     state = AsyncData(current.copyWith(spreadCoverPage: value));
     log.info(
       'set spread cover page',
-      attributes: {'value': .bool(value), 'reader': const .string('image')},
+      attributes: {'value': value, 'reader': 'image'},
     );
   }
 
@@ -217,7 +217,7 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     state = AsyncData(defaults);
     log.info(
       'reset reader settings to defaults',
-      attributes: {'reader': const .string('image')},
+      attributes: {'reader': 'image'},
     );
   }
 
@@ -226,7 +226,7 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     ref.read(defaultImageReaderSettingsProvider.notifier).setDefault(current);
     log.info(
       'set current reader settings as default',
-      attributes: {'reader': const .string('image')},
+      attributes: {'reader': 'image'},
     );
   }
 }

@@ -76,8 +76,8 @@ class CollectionSyncOperations {
       log.debug(
         'failed to download collection cover',
         attributes: {
-          'collection_id': .int(collectionId),
-          'status_code': .int(res.statusCode),
+          'collection_id': collectionId,
+          'status_code': res.statusCode,
         },
       );
       return null;

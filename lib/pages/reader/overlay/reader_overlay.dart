@@ -220,10 +220,8 @@ class ReaderOverlay extends HookConsumerWidget {
                                 log.debug(
                                   'navigating to previous chapter',
                                   attributes: {
-                                    if (prevChapter.value != null)
-                                      'chapter_id': .int(prevChapter.value!.id)
-                                    else
-                                      'chapter_id': const .string('null'),
+                                    'chapter_id':
+                                        prevChapter.value?.id ?? 'null',
                                   },
                                 );
                                 ReaderRoute(
@@ -261,10 +259,8 @@ class ReaderOverlay extends HookConsumerWidget {
                                 log.debug(
                                   'navigating to next chapter',
                                   attributes: {
-                                    if (nextChapter.value != null)
-                                      'chapter_id': .int(nextChapter.value!.id)
-                                    else
-                                      'chapter_id': const .string('null'),
+                                    'chapter_id':
+                                        nextChapter.value?.id ?? 'null',
                                   },
                                 );
                                 ReaderRoute(

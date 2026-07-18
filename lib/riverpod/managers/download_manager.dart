@@ -63,7 +63,7 @@ class DownloadManager extends _$DownloadManager {
     log.info(
       'enqueued chapter for download',
       attributes: {
-        'chapter_id': .int(chapterId),
+        'chapter_id': chapterId,
       },
     );
   }
@@ -81,8 +81,8 @@ class DownloadManager extends _$DownloadManager {
     log.info(
       'enqueued volume for download',
       attributes: {
-        'volume_id': .int(volumeId),
-        'chapter_count': .int(ids.length),
+        'volume_id': volumeId,
+        'chapter_count': ids.length,
       },
     );
   }
@@ -100,8 +100,8 @@ class DownloadManager extends _$DownloadManager {
     log.info(
       'enqueued series for download',
       attributes: {
-        'series_id': .int(seriesId),
-        'chapter_count': .int(ids.length),
+        'series_id': seriesId,
+        'chapter_count': ids.length,
       },
     );
   }
@@ -116,7 +116,7 @@ class DownloadManager extends _$DownloadManager {
     state = AsyncData(current.copyWith(downloadQueue: newQueue));
     log.info(
       'canceled download for chapter',
-      attributes: {'chapter_id': .int(chapterId)},
+      attributes: {'chapter_id': chapterId},
     );
   }
 
@@ -128,7 +128,7 @@ class DownloadManager extends _$DownloadManager {
     state = AsyncData(current.copyWith(downloadQueue: {}));
     log.info(
       'canceled all downloads',
-      attributes: {'count': .int(current.downloadQueue.length)},
+      attributes: {'count': current.downloadQueue.length},
     );
   }
 
@@ -180,7 +180,7 @@ class DownloadManager extends _$DownloadManager {
       log.info(
         'starting download for chapter',
         attributes: {
-          'chapter_id': .int(chapterId),
+          'chapter_id': chapterId,
         },
       );
 
@@ -228,7 +228,7 @@ class DownloadManager extends _$DownloadManager {
         error: e,
         stacktrace: stacktrace,
         attributes: {
-          'chapter_id': .int(chapterId),
+          'chapter_id': chapterId,
         },
       );
     } finally {
@@ -238,7 +238,7 @@ class DownloadManager extends _$DownloadManager {
         log.info(
           'download completed for chapter',
           attributes: {
-            'chapterId': .int(chapterId),
+            'chapterId': chapterId,
           },
         );
         final current = await future;

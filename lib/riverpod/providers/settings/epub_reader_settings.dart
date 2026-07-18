@@ -91,7 +91,7 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     );
     log.info(
       'set font size',
-      attributes: {'value': .double(newSize), 'reader': const .string('epub')},
+      attributes: {'value': newSize, 'reader': 'epub'},
     );
   }
 
@@ -108,7 +108,7 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     );
     log.info(
       'set margin size',
-      attributes: {'value': .double(newSize), 'reader': const .string('epub')},
+      attributes: {'value': newSize, 'reader': 'epub'},
     );
   }
 
@@ -125,7 +125,7 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     );
     log.info(
       'set line height',
-      attributes: {'value': .double(newSize), 'reader': const .string('epub')},
+      attributes: {'value': newSize, 'reader': 'epub'},
     );
   }
 
@@ -142,7 +142,7 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     );
     log.info(
       'set word spacing',
-      attributes: {'value': .double(newSize), 'reader': const .string('epub')},
+      attributes: {'value': newSize, 'reader': 'epub'},
     );
   }
 
@@ -160,8 +160,8 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     log.info(
       'set letter spacing',
       attributes: {
-        'value': .double(newSize),
-        'reader': const .string('epub'),
+        'value': newSize,
+        'reader': 'epub',
       },
     );
   }
@@ -174,7 +174,7 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     );
     log.info(
       'set highhlight resume point',
-      attributes: {'value': .bool(value), 'reader': const .string('epub')},
+      attributes: {'value': value, 'reader': 'epub'},
     );
   }
 
@@ -183,7 +183,7 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     state = AsyncData(defaults);
     log.info(
       'set reader settings to defaults',
-      attributes: {'reader': const .string('epub')},
+      attributes: {'reader': 'epub'},
     );
   }
 
@@ -192,7 +192,7 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     ref.read(defaultEpubReaderSettingsProvider.notifier).setDefault(current);
     log.info(
       'set current reader settings as default',
-      attributes: {'reader': const .string('epub')},
+      attributes: {'reader': 'epub'},
     );
   }
 }

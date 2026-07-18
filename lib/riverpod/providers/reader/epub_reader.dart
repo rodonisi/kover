@@ -198,7 +198,7 @@ class EpubReflow extends _$EpubReflow {
           log.info(
             'found resume point',
             attributes: {
-              'scroll_id': LogAttribute.string(current.scrollId!),
+              'scroll_id': current.scrollId,
             },
           );
 

@@ -65,8 +65,8 @@ class PdfReaderSettings extends _$PdfReaderSettings {
     log.info(
       'set reader mode',
       attributes: {
-        'value': .string(newMode.toString()),
-        'reader': const .string('pdf'),
+        'value': newMode,
+        'reader': 'pdf',
       },
     );
   }
@@ -80,8 +80,8 @@ class PdfReaderSettings extends _$PdfReaderSettings {
     log.info(
       'set ignore safe areas',
       attributes: {
-        'value': .bool(ignore),
-        'reader': const .string('pdf'),
+        'value': ignore,
+        'reader': 'pdf',
       },
     );
   }
@@ -91,7 +91,7 @@ class PdfReaderSettings extends _$PdfReaderSettings {
     state = AsyncData(defaults);
     log.info(
       'reset reader to default settings',
-      attributes: {'reader': const .string('pdf')},
+      attributes: {'reader': 'pdf'},
     );
   }
 
@@ -100,7 +100,7 @@ class PdfReaderSettings extends _$PdfReaderSettings {
     ref.read(defaultPdfReaderSettingsProvider.notifier).setDefault(current);
     log.info(
       'set current settings as default',
-      attributes: {'reader': const .string('pdf')},
+      attributes: {'reader': 'pdf'},
     );
   }
 }

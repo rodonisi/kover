@@ -78,7 +78,7 @@ class VolumesRepository {
               'failed to fetch cover for volume',
               error: e,
               stacktrace: stacktrace,
-              attributes: {'volume_id': .int(volumeId)},
+              attributes: {'volume_id': volumeId},
             );
           }
 

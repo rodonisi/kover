@@ -85,7 +85,7 @@ class ChaptersRepository {
               'failed to fetch series cover for chapter',
               error: e,
               stacktrace: stacktrace,
-              attributes: {'chapter_id': .int(chapterId)},
+              attributes: {'chapter_id': chapterId},
             );
           }
 
@@ -104,7 +104,7 @@ class ChaptersRepository {
         'failed to fetch cover for chapter',
         error: e,
         stacktrace: stacktrace,
-        attributes: {'chapter_id': .int(chapterId)},
+        attributes: {'chapter_id': chapterId},
       );
     }
   }

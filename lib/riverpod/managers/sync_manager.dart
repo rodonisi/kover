@@ -248,7 +248,7 @@ class SyncManager extends _$SyncManager {
         'failed sync phase',
         error: e,
         stacktrace: stacktrace,
-        attributes: {'phase': .string(phase.toString())},
+        attributes: {'phase': phase},
       );
     } finally {
       _runningPhases.remove(phase);

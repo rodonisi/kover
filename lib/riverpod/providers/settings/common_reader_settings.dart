@@ -65,8 +65,8 @@ class CommonReaderSettings extends _$CommonReaderSettings {
     log.info(
       'toggle read direction',
       attributes: {
-        'value': .string(direction.name),
-        'series_format': .string(await _seriesFormat()),
+        'value': direction.name,
+        'series_format': await _seriesFormat(),
       },
     );
   }
@@ -81,8 +81,8 @@ class CommonReaderSettings extends _$CommonReaderSettings {
     log.info(
       'set show progress bar',
       attributes: {
-        'value': .bool(value),
-        'series_format': .string(await _seriesFormat()),
+        'value': value,
+        'series_format': await _seriesFormat(),
       },
     );
   }
@@ -96,8 +96,8 @@ class CommonReaderSettings extends _$CommonReaderSettings {
     log.info(
       'set orientation lock',
       attributes: {
-        'value': .string(newLock.name),
-        'series_format': .string(await _seriesFormat()),
+        'value': newLock.name,
+        'series_format': await _seriesFormat(),
       },
     );
   }
@@ -111,8 +111,8 @@ class CommonReaderSettings extends _$CommonReaderSettings {
     log.info(
       'set navigation gestures enabled',
       attributes: {
-        'value': .bool(value),
-        'series_format': .string(await _seriesFormat()),
+        'value': value,
+        'series_format': await _seriesFormat(),
       },
     );
   }
@@ -124,7 +124,7 @@ class CommonReaderSettings extends _$CommonReaderSettings {
     log.info(
       'set common settings to defaults',
       attributes: {
-        'series_format': .string(await _seriesFormat()),
+        'series_format': await _seriesFormat(),
       },
     );
   }
@@ -135,7 +135,7 @@ class CommonReaderSettings extends _$CommonReaderSettings {
 
     log.info(
       'set current reader settings as default',
-      attributes: {'series_format': .string(await _seriesFormat())},
+      attributes: {'series_format': await _seriesFormat()},
     );
   }
 

@@ -1,9 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:logger/logger.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-
-part 'logging.freezed.dart';
 
 enum LogLevel {
   debug(1),
@@ -17,14 +14,6 @@ enum LogLevel {
 
   bool operator >(LogLevel other) => severity > other.severity;
   bool operator <(LogLevel other) => severity < other.severity;
-}
-
-@freezed
-sealed class LogAttribute with _$LogAttribute {
-  const factory LogAttribute.string(String value) = StringLogAttribute;
-  const factory LogAttribute.int(int value) = IntLogAttribute;
-  const factory LogAttribute.double(double value) = DoubleLogAttribute;
-  const factory LogAttribute.bool(bool value) = BoolLogAttribute;
 }
 
 class KoverLogger {
@@ -43,7 +32,7 @@ class KoverLogger {
 
   void debug(
     dynamic message, {
-    Map<String, LogAttribute> attributes = const {},
+    Map<String, dynamic> attributes = const {},
   }) {
     if (level > .debug) return;
 
@@ -56,7 +45,7 @@ class KoverLogger {
 
   void info(
     dynamic message, {
-    Map<String, LogAttribute> attributes = const {},
+    Map<String, dynamic> attributes = const {},
   }) {
     if (level > .info) return;
 
@@ -69,7 +58,7 @@ class KoverLogger {
 
   void warning(
     dynamic message, {
-    Map<String, LogAttribute> attributes = const {},
+    Map<String, dynamic> attributes = const {},
   }) {
     if (level > .warning) return;
 
@@ -84,7 +73,7 @@ class KoverLogger {
     dynamic message, {
     Object? error,
     StackTrace? stacktrace,
-    Map<String, LogAttribute> attributes = const {},
+    Map<String, dynamic> attributes = const {},
   }) {
     if (level > .error) return;
 
@@ -110,7 +99,7 @@ class KoverLogger {
     dynamic message, {
     Object? error,
     StackTrace? stackTrace,
-    Map<String, LogAttribute> attributes = const {},
+    Map<String, dynamic> attributes = const {},
   }) {
     if (level > .fatal) return;
 
@@ -137,7 +126,7 @@ class KoverLogger {
     dynamic message, {
     Object? error,
     StackTrace? stacktrace,
-    Map<String, LogAttribute> attributes = const {},
+    Map<String, dynamic> attributes = const {},
   }) {
     _logLocal(
       level,
@@ -154,7 +143,7 @@ class KoverLogger {
     dynamic message, {
     Object? error,
     StackTrace? stacktrace,
-    Map<String, LogAttribute> attributes = const {},
+    Map<String, dynamic> attributes = const {},
   }) {
     final Level mappedLevel = switch (level) {
       .debug => .debug,
@@ -163,7 +152,8 @@ class KoverLogger {
       .error => .error,
       .fatal => .fatal,
     };
-    final attributeString = attributes.entries
+    final sentryAttributes = _mapSentryAttributes(attributes);
+    final attributeString = sentryAttributes.entries
         .map((e) => '${e.key}: ${e.value.value}')
         .join('\n');
     final fullMessage = '$message\n$attributeString'.trim();
@@ -178,7 +168,7 @@ class KoverLogger {
   void _sendBreadcrumb(
     LogLevel level,
     dynamic message, {
-    Map<String, LogAttribute> attributes = const {},
+    Map<String, dynamic> attributes = const {},
   }) {
     final SentryLevel sentryLevel = switch (level) {
       .debug => .debug,
@@ -198,18 +188,27 @@ class KoverLogger {
   }
 
   static Map<String, SentryAttribute> _mapSentryAttributes(
-    Map<String, LogAttribute> attributes,
+    Map<String, dynamic> attributes,
   ) {
     return attributes.map(
-      (key, value) => MapEntry(
-        key,
-        value.when(
-          string: (value) => SentryAttribute.string(value),
-          int: (value) => SentryAttribute.int(value),
-          double: (value) => SentryAttribute.double(value),
-          bool: (value) => SentryAttribute.bool(value),
-        ),
-      ),
+      (key, value) {
+        final SentryAttribute v = switch (value) {
+          String s => .string(s),
+          int i => .int(i),
+          double d => .double(d),
+          bool b => .bool(b),
+          Iterable<String> l => .stringArray(l.toList()),
+          Iterable<int> l => .intArray(l.toList()),
+          Iterable<double> l => .doubleArray(l.toList()),
+          Iterable<bool> l => .boolArray(l.toList()),
+          Iterable l => .stringArray(
+            l.map((e) => e.toString()).toList(),
+          ),
+          _ => .string(value.toString()),
+        };
+
+        return MapEntry(key, v);
+      },
     );
   }
 }
