@@ -32,7 +32,6 @@ sealed class EpubReaderSettingsLimits {
 }
 
 enum EpubTheme {
-  matchTheme,
   light,
   sepia,
   dark,
@@ -48,7 +47,7 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
     @Default(0.0) double wordSpacing,
     @Default(0.0) double letterSpacing,
     @Default(true) bool highlightResumePoint,
-    @Default(EpubTheme.light) EpubTheme theme,
+    @Default(null) EpubTheme? theme,
   }) = _EpubReaderSettingsState;
 
   factory EpubReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -186,13 +185,13 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     );
   }
 
-  Future<void> setTheme(EpubTheme theme) async {
+  Future<void> setTheme(EpubTheme? theme) async {
     final current = await future;
 
     state = AsyncData(current.copyWith(theme: theme));
     log.info(
       'set theme',
-      attributes: {'value': theme.name, 'reader': 'epub'},
+      attributes: {'value': theme?.name ?? 'null', 'reader': 'epub'},
     );
   }
 

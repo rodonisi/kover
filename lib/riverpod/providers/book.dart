@@ -66,7 +66,7 @@ Future<Map<String, Map<String, String>>> customCss(
   if (!ref.mounted) throw Exception('Provider not mounted');
   final appTheme = await ref.watch(themeProvider.selectAsync((s) => s.theme));
 
-  final theme = themeState.data ?? appTheme;
+  final theme = themeState?.data ?? appTheme;
 
   final highlightColor = theme.colorScheme.tertiaryContainer.withAlpha(0xe0);
   final onHighlightColor = theme.colorScheme.onTertiaryContainer;

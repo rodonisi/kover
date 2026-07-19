@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
+import 'package:kover/pages/reader/epub_reader/theme_picker.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
-import 'package:kover/widgets/settings/choice_option.dart';
 import 'package:kover/widgets/settings/numeric_option.dart';
 import 'package:kover/widgets/settings/reader/navigation_gestures_option.dart';
 import 'package:kover/widgets/settings/reader/orientation_option.dart';
@@ -49,22 +49,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       ReadDirectionOption(seriesId: seriesId),
-                      ChoiceOption<EpubTheme>(
-                        title: l.themeMode,
-                        value: settings.theme,
-                        options: [
-                          ChoiceOptionEntry(
-                            value: .matchTheme,
-                            label: l.matchAppTheme,
-                          ),
-                          ChoiceOptionEntry(value: .light, label: l.light),
-                          ChoiceOptionEntry(value: .sepia, label: l.sepia),
-                          ChoiceOptionEntry(value: .dark, label: l.dark),
-                        ],
-                        onChanged: (newValue) async => await ref
-                            .read(epubSettings.notifier)
-                            .setTheme(newValue),
-                      ),
+                      ThemePicker(seriesId: seriesId),
                       NumericOption(
                         title: l.fontSize,
                         icon: LucideIcons.aLargeSmallDir,
