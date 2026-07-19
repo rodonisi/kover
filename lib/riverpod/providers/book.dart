@@ -2,10 +2,12 @@ import 'package:kover/models/book_chapter_model.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/models/page_content.dart';
 import 'package:kover/models/pdf_model.dart';
+import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/riverpod/repository/book_repository.dart';
 import 'package:kover/utils/extensions/epub_page_preprocessor.dart';
 import 'package:kover/utils/extensions/color.dart';
+import 'package:kover/utils/extensions/epub_theme.dart';
 import 'package:kover/utils/html_constants.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -27,14 +29,13 @@ Future<PageContent> epubPage(
   required int page,
 }) async {
   final repo = ref.watch(bookRepositoryProvider);
-  final css = await ref.watch(customCssProvider.future);
   final content = await repo.getEpubPage(chapterId: chapterId, page: page);
 
   final preprocessed = content.root.preprocessForRender();
 
   return content.copyWith(
     root: preprocessed,
-    styles: {...content.styles, ...css},
+    styles: content.styles,
   );
 }
 
@@ -55,9 +56,17 @@ Future<PdfModel> pdf(Ref ref, {required int chapterId}) async {
 }
 
 @riverpod
-Future<Map<String, Map<String, String>>> customCss(Ref ref) async {
-  final themeState = await ref.watch(themeProvider.future);
-  final theme = themeState.theme;
+Future<Map<String, Map<String, String>>> customCss(
+  Ref ref, {
+  required int seriesId,
+}) async {
+  final themeState = await ref.watch(
+    epubReaderSettingsProvider(seriesId: seriesId).selectAsync((s) => s.theme),
+  );
+  if (!ref.mounted) throw Exception('Provider not mounted');
+  final appTheme = await ref.watch(themeProvider.selectAsync((s) => s.theme));
+
+  final theme = themeState.data ?? appTheme;
 
   final highlightColor = theme.colorScheme.tertiaryContainer.withAlpha(0xe0);
   final onHighlightColor = theme.colorScheme.onTertiaryContainer;

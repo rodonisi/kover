@@ -80,6 +80,14 @@
     "@dark": {
         "description": "Label for the dark theme mode option"
     },
+    "sepia": "Sepia",
+    "@sepia": {
+      "description": "Label for the sepia theme option"
+    },
+    "matchAppTheme": "Match App Theme",
+    "@matchAppTheme": {
+      "description": "Label for the epub reader match app theme option"
+    },
     "outlinedTheme": "Outlined Theme",
     "@outlinedTheme": {
         "description": "Label for the outlined theme setting"

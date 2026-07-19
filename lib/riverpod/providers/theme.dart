@@ -179,6 +179,25 @@ sealed class ThemeModel with _$ThemeModel {
         : theme;
   }
 
+  ThemeData get sepiaTheme {
+    final sepiaScheme = _lightTheme.colorScheme.copyWith(
+      surface: const Color(0xFFF4ECD8),
+      surfaceDim: const Color(0xFFBFA06A),
+      surfaceContainer: const Color(0xFFBFA06A),
+      onSurface: const Color(0xFF3B2F1B),
+    );
+
+    final theme = _lightTheme.copyWith(
+      colorScheme: sepiaScheme,
+      scaffoldBackgroundColor: sepiaScheme.surface,
+    );
+    return reduceAnimations
+        ? theme.copyWith(
+            pageTransitionsTheme: _reduceAnimationsPageTransitionsTheme,
+          )
+        : theme;
+  }
+
   ThemeData get theme {
     return switch (mode) {
       .light => lightTheme,

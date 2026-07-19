@@ -5,11 +5,13 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:html/dom.dart';
 import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
+import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/cached_image_factory.dart';
+import 'package:kover/utils/extensions/epub_theme.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
@@ -71,80 +73,83 @@ class EpubReader extends HookConsumerWidget {
           seriesId: seriesId,
           chapterId: chapterId,
         ),
-        child: Async(
-          asyncValue: ref.watch(nav),
-          data: (navState) => HookConsumer(
-            builder: (context, ref, child) {
-              final controller = usePageController(
-                initialPage: navState.page,
-              );
+        child: _ThemeOverride(
+          seriesId: seriesId,
+          child: Async(
+            asyncValue: ref.watch(nav),
+            data: (navState) => HookConsumer(
+              builder: (context, ref, child) {
+                final controller = usePageController(
+                  initialPage: navState.page,
+                );
 
-              ref.listen(nav, (
-                previous,
-                next,
-              ) async {
-                next.whenData((next) async {
-                  final previousPage = previous?.value?.page;
-                  final nextPage = next.page;
+                ref.listen(nav, (
+                  previous,
+                  next,
+                ) async {
+                  next.whenData((next) async {
+                    final previousPage = previous?.value?.page;
+                    final nextPage = next.page;
 
-                  if (nextPage == previousPage) return;
+                    if (nextPage == previousPage) return;
 
-                  if (controller.hasClients &&
-                      controller.page?.round() != nextPage) {
-                    final isSequential =
-                        previousPage != null &&
-                        (nextPage - previousPage).abs() == 1;
+                    if (controller.hasClients &&
+                        controller.page?.round() != nextPage) {
+                      final isSequential =
+                          previousPage != null &&
+                          (nextPage - previousPage).abs() == 1;
 
-                    isSequential && !reduceAnimations
-                        ? controller.animateToPage(
-                            nextPage,
-                            duration: LayoutConstants.pageSlideDuration,
-                            curve: Curves.easeInOut,
-                          )
-                        : controller.jumpToPage(nextPage);
-                  }
+                      isSequential && !reduceAnimations
+                          ? controller.animateToPage(
+                              nextPage,
+                              duration: LayoutConstants.pageSlideDuration,
+                              curve: Curves.easeInOut,
+                            )
+                          : controller.jumpToPage(nextPage);
+                    }
+                  });
                 });
-              });
 
-              return Stack(
-                children: [
-                  Positioned.fill(
-                    child: Offstage(
-                      offstage: !navState.ready,
-                      child: PageView.builder(
-                        controller: controller,
-                        itemCount: navState.totalPages,
-                        allowImplicitScrolling: true,
-                        reverse: commonSettings.readDirection == .rightToLeft,
-                        physics: const NeverScrollableScrollPhysics(),
-                        onPageChanged: (newPage) {
-                          ref.read(nav.notifier).jumpToPage(newPage);
-                        },
-                        itemBuilder: (context, index) {
-                          return _Page(
-                            seriesId: seriesId,
-                            chapterId: chapterId,
-                            page: index,
-                            reverse:
-                                commonSettings.readDirection == .rightToLeft,
-                            outerController: controller,
-                            onSelectionChanged: (selected) {
-                              if (selected != hasSelection.value) {
-                                hasSelection.value = selected;
-                              }
-                            },
-                          );
-                        },
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Offstage(
+                        offstage: !navState.ready,
+                        child: PageView.builder(
+                          controller: controller,
+                          itemCount: navState.totalPages,
+                          allowImplicitScrolling: true,
+                          reverse: commonSettings.readDirection == .rightToLeft,
+                          physics: const NeverScrollableScrollPhysics(),
+                          onPageChanged: (newPage) {
+                            ref.read(nav.notifier).jumpToPage(newPage);
+                          },
+                          itemBuilder: (context, index) {
+                            return _Page(
+                              seriesId: seriesId,
+                              chapterId: chapterId,
+                              page: index,
+                              reverse:
+                                  commonSettings.readDirection == .rightToLeft,
+                              outerController: controller,
+                              onSelectionChanged: (selected) {
+                                if (selected != hasSelection.value) {
+                                  hasSelection.value = selected;
+                                }
+                              },
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                  if (!navState.ready)
-                    const Positioned.fill(
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
-                ],
-              );
-            },
+                    if (!navState.ready)
+                      const Positioned.fill(
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -234,6 +239,10 @@ class _Page extends HookConsumerWidget {
       ),
     );
 
+    final css = ref.watch(
+      customCssProvider(seriesId: seriesId),
+    );
+
     return Stack(
       children: [
         if (reflow.value?.status != .done)
@@ -245,11 +254,12 @@ class _Page extends HookConsumerWidget {
             ),
           ),
         Positioned.fill(
-          child: Async3(
+          child: Async4(
             asyncValue1: ref.watch(nav),
             asyncValue2: reflow,
             asyncValue3: navigationGestures,
-            data: (navState, reflowState, navigationGestures) {
+            asyncValue4: css,
+            data: (navState, reflowState, navigationGestures, css) {
               // include buffer spinner page if currently measuring.
               final count = reflowState.status == .measuring
                   ? reflowState.subpages.length + 1
@@ -330,7 +340,7 @@ class _Page extends HookConsumerWidget {
                                 child: _RenderContent(
                                   seriesId: seriesId,
                                   html: reflowState.subpages[index].outerHtml,
-                                  styles: reflowState.page.styles,
+                                  styles: {...reflowState.page.styles, ...css},
                                   onSelectionChanged: onSelectionChanged,
                                 ),
                               );
@@ -473,6 +483,31 @@ class _RenderContent extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ThemeOverride extends ConsumerWidget {
+  final int seriesId;
+  final Widget child;
+
+  const _ThemeOverride({
+    required this.seriesId,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(
+      epubReaderSettingsProvider(seriesId: seriesId).select(
+        (value) => value.whenOrNull(data: (data) => data.theme),
+      ),
+    );
+    return Theme(
+      data: theme?.data ?? Theme.of(context),
+      child: Scaffold(
+        body: child,
       ),
     );
   }
