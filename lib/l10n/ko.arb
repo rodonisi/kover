@@ -701,5 +701,29 @@
     "madeWithLove": "❤️으로 제작",
     "@madeWithLove": {
         "description": "Label for the made with love message"
+    },
+    "sepia": "세피아",
+    "@sepia": {
+        "description": "Label for the sepia theme option"
+    },
+    "matchAppTheme": "앱 테마와 일치",
+    "@matchAppTheme": {
+        "description": "Label for the epub reader match app theme option"
+    },
+    "navigationGestures": "네비게이션 제스처",
+    "@navigationGestures": {
+        "description": "Label for the enable navigation gestures reader option"
+    },
+    "appearance": "모양",
+    "@appearance": {
+        "description": "Label for the appearance settings section"
+    },
+    "reduceAnimations": "애니메이션 감소",
+    "@reduceAnimations": {
+        "description": "Label for the reduce animation setting"
+    },
+    "reduceAnimationsDescription": "대부분의 애니메이션과 리더 페이지 전환을 비활성화합니다. 참고: 이 옵션을 활성화하면 가로 리더 모드에서 스와이프 제스처를 사용할 수 없습니다.",
+    "@reduceAnimationsDescription": {
+        "description": "Description for the reduce animation setting"
     }
 }
