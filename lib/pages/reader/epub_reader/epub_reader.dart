@@ -13,7 +13,6 @@ import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/utils/extensions/epub_theme.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/utils/logging.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
 class EpubReader extends HookConsumerWidget {
