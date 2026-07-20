@@ -1,3 +1,4 @@
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/book_chapter_model.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/models/page_content.dart';
@@ -60,10 +61,11 @@ Future<Map<String, Map<String, String>>> customCss(
   Ref ref, {
   required int seriesId,
 }) async {
-  final themeState = await ref.watch(
-    epubReaderSettingsProvider(seriesId: seriesId).selectAsync((s) => s.theme),
+  final themeState = ref.watch(
+    epubReaderSettingsProvider(
+      seriesId: seriesId,
+    ).select((s) => s.value?.theme),
   );
-  if (!ref.mounted) throw Exception('Provider not mounted');
   final appTheme = await ref.watch(themeProvider.selectAsync((s) => s.theme));
 
   final theme = themeState?.data ?? appTheme;

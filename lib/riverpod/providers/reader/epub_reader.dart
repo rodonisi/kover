@@ -54,11 +54,16 @@ class EpubReflow extends _$EpubReflow {
   }) async {
     // force rerender on settings change
     ref.listen(epubReaderSettingsProvider(seriesId: seriesId), (prev, next) {
-      ref.invalidate(
-        readerProvider(seriesId: seriesId, chapterId: chapterId),
-        asReload: true,
-      );
-      ref.invalidateSelf(asReload: true);
+      next.whenData((next) {
+        final partialPrev = prev?.value?.copyWith(
+          theme: next.theme,
+        );
+
+        // skip if the settings change doesn't affect the reflow
+        if (partialPrev == next) return;
+
+        ref.invalidateSelf(asReload: true);
+      });
     });
 
     final readerState = await ref.read(
@@ -268,16 +273,33 @@ class EpubNavigation extends _$EpubNavigation {
   }
 
   void _handleSettingsChanges() {
-    ref.listen(epubReaderSettingsProvider(seriesId: seriesId), (
-      prev,
-      next,
-    ) async {
-      final current = await future;
+    listenSelf((prev, next) {
+      next.whenData((data) {
+        if (prev?.value?.page == data.page) {
+          return;
+        }
 
-      _resumed = false;
-      state = AsyncData(
-        current.copyWith(ready: false, subpage: 0),
-      );
+        ref.listen(
+          epubReflowProvider(
+            seriesId: seriesId,
+            chapterId: chapterId,
+            page: data.page,
+          ),
+          (prev, next) {
+            next.whenData((next) {
+              if (next.status == .measuring && prev?.value?.status == .done) {
+                state = AsyncData(
+                  data.copyWith(
+                    ready: false,
+                    subpage: 0,
+                    totalSubpages: next.subpages.length,
+                  ),
+                );
+              }
+            });
+          },
+        );
+      });
     });
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/extensions/epub_theme.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/settings/option_container.dart';
@@ -16,58 +17,62 @@ class ThemePicker extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final provider = epubReaderSettingsProvider(seriesId: seriesId);
     final theme = ref.watch(provider.select((s) => s.whenData((s) => s.theme)));
-    final screenWidth = MediaQuery.of(context).size.width;
 
     return Async(
       asyncValue: theme,
       data: (data) {
         return OptionContainer(
-          title: l.themeMode,
-          child: SingleChildScrollView(
-            scrollDirection: .horizontal,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: screenWidth - LayoutConstants.largePadding * 2,
-              ),
-              child: Row(
-                spacing: LayoutConstants.largePadding,
-                mainAxisAlignment: .center,
-                children: [
-                  Tooltip(
-                    message: l.matchAppTheme,
-                    child: _Selected(
-                      isSelected: data == null,
-                      child: _AppThemeOption(
-                        onTap: () async {
-                          await ref.read(provider.notifier).setTheme(null);
-                        },
-                      ),
-                    ),
+          icon: KoverIcons.theme,
+          title: l.theme,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                scrollDirection: .horizontal,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minWidth: constraints.maxWidth,
                   ),
-                  ...EpubTheme.values.map((t) {
-                    final isSelected = t == data;
-                    return Tooltip(
-                      message: switch (t) {
-                        .light => l.light,
-                        .sepia => l.sepia,
-                        .dark => l.dark,
-                      },
-                      child: _Selected(
-                        isSelected: isSelected,
-                        child: Theme(
-                          data: t.data,
-                          child: _ThemePreview(
+                  child: Row(
+                    spacing: LayoutConstants.largePadding,
+                    mainAxisAlignment: .center,
+                    children: [
+                      Tooltip(
+                        message: l.matchAppTheme,
+                        child: _Selected(
+                          isSelected: data == null,
+                          child: _AppThemeOption(
                             onTap: () async {
-                              await ref.read(provider.notifier).setTheme(t);
+                              await ref.read(provider.notifier).setTheme(null);
                             },
                           ),
                         ),
                       ),
-                    );
-                  }),
-                ],
-              ),
-            ),
+                      ...EpubTheme.values.map((t) {
+                        final isSelected = t == data;
+                        return Tooltip(
+                          message: switch (t) {
+                            .light => l.light,
+                            .sepia => l.sepia,
+                            .dark => l.dark,
+                          },
+                          child: _Selected(
+                            isSelected: isSelected,
+                            child: Theme(
+                              data: t.data,
+                              child: _ThemePreview(
+                                onTap: () async {
+                                  await ref.read(provider.notifier).setTheme(t);
+                                },
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         );
       },

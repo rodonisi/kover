@@ -68,6 +68,10 @@
     "@themeMode": {
         "description": "Label for the theme mode setting"
     },
+    "theme": "Theme",
+    "@theme": {
+        "description": "Label for the epub reader theme setting"
+    },
     "system": "System",
     "@system": {
         "description": "Label for the system theme mode option"

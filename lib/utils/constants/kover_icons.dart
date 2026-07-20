@@ -21,6 +21,7 @@ sealed class KoverIcons {
   static const IconData navigationGestures = LucideIcons.pointer;
   static const IconData animation = Icons.animation_sharp;
   static const IconData outline = LucideIcons.squareDashed;
+  static const IconData theme = LucideIcons.palette;
   static const IconData systemTheme = LucideIcons.sunMoon;
   static const IconData lightTheme = LucideIcons.sun;
   static const IconData darkTheme = LucideIcons.moon;
