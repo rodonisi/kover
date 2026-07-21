@@ -717,5 +717,17 @@
     "reduceAnimationsDescription": "Deaktiviert die meisten Animationen und Seitenübergänge des Readers. Hinweis: Wischgesten in horizontalen Lesemodi sind nicht verfügbar, wenn diese Option aktiviert ist.",
     "@reduceAnimationsDescription": {
         "description": "Description for the reduce animation setting"
+    },
+    "theme": "Thema",
+    "@theme": {
+        "description": "Label for the epub reader theme setting"
+    },
+    "sepia": "Sepia",
+    "@sepia": {
+        "description": "Label for the sepia theme option"
+    },
+    "matchAppTheme": "Wie App-Thema",
+    "@matchAppTheme": {
+        "description": "Label for the epub reader match app theme option"
     }
 }
