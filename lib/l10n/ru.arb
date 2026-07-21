@@ -587,5 +587,124 @@
     "syncingReadingLists": "Синхронизация списков чтения",
     "@syncingReadingLists": {
         "description": "Label for the syncing reading lists phase"
+    },
+    "theme": "Тема",
+    "@theme": {
+        "description": "Label for the epub reader theme setting"
+    },
+    "sepia": "Сепия",
+    "@sepia": {
+        "description": "Label for the sepia theme option"
+    },
+    "matchAppTheme": "Как в приложении",
+    "@matchAppTheme": {
+        "description": "Label for the epub reader match app theme option"
+    },
+    "refreshingMetadataForSeries": "Обновление метаданных для серии {seriesId}",
+    "@refreshingMetadataForSeries": {
+        "description": "Label for the refreshing metadata phase with the series ID",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "refreshingCoversForSeries": "Обновление обложек для серии {seriesId}",
+    "@refreshingCoversForSeries": {
+        "description": "Label for the refreshing covers phase with the series ID",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series which covers are being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "refreshingServerSettings": "Обновление настроек сервера",
+    "@refreshingServerSettings": {
+        "description": "Label for the refreshing server settings phase"
+    },
+    "moreCount": "+{count} ещё",
+    "@moreCount": {
+        "description": "Label indicating there are more items beyond the displayed amount",
+        "placeholders": {
+            "count": {
+                "description": "The count of items beyond the displayed amount",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "wordCount": "{wordCount} слов",
+    "@wordCount": {
+        "description": "Label for the word count of a book entry",
+        "placeholders": {
+            "wordCount": {
+                "description": "The amount of words",
+                "type": "int",
+                "format": "compact",
+                "example": "42000"
+            }
+        }
+    },
+    "fitDirection": "Направление подгонки",
+    "@fitDirection": {
+        "description": "Label for the image fit direction setting"
+    },
+    "contain": "Вписать",
+    "@contain": {
+        "description": "Label for the contain image fit option"
+    },
+    "width": "Ширина",
+    "@width": {
+        "description": "Label for the fit width image option"
+    },
+    "height": "Высота",
+    "@height": {
+        "description": "Label for the fit height image option"
+    },
+    "pageGap": "Отступ между страницами",
+    "@pageGap": {
+        "description": "Label for the page gap setting"
+    },
+    "ignoreSafeAreas": "Игнорировать безопасные зоны",
+    "@ignoreSafeAreas": {
+        "description": "Label for the ignore safe areas setting"
+    },
+    "dismiss": "Скрыть",
+    "@dismiss": {
+        "description": "Label for the dismiss button in chapter snackbar"
+    },
+    "go": "Перейти",
+    "@go": {
+        "description": "Label for the go button in chapter snackbar"
+    },
+    "previousChapter": "Предыдущая: {chapterTitle}",
+    "@previousChapter": {
+        "description": "Label for the previous chapter snackbar with the chapter title",
+        "placeholders": {
+            "chapterTitle": {
+                "description": "The title of the previous chapter",
+                "type": "String",
+                "example": "Chapter 2"
+            }
+        }
+    },
+    "nextChapter": "Следующая: {chapterTitle}",
+    "@nextChapter": {
+        "description": "Label for the next chapter snackbar with the chapter title",
+        "placeholders": {
+            "chapterTitle": {
+                "description": "The title of the next chapter",
+                "type": "String",
+                "example": "Chapter 3"
+            }
+        }
+    },
+    "syncingTocs": "Синхронизация оглавлений глав",
+    "@syncingTocs": {
+        "description": "Label for the syncing chapters TOCs phase"
     }
 }
