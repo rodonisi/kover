@@ -622,5 +622,17 @@
     "reduceAnimationsDescription": "Disabilita la maggior parte delle animazioni e delle transizioni di pagina del lettore. Nota: i gesti di scorrimento nelle modalità di lettura orizzontali non saranno disponibili quando questa opzione è abilitata.",
     "@reduceAnimationsDescription": {
         "description": "Description for the reduce animation setting"
+    },
+    "theme": "Tema",
+    "@theme": {
+        "description": "Label for the epub reader theme setting"
+    },
+    "sepia": "Seppia",
+    "@sepia": {
+        "description": "Label for the sepia theme option"
+    },
+    "matchAppTheme": "Usa tema dell'app",
+    "@matchAppTheme": {
+        "description": "Label for the epub reader match app theme option"
     }
 }
