@@ -706,5 +706,32 @@
     "syncingTocs": "Синхронизация оглавлений глав",
     "@syncingTocs": {
         "description": "Label for the syncing chapters TOCs phase"
+    },
+    "paragraphSpacing": "Интервал между абзацами",
+    "@paragraphSpacing": {
+        "description": "Label for the paragraph spacing setting"
+    },
+    "items": "{count, plural, =0{Нет элементов} one{{count} элемент} few{{count} элемента} many{{count} элементов} other{{count} элемента}}",
+    "@items": {
+        "description": "Label for the number of items, with pluralization",
+        "placeholders": {
+            "count": {
+                "description": "The amount of items",
+                "type": "int",
+                "example": "2"
+            }
+        }
+    },
+    "coverPage": "Титульная страница",
+    "@coverPage": {
+        "description": "Label for the cover page setting"
+    },
+    "coverPageDescription": "Использовать первую страницу как титульную, отображая её отдельно",
+    "@coverPageDescription": {
+        "description": "Description for the cover page setting"
+    },
+    "syncingSidenav": "Синхронизация порядка бокового меню",
+    "@syncingSidenav": {
+        "description": "Label for the sidenav syncing phase"
     }
 }
