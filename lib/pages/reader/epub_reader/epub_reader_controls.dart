@@ -4,6 +4,7 @@ import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/reader/epub_reader/theme_picker.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
@@ -74,7 +75,18 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                             .read(epubSettings.notifier)
                             .setMarginSize(newValue),
                       ),
-
+                      NumericOption(
+                        title: l.paragraphSpacing,
+                        icon: KoverIcons.paragraphSpacing,
+                        value: settings.paragraphSpacing,
+                        decimalPlaces: 0,
+                        min: EpubReaderSettingsLimits.paragraphSpacingMin,
+                        max: EpubReaderSettingsLimits.paragraphSpacingMax,
+                        step: EpubReaderSettingsLimits.paragraphSpacingStep,
+                        onChanged: (newValue) async => await ref
+                            .read(epubSettings.notifier)
+                            .setParagraphSpacing(newValue),
+                      ),
                       NumericOption(
                         title: l.lineHeight,
                         icon: LucideIcons.listChevronsUpDown,

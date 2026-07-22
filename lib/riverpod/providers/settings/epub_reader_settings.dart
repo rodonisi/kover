@@ -18,6 +18,10 @@ sealed class EpubReaderSettingsLimits {
   static const double marginSizeMax = LayoutConstants.largestPadding;
   static const double marginSizeStep = 4;
 
+  static const double paragraphSpacingMin = 0.0;
+  static const double paragraphSpacingMax = LayoutConstants.largestPadding;
+  static const double paragraphSpacingStep = 4;
+
   static const double lineHeightMin = 0.5;
   static const double lineHeightMax = 5.0;
   static const double lineHeightStep = 0.2;
@@ -43,6 +47,7 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
   const factory EpubReaderSettingsState({
     @Default(LayoutConstants.mediumPadding) double marginSize,
     @Default(14.0) double fontSize,
+    @Default(0.0) double paragraphSpacing,
     @Default(1.5) double lineHeight,
     @Default(0.0) double wordSpacing,
     @Default(0.0) double letterSpacing,
@@ -115,6 +120,23 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     );
     log.info(
       'set margin size',
+      attributes: {'value': newSize, 'reader': 'epub'},
+    );
+  }
+
+  Future<void> setParagraphSpacing(double newSize) async {
+    final current = await future;
+
+    state = AsyncData(
+      current.copyWith(
+        paragraphSpacing: newSize.clamp(
+          EpubReaderSettingsLimits.paragraphSpacingMin,
+          EpubReaderSettingsLimits.paragraphSpacingMax,
+        ),
+      ),
+    );
+    log.info(
+      'set paragraph spacing',
       attributes: {'value': newSize, 'reader': 'epub'},
     );
   }

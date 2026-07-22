@@ -239,10 +239,6 @@ class _Page extends HookConsumerWidget {
       ),
     );
 
-    final css = ref.watch(
-      customCssProvider(seriesId: seriesId),
-    );
-
     return Stack(
       children: [
         if (reflow.value?.status != .done)
@@ -254,12 +250,11 @@ class _Page extends HookConsumerWidget {
             ),
           ),
         Positioned.fill(
-          child: Async4(
+          child: Async3(
             asyncValue1: ref.watch(nav),
             asyncValue2: reflow,
             asyncValue3: navigationGestures,
-            asyncValue4: css,
-            data: (navState, reflowState, navigationGestures, css) {
+            data: (navState, reflowState, navigationGestures) {
               // include buffer spinner page if currently measuring.
               final count = reflowState.status == .measuring
                   ? reflowState.subpages.length + 1
@@ -340,7 +335,7 @@ class _Page extends HookConsumerWidget {
                                 child: _RenderContent(
                                   seriesId: seriesId,
                                   html: reflowState.subpages[index].outerHtml,
-                                  styles: {...reflowState.page.styles, ...css},
+                                  styles: reflowState.page.styles,
                                   onSelectionChanged: onSelectionChanged,
                                 ),
                               );
@@ -383,9 +378,6 @@ class _MeasureContent extends HookConsumerWidget {
       page: page,
     );
     final reflow = ref.watch(provider);
-    final css = ref.watch(
-      customCssProvider(seriesId: seriesId),
-    );
     final imageCache = useState(CachedImageFactory());
 
     return LayoutBuilder(
@@ -406,17 +398,16 @@ class _MeasureContent extends HookConsumerWidget {
           }
         });
 
-        return Async2(
-          asyncValue1: reflow,
-          asyncValue2: css,
-          data: (data, css) => Offstage(
+        return Async(
+          asyncValue: reflow,
+          data: (data) => Offstage(
             child: Column(
               mainAxisSize: .min,
               children: [
                 _RenderContent(
                   seriesId: seriesId,
                   key: key.value,
-                  styles: {...data.page.styles, ...css},
+                  styles: data.page.styles,
                   html: (data.buffer ?? DocumentFragment()).outerHtml,
                   imageCache: imageCache.value,
                 ),
@@ -450,45 +441,67 @@ class _RenderContent extends ConsumerWidget {
     final epubSettings = ref.watch(
       epubReaderSettingsProvider(seriesId: seriesId),
     );
+    final css = ref.watch(
+      customCssProvider(seriesId: seriesId),
+    );
 
-    return Async(
-      asyncValue: epubSettings,
-      data: (epubSettings) => SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(epubSettings.marginSize),
-          child: SelectionArea(
-            onSelectionChanged: (selection) {
-              onSelectionChanged?.call(
-                selection != null && selection.plainText.isNotEmpty,
-              );
-            },
-            child: HtmlWidget(
-              html,
-              buildAsync: false,
-              enableCaching: true,
-              factoryBuilder: () => imageCache ?? CachedImageFactory(),
-              customStylesBuilder: (element) {
-                final s = Map<String, String>.from(
-                  styles[element.localName] ?? {},
+    return Async2(
+      asyncValue1: epubSettings,
+      asyncValue2: css,
+      data: (epubSettings, css) {
+        final mergedStyles = Map<String, Map<String, String>>.from(styles);
+        for (final entry in css.entries) {
+          mergedStyles[entry.key] = {
+            ...mergedStyles[entry.key] ?? {},
+            ...entry.value,
+          };
+        }
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(epubSettings.marginSize),
+            child: SelectionArea(
+              onSelectionChanged: (selection) {
+                onSelectionChanged?.call(
+                  selection != null && selection.plainText.isNotEmpty,
                 );
-
-                for (final className in element.classes) {
-                  s.addAll(styles['.$className'] ?? {});
-                }
-
-                return s;
               },
-              textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: epubSettings.fontSize,
-                height: epubSettings.lineHeight,
-                wordSpacing: epubSettings.wordSpacing,
-                letterSpacing: epubSettings.letterSpacing,
+              child: HtmlWidget(
+                html,
+                buildAsync: false,
+                enableCaching: true,
+                factoryBuilder: () => imageCache ?? CachedImageFactory(),
+                customStylesBuilder: (element) {
+                  final s = Map<String, String>.from(
+                    mergedStyles[element.localName] ?? {},
+                  );
+
+                  for (final className in element.classes) {
+                    s.addAll(mergedStyles['.$className'] ?? {});
+                  }
+
+                  if (element.localName == 'p' &&
+                      element.nextElementSibling != null) {
+                    final paragraphMargin =
+                        'margin-bottom: ${epubSettings.paragraphSpacing}px';
+
+                    element.attributes['style'] =
+                        '${element.attributes['style']}; $paragraphMargin';
+                  }
+
+                  return s;
+                },
+                textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: epubSettings.fontSize,
+                  height: epubSettings.lineHeight,
+                  wordSpacing: epubSettings.wordSpacing,
+                  letterSpacing: epubSettings.letterSpacing,
+                ),
+                rebuildTriggers: [mergedStyles, epubSettings],
               ),
-              rebuildTriggers: [html, styles],
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -730,5 +730,9 @@
     "reduceAnimationsDescription": "Disables most animations and reader page transitions. Note: swipe gestures in horizontal reader modes will not be available when this option is enabled.",
     "@reduceAnimationsDescription": {
       "description": "Description for the reduce animation setting" 
+    },
+    "paragraphSpacing": "Paragraph Spacing",
+    "@paragraphSpacing": {
+      "description": "Label for the paragraph spacing setting"
     }
 }
