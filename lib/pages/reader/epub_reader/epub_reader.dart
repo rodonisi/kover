@@ -210,6 +210,8 @@ class _Page extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final imageCache = useMemoized(() => CachedImageFactory(), []);
+
     final reflow = ref.watch(
       epubReflowProvider(
         seriesId: seriesId,
@@ -247,6 +249,7 @@ class _Page extends HookConsumerWidget {
               seriesId: seriesId,
               chapterId: chapterId,
               page: page,
+              imageCache: imageCache,
             ),
           ),
         Positioned.fill(
@@ -336,6 +339,7 @@ class _Page extends HookConsumerWidget {
                                   seriesId: seriesId,
                                   html: reflowState.subpages[index].outerHtml,
                                   styles: reflowState.page.styles,
+                                  imageCache: imageCache,
                                   onSelectionChanged: onSelectionChanged,
                                 ),
                               );
@@ -363,29 +367,30 @@ class _MeasureContent extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
   final int page;
+  final CachedImageFactory? imageCache;
   const _MeasureContent({
     required this.seriesId,
     required this.chapterId,
     required this.page,
+    this.imageCache,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final key = useState(GlobalKey());
+    final key = useMemoized(() => GlobalKey(), []);
     final provider = epubReflowProvider(
       seriesId: seriesId,
       chapterId: chapterId,
       page: page,
     );
     final reflow = ref.watch(provider);
-    final imageCache = useState(CachedImageFactory());
 
     return LayoutBuilder(
       builder: (context, constraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) async {
           await WidgetsBinding.instance.endOfFrame;
           final renderBox =
-              key.value.currentContext?.findRenderObject() as RenderBox?;
+              key.currentContext?.findRenderObject() as RenderBox?;
           if (renderBox == null) {
             return;
           }
@@ -405,11 +410,11 @@ class _MeasureContent extends HookConsumerWidget {
               mainAxisSize: .min,
               children: [
                 _RenderContent(
+                  key: key,
                   seriesId: seriesId,
-                  key: key.value,
                   styles: data.page.styles,
                   html: (data.buffer ?? DocumentFragment()).outerHtml,
-                  imageCache: imageCache.value,
+                  imageCache: imageCache,
                 ),
               ],
             ),
@@ -456,6 +461,7 @@ class _RenderContent extends ConsumerWidget {
             ...entry.value,
           };
         }
+
         return SafeArea(
           child: Padding(
             padding: EdgeInsets.all(epubSettings.marginSize),
@@ -496,7 +502,10 @@ class _RenderContent extends ConsumerWidget {
                   wordSpacing: epubSettings.wordSpacing,
                   letterSpacing: epubSettings.letterSpacing,
                 ),
-                rebuildTriggers: [mergedStyles, epubSettings],
+                rebuildTriggers: [
+                  mergedStyles.toString(),
+                  epubSettings,
+                ],
               ),
             ),
           ),
