@@ -729,5 +729,9 @@
     "matchAppTheme": "Wie App-Thema",
     "@matchAppTheme": {
         "description": "Label for the epub reader match app theme option"
+    },
+    "paragraphSpacing": "Absatzabstand",
+    "@paragraphSpacing": {
+        "description": "Label for the paragraph spacing setting"
     }
 }
