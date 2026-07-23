@@ -12,26 +12,34 @@ class DownloadDao extends DatabaseAccessor<AppDatabase>
     with _$DownloadDaoMixin {
   DownloadDao(super.attachedDatabase);
 
+  JoinedSelectStatement<HasResultSet, dynamic> _downloadedPagesForChapterQuery({
+    required int chapterId,
+  }) {
+    final countColumn = downloadedPages.chapterId.count();
+    return selectOnly(downloadedPages).join([
+        innerJoin(
+          chapters,
+          chapters.id.equalsExp(downloadedPages.chapterId),
+        ),
+      ])
+      ..addColumns([countColumn, chapters.pages, chapters.format])
+      ..where(downloadedPages.chapterId.equals(chapterId));
+  }
+
   /// Returns whether ALL pages of a chapter [chapterId] are stored locally.
   SingleSelectable<bool> isChapterDownloaded({required int chapterId}) {
-    final downloadedCount = downloadedPages.chapterId.count();
-
-    final query = selectOnly(chapters)
-      ..addColumns([chapters.pages, downloadedCount])
-      ..where(chapters.id.equals(chapterId));
-
-    query.join([
-      leftOuterJoin(
-        downloadedPages,
-        downloadedPages.chapterId.equalsExp(chapters.id),
-        useColumns: false,
-      ),
-    ]);
+    final countColumn = downloadedPages.chapterId.count();
+    final query = _downloadedPagesForChapterQuery(chapterId: chapterId);
 
     return query.map((row) {
+      final downloaded = row.read(countColumn) ?? 0;
       final total = row.read(chapters.pages) ?? 0;
-      final downloaded = row.read(downloadedCount) ?? 0;
-      return total > 0 && downloaded >= total;
+      final format = row.readWithConverter(chapters.format);
+
+      return switch (format) {
+        .pdf => downloaded > 0,
+        _ => total > 0 && downloaded >= total,
+      };
     });
   }
 
@@ -46,15 +54,7 @@ class DownloadDao extends DatabaseAccessor<AppDatabase>
   SingleSelectable<double> dowloadPercent({required int chapterId}) {
     final countColumn = downloadedPages.chapterId.count();
 
-    final query =
-        selectOnly(downloadedPages).join([
-            innerJoin(
-              chapters,
-              chapters.id.equalsExp(downloadedPages.chapterId),
-            ),
-          ])
-          ..addColumns([countColumn, chapters.pages, chapters.format])
-          ..where(downloadedPages.chapterId.equals(chapterId));
+    final query = _downloadedPagesForChapterQuery(chapterId: chapterId);
 
     return query.map((row) {
       final downloaded = row.read(countColumn) ?? 0;
