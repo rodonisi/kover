@@ -634,5 +634,9 @@
     "matchAppTheme": "Usa tema dell'app",
     "@matchAppTheme": {
         "description": "Label for the epub reader match app theme option"
+    },
+    "paragraphSpacing": "Spaziatura paragrafi",
+    "@paragraphSpacing": {
+        "description": "Label for the paragraph spacing setting"
     }
 }
