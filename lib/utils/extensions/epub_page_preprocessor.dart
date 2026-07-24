@@ -105,22 +105,49 @@ extension EpubPagePreprocessor on DocumentFragment {
 }
 
 class _TextIndentVisitor extends TreeVisitor {
+  static const blockElements = {
+    'div',
+    'p',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'li',
+  };
+
+  String? _inheritedTextIndent;
+
   @override
   void visitElement(Element element) {
-    final textIndent = element.styles
+    final explicitTextIndent = element.styles
         .where((s) => s.property == 'text-indent')
-        .firstOrNull;
+        .firstOrNull
+        ?.value
+        ?.span
+        ?.text;
 
-    if (textIndent != null && textIndent.value?.span?.text != null) {
+    final currentTextIndent = explicitTextIndent ?? _inheritedTextIndent;
+
+    if (currentTextIndent != null &&
+        blockElements.contains(element.localName)) {
       final span = Element.tag('span')
         ..text =
             '\u00A0' // Non-breaking space
         ..attributes['style'] =
-            'display: inline-block; width: ${textIndent.value!.span!.text}';
+            'display: inline-block; width: $currentTextIndent';
+
       element.insertBefore(span, element.firstChild);
     }
 
+    final previousInherited = _inheritedTextIndent;
+
+    _inheritedTextIndent = currentTextIndent;
+
     super.visitElement(element);
+
+    _inheritedTextIndent = previousInherited;
   }
 }
 
