@@ -725,5 +725,13 @@
     "reduceAnimationsDescription": "대부분의 애니메이션과 리더 페이지 전환을 비활성화합니다. 참고: 이 옵션을 활성화하면 가로 리더 모드에서 스와이프 제스처를 사용할 수 없습니다.",
     "@reduceAnimationsDescription": {
         "description": "Description for the reduce animation setting"
+    },
+    "theme": "테마",
+    "@theme": {
+        "description": "Label for the epub reader theme setting"
+    },
+    "paragraphSpacing": "문단 간격",
+    "@paragraphSpacing": {
+        "description": "Label for the paragraph spacing setting"
     }
 }
