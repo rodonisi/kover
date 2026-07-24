@@ -1,6 +1,8 @@
 import 'package:csslib/parser.dart' as css;
 import 'package:csslib/visitor.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:html/dom.dart';
+import 'package:html/dom_parsing.dart';
 import 'package:kover/utils/extensions/element.dart';
 import 'package:kover/utils/html_constants.dart';
 import 'package:kover/utils/logging.dart';
@@ -22,6 +24,7 @@ extension EpubPagePreprocessor on DocumentFragment {
     final elementMap = _matchRulesToElements(root, rules);
     _applyInlinedStyles(elementMap);
     _applyScrollIds(root);
+    _applyTextIndent(root);
 
     return root;
   }
@@ -93,6 +96,31 @@ extension EpubPagePreprocessor on DocumentFragment {
     for (final child in root.children) {
       walk(child);
     }
+  }
+
+  static void _applyTextIndent(DocumentFragment root) {
+    final visitor = _TextIndentVisitor();
+    visitor.visit(root);
+  }
+}
+
+class _TextIndentVisitor extends TreeVisitor {
+  @override
+  void visitElement(Element element) {
+    final textIndent = element.styles
+        .where((s) => s.property == 'text-indent')
+        .firstOrNull;
+
+    if (textIndent != null && textIndent.value?.span?.text != null) {
+      final span = Element.tag('span')
+        ..text =
+            '\u00A0' // Non-breaking space
+        ..attributes['style'] =
+            'display: inline-block; width: ${textIndent.value!.span!.text}';
+      element.insertBefore(span, element.firstChild);
+    }
+
+    super.visitElement(element);
   }
 }
 
