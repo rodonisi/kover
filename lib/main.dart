@@ -46,7 +46,11 @@ class App extends ConsumerWidget {
             debugShowCheckedModeBanner: false,
             theme: theme.lightTheme,
             darkTheme: theme.darkTheme,
-            themeMode: theme.mode,
+            themeMode: switch (theme.mode) {
+              .system => .system,
+              .light => .light,
+              .dark || .black => .dark,
+            },
             routerConfig: ref.watch(routerProvider),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,

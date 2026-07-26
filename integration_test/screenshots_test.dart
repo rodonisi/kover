@@ -285,7 +285,7 @@ void main() {
         tester,
         additionalOverrides: [
           themeProvider.overrideWithBuild(
-            (_, _) => const ThemeModel(mode: ThemeMode.light),
+            (_, _) => const ThemeModel(mode: .light),
           ),
         ],
       );

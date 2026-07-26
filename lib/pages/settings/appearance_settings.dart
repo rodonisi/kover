@@ -48,7 +48,7 @@ class _ThemeMode extends ConsumerWidget {
 
     return Async(
       asyncValue: theme,
-      data: (theme) => ChoiceOption<ThemeMode>(
+      data: (theme) => ChoiceOption<KoverThemeMode>(
         title: l.themeMode,
         options: [
           ChoiceOptionEntry(
@@ -65,6 +65,11 @@ class _ThemeMode extends ConsumerWidget {
             value: .dark,
             label: l.dark,
             icon: KoverIcons.darkTheme,
+          ),
+          ChoiceOptionEntry(
+            value: .black,
+            label: l.black,
+            icon: KoverIcons.blackTheme,
           ),
         ],
         value: theme.mode,
