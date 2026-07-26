@@ -133,10 +133,14 @@ class _TextIndentVisitor extends TreeVisitor {
     if (currentTextIndent != null &&
         blockElements.contains(element.localName)) {
       final span = Element.tag('span')
-        ..text =
-            '\u00A0' // Non-breaking space
+        ..text = ' '
+        ..attributes[HtmlConstants.textIndentSpanAttribute] = ''
         ..attributes['style'] =
             'display: inline-block; width: $currentTextIndent';
+
+      log.debug(
+        'Applying text-indent: $currentTextIndent to ${element.localName}',
+      );
 
       element.insertBefore(span, element.firstChild);
     }

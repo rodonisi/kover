@@ -3,4 +3,5 @@ sealed class HtmlConstants {
   static const String resumeParagraphClass = 'resume-paragraph';
   static const String kavitaWrapperClass = 'book-content';
   static const String koverWrapperClass = 'kover-content';
+  static const String textIndentSpanAttribute = 'indent-span';
 }

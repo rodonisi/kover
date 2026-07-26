@@ -1,4 +1,5 @@
 import 'package:html/dom.dart';
+import 'package:kover/utils/html_constants.dart';
 
 class ElementCursor {
   static const Set<String> _leafTags = {'img', 'svg'};
@@ -66,7 +67,8 @@ class ElementCursor {
 
     if (child is! Element ||
         _leafTags.contains(child.localName) ||
-        child.nodes.isEmpty) {
+        child.nodes.isEmpty ||
+        child.attributes.containsKey(HtmlConstants.textIndentSpanAttribute)) {
       return false;
     }
 
