@@ -268,7 +268,7 @@ void main() {
 
       await binding.screenshot(tester, 'epub_reader');
 
-      final center = tester.getCenter(find.byType(Scaffold));
+      final center = tester.getCenter(find.byType(ReaderOverlay));
       await tester.tapAt(center);
       await tester.pump(500.ms);
       await binding.screenshot(tester, 'epub_reader_overlay');
