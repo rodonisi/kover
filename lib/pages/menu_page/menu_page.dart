@@ -89,7 +89,7 @@ class MenuPage extends ConsumerWidget {
               SliverSection(title: l.libraries),
               const SliverLibraries(),
             ],
-            SliverSection(title: l.downloadQueue),
+            SliverSection(title: l.more),
             SliverPadding(
               padding: const EdgeInsetsGeometry.symmetric(
                 vertical: LayoutConstants.smallerPadding,
