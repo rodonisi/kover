@@ -54,6 +54,7 @@ class ThemePicker extends ConsumerWidget {
                             .light => l.light,
                             .sepia => l.sepia,
                             .dark => l.dark,
+                            .black => l.black,
                           },
                           child: _Selected(
                             isSelected: isSelected,
