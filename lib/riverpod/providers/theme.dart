@@ -81,11 +81,18 @@ final _reduceAnimationsPageTransitionsTheme = PageTransitionsTheme(
   },
 );
 
+enum KoverThemeMode {
+  light,
+  dark,
+  black,
+  system,
+}
+
 @freezed
 sealed class ThemeModel with _$ThemeModel {
   const ThemeModel._();
   const factory ThemeModel({
-    @Default(ThemeMode.system) ThemeMode mode,
+    @Default(KoverThemeMode.system) KoverThemeMode mode,
     @Default(false) bool outlined,
     @Default(false) bool reduceAnimations,
   }) = _ThemeModel;
@@ -171,6 +178,10 @@ sealed class ThemeModel with _$ThemeModel {
   );
 
   ThemeData get darkTheme {
+    if (mode == .black) {
+      return blackTheme;
+    }
+
     final theme = outlined ? _outlinedDarkTheme : _darkTheme;
     return reduceAnimations
         ? theme.copyWith(
@@ -198,10 +209,38 @@ sealed class ThemeModel with _$ThemeModel {
         : theme;
   }
 
+  ThemeData get blackTheme {
+    final baseTheme = outlined ? _outlinedDarkTheme : _darkTheme;
+    final blackScheme = baseTheme.colorScheme.copyWith(
+      surface: const Color(0xff000000),
+      surfaceDim: const Color(0xff000000),
+      surfaceBright: const Color(0xff363a35),
+      surfaceContainerLowest: const Color(0xff0b0f0b),
+      surfaceContainerLow: const Color(0xff181d18),
+      surfaceContainer: const Color(0xff1c211c),
+      surfaceContainerHigh: const Color(0xff262b26),
+      surfaceContainerHighest: const Color(0xff313631),
+      onSurface: const Color(0xffdfe4dc),
+      onSurfaceVariant: const Color(0xffc0c9c1),
+      outline: const Color(0xff8a938c),
+      outlineVariant: const Color(0xff404943),
+    );
+    final theme = baseTheme.copyWith(
+      colorScheme: blackScheme,
+      scaffoldBackgroundColor: blackScheme.surface,
+    );
+    return reduceAnimations
+        ? theme.copyWith(
+            pageTransitionsTheme: _reduceAnimationsPageTransitionsTheme,
+          )
+        : theme;
+  }
+
   ThemeData get theme {
     return switch (mode) {
       .light => lightTheme,
       .dark => darkTheme,
+      .black => blackTheme,
       .system =>
         WidgetsBinding.instance.platformDispatcher.platformBrightness == .dark
             ? darkTheme
@@ -223,7 +262,7 @@ class Theme extends _$Theme {
     return state.value ?? const ThemeModel();
   }
 
-  Future<void> setMode(ThemeMode mode) async {
+  Future<void> setMode(KoverThemeMode mode) async {
     final current = await future;
 
     state = AsyncData(current.copyWith(mode: mode));

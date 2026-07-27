@@ -84,6 +84,10 @@
     "@dark": {
         "description": "Label for the dark theme mode option"
     },
+    "black": "Black",
+    "@black": {
+      "description": "Label for the black theme option"
+    },
     "sepia": "Sepia",
     "@sepia": {
       "description": "Label for the sepia theme option"

@@ -6,6 +6,7 @@ import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/riverpod/repository/sentry_repository.dart';
 import 'package:kover/sync/background.dart';
+import 'package:kover/utils/extensions/kover_theme_mode.dart';
 import 'package:kover/utils/sentry.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/breakpoints.dart';
@@ -46,7 +47,7 @@ class App extends ConsumerWidget {
             debugShowCheckedModeBanner: false,
             theme: theme.lightTheme,
             darkTheme: theme.darkTheme,
-            themeMode: theme.mode,
+            themeMode: theme.mode.toThemeMode(),
             routerConfig: ref.watch(routerProvider),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,

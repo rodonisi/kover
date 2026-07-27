@@ -39,6 +39,7 @@ enum EpubTheme {
   light,
   sepia,
   dark,
+  black,
 }
 
 @freezed

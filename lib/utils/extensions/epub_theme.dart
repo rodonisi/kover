@@ -8,6 +8,7 @@ extension EpubThemeExtension on EpubTheme {
       .light => const ThemeModel().lightTheme,
       .sepia => const ThemeModel().sepiaTheme,
       .dark => const ThemeModel().darkTheme,
+      .black => const ThemeModel().blackTheme,
     };
   }
 }
