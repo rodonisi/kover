@@ -240,13 +240,7 @@ sealed class ThemeModel with _$ThemeModel {
     return switch (mode) {
       .light => lightTheme,
       .dark => darkTheme,
-      .black => darkTheme.copyWith(
-        colorScheme: darkTheme.colorScheme.copyWith(
-          surface: Colors.black,
-          surfaceDim: Colors.black,
-          surfaceContainer: Colors.black,
-        ),
-      ),
+      .black => blackTheme,
       .system =>
         WidgetsBinding.instance.platformDispatcher.platformBrightness == .dark
             ? darkTheme
