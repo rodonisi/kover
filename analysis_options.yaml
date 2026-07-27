@@ -25,4 +25,4 @@ analyzer:
     - lib/api/**
 
 plugins:
-  riverpod_lint: ^3.1.4-dev.1
+  riverpod_lint: ^3.1.6
