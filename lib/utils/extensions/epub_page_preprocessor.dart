@@ -138,10 +138,6 @@ class _TextIndentVisitor extends TreeVisitor {
         ..attributes['style'] =
             'display: inline-block; width: $currentTextIndent';
 
-      log.debug(
-        'Applying text-indent: $currentTextIndent to ${element.localName}',
-      );
-
       element.insertBefore(span, element.firstChild);
     }
 
