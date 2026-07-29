@@ -1,7 +1,26 @@
 import 'package:html/dom.dart';
 import 'package:kover/utils/html_constants.dart';
 
-class ElementCursor {
+abstract class ReflowEngine {
+  /// The current buffer element that is being built.
+  Element get buffer;
+
+  /// The progress of the reflow operation, as a value between 0.0 and 1.0.
+  double get progress;
+
+  /// Adds the next node from the source tree to the buffer.
+  /// Returns true when a node was added, false if there are no more nodes to add.
+  bool addNext();
+
+  /// Splits the last child of the current target element, if possible.
+  /// Returns true if a split was performed, false otherwise.
+  bool splitChild();
+
+  /// Commits the current buffer and returns a new buffer for further additions.
+  Element commitSplit();
+}
+
+class LinearReflowEngine implements ReflowEngine {
   static const Set<String> _leafTags = {'img', 'svg'};
 
   final Element _root;
@@ -11,7 +30,7 @@ class ElementCursor {
   late Element _target;
   int _consumed = 0;
 
-  ElementCursor({required Element root})
+  LinearReflowEngine({required Element root})
     : _root = root.clone(true),
       _buffer = root.clone(false) {
     _stack.addAll(_root.nodes.reversed);
@@ -19,16 +38,19 @@ class ElementCursor {
     _target = _buffer;
   }
 
+  @override
   Element get buffer => _buffer;
 
+  @override
   double get progress {
     final total = _consumed + _stack.length;
     if (total == 0) return 1.0;
     return _consumed / total;
   }
 
-  Element? addNext() {
-    if (_stack.isEmpty) return null;
+  @override
+  bool addNext() {
+    if (_stack.isEmpty) return false;
 
     final node = _stack.removeLast();
     _consumed++;
@@ -40,15 +62,16 @@ class ElementCursor {
         return addNext();
       case _CommitBacktrack(:final innerNode):
         _target.append(innerNode);
-        return _stack.length > 1 ? addNext() : _buffer;
+        return _stack.length > 1 ? addNext() : true;
       case Node _:
         _target.append(node);
-        return _buffer;
+        return true;
       default:
         throw Exception('Unexpected stack item: $node');
     }
   }
 
+  @override
   Element commitSplit() {
     if (_target.nodes.isNotEmpty) {
       _stack.add(_CommitBacktrack(_target.nodes.removeLast()));
@@ -66,6 +89,7 @@ class ElementCursor {
     return result;
   }
 
+  @override
   bool splitChild() {
     if (_target.nodes.isEmpty) return false;
 

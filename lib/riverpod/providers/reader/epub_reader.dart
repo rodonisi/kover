@@ -14,7 +14,7 @@ import 'package:kover/utils/extensions/document_fragment.dart';
 import 'package:kover/utils/extensions/string.dart';
 import 'package:kover/utils/html_constants.dart';
 import 'package:kover/utils/logging.dart';
-import 'package:kover/utils/element_cursor.dart';
+import 'package:kover/utils/reflow_engine.dart';
 import 'package:kover/utils/headless_measure_pipeline.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -54,7 +54,7 @@ class EpubReflow extends _$EpubReflow {
   bool _measuring = false;
   late EpubMeasureWidgetBuilder _measureBuilder;
   late Duration _maxChunkDuration;
-  late ElementCursor _cursor;
+  late ReflowEngine _cursor;
 
   @override
   Future<EpubReflowState> build({
@@ -107,7 +107,7 @@ class EpubReflow extends _$EpubReflow {
       await loader.load();
     }
 
-    _cursor = ElementCursor(root: pageContent.root.children.first);
+    _cursor = LinearReflowEngine(root: pageContent.root.children.first);
 
     return EpubReflowState(
       page: pageContent,
@@ -211,7 +211,7 @@ class EpubReflow extends _$EpubReflow {
     if (current == null || current.status == .done) return;
 
     final next = _cursor.addNext();
-    if (next != null) return;
+    if (next) return;
 
     final tail = DocumentFragment()..append(_cursor.buffer.clone(true));
     final newSubpages = [

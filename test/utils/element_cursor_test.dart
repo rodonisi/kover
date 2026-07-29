@@ -1,28 +1,28 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart';
-import 'package:kover/utils/element_cursor.dart';
+import 'package:kover/utils/reflow_engine.dart';
 
 void main() {
   group('ElementCursor', () {
     test('when empty nodes, next returns null', () {
       // <div></div>
       final root = Element.tag('div');
-      final cursor = ElementCursor(root: root);
+      final cursor = LinearReflowEngine(root: root);
 
       final res = cursor.addNext();
 
-      expect(res, isNull);
+      expect(res, isFalse);
     });
 
     test('when exhausted, next returns null', () {
       // <div>Hello</div>
       final root = Element.tag('div')..append(Text('Hello'));
-      final cursor = ElementCursor(root: root);
+      final cursor = LinearReflowEngine(root: root);
 
       cursor.addNext();
       final res = cursor.addNext();
 
-      expect(res, isNull);
+      expect(res, isFalse);
     });
 
     test('when commit split, then root clone up to split is returned', () {
@@ -36,7 +36,7 @@ void main() {
       final expected = Element.tag('div')
         ..append(Element.tag('p')..append(Text('Hello')));
 
-      final cursor = ElementCursor(root: root);
+      final cursor = LinearReflowEngine(root: root);
 
       cursor.addNext();
       cursor.addNext();
@@ -56,17 +56,17 @@ void main() {
       final expected = Element.tag('div')
         ..append(Element.tag('p')..append(Text('there')));
 
-      final cursor = ElementCursor(root: root);
+      final cursor = LinearReflowEngine(root: root);
 
       cursor.addNext(); // p0
       cursor.addNext(); // p1
       cursor.commitSplit(); // p0
-      final res = cursor.addNext(); // p1
+      cursor.addNext(); // p1
+      final res = cursor.buffer;
       final next = cursor.addNext(); // exhausted
 
-      expect(res, isNotNull);
-      expect(res!.outerHtml, equals(expected.outerHtml));
-      expect(next, isNull);
+      expect(res.outerHtml, equals(expected.outerHtml));
+      expect(next, isFalse);
     });
 
     test(
@@ -77,7 +77,7 @@ void main() {
         // </div>
         final root = Element.tag('div')
           ..append(Element.tag('img')..append(Text('Hello')));
-        final cursor = ElementCursor(root: root);
+        final cursor = LinearReflowEngine(root: root);
 
         cursor.addNext();
         final res = cursor.splitChild();
@@ -92,7 +92,7 @@ void main() {
       // </div>
       final root = Element.tag('div')
         ..append(Element.tag('div')..append(Text('Hello')));
-      final cursor = ElementCursor(root: root);
+      final cursor = LinearReflowEngine(root: root);
 
       cursor.addNext();
       final res = cursor.splitChild();
@@ -113,14 +113,15 @@ void main() {
         final expected = Element.tag('div')
           ..append(Element.tag('div')..append(Text('Hello')));
 
-        final cursor = ElementCursor(root: root);
+        final cursor = LinearReflowEngine(root: root);
 
         cursor.addNext();
         cursor.splitChild();
-        final res = cursor.addNext();
+        cursor.addNext();
+        final res = cursor.buffer;
 
         expect(res, isNotNull);
-        expect(res!.outerHtml, equals(expected.outerHtml));
+        expect(res.outerHtml, equals(expected.outerHtml));
       },
     );
 
@@ -137,21 +138,21 @@ void main() {
         final expectedCommit = Element.tag('div')..append(Element.tag('div'));
         final expectedNext = Element.tag('div')..append(Element.tag('p'));
 
-        final cursor = ElementCursor(root: root);
+        final cursor = LinearReflowEngine(root: root);
 
         cursor.addNext(); // div
         cursor.splitChild(); // div
         cursor.addNext(); // inner div
         cursor.addNext(); // p
         final commit = cursor.commitSplit();
-        final res = cursor.addNext();
+        cursor.addNext();
+        final res = cursor.buffer;
         final cont = cursor.addNext();
-
         expect(commit.outerHtml, equals(expectedCommit.outerHtml));
 
         expect(res, isNotNull);
-        expect(res!.outerHtml, equals(expectedNext.outerHtml));
-        expect(cont, isNull);
+        expect(res.outerHtml, equals(expectedNext.outerHtml));
+        expect(cont, isFalse);
       },
     );
 
@@ -164,16 +165,17 @@ void main() {
       final expected = Element.tag('div')
         ..append(Element.tag('p')..append(Text(r'Hello ')));
 
-      final cursor = ElementCursor(root: root);
+      final cursor = LinearReflowEngine(root: root);
 
       cursor.addNext();
       cursor.splitChild();
       cursor.addNext();
       cursor.splitChild();
-      final res = cursor.addNext();
+      cursor.addNext();
+      final res = cursor.buffer;
 
       expect(res, isNotNull);
-      expect(res!.outerHtml, equals(expected.outerHtml));
+      expect(res.outerHtml, equals(expected.outerHtml));
     });
 
     test('when splitting text node, addNext adds words', () {
@@ -187,7 +189,7 @@ void main() {
       final expectedNext = Element.tag('div')
         ..append(Element.tag('p')..append(Text('there')));
 
-      final cursor = ElementCursor(root: root);
+      final cursor = LinearReflowEngine(root: root);
 
       cursor.addNext();
       cursor.splitChild();
@@ -196,11 +198,12 @@ void main() {
       cursor.addNext();
       cursor.addNext();
       final commit = cursor.commitSplit();
-      final res = cursor.addNext();
+      cursor.addNext();
+      final res = cursor.buffer;
 
       expect(commit.outerHtml, equals(expectedCommit.outerHtml));
       expect(res, isNotNull);
-      expect(res!.outerHtml, equals(expectedNext.outerHtml));
+      expect(res.outerHtml, equals(expectedNext.outerHtml));
     });
 
     test('when committing after sentences split, no sentences are lost', () {
@@ -214,7 +217,7 @@ void main() {
       final expectedNext = Element.tag('div')
         ..append(Element.tag('p')..append(Text('There. Sentences.')));
 
-      final cursor = ElementCursor(root: root);
+      final cursor = LinearReflowEngine(root: root);
 
       cursor.addNext();
       cursor.splitChild();
@@ -223,39 +226,44 @@ void main() {
       cursor.addNext();
       cursor.addNext();
       final commit = cursor.commitSplit();
-      final res = cursor.addNext();
+      cursor.addNext();
+      final res = cursor.buffer;
 
       expect(commit.outerHtml, equals(expectedCommit.outerHtml));
       expect(res, isNotNull);
-      expect(res!.outerHtml, equals(expectedNext.outerHtml));
+      expect(res.outerHtml, equals(expectedNext.outerHtml));
     });
 
-    test('when last sentece does not end with period, then it is not lost', () {
-      // <div>
-      //  <p>Hello. There. Sentences</p>
-      // </div>
-      final root = Element.tag('div')
-        ..append(Element.tag('p')..append(Text('Hello. There. Sentences')));
-      final expectedCommit = Element.tag('div')
-        ..append(Element.tag('p')..append(Text(r'Hello. ')));
-      final expectedNext = Element.tag('div')
-        ..append(Element.tag('p')..append(Text('There. Sentences')));
+    test(
+      'when last sentece does not end with period, then it is not lost',
+      () {
+        // <div>
+        //  <p>Hello. There. Sentences</p>
+        // </div>
+        final root = Element.tag('div')
+          ..append(Element.tag('p')..append(Text('Hello. There. Sentences')));
+        final expectedCommit = Element.tag('div')
+          ..append(Element.tag('p')..append(Text(r'Hello. ')));
+        final expectedNext = Element.tag('div')
+          ..append(Element.tag('p')..append(Text('There. Sentences')));
 
-      final cursor = ElementCursor(root: root);
+        final cursor = LinearReflowEngine(root: root);
 
-      cursor.addNext();
-      cursor.splitChild();
-      cursor.addNext();
-      cursor.splitChild();
-      cursor.addNext();
-      cursor.addNext();
-      final commit = cursor.commitSplit();
-      final res = cursor.addNext();
+        cursor.addNext();
+        cursor.splitChild();
+        cursor.addNext();
+        cursor.splitChild();
+        cursor.addNext();
+        cursor.addNext();
+        final commit = cursor.commitSplit();
+        cursor.addNext();
+        final res = cursor.buffer;
 
-      expect(commit.outerHtml, equals(expectedCommit.outerHtml));
-      expect(res, isNotNull);
-      expect(res!.outerHtml, equals(expectedNext.outerHtml));
-    });
+        expect(commit.outerHtml, equals(expectedCommit.outerHtml));
+        expect(res, isNotNull);
+        expect(res.outerHtml, equals(expectedNext.outerHtml));
+      },
+    );
 
     test('when sentences end in quote, then they split correctly', () {
       // <div>
@@ -272,7 +280,7 @@ void main() {
       final expectedNext = Element.tag('div')
         ..append(Element.tag('p')..append(Text('"There."')));
 
-      final cursor = ElementCursor(root: root);
+      final cursor = LinearReflowEngine(root: root);
 
       cursor.addNext();
       cursor.splitChild();
@@ -281,11 +289,12 @@ void main() {
       cursor.addNext();
       cursor.addNext();
       final commit = cursor.commitSplit();
-      final res = cursor.addNext();
+      cursor.addNext();
+      final res = cursor.buffer;
 
       expect(commit.outerHtml, equals(expectedCommit.outerHtml));
       expect(res, isNotNull);
-      expect(res!.outerHtml, equals(expectedNext.outerHtml));
+      expect(res.outerHtml, equals(expectedNext.outerHtml));
     });
 
     test('complete split run', () {
@@ -294,7 +303,9 @@ void main() {
       //   <p>est aliqua eu minim</p>
       // </div>
       final root = Element.tag('div')
-        ..append(Element.tag('p')..append(Text('sit aliqua labore incididunt')))
+        ..append(
+          Element.tag('p')..append(Text('sit aliqua labore incididunt')),
+        )
         ..append(Element.tag('p')..append(Text('est aliqua eu minim')));
       final expectedFirstSplit = Element.tag(
         'div',
@@ -303,7 +314,7 @@ void main() {
         ..append(Element.tag('p')..append(Text('labore incididunt')))
         ..append(Element.tag('p')..append(Text('est aliqua eu minim')));
 
-      final cursor = ElementCursor(root: root);
+      final cursor = LinearReflowEngine(root: root);
 
       cursor.addNext(); // div
       cursor.splitChild(); // div
@@ -314,13 +325,14 @@ void main() {
       cursor.addNext(); // text 'sit aliqua labore'
       final firstCommit = cursor.commitSplit(); // text 'sit aliqua'
       cursor.addNext(); // text 'labore incididunt'
-      final second = cursor.addNext(); // p1
+      cursor.addNext(); // p1
+      final second = cursor.buffer; // p1
       final next = cursor.addNext(); // exhausted
 
       expect(firstCommit.outerHtml, equals(expectedFirstSplit.outerHtml));
       expect(second, isNotNull);
-      expect(second!.outerHtml, equals(expectedSecondSplit.outerHtml));
-      expect(next, isNull);
+      expect(second.outerHtml, equals(expectedSecondSplit.outerHtml));
+      expect(next, isFalse);
     });
   });
 
