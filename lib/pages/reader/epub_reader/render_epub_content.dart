@@ -6,13 +6,13 @@ import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
-class RenderContent extends ConsumerWidget {
+class RenderEpubContent extends ConsumerWidget {
   final int seriesId;
   final String html;
   final Map<String, Map<String, String>> styles;
   final CachedImageFactory? imageCache;
 
-  const RenderContent({
+  const RenderEpubContent({
     super.key,
     required this.seriesId,
     required this.html,

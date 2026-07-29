@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/epub_reader/epub_measure_root.dart';
 import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
-import 'package:kover/pages/reader/epub_reader/render_content.dart';
+import 'package:kover/pages/reader/epub_reader/render_epub_content.dart';
 import 'package:kover/pages/reader/epub_reader/theme_override.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
@@ -361,7 +361,7 @@ class _Page extends HookConsumerWidget {
                                         selection.plainText.isNotEmpty,
                                   );
                                 },
-                                child: RenderContent(
+                                child: RenderEpubContent(
                                   seriesId: seriesId,
                                   html: reflowState.subpages[index].outerHtml,
                                   styles: reflowState.page.styles,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
-import 'package:kover/pages/reader/epub_reader/render_content.dart';
+import 'package:kover/pages/reader/epub_reader/render_epub_content.dart';
 import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/utils/headless_measure_pipeline.dart';
 
@@ -35,7 +35,7 @@ class EpubMeasureRoot extends StatelessWidget {
       mainAxisSize: .min,
       children: [
         MeasureTarget(
-          child: RenderContent(
+          child: RenderEpubContent(
             seriesId: seriesId,
             styles: styles,
             html: html,
