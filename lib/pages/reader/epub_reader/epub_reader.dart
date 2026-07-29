@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:html/dom.dart';
+import 'package:kover/pages/reader/epub_reader/epub_measure_root.dart';
 import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
+import 'package:kover/pages/reader/epub_reader/render_content.dart';
+import 'package:kover/pages/reader/epub_reader/theme_override.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
-import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
-import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/cached_image_factory.dart';
-import 'package:kover/utils/extensions/epub_theme.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
@@ -73,7 +71,7 @@ class EpubReader extends HookConsumerWidget {
           seriesId: seriesId,
           chapterId: chapterId,
         ),
-        child: _ThemeOverride(
+        child: ThemeOverride(
           seriesId: seriesId,
           child: Async(
             asyncValue: ref.watch(nav),
@@ -212,13 +210,12 @@ class _Page extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final imageCache = useMemoized(() => CachedImageFactory(), []);
 
-    final reflow = ref.watch(
-      epubReflowProvider(
-        seriesId: seriesId,
-        chapterId: chapterId,
-        page: page,
-      ),
+    final provider = epubReflowProvider(
+      seriesId: seriesId,
+      chapterId: chapterId,
+      page: page,
     );
+    final reflow = ref.watch(provider);
     final nav = epubNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
@@ -241,301 +238,139 @@ class _Page extends HookConsumerWidget {
       ),
     );
 
-    return Stack(
-      children: [
-        if (reflow.value?.status != .done)
-          Positioned.fill(
-            child: _MeasureContent(
-              seriesId: seriesId,
-              chapterId: chapterId,
-              page: page,
-              imageCache: imageCache,
-            ),
-          ),
-        Positioned.fill(
-          child: Async3(
-            asyncValue1: ref.watch(nav),
-            asyncValue2: reflow,
-            asyncValue3: navigationGestures,
-            data: (navState, reflowState, navigationGestures) {
-              // include buffer spinner page if currently measuring.
-              final count = reflowState.status == .measuring
-                  ? reflowState.subpages.length + 1
-                  : reflowState.subpages.length;
-
-              return HookConsumer(
-                builder: (context, ref, child) {
-                  final controller = usePageController(
-                    initialPage: navState.subpage,
-                  );
-                  final scrollPhysics = navigationGestures && !reduceAnimations
-                      ? const AlwaysScrollableScrollPhysics(
-                          parent: ClampingScrollPhysics(),
-                        )
-                      : const NeverScrollableScrollPhysics();
-
-                  ref.listen(nav, (
-                    previous,
-                    next,
-                  ) async {
-                    next.whenData((next) async {
-                      final previousSubpage = previous?.value?.subpage;
-                      final nextSubpage = next.subpage;
-
-                      if (next.page != page ||
-                          next.fromObserver ||
-                          nextSubpage == previousSubpage) {
-                        return;
-                      }
-
-                      if (controller.hasClients &&
-                          controller.page?.round() != nextSubpage) {
-                        final isSequential =
-                            previousSubpage != null &&
-                            (nextSubpage - previousSubpage).abs() == 1;
-
-                        isSequential && !reduceAnimations
-                            ? controller.animateToPage(
-                                nextSubpage,
-                                duration: LayoutConstants.pageSlideDuration,
-                                curve: Curves.easeInOut,
-                              )
-                            : controller.jumpToPage(nextSubpage);
-                      }
-                    });
-                  });
-
-                  return Stack(
-                    children: [
-                      Offstage(
-                        offstage: navState.page > page,
-                        child: NotificationListener<ScrollNotification>(
-                          onNotification: navigationGestures
-                              ? handleScrollNotification
-                              : null,
-                          child: PageView.builder(
-                            controller: controller,
-                            allowImplicitScrolling: true,
-                            pageSnapping: true,
-                            reverse: reverse,
-                            itemCount: count,
-                            physics: scrollPhysics,
-                            onPageChanged: (newPage) {
-                              if (navState.page != page) return;
-
-                              ref
-                                  .read(nav.notifier)
-                                  .jumpToSubpage(newPage, fromObserver: true);
-                            },
-                            itemBuilder: (context, index) {
-                              if (index >= reflowState.subpages.length) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-
-                              return SingleChildScrollView(
-                                child: _RenderContent(
-                                  seriesId: seriesId,
-                                  html: reflowState.subpages[index].outerHtml,
-                                  styles: reflowState.page.styles,
-                                  imageCache: imageCache,
-                                  onSelectionChanged: onSelectionChanged,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                      if (navState.page > page)
-                        const Positioned.fill(
-                          child: Center(child: CircularProgressIndicator()),
-                        ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _MeasureContent extends HookConsumerWidget {
-  final int seriesId;
-  final int chapterId;
-  final int page;
-  final CachedImageFactory? imageCache;
-  const _MeasureContent({
-    required this.seriesId,
-    required this.chapterId,
-    required this.page,
-    this.imageCache,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final key = useMemoized(() => GlobalKey(), []);
-    final provider = epubReflowProvider(
-      seriesId: seriesId,
-      chapterId: chapterId,
-      page: page,
-    );
-    final reflow = ref.watch(provider);
-
     return LayoutBuilder(
       builder: (context, constraints) {
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          await WidgetsBinding.instance.endOfFrame;
-          final renderBox =
-              key.currentContext?.findRenderObject() as RenderBox?;
-          if (renderBox == null) {
-            return;
-          }
-
-          if (!renderBox.hasSize ||
-              renderBox.size.height <= constraints.maxHeight) {
-            await ref.read(provider.notifier).addElement();
-          } else {
-            await ref.read(provider.notifier).overflow();
-          }
-        });
-
-        return Async(
-          asyncValue: reflow,
-          data: (data) => Offstage(
-            child: Column(
-              mainAxisSize: .min,
-              children: [
-                _RenderContent(
-                  key: key,
-                  seriesId: seriesId,
-                  styles: data.page.styles,
-                  html: (data.buffer ?? DocumentFragment()).outerHtml,
-                  imageCache: imageCache,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _RenderContent extends ConsumerWidget {
-  final int seriesId;
-  final String html;
-  final Map<String, Map<String, String>> styles;
-  final CachedImageFactory? imageCache;
-  final void Function(bool)? onSelectionChanged;
-
-  const _RenderContent({
-    super.key,
-    required this.seriesId,
-    required this.html,
-    required this.styles,
-    this.imageCache,
-    this.onSelectionChanged,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final epubSettings = ref.watch(
-      epubReaderSettingsProvider(seriesId: seriesId),
-    );
-    final css = ref.watch(
-      customCssProvider(seriesId: seriesId),
-    );
-
-    return Async2(
-      asyncValue1: epubSettings,
-      asyncValue2: css,
-      data: (epubSettings, css) {
-        final mergedStyles = Map<String, Map<String, String>>.from(styles);
-        for (final entry in css.entries) {
-          mergedStyles[entry.key] = {
-            ...mergedStyles[entry.key] ?? {},
-            ...entry.value,
-          };
+        if (reflow.value?.status != .done) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) return;
+            ref
+                .read(provider.notifier)
+                .startReflow(
+                  viewport: constraints.biggest,
+                  devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+                  measureBuilder: (html, styles) => EpubMeasureRoot(
+                    container: ProviderScope.containerOf(context),
+                    mediaQueryData: MediaQuery.of(context),
+                    themeData: Theme.of(context),
+                    textDirection: Directionality.of(context),
+                    locale: Localizations.localeOf(context),
+                    seriesId: seriesId,
+                    html: html,
+                    styles: styles,
+                    imageCache: imageCache,
+                  ),
+                );
+          });
         }
 
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(epubSettings.marginSize),
-            child: SelectionArea(
-              onSelectionChanged: (selection) {
-                onSelectionChanged?.call(
-                  selection != null && selection.plainText.isNotEmpty,
+        return Async3(
+          asyncValue1: ref.watch(nav),
+          asyncValue2: reflow,
+          asyncValue3: navigationGestures,
+          data: (navState, reflowState, navigationGestures) {
+            // include buffer spinner page if currently measuring.
+            final count = reflowState.status == .measuring
+                ? reflowState.subpages.length + 1
+                : reflowState.subpages.length;
+
+            return HookConsumer(
+              builder: (context, ref, child) {
+                final controller = usePageController(
+                  initialPage: navState.subpage,
+                );
+                final scrollPhysics = navigationGestures && !reduceAnimations
+                    ? const AlwaysScrollableScrollPhysics(
+                        parent: ClampingScrollPhysics(),
+                      )
+                    : const NeverScrollableScrollPhysics();
+
+                ref.listen(nav, (
+                  previous,
+                  next,
+                ) async {
+                  next.whenData((next) async {
+                    final previousSubpage = previous?.value?.subpage;
+                    final nextSubpage = next.subpage;
+
+                    if (next.page != page ||
+                        next.fromObserver ||
+                        nextSubpage == previousSubpage) {
+                      return;
+                    }
+
+                    if (controller.hasClients &&
+                        controller.page?.round() != nextSubpage) {
+                      final isSequential =
+                          previousSubpage != null &&
+                          (nextSubpage - previousSubpage).abs() == 1;
+
+                      isSequential && !reduceAnimations
+                          ? controller.animateToPage(
+                              nextSubpage,
+                              duration: LayoutConstants.pageSlideDuration,
+                              curve: Curves.easeInOut,
+                            )
+                          : controller.jumpToPage(nextSubpage);
+                    }
+                  });
+                });
+
+                return Stack(
+                  children: [
+                    Offstage(
+                      offstage: navState.page > page,
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: navigationGestures
+                            ? handleScrollNotification
+                            : null,
+                        child: PageView.builder(
+                          controller: controller,
+                          allowImplicitScrolling: true,
+                          pageSnapping: true,
+                          reverse: reverse,
+                          itemCount: count,
+                          physics: scrollPhysics,
+                          onPageChanged: (newPage) {
+                            if (navState.page != page) return;
+
+                            ref
+                                .read(nav.notifier)
+                                .jumpToSubpage(
+                                  newPage,
+                                  fromObserver: true,
+                                );
+                          },
+                          itemBuilder: (context, index) {
+                            if (index >= reflowState.subpages.length) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+
+                            return SingleChildScrollView(
+                              child: RenderContent(
+                                seriesId: seriesId,
+                                html: reflowState.subpages[index].outerHtml,
+                                styles: reflowState.page.styles,
+                                imageCache: imageCache,
+                                onSelectionChanged: onSelectionChanged,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    if (navState.page > page)
+                      const Positioned.fill(
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                  ],
                 );
               },
-              child: HtmlWidget(
-                html,
-                buildAsync: false,
-                enableCaching: true,
-                factoryBuilder: () => imageCache ?? CachedImageFactory(),
-                customStylesBuilder: (element) {
-                  final s = Map<String, String>.from(
-                    mergedStyles[element.localName] ?? {},
-                  );
-
-                  for (final className in element.classes) {
-                    s.addAll(mergedStyles['.$className'] ?? {});
-                  }
-
-                  if (element.localName == 'p' &&
-                      element.nextElementSibling != null) {
-                    final paragraphMargin =
-                        'margin-bottom: ${epubSettings.paragraphSpacing}px';
-
-                    element.attributes['style'] =
-                        '${element.attributes['style']}; $paragraphMargin';
-                  }
-
-                  return s;
-                },
-                textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: epubSettings.fontSize,
-                  height: epubSettings.lineHeight,
-                  wordSpacing: epubSettings.wordSpacing,
-                  letterSpacing: epubSettings.letterSpacing,
-                ),
-                rebuildTriggers: [
-                  mergedStyles.toString(),
-                  epubSettings,
-                ],
-              ),
-            ),
-          ),
+            );
+          },
         );
       },
-    );
-  }
-}
-
-class _ThemeOverride extends ConsumerWidget {
-  final int seriesId;
-  final Widget child;
-
-  const _ThemeOverride({
-    required this.seriesId,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = ref.watch(
-      epubReaderSettingsProvider(seriesId: seriesId).select(
-        (value) => value.whenOrNull(data: (data) => data.theme),
-      ),
-    );
-    return Theme(
-      data: theme?.data ?? Theme.of(context),
-      child: Scaffold(
-        body: child,
-      ),
     );
   }
 }

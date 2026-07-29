@@ -18,6 +18,9 @@ class ElementCursor {
     _target = _buffer;
   }
 
+  /// The current buffer element holding all nodes added so far.
+  Element get buffer => _buffer;
+
   Element? addNext() {
     if (_stack.isEmpty) return null;
 
