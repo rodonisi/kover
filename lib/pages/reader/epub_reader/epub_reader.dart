@@ -348,12 +348,19 @@ class _Page extends HookConsumerWidget {
                             }
 
                             return SingleChildScrollView(
-                              child: RenderContent(
-                                seriesId: seriesId,
-                                html: reflowState.subpages[index].outerHtml,
-                                styles: reflowState.page.styles,
-                                imageCache: imageCache,
-                                onSelectionChanged: onSelectionChanged,
+                              child: SelectionArea(
+                                onSelectionChanged: (selection) {
+                                  onSelectionChanged?.call(
+                                    selection != null &&
+                                        selection.plainText.isNotEmpty,
+                                  );
+                                },
+                                child: RenderContent(
+                                  seriesId: seriesId,
+                                  html: reflowState.subpages[index].outerHtml,
+                                  styles: reflowState.page.styles,
+                                  imageCache: imageCache,
+                                ),
                               ),
                             );
                           },

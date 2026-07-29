@@ -11,20 +11,13 @@ class RenderContent extends ConsumerWidget {
   final String html;
   final Map<String, Map<String, String>> styles;
   final CachedImageFactory? imageCache;
-  final void Function(bool)? onSelectionChanged;
 
-  /// Whether to wrap the content in [SelectionArea]. Disabled for the
-  /// headless measure pass: selection has no layout impact but requires an
-  /// [Overlay] ancestor, which the measure tree does not have.
-  final bool selectable;
-
-  const RenderContent({super.key, 
+  const RenderContent({
+    super.key,
     required this.seriesId,
     required this.html,
     required this.styles,
     this.imageCache,
-    this.onSelectionChanged,
-    this.selectable = true,
   });
 
   @override
@@ -48,56 +41,45 @@ class RenderContent extends ConsumerWidget {
           };
         }
 
-        final content = HtmlWidget(
-          html,
-          buildAsync: false,
-          enableCaching: true,
-          factoryBuilder: () => imageCache ?? CachedImageFactory(),
-          customStylesBuilder: (element) {
-            final s = Map<String, String>.from(
-              mergedStyles[element.localName] ?? {},
-            );
-
-            for (final className in element.classes) {
-              s.addAll(mergedStyles['.$className'] ?? {});
-            }
-
-            if (element.localName == 'p' &&
-                element.nextElementSibling != null) {
-              final paragraphMargin =
-                  'margin-bottom: ${epubSettings.paragraphSpacing}px';
-
-              element.attributes['style'] =
-                  '${element.attributes['style']}; $paragraphMargin';
-            }
-
-            return s;
-          },
-          textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontSize: epubSettings.fontSize,
-            height: epubSettings.lineHeight,
-            wordSpacing: epubSettings.wordSpacing,
-            letterSpacing: epubSettings.letterSpacing,
-          ),
-          rebuildTriggers: [
-            mergedStyles.toString(),
-            epubSettings,
-          ],
-        );
-
         return SafeArea(
           child: Padding(
             padding: EdgeInsets.all(epubSettings.marginSize),
-            child: selectable
-                ? SelectionArea(
-                    onSelectionChanged: (selection) {
-                      onSelectionChanged?.call(
-                        selection != null && selection.plainText.isNotEmpty,
-                      );
-                    },
-                    child: content,
-                  )
-                : content,
+            child: HtmlWidget(
+              html,
+              buildAsync: false,
+              enableCaching: true,
+              factoryBuilder: () => imageCache ?? CachedImageFactory(),
+              customStylesBuilder: (element) {
+                final s = Map<String, String>.from(
+                  mergedStyles[element.localName] ?? {},
+                );
+
+                for (final className in element.classes) {
+                  s.addAll(mergedStyles['.$className'] ?? {});
+                }
+
+                if (element.localName == 'p' &&
+                    element.nextElementSibling != null) {
+                  final paragraphMargin =
+                      'margin-bottom: ${epubSettings.paragraphSpacing}px';
+
+                  element.attributes['style'] =
+                      '${element.attributes['style']}; $paragraphMargin';
+                }
+
+                return s;
+              },
+              textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: epubSettings.fontSize,
+                height: epubSettings.lineHeight,
+                wordSpacing: epubSettings.wordSpacing,
+                letterSpacing: epubSettings.letterSpacing,
+              ),
+              rebuildTriggers: [
+                mergedStyles.toString(),
+                epubSettings,
+              ],
+            ),
           ),
         );
       },

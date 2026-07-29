@@ -40,7 +40,6 @@ class EpubMeasureRoot extends StatelessWidget {
             styles: styles,
             html: html,
             imageCache: imageCache,
-            selectable: false,
           ),
         ),
       ],
