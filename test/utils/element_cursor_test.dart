@@ -163,7 +163,7 @@ void main() {
       final root = Element.tag('div')
         ..append(Element.tag('p')..append(Text('Hello there')));
       final expected = Element.tag('div')
-        ..append(Element.tag('p')..append(Text(r'Hello ')));
+        ..append(Element.tag('p')..append(Text('Hello')));
 
       final cursor = LinearReflowEngine(root: root);
 
@@ -185,9 +185,9 @@ void main() {
       final root = Element.tag('div')
         ..append(Element.tag('p')..append(Text('Hello there')));
       final expectedCommit = Element.tag('div')
-        ..append(Element.tag('p')..append(Text(r'Hello ')));
+        ..append(Element.tag('p')..append(Text('Hello')));
       final expectedNext = Element.tag('div')
-        ..append(Element.tag('p')..append(Text('there')));
+        ..append(Element.tag('p')..append(Text(' there')));
 
       final cursor = LinearReflowEngine(root: root);
 
@@ -276,9 +276,9 @@ void main() {
             Element.tag('p')..append(Text('"Hello." "There."')),
           );
       final expectedCommit = Element.tag('div')
-        ..append(Element.tag('p')..append(Text(r'"Hello." ')));
+        ..append(Element.tag('p')..append(Text('"Hello."')));
       final expectedNext = Element.tag('div')
-        ..append(Element.tag('p')..append(Text('"There."')));
+        ..append(Element.tag('p')..append(Text(' "There."')));
 
       final cursor = LinearReflowEngine(root: root);
 
@@ -309,9 +309,9 @@ void main() {
         ..append(Element.tag('p')..append(Text('est aliqua eu minim')));
       final expectedFirstSplit = Element.tag(
         'div',
-      )..append(Element.tag('p')..append(Text(r'sit aliqua ')));
+      )..append(Element.tag('p')..append(Text('sit aliqua')));
       final expectedSecondSplit = Element.tag('div')
-        ..append(Element.tag('p')..append(Text('labore incididunt')))
+        ..append(Element.tag('p')..append(Text(' labore incididunt')))
         ..append(Element.tag('p')..append(Text('est aliqua eu minim')));
 
       final cursor = LinearReflowEngine(root: root);

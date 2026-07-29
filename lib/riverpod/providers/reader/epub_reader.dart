@@ -107,7 +107,7 @@ class EpubReflow extends _$EpubReflow {
       await loader.load();
     }
 
-    _cursor = LinearReflowEngine(root: pageContent.root.children.first);
+    _cursor = BinaryReflowEngine(root: pageContent.root.children.first);
 
     return EpubReflowState(
       page: pageContent,
@@ -131,6 +131,7 @@ class EpubReflow extends _$EpubReflow {
     _maxChunkDuration = Duration(milliseconds: (1000 / refreshRate).round());
 
     if (_measuring || !state.hasValue) return;
+    final s = Stopwatch()..start();
     _measuring = true;
     _pipeline.attach(size: viewport, devicePixelRatio: devicePixelRatio);
 
@@ -192,6 +193,15 @@ class EpubReflow extends _$EpubReflow {
           }
         }
       }
+
+      log.info(
+        'reflow completed',
+        attributes: {
+          'page': page,
+          'subpages': (await future).subpages.length,
+          'duration_ms': s.elapsedMilliseconds,
+        },
+      );
     } on MeasureTreeBuildException catch (e, stacktrace) {
       log.error(
         'measure widget failed to build',
