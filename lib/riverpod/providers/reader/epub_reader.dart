@@ -21,10 +21,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'epub_reader.freezed.dart';
 part 'epub_reader.g.dart';
 
-/// Builds the measure widget laid out by [HeadlessMeasurePipeline]. Must
-/// reproduce the display pass' context (providers, media query, theme,
-/// directionality) so measurements match what is rendered. The measured
-/// content must be wrapped in a [MeasureTarget].
 typedef EpubMeasureWidgetBuilder =
     Widget Function(String html, Map<String, Map<String, String>> styles);
 
@@ -49,19 +45,15 @@ sealed class EpubReflowState with _$EpubReflowState {
 @riverpod
 class EpubReflow extends _$EpubReflow {
   static final _maxChunkDuration = 15.ms;
-
   final HeadlessMeasurePipeline _pipeline = HeadlessMeasurePipeline();
-  bool _measuring = false;
-
-  /// The most recent measure widget builder. Refreshed on every
-  /// [startReflow] call, even while a loop is running, so the loop always
-  /// uses the freshest context (media query, theme, locale).
-  EpubMeasureWidgetBuilder? _latestBuilder;
 
   // The scroll-id to seek to on resume. Set once from the DB on the very
   // first build and cleared as soon as we reach a Display state, so that
   // subsequent page-turn rebuilds never re-trigger a seek.
   String? _resumeScrollId;
+  bool _measuring = false;
+  EpubMeasureWidgetBuilder? _measureBuilder;
+
   late ElementCursor _cursor;
 
   @override
@@ -142,29 +134,26 @@ class EpubReflow extends _$EpubReflow {
   }) async {
     if (viewport.isEmpty) return;
 
-    _latestBuilder = measureBuilder;
-
-    // Reconfigure even when a loop is already running so it picks up the
-    // new viewport size on its next iteration.
-    _pipeline.attach(size: viewport, devicePixelRatio: devicePixelRatio);
+    _measureBuilder = measureBuilder;
 
     if (_measuring) return;
     _measuring = true;
+    _pipeline.attach(size: viewport, devicePixelRatio: devicePixelRatio);
 
     try {
       // Ensure the measure widget has its data on first build; the
       // synchronous loop would otherwise outrun the async resolution.
       await ref.read(epubReaderSettingsProvider(seriesId: seriesId).future);
+
       if (!ref.mounted) return;
       await ref.read(customCssProvider(seriesId: seriesId).future);
-      if (!ref.mounted) return;
 
       final stopwatch = Stopwatch()..start();
 
       while ((await future).status != .done) {
-        if (!ref.mounted) return;
         final maxHeight = _pipeline.viewportSize?.height ?? viewport.height;
         final bufferHtml = _cursor.buffer.outerHtml;
+
         if (!_pipeline.isAttached) {
           log.warning(
             'pipeline detached during reflow',
@@ -176,8 +165,11 @@ class EpubReflow extends _$EpubReflow {
           return;
         }
 
+        if (!ref.mounted) return;
+
+        final current = await future;
         final height = _pipeline
-            .measure(_latestBuilder!(bufferHtml, state.value!.page.styles))
+            .measure(_measureBuilder!(bufferHtml, current.page.styles))
             .height;
 
         // A zero-height measure for non-empty content means the measure
@@ -193,16 +185,13 @@ class EpubReflow extends _$EpubReflow {
         if (height <= maxHeight) {
           await _addElement();
         } else {
-          await _overflow();
+          await _handleOverflow();
         }
-
-        if (!ref.mounted) return;
 
         // Yield to the event loop periodically to keep the UI responsive.
         if (stopwatch.elapsed >= _maxChunkDuration) {
           stopwatch.reset();
           await SchedulerBinding.instance.endOfFrame;
-          if (!ref.mounted) return;
         }
       }
     } on MeasureTreeBuildException catch (e, stacktrace) {
@@ -219,8 +208,6 @@ class EpubReflow extends _$EpubReflow {
     }
   }
 
-  /// Grows the cursor buffer by the next node. When the cursor is exhausted,
-  /// commits the remaining buffer as the final subpage and finishes.
   Future<void> _addElement() async {
     final current = state.value;
     if (current == null || current.status == .done) return;
@@ -253,9 +240,7 @@ class EpubReflow extends _$EpubReflow {
     state = AsyncData(newState);
   }
 
-  /// Handles content that no longer fits the viewport: splits the current
-  /// node finer, or commits the current buffer as a new subpage.
-  Future<void> _overflow() async {
+  Future<void> _handleOverflow() async {
     final current = state.value;
     if (current == null || current.status == .done) return;
 

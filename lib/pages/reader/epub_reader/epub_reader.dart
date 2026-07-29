@@ -216,10 +216,12 @@ class _Page extends HookConsumerWidget {
       page: page,
     );
     final reflow = ref.watch(provider);
-    final nav = epubNavigationProvider(
+    final navigationProvider = epubNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
     );
+    final navigation = ref.watch(navigationProvider);
+
     final navigationGestures = ref.watch(
       commonReaderSettingsProvider(
         seriesId: seriesId,
@@ -264,10 +266,10 @@ class _Page extends HookConsumerWidget {
         }
 
         return Async3(
-          asyncValue1: ref.watch(nav),
+          asyncValue1: navigation,
           asyncValue2: reflow,
           asyncValue3: navigationGestures,
-          data: (navState, reflowState, navigationGestures) {
+          data: (navigationState, reflowState, navigationGestures) {
             // include buffer spinner page if currently measuring.
             final count = reflowState.status == .measuring
                 ? reflowState.subpages.length + 1
@@ -276,7 +278,7 @@ class _Page extends HookConsumerWidget {
             return HookConsumer(
               builder: (context, ref, child) {
                 final controller = usePageController(
-                  initialPage: navState.subpage,
+                  initialPage: navigationState.subpage,
                 );
                 final scrollPhysics = navigationGestures && !reduceAnimations
                     ? const AlwaysScrollableScrollPhysics(
@@ -284,41 +286,45 @@ class _Page extends HookConsumerWidget {
                       )
                     : const NeverScrollableScrollPhysics();
 
-                ref.listen(nav, (
-                  previous,
-                  next,
-                ) async {
-                  next.whenData((next) async {
-                    final previousSubpage = previous?.value?.subpage;
-                    final nextSubpage = next.subpage;
+                ref.listen(
+                  navigationProvider.select(
+                    (state) => state.whenData(
+                      (data) {
+                        if (data.page != page || data.fromObserver) return null;
 
-                    if (next.page != page ||
-                        next.fromObserver ||
-                        nextSubpage == previousSubpage) {
-                      return;
-                    }
+                        return data.subpage;
+                      },
+                    ),
+                  ),
+                  (previous, next) async {
+                    next.whenData((next) async {
+                      final previousSubpage = previous?.value;
+                      if (next == null || next == previousSubpage) {
+                        return;
+                      }
 
-                    if (controller.hasClients &&
-                        controller.page?.round() != nextSubpage) {
-                      final isSequential =
-                          previousSubpage != null &&
-                          (nextSubpage - previousSubpage).abs() == 1;
+                      if (controller.hasClients &&
+                          controller.page?.round() != next) {
+                        final isSequential =
+                            previousSubpage != null &&
+                            (next - previousSubpage).abs() == 1;
 
-                      isSequential && !reduceAnimations
-                          ? controller.animateToPage(
-                              nextSubpage,
-                              duration: LayoutConstants.pageSlideDuration,
-                              curve: Curves.easeInOut,
-                            )
-                          : controller.jumpToPage(nextSubpage);
-                    }
-                  });
-                });
+                        isSequential && !reduceAnimations
+                            ? controller.animateToPage(
+                                next,
+                                duration: LayoutConstants.pageSlideDuration,
+                                curve: Curves.easeInOut,
+                              )
+                            : controller.jumpToPage(next);
+                      }
+                    });
+                  },
+                );
 
                 return Stack(
                   children: [
                     Offstage(
-                      offstage: navState.page > page,
+                      offstage: navigationState.page > page,
                       child: NotificationListener<ScrollNotification>(
                         onNotification: navigationGestures
                             ? handleScrollNotification
@@ -331,10 +337,10 @@ class _Page extends HookConsumerWidget {
                           itemCount: count,
                           physics: scrollPhysics,
                           onPageChanged: (newPage) {
-                            if (navState.page != page) return;
+                            if (navigationState.page != page) return;
 
                             ref
-                                .read(nav.notifier)
+                                .read(navigationProvider.notifier)
                                 .jumpToSubpage(
                                   newPage,
                                   fromObserver: true,
@@ -367,7 +373,7 @@ class _Page extends HookConsumerWidget {
                         ),
                       ),
                     ),
-                    if (navState.page > page)
+                    if (navigationState.page > page)
                       const Positioned.fill(
                         child: Center(child: CircularProgressIndicator()),
                       ),
