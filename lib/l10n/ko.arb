@@ -733,5 +733,9 @@
     "paragraphSpacing": "문단 간격",
     "@paragraphSpacing": {
         "description": "Label for the paragraph spacing setting"
+    },
+    "black": "블랙",
+    "@black": {
+        "description": "Label for the black theme option"
     }
 }
