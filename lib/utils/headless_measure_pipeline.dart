@@ -121,7 +121,6 @@ class HeadlessMeasurePipeline {
     return found;
   }
 
-  /// Detaches and disposes all owned resources.
   void dispose() {
     if (_rootElement != null) {
       // Unmount the element tree by attaching an empty adapter.

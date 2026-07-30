@@ -19,13 +19,8 @@ class ElementCursor {
     _target = _buffer;
   }
 
-  /// The current buffer element holding all nodes added so far.
   Element get buffer => _buffer;
 
-  /// Fraction of consumed nodes in `[0, 1]`. Splits push extra nodes onto
-  /// the stack, which grows the denominator, so the raw value can dip
-  /// mid-reflow; callers should clamp monotonically if a non-decreasing
-  /// value is required.
   double get progress {
     final total = _consumed + _stack.length;
     if (total == 0) return 1.0;

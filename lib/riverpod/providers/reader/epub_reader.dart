@@ -45,7 +45,7 @@ sealed class EpubReflowState with _$EpubReflowState {
 
 @riverpod
 class EpubReflow extends _$EpubReflow {
-  final HeadlessMeasurePipeline _pipeline = HeadlessMeasurePipeline();
+  final _pipeline = HeadlessMeasurePipeline();
 
   // The scroll-id to seek to on resume. Set once from the DB on the very
   // first build and cleared as soon as we reach a Display state, so that
@@ -74,14 +74,6 @@ class EpubReflow extends _$EpubReflow {
         // skip if the settings change doesn't affect the reflow
         if (partialPrev == next) return;
 
-        ref.invalidateSelf(asReload: true);
-      });
-    });
-
-    // force rerender on css change (e.g. theme toggled)
-    ref.listen(customCssProvider(seriesId: seriesId), (prev, next) {
-      next.whenData((next) {
-        if (prev?.value == next) return;
         ref.invalidateSelf(asReload: true);
       });
     });
@@ -260,8 +252,7 @@ class EpubReflow extends _$EpubReflow {
       ...current.subpages,
       if (fragment.hasVisibleNodes) fragment,
     ];
-    // Monotonic clamp: word/sentence splits push extra nodes onto the
-    // cursor stack, which would otherwise make the raw progress dip.
+
     final cursorProgress = _cursor.progress;
 
     var newState = current.copyWith(
