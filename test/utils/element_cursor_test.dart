@@ -323,4 +323,61 @@ void main() {
       expect(next, isNull);
     });
   });
+
+  group('progress', () {
+    test('is 1 when there are no nodes', () {
+      // <div></div>
+      final cursor = ElementCursor(root: Element.tag('div'));
+
+      expect(cursor.progress, 1.0);
+    });
+
+    test('starts at 0', () {
+      // <div><p></p></div>
+      final root = Element.tag('div')..append(Element.tag('p'));
+      final cursor = ElementCursor(root: root);
+
+      expect(cursor.progress, 0.0);
+    });
+
+    test('increases as nodes are consumed', () {
+      // <div><p></p><p></p></div>
+      final root = Element.tag('div')
+        ..append(Element.tag('p'))
+        ..append(Element.tag('p'));
+      final cursor = ElementCursor(root: root);
+
+      cursor.addNext();
+
+      expect(cursor.progress, 0.5);
+    });
+
+    test('is 1 when exhausted', () {
+      // <div>Hello</div>
+      final root = Element.tag('div')..append(Text('Hello'));
+      final cursor = ElementCursor(root: root);
+
+      cursor.addNext();
+
+      expect(cursor.progress, 1.0);
+    });
+
+    test('stays within [0, 1] during word splits and ends at 1', () {
+      // <div><p>one two three four</p></div>
+      final root = Element.tag('div')
+        ..append(Element.tag('p')..append(Text('one two three four')));
+      final cursor = ElementCursor(root: root);
+
+      cursor.addNext(); // p
+      cursor.splitChild(); // descend into p
+      cursor.addNext(); // text node
+      final split = cursor.splitChild(); // words pushed onto the stack
+
+      expect(split, isTrue);
+      expect(cursor.progress, inInclusiveRange(0.0, 1.0));
+
+      while (cursor.addNext() != null) {}
+      expect(cursor.progress, 1.0);
+    });
+  });
 }

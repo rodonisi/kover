@@ -81,6 +81,14 @@ class EpubReader extends HookConsumerWidget {
                   initialPage: navState.page,
                 );
 
+                final reflowProgress = ref.watch(
+                  epubReflowProvider(
+                    seriesId: seriesId,
+                    chapterId: chapterId,
+                    page: navState.page,
+                  ).select((state) => state.value?.progress ?? 0.0),
+                );
+
                 ref.listen(nav, (
                   previous,
                   next,
@@ -141,8 +149,12 @@ class EpubReader extends HookConsumerWidget {
                       ),
                     ),
                     if (!navState.ready)
-                      const Positioned.fill(
-                        child: Center(child: CircularProgressIndicator()),
+                      Positioned.fill(
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            value: reflowProgress,
+                          ),
+                        ),
                       ),
                   ],
                 );
@@ -261,6 +273,7 @@ class _Page extends HookConsumerWidget {
                     styles: styles,
                     imageCache: imageCache,
                   ),
+                  refreshRate: View.of(context).display.refreshRate,
                 );
           });
         }
@@ -321,63 +334,54 @@ class _Page extends HookConsumerWidget {
                   },
                 );
 
-                return Stack(
-                  children: [
-                    Offstage(
-                      offstage: navigationState.page > page,
-                      child: NotificationListener<ScrollNotification>(
-                        onNotification: navigationGestures
-                            ? handleScrollNotification
-                            : null,
-                        child: PageView.builder(
-                          controller: controller,
-                          allowImplicitScrolling: true,
-                          pageSnapping: true,
-                          reverse: reverse,
-                          itemCount: count,
-                          physics: scrollPhysics,
-                          onPageChanged: (newPage) {
-                            if (navigationState.page != page) return;
+                return NotificationListener<ScrollNotification>(
+                  onNotification: navigationGestures
+                      ? handleScrollNotification
+                      : null,
+                  child: PageView.builder(
+                    controller: controller,
+                    allowImplicitScrolling: true,
+                    pageSnapping: true,
+                    reverse: reverse,
+                    itemCount: count,
+                    physics: scrollPhysics,
+                    onPageChanged: (newPage) {
+                      if (navigationState.page != page) return;
 
-                            ref
-                                .read(navigationProvider.notifier)
-                                .jumpToSubpage(
-                                  newPage,
-                                  fromObserver: true,
-                                );
-                          },
-                          itemBuilder: (context, index) {
-                            if (index >= reflowState.subpages.length) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
+                      ref
+                          .read(navigationProvider.notifier)
+                          .jumpToSubpage(
+                            newPage,
+                            fromObserver: true,
+                          );
+                    },
+                    itemBuilder: (context, index) {
+                      if (index >= reflowState.subpages.length) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: reflowState.progress,
+                          ),
+                        );
+                      }
 
-                            return SingleChildScrollView(
-                              child: SelectionArea(
-                                onSelectionChanged: (selection) {
-                                  onSelectionChanged?.call(
-                                    selection != null &&
-                                        selection.plainText.isNotEmpty,
-                                  );
-                                },
-                                child: RenderEpubContent(
-                                  seriesId: seriesId,
-                                  html: reflowState.subpages[index].outerHtml,
-                                  styles: reflowState.page.styles,
-                                  imageCache: imageCache,
-                                ),
-                              ),
+                      return SingleChildScrollView(
+                        child: SelectionArea(
+                          onSelectionChanged: (selection) {
+                            onSelectionChanged?.call(
+                              selection != null &&
+                                  selection.plainText.isNotEmpty,
                             );
                           },
+                          child: RenderEpubContent(
+                            seriesId: seriesId,
+                            html: reflowState.subpages[index].outerHtml,
+                            styles: reflowState.page.styles,
+                            imageCache: imageCache,
+                          ),
                         ),
-                      ),
-                    ),
-                    if (navigationState.page > page)
-                      const Positioned.fill(
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                  ],
+                      );
+                    },
+                  ),
                 );
               },
             );

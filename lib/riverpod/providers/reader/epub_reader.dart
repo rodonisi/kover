@@ -39,12 +39,12 @@ sealed class EpubReflowState with _$EpubReflowState {
     @Default(null) String? scrollId,
     @Default(null) int? resumeSubpage,
     @Default([]) List<DocumentFragment> subpages,
+    @Default(0.0) double progress,
   }) = _EpubReflowState;
 }
 
 @riverpod
 class EpubReflow extends _$EpubReflow {
-  static final _maxChunkDuration = 15.ms;
   final HeadlessMeasurePipeline _pipeline = HeadlessMeasurePipeline();
 
   // The scroll-id to seek to on resume. Set once from the DB on the very
@@ -52,8 +52,8 @@ class EpubReflow extends _$EpubReflow {
   // subsequent page-turn rebuilds never re-trigger a seek.
   String? _resumeScrollId;
   bool _measuring = false;
-  EpubMeasureWidgetBuilder? _measureBuilder;
-
+  late EpubMeasureWidgetBuilder _measureBuilder;
+  late Duration _maxChunkDuration;
   late ElementCursor _cursor;
 
   @override
@@ -131,12 +131,14 @@ class EpubReflow extends _$EpubReflow {
     required Size viewport,
     required double devicePixelRatio,
     required EpubMeasureWidgetBuilder measureBuilder,
+    required double refreshRate,
   }) async {
     if (viewport.isEmpty) return;
 
     _measureBuilder = measureBuilder;
+    _maxChunkDuration = Duration(milliseconds: (1000 / refreshRate).round());
 
-    if (_measuring) return;
+    if (_measuring || !state.hasValue) return;
     _measuring = true;
     _pipeline.attach(size: viewport, devicePixelRatio: devicePixelRatio);
 
@@ -150,7 +152,7 @@ class EpubReflow extends _$EpubReflow {
 
       final stopwatch = Stopwatch()..start();
 
-      while ((await future).status != .done) {
+      while (state.value?.status != .done) {
         final maxHeight = _pipeline.viewportSize?.height ?? viewport.height;
         final bufferHtml = _cursor.buffer.outerHtml;
 
@@ -169,7 +171,7 @@ class EpubReflow extends _$EpubReflow {
 
         final current = await future;
         final height = _pipeline
-            .measure(_measureBuilder!(bufferHtml, current.page.styles))
+            .measure(_measureBuilder(bufferHtml, current.page.styles))
             .height;
 
         // A zero-height measure for non-empty content means the measure
@@ -191,7 +193,11 @@ class EpubReflow extends _$EpubReflow {
         // Yield to the event loop periodically to keep the UI responsive.
         if (stopwatch.elapsed >= _maxChunkDuration) {
           stopwatch.reset();
-          await SchedulerBinding.instance.endOfFrame;
+          if (SchedulerBinding.instance.hasScheduledFrame) {
+            await SchedulerBinding.instance.endOfFrame;
+          } else {
+            await Future<void>.delayed(0.ms);
+          }
         }
       }
     } on MeasureTreeBuildException catch (e, stacktrace) {
@@ -229,6 +235,7 @@ class EpubReflow extends _$EpubReflow {
     var newState = current.copyWith(
       subpages: newSubpages,
       status: .done,
+      progress: 1.0,
     );
 
     newState = await _checkResumePoint(
@@ -253,8 +260,15 @@ class EpubReflow extends _$EpubReflow {
       ...current.subpages,
       if (fragment.hasVisibleNodes) fragment,
     ];
+    // Monotonic clamp: word/sentence splits push extra nodes onto the
+    // cursor stack, which would otherwise make the raw progress dip.
+    final cursorProgress = _cursor.progress;
+
     var newState = current.copyWith(
       subpages: newSubpages,
+      progress: cursorProgress > current.progress
+          ? cursorProgress
+          : current.progress,
     );
 
     newState = await _checkResumePoint(

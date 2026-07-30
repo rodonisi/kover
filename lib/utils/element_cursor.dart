@@ -9,6 +9,7 @@ class ElementCursor {
   final List<Object> _stack = [];
   final List<Element> _targetStack = [];
   late Element _target;
+  int _consumed = 0;
 
   ElementCursor({required Element root})
     : _root = root.clone(true),
@@ -21,10 +22,21 @@ class ElementCursor {
   /// The current buffer element holding all nodes added so far.
   Element get buffer => _buffer;
 
+  /// Fraction of consumed nodes in `[0, 1]`. Splits push extra nodes onto
+  /// the stack, which grows the denominator, so the raw value can dip
+  /// mid-reflow; callers should clamp monotonically if a non-decreasing
+  /// value is required.
+  double get progress {
+    final total = _consumed + _stack.length;
+    if (total == 0) return 1.0;
+    return _consumed / total;
+  }
+
   Element? addNext() {
     if (_stack.isEmpty) return null;
 
     final node = _stack.removeLast();
+    _consumed++;
 
     switch (node) {
       case _PopMarker():
