@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/epub_reader/epub_measure_root.dart';
 import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
 import 'package:kover/pages/reader/epub_reader/render_epub_content.dart';
-import 'package:kover/pages/reader/epub_reader/theme_override.dart';
+import 'package:kover/pages/reader/epub_reader/epub_theme_override.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
@@ -71,7 +71,7 @@ class EpubReader extends HookConsumerWidget {
           seriesId: seriesId,
           chapterId: chapterId,
         ),
-        child: ThemeOverride(
+        child: EpubThemeOverride(
           seriesId: seriesId,
           child: Async(
             asyncValue: ref.watch(nav),

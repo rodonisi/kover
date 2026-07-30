@@ -3,11 +3,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/extensions/epub_theme.dart';
 
-class ThemeOverride extends ConsumerWidget {
+class EpubThemeOverride extends ConsumerWidget {
   final int seriesId;
   final Widget child;
 
-  const ThemeOverride({
+  const EpubThemeOverride({
     super.key,
     required this.seriesId,
     required this.child,
