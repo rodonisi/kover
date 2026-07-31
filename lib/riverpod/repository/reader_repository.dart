@@ -5,7 +5,9 @@ import 'package:kover/models/progress_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/reader_sync_operations.dart';
+import 'package:kover/utils/extensions/iterable.dart';
 import 'package:kover/utils/logging.dart';
+import 'package:pool/pool.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'reader_repository.g.dart';
@@ -161,15 +163,16 @@ class ReaderRepository {
   /// Refresh complete progress for all series that have newer reading progress
   /// than local
   Future<void> refreshOutdatedProgress() async {
-    final batch = <ReadingProgressCompanion>[];
     final outdated = await _db.readerDao.getOutdatedChapterIds();
+    final pool = Pool(8);
 
-    for (final c in outdated) {
-      final progress = await _readerClient.getProgress(c);
-      batch.add(progress);
+    for (final chunk in outdated.chunked(48)) {
+      final batch = await Future.wait(
+        chunk.map((b) => pool.withResource(() => _readerClient.getProgress(b))),
+      );
+
+      await _db.readerDao.mergeProgressBatch(batch);
     }
-
-    await _db.readerDao.mergeProgressBatch(batch);
   }
 
   /// Synchronize all dirty progress entries by sending them to the backend,
