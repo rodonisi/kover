@@ -244,7 +244,11 @@ class _Page extends HookConsumerWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (reflow.value?.status != .done) {
+        final isVisiblePage = navigation.value?.page == page;
+        final visibleReady = navigation.value?.ready ?? false;
+        final shouldStart = isVisiblePage || visibleReady;
+
+        if (shouldStart && reflow.value?.status != .done) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!context.mounted) return;
             ref
