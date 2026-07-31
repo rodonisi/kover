@@ -139,26 +139,29 @@ void main() {
       expect(engine.addNext(), isFalse);
     });
 
-    test('when unsplittable unit overflows an empty page, commits it as-is', () {
-      final root = Element.tag('div')
-        ..append(Element.tag('img'))
-        ..append(Element.tag('p')..append(Text('after')));
-      final engine = BinaryReflowEngine(root: root);
+    test(
+      'when unsplittable unit overflows an empty page, commits it as-is',
+      () {
+        final root = Element.tag('div')
+          ..append(Element.tag('img'))
+          ..append(Element.tag('p')..append(Text('after')));
+        final engine = BinaryReflowEngine(root: root);
 
-      engine.addNext(); // p1: img probed
-      // The img overflows and cannot split; the page is empty, so it is
-      // accepted for the current page. Still false: the driver commits.
-      expect(engine.overflow(), isFalse);
+        engine.addNext(); // p1: img probed
+        // The img overflows and cannot split; the page is empty, so it is
+        // accepted for the current page. Still false: the driver commits.
+        expect(engine.overflow(), isFalse);
 
-      // The img stays on the committed page and is consumed.
-      final page = engine.commitSplit();
-      expect(page.outerHtml, equals('<div><img></div>'));
+        // The img stays on the committed page and is consumed.
+        final page = engine.commitSplit();
+        expect(page.outerHtml, equals('<div><img></div>'));
 
-      // The remaining content reflows and the engine terminates.
-      expect(engine.addNext(), isTrue);
-      expect(engine.buffer.text, equals('after'));
-      expect(engine.addNext(), isFalse);
-    });
+        // The remaining content reflows and the engine terminates.
+        expect(engine.addNext(), isTrue);
+        expect(engine.buffer.text, equals('after'));
+        expect(engine.addNext(), isFalse);
+      },
+    );
 
     test('driver run: oversized unsplittable first unit terminates', () {
       // The first word fits no page; without the empty-page accept the
