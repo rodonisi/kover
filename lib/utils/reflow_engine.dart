@@ -130,15 +130,6 @@ class BinaryReflowEngine implements ReflowEngine {
     return true;
   }
 
-  /// Marks an unsplittable overflower as accepted when the current page
-  /// holds nothing else: it gets the page to itself (visually overflowing)
-  /// and [commitSplit] consumes it, guaranteeing progress.
-  void _acceptUnsplittable(_Frame frame) {
-    if (frame.lo == 0 && _frames.every((f) => (f.splitAt ?? 0) == 0)) {
-      frame.lo = frame.p;
-    }
-  }
-
   @override
   Element commitSplit() {
     final frame = _frames.last;
@@ -152,8 +143,7 @@ class BinaryReflowEngine implements ReflowEngine {
 
     // Ancestors committed everything before the straddler unit. The unit
     // itself stays (hollow) so the child shell swap keeps its slot.
-    for (var i = 0; i < _frames.length - 1; i++) {
-      final f = _frames[i];
+    for (final f in _frames.take(_frames.length - 1)) {
       f.pending.removeRange(0, f.splitAt!);
       f.splitAt = 0;
     }
@@ -176,6 +166,15 @@ class BinaryReflowEngine implements ReflowEngine {
     }
 
     return result;
+  }
+
+  /// Marks an unsplittable overflower as accepted when the current page
+  /// holds nothing else: it gets the page to itself (visually overflowing)
+  /// and [commitSplit] consumes it, guaranteeing progress.
+  void _acceptUnsplittable(_Frame frame) {
+    if (frame.lo == 0 && _frames.every((f) => (f.splitAt ?? 0) == 0)) {
+      frame.lo = frame.p;
+    }
   }
 
   /// Splits [text] into words. The whitespace leads the following word, so a

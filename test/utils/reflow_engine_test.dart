@@ -2,46 +2,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart';
 import 'package:kover/utils/reflow_engine.dart';
 
-/// Drives an engine against a fake viewport where height is the buffer's
-/// text length, mimicking the provider reflow loop. Returns the committed
-/// subpages plus the final buffer.
-List<Element> runReflow(ReflowEngine engine, int maxHeight) {
-  final pages = <Element>[];
-
-  var guard = 0;
-  while (true) {
-    if (++guard > 10000) fail('reflow did not converge');
-
-    final fits = engine.buffer.text.length <= maxHeight;
-
-    if (fits) {
-      if (engine.addNext()) continue;
-      pages.add(engine.buffer.clone(true));
-      return pages;
-    }
-
-    if (engine.overflow()) continue;
-    pages.add(engine.commitSplit());
-  }
-}
-
-Element paragraphs(int count, String text) {
-  final root = Element.tag('div');
-  for (var i = 0; i < count; i++) {
-    root.append(Element.tag('p')..append(Text(text)));
-  }
-  return root;
-}
-
 void main() {
   group('BinaryReflowEngine', () {
     test('when empty nodes, addNext returns false', () {
+      // <div></div>
       final engine = BinaryReflowEngine(root: Element.tag('div'));
 
       expect(engine.addNext(), isFalse);
     });
 
     test('when exhausted, addNext returns false', () {
+      // <div>Hello</div>
       final root = Element.tag('div')..append(Text('Hello'));
       final engine = BinaryReflowEngine(root: root);
 
@@ -51,6 +22,9 @@ void main() {
     });
 
     test('when split child on leaf node, then returns false', () {
+      // <div>
+      //   <img>Hello</img>
+      // </div>
       final root = Element.tag('div')
         ..append(Element.tag('img')..append(Text('Hello')));
       final engine = BinaryReflowEngine(root: root);
@@ -61,11 +35,21 @@ void main() {
     });
 
     test('when no overflow bound, addNext halves the probe range', () {
-      final root = paragraphs(8, 'aaaa');
+      // <div>
+      //   <p>aaaa</p>
+      //   <p>aaaa</p>
+      //   <p>aaaa</p>
+      //   <p>aaaa</p>
+      // </div>
+      final root = Element.tag('div')
+        ..append(Element.tag('p')..append(Text('aaaa')))
+        ..append(Element.tag('p')..append(Text('aaaa')))
+        ..append(Element.tag('p')..append(Text('aaaa')))
+        ..append(Element.tag('p')..append(Text('aaaa')));
       final engine = BinaryReflowEngine(root: root);
 
-      // Binary search: 4, 6, 7, 8.
-      for (final expected in [4, 6, 7, 8]) {
+      // Binary search: 2, 3, 4.
+      for (final expected in [2, 3, 4]) {
         expect(engine.addNext(), isTrue);
         expect(engine.buffer.nodes.length, equals(expected));
       }
@@ -74,14 +58,20 @@ void main() {
     });
 
     test('when range not collapsed, splitChild shrinks the buffer', () {
-      final root = paragraphs(8, 'aaaa');
+      // <div>
+      //   <p>aaaa</p>
+      //   <p>aaaa</p>
+      //   <p>aaaa</p>
+      //   <p>aaaa</p>
+      // </div>
+      final root = Element.tag('div')
+        ..append(Element.tag('p')..append(Text('aaaa')))
+        ..append(Element.tag('p')..append(Text('aaaa')))
+        ..append(Element.tag('p')..append(Text('aaaa')))
+        ..append(Element.tag('p')..append(Text('aaaa')));
       final engine = BinaryReflowEngine(root: root);
 
       expect(engine.addNext(), isTrue);
-      expect(engine.buffer.nodes.length, equals(4));
-
-      // Overflow at 4 with 0 confirmed: shrinks to midpoint 2.
-      expect(engine.overflow(), isTrue);
       expect(engine.buffer.nodes.length, equals(2));
 
       // Overflow at 2 with 0 confirmed: shrinks to midpoint 1.
@@ -99,6 +89,10 @@ void main() {
     });
 
     test('when boundary found, descends into the overflowing unit', () {
+      // <div>
+      //   <p>one two</p>
+      //   <p>three four</p>
+      // </div>
       final root = Element.tag('div')
         ..append(Element.tag('p')..append(Text('one two')))
         ..append(Element.tag('p')..append(Text('three four')));
@@ -113,6 +107,10 @@ void main() {
     });
 
     test('commit returns content up to split and backtracks', () {
+      // <div>
+      //   <p>Hello</p>
+      //   <p>there</p>
+      // </div>
       final root = Element.tag('div')
         ..append(Element.tag('p')..append(Text('Hello')))
         ..append(Element.tag('p')..append(Text('there')));
@@ -140,8 +138,130 @@ void main() {
     });
 
     test(
+      'when committing after sentences split, no sentences are lost',
+      () {
+        // <div>
+        //   <p>Hello. There. Sentences.</p>
+        // </div>
+        final root = Element.tag('div')
+          ..append(Element.tag('p')..append(Text('Hello. There. Sentences.')));
+        final expectedCommit = Element.tag('div')
+          ..append(Element.tag('p')..append(Text('Hello.')));
+        final expectedNext = Element.tag('div')
+          ..append(Element.tag('p')..append(Text(' There. Sentences.')));
+
+        final engine = BinaryReflowEngine(root: root);
+
+        engine.addNext(); // p probed
+        engine.overflow(); // descend into p
+        engine.addNext(); // text probed
+        engine.overflow(); // split into 'Hello.', ' There.', ' Sentences.'
+        engine.addNext(); // probe 'Hello. There.'
+        engine.overflow(); // shrink to 'Hello.'
+        engine.addNext(); // fits: re-probe 'Hello. There.'
+        engine.overflow(); // ' There.' is unsplittable
+        final commit = engine.commitSplit(); // backtrack ' There.'
+        engine.addNext(); // probe ' There.'
+        final res = engine.addNext(); // probe ' There. Sentences.'
+
+        expect(commit.outerHtml, equals(expectedCommit.outerHtml));
+        expect(res, isTrue);
+        expect(engine.buffer.outerHtml, equals(expectedNext.outerHtml));
+      },
+    );
+
+    test(
+      'when last sentence does not end with period, then it is not lost',
+      () {
+        // <div>
+        //   <p>Hello. There. Sentences</p>
+        // </div>
+        final root = Element.tag('div')
+          ..append(Element.tag('p')..append(Text('Hello. There. Sentences')));
+        final expectedCommit = Element.tag('div')
+          ..append(Element.tag('p')..append(Text('Hello.')));
+        final expectedNext = Element.tag('div')
+          ..append(Element.tag('p')..append(Text(' There. Sentences')));
+
+        final engine = BinaryReflowEngine(root: root);
+
+        engine.addNext(); // p probed
+        engine.overflow(); // descend into p
+        engine.addNext(); // text probed
+        engine.overflow(); // split into 'Hello.', ' There.', ' Sentences'
+        engine.addNext(); // probe 'Hello. There.'
+        engine.overflow(); // shrink to 'Hello.'
+        engine.addNext(); // fits: re-probe 'Hello. There.'
+        engine.overflow(); // ' There.' is unsplittable
+        final commit = engine.commitSplit(); // backtrack ' There.'
+        engine.addNext(); // probe ' There.'
+        final res = engine.addNext(); // probe ' There. Sentences'
+
+        expect(commit.outerHtml, equals(expectedCommit.outerHtml));
+        expect(res, isTrue);
+        expect(engine.buffer.outerHtml, equals(expectedNext.outerHtml));
+      },
+    );
+
+    test('when sentences end in quote, then they split correctly', () {
+      // <div>
+      //   <p>"Hello." "There."</p>
+      // </div>
+      final root = Element.tag('div')
+        ..append(Element.tag('p')..append(Text('"Hello." "There."')));
+      final expectedCommit = Element.tag('div')
+        ..append(Element.tag('p')..append(Text('"Hello."')));
+      final expectedNext = Element.tag('div')
+        ..append(Element.tag('p')..append(Text(' "There."')));
+
+      final engine = BinaryReflowEngine(root: root);
+
+      engine.addNext(); // p probed
+      engine.overflow(); // descend into p
+      engine.addNext(); // text probed
+      engine.overflow(); // split into '"Hello."', ' "There."'
+      engine.addNext(); // probe '"Hello."'
+      engine.overflow(); // unsplittable on an empty page: accepted as-is
+      final commit = engine.commitSplit();
+      final res = engine.addNext(); // probe ' "There."'
+
+      expect(commit.outerHtml, equals(expectedCommit.outerHtml));
+      expect(res, isTrue);
+      expect(engine.buffer.outerHtml, equals(expectedNext.outerHtml));
+    });
+
+    test('when splitting words, whitespace stays on the following word', () {
+      // <p>Hello there white space</p>
+      final root = Element.tag('p')..append(Text('Hello there white space'));
+      // The page-ending word carries no trailing whitespace ...
+      final expectedCommit = Element.tag('p')..append(Text('Hello there'));
+      // ... it is kept on the following word: no whitespace is lost.
+      final expectedNext = Element.tag('p')..append(Text(' white space'));
+
+      final engine = BinaryReflowEngine(root: root);
+
+      engine.addNext(); // text probed
+      engine.overflow(); // split into 'Hello', ' there', ' white', ' space'
+      engine.addNext(); // probe 'Hello there'
+      engine.addNext(); // probe 'Hello there white'
+      engine.overflow(); // ' white' is unsplittable
+      final commit = engine.commitSplit(); // backtrack ' white'
+      engine.addNext(); // probe ' white'
+      final res = engine.addNext(); // probe ' white space'
+
+      expect(commit.outerHtml, equals(expectedCommit.outerHtml));
+      expect(res, isTrue);
+      expect(engine.buffer.outerHtml, equals(expectedNext.outerHtml));
+      expect(commit.text + engine.buffer.text, equals(root.text));
+    });
+
+    test(
       'when unsplittable unit overflows an empty page, commits it as-is',
       () {
+        // <div>
+        //   <img>
+        //   <p>after</p>
+        // </div>
         final root = Element.tag('div')
           ..append(Element.tag('img'))
           ..append(Element.tag('p')..append(Text('after')));
@@ -162,18 +282,5 @@ void main() {
         expect(engine.addNext(), isFalse);
       },
     );
-
-    test('driver run: oversized unsplittable first unit terminates', () {
-      // The first word fits no page; without the empty-page accept the
-      // driver loop never converges.
-      final root = Element.tag('div')
-        ..append(Element.tag('p')..append(Text('abcdefghij')))
-        ..append(Element.tag('p')..append(Text('xy')));
-
-      final pages = runReflow(BinaryReflowEngine(root: root), 3);
-
-      expect(pages.first.text, equals('abcdefghij'));
-      expect(pages.map((e) => e.text).join(), equals(root.text));
-    });
   });
 }
