@@ -29,10 +29,10 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   SeriesDao(super.attachedDatabase);
 
   /// Watch series [seriesId]
-  Stream<SeriesData> watchSeries(int seriesId) {
+  Stream<SeriesData?> watchSeries(int seriesId) {
     return managers.series
         .filter((s) => s.id(seriesId))
-        .watchSingle(distinct: true);
+        .watchSingleOrNull(distinct: true);
   }
 
   /// Search series by [query].

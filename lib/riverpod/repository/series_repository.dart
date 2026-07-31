@@ -10,6 +10,7 @@ import 'package:kover/sync/series_sync_operations.dart';
 import 'package:kover/sync/volume_sync_operations.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:rxdart/rxdart.dart';
 
 part 'series_repository.g.dart';
 
@@ -55,6 +56,7 @@ class SeriesRepository {
   Stream<SeriesModel> watchSeries(int seriesId) {
     return _db.seriesDao
         .watchSeries(seriesId)
+        .whereNotNull()
         .map(SeriesModel.fromDatabaseModel);
   }
 
