@@ -141,6 +141,12 @@ class BinaryReflowEngine implements ReflowEngine {
     }
     frame.pending.removeRange(0, frame.lo);
 
+    // Drop whitespace at the start of the next page.
+    if (frame.pending.isNotEmpty && frame.pending.first is Text) {
+      final first = frame.pending.first as Text;
+      first.data = first.data.trimLeft();
+    }
+
     // Ancestors committed everything before the straddler unit. The unit
     // itself stays (hollow) so the child shell swap keeps its slot.
     for (final f in _frames.take(_frames.length - 1)) {
