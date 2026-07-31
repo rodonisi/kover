@@ -733,5 +733,9 @@
     "paragraphSpacing": "Absatzabstand",
     "@paragraphSpacing": {
         "description": "Label for the paragraph spacing setting"
+    },
+    "black": "Schwarz",
+    "@black": {
+        "description": "Label for the black theme option"
     }
 }
