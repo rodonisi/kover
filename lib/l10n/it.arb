@@ -638,5 +638,9 @@
     "paragraphSpacing": "Spaziatura paragrafi",
     "@paragraphSpacing": {
         "description": "Label for the paragraph spacing setting"
+    },
+    "black": "Nero",
+    "@black": {
+        "description": "Label for the black theme option"
     }
 }
