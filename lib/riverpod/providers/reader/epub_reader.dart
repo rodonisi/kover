@@ -191,6 +191,7 @@ class EpubReflow extends _$EpubReflow {
             await Future<void>.delayed(0.ms);
           }
         }
+        if (!ref.mounted) return;
       }
 
       log.info(

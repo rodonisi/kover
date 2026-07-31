@@ -16,143 +16,14 @@ abstract class ReflowEngine {
   Element commitSplit();
 }
 
-const Set<String> _leafTags = {'img', 'svg'};
-
-final _sentencesReg = RegExp(r'.*?[.!?]+(?:\s+|$)|.+?$');
-final _wordsReg = RegExp(r'(?=\s)');
-
-/// Splits [text] into words. The whitespace leads the following word, so a
-/// page-ending word is measured without its trailing whitespace while no
-/// whitespace is lost. Returns null when the text is a single word.
-List<String>? _wordSegments(String text) {
-  final words = text.split(_wordsReg).where((word) => word.isNotEmpty).toList();
-
-  return words.length > 1 ? words : null;
-}
-
-/// Splits [text] into sentences, or into words when it is a single sentence.
-/// Returns null when the text cannot be split further.
-List<String>? _textSegments(String text) {
-  // Split by sentences, keeping the delimiters and trailing whitespaces.
-  final sentences = _sentencesReg
-      .allMatches(text)
-      .map((match) => match.group(0)!)
-      .toList();
-
-  if (sentences.length > 1) return sentences;
-
-  return _wordSegments(text);
-}
-
-class LinearReflowEngine implements ReflowEngine {
-  final Element _root;
-  final Element _buffer;
-  final List<Object> _stack = [];
-  final List<Element> _targetStack = [];
-  late Element _target;
-
-  LinearReflowEngine({required Element root})
-    : _root = root.clone(true),
-      _buffer = root.clone(false) {
-    _stack.addAll(_root.nodes.reversed);
-    _targetStack.add(_buffer);
-    _target = _buffer;
-  }
-
-  @override
-  Element get buffer => _buffer;
-
-  @override
-  bool addNext() {
-    if (_stack.isEmpty) return false;
-
-    final node = _stack.removeLast();
-
-    switch (node) {
-      case _PopMarker():
-        _targetStack.removeLast();
-        _target = _targetStack.last;
-        return addNext();
-      case _CommitBacktrack(:final innerNode):
-        _target.append(innerNode);
-        return _stack.length > 1 ? addNext() : true;
-      case Node _:
-        _target.append(node);
-        return true;
-      default:
-        throw Exception('Unexpected stack item: $node');
-    }
-  }
-
-  @override
-  Element commitSplit() {
-    if (_target.nodes.isNotEmpty) {
-      _stack.add(_CommitBacktrack(_target.nodes.removeLast()));
-    }
-
-    final result = _buffer.clone(true);
-
-    // Reconstruct a clear tree up to the current target
-    _targetStack.fold(null, (Element? parent, current) {
-      current.nodes.clear();
-      if (parent != null) parent.append(current);
-      return current;
-    });
-
-    return result;
-  }
-
-  @override
-  bool overflow() {
-    if (_target.nodes.isEmpty) return false;
-
-    final child = _target.nodes.last;
-
-    if (child is Text) {
-      return _splitTextNode(child);
-    }
-
-    if (child is! Element ||
-        _leafTags.contains(child.localName) ||
-        child.nodes.isEmpty ||
-        child.attributes.containsKey(HtmlConstants.textIndentSpanAttribute)) {
-      return false;
-    }
-
-    final newTarget = child.clone(false);
-    _target.nodes.last.replaceWith(newTarget);
-
-    // Push a marker so we know when this element's children are done
-    _stack.add(_PopMarker());
-    _stack.addAll(child.nodes.reversed);
-
-    _target = newTarget;
-    _targetStack.add(newTarget);
-
-    return true;
-  }
-
-  bool _splitTextNode(Text child) {
-    final segments = _textSegments(child.text);
-
-    // A single word that still doesn't fit can't be split further.
-    if (segments == null) return false;
-
-    child.remove();
-
-    for (final segment in segments.reversed) {
-      _stack.add(Text(segment));
-    }
-
-    return true;
-  }
-}
-
 /// Binary search based reflow engine. Each tree level is probed by binary search
 /// on the number of child units that fit. When the boundary unit is found,
 /// the engine descends one level and binary searches within it, until the
 /// unit is unsplittable (same end condition as [LinearReflowEngine]).
 class BinaryReflowEngine implements ReflowEngine {
+  static const Set<String> _leafTags = {'img', 'svg'};
+  static final _wordsReg = RegExp(r'(?=\s)');
+
   final Element _root;
   final Element _buffer;
   final List<_Frame> _frames = [];
@@ -227,7 +98,10 @@ class BinaryReflowEngine implements ReflowEngine {
 
     if (unit is Text) {
       final segments = _textSegments(unit.text);
-      if (segments == null) return false;
+      if (segments == null) {
+        _acceptUnsplittable(frame);
+        return false;
+      }
 
       frame.pending
         ..removeAt(frame.lo)
@@ -242,6 +116,7 @@ class BinaryReflowEngine implements ReflowEngine {
         _leafTags.contains(unit.localName) ||
         unit.nodes.isEmpty ||
         unit.attributes.containsKey(HtmlConstants.textIndentSpanAttribute)) {
+      _acceptUnsplittable(frame);
       return false;
     }
 
@@ -255,12 +130,22 @@ class BinaryReflowEngine implements ReflowEngine {
     return true;
   }
 
+  /// Marks an unsplittable overflower as accepted when the current page
+  /// holds nothing else: it gets the page to itself (visually overflowing)
+  /// and [commitSplit] consumes it, guaranteeing progress.
+  void _acceptUnsplittable(_Frame frame) {
+    if (frame.lo == 0 && _frames.every((f) => (f.splitAt ?? 0) == 0)) {
+      frame.lo = frame.p;
+    }
+  }
+
   @override
   Element commitSplit() {
     final frame = _frames.last;
 
-    // Backtrack the overflower so it resumes on the next page.
-    if (frame.target.nodes.isNotEmpty) {
+    // Backtrack the overflower so it resumes on the next page. An accepted
+    // unsplittable overflower (p == lo) stays on the committed page.
+    if (frame.p > frame.lo && frame.target.nodes.isNotEmpty) {
       frame.target.nodes.removeLast();
     }
     frame.pending.removeRange(0, frame.lo);
@@ -293,6 +178,18 @@ class BinaryReflowEngine implements ReflowEngine {
     return result;
   }
 
+  /// Splits [text] into words. The whitespace leads the following word, so a
+  /// page-ending word is measured without its trailing whitespace while no
+  /// whitespace is lost. Returns null when the text is a single word.
+  List<String>? _textSegments(String text) {
+    final words = text
+        .split(_wordsReg)
+        .where((word) => word.isNotEmpty)
+        .toList();
+
+    return words.length > 1 ? words : null;
+  }
+
   /// Mirrors the first [_Frame.p] units of [frame] into its target.
   void _rebuild(_Frame frame) {
     frame.target.nodes
@@ -322,14 +219,4 @@ class _Frame {
 
   /// Index of the straddler unit a child frame descended into, if any.
   int? splitAt;
-}
-
-/// Simple marker indicating we need to pop the target stack
-class _PopMarker {}
-
-/// Simple wrapper for a node was popped from the target following a split.
-/// A node can only be popped on commit once to avoid endless loops.
-class _CommitBacktrack {
-  final Node innerNode;
-  _CommitBacktrack(this.innerNode);
 }

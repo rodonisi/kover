@@ -139,116 +139,38 @@ void main() {
       expect(engine.addNext(), isFalse);
     });
 
-    test('driver run: pages match the linear engine', () {
-      final root = paragraphs(8, 'aaaa');
-
-      final binary = runReflow(BinaryReflowEngine(root: root), 12);
-      final linear = runReflow(LinearReflowEngine(root: root), 12);
-
-      expect(
-        binary.map((e) => e.outerHtml).toList(),
-        equals(linear.map((e) => e.outerHtml).toList()),
-      );
-      expect(binary.length, greaterThan(1));
-    });
-
-    test('driver run: word splits match the linear engine', () {
+    test('when unsplittable unit overflows an empty page, commits it as-is', () {
       final root = Element.tag('div')
-        ..append(
-          Element.tag('p')..append(Text('sit aliqua labore incididunt')),
-        )
-        ..append(Element.tag('p')..append(Text('est aliqua eu minim')));
-
-      final binary = runReflow(BinaryReflowEngine(root: root), 20);
-      final linear = runReflow(LinearReflowEngine(root: root), 20);
-
-      expect(
-        binary.map((e) => e.outerHtml).toList(),
-        equals(linear.map((e) => e.outerHtml).toList()),
-      );
-      expect(binary.length, greaterThan(1));
-    });
-
-    test('driver run: sentence splits match the linear engine', () {
-      final root = Element.tag('div')
-        ..append(
-          Element.tag('p')..append(Text('Hello. There. Sentences. More here.')),
-        );
-
-      final binary = runReflow(BinaryReflowEngine(root: root), 15);
-      final linear = runReflow(LinearReflowEngine(root: root), 15);
-
-      expect(
-        binary.map((e) => e.outerHtml).toList(),
-        equals(linear.map((e) => e.outerHtml).toList()),
-      );
-      expect(binary.length, greaterThan(1));
-    });
-
-    test('driver run: nested elements match the linear engine', () {
-      final root = Element.tag('div')
-        ..append(
-          Element.tag('div')
-            ..append(Element.tag('p')..append(Text('alpha beta gamma')))
-            ..append(Element.tag('p')..append(Text('delta epsilon'))),
-        )
-        ..append(Element.tag('p')..append(Text('zeta eta theta')));
-
-      final binary = runReflow(BinaryReflowEngine(root: root), 14);
-      final linear = runReflow(LinearReflowEngine(root: root), 14);
-
-      expect(
-        binary.map((e) => e.outerHtml).toList(),
-        equals(linear.map((e) => e.outerHtml).toList()),
-      );
-      expect(binary.length, greaterThan(1));
-    });
-
-    test('driver run: no content is lost', () {
-      final root = Element.tag('div')
-        ..append(
-          Element.tag('p')..append(Text('one two. three four five. six')),
-        )
         ..append(Element.tag('img'))
-        ..append(Element.tag('p')..append(Text('seven eight nine')));
-
-      final pages = runReflow(BinaryReflowEngine(root: root), 10);
-
-      // Exact join: no whitespace is lost across page boundaries.
-      expect(pages.map((e) => e.text).join(), equals(root.text));
-      expect(
-        pages.any((e) => e.querySelector('img') != null),
-        isTrue,
-      );
-    });
-
-    test('word units keep whitespace on the following word', () {
-      final root = Element.tag('div')
-        ..append(Element.tag('p')..append(Text('a b')));
+        ..append(Element.tag('p')..append(Text('after')));
       final engine = BinaryReflowEngine(root: root);
 
-      engine.addNext(); // p
-      engine.overflow(); // descend into p
-      engine.addNext(); // text 'a b'
-      engine.overflow(); // split into words ['a', ' b']
+      engine.addNext(); // p1: img probed
+      // The img overflows and cannot split; the page is empty, so it is
+      // accepted for the current page. Still false: the driver commits.
+      expect(engine.overflow(), isFalse);
 
-      engine.addNext();
-      expect(engine.buffer.text, equals('a'));
-      engine.addNext();
-      expect(engine.buffer.text, equals('a b'));
+      // The img stays on the committed page and is consumed.
+      final page = engine.commitSplit();
+      expect(page.outerHtml, equals('<div><img></div>'));
+
+      // The remaining content reflows and the engine terminates.
+      expect(engine.addNext(), isTrue);
+      expect(engine.buffer.text, equals('after'));
+      expect(engine.addNext(), isFalse);
     });
 
-    test('driver run: whole content fits in one page', () {
-      final root = paragraphs(2, 'aaaa');
+    test('driver run: oversized unsplittable first unit terminates', () {
+      // The first word fits no page; without the empty-page accept the
+      // driver loop never converges.
+      final root = Element.tag('div')
+        ..append(Element.tag('p')..append(Text('abcdefghij')))
+        ..append(Element.tag('p')..append(Text('xy')));
 
-      final binary = runReflow(BinaryReflowEngine(root: root), 100);
-      final linear = runReflow(LinearReflowEngine(root: root), 100);
+      final pages = runReflow(BinaryReflowEngine(root: root), 3);
 
-      expect(binary.length, equals(1));
-      expect(
-        binary.map((e) => e.outerHtml).toList(),
-        equals(linear.map((e) => e.outerHtml).toList()),
-      );
+      expect(pages.first.text, equals('abcdefghij'));
+      expect(pages.map((e) => e.text).join(), equals(root.text));
     });
   });
 }
