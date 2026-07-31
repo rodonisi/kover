@@ -106,6 +106,19 @@ class EpubReflow extends _$EpubReflow {
       await loader.load();
     }
 
+    final settings = await ref.watch(
+      epubReaderSettingsProvider(seriesId: seriesId).future,
+    );
+
+    if (settings.highlightResumePoint && _resumeScrollId != null) {
+      final resumePoint = pageContent.root.querySelector(
+        '[${HtmlConstants.scrollIdAttribute}="${_resumeScrollId!.cssEscaped}"]',
+      );
+      if (resumePoint != null && resumePoint.hasChildNodes()) {
+        resumePoint.classes.add(HtmlConstants.resumeParagraphClass);
+      }
+    }
+
     _cursor = BinaryReflowEngine(root: pageContent.root.children.first);
 
     return EpubReflowState(
@@ -283,13 +296,6 @@ class EpubReflow extends _$EpubReflow {
               'scroll_id': current.scrollId,
             },
           );
-
-          final settings = await ref.read(
-            epubReaderSettingsProvider(seriesId: seriesId).future,
-          );
-          if (settings.highlightResumePoint) {
-            resumePoint.classes.add(HtmlConstants.resumeParagraphClass);
-          }
 
           newState = current.copyWith(
             scrollId: null,
