@@ -5,16 +5,12 @@ abstract class ReflowEngine {
   /// The current buffer element that is being built.
   Element get buffer;
 
-  /// The progress of the reflow operation, as a value between 0.0 and 1.0.
-  double get progress;
-
   /// Adds the next node from the source tree to the buffer.
   /// Returns true when a node was added, false if there are no more nodes to add.
   bool addNext();
 
-  /// Splits the last child of the current target element, if possible.
-  /// Returns true if a split was performed, false otherwise.
-  bool splitChild();
+  /// Marks the current buffer as overflowing.
+  bool overflow();
 
   /// Commits the current buffer and returns a new buffer for further additions.
   Element commitSplit();
@@ -54,7 +50,6 @@ class LinearReflowEngine implements ReflowEngine {
   final List<Object> _stack = [];
   final List<Element> _targetStack = [];
   late Element _target;
-  int _consumed = 0;
 
   LinearReflowEngine({required Element root})
     : _root = root.clone(true),
@@ -68,18 +63,10 @@ class LinearReflowEngine implements ReflowEngine {
   Element get buffer => _buffer;
 
   @override
-  double get progress {
-    final total = _consumed + _stack.length;
-    if (total == 0) return 1.0;
-    return _consumed / total;
-  }
-
-  @override
   bool addNext() {
     if (_stack.isEmpty) return false;
 
     final node = _stack.removeLast();
-    _consumed++;
 
     switch (node) {
       case _PopMarker():
@@ -116,7 +103,7 @@ class LinearReflowEngine implements ReflowEngine {
   }
 
   @override
-  bool splitChild() {
+  bool overflow() {
     if (_target.nodes.isEmpty) return false;
 
     final child = _target.nodes.last;
@@ -161,37 +148,23 @@ class LinearReflowEngine implements ReflowEngine {
   }
 }
 
-/// Binary search reflow engine. Each tree level is probed by binary search
+/// Binary search based reflow engine. Each tree level is probed by binary search
 /// on the number of child units that fit. When the boundary unit is found,
 /// the engine descends one level and binary searches within it, until the
 /// unit is unsplittable (same end condition as [LinearReflowEngine]).
-///
-/// The driver contract matches [ReflowEngine]: [addNext] reports that the
-/// current buffer fits, [splitChild] reports that it overflows.
 class BinaryReflowEngine implements ReflowEngine {
   final Element _root;
   final Element _buffer;
   final List<_Frame> _frames = [];
 
-  /// Child count of the root at construction, for [progress].
-  final int _rootUnits;
-
   BinaryReflowEngine({required Element root})
     : _root = root.clone(true),
-      _buffer = root.clone(false),
-      _rootUnits = root.nodes.length {
+      _buffer = root.clone(false) {
     _frames.add(_Frame(target: _buffer, pending: List.of(_root.nodes)));
   }
 
   @override
   Element get buffer => _buffer;
-
-  @override
-  double get progress {
-    if (_frames.isEmpty || _rootUnits == 0) return 1.0;
-
-    return (1 - _frames.first.pending.length / _rootUnits).clamp(0.0, 1.0);
-  }
 
   @override
   bool addNext() {
@@ -234,7 +207,7 @@ class BinaryReflowEngine implements ReflowEngine {
   }
 
   @override
-  bool splitChild() {
+  bool overflow() {
     if (_frames.isEmpty) return false;
 
     final frame = _frames.last;
@@ -338,14 +311,13 @@ class _Frame {
   /// The units of this level; the first [p] are mirrored into [target].
   final List<Node> pending;
 
-  /// Units currently mirrored into [target].
+  /// Binary search pivot point. Matches units currently mirrored into [target].
   int p = 0;
 
-  /// Units confirmed by the driver to fit.
+  /// Binary search lower bound. Matches units known to fit into [target].
   int lo = 0;
 
-  /// Units reported by the driver to overflow; [pending.length] while
-  /// unknown.
+  /// Binary search upper bound. Matches units known to overflow [target].
   int hi;
 
   /// Index of the straddler unit a child frame descended into, if any.

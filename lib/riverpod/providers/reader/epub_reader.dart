@@ -39,7 +39,6 @@ sealed class EpubReflowState with _$EpubReflowState {
     @Default(null) String? scrollId,
     @Default(null) int? resumeSubpage,
     @Default([]) List<DocumentFragment> subpages,
-    @Default(0.0) double progress,
   }) = _EpubReflowState;
 }
 
@@ -237,7 +236,6 @@ class EpubReflow extends _$EpubReflow {
     var newState = current.copyWith(
       subpages: newSubpages,
       status: .done,
-      progress: 1.0,
     );
 
     newState = await _checkResumePoint(
@@ -253,7 +251,7 @@ class EpubReflow extends _$EpubReflow {
     final current = state.value;
     if (current == null || current.status == .done) return;
 
-    if (_cursor.splitChild()) return;
+    if (_cursor.overflow()) return;
 
     final newSubpageNode = _cursor.commitSplit();
 
@@ -263,13 +261,8 @@ class EpubReflow extends _$EpubReflow {
       if (fragment.hasVisibleNodes) fragment,
     ];
 
-    final cursorProgress = _cursor.progress;
-
     var newState = current.copyWith(
       subpages: newSubpages,
-      progress: cursorProgress > current.progress
-          ? cursorProgress
-          : current.progress,
     );
 
     newState = await _checkResumePoint(

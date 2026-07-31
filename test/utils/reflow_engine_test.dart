@@ -20,7 +20,7 @@ List<Element> runReflow(ReflowEngine engine, int maxHeight) {
       return pages;
     }
 
-    if (engine.splitChild()) continue;
+    if (engine.overflow()) continue;
     pages.add(engine.commitSplit());
   }
 }
@@ -57,7 +57,7 @@ void main() {
 
       engine.addNext();
       // Simulate the driver reporting overflow on the single unit.
-      expect(engine.splitChild(), isFalse);
+      expect(engine.overflow(), isFalse);
     });
 
     test('when no overflow bound, addNext halves the probe range', () {
@@ -81,11 +81,11 @@ void main() {
       expect(engine.buffer.nodes.length, equals(4));
 
       // Overflow at 4 with 0 confirmed: shrinks to midpoint 2.
-      expect(engine.splitChild(), isTrue);
+      expect(engine.overflow(), isTrue);
       expect(engine.buffer.nodes.length, equals(2));
 
       // Overflow at 2 with 0 confirmed: shrinks to midpoint 1.
-      expect(engine.splitChild(), isTrue);
+      expect(engine.overflow(), isTrue);
       expect(engine.buffer.nodes.length, equals(1));
 
       // 1 fits, range collapsed (2 overflows) -> re-append known overflower.
@@ -93,7 +93,7 @@ void main() {
       expect(engine.buffer.nodes.length, equals(2));
 
       // Overflow at 2: boundary collapsed, descend into the 2nd paragraph.
-      expect(engine.splitChild(), isTrue);
+      expect(engine.overflow(), isTrue);
       expect(engine.buffer.nodes.length, equals(2));
       expect(engine.buffer.nodes.last.nodes, isEmpty);
     });
@@ -107,7 +107,7 @@ void main() {
       engine.addNext(); // p1
       engine.addNext(); // p2
       // Boundary: 1 fits, 2 overflows -> descend into p2 (empty clone).
-      expect(engine.splitChild(), isTrue);
+      expect(engine.overflow(), isTrue);
       expect(engine.buffer.nodes.length, equals(2));
       expect(engine.buffer.text, equals('one two'));
     });
@@ -127,9 +127,9 @@ void main() {
 
       engine.addNext(); // p1
       engine.addNext(); // p2
-      engine.splitChild(); // boundary: descend into p2 (empty clone)
+      engine.overflow(); // boundary: descend into p2 (empty clone)
       engine.addNext(); // text 'there' appended to the clone
-      engine.splitChild(); // single word overflows: unsplittable
+      engine.overflow(); // single word overflows: unsplittable
       final commit = engine.commitSplit(); // backtrack 'there'
       engine.addNext(); // 'there' re-added
 
@@ -228,9 +228,9 @@ void main() {
       final engine = BinaryReflowEngine(root: root);
 
       engine.addNext(); // p
-      engine.splitChild(); // descend into p
+      engine.overflow(); // descend into p
       engine.addNext(); // text 'a b'
-      engine.splitChild(); // split into words ['a', ' b']
+      engine.overflow(); // split into words ['a', ' b']
 
       engine.addNext();
       expect(engine.buffer.text, equals('a'));
