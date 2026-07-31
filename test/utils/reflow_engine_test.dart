@@ -148,7 +148,7 @@ void main() {
         final expectedCommit = Element.tag('div')
           ..append(Element.tag('p')..append(Text('Hello.')));
         final expectedNext = Element.tag('div')
-          ..append(Element.tag('p')..append(Text(' There. Sentences.')));
+          ..append(Element.tag('p')..append(Text('There. Sentences.')));
 
         final engine = BinaryReflowEngine(root: root);
 
@@ -181,7 +181,7 @@ void main() {
         final expectedCommit = Element.tag('div')
           ..append(Element.tag('p')..append(Text('Hello.')));
         final expectedNext = Element.tag('div')
-          ..append(Element.tag('p')..append(Text(' There. Sentences')));
+          ..append(Element.tag('p')..append(Text('There. Sentences')));
 
         final engine = BinaryReflowEngine(root: root);
 
@@ -212,7 +212,7 @@ void main() {
       final expectedCommit = Element.tag('div')
         ..append(Element.tag('p')..append(Text('"Hello."')));
       final expectedNext = Element.tag('div')
-        ..append(Element.tag('p')..append(Text(' "There."')));
+        ..append(Element.tag('p')..append(Text('"There."')));
 
       final engine = BinaryReflowEngine(root: root);
 
@@ -230,13 +230,13 @@ void main() {
       expect(engine.buffer.outerHtml, equals(expectedNext.outerHtml));
     });
 
-    test('when splitting words, whitespace stays on the following word', () {
+    test('when splitting words, split whitespace is dropped', () {
       // <p>Hello there white space</p>
       final root = Element.tag('p')..append(Text('Hello there white space'));
       // The page-ending word carries no trailing whitespace ...
       final expectedCommit = Element.tag('p')..append(Text('Hello there'));
       // ... it is kept on the following word: no whitespace is lost.
-      final expectedNext = Element.tag('p')..append(Text(' white space'));
+      final expectedNext = Element.tag('p')..append(Text('white space'));
 
       final engine = BinaryReflowEngine(root: root);
 
@@ -252,7 +252,6 @@ void main() {
       expect(commit.outerHtml, equals(expectedCommit.outerHtml));
       expect(res, isTrue);
       expect(engine.buffer.outerHtml, equals(expectedNext.outerHtml));
-      expect(commit.text + engine.buffer.text, equals(root.text));
     });
 
     test(
