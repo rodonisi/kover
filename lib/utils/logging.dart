@@ -1,20 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:kover/models/log_entry.dart';
 import 'package:logger/logger.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
-enum LogLevel {
-  debug(1),
-  info(2),
-  warning(3),
-  error(4),
-  fatal(5);
-
-  final int severity;
-  const LogLevel(this.severity);
-
-  bool operator >(LogLevel other) => severity > other.severity;
-  bool operator <(LogLevel other) => severity < other.severity;
-}
+typedef Sink = void Function(LogEntry entry);
 
 class KoverLogger {
   final localLogger = Logger(
@@ -27,6 +16,7 @@ class KoverLogger {
     ),
   );
   final LogLevel level;
+  Sink? sink;
 
   KoverLogger({this.level = .debug});
 
@@ -135,6 +125,19 @@ class KoverLogger {
       stacktrace: stacktrace,
       attributes: attributes,
     );
+
+    sink?.call(
+      LogEntry(
+        timestamp: DateTime.now(),
+        level: level,
+        message: message.toString(),
+        attributes: attributes.map(
+          (key, value) => MapEntry(key, value.toString()),
+        ),
+        error: error.toString(),
+      ),
+    );
+
     _sendBreadcrumb(level, message, attributes: attributes);
   }
 
