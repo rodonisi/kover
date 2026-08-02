@@ -96,6 +96,16 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
   Future<void> upsertVolumeCover(VolumeCoversCompanion cover) async {
     await into(volumeCovers).insertOnConflictUpdate(cover);
   }
+
+  /// Upsert multiple volume covers in a single batch to avoid per-insert
+  /// [notifyUpdates] cascades that can block the main thread.
+  Future<void> upsertVolumeCoversBatch(
+    Iterable<VolumeCoversCompanion> covers,
+  ) async {
+    if (covers.isEmpty) return;
+
+    await batch((b) => b.insertAllOnConflictUpdate(volumeCovers, covers));
+  }
 }
 
 class VolumeWithRelations {

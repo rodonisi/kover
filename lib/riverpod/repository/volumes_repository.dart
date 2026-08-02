@@ -5,6 +5,7 @@ import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/volume_sync_operations.dart';
+import 'package:kover/utils/chunked_fetch.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -95,12 +96,12 @@ class VolumesRepository {
   /// Fetch missing covers for all volumes
   Future<void> fetchMissingCovers() async {
     final missing = await _db.volumesDao.getMissingCovers();
-    for (final id in missing) {
-      final volumeCover = await _client.getVolumeCover(id);
-
-      if (volumeCover == null) continue;
-
-      await _db.volumesDao.upsertVolumeCover(volumeCover);
-    }
+    await chunkedFetch(
+      items: missing,
+      fetchCallback: (id) async => _client.getVolumeCover(id),
+      upsertCallback: (covers) async => _db.volumesDao.upsertVolumeCoversBatch(
+        covers.whereType<VolumeCoversCompanion>(),
+      ),
+    );
   }
 }

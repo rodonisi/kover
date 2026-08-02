@@ -550,6 +550,16 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     await into(seriesCovers).insertOnConflictUpdate(cover);
   }
 
+  /// Upsert multiple series covers in a single batch to avoid per-insert
+  /// [notifyUpdates] cascades that can block the main thread.
+  Future<void> upsertSeriesCoversBatch(
+    Iterable<SeriesCoversCompanion> covers,
+  ) async {
+    if (covers.isEmpty) return;
+
+    await batch((b) => b.insertAllOnConflictUpdate(seriesCovers, covers));
+  }
+
   /// Set all isRecentlyUpdated flags to false
   Future<void> clearIsRecentlyUpdated() async {
     await (update(series)..where((row) => row.isRecentlyUpdated)).write(

@@ -91,4 +91,14 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
   Future<void> upsertChapterCover(ChapterCoversCompanion cover) async {
     await into(chapterCovers).insertOnConflictUpdate(cover);
   }
+
+  /// Upsert multiple chapter covers in a single batch to avoid per-insert
+  /// [notifyUpdates] cascades that can block the main thread.
+  Future<void> upsertChapterCoversBatch(
+    Iterable<ChapterCoversCompanion> covers,
+  ) async {
+    if (covers.isEmpty) return;
+
+    await batch((b) => b.insertAllOnConflictUpdate(chapterCovers, covers));
+  }
 }

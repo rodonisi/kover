@@ -8,6 +8,7 @@ import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/chapter_sync_operations.dart';
 import 'package:kover/sync/series_sync_operations.dart';
 import 'package:kover/sync/volume_sync_operations.dart';
+import 'package:kover/utils/chunked_fetch.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
@@ -319,44 +320,41 @@ class SeriesRepository {
   /// Fetch all missing series covers
   Future<void> fetchMissingCovers() async {
     final missingIds = await _db.seriesDao.getMissingCovers();
-    for (final id in missingIds) {
-      final seriesCover = await _client.getSeriesCover(id);
-
-      if (seriesCover == null) continue;
-
-      await _db.seriesDao.upsertSeriesCover(seriesCover);
-    }
+    await chunkedFetch(
+      items: missingIds,
+      fetchCallback: (id) async => _client.getSeriesCover(id),
+      upsertCallback: (covers) async => _db.seriesDao.upsertSeriesCoversBatch(
+        covers.whereType<SeriesCoversCompanion>(),
+      ),
+    );
   }
 
   /// Refresh all covers for series [seriesId], including volume and chapter covers.
   Future<void> refreshCovers({required int seriesId}) async {
     final seriesCover = await _client.getSeriesCover(seriesId);
-
-    if (seriesCover == null) return;
-
-    await _db.seriesDao.upsertSeriesCover(seriesCover);
+    if (seriesCover != null) {
+      await _db.seriesDao.upsertSeriesCover(seriesCover);
+    }
     final details = await _client.getSeriesDetail(seriesId);
     final volumeIds = details.volumes.map((v) => v.volume.id.value).toList();
-
-    for (final volumeId in volumeIds) {
-      final volumeCover = await _volumeClient.getVolumeCover(volumeId);
-
-      if (volumeCover == null) continue;
-
-      await _db.volumesDao.upsertVolumeCover(volumeCover);
-    }
-
+    await chunkedFetch(
+      items: volumeIds,
+      fetchCallback: (id) => _volumeClient.getVolumeCover(id),
+      upsertCallback: (covers) async => _db.volumesDao.upsertVolumeCoversBatch(
+        covers.whereType<VolumeCoversCompanion>(),
+      ),
+    );
     final chapters = details.volumes.expand((v) => v.chapters).toList();
     chapters.addAll(details.chapters);
     chapters.addAll(details.storyline);
     final chapterIds = chapters.map((c) => c.id.value).toSet();
-
-    for (final chapterId in chapterIds) {
-      final chapterCover = await _chapterClient.getChapterCover(chapterId);
-
-      if (chapterCover == null) continue;
-
-      await _db.chaptersDao.upsertChapterCover(chapterCover);
-    }
+    await chunkedFetch(
+      items: chapterIds,
+      fetchCallback: (id) => _chapterClient.getChapterCover(id),
+      upsertCallback: (covers) async =>
+          _db.chaptersDao.upsertChapterCoversBatch(
+            covers.whereType<ChapterCoversCompanion>(),
+          ),
+    );
   }
 }

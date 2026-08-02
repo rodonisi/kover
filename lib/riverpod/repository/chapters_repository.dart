@@ -5,6 +5,7 @@ import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/chapter_sync_operations.dart';
+import 'package:kover/utils/chunked_fetch.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -93,27 +94,16 @@ class ChaptersRepository {
         });
   }
 
-  Future<void> downloadChapterCover(int chapterId) async {
-    try {
-      final remoteCover = await _client.getChapterCover(chapterId);
-      if (remoteCover != null) {
-        await _db.chaptersDao.upsertChapterCover(remoteCover);
-      }
-    } catch (e, stacktrace) {
-      log.error(
-        'failed to fetch cover for chapter',
-        error: e,
-        stacktrace: stacktrace,
-        attributes: {'chapter_id': chapterId},
-      );
-    }
-  }
-
   /// Fetch all missing chapter covers
   Future<void> fetchMissingCovers() async {
     final missing = await _db.chaptersDao.getMissingCovers();
-    for (final id in missing) {
-      await downloadChapterCover(id);
-    }
+    await chunkedFetch(
+      items: missing,
+      fetchCallback: (id) async => _client.getChapterCover(id),
+      upsertCallback: (covers) async =>
+          _db.chaptersDao.upsertChapterCoversBatch(
+            covers.whereType<ChapterCoversCompanion>(),
+          ),
+    );
   }
 }
