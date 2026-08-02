@@ -737,5 +737,13 @@
     "black": "블랙",
     "@black": {
         "description": "Label for the black theme option"
+    },
+    "logs": "로그",
+    "@logs": {
+        "description": "Label for the logs settings section"
+    },
+    "copiedToClipboard": "클립보드로 복사됨",
+    "@copiedToClipboard": {
+        "description": "Message shown when a value is copied to the clipboard"
     }
 }
