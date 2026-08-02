@@ -3,10 +3,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/settings/navbar_editor.dart';
+import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
+import 'package:kover/widgets/settings/navigate_option.dart';
 import 'package:kover/widgets/settings/select_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
@@ -33,6 +35,7 @@ class GeneralSettings extends ConsumerWidget {
             const _Locale(),
             const NavbarEditor(),
             const _SendDiagnostics(),
+            const _LocalLogs(),
           ],
         ),
       ),
@@ -110,6 +113,23 @@ class _SendDiagnostics extends ConsumerWidget {
             .read(generalSettingsProvider.notifier)
             .setSendDiagnostics(value),
       ),
+    );
+  }
+}
+
+class _LocalLogs extends StatelessWidget {
+  const _LocalLogs();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+
+    return NavigateOption(
+      title: l.logs,
+      leadingIcon: KoverIcons.logs,
+      onTap: () {
+        const LocalLogsRoute().push(context);
+      },
     );
   }
 }

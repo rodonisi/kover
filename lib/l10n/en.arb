@@ -738,5 +738,13 @@
     "paragraphSpacing": "Paragraph Spacing",
     "@paragraphSpacing": {
       "description": "Label for the paragraph spacing setting"
+    },
+    "logs": "Logs",
+    "@logs": {
+      "description": "Label for the logs settings section"
+    },
+    "copiedToClipboard": "Copied to clipboard",
+    "@copiedToClipboard": {
+      "description": "Message shown when a value is copied to the clipboard"
     }
 }

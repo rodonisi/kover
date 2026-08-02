@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
-import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/widgets/settings/navigate_option.dart';
 
 class BottomSheetOption extends ConsumerWidget {
   final String title;
@@ -31,24 +31,9 @@ class BottomSheetOption extends ConsumerWidget {
         ? const AnimationStyle(duration: .zero, reverseDuration: .zero)
         : null;
 
-    return ListTile(
-      title: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: LayoutConstants.smallerPadding,
-        ),
-        child: Text(title),
-      ),
-      titleTextStyle: Theme.of(context).textTheme.titleSmall,
-      horizontalTitleGap: LayoutConstants.smallPadding,
-      leading: leadingIcon != null ? Icon(leadingIcon) : null,
-      iconColor: Theme.of(context).colorScheme.onSurface,
-      trailing: const Icon(KoverIcons.chevronRight),
-      contentPadding: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(
-          LayoutConstants.smallerBorderRadius,
-        ),
-      ),
+    return NavigateOption(
+      title: title,
+      leadingIcon: leadingIcon,
       onTap: () {
         showModalBottomSheet(
           context: context,

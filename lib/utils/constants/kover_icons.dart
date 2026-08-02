@@ -20,6 +20,7 @@ sealed class KoverIcons {
   static const IconData save = LucideIcons.save;
   static const IconData reset = LucideIcons.rotateCcw;
   static const IconData analytics = LucideIcons.barChart2;
+  static const IconData logs = LucideIcons.fileText;
   static const IconData navigationGestures = LucideIcons.pointer;
   static const IconData animation = Icons.animation_sharp;
   static const IconData outline = LucideIcons.squareDashed;
@@ -42,12 +43,18 @@ sealed class KoverIcons {
   static const IconData chevronRight = LucideIcons.chevronRight;
   static const IconData check = LucideIcons.check;
   static const IconData info = LucideIcons.info;
+  static const IconData debug = LucideIcons.bug;
+  static const IconData warning = LucideIcons.alertTriangle;
+  static const IconData error = LucideIcons.circleX;
+  static const IconData fatal = LucideIcons.bomb;
+  static const IconData copy = LucideIcons.copy;
   static const IconData language = LucideIcons.languages;
   static const IconData trash = LucideIcons.trash;
   static const IconData minus = LucideIcons.minus;
   static const IconData plus = LucideIcons.plus;
   static const IconData dragHandle = LucideIcons.gripHorizontal;
   static const IconData navbar = LucideIcons.ellipsis;
+  static const IconData visible = LucideIcons.eye;
   static const IconData hidden = LucideIcons.eyeOff;
   static const IconData play = Icons.play_arrow_rounded;
   static const IconData noConnection = LucideIcons.wifiOff;

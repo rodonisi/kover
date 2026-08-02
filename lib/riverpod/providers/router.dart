@@ -13,6 +13,7 @@ import 'package:kover/pages/series_detail_page/chapters_page/chapters_page.dart'
 import 'package:kover/pages/series_detail_page/series_detail_page.dart';
 import 'package:kover/pages/series_detail_page/volume_detail_page/volume_detail_page.dart';
 import 'package:kover/pages/series_detail_page/volumes_page/volumes_page.dart';
+import 'package:kover/pages/settings/local_logs/local_logs_page.dart';
 import 'package:kover/pages/settings/settings_page.dart';
 import 'package:kover/pages/want_to_read_page/want_to_read_page.dart';
 import 'package:kover/widgets/util/navigator_container.dart';
@@ -115,6 +116,9 @@ GoRouter router(Ref ref) {
             ),
             TypedGoRoute<SettingsRoute>(
               path: 'settings',
+              routes: [
+                TypedGoRoute<LocalLogsRoute>(path: 'local-logs'),
+              ],
             ),
           ],
         ),
@@ -337,6 +341,14 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const SettingsPage();
+}
+
+class LocalLogsRoute extends GoRouteData with $LocalLogsRoute {
+  const LocalLogsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const LocalLogsPage();
 }
 
 class DownloadQueueRoute extends GoRouteData with $DownloadQueueRoute {

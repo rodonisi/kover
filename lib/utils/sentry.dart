@@ -38,7 +38,7 @@ void _scrubMessage(SentryMessage? message) {
   message?.scrubUrls();
 }
 
-String _scrubLooseUrls(String input) {
+String scrubLooseUrls(String input) {
   final looseUrlRegex = RegExp(
     r'(?:https?:\/\/|www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)',
     caseSensitive: false,
@@ -48,12 +48,12 @@ String _scrubLooseUrls(String input) {
 
 extension on SentryException {
   void scrubUrls() {
-    value = _scrubLooseUrls(value ?? '');
+    value = scrubLooseUrls(value ?? '');
   }
 }
 
 extension on SentryMessage {
   void scrubUrls() {
-    formatted = _scrubLooseUrls(formatted);
+    formatted = scrubLooseUrls(formatted);
   }
 }

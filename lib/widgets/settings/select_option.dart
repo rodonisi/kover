@@ -29,6 +29,7 @@ class SelectOption<T> extends StatelessWidget {
       child: DropdownMenu<T>(
         inputDecorationTheme: const InputDecorationTheme(
           isDense: true,
+          visualDensity: .compact,
         ),
         initialSelection: value,
         dropdownMenuEntries: options
