@@ -28,27 +28,12 @@ Thank you for your interest in contributing to Kover. This document outlines the
 
 ---
 
-## AI Assistance Disclosure
+## AI Assistance
 
-> [!IMPORTANT]  
-> If any AI tool was used while contributing to Kover, it must be disclosed in the pull request.
+AI is a helpful tool, and is allowed to use to assist with contributions. It ultimately doesn't matter who or what wrote the code, provided it works and meets our standards.
 
-Please state in your PR whether AI assistance was used and to what extent (for example, _docs only_ or _code generation_).  
-If AI-generated text was used in PR discussions or responses, disclose that as well.  
-Minor autocomplete or keyword suggestions do not require disclosure.
-
-### Examples
-
-> This PR was written primarily by Claude Code.  
-> I used Cursor to explore parts of the codebase, but the implementation is fully manual.
-
-AI-assisted contributions are welcome, but contributors remain fully responsible for the code they submit. An understanding
-of the submitted code and readiness to apply changes is expected regardless of AI involvement.
-
-Being this a hobby project and to avoid wasting anyone's time, in cases where AI-generated code is not up to standard,
-maintainers may reserve the right to reject the contribution or request significant revisions.
-
-Always disclose AI involvement to maintain transparency and respect for maintainers’ time.
+However, please respect the reviewers' time. AI is not a replacement for human judgment, testing, and common sense. If a pull request is significantly below standard (whether
+written by a human or an AI) maintainers reserve the right to reject the contribution outright or request major revisions.
 
 ## Reporting Issues
 
