@@ -10,8 +10,7 @@ Thank you for your interest in contributing to Kover. This document outlines the
 
 - [Contributing to Kover](#contributing-to-kover)
   - [Table of Contents](#table-of-contents)
-  - [AI Assistance Disclosure](#ai-assistance-disclosure)
-    - [Examples](#examples)
+  - [AI Assistance](#ai-assistance)
   - [Reporting Issues](#reporting-issues)
   - [Requesting Features & Enhancements](#requesting-features-enhancements)
   - [Localizations](#localizations)
