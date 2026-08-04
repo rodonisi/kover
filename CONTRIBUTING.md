@@ -29,7 +29,8 @@ Thank you for your interest in contributing to Kover. This document outlines the
 
 ## AI Assistance
 
-AI is a helpful tool, and is allowed to use to assist with contributions. It ultimately doesn't matter who or what wrote the code, provided it works and meets our standards.
+AI is a helpful tool, and its use is permitted to assist with contributions. It ultimately doesn't matter who or what wrote the code, provided it works and meets our standards. 
+Still, understanding of the proposed changes and ability to engage in discussions about them is expected and required.
 
 However, please respect the reviewers' time. AI is not a replacement for human judgment, testing, and common sense. If a pull request is significantly below standard (whether
 written by a human or an AI) maintainers reserve the right to reject the contribution outright or request major revisions.
