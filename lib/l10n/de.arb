@@ -737,5 +737,13 @@
     "black": "Schwarz",
     "@black": {
         "description": "Label for the black theme option"
+    },
+    "logs": "Logs",
+    "@logs": {
+        "description": "Label for the logs settings section"
+    },
+    "copiedToClipboard": "In die Zwischenablage kopiert",
+    "@copiedToClipboard": {
+        "description": "Message shown when a value is copied to the clipboard"
     }
 }
