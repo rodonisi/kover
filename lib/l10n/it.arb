@@ -642,5 +642,13 @@
     "black": "Nero",
     "@black": {
         "description": "Label for the black theme option"
+    },
+    "logs": "Log",
+    "@logs": {
+        "description": "Label for the logs settings section"
+    },
+    "copiedToClipboard": "Copiato negli appunti",
+    "@copiedToClipboard": {
+        "description": "Message shown when a value is copied to the clipboard"
     }
 }
