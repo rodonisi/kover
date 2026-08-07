@@ -316,11 +316,11 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   ///   - A chapter was added within [ServerSettings.onDeckUpdateDays] days
   ///
   /// Ordered by most recent reading activity, then most recently updated.
-  Stream<List<SeriesData>> watchOnDeck() async* {
+  Stream<List<SeriesData>> watchOnDeck() {
     final totalPagesRead = readingProgress.pagesRead.sum();
     final latestReadDate = readingProgress.lastModified.max();
 
-    yield* managers.serverSettings
+    return managers.serverSettings
         .filter((f) => f.key.equals(DataConstants.serverSettingsKey))
         .watchSingleOrNull()
         .switchMap((setting) {
