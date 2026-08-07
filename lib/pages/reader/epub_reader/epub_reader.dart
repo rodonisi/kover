@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/epub_reader/epub_measure_root.dart';
@@ -116,48 +117,57 @@ class EpubReader extends HookConsumerWidget {
                   });
                 });
 
-                return Stack(
-                  children: [
-                    Positioned.fill(
-                      child: Offstage(
-                        offstage: !navState.ready,
-                        child: PageView.builder(
-                          controller: controller,
-                          itemCount: navState.totalPages,
-                          allowImplicitScrolling: true,
-                          scrollDirection: switch (readerMode) {
-                            .horizontal => .horizontal,
-                            .vertical => .vertical,
-                          },
-                          reverse: commonSettings.readDirection == .rightToLeft,
-                          physics: const NeverScrollableScrollPhysics(),
-                          onPageChanged: (newPage) {
-                            ref.read(nav.notifier).jumpToPage(newPage);
-                          },
-                          itemBuilder: (context, index) {
-                            return _Page(
-                              seriesId: seriesId,
-                              chapterId: chapterId,
-                              page: index,
-                              reverse:
-                                  commonSettings.readDirection == .rightToLeft,
-                              vertical: readerMode == .vertical,
-                              outerController: controller,
-                              onSelectionChanged: (selected) {
-                                if (selected != hasSelection.value) {
-                                  hasSelection.value = selected;
-                                }
-                              },
-                            );
-                          },
+                return SafeArea(
+                  bottom: false,
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: Offstage(
+                          offstage: !navState.ready,
+                          child: PageView.builder(
+                            clipBehavior: .none,
+                            controller: controller,
+                            itemCount: navState.totalPages,
+                            allowImplicitScrolling: true,
+                            scrollCacheExtent: const ScrollCacheExtent.viewport(
+                              2,
+                            ),
+                            scrollDirection: switch (readerMode) {
+                              .horizontal => .horizontal,
+                              .vertical => .vertical,
+                            },
+                            reverse:
+                                commonSettings.readDirection == .rightToLeft,
+                            physics: const NeverScrollableScrollPhysics(),
+                            onPageChanged: (newPage) {
+                              ref.read(nav.notifier).jumpToPage(newPage);
+                            },
+                            itemBuilder: (context, index) {
+                              return _Page(
+                                seriesId: seriesId,
+                                chapterId: chapterId,
+                                page: index,
+                                reverse:
+                                    commonSettings.readDirection ==
+                                    .rightToLeft,
+                                vertical: readerMode == .vertical,
+                                outerController: controller,
+                                onSelectionChanged: (selected) {
+                                  if (selected != hasSelection.value) {
+                                    hasSelection.value = selected;
+                                  }
+                                },
+                              );
+                            },
+                          ),
                         ),
                       ),
-                    ),
-                    if (!navState.ready)
-                      const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                  ],
+                      if (!navState.ready)
+                        const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -351,8 +361,10 @@ class _Page extends HookConsumerWidget {
                   child: PageView.builder(
                     controller: controller,
                     allowImplicitScrolling: true,
+                    scrollCacheExtent: const ScrollCacheExtent.viewport(2),
                     scrollDirection: vertical ? .vertical : .horizontal,
                     pageSnapping: !vertical,
+                    clipBehavior: .none,
                     reverse: reverse,
                     itemCount: count,
                     physics: scrollPhysics,

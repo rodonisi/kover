@@ -45,6 +45,7 @@ class RenderEpubContent extends ConsumerWidget {
         }
 
         return SafeArea(
+          bottom: false,
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: epubSettings.marginSize,
