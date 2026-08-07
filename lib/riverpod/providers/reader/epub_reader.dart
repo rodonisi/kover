@@ -106,7 +106,7 @@ class EpubReflow extends _$EpubReflow {
       await loader.load();
     }
 
-    final settings = await ref.watch(
+    final settings = await ref.read(
       epubReaderSettingsProvider(seriesId: seriesId).future,
     );
 
