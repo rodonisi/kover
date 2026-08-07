@@ -61,6 +61,18 @@ class SubpageProgress extends ConsumerWidget {
 
     final subpageProgress = reader.whenOrNull(
       data: (data) {
+        final reflowStatus = ref
+            .read(
+              epubReflowProvider(
+                seriesId: seriesId,
+                chapterId: chapterId,
+                page: data.page,
+              ),
+            )
+            .value
+            ?.status;
+        if (reflowStatus != .done) return null;
+
         final subpage = spreads ? data.subpage ~/ 2 : data.subpage;
         final total = spreads
             ? (data.totalSubpages + 1) ~/ 2
