@@ -130,7 +130,7 @@ class EpubReader extends HookConsumerWidget {
                             itemCount: navState.totalPages,
                             allowImplicitScrolling: true,
                             scrollCacheExtent: const ScrollCacheExtent.viewport(
-                              2,
+                              4,
                             ),
                             scrollDirection: switch (readerMode) {
                               .horizontal => .horizontal,
@@ -354,44 +354,44 @@ class _Page extends HookConsumerWidget {
                   },
                 );
 
-                return NotificationListener<ScrollNotification>(
-                  onNotification: navigationGestures
-                      ? handleScrollNotification
-                      : null,
-                  child: PageView.builder(
-                    controller: controller,
-                    allowImplicitScrolling: true,
-                    scrollCacheExtent: const ScrollCacheExtent.viewport(2),
-                    scrollDirection: vertical ? .vertical : .horizontal,
-                    pageSnapping: !vertical,
-                    clipBehavior: .none,
-                    reverse: reverse,
-                    itemCount: count,
-                    physics: scrollPhysics,
-                    onPageChanged: (newPage) {
-                      if (navigationState.page != page) return;
+                return SelectionArea(
+                  onSelectionChanged: (selection) {
+                    onSelectionChanged?.call(
+                      selection != null && selection.plainText.isNotEmpty,
+                    );
+                  },
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: navigationGestures
+                        ? handleScrollNotification
+                        : null,
+                    child: PageView.builder(
+                      controller: controller,
+                      allowImplicitScrolling: true,
+                      scrollCacheExtent: const ScrollCacheExtent.viewport(4),
+                      scrollDirection: vertical ? .vertical : .horizontal,
+                      pageSnapping: !vertical,
+                      clipBehavior: .none,
+                      reverse: reverse,
+                      itemCount: count,
+                      physics: scrollPhysics,
+                      onPageChanged: (newPage) {
+                        if (navigationState.page != page) return;
 
-                      ref
-                          .read(navigationProvider.notifier)
-                          .jumpToSubpage(
-                            newPage,
-                            fromObserver: true,
+                        ref
+                            .read(navigationProvider.notifier)
+                            .jumpToSubpage(
+                              newPage,
+                              fromObserver: true,
+                            );
+                      },
+                      itemBuilder: (context, index) {
+                        if (index >= reflowState.subpages.length) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
                           );
-                    },
-                    itemBuilder: (context, index) {
-                      if (index >= reflowState.subpages.length) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
+                        }
 
-                      return SelectionArea(
-                        onSelectionChanged: (selection) {
-                          onSelectionChanged?.call(
-                            selection != null && selection.plainText.isNotEmpty,
-                          );
-                        },
-                        child: OverflowBox(
+                        return OverflowBox(
                           maxHeight: double.infinity,
                           child: RenderEpubContent(
                             seriesId: seriesId,
@@ -400,9 +400,9 @@ class _Page extends HookConsumerWidget {
                             imageCache: imageCache,
                             verticalPadding: !vertical,
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 );
               },
