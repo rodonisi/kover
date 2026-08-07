@@ -53,12 +53,8 @@ class HeadlessMeasurePipeline {
       devicePixelRatio: devicePixelRatio,
     );
 
-    if (_renderView != null) {
-      if (viewportSize != size) {
-        _renderView!.configuration = configuration;
-        viewportSize = size;
-      }
-      return;
+    if (isAttached) {
+      _reset();
     }
 
     viewportSize = size;
@@ -121,14 +117,20 @@ class HeadlessMeasurePipeline {
     return found;
   }
 
-  void dispose() {
+  /// Tears down the pipeline so the next [attach] starts from a clean
+  /// [BuildOwner] and element tree.
+  void _reset() {
     if (_rootElement != null) {
-      // Unmount the element tree by attaching an empty adapter.
-      RenderObjectToWidgetAdapter<RenderBox>(
-        container: _renderView!,
-      ).attachToRenderTree(_buildOwner!, _rootElement);
-      _buildOwner!.buildScope(_rootElement!);
-      _buildOwner!.finalizeTree();
+      try {
+        // Unmount the element tree by attaching an empty adapter.
+        RenderObjectToWidgetAdapter<RenderBox>(
+          container: _renderView!,
+        ).attachToRenderTree(_buildOwner!, _rootElement);
+        _buildOwner!.buildScope(_rootElement!);
+        _buildOwner!.finalizeTree();
+      } catch (_) {
+        // Dirty elements orphaned by the previous run; abandon the owner.
+      }
       _rootElement = null;
     }
 
@@ -140,4 +142,6 @@ class HeadlessMeasurePipeline {
     _pipelineOwner = null;
     viewportSize = null;
   }
+
+  void dispose() => _reset();
 }
