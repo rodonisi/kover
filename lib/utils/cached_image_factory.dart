@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 class CachedImageFactory extends WidgetFactory {
-  // final BuildContext context;
   final Map<int, MemoryImage> _cache = {};
   final double? maxHeight;
 
