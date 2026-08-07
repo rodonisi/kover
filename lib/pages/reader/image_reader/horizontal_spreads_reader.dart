@@ -78,37 +78,45 @@ class _SpreadsContent extends ConsumerWidget {
       asyncValue1: nav,
       asyncValue2: settings,
       data: (navState, settings) {
-        final content = Stack(
-          children: [
-            Offstage(
-              offstage: !navState.ready,
-              child: _ImageSpreadsReaderContent(
-                seriesId: seriesId,
-                chapterId: chapterId,
-                initialSpread: navState.currentSpread,
-              ),
-            ),
-            if (!navState.ready) ...[
-              Offstage(
-                child: _RenderPreviousPages(
-                  seriesId: seriesId,
-                  chapterId: chapterId,
-                  currentSpread: navState.currentSpread,
-                ),
-              ),
-              const Center(
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!context.mounted) return;
+
+              ref
+                  .read(
+                    spreadsProvider(
+                      seriesId: seriesId,
+                      chapterId: chapterId,
+                    ).notifier,
+                  )
+                  .startChecking(
+                    viewport: constraints.biggest,
+                    devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+                    refreshRate: View.of(context).display.refreshRate,
+                  );
+            });
+
+            if (!navState.ready) {
+              return const Center(
                 child: CircularProgressIndicator(),
-              ),
-            ],
-          ],
-        );
+              );
+            }
 
-        if (settings.ignoreSafeAreas) {
-          return content;
-        }
+            final content = _ImageSpreadsReaderContent(
+              seriesId: seriesId,
+              chapterId: chapterId,
+              initialSpread: navState.currentSpread,
+            );
 
-        return SafeArea(
-          child: content,
+            if (settings.ignoreSafeAreas) {
+              return content;
+            }
+
+            return SafeArea(
+              child: content,
+            );
+          },
         );
       },
     );
@@ -246,50 +254,6 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
                   .toList(),
             );
           },
-        );
-      },
-    );
-  }
-}
-
-class _RenderPreviousPages extends ConsumerWidget {
-  final int seriesId;
-  final int chapterId;
-  final int currentSpread;
-
-  const _RenderPreviousPages({
-    required this.seriesId,
-    required this.chapterId,
-    required this.currentSpread,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Async(
-      asyncValue: ref.watch(
-        spreadsProvider(seriesId: seriesId, chapterId: chapterId),
-      ),
-      data: (spreads) {
-        final pagesToRender = spreads.spreads
-            .take(currentSpread)
-            .expand((spread) => spread)
-            .toList();
-
-        final cacheWidth =
-            (MediaQuery.of(context).size.width *
-                MediaQuery.of(context).devicePixelRatio) ~/
-            2;
-
-        return Stack(
-          children: pagesToRender.map((page) {
-            return _RenderPage(
-              seriesId: seriesId,
-              chapterId: chapterId,
-              page: page,
-              alignment: .center,
-              imageCacheWidth: cacheWidth,
-            );
-          }).toList(),
         );
       },
     );
