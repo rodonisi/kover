@@ -11,7 +11,6 @@ import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:kover/widgets/util/measured_widget.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
 
 class SliverObserverControllerHook extends Hook<SliverObserverController> {
@@ -162,85 +161,114 @@ class VerticalContinuousReader extends HookConsumerWidget {
               },
             );
 
-            final content = Stack(
-              children: [
-                Offstage(
-                  child: _RenderPreviousPages(
-                    seriesId: seriesId,
-                    chapterId: chapterId,
-                    currentPage: nav.currentPage,
+            final content = ZoomableVerticalScrollView(
+              scrollController: scrollController,
+              gestureController: gestureController,
+              child: SliverViewObserver(
+                controller: observerController,
+                onObserve: (ObserveModel model) {
+                  if (model is! ListViewObserveModel) return;
+
+                  final firstVisibleIndex = model.firstChild?.index;
+                  if (firstVisibleIndex == null) return;
+
+                  if (model.displayingChildIndexList.contains(
+                    nav.totalPages - 1,
+                  )) {
+                    ref
+                        .read(navProvider.notifier)
+                        .jumpToPage(nav.totalPages - 1, fromObserver: true);
+                    return;
+                  }
+
+                  ref
+                      .read(navProvider.notifier)
+                      .jumpToPage(firstVisibleIndex, fromObserver: true);
+                },
+                child: CustomScrollView(
+                  controller: scrollController,
+                  scrollCacheExtent: const ScrollCacheExtent.viewport(5),
+                  scrollBehavior: ScrollConfiguration.of(context).copyWith(
+                    scrollbars: false,
                   ),
-                ),
-                ZoomableVerticalScrollView(
-                  scrollController: scrollController,
-                  gestureController: gestureController,
-                  child: SliverViewObserver(
-                    controller: observerController,
-                    onObserve: (ObserveModel model) {
-                      if (model is! ListViewObserveModel) return;
-
-                      final firstVisibleIndex = model.firstChild?.index;
-                      if (firstVisibleIndex == null) return;
-
-                      if (model.displayingChildIndexList.contains(
-                        nav.totalPages - 1,
-                      )) {
-                        ref
-                            .read(navProvider.notifier)
-                            .jumpToPage(nav.totalPages - 1, fromObserver: true);
-                        return;
-                      }
-
-                      ref
-                          .read(navProvider.notifier)
-                          .jumpToPage(firstVisibleIndex, fromObserver: true);
-                    },
-                    child: CustomScrollView(
-                      controller: scrollController,
-                      scrollCacheExtent: const ScrollCacheExtent.viewport(5),
-                      scrollBehavior: ScrollConfiguration.of(context).copyWith(
-                        scrollbars: false,
-                      ),
-                      slivers: [
-                        AnimatedBuilder(
-                          animation: gestureController,
-                          builder: (context, _) {
-                            return SliverSafeArea(
-                              sliver: SliverPadding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: settings.verticalReaderPadding,
-                                  vertical:
-                                      gestureController.verticalScrollPadding,
-                                ),
-                                sliver: SliverList.separated(
-                                  itemCount: nav.totalPages,
-                                  itemBuilder: (context, index) =>
-                                      _VerticalReaderItem(
-                                        chapterId: chapterId,
-                                        seriesId: seriesId,
-                                        page: index,
-                                      ),
-                                  separatorBuilder: (context, index) =>
-                                      SizedBox(
-                                        height: settings.verticalReaderGap,
-                                      ),
-                                ),
+                  slivers: [
+                    AnimatedBuilder(
+                      animation: gestureController,
+                      builder: (context, _) {
+                        return SliverSafeArea(
+                          sliver: SliverPadding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: settings.verticalReaderPadding,
+                              vertical:
+                                  gestureController.verticalScrollPadding,
+                            ),
+                            sliver: SliverList.separated(
+                              itemCount: nav.totalPages,
+                              itemBuilder: (context, index) =>
+                                  _VerticalReaderItem(
+                                    chapterId: chapterId,
+                                    seriesId: seriesId,
+                                    page: index,
+                                  ),
+                              separatorBuilder: (context, index) => SizedBox(
+                                height: settings.verticalReaderGap,
                               ),
-                            );
-                          },
-                        ),
-                      ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             );
 
-            if (settings.ignoreSafeAreas) {
-              return content;
-            }
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final cache = ref.watch(
+                  verticalReaderCacheProvider(
+                    seriesId: seriesId,
+                    chapterId: chapterId,
+                  ),
+                );
 
-            return SafeArea(child: content);
+                final cacheMissingBeforeCurrent =
+                    cache.value?.cachedHeights == null
+                    ? nav.currentPage > 0
+                    : List.generate(
+                        nav.currentPage,
+                        (index) => index,
+                      ).any(
+                        (index) =>
+                            !cache.value!.cachedHeights.containsKey(index),
+                      );
+
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!context.mounted || !cacheMissingBeforeCurrent) return;
+                  ref
+                      .read(
+                        verticalReaderCacheProvider(
+                          seriesId: seriesId,
+                          chapterId: chapterId,
+                        ).notifier,
+                      )
+                      .startMeasuring(
+                        currentPage: nav.currentPage,
+                        viewport: constraints.biggest,
+                        devicePixelRatio:
+                            MediaQuery.devicePixelRatioOf(context),
+                        horizontalPadding: settings.verticalReaderPadding,
+                        refreshRate: View.of(context).display.refreshRate,
+                      );
+                });
+
+                if (settings.ignoreSafeAreas) {
+                  return content;
+                }
+
+                return SafeArea(child: content);
+              },
+            );
           },
         );
       },
@@ -289,88 +317,6 @@ class _VerticalReaderItem extends ConsumerWidget {
           child: Center(child: CircularProgressIndicator()),
         ),
       ),
-    );
-  }
-}
-
-class _RenderPreviousPages extends ConsumerWidget {
-  final int seriesId;
-  final int chapterId;
-  final int currentPage;
-
-  const _RenderPreviousPages({
-    required this.seriesId,
-    required this.chapterId,
-    required this.currentPage,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cache = ref.watch(
-      verticalReaderCacheProvider(seriesId: seriesId, chapterId: chapterId),
-    );
-
-    final double screenWidth = MediaQuery.sizeOf(context).width;
-
-    return Async(
-      asyncValue: cache,
-      data: (cache) {
-        final pagesToRender = List.generate(
-          currentPage,
-          (index) => index,
-        )..removeWhere((index) => cache.cachedHeights.containsKey(index));
-
-        return Stack(
-          children: pagesToRender.map((page) {
-            return OverflowBox(
-              minWidth: screenWidth,
-              maxWidth: screenWidth,
-              maxHeight: double.infinity,
-              alignment: Alignment.topCenter,
-              child: Consumer(
-                builder: (context, ref, _) {
-                  final image = ref.watch(
-                    imagePageProvider(chapterId: chapterId, page: page),
-                  );
-
-                  final settings = ref.watch(
-                    imageReaderSettingsProvider(seriesId: seriesId),
-                  );
-
-                  return Async2(
-                    asyncValue1: image,
-                    asyncValue2: settings,
-                    data: (image, settings) {
-                      return MeasuredWidget(
-                        onSizeMeasured: (size) {
-                          if (size.height > 0) {
-                            ref
-                                .read(
-                                  verticalReaderCacheProvider(
-                                    seriesId: seriesId,
-                                    chapterId: chapterId,
-                                  ).notifier,
-                                )
-                                .cachePageHeight(page, size.height);
-                          }
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: settings.verticalReaderPadding,
-                          ),
-                          child: _RenderImage(
-                            image: image,
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            );
-          }).toList(),
-        );
-      },
     );
   }
 }
