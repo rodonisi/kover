@@ -129,9 +129,7 @@ class EpubReader extends HookConsumerWidget {
                             controller: controller,
                             itemCount: navState.totalPages,
                             allowImplicitScrolling: true,
-                            scrollCacheExtent: const ScrollCacheExtent.viewport(
-                              4,
-                            ),
+                            scrollCacheExtent: const .viewport(4),
                             scrollDirection: switch (readerMode) {
                               .horizontal => .horizontal,
                               .vertical => .vertical,
@@ -367,7 +365,7 @@ class _Page extends HookConsumerWidget {
                     child: PageView.builder(
                       controller: controller,
                       allowImplicitScrolling: true,
-                      scrollCacheExtent: const ScrollCacheExtent.viewport(4),
+                      scrollCacheExtent: const .viewport(4),
                       scrollDirection: vertical ? .vertical : .horizontal,
                       pageSnapping: !vertical,
                       clipBehavior: .none,
