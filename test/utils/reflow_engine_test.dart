@@ -116,8 +116,7 @@ void main() {
         ..append(Element.tag('p')..append(Text('there')));
       // The empty p2 clone is kept, matching the linear engine's commit.
       final expectedCommit = Element.tag('div')
-        ..append(Element.tag('p')..append(Text('Hello')))
-        ..append(Element.tag('p'));
+        ..append(Element.tag('p')..append(Text('Hello')));
       final expectedNext = Element.tag('div')
         ..append(Element.tag('p')..append(Text('there')));
 
