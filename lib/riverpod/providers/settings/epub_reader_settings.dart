@@ -42,6 +42,8 @@ enum EpubTheme {
   black,
 }
 
+enum EpubReaderMode { horizontal, vertical }
+
 @freezed
 sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
   const EpubReaderSettingsState._();
@@ -54,6 +56,7 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
     @Default(0.0) double letterSpacing,
     @Default(true) bool highlightResumePoint,
     @Default(null) EpubTheme? theme,
+    @Default(EpubReaderMode.horizontal) EpubReaderMode mode,
   }) = _EpubReaderSettingsState;
 
   factory EpubReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -214,7 +217,17 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     state = AsyncData(current.copyWith(theme: theme));
     log.info(
       'set theme',
-      attributes: {'value': theme?.name ?? 'null', 'reader': 'epub'},
+      attributes: {'value': theme, 'reader': 'epub'},
+    );
+  }
+
+  Future<void> setMode(EpubReaderMode mode) async {
+    final current = await future;
+
+    state = AsyncData(current.copyWith(mode: mode));
+    log.info(
+      'set mode',
+      attributes: {'value': mode, 'reader': 'epub'},
     );
   }
 

@@ -29,6 +29,9 @@ sealed class KoverIcons {
   static const IconData lightTheme = LucideIcons.sun;
   static const IconData darkTheme = LucideIcons.moon;
   static const IconData blackTheme = LucideIcons.moonStar;
+  static const IconData verticalReaderMode = LucideIcons.moveVertical;
+  static const IconData horizontalReaderMode = LucideIcons.moveHorizontal;
+  static const IconData twoPageReaderMode = LucideIcons.columns2;
 
   static const IconData ascending = LucideIcons.arrowDownNarrowWide;
   static const IconData descending = LucideIcons.arrowDownWideNarrow;

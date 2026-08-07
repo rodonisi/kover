@@ -56,27 +56,22 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                       ReadDirectionOption(seriesId: seriesId),
                       ChoiceOption<ReaderMode>(
                         title: l.readerMode,
-                        icon: switch (settings.readerMode) {
-                          .horizontal => LucideIcons.moveHorizontal,
-                          .vertical => LucideIcons.moveVertical,
-                          .spread => LucideIcons.columns2,
-                        },
                         options: [
                           ChoiceOptionEntry(
                             value: .horizontal,
                             label: l.horizontal,
-                            icon: LucideIcons.moveHorizontal,
+                            icon: KoverIcons.horizontalReaderMode,
                           ),
                           ChoiceOptionEntry(
                             value: .vertical,
                             label: l.vertical,
-                            icon: LucideIcons.moveVertical,
+                            icon: KoverIcons.verticalReaderMode,
                           ),
                           if (breakpoint != .compact)
                             ChoiceOptionEntry(
                               value: .spread,
                               label: l.twoPage,
-                              icon: LucideIcons.columns2,
+                              icon: KoverIcons.twoPageReaderMode,
                             ),
                         ],
                         value: settings.readerMode,

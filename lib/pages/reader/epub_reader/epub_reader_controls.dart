@@ -8,6 +8,7 @@ import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
+import 'package:kover/widgets/settings/choice_option.dart';
 import 'package:kover/widgets/settings/numeric_option.dart';
 import 'package:kover/widgets/settings/reader/navigation_gestures_option.dart';
 import 'package:kover/widgets/settings/reader/orientation_option.dart';
@@ -49,8 +50,29 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                         l.readerSettings,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      ReadDirectionOption(seriesId: seriesId),
                       ThemePicker(seriesId: seriesId),
+                      ReadDirectionOption(seriesId: seriesId),
+                      ChoiceOption<EpubReaderMode>(
+                        title: l.readerMode,
+                        value: settings.mode,
+                        options: [
+                          ChoiceOptionEntry(
+                            value: .horizontal,
+                            label: l.horizontal,
+                            icon: KoverIcons.horizontalReaderMode,
+                          ),
+                          ChoiceOptionEntry(
+                            value: .vertical,
+                            label: l.vertical,
+                            icon: KoverIcons.verticalReaderMode,
+                          ),
+                        ],
+                        onChanged: (newValue) async {
+                          await ref
+                              .read(epubSettings.notifier)
+                              .setMode(newValue);
+                        },
+                      ),
                       NumericOption(
                         title: l.fontSize,
                         icon: LucideIcons.aLargeSmallDir,
