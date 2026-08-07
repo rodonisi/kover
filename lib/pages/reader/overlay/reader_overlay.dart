@@ -138,8 +138,6 @@ class ReaderOverlay extends HookConsumerWidget {
           );
 
           return Scaffold(
-            extendBody: true,
-            extendBodyBehindAppBar: true,
             endDrawerEnableOpenDragGesture: false,
             endDrawer: endDrawer,
             body: FocusableActionDetector(
