@@ -135,7 +135,8 @@ class EpubReader extends HookConsumerWidget {
                               .vertical => .vertical,
                             },
                             reverse:
-                                commonSettings.readDirection == .rightToLeft,
+                                commonSettings.readDirection == .rightToLeft &&
+                                readerMode == .horizontal,
                             physics: const NeverScrollableScrollPhysics(),
                             onPageChanged: (newPage) {
                               ref.read(nav.notifier).jumpToPage(newPage);
@@ -147,7 +148,8 @@ class EpubReader extends HookConsumerWidget {
                                 page: index,
                                 reverse:
                                     commonSettings.readDirection ==
-                                    .rightToLeft,
+                                        .rightToLeft &&
+                                    readerMode == .horizontal,
                                 vertical: readerMode == .vertical,
                                 outerController: controller,
                                 onSelectionChanged: (selected) {
