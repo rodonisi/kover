@@ -4,7 +4,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
-import 'package:kover/utils/extensions/document_fragment.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
 class RenderEpubContent extends ConsumerWidget {
@@ -66,9 +65,7 @@ class RenderEpubContent extends ConsumerWidget {
                 }
 
                 final considerLast =
-                    !verticalPadding &&
-                    element.nextElementSibling != null &&
-                    element.nextElementSibling!.hasVisibleNodes;
+                    !verticalPadding || element.nextElementSibling != null;
 
                 if (element.localName == 'p' && considerLast) {
                   final paragraphMargin =
