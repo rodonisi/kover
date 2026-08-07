@@ -158,20 +158,17 @@ class EpubReflow extends _$EpubReflow {
         final maxHeight = _pipeline.viewportSize?.height ?? viewport.height;
         final bufferHtml = _cursor.buffer.outerHtml;
 
-        if (!_pipeline.isAttached) {
-          log.warning(
-            'pipeline detached during reflow',
-            attributes: {
-              'page': page,
-              'bufferLength': bufferHtml.length,
-            },
-          );
-          return;
-        }
-
         if (!ref.mounted) return;
 
         final current = await future;
+
+        if (!_pipeline.isAttached) {
+          log.warning(
+            'pipeline detached during reflow',
+            attributes: {'page': page, 'bufferLength': bufferHtml.length},
+          );
+          return;
+        }
         final height = _pipeline
             .measure(_measureBuilder(bufferHtml, current.page.styles))
             .height;
