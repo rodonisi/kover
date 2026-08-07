@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/reader/epub_reader/theme_picker.dart';
+import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
@@ -26,6 +27,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final epubSettings = epubReaderSettingsProvider(seriesId: seriesId);
     final commonSettings = commonReaderSettingsProvider(seriesId: seriesId);
+    final breakpoint = ref.watch(breakpointsProvider);
 
     return Async(
       asyncValue: ref.watch(epubSettings),
@@ -66,6 +68,12 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                             label: l.vertical,
                             icon: KoverIcons.verticalReaderMode,
                           ),
+                          if (breakpoint != .compact)
+                            ChoiceOptionEntry(
+                              value: .spreads,
+                              label: l.twoPage,
+                              icon: KoverIcons.twoPageReaderMode,
+                            ),
                         ],
                         onChanged: (newValue) async {
                           await ref

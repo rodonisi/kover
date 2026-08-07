@@ -132,10 +132,11 @@ class EpubReader extends HookConsumerWidget {
                             scrollDirection: switch (readerMode) {
                               .horizontal => .horizontal,
                               .vertical => .vertical,
+                              .spreads => .horizontal,
                             },
                             reverse:
                                 commonSettings.readDirection == .rightToLeft &&
-                                readerMode == .horizontal,
+                                readerMode != .vertical,
                             physics: const NeverScrollableScrollPhysics(),
                             onPageChanged: (newPage) {
                               ref.read(nav.notifier).jumpToPage(newPage);
@@ -148,8 +149,8 @@ class EpubReader extends HookConsumerWidget {
                                 reverse:
                                     commonSettings.readDirection ==
                                         .rightToLeft &&
-                                    readerMode == .horizontal,
-                                vertical: readerMode == .vertical,
+                                    readerMode != .vertical,
+                                mode: readerMode,
                                 outerController: controller,
                                 onSelectionChanged: (selected) {
                                   if (selected != hasSelection.value) {
@@ -182,7 +183,7 @@ class _Page extends HookConsumerWidget {
   final int chapterId;
   final int page;
   final bool reverse;
-  final bool vertical;
+  final EpubReaderMode mode;
   final PageController outerController;
   final void Function(bool)? onSelectionChanged;
 
@@ -190,8 +191,8 @@ class _Page extends HookConsumerWidget {
     required this.seriesId,
     required this.chapterId,
     required this.page,
+    required this.mode,
     this.reverse = false,
-    this.vertical = false,
     this.onSelectionChanged,
     required this.outerController,
   });
@@ -232,10 +233,18 @@ class _Page extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final container = ProviderScope.containerOf(context);
+    final mediaQueryData = MediaQuery.of(context);
+    final themeData = Theme.of(context);
+    final textDirection = Directionality.of(context);
+    final locale = Localizations.localeOf(context);
     final imageCache = useMemoized(
-      () => CachedImageFactory(maxHeight: MediaQuery.of(context).size.height),
+      () => CachedImageFactory(maxHeight: mediaQueryData.size.height),
       [],
     );
+    final vertical = mode == .vertical;
+    final spreads = mode == .spreads;
+
     final provider = epubReflowProvider(
       seriesId: seriesId,
       chapterId: chapterId,
@@ -253,6 +262,14 @@ class _Page extends HookConsumerWidget {
         seriesId: seriesId,
       ).select(
         (value) => value.whenData((data) => data.navigationGersturesEnabled),
+      ),
+    );
+
+    final readDirection = ref.watch(
+      commonReaderSettingsProvider(
+        seriesId: seriesId,
+      ).select(
+        (value) => value.requireValue.readDirection,
       ),
     );
 
@@ -278,14 +295,19 @@ class _Page extends HookConsumerWidget {
             ref
                 .read(provider.notifier)
                 .startReflow(
-                  viewport: constraints.biggest,
+                  viewport: spreads
+                      ? Size(
+                          constraints.maxWidth / 2,
+                          constraints.maxHeight,
+                        )
+                      : constraints.biggest,
                   devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
                   measureBuilder: (html, styles) => EpubMeasureRoot(
-                    container: ProviderScope.containerOf(context),
-                    mediaQueryData: MediaQuery.of(context),
-                    themeData: Theme.of(context),
-                    textDirection: Directionality.of(context),
-                    locale: Localizations.localeOf(context),
+                    container: container,
+                    mediaQueryData: mediaQueryData,
+                    themeData: themeData,
+                    textDirection: textDirection,
+                    locale: locale,
                     seriesId: seriesId,
                     html: html,
                     styles: styles,
@@ -306,11 +328,14 @@ class _Page extends HookConsumerWidget {
             final count = reflowState.status == .measuring
                 ? reflowState.subpages.length + 1
                 : reflowState.subpages.length;
+            final spreadCount = (count + 1) ~/ 2;
 
             return HookConsumer(
               builder: (context, ref, child) {
                 final controller = usePageController(
-                  initialPage: navigationState.subpage,
+                  initialPage: spreads
+                      ? navigationState.subpage ~/ 2
+                      : navigationState.subpage,
                 );
                 final scrollPhysics = navigationGestures && !reduceAnimations
                     ? const AlwaysScrollableScrollPhysics(
@@ -324,7 +349,7 @@ class _Page extends HookConsumerWidget {
                       (data) {
                         if (data.page != page || data.fromObserver) return null;
 
-                        return data.subpage;
+                        return spreads ? data.subpage ~/ 2 : data.subpage;
                       },
                     ),
                   ),
@@ -353,6 +378,31 @@ class _Page extends HookConsumerWidget {
                   },
                 );
 
+                Widget buildColumn(int index) {
+                  if (index >= reflowState.subpages.length) {
+                    if (reflowState.status == .measuring &&
+                        index == reflowState.subpages.length) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    return const SizedBox.shrink();
+                  }
+
+                  return OverflowBox(
+                    maxHeight: double.infinity,
+                    alignment: .topCenter,
+                    child: RenderEpubContent(
+                      seriesId: seriesId,
+                      html: reflowState.subpages[index].outerHtml,
+                      styles: reflowState.page.styles,
+                      imageCache: imageCache,
+                      verticalPadding: !vertical,
+                    ),
+                  );
+                }
+
                 return SelectionArea(
                   onSelectionChanged: (selection) {
                     onSelectionChanged?.call(
@@ -371,7 +421,7 @@ class _Page extends HookConsumerWidget {
                       pageSnapping: !vertical,
                       clipBehavior: .none,
                       reverse: reverse,
-                      itemCount: count,
+                      itemCount: spreads ? spreadCount : count,
                       physics: scrollPhysics,
                       onPageChanged: (newPage) {
                         if (navigationState.page != page) return;
@@ -379,26 +429,24 @@ class _Page extends HookConsumerWidget {
                         ref
                             .read(navigationProvider.notifier)
                             .jumpToSubpage(
-                              newPage,
+                              spreads ? newPage * 2 : newPage,
                               fromObserver: true,
                             );
                       },
                       itemBuilder: (context, index) {
-                        if (index >= reflowState.subpages.length) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                        if (!spreads) {
+                          return buildColumn(index);
                         }
 
-                        return OverflowBox(
-                          maxHeight: double.infinity,
-                          child: RenderEpubContent(
-                            seriesId: seriesId,
-                            html: reflowState.subpages[index].outerHtml,
-                            styles: reflowState.page.styles,
-                            imageCache: imageCache,
-                            verticalPadding: !vertical,
-                          ),
+                        return Row(
+                          textDirection: switch (readDirection) {
+                            .leftToRight => .ltr,
+                            .rightToLeft => .rtl,
+                          },
+                          children: [
+                            Expanded(child: buildColumn(index * 2)),
+                            Expanded(child: buildColumn(index * 2 + 1)),
+                          ],
                         );
                       },
                     ),

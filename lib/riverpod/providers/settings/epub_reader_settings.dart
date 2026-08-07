@@ -42,7 +42,7 @@ enum EpubTheme {
   black,
 }
 
-enum EpubReaderMode { horizontal, vertical }
+enum EpubReaderMode { horizontal, vertical, spreads }
 
 @freezed
 sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {

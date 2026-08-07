@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
+import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 
 class ReaderProgress extends ConsumerWidget {
   final int seriesId;
@@ -41,16 +42,34 @@ class SubpageProgress extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+
     final reader = ref.watch(
       epubNavigationProvider(seriesId: seriesId, chapterId: chapterId),
     );
+
+    final spreads =
+        ref
+            .watch(
+              epubReaderSettingsProvider(seriesId: seriesId),
+            )
+            .whenOrNull(data: (data) => data.mode == .spreads) ??
+        false;
 
     final progress = reader.whenOrNull(
       data: (data) => (data.page + 1) / data.totalPages,
     );
 
     final subpageProgress = reader.whenOrNull(
-      data: (data) => (data.subpage + 1) / data.totalSubpages,
+      data: (data) {
+        final subpage = spreads ? data.subpage ~/ 2 : data.subpage;
+        final total = spreads
+            ? (data.totalSubpages + 1) ~/ 2
+            : data.totalSubpages;
+
+        if (total == 0) return null;
+
+        return (subpage + 1) / total;
+      },
     );
 
     final screenWidth = MediaQuery.sizeOf(context).width;
