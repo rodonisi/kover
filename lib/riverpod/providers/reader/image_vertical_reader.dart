@@ -24,7 +24,6 @@ sealed class VerticalReaderCacheState with _$VerticalReaderCacheState {
 class VerticalReaderCache extends _$VerticalReaderCache {
   final _pipeline = HeadlessMeasurePipeline();
 
-  int? _measureUpToPage;
   bool _measuring = false;
   double? _measuredWidth;
 
@@ -40,7 +39,7 @@ class VerticalReaderCache extends _$VerticalReaderCache {
 
   /// Measures the heights of all pages before [currentPage] that are not
   /// cached yet. Safe to call repeatedly;
-  Future<void> startMeasuring({
+  Future<void> measurePreviousPages({
     required int currentPage,
     required Size viewport,
     required double devicePixelRatio,
@@ -48,8 +47,6 @@ class VerticalReaderCache extends _$VerticalReaderCache {
     required double refreshRate,
   }) async {
     if (viewport.isEmpty) return;
-
-    _measureUpToPage = currentPage;
 
     if (_measuring) return;
     _measuring = true;
@@ -59,12 +56,18 @@ class VerticalReaderCache extends _$VerticalReaderCache {
       // width changed so stale heights never mix with fresh ones.
       if (_measuredWidth != viewport.width) {
         _measuredWidth = viewport.width;
-        state = const AsyncValue.data(
+        state = const .data(
           VerticalReaderCacheState(cachedHeights: {}),
         );
       }
 
-      if (_measureUpToPage == null || _measureUpToPage! <= 0) return;
+      final current = await future;
+      final missingPages = List.generate(
+        currentPage,
+        (index) => index,
+      ).where((page) => !current.cachedHeights.containsKey(page));
+
+      if (missingPages.isEmpty) return;
 
       _pipeline.attach(
         size: viewport,
@@ -76,8 +79,7 @@ class VerticalReaderCache extends _$VerticalReaderCache {
         milliseconds: (1000 / refreshRate).round(),
       );
 
-      var page = 0;
-      while (page < (_measureUpToPage ?? 0)) {
+      for (final page in missingPages) {
         if (!ref.mounted) return;
 
         final current = await future;
@@ -87,7 +89,6 @@ class VerticalReaderCache extends _$VerticalReaderCache {
             horizontalPadding: horizontalPadding,
           );
         }
-        page++;
 
         // Yield to the event loop periodically to keep the UI responsive.
         if (stopwatch.elapsed >= maxChunkDuration) {

@@ -199,8 +199,7 @@ class VerticalContinuousReader extends HookConsumerWidget {
                           sliver: SliverPadding(
                             padding: EdgeInsets.symmetric(
                               horizontal: settings.verticalReaderPadding,
-                              vertical:
-                                  gestureController.verticalScrollPadding,
+                              vertical: gestureController.verticalScrollPadding,
                             ),
                             sliver: SliverList.separated(
                               itemCount: nav.totalPages,
@@ -225,26 +224,8 @@ class VerticalContinuousReader extends HookConsumerWidget {
 
             return LayoutBuilder(
               builder: (context, constraints) {
-                final cache = ref.watch(
-                  verticalReaderCacheProvider(
-                    seriesId: seriesId,
-                    chapterId: chapterId,
-                  ),
-                );
-
-                final cacheMissingBeforeCurrent =
-                    cache.value?.cachedHeights == null
-                    ? nav.currentPage > 0
-                    : List.generate(
-                        nav.currentPage,
-                        (index) => index,
-                      ).any(
-                        (index) =>
-                            !cache.value!.cachedHeights.containsKey(index),
-                      );
-
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (!context.mounted || !cacheMissingBeforeCurrent) return;
+                  if (!context.mounted) return;
                   ref
                       .read(
                         verticalReaderCacheProvider(
@@ -252,11 +233,12 @@ class VerticalContinuousReader extends HookConsumerWidget {
                           chapterId: chapterId,
                         ).notifier,
                       )
-                      .startMeasuring(
+                      .measurePreviousPages(
                         currentPage: nav.currentPage,
                         viewport: constraints.biggest,
-                        devicePixelRatio:
-                            MediaQuery.devicePixelRatioOf(context),
+                        devicePixelRatio: MediaQuery.devicePixelRatioOf(
+                          context,
+                        ),
                         horizontalPadding: settings.verticalReaderPadding,
                         refreshRate: View.of(context).display.refreshRate,
                       );

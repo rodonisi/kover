@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:kover/utils/headless_measure_pipeline.dart';
 
 /// The widget tree measured by the [HeadlessMeasurePipeline] for a single
-/// vertical-reader page.
+/// image.
 class ImageMeasureRoot extends StatelessWidget {
   final ui.Image image;
   final double horizontalPadding;

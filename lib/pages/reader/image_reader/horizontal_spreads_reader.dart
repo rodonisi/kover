@@ -90,7 +90,7 @@ class _SpreadsContent extends ConsumerWidget {
                       chapterId: chapterId,
                     ).notifier,
                   )
-                  .startChecking(
+                  .checkLandscapePages(
                     viewport: constraints.biggest,
                     devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
                     refreshRate: View.of(context).display.refreshRate,

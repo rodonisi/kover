@@ -29,9 +29,6 @@ sealed class SpreadsState with _$SpreadsState {
 class Spreads extends _$Spreads {
   final _pipeline = HeadlessMeasurePipeline();
 
-  /// The furthest page the checking loop should cover. Updated on every
-  /// [startChecking] call so pages reached mid-run are picked up too.
-  int? _checkUpToPage;
   bool _checking = false;
 
   @override
@@ -62,17 +59,16 @@ class Spreads extends _$Spreads {
     return SpreadsState(spreads: spreads, checkedPages: {});
   }
 
-  /// Decodes and checks all pages before [targetPage] that are not rendered
-  /// yet, using the headless [_pipeline]. Safe to call repeatedly; concurrent
-  /// calls are coalesced and mark pages rendered/landscape as they go.
-  Future<void> startChecking({
+  /// Check all pages before the current page for landscape orientation. This
+  /// is safe to call repeatedly.
+  Future<void> checkLandscapePages({
     required Size viewport,
     required double devicePixelRatio,
     required double refreshRate,
   }) async {
     if (viewport.isEmpty) return;
 
-    _checkUpToPage = (await ref.read(
+    final targetPage = (await ref.read(
       readerNavigationProvider(
         seriesId: seriesId,
         chapterId: chapterId,
@@ -83,7 +79,14 @@ class Spreads extends _$Spreads {
     _checking = true;
 
     try {
-      if (_checkUpToPage == null || _checkUpToPage! <= 0) return;
+      final current = await future;
+      final missingPages = List.generate(targetPage, (index) => index).where((
+        page,
+      ) {
+        return !current.checkedPages.contains(page);
+      });
+
+      if (missingPages.isEmpty) return;
 
       _pipeline.attach(
         size: viewport,
@@ -95,11 +98,6 @@ class Spreads extends _$Spreads {
         milliseconds: (1000 / refreshRate).round(),
       );
 
-      final current = await future;
-      final missingPages = List.generate(_checkUpToPage!, (index) => index)
-          .where((page) {
-            return !current.checkedPages.contains(page);
-          });
       for (final page in missingPages) {
         if (!ref.mounted) return;
 
