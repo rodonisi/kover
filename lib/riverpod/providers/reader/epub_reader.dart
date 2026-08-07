@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:html/dom.dart';
 import 'package:kover/models/page_content.dart';
 import 'package:kover/riverpod/providers/book.dart';
+import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
@@ -77,15 +78,12 @@ class EpubReflow extends _$EpubReflow {
       });
     });
 
-    final readerState = await ref.read(
-      readerProvider(
-        seriesId: seriesId,
-        chapterId: chapterId,
-      ).future,
+    final progress = await ref.read(
+      bookProgressProvider(chapterId: chapterId).future,
     );
 
-    if (page == readerState.initialPage) {
-      _resumeScrollId = readerState.bookScrollId;
+    if (progress != null && page == progress.pageNum) {
+      _resumeScrollId = progress.bookScrollId;
     }
 
     if (!ref.mounted) throw StateError('epubReflowProvider disposed');
@@ -518,6 +516,7 @@ class EpubNavigation extends _$EpubNavigation {
           final current = await future;
 
           if (data.status == .measuring && prev?.value?.status == .done) {
+            _resumed = false;
             state = AsyncData(
               current.copyWith(
                 subpage: 0,

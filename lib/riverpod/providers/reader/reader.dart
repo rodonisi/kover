@@ -9,6 +9,7 @@ import 'package:kover/riverpod/providers/chapter.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
+import 'package:kover/utils/extensions/ref.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -83,40 +84,42 @@ class Reader extends _$Reader {
     String? scrollId,
     bool handleCompletion = true,
   }) async {
-    if (state.isLoading) return;
-    final current = await future;
+    await ref.withKeepAlive(() async {
+      if (state.isLoading) return;
+      final current = await future;
 
-    _saveProgressDebounce?.cancel();
+      _saveProgressDebounce?.cancel();
 
-    _saveProgressDebounce = Timer(200.ms, () async {
-      if (!ref.mounted) return;
+      _saveProgressDebounce = Timer(200.ms, () async {
+        if (!ref.mounted) return;
 
-      if (handleCompletion && page >= current.totalPages - 1) {
-        await markComplete();
-        return;
-      }
+        if (handleCompletion && page >= current.totalPages - 1) {
+          await markComplete();
+          return;
+        }
 
-      await ref
-          .read(readerRepositoryProvider)
-          .saveProgress(
-            ProgressModel(
-              libraryId: current.libraryId,
-              seriesId: current.series.id,
-              volumeId: current.volumeId,
-              chapterId: current.chapter.id,
-              pageNum: page.clamp(0, current.totalPages - 1),
-              bookScrollId: scrollId,
-            ),
-          );
+        await ref
+            .read(readerRepositoryProvider)
+            .saveProgress(
+              ProgressModel(
+                libraryId: current.libraryId,
+                seriesId: current.series.id,
+                volumeId: current.volumeId,
+                chapterId: current.chapter.id,
+                pageNum: page.clamp(0, current.totalPages - 1),
+                bookScrollId: scrollId,
+              ),
+            );
 
-      log.debug(
-        'saved progress',
-        attributes: {
-          'page': page,
-          'scroll_id': scrollId ?? 'null',
-          'chapter_id': current.chapter.id,
-        },
-      );
+        log.debug(
+          'saved progress',
+          attributes: {
+            'page': page,
+            'scroll_id': scrollId ?? 'null',
+            'chapter_id': current.chapter.id,
+          },
+        );
+      });
     });
   }
 
