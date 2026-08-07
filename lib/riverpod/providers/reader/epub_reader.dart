@@ -333,7 +333,7 @@ class EpubNavigation extends _$EpubNavigation {
   var _resumed = false;
   var _wasAheadReflow = false;
   var _spreads = false;
-  var _spreadStep = 1;
+  int get _step => _spreads ? 2 : 1;
 
   @override
   Future<EpubNavigationState> build({
@@ -351,7 +351,6 @@ class EpubNavigation extends _$EpubNavigation {
       (prev, next) {
         next.whenData((mode) {
           _spreads = mode == .spreads;
-          _spreadStep = _spreads ? 2 : 1;
         });
       },
       fireImmediately: true,
@@ -620,11 +619,11 @@ class EpubNavigation extends _$EpubNavigation {
 
   Future<void> nextPage() async {
     final current = await future;
-    await jumpToSubpage(current.subpage + _spreadStep);
+    await jumpToSubpage(current.subpage + _step);
   }
 
   Future<void> previousPage() async {
     final current = await future;
-    await jumpToSubpage(current.subpage - _spreadStep);
+    await jumpToSubpage(current.subpage - _step);
   }
 }
