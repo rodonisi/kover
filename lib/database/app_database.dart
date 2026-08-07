@@ -144,6 +144,15 @@ class AppDatabase extends _$AppDatabase {
     return MigrationStrategy(
       onUpgrade: stepByStep(
         from1To2: (m, schema) async {
+          // Clear legacy credentials entry from database if present.
+          final rows = await (delete(
+            riverpodStorage,
+          )..where((tbl) => tbl.key.equals(Credentials.persistKey))).go();
+
+          if (rows > 0) {
+            await vacuum();
+          }
+
           await transaction(() async {
             await m.createTable(schema.serverSettings);
           });
@@ -204,16 +213,6 @@ class AppDatabase extends _$AppDatabase {
           });
         },
       ),
-      beforeOpen: (details) async {
-        // Clear legacy credentials entry from database if present.
-        final rows = await (delete(
-          riverpodStorage,
-        )..where((tbl) => tbl.key.equals(Credentials.persistKey))).go();
-
-        if (rows > 0) {
-          await vacuum();
-        }
-      },
     );
   }
 
