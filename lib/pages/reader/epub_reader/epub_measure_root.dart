@@ -15,6 +15,7 @@ class EpubMeasureRoot extends StatelessWidget {
   final String html;
   final Map<String, Map<String, String>> styles;
   final CachedImageFactory? imageCache;
+  final bool verticalPadding;
 
   const EpubMeasureRoot({
     super.key,
@@ -27,6 +28,7 @@ class EpubMeasureRoot extends StatelessWidget {
     required this.html,
     required this.styles,
     this.imageCache,
+    this.verticalPadding = true,
   });
 
   @override
@@ -40,6 +42,7 @@ class EpubMeasureRoot extends StatelessWidget {
             styles: styles,
             html: html,
             imageCache: imageCache,
+            verticalPadding: verticalPadding,
           ),
         ),
       ],

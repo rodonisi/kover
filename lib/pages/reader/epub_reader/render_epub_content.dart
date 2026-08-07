@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
+import 'package:kover/utils/extensions/document_fragment.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
 class RenderEpubContent extends ConsumerWidget {
@@ -11,6 +12,7 @@ class RenderEpubContent extends ConsumerWidget {
   final String html;
   final Map<String, Map<String, String>> styles;
   final CachedImageFactory? imageCache;
+  final bool verticalPadding;
 
   const RenderEpubContent({
     super.key,
@@ -18,6 +20,7 @@ class RenderEpubContent extends ConsumerWidget {
     required this.html,
     required this.styles,
     this.imageCache,
+    this.verticalPadding = true,
   });
 
   @override
@@ -43,7 +46,10 @@ class RenderEpubContent extends ConsumerWidget {
 
         return SafeArea(
           child: Padding(
-            padding: EdgeInsets.all(epubSettings.marginSize),
+            padding: EdgeInsets.symmetric(
+              horizontal: epubSettings.marginSize,
+              vertical: verticalPadding ? epubSettings.marginSize : 0,
+            ),
             child: HtmlWidget(
               html,
               buildAsync: false,
@@ -58,8 +64,12 @@ class RenderEpubContent extends ConsumerWidget {
                   s.addAll(mergedStyles['.$className'] ?? {});
                 }
 
-                if (element.localName == 'p' &&
-                    element.nextElementSibling != null) {
+                final considerLast =
+                    !verticalPadding &&
+                    element.nextElementSibling != null &&
+                    element.nextElementSibling!.hasVisibleNodes;
+
+                if (element.localName == 'p' && considerLast) {
                   final paragraphMargin =
                       'margin-bottom: ${epubSettings.paragraphSpacing}px';
 
