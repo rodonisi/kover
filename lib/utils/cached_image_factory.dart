@@ -29,13 +29,11 @@ class CachedImageFactory extends WidgetFactory {
       constraints: BoxConstraints(
         maxHeight: maxHeight ?? double.infinity,
       ),
-      child: Center(
-        child: Image(
-          key: ValueKey(hash),
-          image: provider,
-          gaplessPlayback: true,
-          fit: .fill,
-        ),
+      child: Image(
+        key: ValueKey(hash),
+        image: provider,
+        gaplessPlayback: true,
+        fit: .fill,
       ),
     );
   }
