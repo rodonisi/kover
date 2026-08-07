@@ -4,8 +4,9 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 class CachedImageFactory extends WidgetFactory {
   // final BuildContext context;
   final Map<int, MemoryImage> _cache = {};
+  final double? maxHeight;
 
-  CachedImageFactory();
+  CachedImageFactory({this.maxHeight});
 
   @override
   Widget? buildImageWidget(
@@ -24,11 +25,18 @@ class CachedImageFactory extends WidgetFactory {
 
     final provider = _cache[hash] ??= MemoryImage(bytes);
 
-    return Image(
-      key: ValueKey(hash),
-      image: provider,
-      gaplessPlayback: true,
-      fit: .fill,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: maxHeight ?? double.infinity,
+      ),
+      child: Center(
+        child: Image(
+          key: ValueKey(hash),
+          image: provider,
+          gaplessPlayback: true,
+          fit: .fill,
+        ),
+      ),
     );
   }
 }
