@@ -24,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Get FVM Configuration 🔧
         uses: kuhnroyal/flutter-fvm-config-action@v3

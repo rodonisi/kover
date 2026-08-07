@@ -18,13 +18,13 @@ jobs:
       build_number: ${{ steps.version.outputs.BUILD_NUMBER }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Get semantic version
         id: versioning
-        uses: PaulHatch/semantic-version@v6.0.2
+        uses: PaulHatch/semantic-version@v6.0.3
         with:
           bump_each_commit: false
           bump_each_commit_patch_pattern: "fix"
