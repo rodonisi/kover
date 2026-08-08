@@ -3,12 +3,14 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/database/dao/volumes_dao.dart';
 import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/libraries.dart';
+import 'package:kover/database/tables/on_deck_removal.dart';
 import 'package:kover/database/tables/progress.dart';
 import 'package:kover/database/tables/series.dart';
 import 'package:kover/database/tables/server_settings.dart';
 import 'package:kover/database/tables/volumes.dart';
 import 'package:kover/database/tables/want_to_read.dart';
 import 'package:kover/utils/data_constants.dart';
+import 'package:kover/utils/extensions/iterable.dart';
 import 'package:rxdart/rxdart.dart';
 
 part 'series_dao.g.dart';
@@ -23,6 +25,7 @@ part 'series_dao.g.dart';
     WantToRead,
     ServerSettings,
     Libraries,
+    OnDeckRemoval,
   ],
 )
 class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
@@ -307,8 +310,6 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         );
   }
 
-  /// Watch series on deck.
-  ///
   /// A series is on deck when:
   /// - The user has read some pages but not all (partially read)
   /// - AND either:
@@ -316,10 +317,57 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   ///   - A chapter was added within [ServerSettings.onDeckUpdateDays] days
   ///
   /// Ordered by most recent reading activity, then most recently updated.
-  Stream<List<SeriesData>> watchOnDeck() {
+  MultiSelectable<SeriesData> _onDeckQuery({
+    required int progressDays,
+    required int updateDays,
+  }) {
     final totalPagesRead = readingProgress.pagesRead.sum();
     final latestReadDate = readingProgress.lastModified.max();
 
+    final cutoffProgress = DateTime.now().subtract(
+      Duration(days: progressDays),
+    );
+    final cutoffLastAdded = DateTime.now().subtract(Duration(days: updateDays));
+
+    final query =
+        select(series).join([
+            innerJoin(
+              readingProgress,
+              readingProgress.seriesId.equalsExp(series.id),
+            ),
+            innerJoin(
+              libraries,
+              libraries.id.equalsExp(series.libraryId),
+            ),
+          ])
+          ..where(
+            libraries.includeInDashboard.equals(true) &
+                notExistsQuery(
+                  select(onDeckRemoval)
+                    ..where((tbl) => tbl.seriesId.equalsExp(series.id)),
+                ),
+          )
+          ..addColumns([totalPagesRead, latestReadDate])
+          ..groupBy(
+            [series.id],
+            having:
+                totalPagesRead.isBiggerThanValue(0) &
+                totalPagesRead.isSmallerThan(series.pages) &
+                (latestReadDate.isBiggerOrEqualValue(cutoffProgress) |
+                    series.lastChapterAdded.isBiggerOrEqualValue(
+                      cutoffLastAdded,
+                    )),
+          )
+          ..orderBy([
+            OrderingTerm.desc(latestReadDate),
+            OrderingTerm.desc(series.lastChapterAdded),
+          ]);
+
+    return query.map((row) => row.readTable(series));
+  }
+
+  /// Watch series on deck.
+  Stream<List<SeriesData>> watchOnDeck() {
     return managers.serverSettings
         .filter((f) => f.key.equals(DataConstants.serverSettingsKey))
         .watchSingleOrNull()
@@ -329,43 +377,28 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
           final updateDays =
               setting?.onDeckUpdateDays ?? DataConstants.onDeckUpdateDays;
 
-          final cutoffProgress = DateTime.now().subtract(
-            Duration(days: progressDays),
-          );
-          final cutoffLastAdded = DateTime.now().subtract(
-            Duration(days: updateDays),
-          );
-
-          final query =
-              select(series).join([
-                  innerJoin(
-                    readingProgress,
-                    readingProgress.seriesId.equalsExp(series.id),
-                  ),
-                  innerJoin(
-                    libraries,
-                    libraries.id.equalsExp(series.libraryId),
-                  ),
-                ])
-                ..where(libraries.includeInDashboard.equals(true))
-                ..addColumns([totalPagesRead, latestReadDate])
-                ..groupBy(
-                  [series.id],
-                  having:
-                      totalPagesRead.isBiggerThanValue(0) &
-                      totalPagesRead.isSmallerThan(series.pages) &
-                      (latestReadDate.isBiggerOrEqualValue(cutoffProgress) |
-                          series.lastChapterAdded.isBiggerOrEqualValue(
-                            cutoffLastAdded,
-                          )),
-                )
-                ..orderBy([
-                  OrderingTerm.desc(latestReadDate),
-                  OrderingTerm.desc(series.lastChapterAdded),
-                ]);
-
-          return query.map((row) => row.readTable(series)).watch();
+          return _onDeckQuery(
+            progressDays: progressDays,
+            updateDays: updateDays,
+          ).watch();
         });
+  }
+
+  /// Get series on deck.
+  Future<List<SeriesData>> getOnDeck() async {
+    final setting = await managers.serverSettings
+        .filter((f) => f.key.equals(DataConstants.serverSettingsKey))
+        .getSingleOrNull();
+
+    final progressDays =
+        setting?.onDeckProgressDays ?? DataConstants.onDeckProgressDays;
+    final updateDays =
+        setting?.onDeckUpdateDays ?? DataConstants.onDeckUpdateDays;
+
+    return await _onDeckQuery(
+      progressDays: progressDays,
+      updateDays: updateDays,
+    ).get();
   }
 
   /// Watch recently updated series
@@ -574,9 +607,52 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     );
   }
 
+  Future<List<OnDeckRemovalData>> getDirtyOnDeckRemovalSeriesIds() async {
+    return await managers.onDeckRemoval.filter((f) => f.dirty(true)).get();
+  }
+
   /// Clear the want to read list
   Future<void> clearWantToRead() async {
     await delete(wantToRead).go();
+  }
+
+  /// Clear dirty flags for OnDeckRemoval entries for series [seriesIds]
+  Future<void> clearDirtyOnDeckRemovalForSeries(Iterable<int> seriesIds) async {
+    await transaction(() async {
+      for (final batch in seriesIds.chunked(100)) {
+        await (update(onDeckRemoval)..where((tbl) => tbl.seriesId.isIn(batch)))
+            .write(const OnDeckRemovalCompanion(dirty: Value(false)));
+      }
+    });
+  }
+
+  /// Remove on deck removal entry for series [seriesId] if present.
+  Future<void> clearOnDeckRemovalForSeries(int seriesId) async {
+    await managers.onDeckRemoval
+        .filter((f) => f.seriesId.id(seriesId))
+        .delete();
+  }
+
+  /// Remove batch from on deck removal table for series [seriesIds] if present
+  /// and clean.
+  Future<void> clearOnDeckRemovalForSeriesBatch(
+    Iterable<int> seriesIds, {
+    bool cleanOnly = true,
+  }) async {
+    final query = delete(onDeckRemoval)
+      ..where((tbl) => tbl.seriesId.isIn(seriesIds));
+
+    if (cleanOnly) {
+      query.where((tbl) => tbl.dirty.equals(false));
+    }
+
+    await query.go();
+  }
+
+  Future<void> upsertOnDeckRemovalBatch(
+    Iterable<OnDeckRemovalCompanion> entries,
+  ) async {
+    await batch((b) => b.insertAllOnConflictUpdate(onDeckRemoval, entries));
   }
 }
 
