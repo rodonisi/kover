@@ -337,7 +337,10 @@ class _Page extends HookConsumerWidget {
                       ? navigationState.subpage ~/ 2
                       : navigationState.subpage,
                 );
-                final scrollPhysics = navigationGestures && !reduceAnimations
+                final bool canScroll =
+                    navigationGestures &&
+                    (!reduceAnimations || mode == .vertical);
+                final scrollPhysics = canScroll
                     ? const AlwaysScrollableScrollPhysics(
                         parent: ClampingScrollPhysics(),
                       )
