@@ -53,6 +53,7 @@ sealed class KoverIcons {
   static const IconData copy = LucideIcons.copy;
   static const IconData language = LucideIcons.languages;
   static const IconData trash = LucideIcons.trash;
+  static const IconData remove = LucideIcons.x;
   static const IconData minus = LucideIcons.minus;
   static const IconData plus = LucideIcons.plus;
   static const IconData dragHandle = LucideIcons.gripHorizontal;

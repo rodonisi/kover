@@ -9,11 +9,13 @@ import 'package:kover/widgets/lists/series_sliver_grid.dart';
 class CollapsibleSection extends HookConsumerWidget {
   final String title;
   final List<SeriesModel> series;
+  final bool canRemoveOnDeck;
 
   const CollapsibleSection({
     super.key,
     required this.title,
     required this.series,
+    this.canRemoveOnDeck = false,
   });
 
   @override
@@ -61,6 +63,7 @@ class CollapsibleSection extends HookConsumerWidget {
           sliver: SeriesSliverGrid(
             series: series,
             rowCount: toShow,
+            canRemoveOnDeck: canRemoveOnDeck,
             onCrossAxisCountChanged: (rowLength) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 showCollapseButton.value = total > rowLength;

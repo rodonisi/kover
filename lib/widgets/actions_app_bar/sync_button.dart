@@ -151,6 +151,7 @@ String _phaseLabel(AppLocalizations l, SyncPhase phase) {
     allSeries: () => l.syncingAllSeries,
     metadata: () => l.syncingMetadata,
     tocs: () => l.syncingTocs,
+    onDeck: () => l.syncingOnDeck,
     recentlyAdded: () => l.syncingRecentlyAdded,
     recentlyUpdated: () => l.syncingRecentlyUpdated,
     libraries: () => l.syncingLibraries,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/extensions/iterable.dart';
 import 'package:kover/widgets/context_menu/context_menu_button.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -10,6 +11,7 @@ class ActionsContextMenu extends StatelessWidget {
   final VoidCallback? onMarkUnread;
   final VoidCallback? onAddWantToRead;
   final VoidCallback? onRemoveWantToRead;
+  final VoidCallback? onRemoveOnDeck;
   final VoidCallback? onDownload;
   final VoidCallback? onRemoveDownload;
   final VoidCallback? onRefreshMetadata;
@@ -22,6 +24,7 @@ class ActionsContextMenu extends StatelessWidget {
     this.onMarkUnread,
     this.onAddWantToRead,
     this.onRemoveWantToRead,
+    this.onRemoveOnDeck,
     this.onDownload,
     this.onRemoveDownload,
     this.onRefreshMetadata,
@@ -38,6 +41,7 @@ class ActionsContextMenu extends StatelessWidget {
         onMarkUnread: onMarkUnread,
         onAddWantToRead: onAddWantToRead,
         onRemoveWantToRead: onRemoveWantToRead,
+        onRemoveOnDeck: onRemoveOnDeck,
         onDownload: onDownload,
         onRemoveDownload: onRemoveDownload,
         onRefreshMetadata: onRefreshMetadata,
@@ -109,6 +113,7 @@ ContextMenu _getContextMenu({
   VoidCallback? onMarkUnread,
   VoidCallback? onAddWantToRead,
   VoidCallback? onRemoveWantToRead,
+  VoidCallback? onRemoveOnDeck,
   VoidCallback? onDownload,
   VoidCallback? onRemoveDownload,
   VoidCallback? onRefreshMetadata,
@@ -134,11 +139,16 @@ ContextMenu _getContextMenu({
     onRefreshMetadata: onRefreshMetadata,
     onRefreshCovers: onRefreshCovers,
   );
+  final removeOnDeckEntries = _removeOnDeckEntries(
+    context: context,
+    onRemoveOnDeck: onRemoveOnDeck,
+  );
   return ContextMenu(
     entries: _withDividers(
       [
         wantToReadEntries,
         markReadEntries,
+        removeOnDeckEntries,
         downloadEntries,
         refreshEntries,
       ],
@@ -238,6 +248,21 @@ List<ContextMenuEntry> _refreshEntries({
         label: Text(l.refreshCovers),
         icon: const Icon(LucideIcons.imageDown),
         onSelected: (_) => onRefreshCovers(),
+      ),
+  ];
+}
+
+List<ContextMenuEntry> _removeOnDeckEntries({
+  required BuildContext context,
+  VoidCallback? onRemoveOnDeck,
+}) {
+  final l = AppLocalizations.of(context);
+  return [
+    if (onRemoveOnDeck != null)
+      MenuItem(
+        label: Text(l.removeFromOnDeck),
+        icon: const Icon(KoverIcons.remove),
+        onSelected: (_) => onRemoveOnDeck(),
       ),
   ];
 }

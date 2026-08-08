@@ -746,5 +746,13 @@
     "copiedToClipboard": "Copied to clipboard",
     "@copiedToClipboard": {
       "description": "Message shown when a value is copied to the clipboard"
+    },
+    "removeFromOnDeck": "Remove From On Deck",
+    "@removeFromOnDeck": {
+      "description": "Label for the remove from on deck context menu item" 
+    },
+    "syncingOnDeck": "Syncing On Deck",
+    "@syncingOnDeck": {
+      "description": "Label for the syncing on deck phase"
     }
 }

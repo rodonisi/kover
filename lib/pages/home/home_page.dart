@@ -56,7 +56,11 @@ class OnDeck extends ConsumerWidget {
 
     return AsyncSliver(
       asyncValue: onDeck,
-      data: (data) => CollapsibleSection(title: l.onDeck, series: data),
+      data: (data) => CollapsibleSection(
+        title: l.onDeck,
+        series: data,
+        canRemoveOnDeck: true,
+      ),
     );
   }
 }
