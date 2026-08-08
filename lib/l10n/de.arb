@@ -745,5 +745,13 @@
     "copiedToClipboard": "In die Zwischenablage kopiert",
     "@copiedToClipboard": {
         "description": "Message shown when a value is copied to the clipboard"
+    },
+    "removeFromOnDeck": "Von Weiterlesen entfernen",
+    "@removeFromOnDeck": {
+        "description": "Label for the remove from on deck context menu item"
+    },
+    "syncingOnDeck": "Synchronisiere Weiterlesen",
+    "@syncingOnDeck": {
+        "description": "Label for the syncing on deck phase"
     }
 }
