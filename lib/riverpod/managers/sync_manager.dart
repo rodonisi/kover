@@ -28,6 +28,7 @@ sealed class SyncPhase with _$SyncPhase {
   const factory SyncPhase.allSeries() = AllSeries;
   const factory SyncPhase.metadata() = Metadata;
   const factory SyncPhase.tocs() = Tocs;
+  const factory SyncPhase.onDeck() = OnDeck;
   const factory SyncPhase.recentlyAdded() = RecentlyAdded;
   const factory SyncPhase.recentlyUpdated() = RecentlyUpdated;
   const factory SyncPhase.libraries() = Libraries;
@@ -104,6 +105,8 @@ class SyncManager extends _$SyncManager {
         () async => await _engine.syncMetadata(),
     tocs: () =>
         () async => await _engine.syncTocs(),
+    onDeck: () =>
+        () async => await _engine.syncOnDeck(),
     recentlyAdded: () =>
         () async => await _engine.syncRecentlyAdded(),
     recentlyUpdated: () =>
@@ -147,9 +150,10 @@ class SyncManager extends _$SyncManager {
     final settings = await ref.read(downloadSettingsProvider.future);
 
     _enqueuePhases({const .allSeries()});
+    _enqueuePhases({const .progress()});
     _enqueuePhases({
-      const .progress(),
       const .libraries(),
+      const .onDeck(),
       const .recentlyUpdated(),
       const .recentlyAdded(),
       const .collections(),

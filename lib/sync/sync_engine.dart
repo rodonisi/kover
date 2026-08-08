@@ -55,6 +55,10 @@ class SyncEngine {
     await _pool.withResource(wantToReadRepo.mergeWantToRead);
   }
 
+  Future<void> syncOnDeck() async {
+    await _pool.withResource(seriesRepo.syncOnDeck);
+  }
+
   Future<void> syncRecentlyUpdated() async {
     await _pool.withResource(seriesRepo.refreshRecentlyUpdated);
   }
