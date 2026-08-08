@@ -650,5 +650,13 @@
     "copiedToClipboard": "Copiato negli appunti",
     "@copiedToClipboard": {
         "description": "Message shown when a value is copied to the clipboard"
+    },
+    "removeFromOnDeck": "Rimuovi da in primo piano",
+    "@removeFromOnDeck": {
+        "description": "Label for the remove from on deck context menu item"
+    },
+    "syncingOnDeck": "Sincronizzazione in primo piano",
+    "@syncingOnDeck": {
+        "description": "Label for the syncing on deck phase"
     }
 }
