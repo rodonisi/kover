@@ -7,14 +7,12 @@ class SeriesSliverGrid extends StatelessWidget {
   final List<SeriesModel> series;
   final int? rowCount;
   final void Function(int crossAxisCount)? onCrossAxisCountChanged;
-  final bool canRemoveOnDeck;
 
   const SeriesSliverGrid({
     super.key,
     required this.series,
     this.rowCount,
     this.onCrossAxisCountChanged,
-    this.canRemoveOnDeck = false,
   });
 
   @override
@@ -25,10 +23,7 @@ class SeriesSliverGrid extends StatelessWidget {
       onCrossAxisCountChanged: onCrossAxisCountChanged,
       builder: (context, index) {
         final series = this.series[index];
-        return SeriesCard(
-          seriesId: series.id,
-          canRemoveOnDeck: canRemoveOnDeck,
-        );
+        return SeriesCard(seriesId: series.id);
       },
     );
   }

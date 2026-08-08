@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/pages/home/on_deck_scope.dart';
 import 'package:kover/riverpod/managers/download_manager.dart';
 import 'package:kover/riverpod/providers/download.dart';
 import 'package:kover/riverpod/providers/reader.dart';
@@ -17,12 +18,10 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SeriesCard extends HookConsumerWidget {
   final int seriesId;
-  final bool canRemoveOnDeck;
 
   const SeriesCard({
     super.key,
     required this.seriesId,
-    this.canRemoveOnDeck = false,
   });
 
   @override
@@ -62,7 +61,7 @@ class SeriesCard extends HookConsumerWidget {
                 await ref.read(wantToRead.notifier).remove();
               }
             : null,
-        onRemoveOnDeck: canRemoveOnDeck
+        onRemoveOnDeck: OnDeckScope.of(context)
             ? () async {
                 await ref
                     .read(seriesRepositoryProvider)

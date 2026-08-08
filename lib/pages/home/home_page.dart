@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/home/collapsible_section.dart';
+import 'package:kover/pages/home/on_deck_scope.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/widgets/actions_app_bar/actions_app_bar.dart';
@@ -56,10 +57,11 @@ class OnDeck extends ConsumerWidget {
 
     return AsyncSliver(
       asyncValue: onDeck,
-      data: (data) => CollapsibleSection(
-        title: l.onDeck,
-        series: data,
-        canRemoveOnDeck: true,
+      data: (data) => OnDeckScope(
+        child: CollapsibleSection(
+          title: l.onDeck,
+          series: data,
+        ),
       ),
     );
   }
