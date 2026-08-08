@@ -44,7 +44,10 @@ class ZoomableHorizontalPageImage extends HookWidget {
           controller.value.getMaxScaleOnAxis() > _minScale + 1e-3;
 
       var wasZoomed = isZoomed();
-      onZoomChanged(wasZoomed);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        onZoomChanged(wasZoomed);
+      });
 
       void onChange() {
         final zoomed = isZoomed();

@@ -125,9 +125,14 @@ class HorizontalPagedReader extends HookConsumerWidget {
                       key: ValueKey(index),
                       outerController: pageController,
                       onZoomChanged: (zoomed) {
+                        if (zoomedPageIndexes.value.contains(index) == zoomed) {
+                          return;
+                        }
+
                         final nextZoomedPageIndexes = {
                           ...zoomedPageIndexes.value,
                         };
+
                         zoomed
                             ? nextZoomedPageIndexes.add(index)
                             : nextZoomedPageIndexes.remove(index);
