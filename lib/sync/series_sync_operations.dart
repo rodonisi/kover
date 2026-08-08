@@ -24,6 +24,31 @@ class SeriesSyncOperations {
     return res.map((dto) => dto.toSeriesCompanion());
   }
 
+  Future<Iterable<SeriesCompanion>> getOnDeck() async {
+    final res = await _client.apiSeriesOnDeckPost();
+
+    if (!res.isSuccessful || res.body == null) {
+      throw Exception('Failed to load on deck series: ${res.error}');
+    }
+
+    return res.body!.map((dto) => dto.toSeriesCompanion());
+  }
+
+  Future<bool> removeFromOnDeck({required int seriesId}) async {
+    final res = await _client.apiSeriesRemoveFromOnDeckPost(
+      seriesId: seriesId,
+    );
+
+    if (!res.isSuccessful) {
+      log.warning(
+        'failed to remove series from on deck',
+        attributes: {'series_id': seriesId, 'status_code': res.statusCode},
+      );
+    }
+
+    return res.isSuccessful;
+  }
+
   Future<Iterable<SeriesCompanion>> getRecentlyAdded() async {
     final res = await _client.apiSeriesRecentlyAddedV2Post(
       body: const SeriesFilterV2Dto(

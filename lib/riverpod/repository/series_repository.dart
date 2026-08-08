@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/dao/series_metadata_dao.dart';
 import 'package:kover/models/image_model.dart';
@@ -281,6 +282,120 @@ class SeriesRepository {
     await _db.seriesMetadataDao.upsertMetadataAndDetails(
       metadata: metadata,
       details: details,
+    );
+  }
+
+  /// Mark series [seriesId] as removed from on deck. The resulting entry will
+  /// be dirty.
+  Future<void> removeFromOnDeck({required int seriesId}) async {
+    await _db.seriesDao.upsertOnDeckRemovalBatch([
+      OnDeckRemovalCompanion.insert(
+        seriesId: Value(seriesId),
+        dirty: const Value(true),
+      ),
+    ]);
+
+    try {
+      final success = await _client.removeFromOnDeck(seriesId: seriesId);
+      if (success) {
+        await _db.seriesDao.clearDirtyOnDeckRemovalForSeries({seriesId});
+      }
+    } catch (e) {
+      log.info(
+        'failed to immediately push on deck removal for series, leaving dirty.',
+        attributes: {
+          'series_id': seriesId,
+          'error_type': e.runtimeType,
+          'error_message': e,
+        },
+      );
+    }
+  }
+
+  /// Synchronize the on deck series list with the remote.
+  /// All series that are not on deck on the remote and have no dirty local
+  /// progress will be removed from the local on deck list.
+  /// All dirty on deck removals will be pushed to the remote unless the remote
+  /// progress is newer than the entry.
+  Future<void> syncOnDeck() async {
+    final remoteSeries = await _client.getOnDeck();
+    final localOnDeck = await _db.seriesDao.getOnDeck();
+    final localOnDeckIds = localOnDeck.map((s) => s.id).toSet();
+    final remoteOnDeckIds = remoteSeries.map((s) => s.id.value).toSet();
+
+    final delta = localOnDeckIds
+        .difference(remoteOnDeckIds)
+        .map((id) => OnDeckRemovalCompanion.insert(seriesId: Value(id)));
+
+    await _db.seriesDao.upsertOnDeckRemovalBatch(delta);
+
+    final dirtyRemovals = await _db.seriesDao.getDirtyOnDeckRemovalSeriesIds();
+    final outdatedRemovals = dirtyRemovals.where((entry) {
+      final series = remoteSeries
+          .where(
+            (s) => s.id.value == entry.seriesId,
+          )
+          .firstOrNull;
+
+      final remoteLastRead = series?.remoteLastRead.value;
+
+      return remoteLastRead != null && remoteLastRead.isAfter(entry.created);
+    });
+
+    if (outdatedRemovals.isNotEmpty) {
+      await _db.seriesDao.clearOnDeckRemovalForSeriesBatch(
+        outdatedRemovals.map((e) => e.seriesId).toSet(),
+        cleanOnly: false,
+      );
+      log.info(
+        'cleared outdated on deck removals',
+        attributes: {
+          'count': outdatedRemovals.length,
+          'series_ids': outdatedRemovals.map((e) => e.seriesId).toList(),
+        },
+      );
+    }
+
+    final remainingDirtyRemovals = dirtyRemovals
+        .where((entry) => !outdatedRemovals.contains(entry))
+        .map((e) => e.seriesId)
+        .toSet();
+
+    await chunkedFetch(
+      items: remainingDirtyRemovals,
+      fetchCallback: (seriesId) async {
+        try {
+          final success = await _client.removeFromOnDeck(seriesId: seriesId);
+          if (success) {
+            return seriesId;
+          }
+          return null;
+        } catch (e) {
+          log.warning(
+            'failed to remove series from on deck',
+            attributes: {
+              'series_id': seriesId,
+              'error_type': e.runtimeType,
+              'error_message': e,
+            },
+          );
+          return null;
+        }
+      },
+      upsertCallback: (removedIds) async {
+        final removed = removedIds.whereType<int>().toSet();
+
+        if (removed.isEmpty) return;
+
+        await _db.seriesDao.clearDirtyOnDeckRemovalForSeries(removed);
+        log.info(
+          'pushed on deck removals',
+          attributes: {
+            'count': removed.length,
+            'series_ids': removed,
+          },
+        );
+      },
     );
   }
 
