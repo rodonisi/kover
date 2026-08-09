@@ -77,22 +77,26 @@ class EpubReflow extends _$EpubReflow {
         ref.invalidateSelf(asReload: true);
       });
     });
-
-    final progress = await ref.read(
+    final progressFuture = ref.read(
       bookProgressProvider(chapterId: chapterId).future,
     );
-
-    if (progress != null && page == progress.pageNum) {
-      _resumeScrollId = progress.bookScrollId;
-    }
-
-    if (!ref.mounted) throw StateError('epubReflowProvider disposed');
-    final pageContent = await ref.read(
+    final settingsFuture = ref.read(
+      epubReaderSettingsProvider(seriesId: seriesId).future,
+    );
+    final pageContentFuture = ref.read(
       epubPageProvider(
         chapterId: chapterId,
         page: page,
       ).future,
     );
+
+    final progress = await progressFuture;
+    final pageContent = await pageContentFuture;
+    final settings = await settingsFuture;
+
+    if (progress != null && page == progress.pageNum) {
+      _resumeScrollId = progress.bookScrollId;
+    }
 
     for (final family in pageContent.fonts.entries) {
       final loader = FontLoader(family.key);
@@ -103,10 +107,6 @@ class EpubReflow extends _$EpubReflow {
       }
       await loader.load();
     }
-
-    final settings = await ref.read(
-      epubReaderSettingsProvider(seriesId: seriesId).future,
-    );
 
     if (settings.highlightResumePoint && _resumeScrollId != null) {
       final resumePoint = pageContent.root.querySelector(
@@ -141,34 +141,22 @@ class EpubReflow extends _$EpubReflow {
     _maxChunkDuration = Duration(milliseconds: (1000 / refreshRate).round());
 
     if (_measuring || !state.hasValue) return;
+
     _measuring = true;
     _pipeline.attach(size: viewport, devicePixelRatio: devicePixelRatio);
+    final current = state.requireValue;
 
     try {
-      // Ensure the measure widget has its data on first build; the
-      // synchronous loop would otherwise outrun the async resolution.
-      await ref.read(epubReaderSettingsProvider(seriesId: seriesId).future);
-
-      if (!ref.mounted) return;
-      await ref.read(customCssProvider(seriesId: seriesId).future);
-
       final stopwatch = Stopwatch()..start();
 
       while (state.value?.status != .done) {
         final maxHeight = _pipeline.viewportSize?.height ?? viewport.height;
         final bufferHtml = _cursor.buffer.outerHtml;
 
-        if (!ref.mounted) return;
-
-        final current = await future;
-
-        if (!_pipeline.isAttached) {
-          log.warning(
-            'pipeline detached during reflow',
-            attributes: {'page': page, 'bufferLength': bufferHtml.length},
-          );
+        if (!_pipeline.isAttached || !ref.mounted) {
           return;
         }
+
         final height = _pipeline
             .measure(_measureBuilder(bufferHtml, current.page.styles))
             .height;
@@ -198,7 +186,6 @@ class EpubReflow extends _$EpubReflow {
             await Future<void>.delayed(0.ms);
           }
         }
-        if (!ref.mounted) return;
       }
     } on MeasureTreeBuildException catch (e, stacktrace) {
       log.error(

@@ -25,9 +25,13 @@ class EpubTocDrawer extends HookConsumerWidget {
     final hasScrolled = useState(false);
 
     useEffect(() {
-      ref
-          .read(syncManagerProvider.notifier)
-          .refreshChapterToc(chapterId: chapterId);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+
+        ref
+            .read(syncManagerProvider.notifier)
+            .refreshChapterToc(chapterId: chapterId);
+      });
       return null;
     }, []);
 
