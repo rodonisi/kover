@@ -149,7 +149,7 @@ class EpubReflow extends _$EpubReflow {
     try {
       final stopwatch = Stopwatch()..start();
 
-      while (state.value?.status != .done) {
+      while (ref.mounted && state.value?.status != .done) {
         final maxHeight = _pipeline.viewportSize?.height ?? viewport.height;
         final bufferHtml = _cursor.buffer.outerHtml;
 
