@@ -745,5 +745,13 @@
     "copiedToClipboard": "클립보드로 복사됨",
     "@copiedToClipboard": {
         "description": "Message shown when a value is copied to the clipboard"
+    },
+    "removeFromOnDeck": "계속 읽기 목록에서 제거",
+    "@removeFromOnDeck": {
+        "description": "Label for the remove from on deck context menu item"
+    },
+    "syncingOnDeck": "계속 읽기 동기화 중",
+    "@syncingOnDeck": {
+        "description": "Label for the syncing on deck phase"
     }
 }
