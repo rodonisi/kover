@@ -19,7 +19,11 @@ class ChaptersGrid extends StatelessWidget {
       itemCount: chapters.length,
       builder: (context, index) {
         final chapter = chapters[index];
-        return ChapterCard(chapterId: chapter.id, seriesId: seriesId);
+        return ChapterCard(
+          key: ValueKey(chapter.id),
+          chapterId: chapter.id,
+          seriesId: seriesId,
+        );
       },
     );
   }

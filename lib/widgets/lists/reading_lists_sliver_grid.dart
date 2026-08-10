@@ -17,7 +17,10 @@ class ReadingListsSliverGrid extends StatelessWidget {
       itemCount: readingLists.length,
       builder: (context, index) {
         final readingList = readingLists[index];
-        return ReadingListCard(readingListId: readingList.id);
+        return ReadingListCard(
+          key: ValueKey(readingList.id),
+          readingListId: readingList.id,
+        );
       },
     );
   }
