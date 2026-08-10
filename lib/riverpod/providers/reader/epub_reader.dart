@@ -83,7 +83,7 @@ class EpubReflow extends _$EpubReflow {
     final settingsFuture = ref.read(
       epubReaderSettingsProvider(seriesId: seriesId).future,
     );
-    final pageContentFuture = ref.read(
+    final pageContentFuture = ref.watch(
       epubPageProvider(
         chapterId: chapterId,
         page: page,
@@ -91,8 +91,8 @@ class EpubReflow extends _$EpubReflow {
     );
 
     final progress = await progressFuture;
-    final pageContent = await pageContentFuture;
     final settings = await settingsFuture;
+    final pageContent = await pageContentFuture;
 
     if (progress != null && page == progress.pageNum) {
       _resumeScrollId = progress.bookScrollId;
@@ -144,18 +144,20 @@ class EpubReflow extends _$EpubReflow {
 
     _measuring = true;
     _pipeline.attach(size: viewport, devicePixelRatio: devicePixelRatio);
-    final current = state.requireValue;
 
     try {
+      if (!ref.mounted) return;
+
       final stopwatch = Stopwatch()..start();
 
-      while (ref.mounted && state.value?.status != .done) {
+      while (ref.mounted &&
+          _pipeline.isAttached &&
+          state.value?.status != .done) {
         final maxHeight = _pipeline.viewportSize?.height ?? viewport.height;
         final bufferHtml = _cursor.buffer.outerHtml;
 
-        if (!_pipeline.isAttached || !ref.mounted) {
-          return;
-        }
+        final current = await future;
+        if (!ref.mounted || !_pipeline.isAttached) return;
 
         final height = _pipeline
             .measure(_measureBuilder(bufferHtml, current.page.styles))
