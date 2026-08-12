@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "rodonisi" "\0"
-            VALUE "FileDescription", "Kover" "\0"
+            VALUE "CompanyName", "com.rodonisi" "\0"
+            VALUE "FileDescription", "kover" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "Kover" "\0"
-            VALUE "LegalCopyright", "Copyright © 2026" "\0"
+            VALUE "InternalName", "kover" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.rodonisi. All rights reserved." "\0"
             VALUE "OriginalFilename", "kover.exe" "\0"
-            VALUE "ProductName", "Kover" "\0"
+            VALUE "ProductName", "kover" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
