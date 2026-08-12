@@ -22,8 +22,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'epub_reader.freezed.dart';
 part 'epub_reader.g.dart';
 
-typedef EpubMeasureWidgetBuilder =
-    Widget Function(String html, Map<String, Map<String, String>> styles);
+typedef EpubMeasureWidgetBuilder = Widget Function(
+  String html,
+  Map<String, Map<String, String>> styles,
+);
 
 enum EpubReflowStatus {
   measuring,
