@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:kover/models/collection_model.dart';
 import 'package:kover/widgets/cards/collection_card.dart';
 import 'package:kover/widgets/lists/adaptive_sliver_grid.dart';

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reading_list_details_page/reading_list_app_bar.dart';
 import 'package:kover/pages/reading_list_details_page/reading_list_chapter_entry.dart';

@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:kover/utils/headless_measure_pipeline.dart';
 
 /// The widget tree measured by the [HeadlessMeasurePipeline] for a single

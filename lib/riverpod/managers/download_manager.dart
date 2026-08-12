@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math' hide log;
 
 import 'package:async/async.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';

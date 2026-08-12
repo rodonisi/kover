@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:kover/utils/instant_transition_builder.dart';

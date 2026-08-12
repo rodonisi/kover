@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/riverpod/providers/router.dart';

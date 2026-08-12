@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
@@ -15,13 +14,14 @@ import 'package:kover/widgets/cards/cover_image.dart';
 import 'package:kover/widgets/lists/cover_list_entry.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SearchButton extends HookConsumerWidget {
   const SearchButton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = useSearchController();
+    final controller = useMemoized(() => SearchController(), []);
 
     return SearchAnchor(
       searchController: controller,

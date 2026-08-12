@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/image_reader/horizontal_paged_reader.dart';
 import 'package:kover/pages/reader/image_reader/horizontal_spreads_reader.dart';

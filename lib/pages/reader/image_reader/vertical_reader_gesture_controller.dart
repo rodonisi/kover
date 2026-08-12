@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class VerticalReaderGestureController extends ChangeNotifier {
   static const double _minScale = 1.0;

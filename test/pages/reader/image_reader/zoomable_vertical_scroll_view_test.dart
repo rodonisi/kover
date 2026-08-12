@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kover/pages/reader/image_reader/vertical_reader_gesture_controller.dart';
 import 'package:kover/pages/reader/image_reader/zoomable_vertical_scroll_view.dart';

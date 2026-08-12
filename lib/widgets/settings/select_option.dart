@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:kover/widgets/settings/option_container.dart';
 
 class SelectOption<T> extends StatelessWidget {

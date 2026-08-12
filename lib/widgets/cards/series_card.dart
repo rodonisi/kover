@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/home/on_deck_scope.dart';
 import 'package:kover/riverpod/managers/download_manager.dart';
