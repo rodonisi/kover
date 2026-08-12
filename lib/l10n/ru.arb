@@ -733,5 +733,21 @@
     "syncingSidenav": "Синхронизация порядка бокового меню",
     "@syncingSidenav": {
         "description": "Label for the sidenav syncing phase"
+    },
+    "black": "Чёрная",
+    "@black": {
+        "description": "Label for the black theme option"
+    },
+    "logs": "Логи",
+    "@logs": {
+        "description": "Label for the logs settings section"
+    },
+    "copiedToClipboard": "Скопировано в буфер обмена",
+    "@copiedToClipboard": {
+        "description": "Message shown when a value is copied to the clipboard"
+    },
+    "removeFromOnDeck": "Удалить из очереди",
+    "@removeFromOnDeck": {
+        "description": "Label for the remove from on deck context menu item"
     }
 }
