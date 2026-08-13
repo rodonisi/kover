@@ -316,12 +316,14 @@ class _Page extends HookConsumerWidget {
                 : null,
             child: vertical
                 ? EpubVerticalSubpages(
+                    key: ValueKey(page),
                     seriesId: seriesId,
                     chapterId: chapterId,
                     page: page,
                     imageCache: imageCache,
                   )
                 : EpubHorizontalSubpages(
+                    key: ValueKey(page),
                     seriesId: seriesId,
                     chapterId: chapterId,
                     page: page,
