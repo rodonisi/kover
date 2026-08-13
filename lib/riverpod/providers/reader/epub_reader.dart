@@ -139,7 +139,9 @@ class EpubReflow extends _$EpubReflow {
     if (viewport.isEmpty) return;
 
     _measureBuilder = measureBuilder;
-    _maxChunkDuration = Duration(milliseconds: (1000 / refreshRate).round());
+    _maxChunkDuration = Duration(
+      milliseconds: (1000 / refreshRate > 0 ? refreshRate : 30).round(),
+    );
 
     if (_measuring || !state.hasValue) return;
 
