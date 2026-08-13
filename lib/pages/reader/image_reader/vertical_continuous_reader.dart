@@ -9,48 +9,10 @@ import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/image_vertical_reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
+import 'package:kover/utils/hooks/use_sliver_observer_controller.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
-
-class SliverObserverControllerHook extends Hook<SliverObserverController> {
-  final ScrollController? controller;
-  final int? initialIndex;
-
-  const SliverObserverControllerHook({this.controller, this.initialIndex});
-
-  @override
-  SliverObserverControllerHookState createState() =>
-      SliverObserverControllerHookState();
-}
-
-class SliverObserverControllerHookState
-    extends HookState<SliverObserverController, SliverObserverControllerHook> {
-  late final SliverObserverController controller;
-
-  @override
-  void initHook() {
-    super.initHook();
-    controller = SliverObserverController(controller: hook.controller)
-      ..initialIndexModelBlock = hook.initialIndex != null
-          ? () => ObserverIndexPositionModel(index: hook.initialIndex!)
-          : null
-      ..cacheJumpIndexOffset = false;
-  }
-
-  @override
-  SliverObserverController build(BuildContext context) => controller;
-}
-
-SliverObserverController useSliverObserverController({
-  ScrollController? controller,
-  int? initialIndex,
-}) => use(
-  SliverObserverControllerHook(
-    controller: controller,
-    initialIndex: initialIndex,
-  ),
-);
 
 class VerticalContinuousReader extends HookConsumerWidget {
   final int seriesId;
