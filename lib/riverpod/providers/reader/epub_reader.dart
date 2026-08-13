@@ -51,10 +51,6 @@ sealed class EpubReflowState with _$EpubReflowState {
 class EpubReflow extends _$EpubReflow {
   final _pipeline = HeadlessMeasurePipeline();
 
-  // The scroll-id to seek to on resume. Set once from the DB on the very
-  // first build and cleared as soon as we reach a Display state, so that
-  // subsequent page-turn rebuilds never re-trigger a seek.
-  String? _resumeScrollId;
   bool _measuring = false;
   late EpubMeasureWidgetBuilder _measureBuilder;
   late Duration _maxChunkDuration;
@@ -98,8 +94,9 @@ class EpubReflow extends _$EpubReflow {
     final settings = await settingsFuture;
     final pageContent = await pageContentFuture;
 
+    String? resumeScrollId;
     if (progress != null && page == progress.pageNum) {
-      _resumeScrollId = progress.bookScrollId;
+      resumeScrollId = progress.bookScrollId;
     }
 
     for (final family in pageContent.fonts.entries) {
@@ -112,9 +109,9 @@ class EpubReflow extends _$EpubReflow {
       await loader.load();
     }
 
-    if (settings.highlightResumePoint && _resumeScrollId != null) {
+    if (settings.highlightResumePoint && resumeScrollId != null) {
       final resumePoint = pageContent.root.querySelector(
-        '[${HtmlConstants.scrollIdAttribute}="${_resumeScrollId!.cssEscaped}"]',
+        '[${HtmlConstants.scrollIdAttribute}="${resumeScrollId.cssEscaped}"]',
       );
       if (resumePoint != null && resumePoint.hasChildNodes()) {
         resumePoint.classes.add(HtmlConstants.resumeParagraphClass);
@@ -125,7 +122,7 @@ class EpubReflow extends _$EpubReflow {
 
     return EpubReflowState(
       page: pageContent,
-      scrollId: _resumeScrollId,
+      scrollId: resumeScrollId,
     );
   }
 
@@ -346,7 +343,6 @@ class EpubNavigation extends _$EpubNavigation {
 
     _handleNavigationProviderChanges();
     _handleProgress();
-    _handleSettingsChanges();
 
     return EpubNavigationState(
       page: reader.initialPage,
@@ -354,37 +350,6 @@ class EpubNavigation extends _$EpubNavigation {
       subpage: 0,
       totalSubpages: 0,
     );
-  }
-
-  void _handleSettingsChanges() {
-    listenSelf((prev, next) {
-      next.whenData((data) {
-        if (prev?.value?.page == data.page) {
-          return;
-        }
-
-        ref.listen(
-          epubReflowProvider(
-            seriesId: seriesId,
-            chapterId: chapterId,
-            page: data.page,
-          ),
-          (prev, next) {
-            next.whenData((next) {
-              if (next.status == .measuring && prev?.value?.status == .done) {
-                state = AsyncData(
-                  data.copyWith(
-                    ready: false,
-                    subpage: 0,
-                    totalSubpages: next.subpages.length,
-                  ),
-                );
-              }
-            });
-          },
-        );
-      });
-    });
   }
 
   void _handleProgress() {
@@ -502,6 +467,11 @@ class EpubNavigation extends _$EpubNavigation {
         page: page,
       ),
       (prev, next) {
+        if (next.isLoading && prev?.hasValue == true) {
+          _resumed = false;
+          ref.invalidateSelf(asReload: true);
+          return;
+        }
         next.whenData((data) async {
           final current = await future;
 
