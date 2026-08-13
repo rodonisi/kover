@@ -77,72 +77,75 @@ class const EpubVerticalSubpages({
       },
     );
 
-    Widget buildItem(int index) {
-      final Widget content =
-          data.reflow.status == .measuring &&
-              index >= data.reflow.subpages.length
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : RenderEpubContent(
-              seriesId: seriesId,
-              html: data.reflow.subpages[index].outerHtml,
-              styles: data.reflow.page.styles,
-              imageCache: imageCache,
-              verticalPadding: false,
-            );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SliverViewObserver(
+          controller: observerController,
+          onObserve: (ObserveModel model) {
+            if (model is! ListViewObserveModel ||
+                data.navigation.page != page ||
+                data.reflow.status == .measuring) {
+              return;
+            }
 
-      return ConstrainedBox(
-        constraints: BoxConstraints(
-          minHeight: MediaQuery.of(context).size.height - data.paragraphSpacing,
-        ),
-        child: content,
-      );
-    }
+            final firstVisibleIndex = model.firstChild?.index;
+            if (firstVisibleIndex == null) return;
 
-    return SliverViewObserver(
-      controller: observerController,
-      onObserve: (ObserveModel model) {
-        if (model is! ListViewObserveModel ||
-            data.navigation.page != page ||
-            data.reflow.status == .measuring) {
-          return;
-        }
+            final lastSubpage = data.reflow.subpages.length - 1;
 
-        final firstVisibleIndex = model.firstChild?.index;
-        if (firstVisibleIndex == null) return;
+            // report last subpage on bottom edge
+            if (model.displayingChildIndexList.contains(lastSubpage)) {
+              ref
+                  .read(navigationProvider.notifier)
+                  .jumpToSubpage(lastSubpage, fromObserver: true);
+              return;
+            }
 
-        final lastSubpage = data.reflow.subpages.length - 1;
+            ref
+                .read(navigationProvider.notifier)
+                .jumpToSubpage(
+                  firstVisibleIndex.clamp(0, lastSubpage),
+                  fromObserver: true,
+                );
+          },
+          child: CustomScrollView(
+            controller: scrollController,
+            clipBehavior: .none,
+            scrollCacheExtent: const .viewport(4),
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: ClampingScrollPhysics(),
+            ),
+            slivers: [
+              SliverList.builder(
+                itemCount: count,
+                itemBuilder: (context, index) {
+                  final Widget content =
+                      data.reflow.status == .measuring &&
+                          index >= data.reflow.subpages.length
+                      ? const Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : RenderEpubContent(
+                          seriesId: seriesId,
+                          html: data.reflow.subpages[index].outerHtml,
+                          styles: data.reflow.page.styles,
+                          imageCache: imageCache,
+                          verticalPadding: false,
+                        );
 
-        // report last subpage on bottom edge
-        if (model.displayingChildIndexList.contains(lastSubpage)) {
-          ref
-              .read(navigationProvider.notifier)
-              .jumpToSubpage(lastSubpage, fromObserver: true);
-          return;
-        }
-
-        ref
-            .read(navigationProvider.notifier)
-            .jumpToSubpage(
-              firstVisibleIndex.clamp(0, lastSubpage),
-              fromObserver: true,
-            );
-      },
-      child: CustomScrollView(
-        controller: scrollController,
-        clipBehavior: .none,
-        scrollCacheExtent: const .viewport(4),
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: ClampingScrollPhysics(),
-        ),
-        slivers: [
-          SliverList.builder(
-            itemCount: count,
-            itemBuilder: (context, index) => buildItem(index),
+                  return ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight:
+                          constraints.maxHeight * 0.9 - data.paragraphSpacing,
+                    ),
+                    child: content,
+                  );
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
