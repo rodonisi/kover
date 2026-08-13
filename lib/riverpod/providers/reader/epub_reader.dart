@@ -10,7 +10,9 @@ import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
+import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
+import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/utils/extensions/document_fragment.dart';
 import 'package:kover/utils/extensions/string.dart';
 import 'package:kover/utils/html_constants.dart';
@@ -613,4 +615,68 @@ class EpubNavigation extends _$EpubNavigation {
     final current = await future;
     await jumpToSubpage(current.subpage - _step);
   }
+}
+
+@freezed
+sealed class EpubReaderSubpageState with _$EpubReaderSubpageState {
+  const factory EpubReaderSubpageState({
+    required EpubNavigationState navigation,
+    required EpubReflowState reflow,
+    required EpubReaderMode mode,
+    required double paragraphSpacing,
+    required bool reverse,
+    required bool gesturesEnabled,
+    required bool reduceAnimations,
+  }) = _EpubReaderSubpageState;
+}
+
+@riverpod
+Future<EpubReaderSubpageState> epubReaderSubpage(
+  Ref ref, {
+  required int seriesId,
+  required int chapterId,
+  required int page,
+}) async {
+  final navigationFuture = ref.watch(
+    epubNavigationProvider(
+      seriesId: seriesId,
+      chapterId: chapterId,
+    ).future,
+  );
+  final reflowFuture = ref.watch(
+    epubReflowProvider(
+      seriesId: seriesId,
+      chapterId: chapterId,
+      page: page,
+    ).future,
+  );
+  final epubSettingsFuture = ref.watch(
+    epubReaderSettingsProvider(seriesId: seriesId).selectAsync(
+      (value) => (value.mode, value.paragraphSpacing),
+    ),
+  );
+  final commonSettingsFuture = ref.watch(
+    commonReaderSettingsProvider(seriesId: seriesId).selectAsync(
+      (value) => (value.navigationGersturesEnabled, value.readDirection),
+    ),
+  );
+  final reduceAnimationsFuture = ref.watch(
+    themeProvider.selectAsync((value) => value.reduceAnimations),
+  );
+
+  final navigation = await navigationFuture;
+  final reflow = await reflowFuture;
+  final (mode, paragraphSpacing) = await epubSettingsFuture;
+  final (navigationGestures, readDirection) = await commonSettingsFuture;
+  final reduceAnimations = await reduceAnimationsFuture;
+
+  return EpubReaderSubpageState(
+    navigation: navigation,
+    reflow: reflow,
+    mode: mode,
+    paragraphSpacing: paragraphSpacing,
+    reverse: readDirection == .rightToLeft,
+    gesturesEnabled: navigationGestures,
+    reduceAnimations: reduceAnimations,
+  );
 }
