@@ -625,7 +625,7 @@ sealed class EpubReaderSubpageState with _$EpubReaderSubpageState {
     required EpubReaderMode mode,
     required double paragraphSpacing,
     required bool reverse,
-    required bool gesturesEnabled,
+    required bool navigationGesturesEnabled,
     required bool reduceAnimations,
   }) = _EpubReaderSubpageState;
 }
@@ -664,8 +664,8 @@ Future<EpubReaderSubpageState> epubReaderSubpage(
     themeProvider.selectAsync((value) => value.reduceAnimations),
   );
 
-  final navigation = await navigationFuture;
   final reflow = await reflowFuture;
+  final navigation = await navigationFuture;
   final (mode, paragraphSpacing) = await epubSettingsFuture;
   final (navigationGestures, readDirection) = await commonSettingsFuture;
   final reduceAnimations = await reduceAnimationsFuture;
@@ -676,7 +676,7 @@ Future<EpubReaderSubpageState> epubReaderSubpage(
     mode: mode,
     paragraphSpacing: paragraphSpacing,
     reverse: readDirection == .rightToLeft,
-    gesturesEnabled: navigationGestures,
+    navigationGesturesEnabled: navigationGestures,
     reduceAnimations: reduceAnimations,
   );
 }

@@ -251,85 +251,83 @@ class _Page extends HookConsumerWidget {
       chapterId: chapterId,
       page: page,
     );
-    final reflow = ref.watch(provider);
-    final navigationProvider = epubNavigationProvider(
-      seriesId: seriesId,
-      chapterId: chapterId,
-    );
-    final navigation = ref.watch(navigationProvider);
 
-    final navigationGestures = ref.watch(
-      commonReaderSettingsProvider(
+    final subpageState = ref.watch(
+      epubReaderSubpageProvider(
         seriesId: seriesId,
-      ).select(
-        (value) =>
-            value.whenOrNull(data: (data) => data.navigationGersturesEnabled) ??
-            false,
+        chapterId: chapterId,
+        page: page,
       ),
     );
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isVisiblePage = navigation.value?.page == page;
-        final visibleReady = navigation.value?.ready ?? false;
-        final shouldStart = isVisiblePage || visibleReady;
+    return Async(
+      asyncValue: subpageState,
+      skipLoadingOnReload: true,
+      data: (data) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final isVisiblePage = data.navigation.page == page;
+            final visibleReady = data.navigation.ready;
+            final shouldStart = isVisiblePage || visibleReady;
 
-        if (shouldStart && reflow.value?.status != .done) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!context.mounted) return;
-            ref
-                .read(provider.notifier)
-                .startReflow(
-                  viewport: spreads
-                      ? Size(
-                          constraints.maxWidth / 2,
-                          constraints.maxHeight,
-                        )
-                      : constraints.biggest,
-                  devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
-                  measureBuilder: (html, styles) => EpubMeasureRoot(
-                    container: container,
-                    mediaQueryData: mediaQueryData,
-                    themeData: themeData,
-                    textDirection: textDirection,
-                    locale: locale,
-                    seriesId: seriesId,
-                    html: html,
-                    styles: styles,
-                    imageCache: imageCache,
-                    verticalPadding: !vertical,
-                  ),
-                  refreshRate: View.of(context).display.refreshRate,
+            if (shouldStart && data.reflow.status != .done) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!context.mounted) return;
+                ref
+                    .read(provider.notifier)
+                    .startReflow(
+                      viewport: spreads
+                          ? Size(
+                              constraints.maxWidth / 2,
+                              constraints.maxHeight,
+                            )
+                          : constraints.biggest,
+                      devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+                      measureBuilder: (html, styles) => EpubMeasureRoot(
+                        container: container,
+                        mediaQueryData: mediaQueryData,
+                        themeData: themeData,
+                        textDirection: textDirection,
+                        locale: locale,
+                        seriesId: seriesId,
+                        html: html,
+                        styles: styles,
+                        imageCache: imageCache,
+                        verticalPadding: !vertical,
+                      ),
+                      refreshRate: View.of(context).display.refreshRate,
+                    );
+              });
+            }
+
+            return SelectionArea(
+              onSelectionChanged: (selection) {
+                onSelectionChanged?.call(
+                  selection != null && selection.plainText.isNotEmpty,
                 );
-          });
-        }
-
-        return SelectionArea(
-          onSelectionChanged: (selection) {
-            onSelectionChanged?.call(
-              selection != null && selection.plainText.isNotEmpty,
+              },
+              child: NotificationListener<ScrollNotification>(
+                onNotification: data.navigationGesturesEnabled
+                    ? handleScrollNotification
+                    : null,
+                child: vertical
+                    ? EpubVerticalSubpages(
+                        key: ValueKey(page),
+                        seriesId: seriesId,
+                        chapterId: chapterId,
+                        page: page,
+                        imageCache: imageCache,
+                      )
+                    : EpubHorizontalSubpages(
+                        key: ValueKey(page),
+                        seriesId: seriesId,
+                        chapterId: chapterId,
+                        page: page,
+                        imageCache: imageCache,
+                      ),
+              ),
             );
           },
-          child: NotificationListener<ScrollNotification>(
-            onNotification: navigationGestures
-                ? handleScrollNotification
-                : null,
-            child: vertical
-                ? EpubVerticalSubpages(
-                    key: ValueKey(page),
-                    seriesId: seriesId,
-                    chapterId: chapterId,
-                    page: page,
-                    imageCache: imageCache,
-                  )
-                : EpubHorizontalSubpages(
-                    key: ValueKey(page),
-                    seriesId: seriesId,
-                    chapterId: chapterId,
-                    page: page,
-                    imageCache: imageCache,
-                  ),
-          ),
         );
       },
     );
