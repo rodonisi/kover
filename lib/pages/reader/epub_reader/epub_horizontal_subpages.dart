@@ -111,7 +111,6 @@ class const EpubHorizontalSubpages({
           html: data.reflow.subpages[index].outerHtml,
           styles: data.reflow.page.styles,
           imageCache: imageCache,
-          verticalPadding: true,
         ),
       );
     }
@@ -120,8 +119,6 @@ class const EpubHorizontalSubpages({
       controller: controller,
       allowImplicitScrolling: true,
       scrollCacheExtent: const .viewport(4),
-      scrollDirection: .horizontal,
-      clipBehavior: .none,
       reverse: data.reverse,
       itemCount: spreads ? spreadCount : count,
       physics: scrollPhysics,

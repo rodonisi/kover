@@ -114,8 +114,7 @@ class const EpubVerticalSubpages({
 
         final lastSubpage = data.reflow.subpages.length - 1;
 
-        // Bottom edge: report last subpage so progress + tap navigation
-        // behave as if the user reached the end.
+        // report last subpage on bottom edge
         if (model.displayingChildIndexList.contains(lastSubpage)) {
           ref
               .read(navigationProvider.notifier)
@@ -132,6 +131,7 @@ class const EpubVerticalSubpages({
       },
       child: CustomScrollView(
         controller: scrollController,
+        clipBehavior: .none,
         scrollCacheExtent: const .viewport(4),
         physics: const AlwaysScrollableScrollPhysics(
           parent: ClampingScrollPhysics(),
