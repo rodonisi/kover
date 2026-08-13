@@ -53,6 +53,9 @@ class App extends ConsumerWidget {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             locale: locale,
+            builder: (context, child) {
+              return MaterialUiCompatibilityBridge(child: child!);
+            },
           ),
           loading: () => const SizedBox.shrink(),
         ),
