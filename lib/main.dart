@@ -50,7 +50,10 @@ class App extends ConsumerWidget {
             darkTheme: theme.darkTheme,
             themeMode: theme.mode.toThemeMode(),
             routerConfig: ref.watch(routerProvider),
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
             supportedLocales: AppLocalizations.supportedLocales,
             locale: locale,
             builder: (context, child) {
