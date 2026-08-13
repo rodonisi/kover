@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart';
+import 'package:kover/utils/html_constants.dart';
 import 'package:kover/utils/reflow_engine.dart';
 
 void main() {
@@ -145,7 +146,11 @@ void main() {
         final root = Element.tag('div')
           ..append(Element.tag('p')..append(Text('Hello. There. Sentences.')));
         final expectedCommit = Element.tag('div')
-          ..append(Element.tag('p')..append(Text('Hello.')));
+          ..append(
+            Element.tag('p')
+              ..append(Text('Hello.'))
+              ..attributes[HtmlConstants.splitParagraphAttribute] = '',
+          );
         final expectedNext = Element.tag('div')
           ..append(Element.tag('p')..append(Text('There. Sentences.')));
 
@@ -178,7 +183,11 @@ void main() {
         final root = Element.tag('div')
           ..append(Element.tag('p')..append(Text('Hello. There. Sentences')));
         final expectedCommit = Element.tag('div')
-          ..append(Element.tag('p')..append(Text('Hello.')));
+          ..append(
+            Element.tag('p')
+              ..append(Text('Hello.'))
+              ..attributes[HtmlConstants.splitParagraphAttribute] = '',
+          );
         final expectedNext = Element.tag('div')
           ..append(Element.tag('p')..append(Text('There. Sentences')));
 
@@ -209,7 +218,11 @@ void main() {
       final root = Element.tag('div')
         ..append(Element.tag('p')..append(Text('"Hello." "There."')));
       final expectedCommit = Element.tag('div')
-        ..append(Element.tag('p')..append(Text('"Hello."')));
+        ..append(
+          Element.tag('p')
+            ..append(Text('"Hello."'))
+            ..attributes[HtmlConstants.splitParagraphAttribute] = '',
+        );
       final expectedNext = Element.tag('div')
         ..append(Element.tag('p')..append(Text('"There."')));
 
@@ -233,7 +246,9 @@ void main() {
       // <p>Hello there white space</p>
       final root = Element.tag('p')..append(Text('Hello there white space'));
       // The page-ending word carries no trailing whitespace ...
-      final expectedCommit = Element.tag('p')..append(Text('Hello there'));
+      final expectedCommit = Element.tag('p')
+        ..append(Text('Hello there'))
+        ..attributes[HtmlConstants.splitParagraphAttribute] = '';
       // ... it is kept on the following word: no whitespace is lost.
       final expectedNext = Element.tag('p')..append(Text('white space'));
 
@@ -280,5 +295,29 @@ void main() {
         expect(engine.addNext(), isFalse);
       },
     );
+
+    test('when split paragraph backtracks empty, no attribute is set', () {
+      // <div>
+      //   <p>Hello</p>
+      //   <p>there</p>
+      // </div>
+      final root = Element.tag('div')
+        ..append(Element.tag('p')..append(Text('Hello')))
+        ..append(Element.tag('p')..append(Text('there')));
+
+      final engine = BinaryReflowEngine(root: root);
+
+      engine.addNext(); // p1
+      engine.addNext(); // p2
+      engine.overflow(); // boundary: descend into p2 (empty clone)
+      engine.addNext(); // text 'there' appended to the clone
+      engine.overflow(); // single word overflows: unsplittable
+      final commit = engine.commitSplit(); // backtrack 'there', shell removed
+
+      expect(
+        commit.querySelector('p')?.attributes,
+        isNot(contains(HtmlConstants.splitParagraphAttribute)),
+      );
+    });
   });
 }

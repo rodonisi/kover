@@ -164,6 +164,18 @@ class BinaryReflowEngine implements ReflowEngine {
         .where((p) => !p.hasVisibleNodes)
         .forEach((p) => p.remove());
 
+    // Mark a trailing split paragraph so the renderer can omit its bottom
+    // margin: the split halves should read as one paragraph.
+    final hasSplitParagraph = _frames.any(
+      (f) => f.target.localName == 'p' && f.target.hasVisibleNodes,
+    );
+    if (hasSplitParagraph) {
+      final trailing = result.localName == 'p'
+          ? result
+          : result.querySelectorAll('p').lastOrNull;
+      trailing?.attributes[HtmlConstants.splitParagraphAttribute] = '';
+    }
+
     // Reconstruct a clear tree up to the deepest target.
     Element? parent;
     for (final f in _frames) {
