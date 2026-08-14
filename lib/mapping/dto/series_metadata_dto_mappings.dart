@@ -2,71 +2,60 @@ import 'package:drift/drift.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/dao/series_metadata_dao.dart';
-import 'package:kover/database/tables/series_metadata.dart';
+import 'package:kover/mapping/dto/age_rating_mappings.dart';
+import 'package:kover/mapping/dto/person_dto_mappings.dart';
+import 'package:kover/mapping/dto/publication_status_mappings.dart';
 
 extension SeriesMetadataDtoMappings on SeriesMetadataDto {
+  static Iterable<PeopleCompanion> convertPersonDtoList(
+    Iterable<PersonDto>? l,
+  ) {
+    return (l ?? []).map((e) => e.toPeopleCompanion());
+  }
+
   SeriesMetadataCompanions toSeriesMetadataCompanions() {
-    final metadataId = id!;
-    final writersList = writers?.toList() ?? [];
     final genresList = genres?.toList() ?? [];
     final tagsList = tags?.toList() ?? [];
 
     return SeriesMetadataCompanions(
-      metadata: SeriesMetadataCompanion(
-        id: Value(metadataId),
-        seriesId: Value(seriesId!),
-        summary: Value(summary),
-        ageRating: Value.absentIfNull(ageRating?.value),
-        releaseYear: Value(releaseYear ?? 0),
+      metadata: SeriesMetadataCompanion.insert(
+        id: Value(id!),
+        seriesId: seriesId!,
+        summary: Value.absentIfNull(summary),
+        ageRating: ageRating?.toLocal() ?? .unknown,
+        releaseYear: releaseYear ?? 0,
         language: Value(language ?? ''),
         lastUpdated: Value(DateTime.timestamp()),
+        maxCount: maxCount ?? 0,
+        totalCount: totalCount ?? 0,
+        publicationStatus: publicationStatus?.toLocal() ?? .unknown,
       ),
-      writers: writersList
-          .map(
-            (writer) => PeopleCompanion(
-              id: Value(writer.id!),
-              name: Value(writer.name!),
-            ),
-          )
-          .toList(),
+      writers: convertPersonDtoList(writers),
+      coverArtists: convertPersonDtoList(coverArtists),
+      publishers: convertPersonDtoList(publishers),
+      characters: convertPersonDtoList(characters),
+      pencillers: convertPersonDtoList(pencillers),
+      inkers: convertPersonDtoList(inkers),
+      imprints: convertPersonDtoList(imprints),
+      colorists: convertPersonDtoList(colorists),
+      letterers: convertPersonDtoList(letterers),
+      editors: convertPersonDtoList(editors),
+      translators: convertPersonDtoList(translators),
+      teams: convertPersonDtoList(teams),
+      locations: convertPersonDtoList(locations),
       genres: genresList
           .map(
-            (genre) => GenresCompanion(
+            (genre) => GenresCompanion.insert(
               id: Value(genre.id!),
-              label: Value(genre.title!),
+              label: genre.title!,
             ),
           )
           .toList(),
       tags: tagsList
           .map(
-            (tag) => TagsCompanion(
+            (tag) => TagsCompanion.insert(
               id: Value(tag.id!),
-              label: Value(tag.title!),
-            ),
-          )
-          .toList(),
-      peopleRoles: writersList
-          .map(
-            (writer) => SeriesPeopleRolesCompanion(
-              seriesMetadataId: Value(metadataId),
-              personId: Value(writer.id!),
-              role: const Value(PeopleRole.writer),
-            ),
-          )
-          .toList(),
-      seriesGenres: genresList
-          .map(
-            (genre) => SeriesGenresCompanion(
-              seriesMetadataId: Value(metadataId),
-              genreId: Value(genre.id!),
-            ),
-          )
-          .toList(),
-      seriesTags: tagsList
-          .map(
-            (tag) => SeriesTagsCompanion(
-              seriesMetadataId: Value(metadataId),
-              tagId: Value(tag.id!),
+              label: tag.title!,
             ),
           )
           .toList(),

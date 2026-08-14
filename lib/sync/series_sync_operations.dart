@@ -148,19 +148,19 @@ class SeriesSyncOperations {
     final dto = res.body!;
 
     final storyline = (dto.storylineChapters ?? []).map(
-      (c) => c.toChapterCompanion().copyWith(
+      (c) => c.toChapterCompanions().replace(
         seriesId: Value(seriesId),
         isStoryline: const Value(true),
       ),
     );
     final specials = (dto.specials ?? []).map(
-      (c) => c.toChapterCompanion().copyWith(
+      (c) => c.toChapterCompanions().replace(
         seriesId: Value(seriesId),
         isSpecial: const Value(true),
       ),
     );
     final chapters = (dto.chapters ?? []).map(
-      (c) => c.toChapterCompanion().copyWith(
+      (c) => c.toChapterCompanions().replace(
         seriesId: Value(seriesId),
       ),
     );

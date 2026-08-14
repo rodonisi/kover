@@ -24,11 +24,10 @@ extension VolumeDtoMappings on VolumeDto {
         created: Value.absentIfNull(createdUtc?.normalizeUtc()),
         lastModified: Value.absentIfNull(lastModifiedUtc?.normalizeUtc()),
       ),
-      chapters: (chapters ?? []).map(
-        (c) => c.toChapterCompanion().copyWith(
-          seriesId: Value(seriesId!),
-        ),
-      ),
+      chapters: (chapters ?? []).map((c) {
+        final chapter = c.toChapterCompanions();
+        return chapter.replace(seriesId: Value(seriesId!));
+      }),
     );
   }
 }

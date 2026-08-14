@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
+import 'package:kover/database/dao/chapters_dao.dart';
 import 'package:kover/database/dao/volumes_dao.dart';
 import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/libraries.dart';
@@ -7,6 +8,7 @@ import 'package:kover/database/tables/on_deck_removal.dart';
 import 'package:kover/database/tables/progress.dart';
 import 'package:kover/database/tables/series.dart';
 import 'package:kover/database/tables/server_settings.dart';
+import 'package:kover/database/tables/series_metadata.dart';
 import 'package:kover/database/tables/volumes.dart';
 import 'package:kover/database/tables/want_to_read.dart';
 import 'package:kover/utils/data_constants.dart';
@@ -26,6 +28,12 @@ part 'series_dao.g.dart';
     ServerSettings,
     Libraries,
     OnDeckRemoval,
+    People,
+    Genres,
+    Tags,
+    ChapterPeopleRoles,
+    ChapterGenres,
+    ChapterTags,
   ],
 )
 class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
@@ -478,26 +486,26 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         .map((v) => v.chapters)
         .expand((cs) => cs);
 
-    final csMap = <int, ChaptersCompanion>{};
+    final csMap = <int, ChapterWithRelationsCompanion>{};
     for (final c in entry.chapters) {
-      csMap[c.id.value] = c;
+      csMap[c.chapter.id.value] = c;
     }
     for (final c in entry.storyline) {
-      final existing = csMap[c.id.value];
-      csMap[c.id.value] = existing != null
-          ? existing.copyWith(isStoryline: c.isStoryline)
+      final existing = csMap[c.chapter.id.value];
+      csMap[c.chapter.id.value] = existing != null
+          ? existing.replace(isStoryline: c.chapter.isStoryline)
           : c;
     }
     for (final c in entry.specials) {
-      final existing = csMap[c.id.value];
-      csMap[c.id.value] = existing != null
-          ? existing.copyWith(isSpecial: c.isSpecial)
+      final existing = csMap[c.chapter.id.value];
+      csMap[c.chapter.id.value] = existing != null
+          ? existing.replace(isSpecial: c.chapter.isSpecial)
           : c;
     }
     for (final c in volumeChapters) {
-      final existing = csMap[c.id.value];
-      csMap[c.id.value] = existing != null
-          ? existing.copyWith(volumeId: c.volumeId)
+      final existing = csMap[c.chapter.id.value];
+      csMap[c.chapter.id.value] = existing != null
+          ? existing.replace(volumeId: c.chapter.volumeId)
           : c;
     }
 
@@ -521,7 +529,48 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
           chapters,
           (t) => t.seriesId.equals(entry.seriesId) & t.id.isNotIn(chapterIds),
         );
-        batch.insertAllOnConflictUpdate(chapters, csMap.values);
+        batch.insertAllOnConflictUpdate(
+          chapters,
+          csMap.values.map((c) => c.chapter),
+        );
+      });
+
+      await batch((batch) {
+        final peopleList = csMap.values.expand(
+          (c) => [
+            ...c.writers,
+            ...c.coverArtists,
+            ...c.publishers,
+            ...c.characters,
+            ...c.pencillers,
+            ...c.inkers,
+            ...c.imprints,
+            ...c.colorists,
+            ...c.letterers,
+            ...c.editors,
+            ...c.translators,
+            ...c.teams,
+            ...c.locations,
+          ],
+        );
+        final genreLinks = csMap.values.expand((c) => c.chapterGenres);
+        final tagLinks = csMap.values.expand((c) => c.chapterTags);
+
+        batch.insertAllOnConflictUpdate(people, peopleList);
+        batch.insertAllOnConflictUpdate(
+          genres,
+          csMap.values.expand((c) => c.genres),
+        );
+        batch.insertAllOnConflictUpdate(
+          tags,
+          csMap.values.expand((c) => c.tags),
+        );
+        batch.insertAllOnConflictUpdate(
+          chapterPeopleRoles,
+          csMap.values.expand((c) => c.chapterPeopleRoles),
+        );
+        batch.insertAllOnConflictUpdate(chapterGenres, genreLinks);
+        batch.insertAllOnConflictUpdate(chapterTags, tagLinks);
       });
 
       await managers.series
@@ -674,18 +723,10 @@ class SeriesDetailWithRelations {
   });
 }
 
-class SeriesDetailCompanions {
-  final int seriesId;
-  final Iterable<ChaptersCompanion> storyline;
-  final Iterable<ChaptersCompanion> specials;
-  final Iterable<ChaptersCompanion> chapters;
-  final Iterable<VolumeWithChaptersCompanion> volumes;
-
-  const SeriesDetailCompanions({
-    required this.seriesId,
-    required this.storyline,
-    required this.specials,
-    required this.chapters,
-    required this.volumes,
-  });
-}
+class const SeriesDetailCompanions({
+  required final int seriesId,
+  required final Iterable<ChapterWithRelationsCompanion> storyline,
+  required final Iterable<ChapterWithRelationsCompanion> specials,
+  required final Iterable<ChapterWithRelationsCompanion> chapters,
+  required final Iterable<VolumeWithChaptersCompanion> volumes,
+});

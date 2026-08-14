@@ -462,7 +462,7 @@ class SeriesRepository {
     final chapters = details.volumes.expand((v) => v.chapters).toList();
     chapters.addAll(details.chapters);
     chapters.addAll(details.storyline);
-    final chapterIds = chapters.map((c) => c.id.value).toSet();
+    final chapterIds = chapters.map((c) => c.chapter.id.value).toSet();
     await chunkedFetch(
       items: chapterIds,
       fetchCallback: (id) => _chapterClient.getChapterCover(id),

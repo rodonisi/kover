@@ -141,10 +141,10 @@ sealed class SeriesMetadataModel with _$SeriesMetadataModel {
     SeriesMetadataWithRelations data,
   ) {
     return SeriesMetadataModel(
-      seriesId: data.metadata?.seriesId ?? 0,
+      seriesId: data.metadata.seriesId,
       totalChapters: 0,
-      releaseYear: data.metadata?.releaseYear,
-      summary: data.metadata?.summary,
+      releaseYear: data.metadata.releaseYear,
+      summary: data.metadata.summary,
       writers: data.writers
           .map(
             (writer) => PersonModel(

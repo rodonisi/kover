@@ -2,7 +2,8 @@ import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/dao/series_dao.dart';
 import 'package:kover/database/tables/series_metadata.dart';
-import 'package:stream_transform/stream_transform.dart';
+import 'package:kover/models/enums/person_role.dart';
+import 'package:rxdart/rxdart.dart';
 
 part 'series_metadata_dao.g.dart';
 
@@ -23,44 +24,70 @@ class SeriesMetadataDao extends DatabaseAccessor<AppDatabase>
 
   /// Get series metadata for series [seriesId]
   Stream<SeriesMetadataWithRelations> watchSeriesMetadata(int seriesId) {
-    return managers.seriesMetadata
-        .withReferences(
-          (prefetch) => prefetch(
-            seriesGenresRefs: true,
-            seriesPeopleRolesRefs: true,
-            seriesTagsRefs: true,
-          ),
-        )
-        .filter((f) => f.seriesId.id(seriesId))
-        .asyncMap(
-          (m) async {
-            final (metadata, refs) = m;
-            final writersIds =
-                refs.seriesPeopleRolesRefs.prefetchedData
-                    ?.where((p) => p.role == .writer)
-                    .map((p) => p.personId) ??
-                [];
-            final genresIds =
-                refs.seriesGenresRefs.prefetchedData?.map((e) => e.genreId) ??
-                [];
-            final tagIds =
-                refs.seriesTagsRefs.prefetchedData?.map((e) => e.tagId) ?? [];
+    final metadataQuery = select(seriesMetadata)
+      ..where((t) => t.seriesId.equals(seriesId));
 
-            return SeriesMetadataWithRelations(
-              metadata: metadata,
-              writers: await managers.people
-                  .filter((f) => f.id.isIn(writersIds))
-                  .get(),
+    return metadataQuery.watchSingle().switchMap((metadata) {
+      final tagsStream =
+          (select(tags).join([
+                innerJoin(seriesTags, seriesTags.tagId.equalsExp(tags.id)),
+              ])..where(seriesTags.seriesMetadataId.equals(metadata.id)))
+              .watch()
+              .map((rows) => rows.map((r) => r.readTable(tags)).toList());
 
-              genres: await managers.genres
-                  .filter((f) => f.id.isIn(genresIds))
-                  .get(),
-              tags: await managers.tags.filter((f) => f.id.isIn(tagIds)).get(),
-            );
-          },
-        )
-        .watchSingleOrNull()
-        .whereNotNull();
+      final genresStream =
+          (select(genres).join([
+                innerJoin(
+                  seriesGenres,
+                  seriesGenres.genreId.equalsExp(genres.id),
+                ),
+              ])..where(seriesGenres.seriesMetadataId.equals(metadata.id)))
+              .watch()
+              .map((rows) => rows.map((r) => r.readTable(genres)).toList());
+
+      final peopleStream =
+          (select(people).join([
+                innerJoin(
+                  seriesPeopleRoles,
+                  seriesPeopleRoles.personId.equalsExp(people.id),
+                ),
+              ])..where(seriesPeopleRoles.seriesMetadataId.equals(metadata.id)))
+              .watch()
+              .map((rows) {
+                final map = <PersonRole, List<PeopleData>>{};
+                for (final row in rows) {
+                  final person = row.readTable(people);
+                  final role = row.readTable(seriesPeopleRoles).role;
+                  map.putIfAbsent(role, () => []).add(person);
+                }
+                return map;
+              });
+
+      return Rx.combineLatest3(tagsStream, genresStream, peopleStream, (
+        t,
+        g,
+        p,
+      ) {
+        return SeriesMetadataWithRelations(
+          metadata: metadata,
+          tags: t,
+          genres: g,
+          writers: p[PersonRole.writer] ?? [],
+          publishers: p[PersonRole.publisher] ?? [],
+          characters: p[PersonRole.character] ?? [],
+          coverArtists: p[PersonRole.coverArtist] ?? [],
+          pencillers: p[PersonRole.penciller] ?? [],
+          inkers: p[PersonRole.inker] ?? [],
+          imprints: p[PersonRole.imprint] ?? [],
+          colorists: p[PersonRole.colorist] ?? [],
+          letterers: p[PersonRole.letterer] ?? [],
+          editors: p[PersonRole.editor] ?? [],
+          translators: p[PersonRole.translator] ?? [],
+          teams: p[PersonRole.team] ?? [],
+          locations: p[PersonRole.location] ?? [],
+        );
+      });
+    });
   }
 
   /// Get the list of series ids without metadata
@@ -85,21 +112,37 @@ class SeriesMetadataDao extends DatabaseAccessor<AppDatabase>
   ) async {
     final items = metadata.toList();
     final meta = items.map((m) => m.metadata);
-    final ws = items.map((m) => m.writers).expand((e) => e);
-    final gs = items.map((m) => m.genres).expand((e) => e);
-    final ts = items.map((m) => m.tags).expand((e) => e);
-    final prs = items.map((m) => m.peopleRoles).expand((e) => e);
-    final sgs = items.map((m) => m.seriesGenres).expand((e) => e);
-    final sts = items.map((m) => m.seriesTags).expand((e) => e);
+    final ps = items.expand(
+      (m) => [
+        ...m.writers,
+        ...m.coverArtists,
+        ...m.publishers,
+        ...m.characters,
+        ...m.pencillers,
+        ...m.inkers,
+        ...m.imprints,
+        ...m.colorists,
+        ...m.letterers,
+        ...m.editors,
+        ...m.translators,
+        ...m.teams,
+        ...m.locations,
+      ],
+    );
+    final peopleLinks = items.expand((m) => m.seriesPeopleRoles);
+    final gs = items.expand((m) => m.genres);
+    final genresLinks = items.expand((m) => m.seriesGenres);
+    final ts = items.expand((m) => m.tags);
+    final tagsLinks = items.expand((m) => m.seriesTags);
 
     await batch((batch) {
       batch.insertAllOnConflictUpdate(seriesMetadata, meta);
-      batch.insertAllOnConflictUpdate(people, ws);
+      batch.insertAllOnConflictUpdate(people, ps);
+      batch.insertAllOnConflictUpdate(seriesPeopleRoles, peopleLinks);
       batch.insertAllOnConflictUpdate(genres, gs);
+      batch.insertAllOnConflictUpdate(seriesGenres, genresLinks);
       batch.insertAllOnConflictUpdate(tags, ts);
-      batch.insertAllOnConflictUpdate(seriesPeopleRoles, prs);
-      batch.insertAllOnConflictUpdate(seriesGenres, sgs);
-      batch.insertAllOnConflictUpdate(seriesTags, sts);
+      batch.insertAllOnConflictUpdate(seriesTags, tagsLinks);
     });
   }
 
@@ -114,36 +157,89 @@ class SeriesMetadataDao extends DatabaseAccessor<AppDatabase>
   }
 }
 
-class SeriesMetadataWithRelations {
-  final SeriesMetadataData? metadata;
-  final List<PeopleData> writers;
-  final List<Genre> genres;
-  final List<Tag> tags;
+class const SeriesMetadataWithRelations({
+  required final SeriesMetadataData metadata,
+  required final List<PeopleData> writers,
+  required final List<PeopleData> coverArtists,
+  required final List<PeopleData> publishers,
+  required final List<PeopleData> characters,
+  required final List<PeopleData> pencillers,
+  required final List<PeopleData> inkers,
+  required final List<PeopleData> imprints,
+  required final List<PeopleData> colorists,
+  required final List<PeopleData> letterers,
+  required final List<PeopleData> editors,
+  required final List<PeopleData> translators,
+  required final List<PeopleData> teams,
+  required final List<PeopleData> locations,
+  required final List<Genre> genres,
+  required final List<Tag> tags,
+});
 
-  SeriesMetadataWithRelations({
-    required this.metadata,
-    required this.writers,
-    required this.genres,
-    required this.tags,
-  });
+class const SeriesMetadataCompanions({
+  required final SeriesMetadataCompanion metadata,
+  required final Iterable<GenresCompanion> genres,
+  required final Iterable<PeopleCompanion> writers,
+  required final Iterable<PeopleCompanion> coverArtists,
+  required final Iterable<PeopleCompanion> publishers,
+  required final Iterable<PeopleCompanion> characters,
+  required final Iterable<PeopleCompanion> pencillers,
+  required final Iterable<PeopleCompanion> inkers,
+  required final Iterable<PeopleCompanion> imprints,
+  required final Iterable<PeopleCompanion> colorists,
+  required final Iterable<PeopleCompanion> letterers,
+  required final Iterable<PeopleCompanion> editors,
+  required final Iterable<PeopleCompanion> translators,
+  required final Iterable<PeopleCompanion> teams,
+  required final Iterable<PeopleCompanion> locations,
+  required final Iterable<TagsCompanion> tags,
+}) {
+  SeriesPeopleRolesCompanion _mappingWithRole(
+    PeopleCompanion person,
+    PersonRole role,
+  ) {
+    return SeriesPeopleRolesCompanion.insert(
+      seriesMetadataId: metadata.id.value,
+      personId: person.id.value,
+      role: role,
+    );
+  }
 }
 
-class SeriesMetadataCompanions {
-  final SeriesMetadataCompanion metadata;
-  final Iterable<PeopleCompanion> writers;
-  final Iterable<GenresCompanion> genres;
-  final Iterable<TagsCompanion> tags;
-  final Iterable<SeriesPeopleRolesCompanion> peopleRoles;
-  final Iterable<SeriesGenresCompanion> seriesGenres;
-  final Iterable<SeriesTagsCompanion> seriesTags;
+extension on SeriesMetadataCompanions {
+  Iterable<SeriesPeopleRolesCompanion> get seriesPeopleRoles {
+    return [
+      ...writers.map((p) => _mappingWithRole(p, .writer)),
+      ...coverArtists.map((p) => _mappingWithRole(p, .coverArtist)),
+      ...publishers.map((p) => _mappingWithRole(p, .publisher)),
+      ...characters.map((p) => _mappingWithRole(p, .character)),
+      ...pencillers.map((p) => _mappingWithRole(p, .penciller)),
+      ...inkers.map((p) => _mappingWithRole(p, .inker)),
+      ...imprints.map((p) => _mappingWithRole(p, .imprint)),
+      ...colorists.map((p) => _mappingWithRole(p, .colorist)),
+      ...letterers.map((p) => _mappingWithRole(p, .letterer)),
+      ...editors.map((p) => _mappingWithRole(p, .editor)),
+      ...translators.map((p) => _mappingWithRole(p, .translator)),
+      ...teams.map((p) => _mappingWithRole(p, .team)),
+      ...locations.map((p) => _mappingWithRole(p, .location)),
+    ];
+  }
 
-  SeriesMetadataCompanions({
-    required this.metadata,
-    required this.writers,
-    required this.genres,
-    required this.tags,
-    required this.peopleRoles,
-    required this.seriesGenres,
-    required this.seriesTags,
-  });
+  Iterable<SeriesGenresCompanion> get seriesGenres {
+    return genres.map(
+      (g) => SeriesGenresCompanion.insert(
+        seriesMetadataId: metadata.id.value,
+        genreId: g.id.value,
+      ),
+    );
+  }
+
+  Iterable<SeriesTagsCompanion> get seriesTags {
+    return tags.map(
+      (t) => SeriesTagsCompanion.insert(
+        seriesMetadataId: metadata.id.value,
+        tagId: t.id.value,
+      ),
+    );
+  }
 }

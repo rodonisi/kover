@@ -1,0 +1,18 @@
+enum AgeRating {
+  unknown,
+  ratingPending,
+  earlyChildhood,
+  everyone,
+  g,
+  everyOne10Plus,
+  pg,
+  kidsToAdults,
+  teen,
+  mature15Plus,
+  mature17Plus,
+  mature,
+  r18Plus,
+  adultsOnly,
+  x18Plus,
+  notApplicable,
+}

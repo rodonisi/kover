@@ -4,6 +4,7 @@ import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/progress.dart';
 import 'package:kover/database/tables/series.dart';
+import 'package:kover/models/enums/person_role.dart';
 
 part 'chapters_dao.g.dart';
 
@@ -100,5 +101,107 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     if (covers.isEmpty) return;
 
     await batch((b) => b.insertAllOnConflictUpdate(chapterCovers, covers));
+  }
+}
+
+class const ChapterWithRelationsCompanion({
+  required final ChaptersCompanion chapter,
+  required final Iterable<PeopleCompanion> writers,
+  required final Iterable<PeopleCompanion> coverArtists,
+  required final Iterable<PeopleCompanion> publishers,
+  required final Iterable<PeopleCompanion> characters,
+  required final Iterable<PeopleCompanion> pencillers,
+  required final Iterable<PeopleCompanion> inkers,
+  required final Iterable<PeopleCompanion> imprints,
+  required final Iterable<PeopleCompanion> colorists,
+  required final Iterable<PeopleCompanion> letterers,
+  required final Iterable<PeopleCompanion> editors,
+  required final Iterable<PeopleCompanion> translators,
+  required final Iterable<PeopleCompanion> teams,
+  required final Iterable<PeopleCompanion> locations,
+  required final Iterable<GenresCompanion> genres,
+  required final Iterable<TagsCompanion> tags,
+}) {
+  ChapterPeopleRolesCompanion mappingWithRole(
+    PeopleCompanion person,
+    PersonRole role,
+  ) {
+    return ChapterPeopleRolesCompanion.insert(
+      chapterId: chapter.id.value,
+      personId: person.id.value,
+      role: role,
+    );
+  }
+
+  Iterable<ChapterPeopleRolesCompanion> get chapterPeopleRoles => [
+    ...writers.map((p) => mappingWithRole(p, .writer)),
+    ...coverArtists.map((p) => mappingWithRole(p, .coverArtist)),
+    ...publishers.map((p) => mappingWithRole(p, .publisher)),
+    ...characters.map((p) => mappingWithRole(p, .character)),
+    ...pencillers.map((p) => mappingWithRole(p, .penciller)),
+    ...inkers.map((p) => mappingWithRole(p, .inker)),
+    ...imprints.map((p) => mappingWithRole(p, .imprint)),
+    ...colorists.map((p) => mappingWithRole(p, .colorist)),
+    ...letterers.map((p) => mappingWithRole(p, .letterer)),
+    ...editors.map((p) => mappingWithRole(p, .editor)),
+    ...translators.map((p) => mappingWithRole(p, .translator)),
+    ...teams.map((p) => mappingWithRole(p, .team)),
+    ...locations.map((p) => mappingWithRole(p, .location)),
+  ];
+
+  Iterable<ChapterGenresCompanion> get chapterGenres {
+    return genres.map(
+      (g) => ChapterGenresCompanion.insert(
+        chapterId: chapter.id.value,
+        genreId: g.id.value,
+      ),
+    );
+  }
+
+  Iterable<ChapterTagsCompanion> get chapterTags {
+    return tags.map(
+      (t) => ChapterTagsCompanion.insert(
+        chapterId: chapter.id.value,
+        tagId: t.id.value,
+      ),
+    );
+  }
+
+  ChapterWithRelationsCompanion replace({
+    Value<int>? seriesId,
+    Value<bool>? isStoryline,
+    Value<bool>? isSpecial,
+    Value<int>? volumeId,
+  }) {
+    var next = chapter;
+    if (seriesId != null ||
+        isStoryline != null ||
+        isSpecial != null ||
+        volumeId != null) {
+      next = next.copyWith(
+        seriesId: seriesId,
+        isStoryline: isStoryline,
+        isSpecial: isSpecial,
+        volumeId: volumeId,
+      );
+    }
+    return ChapterWithRelationsCompanion(
+      chapter: next,
+      writers: writers,
+      coverArtists: coverArtists,
+      publishers: publishers,
+      characters: characters,
+      pencillers: pencillers,
+      inkers: inkers,
+      imprints: imprints,
+      colorists: colorists,
+      letterers: letterers,
+      editors: editors,
+      translators: translators,
+      teams: teams,
+      locations: locations,
+      genres: genres,
+      tags: tags,
+    );
   }
 }

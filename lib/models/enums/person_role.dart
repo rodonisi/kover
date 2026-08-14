@@ -1,0 +1,15 @@
+enum PersonRole {
+  writer,
+  coverArtist,
+  publisher,
+  character,
+  penciller,
+  inker,
+  imprint,
+  colorist,
+  letterer,
+  editor,
+  translator,
+  team,
+  location,
+}

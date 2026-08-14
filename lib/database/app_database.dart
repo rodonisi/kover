@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:kover/database/app_database.steps.dart';
+import 'package:kover/database/converters/string_list_converter.dart';
 import 'package:kover/database/dao/book_dao.dart';
 import 'package:kover/database/dao/chapters_dao.dart';
 import 'package:kover/database/dao/collections_dao.dart';
@@ -29,8 +30,11 @@ import 'package:kover/database/tables/server_settings.dart';
 import 'package:kover/database/tables/sidenav.dart';
 import 'package:kover/database/tables/volumes.dart';
 import 'package:kover/database/tables/want_to_read.dart';
+import 'package:kover/models/enums/age_rating.dart';
 import 'package:kover/models/enums/format.dart';
 import 'package:kover/models/enums/library_type.dart';
+import 'package:kover/models/enums/person_role.dart';
+import 'package:kover/models/enums/publication_status.dart';
 import 'package:kover/models/enums/sidenav_stream_type.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/utils/logging.dart';
@@ -55,6 +59,9 @@ part 'app_database.g.dart';
     VolumeCovers,
     Chapters,
     ChapterCovers,
+    ChapterPeopleRoles,
+    ChapterGenres,
+    ChapterTags,
     ReadingProgress,
     BookChaptersTable,
     WantToRead,
@@ -91,7 +98,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   /// Clear all content data from the database. Does not clear app state data (e.g. credentials, settings).
   /// Useful e.g. when switching user.
@@ -218,6 +225,60 @@ class AppDatabase extends _$AppDatabase {
         from7To8: (m, schema) async {
           await transaction(() async {
             await m.createTable(schema.onDeckRemoval);
+          });
+        },
+        from8To9: (m, schema) async {
+          await transaction(() async {
+            await m.alterTable(
+              TableMigration(
+                schema.seriesMetadata,
+                newColumns: [
+                  schema.seriesMetadata.maxCount,
+                  schema.seriesMetadata.totalCount,
+                  schema.seriesMetadata.publicationStatus,
+                  schema.seriesMetadata.webLinks,
+                ],
+                columnTransformer: {
+                  schema.seriesMetadata.maxCount: const Constant(0),
+                  schema.seriesMetadata.totalCount: const Constant(0),
+                  schema.seriesMetadata.publicationStatus: const Constant(
+                    'unknown',
+                  ),
+                  schema.seriesMetadata.ageRating: Constant(
+                    AgeRating.unknown.index,
+                  ),
+                },
+              ),
+            );
+            await m.alterTable(
+              TableMigration(
+                schema.people,
+                newColumns: [
+                  schema.people.primaryColor,
+                  schema.people.secondaryColor,
+                  schema.people.description,
+                  schema.people.aliases,
+                ],
+              ),
+            );
+            await m.createTable(schema.chapterPeopleRoles);
+            await m.createTable(schema.chapterGenres);
+            await m.createTable(schema.chapterTags);
+            await m.alterTable(
+              TableMigration(
+                schema.chapters,
+                newColumns: [
+                  schema.chapters.publicationStatus,
+                  schema.chapters.webLinks,
+                ],
+                columnTransformer: {
+                  schema.chapters.publicationStatus: Constant(
+                    PublicationStatus.unknown.name,
+                  ),
+                  schema.chapters.ageRating: Constant(AgeRating.unknown.index),
+                },
+              ),
+            );
           });
         },
       ),

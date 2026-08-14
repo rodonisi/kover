@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
+import 'package:kover/database/dao/chapters_dao.dart';
 import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/progress.dart';
@@ -115,12 +116,7 @@ class VolumeWithRelations {
   const VolumeWithRelations({required this.volume, required this.chapters});
 }
 
-class VolumeWithChaptersCompanion {
-  final VolumesCompanion volume;
-  final Iterable<ChaptersCompanion> chapters;
-
-  const VolumeWithChaptersCompanion({
-    required this.volume,
-    this.chapters = const [],
-  });
-}
+class const VolumeWithChaptersCompanion({
+  required final VolumesCompanion volume,
+  required final Iterable<ChapterWithRelationsCompanion> chapters,
+});

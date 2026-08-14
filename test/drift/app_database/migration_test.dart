@@ -4,8 +4,10 @@ import 'package:drift/drift.dart';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kover/database/tables/series_metadata.dart';
 import 'package:kover/models/enums/format.dart';
 import 'package:kover/models/enums/library_type.dart';
+import 'package:kover/models/enums/publication_status.dart';
 
 import 'generated/schema.dart';
 
@@ -17,6 +19,7 @@ import 'generated/schema_v5.dart' as v5;
 import 'generated/schema_v6.dart' as v6;
 import 'generated/schema_v7.dart' as v7;
 import 'generated/schema_v8.dart' as v8;
+import 'generated/schema_v9.dart' as v9;
 
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -62,19 +65,22 @@ void main() {
 
       final db = AppDatabase(schema.newConnection());
       await verifier.migrateAndValidate(db, 4);
-
-      final libraries = await db.select(db.libraries).get();
-      expect(libraries, hasLength(1));
-      expect(libraries.first.id, 1);
-      expect(libraries.first.name, 'Test Library');
-      expect(libraries.first.type, LibraryType.book);
-      expect(libraries.first.includeInDashboard, true);
-      expect(libraries.first.includeInRecommended, true);
-      expect(libraries.first.includeInSearch, true);
-      expect(libraries.first.defaultLanguage, null);
-      expect(libraries.first.lastScanned, null);
-
       await db.close();
+
+      final migratedDb = v4.DatabaseAtV4(schema.newConnection());
+      final libraries = await migratedDb
+          .select(migratedDb.libraries)
+          .getSingle();
+      expect(libraries.id, 1);
+      expect(libraries.name, 'Test Library');
+      expect(libraries.type, LibraryType.book.name);
+      expect(libraries.includeInDashboard, 1);
+      expect(libraries.includeInRecommended, 1);
+      expect(libraries.includeInSearch, 1);
+      expect(libraries.defaultLanguage, null);
+      expect(libraries.lastScanned, null);
+
+      await migratedDb.close();
     });
   });
 
@@ -105,8 +111,10 @@ void main() {
 
       final db = AppDatabase(schema.newConnection());
       await verifier.migrateAndValidate(db, 7);
+      await db.close();
 
-      final chapters = await db.select(db.chapters).get();
+      final migratedDb = v7.DatabaseAtV7(schema.newConnection());
+      final chapters = await migratedDb.select(migratedDb.chapters).get();
       expect(chapters, hasLength(1));
       expect(chapters.first.id, 1);
       expect(chapters.first.volumeId, 1);
@@ -117,10 +125,10 @@ void main() {
       expect(chapters.first.pages, 42);
       expect(chapters.first.wordCount, 42);
       expect(chapters.first.sortOrder, 1.0);
-      expect(chapters.first.format, Format.epub);
+      expect(chapters.first.format, Format.epub.name);
       expect(chapters.first.remoteLastRead, null);
 
-      await db.close();
+      await migratedDb.close();
     });
 
     test('does not corrupt existing series', () async {
@@ -141,16 +149,137 @@ void main() {
 
       final db = AppDatabase(schema.newConnection());
       await verifier.migrateAndValidate(db, 7);
+      await db.close();
 
-      final series = await db.select(db.series).get();
+      final migratedDb = v7.DatabaseAtV7(schema.newConnection());
+      final series = await migratedDb.select(migratedDb.series).get();
       expect(series, hasLength(1));
       expect(series.first.id, 1);
       expect(series.first.libraryId, 1);
       expect(series.first.name, 'Test Series');
-      expect(series.first.format, Format.epub);
+      expect(series.first.format, Format.epub.name);
       expect(series.first.remoteLastRead, null);
 
+      await migratedDb.close();
+    });
+  });
+
+  group('from 8 to 9', () {
+    test('does not corrupt existing series metadata', () async {
+      final schema = await verifier.schemaAt(8);
+      final oldDb = v8.DatabaseAtV8(schema.newConnection());
+      await oldDb
+          .into(oldDb.seriesMetadata)
+          .insert(
+            v8.SeriesMetadataCompanion.insert(
+              seriesId: 1,
+              releaseYear: 2020,
+              language: 'en',
+            ),
+          );
+      await oldDb.close();
+
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, 9);
       await db.close();
+
+      final migratedDb = v9.DatabaseAtV9(schema.newConnection());
+      final seriesMetadata = await migratedDb
+          .select(migratedDb.seriesMetadata)
+          .get();
+      expect(seriesMetadata, hasLength(1));
+      expect(seriesMetadata.first.seriesId, 1);
+      expect(seriesMetadata.first.releaseYear, 2020);
+      expect(seriesMetadata.first.language, 'en');
+      expect(seriesMetadata.first.maxCount, 0);
+      expect(seriesMetadata.first.totalCount, 0);
+      expect(
+        seriesMetadata.first.publicationStatus,
+        PublicationStatus.unknown.name,
+      );
+      expect(seriesMetadata.first.webLinks, null);
+
+      await migratedDb.close();
+    });
+
+    test('does not corrupt existing people', () async {
+      final schema = await verifier.schemaAt(8);
+      final oldDb = v8.DatabaseAtV8(schema.newConnection());
+      await oldDb
+          .into(oldDb.people)
+          .insert(
+            v8.PeopleCompanion.insert(
+              id: const Value(1),
+              name: 'Test Person',
+            ),
+          );
+      await oldDb.close();
+
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, 9);
+      await db.close();
+
+      final migratedDb = v9.DatabaseAtV9(schema.newConnection());
+      final people = await migratedDb.select(migratedDb.people).get();
+      expect(people, hasLength(1));
+      expect(people.first.id, 1);
+      expect(people.first.name, 'Test Person');
+      expect(people.first.primaryColor, null);
+      expect(people.first.secondaryColor, null);
+      expect(people.first.description, null);
+      expect(people.first.aliases, null);
+
+      await migratedDb.close();
+    });
+
+    test('does not corrupt existing chapters', () async {
+      final schema = await verifier.schemaAt(8);
+      final oldDb = v8.DatabaseAtV8(schema.newConnection());
+      await oldDb
+          .into(oldDb.chapters)
+          .insert(
+            v8.ChaptersCompanion.insert(
+              id: const Value(1),
+              volumeId: 1,
+              seriesId: 1,
+              title: const Value('Test Chapter'),
+              minNumber: 1.0,
+              maxNumber: 1.0,
+              pages: 42,
+              wordCount: 42,
+              sortOrder: 1.0,
+              format: 'epub',
+              releaseDate: DateTime.now().millisecondsSinceEpoch,
+              created: DateTime.now().millisecondsSinceEpoch,
+              lastModified: DateTime.now().millisecondsSinceEpoch,
+            ),
+          );
+      await oldDb.close();
+
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, 9);
+      await db.close();
+
+      final migratedDb = v9.DatabaseAtV9(schema.newConnection());
+      final chapters = await migratedDb.select(migratedDb.chapters).get();
+      expect(chapters, hasLength(1));
+      expect(chapters.first.id, 1);
+      expect(chapters.first.volumeId, 1);
+      expect(chapters.first.seriesId, 1);
+      expect(chapters.first.title, 'Test Chapter');
+      expect(chapters.first.minNumber, 1.0);
+      expect(chapters.first.maxNumber, 1.0);
+      expect(chapters.first.pages, 42);
+      expect(chapters.first.wordCount, 42);
+      expect(chapters.first.sortOrder, 1.0);
+      expect(chapters.first.format, Format.epub.name);
+      expect(
+        chapters.first.publicationStatus,
+        PublicationStatus.unknown.name,
+      );
+      expect(chapters.first.webLinks, null);
+
+      await migratedDb.close();
     });
   });
 }

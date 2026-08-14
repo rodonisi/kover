@@ -3,6 +3,8 @@ import 'package:drift/native.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kover/database/app_database.dart';
+import 'package:kover/models/enums/age_rating.dart';
+import 'package:kover/models/enums/publication_status.dart';
 
 void main() {
   late AppDatabase database;
@@ -41,6 +43,8 @@ void main() {
                     minNumber: 0,
                     maxNumber: 0,
                     sortOrder: 0,
+                    ageRating: AgeRating.unknown,
+                    publicationStatus: PublicationStatus.unknown,
                     wordCount: 0,
                     releaseDate: DateTime.now(),
                     created: DateTime.now(),
@@ -91,6 +95,8 @@ void main() {
                     minNumber: 0,
                     maxNumber: 0,
                     sortOrder: 0,
+                    ageRating: AgeRating.unknown,
+                    publicationStatus: PublicationStatus.unknown,
                     wordCount: 0,
                     releaseDate: DateTime.now(),
                     created: DateTime.now(),
@@ -139,6 +145,8 @@ void main() {
                     minNumber: 0,
                     maxNumber: 0,
                     sortOrder: 0,
+                    ageRating: AgeRating.unknown,
+                    publicationStatus: PublicationStatus.unknown,
                     wordCount: 0,
                     releaseDate: DateTime.now(),
                     created: DateTime.now(),
@@ -189,6 +197,8 @@ void main() {
                     minNumber: 0,
                     maxNumber: 0,
                     sortOrder: 0,
+                    ageRating: AgeRating.unknown,
+                    publicationStatus: PublicationStatus.unknown,
                     wordCount: 0,
                     releaseDate: DateTime.now(),
                     created: DateTime.now(),
