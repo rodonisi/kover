@@ -49,37 +49,31 @@ class AdaptiveSliverAppBar extends HookConsumerWidget {
       actions: actions,
       flexibleSpace: LayoutBuilder(
         builder: (context, constraints) {
-          final value =
-              (constraints.maxHeight - minFlexibleHeight) / infoHeight.value;
-
           WidgetsBinding.instance.addPostFrameCallback((_) {
             isCollapsed.value = constraints.maxHeight <= minFlexibleHeight;
           });
 
-          return Opacity(
-            opacity: value.clamp(0.0, 1.0),
-            child: FlexibleSpaceBar(
-              collapseMode: .pin,
-              background: Stack(
-                children: [
-                  if (background != null)
-                    Positioned.fill(
-                      child:
-                          background ??
-                          Container(color: Theme.of(context).primaryColor),
-                    ),
-                  SafeArea(
-                    child: MeasuredWidget(
-                      onSizeMeasured: (size) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          infoHeight.value = size.height;
-                        });
-                      },
-                      child: child,
-                    ),
+          return FlexibleSpaceBar(
+            collapseMode: .pin,
+            background: Stack(
+              children: [
+                if (background != null)
+                  Positioned.fill(
+                    child:
+                        background ??
+                        Container(color: Theme.of(context).primaryColor),
                   ),
-                ],
-              ),
+                SafeArea(
+                  child: MeasuredWidget(
+                    onSizeMeasured: (size) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        infoHeight.value = size.height;
+                      });
+                    },
+                    child: child,
+                  ),
+                ),
+              ],
             ),
           );
         },

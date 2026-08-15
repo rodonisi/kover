@@ -1,4 +1,3 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/series_model.dart';
@@ -15,6 +14,7 @@ import 'package:kover/widgets/details/detail_app_bar.dart';
 import 'package:kover/widgets/details/info_widgets.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SeriesAppBar extends HookConsumerWidget {
   final int seriesId;
@@ -198,7 +198,7 @@ class _Metadata extends ConsumerWidget {
           Wrap(
             spacing: LayoutConstants.mediumPadding,
             runSpacing: LayoutConstants.mediumPadding,
-            alignment: .spaceBetween,
+            // alignment: .spaceBetween,
             children: [
               if ((series.wordCount ?? 0) > 0)
                 WordCount(wordCount: series.wordCount!),
@@ -210,6 +210,8 @@ class _Metadata extends ConsumerWidget {
                 ReleaseYear(
                   releaseYear: metadata.releaseYear!,
                 ),
+              if (metadata.publicationStatus != .unknown)
+                PublicationStatusDisplay(status: metadata.publicationStatus),
             ],
           ),
           Wrap(
@@ -217,17 +219,18 @@ class _Metadata extends ConsumerWidget {
             runSpacing: LayoutConstants.mediumPadding,
             alignment: .spaceBetween,
             children: [
-              LimitedList(
-                title: l.writers,
-                items: metadata.writers
-                    .map(
-                      (w) => Text(
-                        w.name,
-                        style: Theme.of(context).textTheme.labelMedium,
-                      ),
-                    )
-                    .toList(),
-              ),
+              if (metadata.writers.isNotEmpty)
+                LimitedList(
+                  title: l.writers,
+                  items: metadata.writers
+                      .map(
+                        (w) => Text(
+                          w.name,
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                      )
+                      .toList(),
+                ),
             ],
           ),
         ],

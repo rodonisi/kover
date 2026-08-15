@@ -754,5 +754,33 @@
     "syncingOnDeck": "Syncing On Deck",
     "@syncingOnDeck": {
       "description": "Label for the syncing on deck phase"
+    },
+    "ongoing": "Ongoing",
+    "@ongoing": {
+      "description": "Label for the 'ongoing' publication status"
+    },
+    "completed": "Completed",
+    "@completed": {
+      "description": "Label for the 'completed' publication status"
+    },
+    "hiatus": "Hiatus",
+    "@hiatus": {
+      "description": "Label for the 'hiatus' publication status"
+    },
+    "cancelled": "Cancelled",
+    "@cancelled": {
+      "description": "Label for the 'cancelled' publication status"
+    },
+    "ended": "Ended",
+    "@ended": {
+      "description": "Label for the 'ended' publication status"
+    },
+    "unknown": "Unknown",
+    "@unknown": {
+      "description": "Label for the 'unknown' publication status"
+    },
+    "tags": "Tags",
+    "@tags": {
+      "description": "Label for the tags section in the series details page"
     }
 }

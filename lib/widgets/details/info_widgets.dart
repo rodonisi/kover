@@ -1,3 +1,5 @@
+import 'package:kover/models/enums/publication_status.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
@@ -169,6 +171,37 @@ class Pages extends StatelessWidget {
           size: LayoutConstants.smallIcon,
         ),
         Text(l.pagesCount(pages)),
+      ],
+    );
+  }
+}
+
+class PublicationStatusDisplay extends StatelessWidget {
+  final PublicationStatus status;
+
+  const new({super.key, required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final localizedStatus = switch (status) {
+      .ongoing => l.ongoing,
+      .completed => l.completed,
+      .ended => l.ended,
+      .hiatus => l.hiatus,
+      .cancelled => l.cancelled,
+      .unknown => l.unknown,
+    };
+
+    return Row(
+      mainAxisSize: .min,
+      spacing: LayoutConstants.smallPadding,
+      children: [
+        const Icon(
+          KoverIcons.publicationStatus,
+          size: LayoutConstants.smallIcon,
+        ),
+        Text(localizedStatus),
       ],
     );
   }

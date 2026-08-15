@@ -9,7 +9,7 @@ class const Async<T>({
   required final Widget Function(T) data,
   final Widget Function()? loading,
   final Widget Function(Object, StackTrace)? error,
-  final bool skipLoadingOnReload = false,
+  final bool skipLoadingOnReload = true,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

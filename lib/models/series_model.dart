@@ -1,10 +1,11 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/dao/series_dao.dart';
 import 'package:kover/database/dao/series_metadata_dao.dart';
 import 'package:kover/models/chapter_model.dart';
+import 'package:kover/models/enums/age_rating.dart';
 import 'package:kover/models/enums/format.dart';
+import 'package:kover/models/enums/publication_status.dart';
 import 'package:kover/models/volume_model.dart';
 
 part 'series_model.freezed.dart';
@@ -82,16 +83,6 @@ sealed class PersonModel with _$PersonModel {
     required int id,
     required String name,
   }) = _PersonModel;
-
-  factory PersonModel.fromJson(Map<String, Object?> json) =>
-      _$PersonModelFromJson(json);
-
-  factory PersonModel.fromPersonDto(PersonDto dto) {
-    return PersonModel(
-      id: dto.id!,
-      name: dto.name!,
-    );
-  }
 }
 
 @freezed
@@ -100,16 +91,14 @@ sealed class GenreModel with _$GenreModel {
     required int id,
     required String name,
   }) = _GenreModel;
+}
 
-  factory GenreModel.fromJson(Map<String, Object?> json) =>
-      _$GenreModelFromJson(json);
-
-  factory GenreModel.fromGenreTagDto(GenreTagDto dto) {
-    return GenreModel(
-      id: dto.id!,
-      name: dto.title!,
-    );
-  }
+@freezed
+sealed class TagModel with _$TagModel {
+  const factory TagModel({
+    required int id,
+    required String name,
+  }) = _TagModel;
 }
 
 @freezed
@@ -119,23 +108,25 @@ sealed class SeriesMetadataModel with _$SeriesMetadataModel {
     required int totalChapters,
     required int? releaseYear,
     required String? summary,
+    required AgeRating ageRating,
+    required String? language,
+    required PublicationStatus publicationStatus,
     required List<PersonModel> writers,
+    required List<PersonModel> coverArtists,
+    required List<PersonModel> publishers,
+    required List<PersonModel> characters,
+    required List<PersonModel> pencillers,
+    required List<PersonModel> inkers,
+    required List<PersonModel> imprints,
+    required List<PersonModel> colorists,
+    required List<PersonModel> letterers,
+    required List<PersonModel> editors,
+    required List<PersonModel> translators,
+    required List<PersonModel> teams,
+    required List<PersonModel> locations,
     required List<GenreModel> genres,
+    required List<TagModel> tags,
   }) = _SeriesMetadataModel;
-
-  factory SeriesMetadataModel.fromJson(Map<String, Object?> json) =>
-      _$SeriesMetadataModelFromJson(json);
-
-  factory SeriesMetadataModel.fromSeriesMetadataDto(SeriesMetadataDto dto) {
-    return SeriesMetadataModel(
-      seriesId: dto.seriesId!,
-      totalChapters: dto.totalCount!,
-      releaseYear: dto.releaseYear,
-      summary: dto.summary,
-      writers: dto.writers?.map(PersonModel.fromPersonDto).toList() ?? [],
-      genres: dto.genres?.map(GenreModel.fromGenreTagDto).toList() ?? [],
-    );
-  }
 
   factory SeriesMetadataModel.fromDatabaseModel(
     SeriesMetadataWithRelations data,
@@ -145,14 +136,22 @@ sealed class SeriesMetadataModel with _$SeriesMetadataModel {
       totalChapters: 0,
       releaseYear: data.metadata.releaseYear,
       summary: data.metadata.summary,
-      writers: data.writers
-          .map(
-            (writer) => PersonModel(
-              id: writer.id,
-              name: writer.name,
-            ),
-          )
-          .toList(),
+      ageRating: data.metadata.ageRating,
+      publicationStatus: data.metadata.publicationStatus,
+      language: data.metadata.language,
+      writers: _mapPersonList(data.writers),
+      coverArtists: _mapPersonList(data.coverArtists),
+      publishers: _mapPersonList(data.publishers),
+      characters: _mapPersonList(data.characters),
+      pencillers: _mapPersonList(data.pencillers),
+      inkers: _mapPersonList(data.inkers),
+      imprints: _mapPersonList(data.imprints),
+      colorists: _mapPersonList(data.colorists),
+      letterers: _mapPersonList(data.letterers),
+      editors: _mapPersonList(data.editors),
+      translators: _mapPersonList(data.translators),
+      teams: _mapPersonList(data.teams),
+      locations: _mapPersonList(data.locations),
       genres: data.genres
           .map(
             (genre) => GenreModel(
@@ -161,6 +160,25 @@ sealed class SeriesMetadataModel with _$SeriesMetadataModel {
             ),
           )
           .toList(),
+      tags: data.tags
+          .map(
+            (tag) => TagModel(
+              id: tag.id,
+              name: tag.label,
+            ),
+          )
+          .toList(),
     );
   }
+}
+
+List<PersonModel> _mapPersonList(List<PeopleData> people) {
+  return people
+      .map(
+        (person) => PersonModel(
+          id: person.id,
+          name: person.name,
+        ),
+      )
+      .toList();
 }
