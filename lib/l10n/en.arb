@@ -252,6 +252,54 @@
     "@writers": {
         "description": "Label for the writers metadata in the series details page"
     },
+    "coverArtists": "Cover Artists",
+    "@coverArtists": {
+        "description": "Label for the cover artists metadata in the series details page"
+    },
+    "publishers": "Publishers",
+    "@publishers": {
+        "description": "Label for the publishers metadata in the series details page"
+    },
+    "characters": "Characters",
+    "@characters": {
+        "description": "Label for the characters metadata in the series details page"
+    },
+    "pencillers": "Pencillers",
+    "@pencillers": {
+        "description": "Label for the pencillers metadata in the series details page"
+    },
+    "inkers": "Inkers",
+    "@inkers": {
+        "description": "Label for the inkers metadata in the series details page"
+    },
+    "imprints": "Imprints",
+    "@imprints": {
+        "description": "Label for the imprints metadata in the series details page"
+    },
+    "colorists": "Colorists",
+    "@colorists": {
+        "description": "Label for the colorists metadata in the series details page"
+    },
+    "letterers": "Letterers",
+    "@letterers": {
+        "description": "Label for the letterers metadata in the series details page"
+    },
+    "editors": "Editors",
+    "@editors": {
+        "description": "Label for the editors metadata in the series details page"
+    },
+    "translators": "Translators",
+    "@translators": {
+        "description": "Label for the translators metadata in the series details page"
+    },
+    "teams": "Teams",
+    "@teams": {
+        "description": "Label for the teams metadata in the series details page"
+    },
+    "locations": "Locations",
+    "@locations": {
+        "description": "Label for the locations metadata in the series details page"
+    },
     "filter": "Filter",
     "@filter": {
         "description": "Label for the filter button in lists"

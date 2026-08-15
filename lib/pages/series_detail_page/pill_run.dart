@@ -1,20 +1,55 @@
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
+import 'package:kover/models/series_model.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
-class PillRun extends HookWidget {
+class PeopleRun extends StatelessWidget {
   final String title;
-  final List<String> items;
-  final int collapsedItemCount;
+  final List<PersonModel> items;
 
   const new({
     super.key,
     required this.title,
     required this.items,
+  });
 
+  @override
+  Widget build(BuildContext context) {
+    return PillRun(
+      title: title,
+      items: items.map((p) => p.name).toList(),
+      itemBuilder: (p) => Pill(
+        child: Row(
+          mainAxisSize: .min,
+          spacing: LayoutConstants.smallPadding,
+          children: [
+            const Icon(KoverIcons.person, size: LayoutConstants.smallIcon),
+            Text(
+              p,
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PillRun extends HookWidget {
+  final String title;
+  final List<String> items;
+  final int collapsedItemCount;
+  final Widget Function(String item)? itemBuilder;
+
+  const new({
+    super.key,
+    required this.title,
+    required this.items,
     this.collapsedItemCount = 4,
+    this.itemBuilder,
   });
 
   @override
@@ -41,19 +76,14 @@ class PillRun extends HookWidget {
             alignment: .start,
             children: [
               ...displayItems.map(
-                (g) => Card.filled(
-                  margin: EdgeInsets.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: LayoutConstants.mediumPadding,
-                      vertical: LayoutConstants.smallerPadding,
+                (g) =>
+                    itemBuilder?.call(g) ??
+                    Pill(
+                      child: Text(
+                        g,
+                        style: theme.textTheme.labelSmall,
+                      ),
                     ),
-                    child: Text(
-                      g,
-                      style: theme.textTheme.labelSmall,
-                    ),
-                  ),
-                ),
               ),
               if (items.length > collapsedItemCount)
                 Pill(

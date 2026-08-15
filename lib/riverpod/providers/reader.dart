@@ -16,7 +16,8 @@ Stream<bool> canReadChapter(Ref ref, int chapterId) {
   final repo = ref.watch(downloadRepositoryProvider);
   return repo
       .watchIsChapterDownloaded(chapterId: chapterId)
-      .map((isDownloaded) => isDownloaded || hasConnection);
+      .map((isDownloaded) => isDownloaded || hasConnection)
+      .distinct();
 }
 
 /// Whether the [seriesId] can be read in the current state.
@@ -34,7 +35,8 @@ Stream<bool> canReadSeries(Ref ref, int seriesId) {
 
   return repo
       .watchIsChapterDownloaded(chapterId: chapter.id)
-      .map((isDownloaded) => isDownloaded || hasConnection);
+      .map((isDownloaded) => isDownloaded || hasConnection)
+      .distinct();
 }
 
 /// Whether the [readingListId] can be read in the current state.

@@ -21,11 +21,6 @@ class SeriesDetailPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final details = ref.watch(seriesDetailProvider(seriesId: seriesId));
-    final summary = ref.watch(
-      seriesMetadataProvider(seriesId: seriesId).select(
-        (value) => value.asData?.value.summary,
-      ),
-    );
 
     return Scaffold(
       body: Async(
@@ -91,25 +86,7 @@ class SeriesDetailPage extends HookConsumerWidget {
                           horizontal: LayoutConstants.mediumPadding,
                         ),
                         sliver: SliverToBoxAdapter(
-                          child: Summary(
-                            summary: summary,
-                          ),
-                        ),
-                      ),
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: LayoutConstants.mediumPadding,
-                        ),
-                        sliver: SliverToBoxAdapter(
-                          child: _Genres(seriesId: seriesId),
-                        ),
-                      ),
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: LayoutConstants.mediumPadding,
-                        ),
-                        sliver: SliverToBoxAdapter(
-                          child: _Tags(seriesId: seriesId),
+                          child: _MetadataSections(seriesId: seriesId),
                         ),
                       ),
                       const SliverBottomPadding(),
@@ -137,31 +114,7 @@ class SeriesDetailPage extends HookConsumerWidget {
   }
 }
 
-class _Genres extends ConsumerWidget {
-  final int seriesId;
-  const _Genres({
-    required this.seriesId,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final metadata = ref.watch(seriesMetadataProvider(seriesId: seriesId));
-
-    return Async(
-      asyncValue: metadata,
-      data: (metadata) {
-        if (metadata.genres.isEmpty) return const SizedBox.shrink();
-        return PillRun(
-          title: l.genres,
-          items: metadata.genres.map((g) => g.name).toList(),
-        );
-      },
-    );
-  }
-}
-
-class _Tags extends ConsumerWidget {
+class _MetadataSections extends ConsumerWidget {
   final int seriesId;
 
   const new({required this.seriesId});
@@ -170,14 +123,54 @@ class _Tags extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final metadata = ref.watch(seriesMetadataProvider(seriesId: seriesId));
+
     return Async(
       asyncValue: metadata,
       data: (metadata) {
-        if (metadata.tags.isEmpty) return const SizedBox.shrink();
-
-        return PillRun(
-          title: l.tags,
-          items: metadata.tags.map((g) => g.name).toList(),
+        return Column(
+          mainAxisSize: .min,
+          crossAxisAlignment: .start,
+          spacing: LayoutConstants.mediumPadding,
+          children: [
+            if (metadata.summary != null && metadata.summary!.isNotEmpty)
+              Summary(summary: metadata.summary),
+            if (metadata.genres.isNotEmpty)
+              PillRun(
+                title: l.genres,
+                items: metadata.genres.map((g) => g.name).toList(),
+              ),
+            if (metadata.tags.isNotEmpty)
+              PillRun(
+                title: l.tags,
+                items: metadata.tags.map((g) => g.name).toList(),
+              ),
+            if (metadata.writers.isNotEmpty)
+              PeopleRun(title: l.writers, items: metadata.writers),
+            if (metadata.coverArtists.isNotEmpty)
+              PeopleRun(title: l.coverArtists, items: metadata.coverArtists),
+            if (metadata.publishers.isNotEmpty)
+              PeopleRun(title: l.publishers, items: metadata.publishers),
+            if (metadata.characters.isNotEmpty)
+              PeopleRun(title: l.characters, items: metadata.characters),
+            if (metadata.pencillers.isNotEmpty)
+              PeopleRun(title: l.pencillers, items: metadata.pencillers),
+            if (metadata.inkers.isNotEmpty)
+              PeopleRun(title: l.inkers, items: metadata.inkers),
+            if (metadata.imprints.isNotEmpty)
+              PeopleRun(title: l.imprints, items: metadata.imprints),
+            if (metadata.colorists.isNotEmpty)
+              PeopleRun(title: l.colorists, items: metadata.colorists),
+            if (metadata.letterers.isNotEmpty)
+              PeopleRun(title: l.letterers, items: metadata.letterers),
+            if (metadata.editors.isNotEmpty)
+              PeopleRun(title: l.editors, items: metadata.editors),
+            if (metadata.translators.isNotEmpty)
+              PeopleRun(title: l.translators, items: metadata.translators),
+            if (metadata.teams.isNotEmpty)
+              PeopleRun(title: l.teams, items: metadata.teams),
+            if (metadata.locations.isNotEmpty)
+              PeopleRun(title: l.locations, items: metadata.locations),
+          ],
         );
       },
     );
