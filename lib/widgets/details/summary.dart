@@ -49,14 +49,9 @@ class _SummaryContent extends StatelessWidget {
             padding: const EdgeInsets.symmetric(
               horizontal: LayoutConstants.smallPadding,
             ),
-            // required due to HtmlWidget being rendered in a column which really wants to render its whole content and
-            // show past the overflow
-            child: SingleChildScrollView(
-              physics: const NeverScrollableScrollPhysics(),
-              child: HtmlWidget(
-                summary,
-                renderMode: .column,
-              ),
+            child: HtmlWidget(
+              summary,
+              renderMode: .column,
             ),
           )
         : Markdown(

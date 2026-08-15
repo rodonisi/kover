@@ -24,13 +24,12 @@ Future<SeriesAppBarContinueButtonState> seriesAppBarContinueButton(
   final continuePointFuture = ref.watch(
     continuePointProvider(seriesId: seriesId).future,
   );
-  final progressFuture = ref.watch(
-    continuePointProgressProvider(seriesId: seriesId).future,
-  );
   final canReadFuture = ref.watch(canReadSeriesProvider(seriesId).future);
+  final progress = ref
+      .watch(continuePointProgressProvider(seriesId: seriesId))
+      .value;
 
   final continuePoint = await continuePointFuture;
-  final progress = await progressFuture;
   final canRead = await canReadFuture;
 
   return SeriesAppBarContinueButtonState(

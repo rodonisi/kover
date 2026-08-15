@@ -7,6 +7,7 @@ import 'package:kover/models/enums/age_rating.dart';
 import 'package:kover/models/enums/format.dart';
 import 'package:kover/models/enums/publication_status.dart';
 import 'package:kover/models/volume_model.dart';
+import 'package:kover/widgets/details/metadata_sections.dart';
 
 part 'series_model.freezed.dart';
 part 'series_model.g.dart';
@@ -102,7 +103,9 @@ sealed class TagModel with _$TagModel {
 }
 
 @freezed
-sealed class SeriesMetadataModel with _$SeriesMetadataModel {
+sealed class SeriesMetadataModel
+    with _$SeriesMetadataModel
+    implements MetadataViewModel {
   const factory SeriesMetadataModel({
     required int seriesId,
     required int totalChapters,

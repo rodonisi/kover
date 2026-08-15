@@ -1,3 +1,4 @@
+import 'package:kover/pages/series_detail_page/volume_detail_page/volume_app_bar_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/volume_model.dart';
@@ -12,6 +13,7 @@ import 'package:kover/widgets/cards/cover_image.dart';
 import 'package:kover/widgets/context_menu/actions_menu.dart';
 import 'package:kover/widgets/details/detail_app_bar.dart';
 import 'package:kover/widgets/details/info_widgets.dart';
+import 'package:kover/widgets/details/metadata_sections.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -99,18 +101,16 @@ class _VolumeContinueButtonImage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final continuePoint = ref.watch(
-      volumeContinuePointProvider(volumeId: volumeId),
+    final state = ref.watch(
+      volumeAppBarContinueButtonProvider(volumeId: volumeId),
     );
-    final canRead = ref.watch(canReadVolumeProvider(volumeId));
 
-    return Async2(
-      asyncValue1: continuePoint,
-      asyncValue2: canRead,
-      data: (chapter, canRead) => ContinueButtonImage(
-        enabled: canRead,
+    return Async(
+      asyncValue: state,
+      data: (data) => ContinueButtonImage(
+        enabled: data.canRead,
         image: ChapterCoverImage(
-          chapterId: chapter.id,
+          chapterId: data.chapter.id,
           usePlaceholder: false,
         ),
       ),
@@ -129,20 +129,18 @@ class _VolumeTitleContinueButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final continuePoint = ref.watch(
-      volumeContinuePointProvider(volumeId: volumeId),
+    final state = ref.watch(
+      volumeAppBarContinueButtonProvider(volumeId: volumeId),
     );
-    final canRead = ref.watch(canReadVolumeProvider(volumeId));
 
-    return Async2(
-      asyncValue1: continuePoint,
-      asyncValue2: canRead,
-      data: (chapter, canRead) => TitleContinueButton(
+    return Async(
+      asyncValue: state,
+      data: (data) => TitleContinueButton(
         child: _VolumeContinueButtonImage(volumeId: volumeId),
-        onTap: () => canRead
+        onTap: () => data.canRead
             ? ReaderRoute(
                 seriesId: seriesId,
-                chapterId: chapter.id,
+                chapterId: data.chapter.id,
               ).push(context)
             : null,
       ),
@@ -161,26 +159,22 @@ class _VolumeContinuePointButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final continuePoint = ref.watch(
-      volumeContinuePointProvider(volumeId: volumeId),
-    );
-    final canRead = ref.watch(
-      canReadVolumeProvider(volumeId),
+    final state = ref.watch(
+      volumeAppBarContinueButtonProvider(volumeId: volumeId),
     );
 
-    return Async2(
-      asyncValue1: continuePoint,
-      asyncValue2: canRead,
-      data: (chapter, canRead) => ContinuePointButton(
-        enabled: canRead,
-        title: chapter.title,
+    return Async(
+      asyncValue: state,
+      data: (data) => ContinuePointButton(
+        enabled: data.canRead,
+        title: data.chapter.title,
         cover: _VolumeContinueButtonImage(volumeId: volumeId),
         progress: ref
-            .watch(chapterProgressProvider(chapterId: chapter.id))
+            .watch(chapterProgressProvider(chapterId: data.chapter.id))
             .value,
         onTap: () => ReaderRoute(
           seriesId: seriesId,
-          chapterId: chapter.id,
+          chapterId: data.chapter.id,
         ).push(context),
       ),
     );
@@ -192,10 +186,16 @@ class _VolumeInfo extends ConsumerWidget {
 
   const _VolumeInfo({required this.volume});
 
-  Null get seriesId => null;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final metadata = volume.chapters.isEmpty
+        ? null
+        : ref.watch(
+            chapterMetadataProvider(
+              chapterId: volume.chapters.first.id,
+            ),
+          );
+
     return Column(
       crossAxisAlignment: .start,
       spacing: LayoutConstants.largePadding,
@@ -203,7 +203,6 @@ class _VolumeInfo extends ConsumerWidget {
         Wrap(
           spacing: LayoutConstants.mediumPadding,
           runSpacing: LayoutConstants.mediumPadding,
-          alignment: .spaceBetween,
           children: [
             if ((volume.wordCount ?? 0) > 0)
               WordCount(wordCount: volume.wordCount!),
@@ -211,8 +210,17 @@ class _VolumeInfo extends ConsumerWidget {
             RemainingHours(
               hours: volume.avgHoursToRead ?? 0,
             ),
+            if (metadata?.value?.releaseYear != null)
+              ReleaseYear(
+                releaseYear: metadata!.value!.releaseYear!,
+              ),
           ],
         ),
+        if (metadata != null)
+          Async(
+            asyncValue: metadata,
+            data: (metadata) => MetadataWriters(metadata: metadata),
+          ),
       ],
     );
   }

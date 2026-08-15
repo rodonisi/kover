@@ -40,6 +40,15 @@ class ChaptersRepository {
         .map(ChapterModel.fromDatabaseModel);
   }
 
+  /// Watch chapter metadata for [chapterId]
+  Stream<ChapterMetadataModel> watchChapterMetadata({
+    required int chapterId,
+  }) {
+    return _db.chaptersDao
+        .watchChapterMetadata(chapterId)
+        .map(ChapterMetadataModel.fromDatabaseModel);
+  }
+
   /// Search chapters by [query]. Optionally filter by [volumeId] and/or [seriesId]
   Future<List<ChapterModel>> searchChapters(
     String query, {

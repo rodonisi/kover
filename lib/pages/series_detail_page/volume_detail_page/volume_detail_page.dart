@@ -2,9 +2,10 @@ import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/series_detail_page/volume_detail_page/volume_app_bar.dart';
+import 'package:kover/riverpod/providers/chapter.dart';
 import 'package:kover/riverpod/providers/volume.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/details/summary.dart';
+import 'package:kover/widgets/details/metadata_sections.dart';
 import 'package:kover/widgets/lists/chapters_grid.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 
@@ -29,23 +30,6 @@ class VolumeDetailPage extends ConsumerWidget {
           VolumeAppBar(
             volumeId: volumeId,
           ),
-          if (volume.chapters.isNotEmpty)
-            SliverPadding(
-              padding: const EdgeInsets.only(
-                top: LayoutConstants.mediumPadding,
-                right: LayoutConstants.mediumPadding,
-                left: LayoutConstants.mediumPadding,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    Summary(
-                      summary: volume.chapters.first.summary,
-                    ),
-                  ],
-                ),
-              ),
-            ),
           SliverPadding(
             padding: const EdgeInsetsGeometry.symmetric(
               horizontal: LayoutConstants.mediumPadding,
@@ -67,7 +51,23 @@ class VolumeDetailPage extends ConsumerWidget {
               chapters: volume.chapters,
             ),
           ),
-
+          if (volume.chapters.isNotEmpty)
+            SliverPadding(
+              padding: const EdgeInsets.only(
+                top: LayoutConstants.mediumPadding,
+                right: LayoutConstants.mediumPadding,
+                left: LayoutConstants.mediumPadding,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: MetadataSections(
+                  asyncValue: ref.watch(
+                    chapterMetadataProvider(
+                      chapterId: volume.chapters.first.id,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           const SliverBottomPadding(),
         ],
       ),

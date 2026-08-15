@@ -3,8 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/series_detail_page/chapter_detail_page/chapter_app_bar.dart';
 import 'package:kover/riverpod/providers/chapter.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/details/summary.dart';
-import 'package:kover/widgets/util/async_value.dart';
+import 'package:kover/widgets/details/metadata_sections.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 
 class ChapterDetailPage extends ConsumerWidget {
@@ -17,8 +16,6 @@ class ChapterDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chapter = ref.watch(chapterProvider(chapterId: chapterId));
-
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -32,15 +29,10 @@ class ChapterDetailPage extends ConsumerWidget {
               left: LayoutConstants.mediumPadding,
             ),
             sliver: SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  Async(
-                    asyncValue: chapter,
-                    data: (chapter) => Summary(
-                      summary: chapter.summary,
-                    ),
-                  ),
-                ],
+              child: MetadataSections(
+                asyncValue: ref.watch(
+                  chapterMetadataProvider(chapterId: chapterId),
+                ),
               ),
             ),
           ),

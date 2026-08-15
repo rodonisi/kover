@@ -16,6 +16,15 @@ Stream<ChapterModel> chapter(
 }
 
 @riverpod
+Stream<ChapterMetadataModel> chapterMetadata(
+  Ref ref, {
+  required int chapterId,
+}) {
+  final repo = ref.watch(chaptersRepositoryProvider);
+  return repo.watchChapterMetadata(chapterId: chapterId).distinct();
+}
+
+@riverpod
 Future<List<ChapterModel>> searchChapters(
   Ref ref,
   String query, {

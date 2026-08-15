@@ -188,18 +188,21 @@ class AsyncSliver<T> extends StatelessWidget {
   final Widget Function(T) data;
   final Widget Function()? loading;
   final Widget Function(Object, StackTrace)? error;
+  final bool skipLoadingOnReload;
 
-  const AsyncSliver({
+  const new({
     super.key,
     required this.asyncValue,
     required this.data,
     this.loading,
     this.error,
+    this.skipLoadingOnReload = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return asyncValue.when(
+      skipLoadingOnReload: skipLoadingOnReload,
       data: data,
       loading:
           loading ??

@@ -1,3 +1,4 @@
+import 'package:kover/pages/series_detail_page/chapter_detail_page/chapter_app_bar_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/managers/download_manager.dart';
@@ -10,6 +11,7 @@ import 'package:kover/widgets/cards/cover_image.dart';
 import 'package:kover/widgets/context_menu/actions_menu.dart';
 import 'package:kover/widgets/details/detail_app_bar.dart';
 import 'package:kover/widgets/details/info_widgets.dart';
+import 'package:kover/widgets/details/metadata_sections.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -122,16 +124,19 @@ class _ChapterTitleContinueButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final canRead = ref.watch(canReadChapterProvider(chapterId)).value ?? false;
+    final canRead = ref.watch(canReadChapterProvider(chapterId));
 
-    return TitleContinueButton(
-      onTap: canRead
-          ? () => ReaderRoute(
-              seriesId: seriesId,
-              chapterId: chapterId,
-            ).push(context)
-          : null,
-      child: _ChapterContinueButtonImage(chapterId: chapterId),
+    return Async(
+      asyncValue: canRead,
+      data: (canRead) => TitleContinueButton(
+        onTap: canRead
+            ? () => ReaderRoute(
+                seriesId: seriesId,
+                chapterId: chapterId,
+              ).push(context)
+            : null,
+        child: _ChapterContinueButtonImage(chapterId: chapterId),
+      ),
     );
   }
 }
@@ -147,19 +152,18 @@ class _ChapterContinuePointButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final canRead =
-        ref
-            .watch(
-              canReadChapterProvider(chapterId),
-            )
-            .value ??
-        false;
+    final canRead = ref.watch(
+      canReadChapterProvider(chapterId),
+    );
 
-    return ContinuePointButton(
-      enabled: canRead,
-      cover: _ChapterContinueButtonImage(chapterId: chapterId),
-      onTap: () =>
-          ReaderRoute(seriesId: seriesId, chapterId: chapterId).push(context),
+    return Async(
+      asyncValue: canRead,
+      data: (canRead) => ContinuePointButton(
+        enabled: canRead,
+        cover: _ChapterContinueButtonImage(chapterId: chapterId),
+        onTap: () =>
+            ReaderRoute(seriesId: seriesId, chapterId: chapterId).push(context),
+      ),
     );
   }
 }
@@ -171,10 +175,10 @@ class _ChapterInfo extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chapter = ref.watch(chapterProvider(chapterId: chapterId));
+    final info = ref.watch(chapterInfoProvider(chapterId: chapterId));
 
     return Async(
-      asyncValue: chapter,
+      asyncValue: info,
       data: (data) => Column(
         crossAxisAlignment: .start,
         spacing: LayoutConstants.largePadding,
@@ -182,16 +186,20 @@ class _ChapterInfo extends ConsumerWidget {
           Wrap(
             spacing: LayoutConstants.mediumPadding,
             runSpacing: LayoutConstants.mediumPadding,
-            alignment: .spaceBetween,
             children: [
-              if ((data.wordCount ?? 0) > 0)
-                WordCount(wordCount: data.wordCount!),
-              Pages(pages: data.pages),
+              if ((data.chapter.wordCount ?? 0) > 0)
+                WordCount(wordCount: data.chapter.wordCount!),
+              Pages(pages: data.chapter.pages),
               RemainingHours(
-                hours: data.avgHoursToRead ?? 0,
+                hours: data.chapter.avgHoursToRead ?? 0,
               ),
+              if (data.metadata.releaseYear != null)
+                ReleaseYear(
+                  releaseYear: data.metadata.releaseYear!,
+                ),
             ],
           ),
+          MetadataWriters(metadata: data.metadata),
         ],
       ),
     );
