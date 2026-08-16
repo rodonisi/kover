@@ -111,6 +111,7 @@ class SeriesRepository {
   Stream<SeriesModel> watchSeriesForChapter(int chapterId) {
     return _db.seriesDao
         .watchSeriesForChapter(chapterId)
+        .whereNotNull()
         .map(SeriesModel.fromDatabaseModel);
   }
 

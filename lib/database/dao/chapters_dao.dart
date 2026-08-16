@@ -29,8 +29,8 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     with _$ChaptersDaoMixin {
   ChaptersDao(super.attachedDatabase);
 
-  /// Get [SingleSelectable] for chapter [chapterId]
-  SingleSelectable<Chapter> chapter(int chapterId) {
+  /// Get a [SingleOrNullSelectable] for chapter [chapterId]
+  SingleOrNullSelectable<Chapter> chapter(int chapterId) {
     return managers.chapters.filter((f) => f.id.equals(chapterId));
   }
 
@@ -132,21 +132,21 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
 
     final peopleStream =
         (select(people).join([
-              innerJoin(
-                chapterPeopleRoles,
-                chapterPeopleRoles.personId.equalsExp(people.id),
-              ),
-            ])..where(chapterPeopleRoles.chapterId.equals(chapterId)))
-            .watch()
-            .map((rows) {
-              final map = <PersonRole, List<PeopleData>>{};
-              for (final row in rows) {
-                final person = row.readTable(people);
-                final role = row.readTable(chapterPeopleRoles).role;
-                map.putIfAbsent(role, () => []).add(person);
-              }
-              return map;
-            });
+          innerJoin(
+            chapterPeopleRoles,
+            chapterPeopleRoles.personId.equalsExp(people.id),
+          ),
+        ])..where(chapterPeopleRoles.chapterId.equals(chapterId))).watch().map((
+          rows,
+        ) {
+          final map = <PersonRole, List<PeopleData>>{};
+          for (final row in rows) {
+            final person = row.readTable(people);
+            final role = row.readTable(chapterPeopleRoles).role;
+            map.putIfAbsent(role, () => []).add(person);
+          }
+          return map;
+        });
 
     return Rx.combineLatest3(tagsStream, genresStream, peopleStream, (t, g, p) {
       return ChapterRelations(

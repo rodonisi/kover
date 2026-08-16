@@ -22,8 +22,8 @@ part 'volumes_dao.g.dart';
 class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
   VolumesDao(super.attachedDatabase);
 
-  /// Get a [SingleSelectable] for volume [volumeId]
-  SingleSelectable<VolumeWithRelations> volume(int volumeId) {
+  /// Get a [SingleOrNullSelectable] for volume [volumeId] with its chapters
+  SingleOrNullSelectable<VolumeWithRelations> volume(int volumeId) {
     return managers.volumes
         .withReferences(
           (prefetch) => prefetch(chaptersRefs: true),

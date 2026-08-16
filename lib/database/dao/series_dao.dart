@@ -118,7 +118,8 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     return await q.get();
   }
 
-  Stream<SeriesData> watchSeriesForChapter(int chapterId) {
+  /// Watch series for chapter [chapterId]. Emits null when the chapter does not exist
+  Stream<SeriesData?> watchSeriesForChapter(int chapterId) {
     return managers.chapters
         .withReferences()
         .filter((f) => f.id(chapterId))
@@ -126,7 +127,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
           final (_, refs) = res;
           return await refs.seriesId.getSingle(distinct: true);
         })
-        .watchSingle();
+        .watchSingleOrNull();
   }
 
   /// Get [SingleOrNullSelectable] cover for series [seriesId]

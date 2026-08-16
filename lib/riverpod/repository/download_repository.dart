@@ -74,7 +74,8 @@ class DownloadRepository {
     required int chapterId,
     CancellationToken? cancellationToken,
   }) async {
-    final chapter = await _db.chaptersDao.chapter(chapterId).getSingle();
+    final chapter = await _db.chaptersDao.chapter(chapterId).getSingleOrNull();
+    if (chapter == null) return;
     final format = chapter.format;
     final totalPages = switch (format) {
       .pdf => 1,

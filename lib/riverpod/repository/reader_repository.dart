@@ -242,7 +242,8 @@ class ReaderRepository {
     await _db.readerDao.markVolumeRead(volumeId, isRead: true);
 
     try {
-      final volume = await _db.volumesDao.volume(volumeId).getSingle();
+      final volume = await _db.volumesDao.volume(volumeId).getSingleOrNull();
+      if (volume == null) return;
       await _readerClient.markVolumeRead(
         seriesId: volume.volume.seriesId,
         volumeId: volumeId,
@@ -264,7 +265,8 @@ class ReaderRepository {
     await _db.readerDao.markVolumeRead(volumeId, isRead: false);
 
     try {
-      final volume = await _db.volumesDao.volume(volumeId).getSingle();
+      final volume = await _db.volumesDao.volume(volumeId).getSingleOrNull();
+      if (volume == null) return;
       await _readerClient.markVolumeUnread(
         seriesId: volume.volume.seriesId,
         volumeId: volumeId,

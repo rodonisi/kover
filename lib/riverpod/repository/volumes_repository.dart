@@ -8,6 +8,7 @@ import 'package:kover/sync/volume_sync_operations.dart';
 import 'package:kover/utils/chunked_fetch.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:rxdart/rxdart.dart';
 
 part 'volumes_repository.g.dart';
 
@@ -33,7 +34,8 @@ class VolumesRepository {
   Stream<VolumeModel> watchVolume(int volumeId) {
     return _db.volumesDao
         .volume(volumeId)
-        .watchSingle()
+        .watchSingleOrNull()
+        .whereNotNull()
         .map(VolumeModel.fromDatabaseModel);
   }
 
@@ -88,9 +90,9 @@ class VolumesRepository {
   }
 
   Future<List<int>> getChapterIds({required int volumeId}) async {
-    final volume = await _db.volumesDao.volume(volumeId).getSingle();
+    final volume = await _db.volumesDao.volume(volumeId).getSingleOrNull();
 
-    return volume.chapters.map((c) => c.id).toList();
+    return volume?.chapters.map((c) => c.id).toList() ?? [];
   }
 
   /// Fetch missing covers for all volumes

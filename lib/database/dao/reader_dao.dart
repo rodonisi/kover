@@ -6,6 +6,7 @@ import 'package:kover/database/tables/progress.dart';
 import 'package:kover/database/tables/reading_lists.dart';
 import 'package:kover/database/tables/series.dart';
 import 'package:kover/database/tables/volumes.dart';
+import 'package:rxdart/rxdart.dart';
 
 part 'reader_dao.g.dart';
 
@@ -103,15 +104,17 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   }
 
   /// Stream of continue point for volume [volumeId]
-  Stream<Chapter> watchVolumeContinuePoint({required int volumeId}) async* {
-    final volume = await managers.volumes
+  Stream<Chapter> watchVolumeContinuePoint({required int volumeId}) {
+    return managers.volumes
         .filter((f) => f.id(volumeId))
-        .getSingle();
-
-    yield* _continuePointQuery(
-      seriesId: volume.seriesId,
-      volumeId: volumeId,
-    ).map((row) => row.readTable(chapters)).watchSingle();
+        .watchSingleOrNull()
+        .switchMap((volume) {
+          if (volume == null) return const Stream.empty();
+          return _continuePointQuery(
+            seriesId: volume.seriesId,
+            volumeId: volumeId,
+          ).map((row) => row.readTable(chapters)).watchSingle();
+        });
   }
 
   /// Watch continue point for reading list [readingListId]
