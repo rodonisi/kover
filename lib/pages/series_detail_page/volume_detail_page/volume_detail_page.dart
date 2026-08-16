@@ -63,13 +63,13 @@ class VolumeDetailPage extends ConsumerWidget {
             horizontal: LayoutConstants.mediumPadding,
           ),
           sliver: SliverToBoxAdapter(
-            child: MetadataSections(
-              asyncValue: ref.watch(
-                chapterMetadataProvider(
-                  chapterId: volume.chapters.first.id,
-                ),
-              ),
-            ),
+            // child: MetadataSections(
+            //   asyncValue: ref.watch(
+            //     chapterMetadataProvider(
+            //       chapterId: volume.chapters.first.id,
+            //     ),
+            //   ),
+            // ),
           ),
         ),
       const SliverBottomPadding(),

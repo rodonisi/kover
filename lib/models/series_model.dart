@@ -7,7 +7,7 @@ import 'package:kover/models/enums/age_rating.dart';
 import 'package:kover/models/enums/format.dart';
 import 'package:kover/models/enums/publication_status.dart';
 import 'package:kover/models/volume_model.dart';
-import 'package:kover/widgets/details/metadata_sections.dart';
+import 'package:kover/riverpod/providers/metadata.dart';
 
 part 'series_model.freezed.dart';
 part 'series_model.g.dart';

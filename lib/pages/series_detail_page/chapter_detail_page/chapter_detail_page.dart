@@ -29,11 +29,11 @@ class ChapterDetailPage extends ConsumerWidget {
               left: LayoutConstants.mediumPadding,
             ),
             sliver: SliverToBoxAdapter(
-              child: MetadataSections(
-                asyncValue: ref.watch(
-                  chapterMetadataProvider(chapterId: chapterId),
-                ),
-              ),
+              // child: MetadataSections(
+              //   asyncValue: ref.watch(
+              //     chapterMetadataProvider(chapterId: chapterId),
+              //   ),
+              // ),
             ),
           ),
           const SliverBottomPadding(),
