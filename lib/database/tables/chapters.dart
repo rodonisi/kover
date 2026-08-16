@@ -76,7 +76,7 @@ class ChapterPeopleRoles extends Table {
   TextColumn get role => textEnum<PersonRole>()();
 
   @override
-  Set<Column<Object>>? get primaryKey => {chapterId, personId};
+  Set<Column<Object>>? get primaryKey => {chapterId, personId, role};
 }
 
 class ChapterGenres extends Table {

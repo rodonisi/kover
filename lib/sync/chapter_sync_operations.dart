@@ -1,8 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
-import 'package:kover/database/dao/chapters_dao.dart';
-import 'package:kover/mapping/dto/chapter_dto_mappings.dart';
 import 'package:kover/utils/logging.dart';
 
 class ChapterSyncOperations {
@@ -13,17 +11,6 @@ class ChapterSyncOperations {
     required this._client,
     required this._apiKey,
   });
-
-  /// Fetch chapter [chapterId]
-  Future<ChapterWithRelationsCompanion> getChapter(int chapterId) async {
-    final res = await _client.apiChapterGet(chapterId: chapterId);
-
-    if (!res.isSuccessful || res.body == null) {
-      throw Exception('Failed to load chapter: ${res.error}');
-    }
-
-    return res.body!.toChapterCompanions();
-  }
 
   /// Fetch chapter cover for [chapterId]
   Future<ChapterCoversCompanion?> getChapterCover(int chapterId) async {

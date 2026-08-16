@@ -86,7 +86,7 @@ class PillRun extends HookWidget {
                   child: Text(
                     collapsed.value
                         ? l.moreCount(items.length - collapsedItemCount)
-                        : 'Show less',
+                        : l.showLess,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.primary,
                     ),

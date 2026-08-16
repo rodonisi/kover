@@ -175,6 +175,7 @@ void main() {
               seriesId: 1,
               releaseYear: 2020,
               language: 'en',
+              ageRating: const Value(5),
             ),
           );
       await oldDb.close();
@@ -198,6 +199,7 @@ void main() {
         PublicationStatus.unknown.name,
       );
       expect(seriesMetadata.first.webLinks, null);
+      expect(seriesMetadata.first.ageRating, 5);
 
       await migratedDb.close();
     });
@@ -254,6 +256,26 @@ void main() {
               lastModified: DateTime.now().millisecondsSinceEpoch,
             ),
           );
+      await oldDb
+          .into(oldDb.chapters)
+          .insert(
+            v8.ChaptersCompanion.insert(
+              id: const Value(2),
+              volumeId: 1,
+              seriesId: 1,
+              title: const Value('Test Chapter 2'),
+              minNumber: 2.0,
+              maxNumber: 2.0,
+              pages: 42,
+              wordCount: 42,
+              sortOrder: 2.0,
+              format: 'epub',
+              ageRating: const Value(8),
+              releaseDate: DateTime.now().millisecondsSinceEpoch,
+              created: DateTime.now().millisecondsSinceEpoch,
+              lastModified: DateTime.now().millisecondsSinceEpoch,
+            ),
+          );
       await oldDb.close();
 
       final db = AppDatabase(schema.newConnection());
@@ -262,7 +284,7 @@ void main() {
 
       final migratedDb = v9.DatabaseAtV9(schema.newConnection());
       final chapters = await migratedDb.select(migratedDb.chapters).get();
-      expect(chapters, hasLength(1));
+      expect(chapters, hasLength(2));
       expect(chapters.first.id, 1);
       expect(chapters.first.volumeId, 1);
       expect(chapters.first.seriesId, 1);
@@ -273,11 +295,56 @@ void main() {
       expect(chapters.first.wordCount, 42);
       expect(chapters.first.sortOrder, 1.0);
       expect(chapters.first.format, Format.epub.name);
+      expect(chapters.first.ageRating, 0);
       expect(
         chapters.first.publicationStatus,
         PublicationStatus.unknown.name,
       );
       expect(chapters.first.webLinks, null);
+      expect(chapters.last.id, 2);
+      expect(chapters.last.ageRating, 8);
+
+      await migratedDb.close();
+    });
+
+    test('migrates series people roles and allows multiple roles', () async {
+      final schema = await verifier.schemaAt(8);
+      final oldDb = v8.DatabaseAtV8(schema.newConnection());
+      await oldDb
+          .into(oldDb.seriesPeopleRoles)
+          .insert(
+            v8.SeriesPeopleRolesCompanion.insert(
+              seriesMetadataId: 1,
+              personId: 1,
+              role: 'writer',
+            ),
+          );
+      await oldDb.close();
+
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, 9);
+      await db.close();
+
+      final migratedDb = v9.DatabaseAtV9(schema.newConnection());
+      final roles = await migratedDb.select(migratedDb.seriesPeopleRoles).get();
+      expect(roles, hasLength(1));
+      expect(roles.first.seriesMetadataId, 1);
+      expect(roles.first.personId, 1);
+      expect(roles.first.role, 'writer');
+
+      await migratedDb
+          .into(migratedDb.seriesPeopleRoles)
+          .insert(
+            v9.SeriesPeopleRolesCompanion.insert(
+              seriesMetadataId: 1,
+              personId: 1,
+              role: 'colorist',
+            ),
+          );
+      final rolesAfter = await migratedDb
+          .select(migratedDb.seriesPeopleRoles)
+          .get();
+      expect(rolesAfter, hasLength(2));
 
       await migratedDb.close();
     });

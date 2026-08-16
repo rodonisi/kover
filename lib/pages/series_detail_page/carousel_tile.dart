@@ -7,6 +7,7 @@ class CarouselTile extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget Function(BuildContext, int) listItemBuilder;
   final int? listItemCount;
+  final double height;
 
   const new({
     super.key,
@@ -14,6 +15,7 @@ class CarouselTile extends StatelessWidget {
     this.onTap,
     required this.listItemBuilder,
     this.listItemCount,
+    this.height = LayoutConstants.carouselHeight,
   });
 
   @override
@@ -38,7 +40,7 @@ class CarouselTile extends StatelessWidget {
                 ],
               ),
               SizedBox(
-                height: 200,
+                height: height,
                 child: ShaderMask(
                   shaderCallback: (Rect bounds) {
                     return const LinearGradient(

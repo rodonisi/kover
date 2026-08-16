@@ -27,7 +27,9 @@ class SeriesMetadataDao extends DatabaseAccessor<AppDatabase>
     final metadataQuery = select(seriesMetadata)
       ..where((t) => t.seriesId.equals(seriesId));
 
-    return metadataQuery.watchSingle().switchMap((metadata) {
+    return metadataQuery.watchSingleOrNull().whereNotNull().switchMap((
+      metadata,
+    ) {
       final tagsStream =
           (select(tags).join([
                 innerJoin(seriesTags, seriesTags.tagId.equalsExp(tags.id)),
@@ -112,6 +114,7 @@ class SeriesMetadataDao extends DatabaseAccessor<AppDatabase>
   ) async {
     final items = metadata.toList();
     final meta = items.map((m) => m.metadata);
+    final metadataIds = items.map((m) => m.metadata.id.value);
     final ps = items.expand(
       (m) => [
         ...m.writers,
@@ -136,6 +139,18 @@ class SeriesMetadataDao extends DatabaseAccessor<AppDatabase>
     final tagsLinks = items.expand((m) => m.seriesTags);
 
     await batch((batch) {
+      batch.deleteWhere(
+        seriesPeopleRoles,
+        (t) => t.seriesMetadataId.isIn(metadataIds),
+      );
+      batch.deleteWhere(
+        seriesGenres,
+        (t) => t.seriesMetadataId.isIn(metadataIds),
+      );
+      batch.deleteWhere(
+        seriesTags,
+        (t) => t.seriesMetadataId.isIn(metadataIds),
+      );
       batch.insertAllOnConflictUpdate(seriesMetadata, meta);
       batch.insertAllOnConflictUpdate(people, ps);
       batch.insertAllOnConflictUpdate(seriesPeopleRoles, peopleLinks);

@@ -194,7 +194,6 @@ class _Metadata extends ConsumerWidget {
           Wrap(
             spacing: LayoutConstants.mediumPadding,
             runSpacing: LayoutConstants.mediumPadding,
-            // alignment: .spaceBetween,
             children: [
               if ((series.wordCount ?? 0) > 0)
                 WordCount(wordCount: series.wordCount!),

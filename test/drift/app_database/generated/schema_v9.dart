@@ -3141,7 +3141,7 @@ class SeriesPeopleRoles extends Table
   String get actualTableName => $name;
   static const String $name = 'series_people_roles';
   @override
-  Set<GeneratedColumn> get $primaryKey => {seriesMetadataId, personId};
+  Set<GeneratedColumn> get $primaryKey => {seriesMetadataId, personId, role};
   @override
   SeriesPeopleRolesData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -3168,7 +3168,7 @@ class SeriesPeopleRoles extends Table
 
   @override
   List<String> get customConstraints => const [
-    'PRIMARY KEY(series_metadata_id, person_id)',
+    'PRIMARY KEY(series_metadata_id, person_id, role)',
   ];
   @override
   bool get dontWriteConstraints => true;
@@ -6074,7 +6074,7 @@ class ChapterPeopleRoles extends Table
   String get actualTableName => $name;
   static const String $name = 'chapter_people_roles';
   @override
-  Set<GeneratedColumn> get $primaryKey => {chapterId, personId};
+  Set<GeneratedColumn> get $primaryKey => {chapterId, personId, role};
   @override
   ChapterPeopleRolesData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -6101,7 +6101,7 @@ class ChapterPeopleRoles extends Table
 
   @override
   List<String> get customConstraints => const [
-    'PRIMARY KEY(chapter_id, person_id)',
+    'PRIMARY KEY(chapter_id, person_id, role)',
   ];
   @override
   bool get dontWriteConstraints => true;

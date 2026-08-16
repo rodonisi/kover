@@ -69,7 +69,7 @@ class SeriesPeopleRoles extends Table {
   TextColumn get role => textEnum<PersonRole>()();
 
   @override
-  Set<Column<Object>>? get primaryKey => {seriesMetadataId, personId};
+  Set<Column<Object>>? get primaryKey => {seriesMetadataId, personId, role};
 }
 
 class SeriesGenres extends Table {

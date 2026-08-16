@@ -241,14 +241,13 @@ class AppDatabase extends _$AppDatabase {
                 columnTransformer: {
                   schema.seriesMetadata.maxCount: const Constant(0),
                   schema.seriesMetadata.totalCount: const Constant(0),
-                  schema.seriesMetadata.publicationStatus: const Constant(
-                    'unknown',
+                  schema.seriesMetadata.publicationStatus: Constant(
+                    PublicationStatus.unknown.name,
                   ),
-                  schema.seriesMetadata.ageRating: Constant(
-                    AgeRating.unknown.index,
-                  ),
-                  schema.seriesMetadata.releaseYear:
-                      schema.seriesMetadata.releaseYear,
+                  schema.chapters.ageRating: coalesce([
+                    schema.chapters.ageRating,
+                    const Constant(0),
+                  ]),
                 },
               ),
             );
@@ -277,10 +276,14 @@ class AppDatabase extends _$AppDatabase {
                   schema.chapters.publicationStatus: Constant(
                     PublicationStatus.unknown.name,
                   ),
-                  schema.chapters.ageRating: Constant(AgeRating.unknown.index),
+                  schema.chapters.ageRating: coalesce([
+                    schema.chapters.ageRating,
+                    const Constant(0),
+                  ]),
                 },
               ),
             );
+            await m.alterTable(TableMigration(schema.seriesPeopleRoles));
           });
         },
       ),

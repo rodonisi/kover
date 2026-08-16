@@ -895,7 +895,8 @@
         "constraints": [],
         "explicit_pk": [
           "series_metadata_id",
-          "person_id"
+          "person_id",
+          "role"
         ]
       }
     },
@@ -1788,7 +1789,8 @@
         "constraints": [],
         "explicit_pk": [
           "chapter_id",
-          "person_id"
+          "person_id",
+          "role"
         ]
       }
     },
@@ -3144,7 +3146,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"series_people_roles\" (\"series_metadata_id\" INTEGER NOT NULL REFERENCES series_metadata (id), \"person_id\" INTEGER NOT NULL REFERENCES people (id), \"role\" TEXT NOT NULL, PRIMARY KEY (\"series_metadata_id\", \"person_id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"series_people_roles\" (\"series_metadata_id\" INTEGER NOT NULL REFERENCES series_metadata (id), \"person_id\" INTEGER NOT NULL REFERENCES people (id), \"role\" TEXT NOT NULL, PRIMARY KEY (\"series_metadata_id\", \"person_id\", \"role\"));"
         }
       ]
     },
@@ -3207,7 +3209,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"chapter_people_roles\" (\"chapter_id\" INTEGER NOT NULL REFERENCES chapters (id) ON DELETE CASCADE, \"person_id\" INTEGER NOT NULL REFERENCES people (id), \"role\" TEXT NOT NULL, PRIMARY KEY (\"chapter_id\", \"person_id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"chapter_people_roles\" (\"chapter_id\" INTEGER NOT NULL REFERENCES chapters (id) ON DELETE CASCADE, \"person_id\" INTEGER NOT NULL REFERENCES people (id), \"role\" TEXT NOT NULL, PRIMARY KEY (\"chapter_id\", \"person_id\", \"role\"));"
         }
       ]
     },

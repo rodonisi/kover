@@ -557,6 +557,13 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         final genreLinks = csMap.values.expand((c) => c.chapterGenres);
         final tagLinks = csMap.values.expand((c) => c.chapterTags);
 
+        batch.deleteWhere(
+          chapterPeopleRoles,
+          (t) => t.chapterId.isIn(chapterIds),
+        );
+        batch.deleteWhere(chapterGenres, (t) => t.chapterId.isIn(chapterIds));
+        batch.deleteWhere(chapterTags, (t) => t.chapterId.isIn(chapterIds));
+
         batch.insertAllOnConflictUpdate(people, peopleList);
         batch.insertAllOnConflictUpdate(
           genres,
