@@ -61,6 +61,9 @@ class CarouselTile extends StatelessWidget {
                   blendMode: BlendMode.dstIn,
                   child: ListView.builder(
                     scrollDirection: .horizontal,
+                    padding: const .symmetric(
+                      horizontal: LayoutConstants.smallerPadding,
+                    ),
                     itemCount: listItemCount,
                     itemBuilder: listItemBuilder,
                   ),

@@ -57,9 +57,6 @@ sealed class SeriesDetailModel with _$SeriesDetailModel {
     required List<VolumeModel> unreadVolumes,
   }) = _SeriesDetailModel;
 
-  factory SeriesDetailModel.fromJson(Map<String, Object?> json) =>
-      _$SeriesDetailModelFromJson(json);
-
   factory SeriesDetailModel.fromDatabaseModel(SeriesDetailWithRelations model) {
     return SeriesDetailModel(
       storyline: model.storylineChapters

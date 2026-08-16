@@ -111,77 +111,66 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     await batch((b) => b.insertAllOnConflictUpdate(chapterCovers, covers));
   }
 
-  /// Get chapter metadata for chapter [chapterId]
-  Stream<ChapterMetadataWithRelations> watchChapterMetadata(int chapterId) {
-    final metadataQuery = select(chapters)
-      ..where((t) => t.id.equals(chapterId));
-
-    return metadataQuery.watchSingle().switchMap((chapter) {
-      final tagsStream =
-          (select(tags).join([
-            innerJoin(chapterTags, chapterTags.tagId.equalsExp(tags.id)),
-          ])..where(chapterTags.chapterId.equals(chapter.id))).watch().map(
-            (rows) => rows.map((r) => r.readTable(tags)).toList(),
-          );
-
-      final genresStream =
-          (select(genres).join([
-            innerJoin(
-              chapterGenres,
-              chapterGenres.genreId.equalsExp(genres.id),
-            ),
-          ])..where(chapterGenres.chapterId.equals(chapter.id))).watch().map(
-            (rows) => rows.map((r) => r.readTable(genres)).toList(),
-          );
-
-      final peopleStream =
-          (select(people).join([
-                innerJoin(
-                  chapterPeopleRoles,
-                  chapterPeopleRoles.personId.equalsExp(people.id),
-                ),
-              ])..where(chapterPeopleRoles.chapterId.equals(chapter.id)))
-              .watch()
-              .map((rows) {
-                final map = <PersonRole, List<PeopleData>>{};
-                for (final row in rows) {
-                  final person = row.readTable(people);
-                  final role = row.readTable(chapterPeopleRoles).role;
-                  map.putIfAbsent(role, () => []).add(person);
-                }
-                return map;
-              });
-
-      return Rx.combineLatest3(tagsStream, genresStream, peopleStream, (
-        t,
-        g,
-        p,
-      ) {
-        return ChapterMetadataWithRelations(
-          chapter: chapter,
-          tags: t,
-          genres: g,
-          writers: p[PersonRole.writer] ?? [],
-          publishers: p[PersonRole.publisher] ?? [],
-          characters: p[PersonRole.character] ?? [],
-          coverArtists: p[PersonRole.coverArtist] ?? [],
-          pencillers: p[PersonRole.penciller] ?? [],
-          inkers: p[PersonRole.inker] ?? [],
-          imprints: p[PersonRole.imprint] ?? [],
-          colorists: p[PersonRole.colorist] ?? [],
-          letterers: p[PersonRole.letterer] ?? [],
-          editors: p[PersonRole.editor] ?? [],
-          translators: p[PersonRole.translator] ?? [],
-          teams: p[PersonRole.team] ?? [],
-          locations: p[PersonRole.location] ?? [],
+  /// Watch relations (tags, genres, people) for chapter [chapterId]
+  Stream<ChapterRelations> watchChapterRelations(int chapterId) {
+    final tagsStream =
+        (select(tags).join([
+          innerJoin(chapterTags, chapterTags.tagId.equalsExp(tags.id)),
+        ])..where(chapterTags.chapterId.equals(chapterId))).watch().map(
+          (rows) => rows.map((r) => r.readTable(tags)).toList(),
         );
-      });
+
+    final genresStream =
+        (select(genres).join([
+          innerJoin(
+            chapterGenres,
+            chapterGenres.genreId.equalsExp(genres.id),
+          ),
+        ])..where(chapterGenres.chapterId.equals(chapterId))).watch().map(
+          (rows) => rows.map((r) => r.readTable(genres)).toList(),
+        );
+
+    final peopleStream =
+        (select(people).join([
+              innerJoin(
+                chapterPeopleRoles,
+                chapterPeopleRoles.personId.equalsExp(people.id),
+              ),
+            ])..where(chapterPeopleRoles.chapterId.equals(chapterId)))
+            .watch()
+            .map((rows) {
+              final map = <PersonRole, List<PeopleData>>{};
+              for (final row in rows) {
+                final person = row.readTable(people);
+                final role = row.readTable(chapterPeopleRoles).role;
+                map.putIfAbsent(role, () => []).add(person);
+              }
+              return map;
+            });
+
+    return Rx.combineLatest3(tagsStream, genresStream, peopleStream, (t, g, p) {
+      return ChapterRelations(
+        tags: t,
+        genres: g,
+        writers: p[PersonRole.writer] ?? [],
+        publishers: p[PersonRole.publisher] ?? [],
+        characters: p[PersonRole.character] ?? [],
+        coverArtists: p[PersonRole.coverArtist] ?? [],
+        pencillers: p[PersonRole.penciller] ?? [],
+        inkers: p[PersonRole.inker] ?? [],
+        imprints: p[PersonRole.imprint] ?? [],
+        colorists: p[PersonRole.colorist] ?? [],
+        letterers: p[PersonRole.letterer] ?? [],
+        editors: p[PersonRole.editor] ?? [],
+        translators: p[PersonRole.translator] ?? [],
+        teams: p[PersonRole.team] ?? [],
+        locations: p[PersonRole.location] ?? [],
+      );
     });
   }
 }
 
-class ChapterMetadataWithRelations {
-  final Chapter chapter;
+class ChapterRelations {
   final List<PeopleData> writers;
   final List<PeopleData> coverArtists;
   final List<PeopleData> publishers;
@@ -198,8 +187,7 @@ class ChapterMetadataWithRelations {
   final List<Genre> genres;
   final List<Tag> tags;
 
-  const ChapterMetadataWithRelations({
-    required this.chapter,
+  const ChapterRelations({
     required this.writers,
     required this.coverArtists,
     required this.publishers,

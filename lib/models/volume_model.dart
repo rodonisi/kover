@@ -3,7 +3,6 @@ import 'package:kover/database/dao/volumes_dao.dart';
 import 'package:kover/models/chapter_model.dart';
 
 part 'volume_model.freezed.dart';
-part 'volume_model.g.dart';
 
 @freezed
 sealed class VolumeModel with _$VolumeModel {
@@ -20,9 +19,6 @@ sealed class VolumeModel with _$VolumeModel {
     String? primaryColor,
     String? secondaryColor,
   }) = _VolumeModel;
-
-  factory VolumeModel.fromJson(Map<String, dynamic> json) =>
-      _$VolumeModelFromJson(json);
 
   factory VolumeModel.fromDatabaseModel(VolumeWithRelations data) {
     return VolumeModel(

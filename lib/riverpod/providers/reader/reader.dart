@@ -31,9 +31,6 @@ sealed class ReaderState with _$ReaderState {
     required int initialPage,
     String? bookScrollId,
   }) = _ReaderState;
-
-  factory ReaderState.fromJson(Map<String, Object?> json) =>
-      _$ReaderStateFromJson(json);
 }
 
 @riverpod

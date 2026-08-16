@@ -1,4 +1,3 @@
-import 'package:kover/pages/series_detail_page/chapter_detail_page/chapter_app_bar_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/managers/download_manager.dart';
@@ -175,10 +174,10 @@ class _ChapterInfo extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final info = ref.watch(chapterInfoProvider(chapterId: chapterId));
+    final chapter = ref.watch(chapterMetadataProvider(chapterId: chapterId));
 
     return Async(
-      asyncValue: info,
+      asyncValue: chapter,
       data: (data) => Column(
         crossAxisAlignment: .start,
         spacing: LayoutConstants.largePadding,
@@ -187,19 +186,19 @@ class _ChapterInfo extends ConsumerWidget {
             spacing: LayoutConstants.mediumPadding,
             runSpacing: LayoutConstants.mediumPadding,
             children: [
-              if ((data.chapter.wordCount ?? 0) > 0)
-                WordCount(wordCount: data.chapter.wordCount!),
-              Pages(pages: data.chapter.pages),
+              if ((data.wordCount ?? 0) > 0)
+                WordCount(wordCount: data.wordCount!),
+              Pages(pages: data.pages),
               RemainingHours(
-                hours: data.chapter.avgHoursToRead ?? 0,
+                hours: data.avgHoursToRead ?? 0,
               ),
-              if (data.metadata.releaseYear != null)
+              if (data.releaseYear != null)
                 ReleaseYear(
-                  releaseYear: data.metadata.releaseYear!,
+                  releaseYear: data.releaseYear!,
                 ),
             ],
           ),
-          MetadataWriters(metadata: data.metadata),
+          MetadataWriters(metadata: data),
         ],
       ),
     );
