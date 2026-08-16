@@ -187,7 +187,9 @@ class ContinuePointButton extends HookWidget {
                     mainAxisSize: .min,
                     children: [
                       Text(
-                        l.continueReading,
+                        progress != null && progress! > 0
+                            ? l.continueReading
+                            : l.startReading,
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: textColor,
                         ),

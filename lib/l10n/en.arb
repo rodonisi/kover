@@ -542,6 +542,10 @@
             }
         }
     },
+    "startReading": "Start Reading",
+    "@startReading": {
+        "description": "Label for the start reading button"
+    },
     "continueReading": "Continue Reading",
     "@continueReading": {
         "description": "Label for the continue reading button"
