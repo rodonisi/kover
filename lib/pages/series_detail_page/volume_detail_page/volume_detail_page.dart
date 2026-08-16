@@ -1,12 +1,15 @@
+import 'package:kover/utils/extensions/iterable.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
+import 'package:kover/pages/series_detail_page/carousel_tile.dart';
 import 'package:kover/pages/series_detail_page/volume_detail_page/volume_app_bar.dart';
 import 'package:kover/riverpod/providers/chapter.dart';
+import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/volume.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/widgets/cards/chapter_card.dart';
 import 'package:kover/widgets/details/metadata_sections.dart';
-import 'package:kover/widgets/lists/chapters_grid.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 
 class VolumeDetailPage extends ConsumerWidget {
@@ -24,53 +27,67 @@ class VolumeDetailPage extends ConsumerWidget {
 
     if (volume == null) return const SizedBox.shrink();
 
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          VolumeAppBar(
-            volumeId: volumeId,
+    var items = [
+      VolumeAppBar(
+        volumeId: volumeId,
+      ),
+      if (volume.chapters.isNotEmpty)
+        SliverPadding(
+          padding: const .symmetric(
+            horizontal: LayoutConstants.mediumPadding,
           ),
-          SliverPadding(
-            padding: const EdgeInsetsGeometry.symmetric(
-              horizontal: LayoutConstants.mediumPadding,
-              vertical: LayoutConstants.smallPadding,
-            ),
-            sliver: SliverToBoxAdapter(
-              child: Text(
-                l.chapters,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: LayoutConstants.mediumPadding,
-            ),
-            sliver: ChaptersGrid(
-              seriesId: volume.seriesId,
-              chapters: volume.chapters,
-            ),
-          ),
-          if (volume.chapters.isNotEmpty)
-            SliverPadding(
-              padding: const EdgeInsets.only(
-                top: LayoutConstants.mediumPadding,
-                right: LayoutConstants.mediumPadding,
-                left: LayoutConstants.mediumPadding,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: MetadataSections(
-                  asyncValue: ref.watch(
-                    chapterMetadataProvider(
-                      chapterId: volume.chapters.first.id,
-                    ),
+          sliver: SliverToBoxAdapter(
+            child: CarouselTile(
+              title: '${l.chapters} (${volume.chapters.length})',
+              onTap: () => ChaptersRoute(
+                seriesId: volume.seriesId,
+                volumeId: volume.id,
+              ).push(context),
+              listItemCount: volume.chapters.length,
+              listItemBuilder: (context, index) {
+                final chapter = volume.chapters[index];
+                return AspectRatio(
+                  aspectRatio: LayoutConstants.chapterCardAspectRatio,
+                  child: ChapterCard(
+                    seriesId: volume.seriesId,
+                    chapterId: chapter.id,
                   ),
+                );
+              },
+            ),
+          ),
+        ),
+      if (volume.chapters.isNotEmpty)
+        SliverPadding(
+          padding: const .symmetric(
+            horizontal: LayoutConstants.mediumPadding,
+          ),
+          sliver: SliverToBoxAdapter(
+            child: MetadataSections(
+              asyncValue: ref.watch(
+                chapterMetadataProvider(
+                  chapterId: volume.chapters.first.id,
                 ),
               ),
             ),
-          const SliverBottomPadding(),
-        ],
+          ),
+        ),
+      const SliverBottomPadding(),
+    ];
+
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: items
+            .interleave(
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: LayoutConstants.mediumPadding,
+                ),
+              ),
+            )
+            .toList(),
       ),
     );
   }
 }
+
