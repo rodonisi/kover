@@ -213,7 +213,6 @@ class _Metadata extends ConsumerWidget {
           Wrap(
             spacing: LayoutConstants.mediumPadding,
             runSpacing: LayoutConstants.mediumPadding,
-            alignment: .spaceBetween,
             children: [
               if (metadata.writers.isNotEmpty)
                 LimitedList(

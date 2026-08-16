@@ -3,6 +3,7 @@ import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/enums/publication_status.dart';
 import 'package:kover/models/series_model.dart';
 import 'package:kover/pages/series_detail_page/pill_run.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/details/info_widgets.dart';
 import 'package:kover/widgets/details/summary.dart';
@@ -72,12 +73,18 @@ class MetadataSections extends StatelessWidget {
           if (metadata.genres.isNotEmpty)
             PillRun(
               title: l.genres,
-              items: metadata.genres.map((g) => g.name).toList(),
+              items: metadata.genres
+                  .map(
+                    (g) => PillRunItem(label: g.name),
+                  )
+                  .toList(),
             ),
           if (metadata.tags.isNotEmpty)
             PillRun(
               title: l.tags,
-              items: metadata.tags.map((g) => g.name).toList(),
+              items: metadata.tags
+                  .map((g) => PillRunItem(label: g.name, icon: KoverIcons.tag))
+                  .toList(),
             ),
           if (metadata.writers.isNotEmpty)
             PeopleRun(title: l.writers, items: metadata.writers),

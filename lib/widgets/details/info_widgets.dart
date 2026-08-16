@@ -16,7 +16,7 @@ class LimitedList extends StatelessWidget {
     super.key,
     this.title,
     required this.items,
-    this.maxItems = 3,
+    this.maxItems = 2,
   });
 
   @override

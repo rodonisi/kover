@@ -20,36 +20,25 @@ class PeopleRun extends StatelessWidget {
   Widget build(BuildContext context) {
     return PillRun(
       title: title,
-      items: items.map((p) => p.name).toList(),
-      itemBuilder: (p) => Pill(
-        child: Row(
-          mainAxisSize: .min,
-          spacing: LayoutConstants.smallPadding,
-          children: [
-            const Icon(KoverIcons.person, size: LayoutConstants.smallIcon),
-            Text(
-              p,
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
-          ],
-        ),
-      ),
+      items: items
+          .map((p) => PillRunItem(label: p.name, icon: KoverIcons.person))
+          .toList(),
     );
   }
 }
 
+class const PillRunItem({required final String label, final IconData? icon});
+
 class PillRun extends HookWidget {
   final String title;
-  final List<String> items;
+  final List<PillRunItem> items;
   final int collapsedItemCount;
-  final Widget Function(String item)? itemBuilder;
 
   const new({
     super.key,
     required this.title,
     required this.items,
     this.collapsedItemCount = 4,
-    this.itemBuilder,
   });
 
   @override
@@ -76,14 +65,20 @@ class PillRun extends HookWidget {
             alignment: .start,
             children: [
               ...displayItems.map(
-                (g) =>
-                    itemBuilder?.call(g) ??
-                    Pill(
-                      child: Text(
-                        g,
+                (item) => Pill(
+                  child: Row(
+                    mainAxisSize: .min,
+                    spacing: LayoutConstants.smallPadding,
+                    children: [
+                      if (item.icon != null)
+                        Icon(item.icon, size: LayoutConstants.smallIcon),
+                      Text(
+                        item.label,
                         style: theme.textTheme.labelSmall,
                       ),
-                    ),
+                    ],
+                  ),
+                ),
               ),
               if (items.length > collapsedItemCount)
                 Pill(
