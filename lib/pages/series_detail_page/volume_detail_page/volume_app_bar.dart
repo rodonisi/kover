@@ -1,4 +1,5 @@
 import 'package:kover/pages/series_detail_page/volume_detail_page/volume_app_bar_provider.dart';
+import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/volume_model.dart';
@@ -188,6 +189,7 @@ class _VolumeInfo extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final breakpoint = ref.watch(breakpointsProvider);
     final metadata = volume.chapters.isEmpty
         ? null
         : ref.watch(
@@ -219,7 +221,20 @@ class _VolumeInfo extends ConsumerWidget {
         if (metadata != null)
           Async(
             asyncValue: metadata,
-            data: (metadata) => MetadataWriters(metadata: metadata),
+            data: (metadata) {
+              return Wrap(
+                spacing: LayoutConstants.largerPadding,
+                runSpacing: LayoutConstants.mediumPadding,
+                children: [
+                  if (metadata.writers.isNotEmpty)
+                    MetadataWriters(metadata: metadata),
+                  if (breakpoint > .compact && metadata.genres.isNotEmpty)
+                    MetadataGenres(metadata: metadata),
+                  if (breakpoint > .compact && metadata.tags.isNotEmpty)
+                    MetadataTags(metadata: metadata),
+                ],
+              );
+            },
           ),
       ],
     );

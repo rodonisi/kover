@@ -8,7 +8,12 @@ enum Breakpoint {
   medium,
   expanded,
   large,
-  largest,
+  largest;
+
+  bool operator >(Breakpoint other) => index > other.index;
+  bool operator >=(Breakpoint other) => index >= other.index;
+  bool operator <(Breakpoint other) => index < other.index;
+  bool operator <=(Breakpoint other) => index <= other.index;
 }
 
 @riverpod

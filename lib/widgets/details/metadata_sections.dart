@@ -55,6 +55,56 @@ class MetadataWriters extends StatelessWidget {
   }
 }
 
+class MetadataGenres extends StatelessWidget {
+  final MetadataViewModel metadata;
+
+  const MetadataGenres({super.key, required this.metadata});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    if (metadata.writers.isEmpty) return const SizedBox.shrink();
+
+    return LimitedList(
+      maxItems: 3,
+      title: l.genres,
+      items: metadata.writers
+          .map(
+            (w) => Text(
+              w.name,
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+          )
+          .toList(),
+    );
+  }
+}
+
+class MetadataTags extends StatelessWidget {
+  final MetadataViewModel metadata;
+
+  const MetadataTags({super.key, required this.metadata});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    if (metadata.tags.isEmpty) return const SizedBox.shrink();
+
+    return LimitedList(
+      maxItems: 3,
+      title: l.tags,
+      items: metadata.tags
+          .map(
+            (w) => Text(
+              w.name,
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+          )
+          .toList(),
+    );
+  }
+}
+
 class MetadataSections extends StatelessWidget {
   final AsyncValue<MetadataViewModel> asyncValue;
 

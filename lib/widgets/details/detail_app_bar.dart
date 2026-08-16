@@ -1,3 +1,4 @@
+import 'package:kover/widgets/util/breakpoint_builder.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -51,41 +52,159 @@ class DetailAppBar extends HookConsumerWidget {
         primaryColor: primaryColor,
         secondaryColor: secondaryColor,
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: LayoutConstants.largePadding,
-        ),
-        child: Column(
-          spacing: LayoutConstants.largePadding,
-          crossAxisAlignment: .start,
-          mainAxisAlignment: .start,
-          mainAxisSize: .min,
-          children: [
-            const SizedBox.square(dimension: kToolbarHeight),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            Row(
-              spacing: LayoutConstants.largePadding,
-              children: [
-                SizedBox(
-                  height: 200,
-                  child: ClipRRect(
-                    borderRadius: BorderRadiusGeometry.circular(
-                      LayoutConstants.smallBorderRadius,
-                    ),
-                    child: cover,
+      child: BreakpointBuilder(
+        compactBuilder: (context) {
+          return _CompactLayout(
+            title: title,
+            cover: cover,
+            info: info,
+            continueButton: expandedContinueButton,
+          );
+        },
+        expandedBuilder: (context) {
+          return _ExpandedLayout(
+            title: title,
+            cover: cover,
+            info: info,
+            continueButton: expandedContinueButton,
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CompactLayout extends StatelessWidget {
+  final String title;
+  final Widget cover;
+  final Widget info;
+  final Widget continueButton;
+
+  const new({
+    required this.title,
+    required this.cover,
+    required this.info,
+    required this.continueButton,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: LayoutConstants.largePadding,
+      ),
+      child: Column(
+        spacing: LayoutConstants.largePadding,
+        crossAxisAlignment: .start,
+        mainAxisAlignment: .start,
+        mainAxisSize: .min,
+        children: [
+          const SizedBox.square(dimension: kToolbarHeight),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          Row(
+            spacing: LayoutConstants.largePadding,
+            children: [
+              SizedBox(
+                height: 200,
+                child: ClipRRect(
+                  borderRadius: BorderRadiusGeometry.circular(
+                    LayoutConstants.smallBorderRadius,
                   ),
+                  child: cover,
                 ),
-                Expanded(
-                  child: info,
-                ),
-              ],
-            ),
-            expandedContinueButton,
-            const SizedBox.shrink(),
-          ],
+              ),
+              Expanded(
+                child: info,
+              ),
+            ],
+          ),
+          continueButton,
+          const SizedBox.shrink(),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExpandedLayout extends StatelessWidget {
+  static const double coverHeight = 400;
+  static const double continueButtonMaxWidth = 500;
+  static const double contentMaxWidth = LayoutBreakpoints.expanded;
+  final String title;
+  final Widget cover;
+  final Widget info;
+  final Widget continueButton;
+
+  const _ExpandedLayout({
+    required this.title,
+    required this.cover,
+    required this.info,
+    required this.continueButton,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: LayoutConstants.largePadding,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: contentMaxWidth,
+          ),
+          child: Column(
+            spacing: LayoutConstants.largePadding,
+            crossAxisAlignment: .start,
+            mainAxisAlignment: .start,
+            mainAxisSize: .min,
+            children: [
+              const SizedBox.square(dimension: kToolbarHeight),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              Row(
+                spacing: LayoutConstants.largePadding,
+                children: [
+                  SizedBox(
+                    height: coverHeight,
+                    child: ClipRRect(
+                      borderRadius: BorderRadiusGeometry.circular(
+                        LayoutConstants.smallBorderRadius,
+                      ),
+                      child: cover,
+                    ),
+                  ),
+                  Expanded(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: coverHeight,
+                      ),
+                      child: Column(
+                        mainAxisSize: .min,
+                        mainAxisAlignment: .spaceBetween,
+                        crossAxisAlignment: .start,
+                        children: [
+                          info,
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxWidth: continueButtonMaxWidth,
+                            ),
+                            child: continueButton,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox.shrink(),
+            ],
+          ),
         ),
       ),
     );
