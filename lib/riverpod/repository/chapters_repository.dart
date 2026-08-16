@@ -46,7 +46,10 @@ class ChaptersRepository {
   Stream<ChapterModel> watchChapterWithMetadata({
     required int chapterId,
   }) {
-    final chapter = _db.chaptersDao.chapter(chapterId).watchSingleOrNull().whereNotNull();
+    final chapter = _db.chaptersDao
+        .chapter(chapterId)
+        .watchSingleOrNull()
+        .whereNotNull();
     final relations = _db.chaptersDao.watchChapterRelations(chapterId);
 
     return Rx.combineLatest2(chapter, relations, (c, r) {

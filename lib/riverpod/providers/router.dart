@@ -47,9 +47,9 @@ GoRouter router(Ref ref) {
                 TypedGoRoute<VolumesRoute>(
                   path: 'volumes',
                   routes: [
-TypedGoRoute<VolumeDetailRoute>(
-                  path: ':volumeId',
-                ),
+                    TypedGoRoute<VolumeDetailRoute>(
+                      path: ':volumeId',
+                    ),
                   ],
                 ),
                 TypedGoRoute<ChaptersRoute>(
