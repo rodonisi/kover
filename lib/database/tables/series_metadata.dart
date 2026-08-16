@@ -15,7 +15,7 @@ class SeriesMetadata extends Table {
   )();
   TextColumn get summary => text().nullable()();
   IntColumn get ageRating => intEnum<AgeRating>()();
-  IntColumn get releaseYear => integer()();
+  IntColumn get releaseYear => integer().nullable()();
   TextColumn get language => text().nullable()();
   IntColumn get maxCount => integer()();
   IntColumn get totalCount => integer()();

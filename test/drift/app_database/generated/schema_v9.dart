@@ -1732,10 +1732,10 @@ class SeriesMetadata extends Table
   late final GeneratedColumn<int> releaseYear = GeneratedColumn<int>(
     'release_year',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
   );
   late final GeneratedColumn<String> language = GeneratedColumn<String>(
     'language',
@@ -1837,7 +1837,7 @@ class SeriesMetadata extends Table
       releaseYear: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}release_year'],
-      )!,
+      ),
       language: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}language'],
@@ -1885,7 +1885,7 @@ class SeriesMetadataData extends DataClass
   final int seriesId;
   final String? summary;
   final int ageRating;
-  final int releaseYear;
+  final int? releaseYear;
   final String? language;
   final int maxCount;
   final int totalCount;
@@ -1897,7 +1897,7 @@ class SeriesMetadataData extends DataClass
     required this.seriesId,
     this.summary,
     required this.ageRating,
-    required this.releaseYear,
+    this.releaseYear,
     this.language,
     required this.maxCount,
     required this.totalCount,
@@ -1914,7 +1914,9 @@ class SeriesMetadataData extends DataClass
       map['summary'] = Variable<String>(summary);
     }
     map['age_rating'] = Variable<int>(ageRating);
-    map['release_year'] = Variable<int>(releaseYear);
+    if (!nullToAbsent || releaseYear != null) {
+      map['release_year'] = Variable<int>(releaseYear);
+    }
     if (!nullToAbsent || language != null) {
       map['language'] = Variable<String>(language);
     }
@@ -1936,7 +1938,9 @@ class SeriesMetadataData extends DataClass
           ? const Value.absent()
           : Value(summary),
       ageRating: Value(ageRating),
-      releaseYear: Value(releaseYear),
+      releaseYear: releaseYear == null && nullToAbsent
+          ? const Value.absent()
+          : Value(releaseYear),
       language: language == null && nullToAbsent
           ? const Value.absent()
           : Value(language),
@@ -1960,7 +1964,7 @@ class SeriesMetadataData extends DataClass
       seriesId: serializer.fromJson<int>(json['seriesId']),
       summary: serializer.fromJson<String?>(json['summary']),
       ageRating: serializer.fromJson<int>(json['ageRating']),
-      releaseYear: serializer.fromJson<int>(json['releaseYear']),
+      releaseYear: serializer.fromJson<int?>(json['releaseYear']),
       language: serializer.fromJson<String?>(json['language']),
       maxCount: serializer.fromJson<int>(json['maxCount']),
       totalCount: serializer.fromJson<int>(json['totalCount']),
@@ -1977,7 +1981,7 @@ class SeriesMetadataData extends DataClass
       'seriesId': serializer.toJson<int>(seriesId),
       'summary': serializer.toJson<String?>(summary),
       'ageRating': serializer.toJson<int>(ageRating),
-      'releaseYear': serializer.toJson<int>(releaseYear),
+      'releaseYear': serializer.toJson<int?>(releaseYear),
       'language': serializer.toJson<String?>(language),
       'maxCount': serializer.toJson<int>(maxCount),
       'totalCount': serializer.toJson<int>(totalCount),
@@ -1992,7 +1996,7 @@ class SeriesMetadataData extends DataClass
     int? seriesId,
     Value<String?> summary = const Value.absent(),
     int? ageRating,
-    int? releaseYear,
+    Value<int?> releaseYear = const Value.absent(),
     Value<String?> language = const Value.absent(),
     int? maxCount,
     int? totalCount,
@@ -2004,7 +2008,7 @@ class SeriesMetadataData extends DataClass
     seriesId: seriesId ?? this.seriesId,
     summary: summary.present ? summary.value : this.summary,
     ageRating: ageRating ?? this.ageRating,
-    releaseYear: releaseYear ?? this.releaseYear,
+    releaseYear: releaseYear.present ? releaseYear.value : this.releaseYear,
     language: language.present ? language.value : this.language,
     maxCount: maxCount ?? this.maxCount,
     totalCount: totalCount ?? this.totalCount,
@@ -2090,7 +2094,7 @@ class SeriesMetadataCompanion extends UpdateCompanion<SeriesMetadataData> {
   final Value<int> seriesId;
   final Value<String?> summary;
   final Value<int> ageRating;
-  final Value<int> releaseYear;
+  final Value<int?> releaseYear;
   final Value<String?> language;
   final Value<int> maxCount;
   final Value<int> totalCount;
@@ -2115,7 +2119,7 @@ class SeriesMetadataCompanion extends UpdateCompanion<SeriesMetadataData> {
     required int seriesId,
     this.summary = const Value.absent(),
     required int ageRating,
-    required int releaseYear,
+    this.releaseYear = const Value.absent(),
     this.language = const Value.absent(),
     required int maxCount,
     required int totalCount,
@@ -2124,7 +2128,6 @@ class SeriesMetadataCompanion extends UpdateCompanion<SeriesMetadataData> {
     this.lastUpdated = const Value.absent(),
   }) : seriesId = Value(seriesId),
        ageRating = Value(ageRating),
-       releaseYear = Value(releaseYear),
        maxCount = Value(maxCount),
        totalCount = Value(totalCount),
        publicationStatus = Value(publicationStatus);
@@ -2161,7 +2164,7 @@ class SeriesMetadataCompanion extends UpdateCompanion<SeriesMetadataData> {
     Value<int>? seriesId,
     Value<String?>? summary,
     Value<int>? ageRating,
-    Value<int>? releaseYear,
+    Value<int?>? releaseYear,
     Value<String?>? language,
     Value<int>? maxCount,
     Value<int>? totalCount,

@@ -247,6 +247,8 @@ class AppDatabase extends _$AppDatabase {
                   schema.seriesMetadata.ageRating: Constant(
                     AgeRating.unknown.index,
                   ),
+                  schema.seriesMetadata.releaseYear:
+                      schema.seriesMetadata.releaseYear,
                 },
               ),
             );

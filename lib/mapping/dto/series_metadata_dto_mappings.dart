@@ -21,10 +21,10 @@ extension SeriesMetadataDtoMappings on SeriesMetadataDto {
       metadata: SeriesMetadataCompanion.insert(
         id: Value(id!),
         seriesId: seriesId!,
-        summary: Value.absentIfNull(summary),
+        summary: Value(summary),
         ageRating: ageRating?.toLocal() ?? .unknown,
-        releaseYear: releaseYear ?? 0,
-        language: Value(language ?? ''),
+        releaseYear: Value(releaseYear),
+        language: Value(language),
         lastUpdated: Value(DateTime.timestamp()),
         maxCount: maxCount ?? 0,
         totalCount: totalCount ?? 0,

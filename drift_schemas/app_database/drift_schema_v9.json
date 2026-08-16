@@ -518,7 +518,7 @@
             "name": "release_year",
             "getter_name": "releaseYear",
             "moor_type": "int",
-            "nullable": false,
+            "nullable": true,
             "customConstraints": null,
             "default_dart": null,
             "default_client_dart": null,
@@ -3099,7 +3099,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"series_metadata\" (\"id\" INTEGER NOT NULL, \"series_id\" INTEGER NOT NULL REFERENCES series (id) ON DELETE CASCADE, \"summary\" TEXT NULL, \"age_rating\" INTEGER NOT NULL, \"release_year\" INTEGER NOT NULL, \"language\" TEXT NULL, \"max_count\" INTEGER NOT NULL, \"total_count\" INTEGER NOT NULL, \"publication_status\" TEXT NOT NULL, \"web_links\" TEXT NULL, \"last_updated\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), PRIMARY KEY (\"id\"), UNIQUE (\"series_id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"series_metadata\" (\"id\" INTEGER NOT NULL, \"series_id\" INTEGER NOT NULL REFERENCES series (id) ON DELETE CASCADE, \"summary\" TEXT NULL, \"age_rating\" INTEGER NOT NULL, \"release_year\" INTEGER NULL, \"language\" TEXT NULL, \"max_count\" INTEGER NOT NULL, \"total_count\" INTEGER NOT NULL, \"publication_status\" TEXT NOT NULL, \"web_links\" TEXT NULL, \"last_updated\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), PRIMARY KEY (\"id\"), UNIQUE (\"series_id\"));"
         }
       ]
     },

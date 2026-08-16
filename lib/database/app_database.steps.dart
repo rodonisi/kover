@@ -4324,12 +4324,12 @@ final class Schema9 extends i0.VersionedSchema {
         _column_25,
         _column_26,
         _column_89,
-        _column_28,
-        _column_49,
         _column_90,
+        _column_49,
         _column_91,
         _column_92,
         _column_93,
+        _column_94,
         _column_30,
       ],
       attachedDatabase: database,
@@ -4359,7 +4359,7 @@ final class Schema9 extends i0.VersionedSchema {
         _column_17,
         _column_18,
         _column_47,
-        _column_94,
+        _column_95,
       ],
       attachedDatabase: database,
     ),
@@ -4488,9 +4488,9 @@ final class Schema9 extends i0.VersionedSchema {
         _column_53,
         _column_54,
         _column_55,
-        _column_92,
-        _column_88,
         _column_93,
+        _column_88,
+        _column_94,
         _column_22,
         _column_42,
       ],
@@ -4762,13 +4762,21 @@ i1.GeneratedColumn<int> _column_89(String aliasedName) =>
     );
 i1.GeneratedColumn<int> _column_90(String aliasedName) =>
     i1.GeneratedColumn<int>(
+      'release_year',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<int> _column_91(String aliasedName) =>
+    i1.GeneratedColumn<int>(
       'max_count',
       aliasedName,
       false,
       type: i1.DriftSqlType.int,
       $customConstraints: 'NOT NULL',
     );
-i1.GeneratedColumn<int> _column_91(String aliasedName) =>
+i1.GeneratedColumn<int> _column_92(String aliasedName) =>
     i1.GeneratedColumn<int>(
       'total_count',
       aliasedName,
@@ -4776,7 +4784,7 @@ i1.GeneratedColumn<int> _column_91(String aliasedName) =>
       type: i1.DriftSqlType.int,
       $customConstraints: 'NOT NULL',
     );
-i1.GeneratedColumn<String> _column_92(String aliasedName) =>
+i1.GeneratedColumn<String> _column_93(String aliasedName) =>
     i1.GeneratedColumn<String>(
       'publication_status',
       aliasedName,
@@ -4784,7 +4792,7 @@ i1.GeneratedColumn<String> _column_92(String aliasedName) =>
       type: i1.DriftSqlType.string,
       $customConstraints: 'NOT NULL',
     );
-i1.GeneratedColumn<String> _column_93(String aliasedName) =>
+i1.GeneratedColumn<String> _column_94(String aliasedName) =>
     i1.GeneratedColumn<String>(
       'web_links',
       aliasedName,
@@ -4809,7 +4817,7 @@ class Shape31 extends i0.VersionedTable {
       columnsByName['aliases']! as i1.GeneratedColumn<String>;
 }
 
-i1.GeneratedColumn<String> _column_94(String aliasedName) =>
+i1.GeneratedColumn<String> _column_95(String aliasedName) =>
     i1.GeneratedColumn<String>(
       'aliases',
       aliasedName,
