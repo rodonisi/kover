@@ -248,6 +248,7 @@ class AppDatabase extends _$AppDatabase {
                     schema.chapters.ageRating,
                     const Constant(0),
                   ]),
+                  schema.seriesMetadata.lastUpdated: const Constant(0),
                 },
               ),
             );
@@ -284,6 +285,14 @@ class AppDatabase extends _$AppDatabase {
               ),
             );
             await m.alterTable(TableMigration(schema.seriesPeopleRoles));
+            await m.alterTable(
+              TableMigration(
+                schema.series,
+                columnTransformer: {
+                  schema.series.lastSynced: const Constant(null),
+                },
+              ),
+            );
           });
         },
       ),

@@ -258,23 +258,28 @@ class SeriesRepository {
   Future<void> fetchMissingMetadata() async {
     final series = await _db.seriesMetadataDao.getMissingSeriesIds();
 
-    final metadata = <SeriesMetadataCompanions>[];
-    for (final id in series) {
-      try {
-        metadata.add(await _client.getSeriesMetadata(id));
-      } catch (e) {
-        log.warning(
-          'failed to fetch series metadata for series',
-          attributes: {
-            'series_id': id,
-            'error_type': e.runtimeType,
-            'error_message': e,
-          },
-        );
-      }
-    }
-
-    await _db.seriesMetadataDao.upsertMetadataBatch(metadata);
+    await chunkedFetch(
+      items: series,
+      fetchCallback: (item) async {
+        try {
+          return await _client.getSeriesMetadata(item);
+        } catch (e) {
+          log.warning(
+            'failed to fetch series metadata for series',
+            attributes: {
+              'series_id': item,
+              'error_type': e.runtimeType,
+              'error_message': e,
+            },
+          );
+          return null;
+        }
+      },
+      upsertCallback: (batch) async {
+        final metadata = batch.whereType<SeriesMetadataCompanions>().toList();
+        await _db.seriesMetadataDao.upsertMetadataBatch(metadata);
+      },
+    );
   }
 
   Future<void> refreshMetadataAndDetails({required int seriesId}) async {

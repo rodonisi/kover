@@ -170,41 +170,23 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
   }
 }
 
-class ChapterRelations {
-  final List<PeopleData> writers;
-  final List<PeopleData> coverArtists;
-  final List<PeopleData> publishers;
-  final List<PeopleData> characters;
-  final List<PeopleData> pencillers;
-  final List<PeopleData> inkers;
-  final List<PeopleData> imprints;
-  final List<PeopleData> colorists;
-  final List<PeopleData> letterers;
-  final List<PeopleData> editors;
-  final List<PeopleData> translators;
-  final List<PeopleData> teams;
-  final List<PeopleData> locations;
-  final List<Genre> genres;
-  final List<Tag> tags;
-
-  const ChapterRelations({
-    required this.writers,
-    required this.coverArtists,
-    required this.publishers,
-    required this.characters,
-    required this.pencillers,
-    required this.inkers,
-    required this.imprints,
-    required this.colorists,
-    required this.letterers,
-    required this.editors,
-    required this.translators,
-    required this.teams,
-    required this.locations,
-    required this.genres,
-    required this.tags,
-  });
-}
+class const ChapterRelations({
+  required final List<PeopleData> writers,
+  required final List<PeopleData> coverArtists,
+  required final List<PeopleData> publishers,
+  required final List<PeopleData> characters,
+  required final List<PeopleData> pencillers,
+  required final List<PeopleData> inkers,
+  required final List<PeopleData> imprints,
+  required final List<PeopleData> colorists,
+  required final List<PeopleData> letterers,
+  required final List<PeopleData> editors,
+  required final List<PeopleData> translators,
+  required final List<PeopleData> teams,
+  required final List<PeopleData> locations,
+  required final List<Genre> genres,
+  required final List<Tag> tags,
+});
 
 class const ChapterWithRelationsCompanion({
   required final ChaptersCompanion chapter,
@@ -224,7 +206,7 @@ class const ChapterWithRelationsCompanion({
   required final Iterable<GenresCompanion> genres,
   required final Iterable<TagsCompanion> tags,
 }) {
-  ChapterPeopleRolesCompanion mappingWithRole(
+  ChapterPeopleRolesCompanion _mappingWithRole(
     PeopleCompanion person,
     PersonRole role,
   ) {
@@ -236,19 +218,19 @@ class const ChapterWithRelationsCompanion({
   }
 
   Iterable<ChapterPeopleRolesCompanion> get chapterPeopleRoles => [
-    ...writers.map((p) => mappingWithRole(p, .writer)),
-    ...coverArtists.map((p) => mappingWithRole(p, .coverArtist)),
-    ...publishers.map((p) => mappingWithRole(p, .publisher)),
-    ...characters.map((p) => mappingWithRole(p, .character)),
-    ...pencillers.map((p) => mappingWithRole(p, .penciller)),
-    ...inkers.map((p) => mappingWithRole(p, .inker)),
-    ...imprints.map((p) => mappingWithRole(p, .imprint)),
-    ...colorists.map((p) => mappingWithRole(p, .colorist)),
-    ...letterers.map((p) => mappingWithRole(p, .letterer)),
-    ...editors.map((p) => mappingWithRole(p, .editor)),
-    ...translators.map((p) => mappingWithRole(p, .translator)),
-    ...teams.map((p) => mappingWithRole(p, .team)),
-    ...locations.map((p) => mappingWithRole(p, .location)),
+    ...writers.map((p) => _mappingWithRole(p, .writer)),
+    ...coverArtists.map((p) => _mappingWithRole(p, .coverArtist)),
+    ...publishers.map((p) => _mappingWithRole(p, .publisher)),
+    ...characters.map((p) => _mappingWithRole(p, .character)),
+    ...pencillers.map((p) => _mappingWithRole(p, .penciller)),
+    ...inkers.map((p) => _mappingWithRole(p, .inker)),
+    ...imprints.map((p) => _mappingWithRole(p, .imprint)),
+    ...colorists.map((p) => _mappingWithRole(p, .colorist)),
+    ...letterers.map((p) => _mappingWithRole(p, .letterer)),
+    ...editors.map((p) => _mappingWithRole(p, .editor)),
+    ...translators.map((p) => _mappingWithRole(p, .translator)),
+    ...teams.map((p) => _mappingWithRole(p, .team)),
+    ...locations.map((p) => _mappingWithRole(p, .location)),
   ];
 
   Iterable<ChapterGenresCompanion> get chapterGenres {

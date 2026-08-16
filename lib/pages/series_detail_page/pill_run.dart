@@ -1,4 +1,3 @@
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/series_model.dart';
@@ -57,43 +56,40 @@ class PillRun extends HookWidget {
       spacing: LayoutConstants.smallPadding,
       children: [
         Text(title, style: Theme.of(context).textTheme.headlineSmall),
-        AnimatedContainer(
-          duration: 200.ms,
-          child: Wrap(
-            spacing: LayoutConstants.smallPadding,
-            runSpacing: LayoutConstants.smallPadding,
-            alignment: .start,
-            children: [
-              ...displayItems.map(
-                (item) => Pill(
-                  child: Row(
-                    mainAxisSize: .min,
-                    spacing: LayoutConstants.smallPadding,
-                    children: [
-                      if (item.icon != null)
-                        Icon(item.icon, size: LayoutConstants.smallIcon),
-                      Text(
-                        item.label,
-                        style: theme.textTheme.labelSmall,
-                      ),
-                    ],
+        Wrap(
+          spacing: LayoutConstants.smallPadding,
+          runSpacing: LayoutConstants.smallPadding,
+          alignment: .start,
+          children: [
+            ...displayItems.map(
+              (item) => Pill(
+                child: Row(
+                  mainAxisSize: .min,
+                  spacing: LayoutConstants.smallPadding,
+                  children: [
+                    if (item.icon != null)
+                      Icon(item.icon, size: LayoutConstants.smallIcon),
+                    Text(
+                      item.label,
+                      style: theme.textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (items.length > collapsedItemCount)
+              Pill(
+                onTap: () => collapsed.value = !collapsed.value,
+                child: Text(
+                  collapsed.value
+                      ? l.moreCount(items.length - collapsedItemCount)
+                      : l.showLess,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ),
-              if (items.length > collapsedItemCount)
-                Pill(
-                  onTap: () => collapsed.value = !collapsed.value,
-                  child: Text(
-                    collapsed.value
-                        ? l.moreCount(items.length - collapsedItemCount)
-                        : l.showLess,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
       ],
     );
