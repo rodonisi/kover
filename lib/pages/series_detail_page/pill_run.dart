@@ -63,6 +63,7 @@ class PillRun extends HookWidget {
           children: [
             ...displayItems.map(
               (item) => Pill(
+                key: ValueKey(item.label),
                 child: Row(
                   mainAxisSize: .min,
                   spacing: LayoutConstants.smallPadding,
@@ -79,6 +80,7 @@ class PillRun extends HookWidget {
             ),
             if (items.length > collapsedItemCount)
               Pill(
+                key: ValueKey(collapsed.value),
                 onTap: () => collapsed.value = !collapsed.value,
                 child: Text(
                   collapsed.value
