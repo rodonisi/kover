@@ -1,16 +1,15 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/series_detail_page/carousel_tile.dart';
+import 'package:kover/pages/series_detail_page/metadata_display.dart';
 import 'package:kover/pages/series_detail_page/series_app_bar.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/series.dart';
-import 'package:kover/utils/extensions/iterable.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/cards/chapter_card.dart';
 import 'package:kover/widgets/cards/volume_card.dart';
 import 'package:kover/widgets/details/metadata_sections.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:kover/widgets/util/breakpoint_builder.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -27,85 +26,14 @@ class SeriesDetailPage extends HookConsumerWidget {
         child: CustomScrollView(
           slivers: [
             SeriesAppBar(seriesId: seriesId),
-            SliverAdaptivePadding(
-              sliver: SliverBreakpointBuilder(
-                compactBuilder: (context) {
-                  return [
-                    SliverPadding(
-                      padding: const .only(
-                        top: LayoutConstants.mediumPadding,
-                        left: LayoutConstants.mediumPadding,
-                        right: LayoutConstants.mediumPadding,
-                      ),
-                      sliver: SliverCarouselTiles(seriesId: seriesId),
-                    ),
-                    SliverSummary(),
-                    SliverGenres(),
-                    SliverTags(),
-                    SliverWriters(),
-                    SliverCoverArtists(),
-                    SliverPublishers(),
-                    SliverCharacters(),
-                    SliverPencillers(),
-                    SliverInkers(),
-                    SliverImprints(),
-                    SliverColorists(),
-                    SliverLetterers(),
-                    SliverEditors(),
-                    SliverTranslators(),
-                    SliverTeams(),
-                    SliverLocations(),
-
-                    // List<PersonModel> get writers;
-                    // List<PersonModel> get coverArtists;
-                    // List<PersonModel> get publishers;
-                    // List<PersonModel> get characters;
-                    // List<PersonModel> get pencillers;
-                    // List<PersonModel> get inkers;
-                    // List<PersonModel> get imprints;
-                    // List<PersonModel> get colorists;
-                    // List<PersonModel> get letterers;
-                    // List<PersonModel> get editors;
-                    // List<PersonModel> get translators;
-                    // List<PersonModel> get teams;
-                    // List<PersonModel> get locations;
-                  ];
-                },
-                expandedBuilder: (context) {
-                  return [
-                    SliverConstrainedCrossAxis(
-                      maxExtent: LayoutBreakpoints.large,
-                      sliver: SliverCrossAxisGroup(
-                        slivers: [
-                          SliverSummary(),
-                          SliverPadding(
-                            padding: const .only(
-                              top: LayoutConstants.mediumPadding,
-                              left: LayoutConstants.mediumPadding,
-                              right: LayoutConstants.mediumPadding,
-                            ),
-                            sliver: SliverCarouselTiles(seriesId: seriesId),
-                          ),
-                          // SliverGenres(),
-                          // SliverTags(),
-                          // SliverWriters(),
-                          // SliverCoverArtists(),
-                          // SliverPublishers(),
-                          // SliverCharacters(),
-                          // SliverPencillers(),
-                          // SliverInkers(),
-                          // SliverImprints(),
-                          // SliverColorists(),
-                          // SliverLetterers(),
-                          // SliverEditors(),
-                          // SliverTranslators(),
-                          // SliverTeams(),
-                          // SliverLocations(),
-                        ],
-                      ),
-                    ),
-                  ];
-                },
+            MetadataDisplay(
+              carousels: SliverPadding(
+                padding: const .only(
+                  top: LayoutConstants.mediumPadding,
+                  left: LayoutConstants.mediumPadding,
+                  right: LayoutConstants.mediumPadding,
+                ),
+                sliver: _SliverCarouselTiles(seriesId: seriesId),
               ),
             ),
             const SliverBottomPadding(),
@@ -116,10 +44,10 @@ class SeriesDetailPage extends HookConsumerWidget {
   }
 }
 
-class SliverCarouselTiles extends ConsumerWidget {
+class _SliverCarouselTiles extends ConsumerWidget {
   final int seriesId;
 
-  const new({super.key, required this.seriesId});
+  const new({required this.seriesId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -51,12 +51,15 @@ Future<MetadataViewModel> metadata(
       if (volume.chapters.isEmpty) {
         throw Exception('Volume with ID $volumeId has no chapters.');
       }
+      final firstChapter = await ref.watch(
+        chapterMetadataProvider(chapterId: volume.chapters.first.id).future,
+      );
 
-      return volume.chapters.first;
+      return firstChapter;
     },
     chapter: (chapterId) async {
       return await ref.watch(
-        chapterProvider(chapterId: chapterId).future,
+        chapterMetadataProvider(chapterId: chapterId).future,
       );
     },
   );

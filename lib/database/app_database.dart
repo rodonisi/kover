@@ -284,7 +284,8 @@ class AppDatabase extends _$AppDatabase {
                 },
               ),
             );
-            await m.alterTable(TableMigration(schema.seriesPeopleRoles));
+            await m.drop(schema.seriesPeopleRoles);
+            await m.createTable(schema.seriesPeopleRoles);
             await m.alterTable(
               TableMigration(
                 schema.series,
