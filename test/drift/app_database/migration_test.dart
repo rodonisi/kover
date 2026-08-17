@@ -307,7 +307,37 @@ void main() {
       await migratedDb.close();
     });
 
-    test('migrates series people roles and allows multiple roles', () async {
+    test('resets series last synced', () async {
+      final schema = await verifier.schemaAt(8);
+      final oldDb = v8.DatabaseAtV8(schema.newConnection());
+      await oldDb
+          .into(oldDb.series)
+          .insert(
+            v8.SeriesCompanion.insert(
+              id: const Value(1),
+              libraryId: 1,
+              name: 'Test Series',
+              format: 'epub',
+              created: DateTime.now().millisecondsSinceEpoch,
+              lastSynced: Value(DateTime.now().millisecondsSinceEpoch),
+            ),
+          );
+      await oldDb.close();
+
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, 9);
+      await db.close();
+
+      final migratedDb = v9.DatabaseAtV9(schema.newConnection());
+      final series = await migratedDb.select(migratedDb.series).get();
+      expect(series, hasLength(1));
+      expect(series.first.id, 1);
+      expect(series.first.lastSynced, null);
+
+      await migratedDb.close();
+    });
+
+    test('clears series people roles', () async {
       final schema = await verifier.schemaAt(8);
       final oldDb = v8.DatabaseAtV8(schema.newConnection());
       await oldDb
@@ -327,24 +357,7 @@ void main() {
 
       final migratedDb = v9.DatabaseAtV9(schema.newConnection());
       final roles = await migratedDb.select(migratedDb.seriesPeopleRoles).get();
-      expect(roles, hasLength(1));
-      expect(roles.first.seriesMetadataId, 1);
-      expect(roles.first.personId, 1);
-      expect(roles.first.role, 'writer');
-
-      await migratedDb
-          .into(migratedDb.seriesPeopleRoles)
-          .insert(
-            v9.SeriesPeopleRolesCompanion.insert(
-              seriesMetadataId: 1,
-              personId: 1,
-              role: 'colorist',
-            ),
-          );
-      final rolesAfter = await migratedDb
-          .select(migratedDb.seriesPeopleRoles)
-          .get();
-      expect(rolesAfter, hasLength(2));
+      expect(roles, hasLength(0));
 
       await migratedDb.close();
     });
