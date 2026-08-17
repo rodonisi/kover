@@ -95,16 +95,21 @@ class SliverBreakpointBuilder extends ConsumerWidget {
 }
 
 class SliverAdaptivePadding extends StatelessWidget {
+  final double maxWidth;
   final Widget sliver;
 
-  const new({super.key, required this.sliver});
+  const new({
+    super.key,
+    required this.sliver,
+    this.maxWidth = LayoutConstants.listMaxWidth,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SliverLayoutBuilder(
       builder: (context, constraints) {
         final side =
-            (constraints.crossAxisExtent - LayoutBreakpoints.large).clamp(
+            (constraints.crossAxisExtent - maxWidth).clamp(
               0,
               double.infinity,
             ) /

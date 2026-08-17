@@ -10,6 +10,11 @@ sealed class LayoutConstants {
   static const double largerPadding = 64.0;
   static const double largestPadding = 128.0;
 
+  static const double listSpacing = smallPadding;
+  static const double listSectionSpacing = mediumPadding;
+  static const double listMaxWidth = LayoutBreakpoints.medium;
+  static const double constentMaxWidth = LayoutBreakpoints.large;
+
   static const EdgeInsets smallestEdgeInsets = EdgeInsets.all(smallestPadding);
   static const EdgeInsets smallerEdgeInsets = EdgeInsets.all(smallerPadding);
   static const EdgeInsets smallEdgeInsets = EdgeInsets.all(smallPadding);

@@ -42,6 +42,7 @@ class MetadataDisplay extends ConsumerWidget {
         [];
 
     return SliverAdaptivePadding(
+      maxWidth: LayoutConstants.constentMaxWidth,
       sliver: SliverBreakpointBuilder(
         compactBuilder: (context) {
           return [?carousels, const SliverSummary(), ...visibleSlivers];

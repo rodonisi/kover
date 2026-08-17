@@ -1,3 +1,4 @@
+import 'package:kover/utils/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/image_model.dart';
@@ -38,6 +39,7 @@ class SeriesCoverImage extends ConsumerWidget {
         width: width,
         usePlaceholder: usePlaceholder,
       ),
+      loading: () => const LoadingCover(),
     );
   }
 }
@@ -73,6 +75,7 @@ class VolumeCoverImage extends ConsumerWidget {
           usePlaceholder: usePlaceholder,
         ),
       ),
+      loading: () => const LoadingCover(),
     );
   }
 }
@@ -108,6 +111,7 @@ class ChapterCoverImage extends ConsumerWidget {
           usePlaceholder: usePlaceholder,
         ),
       ),
+      loading: () => const LoadingCover(),
     );
   }
 }
@@ -145,6 +149,7 @@ class CollectionCoverImage extends ConsumerWidget {
           usePlaceholder: usePlaceholder,
         ),
       ),
+      loading: () => const LoadingCover(),
     );
   }
 }
@@ -182,6 +187,7 @@ class ReadingListCoverImage extends ConsumerWidget {
           usePlaceholder: usePlaceholder,
         ),
       ),
+      loading: () => const LoadingCover(),
     );
   }
 }
@@ -220,6 +226,20 @@ class PlaceholderCoverImage extends StatelessWidget {
       fit: fit,
       height: height,
       width: width,
+    );
+  }
+}
+
+class LoadingCover extends StatelessWidget {
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const AspectRatio(
+      aspectRatio: LayoutConstants.coverAspectRatio,
+      child: Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }

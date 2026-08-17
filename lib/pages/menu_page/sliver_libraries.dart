@@ -9,39 +9,34 @@ import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SliverLibraries extends ConsumerWidget {
-  const SliverLibraries({
-    super.key,
-  });
+  final EdgeInsets? padding;
+
+  const new({super.key, this.padding});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final libs = ref.watch(librariesProvider);
+    final p =
+        padding ?? const .only(bottom: LayoutConstants.listSectionSpacing);
 
-    return AsyncSliver(
-      asyncValue: libs,
-      data: (data) {
-        return SliverPadding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: LayoutConstants.mediumPadding,
-            vertical: LayoutConstants.smallPadding,
-          ),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom: index == data.length - 1
-                        ? 0
-                        : LayoutConstants.smallPadding,
-                  ),
-                  child: LibraryListTile(lib: data[index]),
-                );
-              },
-              childCount: data.length,
-            ),
-          ),
-        );
-      },
+    return SliverPadding(
+      padding: p,
+      sliver: AsyncSliver(
+        asyncValue: libs,
+        data: (data) {
+          return SliverList.separated(
+            itemCount: data.length,
+            itemBuilder: (context, index) {
+              return LibraryListTile(lib: data[index]);
+            },
+            separatorBuilder: (context, _) {
+              return const SizedBox(
+                height: LayoutConstants.listSpacing,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
