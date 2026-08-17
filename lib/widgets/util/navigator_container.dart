@@ -1,3 +1,5 @@
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:kover/widgets/util/breakpoint_builder.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -19,7 +21,6 @@ class NavigatorContainer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
     final oneOffs = ref.watch(oneOffsProvider);
     final destinations = ref.watch(
       generalSettingsProvider.select(
@@ -43,6 +44,88 @@ class NavigatorContainer extends ConsumerWidget {
       });
     });
 
+    return Async(
+      asyncValue: destinations,
+      data: (destinations) {
+        final selectedIndex = _mapSelectedIndex(
+          shellIndex: navigationShell.currentIndex,
+          destinations: destinations,
+        );
+        void onDestinationSelected(int index) {
+          final shellIndex = index < destinations.length
+              ? destinations[index].value
+              : navigationShell.route.branches.length - 1;
+          navigationShell.goBranch(
+            shellIndex,
+            initialLocation: true,
+          );
+        }
+
+        return BreakpointBuilder(
+          compactBuilder: (context) {
+            return _CompactNavigationShell(
+              navigationShell: navigationShell,
+              selectedIndex: selectedIndex,
+              onDestinationSelected: onDestinationSelected,
+              destinations: destinations,
+            );
+          },
+          expandedBuilder: (context) {
+            return _ExpandedNavigationLayout(
+              key: const ValueKey('expanded_navigation_layout'),
+              navigationShell: navigationShell,
+              selectedIndex: selectedIndex,
+              onDestinationSelected: onDestinationSelected,
+              destinations: destinations,
+            );
+          },
+          largestBuilder: (context) {
+            return _ExpandedNavigationLayout(
+              key: const ValueKey('largest_navigation_layout'),
+              navigationShell: navigationShell,
+              selectedIndex: selectedIndex,
+              onDestinationSelected: onDestinationSelected,
+              destinations: destinations,
+              startExtended: true,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  static int _mapSelectedIndex({
+    required int shellIndex,
+    required List<NavbarDestinations> destinations,
+  }) {
+    final index = destinations.indexWhere((d) => d.value == shellIndex);
+
+    if (index < 0) {
+      return destinations.length;
+    }
+
+    return index;
+  }
+}
+
+class _CompactNavigationShell extends ConsumerWidget {
+  final StatefulNavigationShell navigationShell;
+  final int selectedIndex;
+  final void Function(int) onDestinationSelected;
+  final List<NavbarDestinations> destinations;
+
+  const new({
+    required this.navigationShell,
+    required this.selectedIndex,
+    required this.onDestinationSelected,
+    required this.destinations,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final theme = ref.watch(themeProvider);
+
     return Scaffold(
       extendBody: true,
       body: navigationShell,
@@ -58,11 +141,9 @@ class NavigatorContainer extends ConsumerWidget {
             context: context,
             removeBottom: true,
             removeTop: true,
-            child: Async2(
-              asyncValue1: ref.watch(themeProvider),
-              asyncValue2: destinations,
-              data: (theme, destinations) {
-                final menuIndex = navigationShell.route.branches.length - 1;
+            child: Async(
+              asyncValue: theme,
+              data: (theme) {
                 return Card(
                   margin: EdgeInsets.zero,
                   clipBehavior: .hardEdge,
@@ -76,19 +157,8 @@ class NavigatorContainer extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(24.0),
                   ),
                   child: NavigationBar(
-                    selectedIndex: _mapSelectedIndex(
-                      shellIndex: navigationShell.currentIndex,
-                      destinations: destinations,
-                    ),
-                    onDestinationSelected: (index) {
-                      final shellIndex = index < destinations.length
-                          ? destinations[index].value
-                          : menuIndex;
-                      navigationShell.goBranch(
-                        shellIndex,
-                        initialLocation: true,
-                      );
-                    },
+                    selectedIndex: selectedIndex,
+                    onDestinationSelected: onDestinationSelected,
                     destinations: [
                       ...destinations.map((destination) {
                         return NavigationDestination(
@@ -110,17 +180,68 @@ class NavigatorContainer extends ConsumerWidget {
       ),
     );
   }
+}
 
-  static int _mapSelectedIndex({
-    required int shellIndex,
-    required List<NavbarDestinations> destinations,
-  }) {
-    final index = destinations.indexWhere((d) => d.value == shellIndex);
+class _ExpandedNavigationLayout extends HookWidget {
+  final StatefulNavigationShell navigationShell;
+  final int selectedIndex;
+  final void Function(int) onDestinationSelected;
+  final List<NavbarDestinations> destinations;
+  final bool startExtended;
 
-    if (index < 0) {
-      return destinations.length;
-    }
+  const new({
+    super.key,
+    required this.navigationShell,
+    required this.selectedIndex,
+    required this.onDestinationSelected,
+    required this.destinations,
+    this.startExtended = false,
+  });
 
-    return index;
+  @override
+  Widget build(BuildContext context) {
+    final extended = useState(startExtended);
+
+    return Scaffold(
+      body: Row(
+        children: [
+          NavigationRail(
+            extended: extended.value,
+            trailingAtBottom: true,
+            trailing: Padding(
+              padding: LayoutConstants.smallestEdgeInsets,
+              child: IconButton(
+                icon: Icon(
+                  extended.value
+                      ? LucideIcons.chevronLeft
+                      : LucideIcons.chevronRight,
+                ),
+                onPressed: () {
+                  extended.value = !extended.value;
+                },
+              ),
+            ),
+            selectedIndex: selectedIndex,
+            onDestinationSelected: onDestinationSelected,
+            destinations: [
+              ...destinations.map((destination) {
+                return NavigationRailDestination(
+                  icon: Icon(destination.icon),
+                  label: Text(
+                    destination.getLabel(AppLocalizations.of(context)),
+                  ),
+                );
+              }),
+              NavigationRailDestination(
+                icon: const Icon(LucideIcons.library),
+                label: Text(AppLocalizations.of(context).menu),
+              ),
+            ],
+          ),
+          const VerticalDivider(width: 1.0, thickness: 1.0),
+          Expanded(child: navigationShell),
+        ],
+      ),
+    );
   }
 }
