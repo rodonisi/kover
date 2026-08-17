@@ -68,4 +68,6 @@ sealed class KoverIcons {
   static const IconData publicationStatus = LucideIcons.activity;
   static const IconData person = LucideIcons.user;
   static const IconData tag = LucideIcons.tag;
+  static const IconData expandPanel = LucideIcons.panelLeftOpen;
+  static const IconData collapsePanel = LucideIcons.panelLeftClose;
 }

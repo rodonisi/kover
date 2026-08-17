@@ -1,4 +1,5 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/widgets/util/breakpoint_builder.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
@@ -213,8 +214,8 @@ class _ExpandedNavigationLayout extends HookWidget {
               child: IconButton(
                 icon: Icon(
                   extended.value
-                      ? LucideIcons.chevronLeft
-                      : LucideIcons.chevronRight,
+                      ? KoverIcons.collapsePanel
+                      : KoverIcons.expandPanel
                 ),
                 onPressed: () {
                   extended.value = !extended.value;
