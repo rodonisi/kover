@@ -12,7 +12,9 @@ class BreakpointsWatcher extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.read(breakpointsProvider.notifier).update(constraints.maxWidth);
+          final usableWidth =
+              constraints.maxWidth - MediaQuery.paddingOf(context).horizontal;
+          ref.read(breakpointsProvider.notifier).update(usableWidth);
         });
 
         return child;

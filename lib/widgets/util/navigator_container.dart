@@ -70,7 +70,7 @@ class NavigatorContainer extends ConsumerWidget {
               destinations: destinations,
             );
           },
-          expandedBuilder: (context) {
+          largeBuilder: (context) {
             return _ExpandedNavigationLayout(
               key: const ValueKey('expanded_navigation_layout'),
               navigationShell: navigationShell,

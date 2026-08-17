@@ -46,7 +46,7 @@ class MetadataDisplay extends ConsumerWidget {
         compactBuilder: (context) {
           return [?carousels, const SliverSummary(), ...visibleSlivers];
         },
-        expandedBuilder: (context) {
+        largeBuilder: (context) {
           return [
             SliverConstrainedCrossAxis(
               maxExtent: LayoutBreakpoints.large,
