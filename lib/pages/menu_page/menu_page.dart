@@ -62,7 +62,8 @@ class MenuPage extends ConsumerWidget {
                           icon: isDownloading
                               ? const Icon(LucideIcons.refreshCw)
                                     .animate(
-                                      onPlay: (controller) => controller.repeat(),
+                                      onPlay: (controller) =>
+                                          controller.repeat(),
                                     )
                                     .rotate(duration: 1500.ms)
                               : const Icon(LucideIcons.download),

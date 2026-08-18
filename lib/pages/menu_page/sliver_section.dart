@@ -10,7 +10,8 @@ class SliverSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p =
-        padding ?? const EdgeInsets.only(bottom: LayoutConstants.smallerPadding);
+        padding ??
+        const EdgeInsets.only(bottom: LayoutConstants.smallerPadding);
 
     return SliverPadding(
       padding: p,
