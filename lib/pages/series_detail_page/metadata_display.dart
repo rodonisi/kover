@@ -4,6 +4,7 @@ import 'package:kover/utils/extensions/iterable.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/details/metadata_sections.dart';
 import 'package:kover/widgets/util/breakpoint_builder.dart';
+import 'package:kover/widgets/util/sliver_adaptive_padding.dart';
 import 'package:material_ui/material_ui.dart';
 
 class MetadataDisplay extends ConsumerWidget {
@@ -47,7 +48,7 @@ class MetadataDisplay extends ConsumerWidget {
         compactBuilder: (context) {
           return [?carousels, const SliverSummary(), ...visibleSlivers];
         },
-        largeBuilder: (context) {
+        expandedBuilder: (context) {
           return [
             SliverConstrainedCrossAxis(
               maxExtent: LayoutBreakpoints.large,

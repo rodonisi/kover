@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kover/riverpod/providers/breakpoints.dart';
@@ -24,27 +24,27 @@ void main() {
       expect(container.read(breakpointsProvider), Breakpoint.compact);
     });
 
-    test('compact until compact', () {
-      expect(update(LayoutBreakpoints.compact), Breakpoint.compact);
+    test('compact below compact', () {
+      expect(update(LayoutBreakpoints.compact - 1), Breakpoint.compact);
     });
 
     test('medium between compact and medium', () {
-      expect(update(LayoutBreakpoints.compact + 1), Breakpoint.medium);
-      expect(update(LayoutBreakpoints.medium), Breakpoint.medium);
+      expect(update(LayoutBreakpoints.compact), Breakpoint.medium);
+      expect(update(LayoutBreakpoints.medium - 1), Breakpoint.medium);
     });
 
     test('expanded between medium and expanded', () {
-      expect(update(LayoutBreakpoints.medium + 1), Breakpoint.expanded);
-      expect(update(LayoutBreakpoints.expanded), Breakpoint.expanded);
+      expect(update(LayoutBreakpoints.medium), Breakpoint.expanded);
+      expect(update(LayoutBreakpoints.expanded - 1), Breakpoint.expanded);
     });
 
     test('large between expanded and large', () {
-      expect(update(LayoutBreakpoints.expanded + 1), Breakpoint.large);
-      expect(update(LayoutBreakpoints.large), Breakpoint.large);
+      expect(update(LayoutBreakpoints.expanded), Breakpoint.large);
+      expect(update(LayoutBreakpoints.large - 1), Breakpoint.large);
     });
 
-    test('largest above 1600', () {
-      expect(update(LayoutBreakpoints.large + 1), Breakpoint.largest);
+    test('largest above large', () {
+      expect(update(LayoutBreakpoints.large), Breakpoint.largest);
     });
   });
 
@@ -103,4 +103,3 @@ void main() {
     });
   });
 }
-

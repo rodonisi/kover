@@ -71,7 +71,7 @@ class NavigatorContainer extends ConsumerWidget {
               destinations: destinations,
             );
           },
-          largeBuilder: (context) {
+          expandedBuilder: (context) {
             return _ExpandedNavigationLayout(
               key: const ValueKey('expanded_navigation_layout'),
               navigationShell: navigationShell,
@@ -215,7 +215,7 @@ class _ExpandedNavigationLayout extends HookWidget {
                 icon: Icon(
                   extended.value
                       ? KoverIcons.collapsePanel
-                      : KoverIcons.expandPanel
+                      : KoverIcons.expandPanel,
                 ),
                 onPressed: () {
                   extended.value = !extended.value;

@@ -7,7 +7,7 @@ import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/widgets/cards/cover_image.dart';
 import 'package:kover/widgets/lists/cover_list_entry.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:kover/widgets/util/breakpoint_builder.dart';
+import 'package:kover/widgets/util/sliver_adaptive_padding.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';

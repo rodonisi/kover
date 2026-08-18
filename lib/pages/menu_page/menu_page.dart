@@ -1,5 +1,5 @@
 import 'package:kover/pages/menu_page/sliver_hidden_destinations.dart';
-import 'package:kover/widgets/util/breakpoint_builder.dart';
+import 'package:kover/widgets/util/sliver_adaptive_padding.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

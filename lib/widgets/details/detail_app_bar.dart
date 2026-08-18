@@ -61,7 +61,7 @@ class DetailAppBar extends HookConsumerWidget {
             continueButton: expandedContinueButton,
           );
         },
-        largeBuilder: (context) {
+        expandedBuilder: (context) {
           return _ExpandedLayout(
             title: title,
             cover: cover,

@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kover/riverpod/providers/breakpoints.dart';
-import 'package:kover/utils/layout_constants.dart';
 
 typedef BreakpointBuilderCallback = Widget Function(BuildContext context);
 typedef SliverBreakpointBuilderCallback = List<Widget> Function(
@@ -50,6 +49,8 @@ class BreakpointBuilder extends ConsumerWidget {
   }
 }
 
+/// A sliver builder that builds different layouts based on the current
+/// [Breakpoint].
 class SliverBreakpointBuilder extends ConsumerWidget {
   final SliverBreakpointBuilderCallback compactBuilder;
   final SliverBreakpointBuilderCallback? mediumBuilder;
@@ -57,7 +58,7 @@ class SliverBreakpointBuilder extends ConsumerWidget {
   final SliverBreakpointBuilderCallback? largeBuilder;
   final SliverBreakpointBuilderCallback? largestBuilder;
 
-  const SliverBreakpointBuilder({
+  const new({
     super.key,
     required this.compactBuilder,
     this.mediumBuilder,
@@ -91,34 +92,5 @@ class SliverBreakpointBuilder extends ConsumerWidget {
     }
 
     return compactBuilder;
-  }
-}
-
-class SliverAdaptivePadding extends StatelessWidget {
-  final double maxWidth;
-  final Widget sliver;
-
-  const new({
-    super.key,
-    required this.sliver,
-    this.maxWidth = LayoutConstants.listMaxWidth,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverLayoutBuilder(
-      builder: (context, constraints) {
-        final side =
-            (constraints.crossAxisExtent - maxWidth).clamp(
-              0,
-              double.infinity,
-            ) /
-            2;
-        return SliverPadding(
-          padding: EdgeInsets.symmetric(horizontal: side),
-          sliver: sliver,
-        );
-      },
-    );
   }
 }
