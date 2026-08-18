@@ -1,4 +1,4 @@
-import 'package:kover/pages/series_detail_page/metadata_display.dart';
+import 'package:kover/pages/series_detail_page/sliver_metadata_display.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/series_detail_page/chapter_detail_page/chapter_app_bar.dart';
@@ -23,7 +23,11 @@ class ChapterDetailPage extends ConsumerWidget {
             ChapterAppBar(
               chapterId: chapterId,
             ),
-            const MetadataDisplay(),
+            const SliverSafeArea(
+              top: false,
+              bottom: false,
+              sliver: SliverMetadataDisplay(),
+            ),
             const SliverBottomPadding(),
           ],
         ),

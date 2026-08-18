@@ -4,12 +4,14 @@ import 'package:kover/utils/layout_constants.dart';
 /// A sliver widget that lets the child sliver grow to a [maxWidth], adding
 /// padding when the viewport is larger than that.
 class SliverAdaptivePadding extends StatelessWidget {
+  final EdgeInsetsGeometry padding;
   final double maxWidth;
   final Widget sliver;
 
   const new({
     super.key,
     required this.sliver,
+    this.padding = const .symmetric(horizontal: LayoutConstants.mediumPadding),
     this.maxWidth = LayoutConstants.listMaxWidth,
   });
 
@@ -24,7 +26,7 @@ class SliverAdaptivePadding extends StatelessWidget {
             ) /
             2;
         return SliverPadding(
-          padding: EdgeInsets.symmetric(horizontal: side),
+          padding: padding.add(.symmetric(horizontal: side)),
           sliver: sliver,
         );
       },

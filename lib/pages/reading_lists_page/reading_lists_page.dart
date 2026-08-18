@@ -63,31 +63,39 @@ class ReadingListsPageContent extends HookConsumerWidget {
             ),
           ],
         ),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: LayoutConstants.mediumPadding,
-          ),
-          sliver: SliverToBoxAdapter(
-            child: FilterInputField(controller: controller),
-          ),
-        ),
-        AsyncSliver(
-          asyncValue: readingLists,
-          data: (data) {
-            final filteredData = _filteredReadingLists(
-              data: data,
-              query: controller.text,
-            );
-            final sortedData = _sortedReadinglists(
-              data: filteredData,
-              direction: sortDirection.value,
-            );
+        SliverSafeArea(
+          top: false,
+          bottom: false,
+          sliver: SliverMainAxisGroup(
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: LayoutConstants.mediumPadding,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: FilterInputField(controller: controller),
+                ),
+              ),
+              AsyncSliver(
+                asyncValue: readingLists,
+                data: (data) {
+                  final filteredData = _filteredReadingLists(
+                    data: data,
+                    query: controller.text,
+                  );
+                  final sortedData = _sortedReadinglists(
+                    data: filteredData,
+                    direction: sortDirection.value,
+                  );
 
-            return SliverPadding(
-              padding: LayoutConstants.smallEdgeInsets,
-              sliver: ReadingListsSliverGrid(readingLists: sortedData),
-            );
-          },
+                  return SliverPadding(
+                    padding: LayoutConstants.smallEdgeInsets,
+                    sliver: ReadingListsSliverGrid(readingLists: sortedData),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
         const SliverBottomPadding(),
       ],

@@ -133,6 +133,7 @@ class SeriesPage extends HookConsumerWidget {
 
     return Scaffold(
       extendBody: true,
+      extendBodyBehindAppBar: true,
       body: CustomScrollView(
         keyboardDismissBehavior: .onDrag,
         slivers: [
@@ -156,30 +157,40 @@ class SeriesPage extends HookConsumerWidget {
               ),
             ],
           ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: LayoutConstants.mediumPadding,
+          SliverSafeArea(
+            top: false,
+            bottom: false,
+            sliver: SliverMainAxisGroup(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: LayoutConstants.mediumPadding,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: FilterInputField(controller: controller),
+                  ),
+                ),
+                AsyncSliver(
+                  asyncValue: allSeries,
+                  data: (data) {
+                    return AsyncSliver(
+                      asyncValue: query,
+                      data: (search) {
+                        final filteredData = controller.text.isEmpty
+                            ? data
+                            : search;
+                        return SliverPadding(
+                          padding: LayoutConstants.smallEdgeInsets,
+                          sliver: SeriesSliverGrid(
+                            series: filteredData,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
             ),
-            sliver: SliverToBoxAdapter(
-              child: FilterInputField(controller: controller),
-            ),
-          ),
-          AsyncSliver(
-            asyncValue: allSeries,
-            data: (data) {
-              return AsyncSliver(
-                asyncValue: query,
-                data: (search) {
-                  final filteredData = controller.text.isEmpty ? data : search;
-                  return SliverPadding(
-                    padding: LayoutConstants.smallEdgeInsets,
-                    sliver: SeriesSliverGrid(
-                      series: filteredData,
-                    ),
-                  );
-                },
-              );
-            },
           ),
           const SliverBottomPadding(),
         ],

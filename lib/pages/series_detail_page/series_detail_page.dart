@@ -1,7 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/series_detail_page/carousel_tile.dart';
-import 'package:kover/pages/series_detail_page/metadata_display.dart';
+import 'package:kover/pages/series_detail_page/sliver_metadata_display.dart';
 import 'package:kover/pages/series_detail_page/series_app_bar.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/series.dart';
@@ -24,16 +24,19 @@ class SeriesDetailPage extends HookConsumerWidget {
       body: MetadataScope(
         metadataId: .series(seriesId: seriesId),
         child: CustomScrollView(
+          clipBehavior: .none,
           slivers: [
             SeriesAppBar(seriesId: seriesId),
-            MetadataDisplay(
-              carousels: SliverPadding(
-                padding: const .only(
-                  top: LayoutConstants.mediumPadding,
-                  left: LayoutConstants.mediumPadding,
-                  right: LayoutConstants.mediumPadding,
+            SliverSafeArea(
+              top: false,
+              bottom: false,
+              sliver: SliverMetadataDisplay(
+                sliverCarousels: SliverPadding(
+                  padding: const .only(
+                    top: LayoutConstants.mediumPadding,
+                  ),
+                  sliver: _SliverCarouselTiles(seriesId: seriesId),
                 ),
-                sliver: _SliverCarouselTiles(seriesId: seriesId),
               ),
             ),
             const SliverBottomPadding(),

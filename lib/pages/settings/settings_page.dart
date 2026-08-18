@@ -5,6 +5,7 @@ import 'package:kover/pages/settings/credentials_settings.dart';
 import 'package:kover/pages/settings/data_management_settings.dart';
 import 'package:kover/pages/settings/general_settings.dart';
 import 'package:kover/pages/settings/version_label.dart';
+import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/sliver_adaptive_padding.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:material_ui/material_ui.dart';
@@ -15,31 +16,35 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
+
     return Scaffold(
       extendBody: true,
-      body: SafeArea(
-        bottom: false,
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar.large(
-              title: Text(l.settings),
-            ),
-            const SliverAdaptivePadding(
-              sliver: SliverMainAxisGroup(
-                slivers: [
-                  SliverToBoxAdapter(child: CredentialsSettings()),
-                  SliverToBoxAdapter(child: GeneralSettings()),
-                  SliverToBoxAdapter(child: AppearanceSettings()),
-                  SliverToBoxAdapter(child: DataManagementSettings()),
-                  SliverToBoxAdapter(
-                    child: Center(child: VersionLabel()),
-                  ),
-                ],
+      extendBodyBehindAppBar: true,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar.large(
+            title: Text(l.settings),
+          ),
+          const SliverSafeArea(
+            top: false,
+            bottom: false,
+            sliver: SliverAdaptivePadding(
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  spacing: LayoutConstants.listSpacing,
+                  children: [
+                    CredentialsSettings(),
+                    GeneralSettings(),
+                    AppearanceSettings(),
+                    DataManagementSettings(),
+                    VersionLabel(),
+                  ],
+                ),
               ),
             ),
-            const SliverBottomPadding(),
-          ],
-        ),
+          ),
+          const SliverBottomPadding(),
+        ],
       ),
     );
   }

@@ -34,8 +34,12 @@ class DownloadQueuePage extends ConsumerWidget {
               if (hasDls) const CancellAllAction(),
             ],
           ),
-          const SliverAdaptivePadding(
-            sliver: DownloadQueueList(),
+          const SliverSafeArea(
+            top: false,
+            bottom: false,
+            sliver: SliverAdaptivePadding(
+              sliver: DownloadQueueList(),
+            ),
           ),
           const SliverBottomPadding(),
         ],

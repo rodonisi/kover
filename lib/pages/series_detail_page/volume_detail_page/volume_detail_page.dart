@@ -1,4 +1,4 @@
-import 'package:kover/pages/series_detail_page/metadata_display.dart';
+import 'package:kover/pages/series_detail_page/sliver_metadata_display.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
@@ -25,60 +25,12 @@ class VolumeDetailPage extends ConsumerWidget {
     final volume = ref.watch(volumeProvider(volumeId: volumeId)).value;
 
     if (volume == null) return const SizedBox.shrink();
-
-    // var items = [
-    //   VolumeAppBar(
-    //     volumeId: volumeId,
-    //   ),
-    //   if (volume.chapters.isNotEmpty)
-    //     SliverPadding(
-    //       padding: const .symmetric(
-    //         horizontal: LayoutConstants.mediumPadding,
-    //       ),
-    //       sliver: SliverToBoxAdapter(
-    //         child: CarouselTile(
-    //           title: '${l.chapters} (${volume.chapters.length})',
-    //           onTap: () => ChaptersRoute(
-    //             seriesId: volume.seriesId,
-    //             volumeId: volume.id,
-    //           ).push(context),
-    //           listItemCount: volume.chapters.length,
-    //           listItemBuilder: (context, index) {
-    //             final chapter = volume.chapters[index];
-    //             return AspectRatio(
-    //               aspectRatio: LayoutConstants.chapterCardAspectRatio,
-    //               child: ChapterCard(
-    //                 seriesId: volume.seriesId,
-    //                 chapterId: chapter.id,
-    //               ),
-    //             );
-    //           },
-    //         ),
-    //       ),
-    //     ),
-    //   if (volume.chapters.isNotEmpty)
-    //     SliverPadding(
-    //       padding: const .symmetric(
-    //         horizontal: LayoutConstants.mediumPadding,
-    //       ),
-    //       sliver: SliverToBoxAdapter(
-    //         // child: MetadataSections(
-    //         //   asyncValue: ref.watch(
-    //         //     chapterMetadataProvider(
-    //         //       chapterId: volume.chapters.first.id,
-    //         //     ),
-    //         //   ),
-    //         // ),
-    //       ),
-    //     ),
-    //   const SliverBottomPadding(),
-    // ];
     final carousel = volume.chapters.isNotEmpty
         ? SliverPadding(
             padding: const .only(
               top: LayoutConstants.mediumPadding,
-              left: LayoutConstants.mediumPadding,
-              right: LayoutConstants.mediumPadding,
+              // left: LayoutConstants.mediumPadding,
+              // right: LayoutConstants.mediumPadding,
             ),
             sliver: SliverToBoxAdapter(
               child: CarouselTile(
@@ -109,21 +61,16 @@ class VolumeDetailPage extends ConsumerWidget {
         child: CustomScrollView(
           slivers: [
             VolumeAppBar(volumeId: volumeId),
-            MetadataDisplay(
-              carousels: carousel,
+            SliverSafeArea(
+              top: false,
+              bottom: false,
+              sliver: SliverMetadataDisplay(
+                sliverCarousels: carousel,
+              ),
             ),
 
             const SliverBottomPadding(),
           ],
-          // slivers: items
-          //     .interleave(
-          //       const SliverToBoxAdapter(
-          //         child: SizedBox(
-          //           height: LayoutConstants.mediumPadding,
-          //         ),
-          //       ),
-          //     )
-          //     .toList(),
         ),
       ),
     );

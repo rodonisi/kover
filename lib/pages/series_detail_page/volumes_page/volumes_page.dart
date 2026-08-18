@@ -27,51 +27,56 @@ class VolumesPage extends HookConsumerWidget {
 
     return Scaffold(
       extendBody: true,
-      body: SafeArea(
-        bottom: false,
-        child: CustomScrollView(
-          keyboardDismissBehavior: .onDrag,
-          slivers: [
-            SliverAppBar.large(
-              title: Text(l.volumes),
-              actionsPadding: const EdgeInsets.symmetric(
-                horizontal: LayoutConstants.smallPadding,
+      body: CustomScrollView(
+        keyboardDismissBehavior: .onDrag,
+        slivers: [
+          SliverAppBar.large(
+            title: Text(l.volumes),
+            actionsPadding: const EdgeInsets.symmetric(
+              horizontal: LayoutConstants.smallPadding,
+            ),
+            actions: [
+              ContextMenuButton(
+                menu: _getMenu(
+                  hideRead: hideRead,
+                  sortDirection: sortDirection,
+                  context: context,
+                ),
+                icon: Icon(
+                  sortDirection.value == .ascending
+                      ? LucideIcons.arrowDownNarrowWide
+                      : LucideIcons.arrowDownWideNarrow,
+                ),
               ),
-              actions: [
-                ContextMenuButton(
-                  menu: _getMenu(
-                    hideRead: hideRead,
-                    sortDirection: sortDirection,
-                    context: context,
+            ],
+          ),
+          SliverSafeArea(
+            top: false,
+            bottom: false,
+            sliver: SliverMainAxisGroup(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: LayoutConstants.mediumPadding,
                   ),
-                  icon: Icon(
-                    sortDirection.value == .ascending
-                        ? LucideIcons.arrowDownNarrowWide
-                        : LucideIcons.arrowDownWideNarrow,
+                  sliver: SliverToBoxAdapter(
+                    child: FilterInputField(controller: controller),
+                  ),
+                ),
+                SliverPadding(
+                  padding: LayoutConstants.smallEdgeInsets,
+                  sliver: _VolumeGrid(
+                    seriesId: seriesId,
+                    hideRead: hideRead.value,
+                    filter: controller.text,
+                    descending: sortDirection.value == .descending,
                   ),
                 ),
               ],
             ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: LayoutConstants.mediumPadding,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: FilterInputField(controller: controller),
-              ),
-            ),
-            SliverPadding(
-              padding: LayoutConstants.smallEdgeInsets,
-              sliver: _VolumeGrid(
-                seriesId: seriesId,
-                hideRead: hideRead.value,
-                filter: controller.text,
-                descending: sortDirection.value == .descending,
-              ),
-            ),
-            const SliverBottomPadding(),
-          ],
-        ),
+          ),
+          const SliverBottomPadding(),
+        ],
       ),
     );
   }

@@ -165,38 +165,43 @@ class _ChaptersPage extends HookConsumerWidget {
 
     return Scaffold(
       extendBody: true,
-      body: SafeArea(
-        bottom: false,
-        child: CustomScrollView(
-          keyboardDismissBehavior: .onDrag,
-          slivers: [
-            SliverAppBar.large(
-              title: Text(title),
-              actionsPadding: const EdgeInsets.symmetric(
-                horizontal: LayoutConstants.smallPadding,
-              ),
-              actions: [
-                ?action,
+      body: CustomScrollView(
+        keyboardDismissBehavior: .onDrag,
+        slivers: [
+          SliverAppBar.large(
+            title: Text(title),
+            actionsPadding: const EdgeInsets.symmetric(
+              horizontal: LayoutConstants.smallPadding,
+            ),
+            actions: [
+              ?action,
+            ],
+          ),
+          SliverSafeArea(
+            top: false,
+            bottom: false,
+            sliver: SliverMainAxisGroup(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: LayoutConstants.mediumPadding,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: FilterInputField(controller: controller),
+                  ),
+                ),
+                SliverPadding(
+                  padding: LayoutConstants.smallEdgeInsets,
+                  sliver: ChaptersGrid(
+                    seriesId: seriesId,
+                    chapters: filteredChapters,
+                  ),
+                ),
               ],
             ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: LayoutConstants.mediumPadding,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: FilterInputField(controller: controller),
-              ),
-            ),
-            SliverPadding(
-              padding: LayoutConstants.smallEdgeInsets,
-              sliver: ChaptersGrid(
-                seriesId: seriesId,
-                chapters: filteredChapters,
-              ),
-            ),
-            const SliverBottomPadding(),
-          ],
-        ),
+          ),
+          const SliverBottomPadding(),
+        ],
       ),
     );
   }
