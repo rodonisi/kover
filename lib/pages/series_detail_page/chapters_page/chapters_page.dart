@@ -224,7 +224,7 @@ ContextMenu<dynamic> _getMenu({
         ),
       ],
       if (sortDirection != null) ...[
-        MenuHeader(text: l.sortBy),
+        MenuHeader(text: l.sortDirection),
         MenuItem(
           icon: sortDirection.value == SortDirection.ascending
               ? const Icon(LucideIcons.check)
