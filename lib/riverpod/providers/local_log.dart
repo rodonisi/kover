@@ -30,6 +30,7 @@ class LocalLog extends _$LocalLog {
   Future<LocalLogModel> build() async {
     await persist(
       ref.watch(storageProvider.future),
+      options: const StorageOptions(destroyKey: '1'),
     ).future;
 
     log.sink = _addEntry;
