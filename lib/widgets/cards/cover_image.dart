@@ -1,3 +1,5 @@
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -230,16 +232,44 @@ class PlaceholderCoverImage extends StatelessWidget {
   }
 }
 
-class LoadingCover extends StatelessWidget {
+class LoadingCover extends ConsumerWidget {
   const new({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const AspectRatio(
-      aspectRatio: LayoutConstants.coverAspectRatio,
-      child: Center(
-        child: CircularProgressIndicator(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reduceAnimations = ref.watch(
+      themeProvider.select(
+        (theme) => theme.whenData((theme) => theme.reduceAnimations),
       ),
+    );
+
+    return Async(
+      asyncValue: reduceAnimations,
+      data: (reduceAnimations) {
+        if (reduceAnimations) {
+          return const AspectRatio(
+            aspectRatio: LayoutConstants.coverAspectRatio,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        return AspectRatio(
+              aspectRatio: LayoutConstants.coverAspectRatio,
+              child: ColoredBox(
+                color: Theme.of(context).colorScheme.surfaceBright,
+              ),
+            )
+            .animate(onPlay: (controller) => controller.repeat())
+            .shimmer(
+              duration: 600.ms,
+              angle: 0.45,
+              color: Theme.of(context).colorScheme.onSurface.withAlpha(0x33),
+            )
+            .then(delay: 1000.ms)
+            .tint(duration: 0.ms);
+      },
     );
   }
 }
