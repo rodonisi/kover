@@ -142,10 +142,12 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         .orderBy((o) => o.minNumber.asc() & o.maxNumber.asc())
         .withReferences((fetch) => fetch(chaptersRefs: true))
         .map(
-          (m) => VolumeWithRelations(
-            volume: m.$1,
-            chapters: m.$2.chaptersRefs.prefetchedData ?? [],
-          ),
+          (m) {
+            final chapters = m.$2.chaptersRefs.prefetchedData ?? [];
+            chapters.sort((a, b) => a.minNumber.compareTo(b.minNumber));
+
+            return VolumeWithRelations(volume: m.$1, chapters: chapters);
+          },
         )
         .watch();
 
