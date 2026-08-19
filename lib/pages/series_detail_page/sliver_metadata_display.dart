@@ -45,7 +45,6 @@ class SliverMetadataDisplay extends ConsumerWidget {
         [];
 
     return SliverAdaptivePadding(
-      padding: .zero,
       maxWidth: LayoutConstants.contentMaxWidth,
       sliver: SliverBreakpointBuilder(
         compactBuilder: (context) {
@@ -53,14 +52,11 @@ class SliverMetadataDisplay extends ConsumerWidget {
         },
         expandedBuilder: (context) {
           return [
-            SliverConstrainedCrossAxis(
-              maxExtent: LayoutBreakpoints.large,
-              sliver: SliverCrossAxisGroup(
-                slivers: [
-                  const SliverSummary(),
-                  ?sliverCarousels,
-                ],
-              ),
+            SliverCrossAxisGroup(
+              slivers: [
+                const SliverSummary(),
+                ?sliverCarousels,
+              ],
             ),
             ...visibleSlivers
                 .chunked(2)
