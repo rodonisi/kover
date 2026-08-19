@@ -13,6 +13,7 @@ sealed class CredentialsState with _$CredentialsState {
   const factory CredentialsState({
     String? url,
     String? apiKey,
+    @Default(false) bool ignoreCertificateValidation,
     @Default({}) Map<String, String> customHeaders,
   }) = _CredentialsState;
 
@@ -43,6 +44,12 @@ class Credentials extends _$Credentials {
     final current = await future;
 
     state = .data(current.copyWith(url: url, apiKey: apiKey));
+  }
+
+  Future<void> updateIgnoreCertificateValidation(bool value) async {
+    final current = await future;
+
+    state = .data(current.copyWith(ignoreCertificateValidation: value));
   }
 
   Future<void> addHeader(String key, String value) async {
@@ -80,7 +87,7 @@ String? apiKey(Ref ref) {
   return settings?.apiKey;
 }
 
-enum LoginStatus { noCredentials, loading, loggedIn, error }
+enum LoginStatus { noCredentials, loading, loggedIn, certificateError, error }
 
 @riverpod
 LoginStatus loginStatus(Ref ref) {
@@ -99,7 +106,12 @@ LoginStatus loginStatus(Ref ref) {
 
   if (user.isLoading) return .loading;
 
-  if (user.hasError) return .error;
+  if (user.hasError) {
+    if (user.error is CertificateValidationException) {
+      return .certificateError;
+    }
+    return .error;
+  }
 
   return .loggedIn;
 }

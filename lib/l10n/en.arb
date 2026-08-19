@@ -727,6 +727,22 @@
     "@invalidCredentials": {
         "description": "User display error displayed when credentials are invalid"
     },
+    "invalidCertificate": "Invalid Certificate",
+    "@invalidCertificate": {
+        "description": "User display error shown when the server certificate cannot be validated"
+    },
+    "invalidCertificateDescription": "The server's HTTPS certificate could not be verified. Check the certificate, or enable \"Ignore certificate validation\" in Settings (only if you trust this server).",
+    "@invalidCertificateDescription": {
+        "description": "Instructions shown when the server certificate cannot be validated"
+    },
+    "ignoreCertificateValidation": "Ignore certificate validation",
+    "@ignoreCertificateValidation": {
+        "description": "Setting that allows a trusted server with an invalid HTTPS certificate"
+    },
+    "ignoreCertificateValidationDescription": "Allow connections even when the server's HTTPS certificate cannot be verified. Only use this for servers you trust.",
+    "@ignoreCertificateValidationDescription": {
+        "description": "Security warning for ignoring HTTPS certificate validation"
+    },
     "orientation": "Orientation",
     "@orientation": {
         "description": "Label for the orientation setting"
@@ -801,7 +817,7 @@
     },
     "removeFromOnDeck": "Remove From On Deck",
     "@removeFromOnDeck": {
-      "description": "Label for the remove from on deck context menu item" 
+      "description": "Label for the remove from on deck context menu item"
     },
     "syncingOnDeck": "Syncing On Deck",
     "@syncingOnDeck": {

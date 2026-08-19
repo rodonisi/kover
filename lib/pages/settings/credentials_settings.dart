@@ -8,6 +8,7 @@ import 'package:kover/riverpod/providers/server_settings.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/bottom_sheet_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -91,6 +92,17 @@ class _CredentialsForm extends HookConsumerWidget {
           leadingIcon: KoverIcons.header,
           bottomSheetBuilder: ((context) => const CustomHeadersSheet()),
         ),
+        BooleanOption(
+          title: l.ignoreCertificateValidation,
+          description: l.ignoreCertificateValidationDescription,
+          icon: KoverIcons.ignoreCertificateValidation,
+          value: data.ignoreCertificateValidation,
+          onChanged: loginStatus == .loading
+              ? null
+              : (value) => ref
+                    .read(credentialsProvider.notifier)
+                    .updateIgnoreCertificateValidation(value),
+        ),
         Row(
           crossAxisAlignment: .center,
           mainAxisAlignment: .spaceBetween,
@@ -130,6 +142,21 @@ class _User extends ConsumerWidget {
       LoginStatus.loading => const SizedBox.square(
         dimension: LayoutConstants.mediumIcon,
         child: CircularProgressIndicator(strokeWidth: 2),
+      ),
+      LoginStatus.certificateError => Row(
+        spacing: LayoutConstants.smallPadding,
+        children: [
+          Icon(
+            KoverIcons.invalidCertificate,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          Text(
+            l.invalidCertificate,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ),
+        ],
       ),
       LoginStatus.error => Row(
         spacing: LayoutConstants.smallPadding,

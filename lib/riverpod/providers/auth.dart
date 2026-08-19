@@ -14,12 +14,38 @@ part 'auth.g.dart';
 
 class NoCredentialsException implements Exception {}
 
+class CertificateValidationException implements Exception {
+  CertificateValidationException(this.cause);
+
+  final Object cause;
+
+  @override
+  String toString() => 'Certificate validation failed: $cause';
+}
+
+bool isCertificateValidationError(Object? error) {
+  if (error is CertificateValidationException || error is HandshakeException) {
+    return true;
+  }
+
+  final message = error.toString().toLowerCase();
+  return message.contains('certificate verify failed') ||
+      message.contains('certificate validation failed') ||
+      message.contains('cert_path_validator_exception');
+}
+
 Duration? _retry(int retryCount, Object error) {
   // Never retry missing credentials
   if (error is NoCredentialsException) return null;
 
-  // Never retry network errors (offline) - fail fast
-  if (error is SocketException || error is TimeoutException) return null;
+  // Never retry connectivity or TLS-certificate errors - fail fast.
+  // A certificate validation failure cannot succeed without changing the
+  // server certificate or the configured URL.
+  if (error is SocketException ||
+      error is TimeoutException ||
+      isCertificateValidationError(error)) {
+    return null;
+  }
 
   // Retry other errors up to 3 times
   if (retryCount >= 3) return null;
@@ -37,12 +63,11 @@ class CurrentUser extends _$CurrentUser {
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
     ).future;
 
-    ref.listen(
-      credentialsProvider,
-      (_, _) => ref.invalidateSelf(asReload: true),
-    );
-
-    final apiKey = ref.watch(apiKeyProvider);
+    // Authentication also depends on transport options such as certificate
+    // validation, not just the API key. Watching the complete credentials
+    // state ensures saving any of these settings refreshes the connection.
+    final credentials = ref.watch(credentialsProvider).value;
+    final apiKey = credentials?.apiKey;
     if (apiKey == null || apiKey.isEmpty) throw NoCredentialsException();
 
     if (state.hasValue) {
@@ -57,25 +82,44 @@ class CurrentUser extends _$CurrentUser {
     try {
       final user = await _fetchUser(apiKey: apiKey);
       state = AsyncValue.data(user);
-    } catch (e) {
+    } catch (error, stackTrace) {
       log.warning(
         'Failed to refresh user',
         attributes: {
-          'error': e,
+          'error': error,
         },
       );
+
+      // A refresh normally keeps the last known user visible if the network
+      // or server is temporarily unavailable. A rejected TLS certificate is
+      // actionable, though: surface it so the user can enable the explicit
+      // certificate-validation exception or correct the server certificate.
+      if (isCertificateValidationError(error)) {
+        state = AsyncValue.error(error, stackTrace);
+      }
     }
   }
 
   Future<UserModel> _fetchUser({required String apiKey}) async {
     final client = ref.watch(restClientProvider);
-    final res = await client.apiPluginAuthenticatePost(
-      apiKey: apiKey,
-      pluginName: 'kover',
-    );
-    if (!res.isSuccessful || res.body == null) {
-      throw Exception('Failed to authenticate: ${res.error}');
+    try {
+      final res = await client.apiPluginAuthenticatePost(
+        apiKey: apiKey,
+        pluginName: 'kover',
+      );
+      if (!res.isSuccessful || res.body == null) {
+        throw switch (res.error) {
+          final Exception error => error,
+          final error => Exception('Failed to authenticate: $error'),
+        };
+      }
+      return UserModel.fromUserDto(res.body!);
+    } catch (error) {
+      if (error is CertificateValidationException) rethrow;
+      if (isCertificateValidationError(error)) {
+        throw CertificateValidationException(error);
+      }
+      rethrow;
     }
-    return UserModel.fromUserDto(res.body!);
   }
 }

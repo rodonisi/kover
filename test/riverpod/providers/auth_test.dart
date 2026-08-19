@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:chopper/chopper.dart';
 import 'package:fake_async/fake_async.dart';
@@ -155,6 +157,108 @@ void main() {
           final user = container.read(currentUserProvider.future);
           expect(user, completion(equals(storedUser)));
           async.flushMicrotasks();
+        });
+      },
+    );
+
+    test(
+      'when the HTTPS certificate is invalid, should report a certificate error',
+      () {
+        fakeAsync((async) {
+          final mockOpenapi = MockOpenapi();
+          final container = ProviderContainer.test(
+            overrides: [
+              storageProvider.overrideWith(
+                (ref) => Storage<String, String>.inMemory(),
+              ),
+              credentialsProvider.overrideWithBuild(
+                (_, _) => const CredentialsState(
+                  url: 'https://example.com',
+                  apiKey: 'valid_api_key',
+                ),
+              ),
+              restClientProvider.overrideWith((_) => mockOpenapi),
+            ],
+          );
+
+          when(
+            mockOpenapi.apiPluginAuthenticatePost(
+              apiKey: anyNamed('apiKey'),
+              pluginName: anyNamed('pluginName'),
+            ),
+          ).thenAnswer(
+            (_) async =>
+                throw const HandshakeException('Certificate is invalid'),
+          );
+
+          expect(container.read(loginStatusProvider), LoginStatus.loading);
+          async.flushMicrotasks();
+
+          expect(
+            container.read(loginStatusProvider),
+            LoginStatus.certificateError,
+          );
+          verify(
+            mockOpenapi.apiPluginAuthenticatePost(
+              apiKey: anyNamed('apiKey'),
+              pluginName: anyNamed('pluginName'),
+            ),
+          ).called(1);
+        });
+      },
+    );
+
+    test(
+      'when saving settings causes a certificate failure, should report a certificate error',
+      () {
+        fakeAsync((async) {
+          final mockOpenapi = MockOpenapi();
+          const credentials = CredentialsState(
+            url: 'https://example.com',
+            apiKey: 'valid_api_key',
+            ignoreCertificateValidation: true,
+          );
+          final container = ProviderContainer.test(
+            overrides: [
+              storageProvider.overrideWith(
+                (ref) => Storage<String, String>.inMemory(),
+              ),
+              credentialsProvider.overrideWithBuild((_, _) => credentials),
+              restClientProvider.overrideWith((_) => mockOpenapi),
+            ],
+          );
+          final userDto = const UserDto(id: 0, username: 'test_user');
+          var attempts = 0;
+
+          when(
+            mockOpenapi.apiPluginAuthenticatePost(
+              apiKey: anyNamed('apiKey'),
+              pluginName: anyNamed('pluginName'),
+            ),
+          ).thenAnswer((_) async {
+            if (attempts++ == 0) {
+              return Response(http.Response('', 200), userDto);
+            }
+            throw const HandshakeException('Certificate is invalid');
+          });
+
+          final sub = container.listen(currentUserProvider, (_, _) {});
+          async.flushMicrotasks();
+          expect(sub.read().value, UserModel.fromUserDto(userDto));
+
+          unawaited(
+            container
+                .read(credentialsProvider.notifier)
+                .updateIgnoreCertificateValidation(false),
+          );
+          async.flushMicrotasks();
+          async.elapse(Duration.zero);
+          async.flushMicrotasks();
+
+          expect(
+            container.read(loginStatusProvider),
+            LoginStatus.certificateError,
+          );
         });
       },
     );

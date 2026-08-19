@@ -1,6 +1,7 @@
 import 'package:chopper/chopper.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
+import 'package:kover/utils/http_client/http_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'client.g.dart';
@@ -9,9 +10,13 @@ ChopperClient getChopperClient(
   Uri uri,
   String apiKey, {
   Map<String, String> customHeaders = const {},
+  bool ignoreCertificateValidation = false,
 }) {
   return ChopperClient(
     baseUrl: uri,
+    client: createHttpClient(
+      ignoreCertificateValidation: ignoreCertificateValidation,
+    ),
     interceptors: [
       HeadersInterceptor({
         'x-api-key': apiKey,
@@ -37,8 +42,14 @@ ChopperClient authenticatedClient(Ref ref) {
     throw Exception('Invalid URL in settings');
   }
 
+  final httpClient = createHttpClient(
+    ignoreCertificateValidation: settings.ignoreCertificateValidation,
+  );
+  if (httpClient != null) ref.onDispose(httpClient.close);
+
   final client = ChopperClient(
     baseUrl: uri,
+    client: httpClient,
     interceptors: [
       HeadersInterceptor({
         'x-api-key': key!,
