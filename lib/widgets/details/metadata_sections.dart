@@ -413,8 +413,6 @@ class _SliverMetadataEntry extends ConsumerWidget {
               padding ??
               const .only(
                 top: LayoutConstants.mediumPadding,
-                left: LayoutConstants.mediumPadding,
-                right: LayoutConstants.mediumPadding,
               ),
           sliver: SliverToBoxAdapter(
             child: builder(context, metadata),
