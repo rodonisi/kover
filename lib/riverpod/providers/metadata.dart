@@ -38,7 +38,7 @@ sealed class MetadataId with _$MetadataId {
 }
 
 @riverpod
-Future<MetadataViewModel> metadata(
+Future<MetadataViewModel?> metadata(
   Ref ref, {
   required MetadataId metadataId,
 }) async {
@@ -48,9 +48,11 @@ Future<MetadataViewModel> metadata(
     },
     volume: (volumeId) async {
       final volume = await ref.watch(volumeProvider(volumeId: volumeId).future);
-      if (volume.chapters.isEmpty) {
-        throw Exception('Volume with ID $volumeId has no chapters.');
+
+      if (volume.chapters.isNotEmpty) {
+        return null;
       }
+
       final firstChapter = await ref.watch(
         chapterMetadataProvider(chapterId: volume.chapters.first.id).future,
       );

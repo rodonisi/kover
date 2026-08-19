@@ -404,7 +404,7 @@ class _SliverMetadataEntry extends ConsumerWidget {
     return AsyncSliver(
       asyncValue: metadata,
       data: (metadata) {
-        if (isEmpty != null && isEmpty!(metadata)) {
+        if (isEmpty == null || metadata == null || isEmpty!(metadata)) {
           return const SliverToBoxAdapter(child: SizedBox.shrink());
         }
 

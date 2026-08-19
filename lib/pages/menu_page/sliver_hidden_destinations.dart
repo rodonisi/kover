@@ -27,21 +27,22 @@ class SliverHiddenDestinations extends ConsumerWidget {
         ),
       ),
     );
+
     final p =
         padding ?? const .only(bottom: LayoutConstants.listSectionSpacing);
 
-    return SliverPadding(
-      padding: p,
-      sliver: AsyncSliver(
-        asyncValue: hiddenDestinations,
-        data: (hiddenDestinations) {
-          if (hiddenDestinations.isEmpty) {
-            return const SliverToBoxAdapter();
-          }
+    return AsyncSliver(
+      asyncValue: hiddenDestinations,
+      data: (hiddenDestinations) {
+        if (hiddenDestinations.isEmpty) {
+          return const SliverToBoxAdapter();
+        }
 
-          final destinationList = hiddenDestinations.toList();
+        final destinationList = hiddenDestinations.toList();
 
-          return SliverList.separated(
+        return SliverPadding(
+          padding: p,
+          sliver: SliverList.separated(
             itemCount: destinationList.length,
             itemBuilder: (context, index) {
               final destination = destinationList[index];
@@ -56,9 +57,9 @@ class SliverHiddenDestinations extends ConsumerWidget {
                 height: LayoutConstants.listSpacing,
               );
             },
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

@@ -27,11 +27,7 @@ class VolumeDetailPage extends ConsumerWidget {
     if (volume == null) return const SizedBox.shrink();
     final carousel = volume.chapters.isNotEmpty
         ? SliverPadding(
-            padding: const .only(
-              top: LayoutConstants.mediumPadding,
-              // left: LayoutConstants.mediumPadding,
-              // right: LayoutConstants.mediumPadding,
-            ),
+            padding: const .only(top: LayoutConstants.mediumPadding),
             sliver: SliverToBoxAdapter(
               child: CarouselTile(
                 title: '${l.chapters} (${volume.chapters.length})',

@@ -208,6 +208,7 @@ class _ExpandedNavigationLayout extends HookWidget {
         children: [
           NavigationRail(
             extended: extended.value,
+            scrollable: true,
             trailingAtBottom: true,
             trailing: Padding(
               padding: LayoutConstants.smallestEdgeInsets,

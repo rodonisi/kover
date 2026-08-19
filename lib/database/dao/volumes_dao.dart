@@ -33,7 +33,7 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
           final (vol, refs) = result;
           final chapters = refs.chaptersRefs.prefetchedData ?? [];
 
-          chapters.sort((a, b) => a.minNumber.compareTo(b.minNumber));
+          chapters.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
 
           return VolumeWithRelations(volume: vol, chapters: chapters);
         });
@@ -60,7 +60,7 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
     return await q.map((result) {
       final (vol, refs) = result;
       final chapters = refs.chaptersRefs.prefetchedData ?? [];
-      chapters.sort((a, b) => a.minNumber.compareTo(b.minNumber));
+      chapters.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
 
       return VolumeWithRelations(volume: vol, chapters: chapters);
     }).get();

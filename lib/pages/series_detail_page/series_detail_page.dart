@@ -13,13 +13,13 @@ import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:material_ui/material_ui.dart';
 
-class SeriesDetailPage extends HookConsumerWidget {
+class SeriesDetailPage extends StatelessWidget {
   final int seriesId;
 
   const SeriesDetailPage({super.key, required this.seriesId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Scaffold(
       body: MetadataScope(
         metadataId: .series(seriesId: seriesId),

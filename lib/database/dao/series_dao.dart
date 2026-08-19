@@ -144,7 +144,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         .map(
           (m) {
             final chapters = m.$2.chaptersRefs.prefetchedData ?? [];
-            chapters.sort((a, b) => a.minNumber.compareTo(b.minNumber));
+            chapters.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
 
             return VolumeWithRelations(volume: m.$1, chapters: chapters);
           },
@@ -316,6 +316,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
                 .filter(
                   (f) => f.volumeId.id(v.id),
                 )
+                .orderBy((o) => o.sortOrder.asc())
                 .get(),
           ),
         );
