@@ -33,18 +33,27 @@ class WantToReadPageContent extends ConsumerWidget {
     });
 
     return CustomScrollView(
+      clipBehavior: .none,
       slivers: [
         const ActionsAppBar(),
-        SliverPadding(
-          padding: LayoutConstants.smallEdgeInsets,
-          sliver: SliverToBoxAdapter(
-            child: Text(
-              l.wantToRead,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+        SliverSafeArea(
+          top: false,
+          bottom: false,
+          sliver: SliverMainAxisGroup(
+            slivers: [
+              SliverPadding(
+                padding: LayoutConstants.smallEdgeInsets,
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    l.wantToRead,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                ),
+              ),
+              const WantToReadGrid(),
+            ],
           ),
         ),
-        const WantToReadGrid(),
         const SliverBottomPadding(),
       ],
     );

@@ -22,7 +22,7 @@ class CredentialsSettings extends ConsumerWidget {
     final loginStatus = ref.watch(loginStatusProvider);
 
     return Card(
-      margin: LayoutConstants.mediumEdgeInsets,
+      margin: .zero,
       child: Padding(
         padding: LayoutConstants.mediumEdgeInsets,
         child: Async(

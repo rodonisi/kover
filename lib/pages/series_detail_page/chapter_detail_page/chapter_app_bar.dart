@@ -1,3 +1,4 @@
+import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/managers/download_manager.dart';
@@ -167,6 +168,7 @@ class _ChapterInfo extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final chapter = ref.watch(chapterMetadataProvider(chapterId: chapterId));
+    final breakpoint = ref.watch(breakpointsProvider);
 
     return Async(
       asyncValue: chapter,
@@ -190,7 +192,17 @@ class _ChapterInfo extends ConsumerWidget {
                 ),
             ],
           ),
-          MetadataWriters(metadata: data),
+          Wrap(
+            spacing: LayoutConstants.largerPadding,
+            runSpacing: LayoutConstants.mediumPadding,
+            children: [
+              if (data.writers.isNotEmpty) MetadataWriters(metadata: data),
+              if (breakpoint > .compact && data.genres.isNotEmpty)
+                MetadataGenres(metadata: data),
+              if (breakpoint > .compact && data.tags.isNotEmpty)
+                MetadataTags(metadata: data),
+            ],
+          ),
         ],
       ),
     );

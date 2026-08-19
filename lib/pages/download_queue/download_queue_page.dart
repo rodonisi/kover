@@ -1,16 +1,16 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/riverpod/managers/download_manager.dart';
 import 'package:kover/riverpod/providers/chapter.dart';
 import 'package:kover/riverpod/providers/download.dart';
 import 'package:kover/riverpod/providers/series.dart';
-import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/cards/cover_image.dart';
 import 'package:kover/widgets/lists/cover_list_entry.dart';
 import 'package:kover/widgets/util/async_value.dart';
+import 'package:kover/widgets/util/sliver_adaptive_padding.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_ui/material_ui.dart';
 
 class DownloadQueuePage extends ConsumerWidget {
   const DownloadQueuePage({super.key});
@@ -34,11 +34,12 @@ class DownloadQueuePage extends ConsumerWidget {
               if (hasDls) const CancellAllAction(),
             ],
           ),
-          const SliverPadding(
-            padding: EdgeInsets.symmetric(
-              horizontal: LayoutConstants.mediumPadding,
+          const SliverSafeArea(
+            top: false,
+            bottom: false,
+            sliver: SliverAdaptivePadding(
+              sliver: DownloadQueueList(),
             ),
-            sliver: DownloadQueueList(),
           ),
           const SliverBottomPadding(),
         ],
@@ -125,6 +126,9 @@ class DownloadQueueItem extends ConsumerWidget {
             icon: const Icon(LucideIcons.x),
           ),
         );
+      },
+      loading: () {
+        return const CoverListEntryPlaceholder();
       },
     );
   }

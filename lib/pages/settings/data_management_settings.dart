@@ -20,7 +20,7 @@ class DataManagementSettings extends ConsumerWidget {
     final settings = ref.watch(downloadSettingsProvider);
 
     return Card(
-      margin: LayoutConstants.mediumEdgeInsets,
+      margin: .zero,
       child: Padding(
         padding: LayoutConstants.mediumEdgeInsets,
         child: Async(

@@ -1,9 +1,9 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/series_model.dart';
 import 'package:kover/pages/series_detail_page/series_app_bar_provider.dart';
 import 'package:kover/riverpod/managers/download_manager.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
+import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:kover/riverpod/providers/download.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/router.dart';
@@ -13,6 +13,7 @@ import 'package:kover/widgets/cards/cover_image.dart';
 import 'package:kover/widgets/context_menu/actions_menu.dart';
 import 'package:kover/widgets/details/detail_app_bar.dart';
 import 'package:kover/widgets/details/info_widgets.dart';
+import 'package:kover/widgets/details/metadata_sections.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
@@ -183,8 +184,9 @@ class _Metadata extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
     final metadata = ref.watch(seriesMetadataProvider(seriesId: series.id));
+    final breakpoint = ref.watch(breakpointsProvider);
+
     return Async(
       asyncValue: metadata,
       data: (metadata) => Column(
@@ -206,25 +208,21 @@ class _Metadata extends ConsumerWidget {
                   releaseYear: metadata.releaseYear!,
                 ),
               if (metadata.publicationStatus != .unknown)
-                PublicationStatusDisplay(status: metadata.publicationStatus),
+                PublicationStatusDisplay(
+                  status: metadata.publicationStatus,
+                ),
             ],
           ),
           Wrap(
-            spacing: LayoutConstants.mediumPadding,
+            spacing: LayoutConstants.largerPadding,
             runSpacing: LayoutConstants.mediumPadding,
             children: [
               if (metadata.writers.isNotEmpty)
-                LimitedList(
-                  title: l.writers,
-                  items: metadata.writers
-                      .map(
-                        (w) => Text(
-                          w.name,
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                      )
-                      .toList(),
-                ),
+                MetadataWriters(metadata: metadata),
+              if (breakpoint > .compact && metadata.genres.isNotEmpty)
+                MetadataGenres(metadata: metadata),
+              if (breakpoint > .compact && metadata.tags.isNotEmpty)
+                MetadataTags(metadata: metadata),
             ],
           ),
         ],

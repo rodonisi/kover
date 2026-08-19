@@ -1,10 +1,9 @@
-import 'package:kover/utils/extensions/iterable.dart';
+import 'package:kover/pages/series_detail_page/sliver_metadata_display.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/series_detail_page/carousel_tile.dart';
 import 'package:kover/pages/series_detail_page/volume_detail_page/volume_app_bar.dart';
-import 'package:kover/riverpod/providers/chapter.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/volume.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -26,66 +25,49 @@ class VolumeDetailPage extends ConsumerWidget {
     final volume = ref.watch(volumeProvider(volumeId: volumeId)).value;
 
     if (volume == null) return const SizedBox.shrink();
-
-    var items = [
-      VolumeAppBar(
-        volumeId: volumeId,
-      ),
-      if (volume.chapters.isNotEmpty)
-        SliverPadding(
-          padding: const .symmetric(
-            horizontal: LayoutConstants.mediumPadding,
-          ),
-          sliver: SliverToBoxAdapter(
-            child: CarouselTile(
-              title: '${l.chapters} (${volume.chapters.length})',
-              onTap: () => ChaptersRoute(
-                seriesId: volume.seriesId,
-                volumeId: volume.id,
-              ).push(context),
-              listItemCount: volume.chapters.length,
-              listItemBuilder: (context, index) {
-                final chapter = volume.chapters[index];
-                return AspectRatio(
-                  aspectRatio: LayoutConstants.chapterCardAspectRatio,
-                  child: ChapterCard(
-                    seriesId: volume.seriesId,
-                    chapterId: chapter.id,
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-      if (volume.chapters.isNotEmpty)
-        SliverPadding(
-          padding: const .symmetric(
-            horizontal: LayoutConstants.mediumPadding,
-          ),
-          sliver: SliverToBoxAdapter(
-            child: MetadataSections(
-              asyncValue: ref.watch(
-                chapterMetadataProvider(
-                  chapterId: volume.chapters.first.id,
-                ),
+    final carousel = volume.chapters.isNotEmpty
+        ? SliverPadding(
+            padding: const .only(top: LayoutConstants.mediumPadding),
+            sliver: SliverToBoxAdapter(
+              child: CarouselTile(
+                title: '${l.chapters} (${volume.chapters.length})',
+                onTap: () => ChaptersRoute(
+                  seriesId: volume.seriesId,
+                  volumeId: volume.id,
+                ).push(context),
+                listItemCount: volume.chapters.length,
+                listItemBuilder: (context, index) {
+                  final chapter = volume.chapters[index];
+                  return AspectRatio(
+                    aspectRatio: LayoutConstants.chapterCardAspectRatio,
+                    child: ChapterCard(
+                      seriesId: volume.seriesId,
+                      chapterId: chapter.id,
+                    ),
+                  );
+                },
               ),
             ),
-          ),
-        ),
-      const SliverBottomPadding(),
-    ];
+          )
+        : null;
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: items
-            .interleave(
-              const SliverToBoxAdapter(
-                child: SizedBox(
-                  height: LayoutConstants.mediumPadding,
-                ),
+      body: MetadataScope(
+        metadataId: .volume(volumeId: volumeId),
+        child: CustomScrollView(
+          slivers: [
+            VolumeAppBar(volumeId: volumeId),
+            SliverSafeArea(
+              top: false,
+              bottom: false,
+              sliver: SliverMetadataDisplay(
+                sliverCarousels: carousel,
               ),
-            )
-            .toList(),
+            ),
+
+            const SliverBottomPadding(),
+          ],
+        ),
       ),
     );
   }

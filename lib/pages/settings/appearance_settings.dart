@@ -16,7 +16,7 @@ class AppearanceSettings extends ConsumerWidget {
     final l = AppLocalizations.of(context);
 
     return Card(
-      margin: LayoutConstants.mediumEdgeInsets,
+      margin: .zero,
       child: Padding(
         padding: LayoutConstants.mediumEdgeInsets,
         child: Column(

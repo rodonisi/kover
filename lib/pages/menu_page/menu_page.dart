@@ -1,3 +1,5 @@
+import 'package:kover/pages/menu_page/sliver_hidden_destinations.dart';
+import 'package:kover/widgets/util/sliver_adaptive_padding.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -9,11 +11,8 @@ import 'package:kover/riverpod/managers/download_manager.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/router.dart';
-import 'package:kover/riverpod/providers/settings/general_settings.dart';
-import 'package:kover/utils/extensions/navbar_destination.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/actions_app_bar/actions_app_bar.dart';
-import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -37,89 +36,48 @@ class MenuPage extends ConsumerWidget {
       ),
     );
 
-    final hiddenDestinations = ref.watch(
-      generalSettingsProvider.select(
-        (state) => state.whenData(
-          (state) => NavbarDestinations.values
-              .where(
-                (destination) =>
-                    !state.navbarDestinations.contains(destination),
-              )
-              .toSet(),
-        ),
-      ),
-    );
-
     return Scaffold(
       extendBody: true,
+      extendBodyBehindAppBar: true,
       body: SafeArea(
-        bottom: false,
         child: CustomScrollView(
+          clipBehavior: .none,
           slivers: [
-            if (loggedIn) ...[
-              const ActionsAppBar(),
-              AsyncSliver(
-                asyncValue: hiddenDestinations,
-                data: (hiddenDestinations) {
-                  if (hiddenDestinations.isEmpty) {
-                    return const SliverToBoxAdapter();
-                  }
-                  return SliverToBoxAdapter(
+            if (loggedIn) const ActionsAppBar(),
+            SliverAdaptivePadding(
+              sliver: SliverMainAxisGroup(
+                slivers: [
+                  if (loggedIn) ...[
+                    const SliverHiddenDestinations(),
+                    SliverSection(title: l.libraries),
+                    const SliverLibraries(),
+                  ],
+                  SliverSection(title: l.more),
+                  SliverToBoxAdapter(
                     child: Column(
-                      mainAxisSize: .min,
-                      children: hiddenDestinations.map(
-                        (destination) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: LayoutConstants.smallerPadding,
-                              horizontal: LayoutConstants.mediumPadding,
-                            ),
-                            child: AppListTile(
-                              title: destination.getLabel(l),
-                              icon: Icon(destination.icon),
-                              onTap: () => destination.route.push(context),
-                            ),
-                          );
-                        },
-                      ).toList(),
+                      spacing: LayoutConstants.listSpacing,
+                      children: [
+                        AppListTile(
+                          title: l.downloadQueue,
+                          icon: isDownloading
+                              ? const Icon(LucideIcons.refreshCw)
+                                    .animate(
+                                      onPlay: (controller) =>
+                                          controller.repeat(),
+                                    )
+                                    .rotate(duration: 1500.ms)
+                              : const Icon(LucideIcons.download),
+                          onTap: () => const DownloadQueueRoute().push(context),
+                        ),
+                        AppListTile(
+                          title: l.settings,
+                          icon: const Icon(LucideIcons.settings),
+                          onTap: () => const SettingsRoute().push(context),
+                        ),
+                      ],
                     ),
-                  );
-                },
-              ),
-              SliverSection(title: l.libraries),
-              const SliverLibraries(),
-            ],
-            SliverSection(title: l.more),
-            SliverPadding(
-              padding: const EdgeInsetsGeometry.symmetric(
-                vertical: LayoutConstants.smallerPadding,
-                horizontal: LayoutConstants.mediumPadding,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: AppListTile(
-                  title: l.downloadQueue,
-                  icon: isDownloading
-                      ? const Icon(LucideIcons.refreshCw)
-                            .animate(
-                              onPlay: (controller) => controller.repeat(),
-                            )
-                            .rotate(duration: 1500.ms)
-                      : const Icon(LucideIcons.download),
-                  onTap: () => const DownloadQueueRoute().push(context),
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsetsGeometry.symmetric(
-                vertical: LayoutConstants.smallerPadding,
-                horizontal: LayoutConstants.mediumPadding,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: AppListTile(
-                  title: l.settings,
-                  icon: const Icon(LucideIcons.settings),
-                  onTap: () => const SettingsRoute().push(context),
-                ),
+                  ),
+                ],
               ),
             ),
             const SliverBottomPadding(),

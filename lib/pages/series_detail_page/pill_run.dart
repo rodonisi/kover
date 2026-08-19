@@ -61,24 +61,30 @@ class PillRun extends HookWidget {
           runSpacing: LayoutConstants.smallPadding,
           alignment: .start,
           children: [
-            ...displayItems.map(
-              (item) => Pill(
-                child: Row(
-                  mainAxisSize: .min,
-                  spacing: LayoutConstants.smallPadding,
-                  children: [
-                    if (item.icon != null)
-                      Icon(item.icon, size: LayoutConstants.smallIcon),
-                    Text(
-                      item.label,
-                      style: theme.textTheme.labelSmall,
-                    ),
-                  ],
-                ),
-              ),
+            ...displayItems.indexed.map(
+              (record) {
+                final (index, item) = record;
+
+                return Pill(
+                  key: ValueKey('${item.label}-$index'),
+                  child: Row(
+                    mainAxisSize: .min,
+                    spacing: LayoutConstants.smallPadding,
+                    children: [
+                      if (item.icon != null)
+                        Icon(item.icon, size: LayoutConstants.smallIcon),
+                      Text(
+                        item.label,
+                        style: theme.textTheme.labelSmall,
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
             if (items.length > collapsedItemCount)
               Pill(
+                key: ValueKey(collapsed.value),
                 onTap: () => collapsed.value = !collapsed.value,
                 child: Text(
                   collapsed.value

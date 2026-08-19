@@ -8,7 +8,12 @@ enum Breakpoint {
   medium,
   expanded,
   large,
-  largest,
+  largest;
+
+  bool operator >(Breakpoint other) => index > other.index;
+  bool operator >=(Breakpoint other) => index >= other.index;
+  bool operator <(Breakpoint other) => index < other.index;
+  bool operator <=(Breakpoint other) => index <= other.index;
 }
 
 @riverpod
@@ -21,10 +26,10 @@ class Breakpoints extends _$Breakpoints {
 
   void update(double width) {
     state = switch (width) {
-      > LayoutBreakpoints.large => .largest,
-      > LayoutBreakpoints.expanded => .large,
-      > LayoutBreakpoints.medium => .expanded,
-      > LayoutBreakpoints.compact => .medium,
+      >= LayoutBreakpoints.large => .largest,
+      >= LayoutBreakpoints.expanded => .large,
+      >= LayoutBreakpoints.medium => .expanded,
+      >= LayoutBreakpoints.compact => .medium,
       _ => Breakpoint.compact,
     };
   }

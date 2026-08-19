@@ -1,3 +1,4 @@
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -75,5 +76,25 @@ class CoverListEntry extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+class CoverListEntryPlaceholder extends StatelessWidget {
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Card.filled(
+          child: Padding(
+            padding: LayoutConstants.smallEdgeInsets,
+            child: SizedBox(
+              height: LayoutConstants.largestIcon,
+            ),
+          ),
+        )
+        .animate(onPlay: (controller) => controller.repeat())
+        .shimmer(duration: 600.ms, angle: 0.45)
+        .then(delay: 1000.ms)
+        .tint(duration: 0.ms);
   }
 }

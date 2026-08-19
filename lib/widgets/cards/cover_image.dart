@@ -1,3 +1,6 @@
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:kover/riverpod/providers/theme.dart' hide Theme;
+import 'package:kover/utils/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/image_model.dart';
@@ -38,6 +41,7 @@ class SeriesCoverImage extends ConsumerWidget {
         width: width,
         usePlaceholder: usePlaceholder,
       ),
+      loading: () => const LoadingCover(),
     );
   }
 }
@@ -73,6 +77,7 @@ class VolumeCoverImage extends ConsumerWidget {
           usePlaceholder: usePlaceholder,
         ),
       ),
+      loading: () => const LoadingCover(),
     );
   }
 }
@@ -108,6 +113,7 @@ class ChapterCoverImage extends ConsumerWidget {
           usePlaceholder: usePlaceholder,
         ),
       ),
+      loading: () => const LoadingCover(),
     );
   }
 }
@@ -145,6 +151,7 @@ class CollectionCoverImage extends ConsumerWidget {
           usePlaceholder: usePlaceholder,
         ),
       ),
+      loading: () => const LoadingCover(),
     );
   }
 }
@@ -182,6 +189,7 @@ class ReadingListCoverImage extends ConsumerWidget {
           usePlaceholder: usePlaceholder,
         ),
       ),
+      loading: () => const LoadingCover(),
     );
   }
 }
@@ -220,6 +228,48 @@ class PlaceholderCoverImage extends StatelessWidget {
       fit: fit,
       height: height,
       width: width,
+    );
+  }
+}
+
+class LoadingCover extends ConsumerWidget {
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reduceAnimations = ref.watch(
+      themeProvider.select(
+        (theme) => theme.whenData((theme) => theme.reduceAnimations),
+      ),
+    );
+
+    return Async(
+      asyncValue: reduceAnimations,
+      data: (reduceAnimations) {
+        if (reduceAnimations) {
+          return const AspectRatio(
+            aspectRatio: LayoutConstants.coverAspectRatio,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        return AspectRatio(
+              aspectRatio: LayoutConstants.coverAspectRatio,
+              child: ColoredBox(
+                color: Theme.of(context).colorScheme.surfaceBright,
+              ),
+            )
+            .animate(onPlay: (controller) => controller.repeat())
+            .shimmer(
+              duration: 600.ms,
+              angle: 0.45,
+              color: Theme.of(context).colorScheme.onSurface.withAlpha(0x33),
+            )
+            .then(delay: 1000.ms)
+            .tint(duration: 0.ms);
+      },
     );
   }
 }

@@ -16,6 +16,7 @@ class AppListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card.filled(
+      margin: .zero,
       clipBehavior: .antiAlias,
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
