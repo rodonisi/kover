@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:kover/models/log_entry.dart';
+import 'package:kover/utils/sentry.dart';
 import 'package:logger/logger.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -130,11 +131,11 @@ class KoverLogger {
       LogEntry(
         timestamp: DateTime.now(),
         level: level,
-        message: message.toString(),
+        message: scrubLooseUrls(message.toString()),
         attributes: attributes.map(
           (key, value) => MapEntry(key, value.toString()),
         ),
-        error: error.toString(),
+        error: error != null ? scrubLooseUrls(error.toString()) : null,
       ),
     );
 
