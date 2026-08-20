@@ -74,7 +74,7 @@ class RenderEpubContent extends ConsumerWidget {
 
                 if (element.localName == 'p' && considerLast && !isSplit) {
                   final paragraphMargin =
-                      'margin-bottom: ${epubSettings.paragraphSpacing}px';
+                      'margin-bottom: ${epubSettings.paragraphSpacing}em';
 
                   element.attributes['style'] =
                       '${element.attributes['style']}; $paragraphMargin';

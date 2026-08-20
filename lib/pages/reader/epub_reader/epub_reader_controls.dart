@@ -109,7 +109,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                         title: l.paragraphSpacing,
                         icon: KoverIcons.paragraphSpacing,
                         value: settings.paragraphSpacing,
-                        decimalPlaces: 0,
+                        decimalPlaces: 1,
                         min: EpubReaderSettingsLimits.paragraphSpacingMin,
                         max: EpubReaderSettingsLimits.paragraphSpacingMax,
                         step: EpubReaderSettingsLimits.paragraphSpacingStep,
