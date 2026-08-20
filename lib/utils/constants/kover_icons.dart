@@ -11,6 +11,17 @@ sealed class KoverIcons {
   static const IconData fitHeight = LucideIcons.chevronsUpDown;
   static const IconData fitContain = LucideIcons.fullscreen;
   static const IconData paragraphSpacing = LucideIcons.betweenHorizonalEnd;
+  static const IconData removeParagraphIndent = LucideIcons.indentDecrease;
+  static const IconData highlight = LucideIcons.highlighter;
+  static const IconData letterSpacing = LucideIcons.wholeWord;
+  static const IconData lineHeight = LucideIcons.listChevronsUpDown;
+  static const IconData wordSpacing = LucideIcons.listMinus;
+  static const IconData margins = LucideIcons.panelLeftDashed;
+  static const IconData fontSize = LucideIcons.aLargeSmallDir;
+  static const IconData textAlignLeft = LucideIcons.textAlignStart;
+  static const IconData textAlignCenter = LucideIcons.textAlignCenter;
+  static const IconData textAlignRight = LucideIcons.textAlignEnd;
+  static const IconData textAlignJustify = LucideIcons.textAlignJustify;
   static const IconData progressBar = LucideIcons.minus;
   static const IconData safeArea = LucideIcons.expand;
   static const IconData save = LucideIcons.save;

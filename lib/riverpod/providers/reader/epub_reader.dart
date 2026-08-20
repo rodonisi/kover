@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -30,6 +32,7 @@ typedef EpubMeasureWidgetBuilder = Widget Function(
 );
 
 enum EpubReflowStatus {
+  initial,
   measuring,
   done,
 }
@@ -40,7 +43,7 @@ sealed class EpubReflowState with _$EpubReflowState {
 
   const factory EpubReflowState({
     required PageContent page,
-    @Default(EpubReflowStatus.measuring) EpubReflowStatus status,
+    @Default(EpubReflowStatus.initial) EpubReflowStatus status,
     @Default(null) String? scrollId,
     @Default(null) int? resumeSubpage,
     @Default([]) List<DocumentFragment> subpages,
@@ -50,8 +53,7 @@ sealed class EpubReflowState with _$EpubReflowState {
 @riverpod
 class EpubReflow extends _$EpubReflow {
   final _pipeline = HeadlessMeasurePipeline();
-
-  bool _measuring = false;
+  Timer? _debounceReflow;
   late EpubMeasureWidgetBuilder _measureBuilder;
   late Duration _maxChunkDuration;
   late ReflowEngine _cursor;
@@ -62,7 +64,9 @@ class EpubReflow extends _$EpubReflow {
     required int chapterId,
     required int page,
   }) async {
-    ref.onDispose(_pipeline.dispose);
+    ref.onDispose(() {
+      _pipeline.dispose();
+    });
 
     // force rerender on settings change
     ref.listen(epubReaderSettingsProvider(seriesId: seriesId), (prev, next) {
@@ -109,6 +113,13 @@ class EpubReflow extends _$EpubReflow {
       await loader.load();
     }
 
+    final existingHighlight = pageContent.root.querySelector(
+      '.${HtmlConstants.resumeParagraphClass}',
+    );
+    if (existingHighlight != null) {
+      existingHighlight.classes.remove(HtmlConstants.resumeParagraphClass);
+    }
+
     if (settings.highlightResumePoint && resumeScrollId != null) {
       final resumePoint = pageContent.root.querySelector(
         '[${HtmlConstants.scrollIdAttribute}="${resumeScrollId.cssEscaped}"]',
@@ -136,6 +147,23 @@ class EpubReflow extends _$EpubReflow {
     required EpubMeasureWidgetBuilder measureBuilder,
     required double refreshRate,
   }) async {
+    _debounceReflow?.cancel();
+    _debounceReflow = Timer(200.ms, () {
+      _reflow(
+        viewport: viewport,
+        devicePixelRatio: devicePixelRatio,
+        measureBuilder: measureBuilder,
+        refreshRate: refreshRate,
+      );
+    });
+  }
+
+  Future<void> _reflow({
+    required Size viewport,
+    required double devicePixelRatio,
+    required EpubMeasureWidgetBuilder measureBuilder,
+    required double refreshRate,
+  }) async {
     if (viewport.isEmpty) return;
 
     _measureBuilder = measureBuilder;
@@ -144,9 +172,9 @@ class EpubReflow extends _$EpubReflow {
       milliseconds: (1000 / refreshRateClamped).round() ~/ 2,
     );
 
-    if (_measuring || !state.hasValue) return;
+    if (!state.hasValue || state.value?.status != .initial) return;
+    state = AsyncData(state.value!.copyWith(status: .measuring));
 
-    _measuring = true;
     _pipeline.attach(size: viewport, devicePixelRatio: devicePixelRatio);
 
     try {
@@ -156,12 +184,16 @@ class EpubReflow extends _$EpubReflow {
 
       while (ref.mounted &&
           _pipeline.isAttached &&
-          state.value?.status != .done) {
+          state.value?.status == .measuring) {
         final maxHeight = _pipeline.viewportSize?.height ?? viewport.height;
         final bufferHtml = _cursor.buffer.outerHtml;
 
         final current = await future;
-        if (!ref.mounted || !_pipeline.isAttached) return;
+        if (!ref.mounted ||
+            !_pipeline.isAttached ||
+            current.status != .measuring) {
+          return;
+        }
 
         final height = _pipeline
             .measure(_measureBuilder(bufferHtml, current.page.styles))
@@ -202,8 +234,6 @@ class EpubReflow extends _$EpubReflow {
       if (ref.mounted) {
         state = AsyncError(e, stacktrace);
       }
-    } finally {
-      _measuring = false;
     }
   }
 
@@ -236,6 +266,10 @@ class EpubReflow extends _$EpubReflow {
       subpage: newSubpages.length - 1,
     );
 
+    // The state was replaced (reload or a newer run) while awaiting; never
+    // clobber it with a stale pagination.
+    if (!identical(state.value, current)) return;
+
     state = AsyncData(newState);
   }
 
@@ -262,6 +296,10 @@ class EpubReflow extends _$EpubReflow {
       fragment: fragment,
       subpage: newSubpages.length - 1,
     );
+
+    // The state was replaced (reload or a newer run) while awaiting; never
+    // clobber it with a stale pagination.
+    if (!identical(state.value, current)) return;
 
     state = AsyncData(newState);
   }

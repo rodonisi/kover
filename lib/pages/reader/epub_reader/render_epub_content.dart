@@ -74,10 +74,29 @@ class RenderEpubContent extends ConsumerWidget {
 
                 if (element.localName == 'p' && considerLast && !isSplit) {
                   final paragraphMargin =
-                      'margin-bottom: ${epubSettings.paragraphSpacing}px';
+                      'margin-bottom: ${epubSettings.paragraphSpacing}em';
 
                   element.attributes['style'] =
                       '${element.attributes['style']}; $paragraphMargin';
+
+                  final alignment = switch (epubSettings.textAlignment) {
+                    EpubTextAlignment.left => 'left',
+                    EpubTextAlignment.center => 'center',
+                    EpubTextAlignment.right => 'right',
+                    EpubTextAlignment.justify => 'justify',
+                  };
+                  final justifyText = 'text-align: $alignment';
+                  element.attributes['style'] =
+                      '${element.attributes['style']}; $justifyText';
+                }
+
+                if (epubSettings.removeParagraphIndent &&
+                    element.attributes.containsKey(
+                      HtmlConstants.textIndentSpanAttribute,
+                    )) {
+                  final textIndent = 'width: 0';
+                  element.attributes['style'] =
+                      '${element.attributes['style']}; $textIndent';
                 }
 
                 return s;

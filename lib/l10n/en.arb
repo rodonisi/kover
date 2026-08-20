@@ -850,5 +850,33 @@
     "tags": "Tags",
     "@tags": {
       "description": "Label for the tags section in the series details page"
+    },
+    "textAlignment": "Text Alignment",
+    "@textAlignment": {
+      "description": "Label for the text alignment setting"
+    },
+    "left": "Left",
+    "@left": {
+      "description": "Label for the left text alignment option"
+    },
+    "center": "Center",
+    "@center": {
+      "description": "Label for the center text alignment option"
+    },
+    "right": "Right",
+    "@right": {
+      "description": "Label for the right text alignment option"
+    },
+    "justify": "Justify",
+    "@justify": {
+      "description": "Label for the justify text alignment option"
+    },
+    "removeParagraphIndentation": "Remove Paragraph Indentation",
+    "@indentParagraphs": {
+      "description": "Label for the remove paragraph indentation setting"
+    },
+    "removeParagraphIndentationDescription": "If enabled, paragraph indentation is stripped from the text. If disabled, the EPUB's original indentation is preserved.",
+    "@removeParagraphIndentationDescription": {
+      "description": "Description for the remove paragraphs indent setting"
     }
 }

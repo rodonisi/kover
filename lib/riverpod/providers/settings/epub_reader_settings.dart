@@ -19,8 +19,8 @@ sealed class EpubReaderSettingsLimits {
   static const double marginSizeStep = 4;
 
   static const double paragraphSpacingMin = 0.0;
-  static const double paragraphSpacingMax = LayoutConstants.largestPadding;
-  static const double paragraphSpacingStep = 4;
+  static const double paragraphSpacingMax = 5.0;
+  static const double paragraphSpacingStep = 0.2;
 
   static const double lineHeightMin = 0.5;
   static const double lineHeightMax = 5.0;
@@ -44,6 +44,8 @@ enum EpubTheme {
 
 enum EpubReaderMode { horizontal, vertical, spreads }
 
+enum EpubTextAlignment { left, right, justify, center }
+
 @freezed
 sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
   const EpubReaderSettingsState._();
@@ -57,10 +59,43 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
     @Default(true) bool highlightResumePoint,
     @Default(null) EpubTheme? theme,
     @Default(EpubReaderMode.horizontal) EpubReaderMode mode,
+    @Default(false) bool removeParagraphIndent,
+    @Default(EpubTextAlignment.left) EpubTextAlignment textAlignment,
   }) = _EpubReaderSettingsState;
 
   factory EpubReaderSettingsState.fromJson(Map<String, Object?> json) =>
       _$EpubReaderSettingsStateFromJson(json);
+}
+
+extension on EpubReaderSettingsState {
+  EpubReaderSettingsState clampLimits() {
+    return copyWith(
+      marginSize: marginSize.clamp(
+        EpubReaderSettingsLimits.marginSizeMin,
+        EpubReaderSettingsLimits.marginSizeMax,
+      ),
+      fontSize: fontSize.clamp(
+        EpubReaderSettingsLimits.fontSizeMin,
+        EpubReaderSettingsLimits.fontSizeMax,
+      ),
+      paragraphSpacing: paragraphSpacing.clamp(
+        EpubReaderSettingsLimits.paragraphSpacingMin,
+        EpubReaderSettingsLimits.paragraphSpacingMax,
+      ),
+      lineHeight: lineHeight.clamp(
+        EpubReaderSettingsLimits.lineHeightMin,
+        EpubReaderSettingsLimits.lineHeightMax,
+      ),
+      wordSpacing: wordSpacing.clamp(
+        EpubReaderSettingsLimits.wordSpacingMin,
+        EpubReaderSettingsLimits.wordSpacingMax,
+      ),
+      letterSpacing: letterSpacing.clamp(
+        EpubReaderSettingsLimits.letterSpacingMin,
+        EpubReaderSettingsLimits.letterSpacingMax,
+      ),
+    );
+  }
 }
 
 @riverpod
@@ -72,7 +107,7 @@ class DefaultEpubReaderSettings extends _$DefaultEpubReaderSettings {
       ref.watch(storageProvider.future),
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
     ).future;
-    return state.value ?? const EpubReaderSettingsState();
+    return state.value?.clampLimits() ?? const EpubReaderSettingsState();
   }
 
   void setDefault(EpubReaderSettingsState newDefault) {
@@ -91,7 +126,7 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     ).future;
 
     final defaults = await ref.watch(defaultEpubReaderSettingsProvider.future);
-    return state.value ?? defaults;
+    return state.value?.clampLimits() ?? defaults;
   }
 
   Future<void> setFontSize(double newSize) async {
@@ -228,6 +263,26 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     log.info(
       'set mode',
       attributes: {'value': mode, 'reader': 'epub'},
+    );
+  }
+
+  Future<void> setTextAlignment(EpubTextAlignment alignment) async {
+    final current = await future;
+
+    state = AsyncData(current.copyWith(textAlignment: alignment));
+    log.info(
+      'set text alignment',
+      attributes: {'value': alignment, 'reader': 'epub'},
+    );
+  }
+
+  Future<void> setRemoveParagraphIndent(bool value) async {
+    final current = await future;
+
+    state = AsyncData(current.copyWith(removeParagraphIndent: value));
+    log.info(
+      'set remove indent paragraphs',
+      attributes: {'value': value, 'reader': 'epub'},
     );
   }
 
