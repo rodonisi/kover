@@ -49,7 +49,7 @@ Future<MetadataViewModel?> metadata(
     volume: (volumeId) async {
       final volume = await ref.watch(volumeProvider(volumeId: volumeId).future);
 
-      if (volume.chapters.isNotEmpty) {
+      if (volume.chapters.isEmpty) {
         return null;
       }
 
