@@ -270,7 +270,7 @@ class _Page extends HookConsumerWidget {
             final visibleReady = data.navigation.ready;
             final shouldStart = isVisiblePage || visibleReady;
 
-            if (shouldStart && data.reflow.status != .done) {
+            if (shouldStart && data.reflow.status == .initial) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!context.mounted) return;
                 ref
