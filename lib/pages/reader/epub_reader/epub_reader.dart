@@ -243,6 +243,7 @@ class _Page extends HookConsumerWidget {
       () => CachedImageFactory(maxHeight: mediaQueryData.size.height),
       [],
     );
+    final lastViewport = useRef<(Size, double)?>(null);
     final vertical = mode == .vertical;
     final spreads = mode == .spreads;
 
@@ -269,20 +270,23 @@ class _Page extends HookConsumerWidget {
             final isVisiblePage = data.navigation.page == page;
             final visibleReady = data.navigation.ready;
             final shouldStart = isVisiblePage || visibleReady;
+            final viewport = spreads
+                ? Size(
+                    constraints.maxWidth / 2,
+                    constraints.maxHeight,
+                  )
+                : constraints.biggest;
+            final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
 
             if (shouldStart && data.reflow.status == .initial) {
+              lastViewport.value = (viewport, devicePixelRatio);
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!context.mounted) return;
                 ref
                     .read(provider.notifier)
                     .startReflow(
-                      viewport: spreads
-                          ? Size(
-                              constraints.maxWidth / 2,
-                              constraints.maxHeight,
-                            )
-                          : constraints.biggest,
-                      devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+                      viewport: viewport,
+                      devicePixelRatio: devicePixelRatio,
                       measureBuilder: (html, styles) => EpubMeasureRoot(
                         container: container,
                         mediaQueryData: mediaQueryData,
@@ -297,6 +301,13 @@ class _Page extends HookConsumerWidget {
                       ),
                       refreshRate: View.of(context).display.refreshRate,
                     );
+              });
+            } else if (data.reflow.status != .initial &&
+                lastViewport.value != (viewport, devicePixelRatio)) {
+              lastViewport.value = (viewport, devicePixelRatio);
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!context.mounted) return;
+                ref.invalidate(provider, asReload: true);
               });
             }
 
