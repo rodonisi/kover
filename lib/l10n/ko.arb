@@ -753,5 +753,101 @@
     "syncingOnDeck": "계속 읽기 동기화 중",
     "@syncingOnDeck": {
         "description": "Label for the syncing on deck phase"
+    },
+    "coverArtists": "표지 아티스트",
+    "@coverArtists": {
+        "description": "Label for the cover artists metadata in the series details page"
+    },
+    "publishers": "출판사",
+    "@publishers": {
+        "description": "Label for the publishers metadata in the series details page"
+    },
+    "characters": "캐릭터",
+    "@characters": {
+        "description": "Label for the characters metadata in the series details page"
+    },
+    "pencillers": "밑그림",
+    "@pencillers": {
+        "description": "Label for the pencillers metadata in the series details page"
+    },
+    "inkers": "선화",
+    "@inkers": {
+        "description": "Label for the inkers metadata in the series details page"
+    },
+    "imprints": "임프린트",
+    "@imprints": {
+        "description": "Label for the imprints metadata in the series details page"
+    },
+    "colorists": "채색",
+    "@colorists": {
+        "description": "Label for the colorists metadata in the series details page"
+    },
+    "letterers": "식자",
+    "@letterers": {
+        "description": "Label for the letterers metadata in the series details page"
+    },
+    "editors": "편집",
+    "@editors": {
+        "description": "Label for the editors metadata in the series details page"
+    },
+    "translators": "번역",
+    "@translators": {
+        "description": "Label for the translators metadata in the series details page"
+    },
+    "teams": "팀",
+    "@teams": {
+        "description": "Label for the teams metadata in the series details page"
+    },
+    "locations": "위치",
+    "@locations": {
+        "description": "Label for the locations metadata in the series details page"
+    },
+    "startReading": "읽기 시작",
+    "@startReading": {
+        "description": "Label for the start reading button"
+    },
+    "invalidCertificate": "유효하지 않은 인증서",
+    "@invalidCertificate": {
+        "description": "User display error shown when the server certificate cannot be validated"
+    },
+    "invalidCertificateDescription": "서버 HTTPS 인증서가 인증되지 않았습니다. 인증서를 확인하거나 (이 서버를 신뢰하는 경우) 설정에서 \"인증서 검증 무시\"를 활성화하십시오.",
+    "@invalidCertificateDescription": {
+        "description": "Instructions shown when the server certificate cannot be validated"
+    },
+    "ignoreCertificateValidation": "인증서 검증 무시",
+    "@ignoreCertificateValidation": {
+        "description": "Setting that allows a trusted server with an invalid HTTPS certificate"
+    },
+    "ignoreCertificateValidationDescription": "서버 HTTPS 인증서가 인증되지 않은 경우에도 연결을 허용합니다. 신뢰하는 서버일 경우에만 사용하십시오.",
+    "@ignoreCertificateValidationDescription": {
+        "description": "Security warning for ignoring HTTPS certificate validation"
+    },
+    "ongoing": "연재 중",
+    "@ongoing": {
+        "description": "Label for the 'ongoing' publication status"
+    },
+    "completed": "완결",
+    "@completed": {
+        "description": "Label for the 'completed' publication status"
+    },
+    "hiatus": "휴재",
+    "@hiatus": {
+        "description": "Label for the 'hiatus' publication status"
+    },
+    "cancelled": "연재 중단",
+    "@cancelled": {
+        "description": "Label for the 'cancelled' publication status"
+    },
+    "ended": "종료",
+    "@ended": {
+        "description": "Label for the 'ended' publication status"
+    },
+    "unknown": "불명",
+    "@unknown": {
+        "description": "Label for the 'unknown' publication status"
+    },
+    "tags": "태그",
+    "@tags": {
+        "description": "Label for the tags section in the series details page"
     }
 }
