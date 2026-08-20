@@ -65,6 +65,7 @@ class EpubReflow extends _$EpubReflow {
     required int page,
   }) async {
     ref.onDispose(() {
+      _debounceReflow?.cancel();
       _pipeline.dispose();
     });
 
@@ -164,7 +165,7 @@ class EpubReflow extends _$EpubReflow {
     required EpubMeasureWidgetBuilder measureBuilder,
     required double refreshRate,
   }) async {
-    if (viewport.isEmpty) return;
+    if (!ref.mounted || viewport.isEmpty) return;
 
     _measureBuilder = measureBuilder;
     final refreshRateClamped = refreshRate > 0 ? refreshRate : 30;

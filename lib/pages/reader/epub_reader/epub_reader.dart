@@ -269,7 +269,10 @@ class _Page extends HookConsumerWidget {
           builder: (context, constraints) {
             final isVisiblePage = data.navigation.page == page;
             final visibleReady = data.navigation.ready;
-            final shouldStart = isVisiblePage || visibleReady;
+            final isAdjacentPage = (data.navigation.page - page).abs() <= 1;
+            final shouldStart =
+                isVisiblePage || (visibleReady && isAdjacentPage);
+
             final viewport = spreads
                 ? Size(
                     constraints.maxWidth / 2,
