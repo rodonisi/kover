@@ -151,6 +151,17 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                             .setLetterSpacing(newValue),
                       ),
                       BooleanOption(
+                        icon: KoverIcons.removeParagraphIndent,
+                        title: l.removeParagraphIndentation,
+                        description: l.removeParagraphIndentationDescription,
+                        value: settings.removeParagraphIndent,
+                        onChanged: (value) async {
+                          await ref
+                              .read(epubSettings.notifier)
+                              .setRemoveParagraphIndent(value);
+                        },
+                      ),
+                      BooleanOption(
                         icon: KoverIcons.justifyText,
                         title: l.justifyText,
                         value: settings.justifyText,

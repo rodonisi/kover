@@ -854,5 +854,13 @@
     "justifyText": "Justify Text",
     "@justifyText": {
       "description": "Label for the justify text setting"
+    },
+    "removeParagraphIndentation": "Remove Paragraph Indentation",
+    "@indentParagraphs": {
+      "description": "Label for the remove paragraph indentation setting"
+    },
+    "removeParagraphIndentationDescription": "If enabled, paragraph indentation is stripped from the text. If disabled, the EPUB's original indentation is preserved.",
+    "@removeParagraphIndentationDescription": {
+      "description": "Description for the remove paragraphs indent setting"
     }
 }

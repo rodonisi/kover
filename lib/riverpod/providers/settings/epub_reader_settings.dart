@@ -57,6 +57,7 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
     @Default(true) bool highlightResumePoint,
     @Default(null) EpubTheme? theme,
     @Default(EpubReaderMode.horizontal) EpubReaderMode mode,
+    @Default(false) bool removeParagraphIndent,
     @Default(false) bool justifyText,
   }) = _EpubReaderSettingsState;
 
@@ -269,6 +270,16 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     state = AsyncData(current.copyWith(justifyText: value));
     log.info(
       'set justify text',
+      attributes: {'value': value, 'reader': 'epub'},
+    );
+  }
+
+  Future<void> setRemoveParagraphIndent(bool value) async {
+    final current = await future;
+
+    state = AsyncData(current.copyWith(removeParagraphIndent: value));
+    log.info(
+      'set remove indent paragraphs',
       attributes: {'value': value, 'reader': 'epub'},
     );
   }

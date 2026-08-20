@@ -85,6 +85,15 @@ class RenderEpubContent extends ConsumerWidget {
                       '${element.attributes['style']}; $justifyText';
                 }
 
+                if (epubSettings.removeParagraphIndent &&
+                    element.attributes.containsKey(
+                      HtmlConstants.textIndentSpanAttribute,
+                    )) {
+                  final textIndent = 'width: 0';
+                  element.attributes['style'] =
+                      '${element.attributes['style']}; $textIndent';
+                }
+
                 return s;
               },
               textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
