@@ -79,8 +79,13 @@ class RenderEpubContent extends ConsumerWidget {
                   element.attributes['style'] =
                       '${element.attributes['style']}; $paragraphMargin';
 
-                  final justifyText =
-                      'text-align: ${epubSettings.justifyText ? 'justify' : 'left'}';
+                  final alignment = switch (epubSettings.textAlignment) {
+                    EpubTextAlignment.left => 'left',
+                    EpubTextAlignment.center => 'center',
+                    EpubTextAlignment.right => 'right',
+                    EpubTextAlignment.justify => 'justify',
+                  };
+                  final justifyText = 'text-align: $alignment';
                   element.attributes['style'] =
                       '${element.attributes['style']}; $justifyText';
                 }

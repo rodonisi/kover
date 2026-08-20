@@ -44,6 +44,8 @@ enum EpubTheme {
 
 enum EpubReaderMode { horizontal, vertical, spreads }
 
+enum EpubTextAlignment { left, right, justify, center }
+
 @freezed
 sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
   const EpubReaderSettingsState._();
@@ -58,7 +60,7 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
     @Default(null) EpubTheme? theme,
     @Default(EpubReaderMode.horizontal) EpubReaderMode mode,
     @Default(false) bool removeParagraphIndent,
-    @Default(false) bool justifyText,
+    @Default(EpubTextAlignment.left) EpubTextAlignment textAlignment,
   }) = _EpubReaderSettingsState;
 
   factory EpubReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -264,13 +266,13 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     );
   }
 
-  Future<void> setJustifyText(bool value) async {
+  Future<void> setTextAlignment(EpubTextAlignment alignment) async {
     final current = await future;
 
-    state = AsyncData(current.copyWith(justifyText: value));
+    state = AsyncData(current.copyWith(textAlignment: alignment));
     log.info(
-      'set justify text',
-      attributes: {'value': value, 'reader': 'epub'},
+      'set text alignment',
+      attributes: {'value': alignment, 'reader': 'epub'},
     );
   }
 

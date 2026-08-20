@@ -851,9 +851,25 @@
     "@tags": {
       "description": "Label for the tags section in the series details page"
     },
-    "justifyText": "Justify Text",
-    "@justifyText": {
-      "description": "Label for the justify text setting"
+    "textAlignment": "Text Alignment",
+    "@textAlignment": {
+      "description": "Label for the text alignment setting"
+    },
+    "left": "Left",
+    "@left": {
+      "description": "Label for the left text alignment option"
+    },
+    "center": "Center",
+    "@center": {
+      "description": "Label for the center text alignment option"
+    },
+    "right": "Right",
+    "@right": {
+      "description": "Label for the right text alignment option"
+    },
+    "justify": "Justify",
+    "@justify": {
+      "description": "Label for the justify text alignment option"
     },
     "removeParagraphIndentation": "Remove Paragraph Indentation",
     "@indentParagraphs": {

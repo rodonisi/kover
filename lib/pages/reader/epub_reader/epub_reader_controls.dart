@@ -161,15 +161,36 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                               .setRemoveParagraphIndent(value);
                         },
                       ),
-                      BooleanOption(
-                        icon: KoverIcons.justifyText,
-                        title: l.justifyText,
-                        value: settings.justifyText,
-                        onChanged: (value) async {
+                      ChoiceOption<EpubTextAlignment>(
+                        title: l.textAlignment,
+                        value: settings.textAlignment,
+                        onChanged: (newValue) async {
                           await ref
                               .read(epubSettings.notifier)
-                              .setJustifyText(value);
+                              .setTextAlignment(newValue);
                         },
+                        options: [
+                          ChoiceOptionEntry(
+                            value: .left,
+                            icon: KoverIcons.textAlignLeft,
+                            label: l.left,
+                          ),
+                          ChoiceOptionEntry(
+                            value: .justify,
+                            icon: KoverIcons.textAlignJustify,
+                            label: l.justify,
+                          ),
+                          ChoiceOptionEntry(
+                            value: .center,
+                            icon: KoverIcons.textAlignCenter,
+                            label: l.center,
+                          ),
+                          ChoiceOptionEntry(
+                            value: .right,
+                            icon: KoverIcons.textAlignRight,
+                            label: l.right,
+                          ),
+                        ],
                       ),
                       if (SafePlatform.isMobile)
                         OrientationOption(seriesId: seriesId),
