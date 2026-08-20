@@ -82,8 +82,8 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                         },
                       ),
                       NumericOption(
+                        icon: KoverIcons.fontSize,
                         title: l.fontSize,
-                        icon: LucideIcons.aLargeSmallDir,
                         value: settings.fontSize,
                         min: EpubReaderSettingsLimits.fontSizeMin,
                         max: EpubReaderSettingsLimits.fontSizeMax,
@@ -94,8 +94,8 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                             .setFontSize(newValue),
                       ),
                       NumericOption(
+                        icon: KoverIcons.margins,
                         title: l.margins,
-                        icon: LucideIcons.panelLeftDashed,
                         value: settings.marginSize,
                         min: EpubReaderSettingsLimits.marginSizeMin,
                         max: EpubReaderSettingsLimits.marginSizeMax,
@@ -106,8 +106,8 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                             .setMarginSize(newValue),
                       ),
                       NumericOption(
-                        title: l.paragraphSpacing,
                         icon: KoverIcons.paragraphSpacing,
+                        title: l.paragraphSpacing,
                         value: settings.paragraphSpacing,
                         decimalPlaces: 1,
                         min: EpubReaderSettingsLimits.paragraphSpacingMin,
@@ -118,8 +118,8 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                             .setParagraphSpacing(newValue),
                       ),
                       NumericOption(
+                        icon: KoverIcons.lineHeight,
                         title: l.lineHeight,
-                        icon: LucideIcons.listChevronsUpDown,
                         value: settings.lineHeight,
                         min: EpubReaderSettingsLimits.lineHeightMin,
                         max: EpubReaderSettingsLimits.lineHeightMax,
@@ -129,6 +129,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                             .setLineHeight(newValue),
                       ),
                       NumericOption(
+                        icon: KoverIcons.wordSpacing,
                         value: settings.wordSpacing,
                         title: l.wordSpacing,
                         min: EpubReaderSettingsLimits.wordSpacingMin,
@@ -137,11 +138,10 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                         onChanged: (newValue) async => await ref
                             .read(epubSettings.notifier)
                             .setWordSpacing(newValue),
-                        icon: LucideIcons.listMinus,
                       ),
                       NumericOption(
+                        icon: KoverIcons.letterSpacing,
                         title: l.letterSpacing,
-                        icon: LucideIcons.wholeWord,
                         value: settings.letterSpacing,
                         min: EpubReaderSettingsLimits.letterSpacingMin,
                         max: EpubReaderSettingsLimits.letterSpacingMax,
@@ -150,10 +150,20 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                             .read(epubSettings.notifier)
                             .setLetterSpacing(newValue),
                       ),
+                      BooleanOption(
+                        icon: KoverIcons.justifyText,
+                        title: l.justifyText,
+                        value: settings.justifyText,
+                        onChanged: (value) async {
+                          await ref
+                              .read(epubSettings.notifier)
+                              .setJustifyText(value);
+                        },
+                      ),
                       if (SafePlatform.isMobile)
                         OrientationOption(seriesId: seriesId),
                       BooleanOption(
-                        icon: LucideIcons.highlighter,
+                        icon: KoverIcons.highlight,
                         title: l.highlightResumeParagraph,
                         value: settings.highlightResumePoint,
                         onChanged: (value) async {

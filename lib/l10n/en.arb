@@ -850,5 +850,9 @@
     "tags": "Tags",
     "@tags": {
       "description": "Label for the tags section in the series details page"
+    },
+    "justifyText": "Justify Text",
+    "@justifyText": {
+      "description": "Label for the justify text setting"
     }
 }
