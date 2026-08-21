@@ -83,9 +83,6 @@ class EpubReflow extends _$EpubReflow {
       });
     });
 
-    // keep alive font manager
-    ref.listen(fontManagerProvider, (_, _) {});
-
     final progressFuture = ref.read(
       bookProgressProvider(chapterId: chapterId).future,
     );
@@ -98,6 +95,7 @@ class EpubReflow extends _$EpubReflow {
         page: page,
       ).future,
     );
+    final fontManager = ref.read(fontManagerProvider.notifier);
 
     final progress = await progressFuture;
     final settings = await settingsFuture;
@@ -108,12 +106,7 @@ class EpubReflow extends _$EpubReflow {
       resumeScrollId = progress.bookScrollId;
     }
 
-    // The provider can be disposed while the futures above are in flight;
-    // never touch ref after that point.
-    if (ref.mounted) {
-      final fontManager = ref.read(fontManagerProvider.notifier);
-      await fontManager.ensureLoaded(pageContent.fonts);
-    }
+    await fontManager.ensureLoaded(pageContent.fonts);
 
     final existingHighlight = pageContent.root.querySelector(
       '.${HtmlConstants.resumeParagraphClass}',

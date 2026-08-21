@@ -9,7 +9,7 @@ part 'font_manager.g.dart';
 /// Loads fonts into the Flutter engine, pulling their bytes from the font
 /// cache or the server on demand, and ensuring each unique font family is
 /// only registered once per session.
-@riverpod
+@Riverpod(keepAlive: true)
 class FontManager extends _$FontManager {
   @override
   Set<String> build() {
