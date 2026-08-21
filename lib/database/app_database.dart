@@ -1,11 +1,15 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:html/parser.dart';
 import 'package:kover/database/app_database.steps.dart';
 import 'package:kover/database/converters/string_list_converter.dart';
 import 'package:kover/database/dao/book_dao.dart';
 import 'package:kover/database/dao/chapters_dao.dart';
 import 'package:kover/database/dao/collections_dao.dart';
 import 'package:kover/database/dao/download_dao.dart';
+import 'package:kover/database/dao/font_dao.dart';
 import 'package:kover/database/dao/libraries_dao.dart';
 import 'package:kover/database/dao/reader_dao.dart';
 import 'package:kover/database/dao/reading_lists_dao.dart';
@@ -19,6 +23,7 @@ import 'package:kover/database/tables/book_info.dart';
 import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/collections.dart';
 import 'package:kover/database/tables/download.dart';
+import 'package:kover/database/tables/fonts.dart';
 import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/on_deck_removal.dart';
 import 'package:kover/database/tables/progress.dart';
@@ -36,6 +41,7 @@ import 'package:kover/models/enums/library_type.dart';
 import 'package:kover/models/enums/person_role.dart';
 import 'package:kover/models/enums/publication_status.dart';
 import 'package:kover/models/enums/sidenav_stream_type.dart';
+import 'package:kover/utils/epub_font_parser.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:path_provider/path_provider.dart';
@@ -75,6 +81,7 @@ part 'app_database.g.dart';
     ReadingListCovers,
     Sidenav,
     OnDeckRemoval,
+    Fonts,
   ],
   daos: [
     StorageDao,
@@ -90,6 +97,7 @@ part 'app_database.g.dart';
     ServerSettingsDao,
     CollectionsDao,
     ReadingListsDao,
+    FontDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -98,7 +106,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   /// Clear all content data from the database. Does not clear app state data (e.g. credentials, settings).
   /// Useful e.g. when switching user.
@@ -123,6 +131,7 @@ class AppDatabase extends _$AppDatabase {
       await delete(onDeckRemoval).go();
       await clearDownloads();
       await clearCovers();
+      await delete(fonts).go();
     });
   }
 
@@ -296,8 +305,118 @@ class AppDatabase extends _$AppDatabase {
             );
           });
         },
+        from9To10: (m, schema) async {
+          await transaction(() async {
+            await m.createTable(schema.fonts);
+            await _migrateLegacyPageFonts();
+          });
+        },
       ),
     );
+  }
+
+  /// Moves the font bytes embedded in pre-migration epub page blobs into the
+  /// fonts table and rewrites the blobs to only carry `FontFace` descriptors.
+  ///
+  /// Legacy blobs embed their bytes as a `{family: [bytes]}` map whose order
+  /// matches the order of the `@font-face` sources declared in the stored
+  /// HTML, so faces and bytes are paired by index within each family.
+  Future<void> _migrateLegacyPageFonts() async {
+    // final rows = await customSelect(
+    //   'SELECT p.chapter_id, p.page, p.data FROM downloaded_pages AS p '
+    //   'INNER JOIN chapters AS c ON c.id = p.chapter_id '
+    //   "WHERE c.format = 'epub'",
+    // ).get();
+    final rows = await (select(downloadedPages).join([
+      innerJoin(
+        chapters,
+        chapters.id.equalsExp(downloadedPages.chapterId),
+      ),
+    ])..where(chapters.format.equals(Format.epub.name))).get();
+
+    for (final row in rows) {
+      final chapterId = row.read(chapters.id);
+      final page = row.read(downloadedPages.page);
+
+      if (chapterId == null || page == null) continue;
+
+      try {
+        final blob = jsonDecode(
+          utf8.decode(row.read(downloadedPages.data) as Uint8List),
+        );
+        if (blob is! Map<String, dynamic>) continue;
+
+        final legacyFonts = blob['fonts'];
+        if (legacyFonts is! Map<String, dynamic> || legacyFonts.isEmpty) {
+          continue;
+        }
+
+        final root = parseFragment(blob['root'] as String? ?? '');
+        final faces = EpubFontParser.parseStyles(
+          root.querySelectorAll('style'),
+        );
+
+        var migrated = false;
+        final consumedPerFamily = <String, int>{};
+        for (final face in faces) {
+          final familyBytes = legacyFonts[face.family];
+          if (familyBytes is! List || familyBytes.isEmpty) continue;
+
+          final index = consumedPerFamily.update(
+            face.family,
+            (count) => count + 1,
+            ifAbsent: () => 0,
+          );
+          if (index >= familyBytes.length) continue;
+
+          final data = Uint8List.fromList(
+            base64Decode(familyBytes[index] as String),
+          );
+          await into(fonts).insert(
+            FontsCompanion.insert(
+              family: face.family,
+              weight: Value(face.weight),
+              url: face.url,
+              data: data,
+            ),
+            onConflict: DoUpdate(
+              (_) => FontsCompanion.insert(
+                family: face.family,
+                weight: Value(face.weight),
+                url: face.url,
+                data: data,
+              ),
+              target: [fonts.url],
+            ),
+          );
+          migrated = true;
+        }
+
+        if (!migrated) continue;
+
+        blob['fonts'] = [for (final face in faces) face.toJson()];
+        await (update(downloadedPages)..where(
+              (tbl) => tbl.chapterId.equals(chapterId) & tbl.page.equals(page),
+            ))
+            .write(
+              DownloadedPagesCompanion(
+                data: Value(utf8.encode(jsonEncode(blob))),
+              ),
+            );
+
+        log.info(
+          'migrated legacy epub page fonts',
+          attributes: {'chapter_id': chapterId, 'page': page},
+        );
+      } catch (e, stacktrace) {
+        log.error(
+          'failed to migrate fonts of downloaded epub page',
+          error: e,
+          stacktrace: stacktrace,
+          attributes: {'chapter_id': chapterId, 'page': page},
+        );
+      }
+    }
   }
 
   static QueryExecutor _openConnection() {
