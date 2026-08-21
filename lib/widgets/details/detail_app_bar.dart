@@ -239,14 +239,16 @@ class CoverAppBarTitle extends StatelessWidget {
 
 class ContinuePointButton extends HookWidget {
   final double? progress;
+  final bool showProgress;
   final String? title;
   final Widget? cover;
   final bool enabled;
   final VoidCallback? onTap;
 
-  const ContinuePointButton({
+  const new({
     super.key,
     this.progress,
+    this.showProgress = true,
     this.title,
     this.cover,
     this.enabled = true,
@@ -327,7 +329,7 @@ class ContinuePointButton extends HookWidget {
                 ),
                 SizedBox.square(
                   dimension: LayoutConstants.largerIcon,
-                  child: progress != null
+                  child: showProgress && progress != null
                       ? Padding(
                           padding: LayoutConstants.smallEdgeInsets,
                           child: CircularProgressIndicator(
