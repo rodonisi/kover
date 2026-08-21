@@ -27,8 +27,7 @@ class FontRepository {
   const FontRepository(this._db, this._client);
 
   /// Returns the bytes of [font], reading them from the cache first and
-  /// fetching them from the server when missing. Never persists anything,
-  /// matching the on-demand behaviour of pages.
+  /// fetching them from the server when missing.
   Future<Uint8List?> getFontData(FontFace font) async {
     final cached = await _db.fontDao.getByUrl(url: font.url);
     if (cached != null) return cached.data;
@@ -39,9 +38,8 @@ class FontRepository {
     return fetched.bytes;
   }
 
-  /// Fetches any missing font in [fonts] and persists every one of them into
-  /// the cache. Only the download flow persists fonts.
-  Future<void> cacheFonts(List<FontFace> fonts) async {
+  /// Fetches any missing font in [fonts] and persists them into the db.
+  Future<void> saveFonts(List<FontFace> fonts) async {
     for (final font in fonts) {
       if (await _db.fontDao.getByUrl(url: font.url) != null) continue;
 

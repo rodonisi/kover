@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/models/font_face.dart';
@@ -43,114 +44,169 @@ void main() {
     group('getFontData', () {
       test(
         'when the font is cached, then returns the cached bytes',
-        () async {
-          await database.fontDao.upsertFont(
-            FontsCompanion.insert(
-              family: face.family,
-              url: face.url,
-              data: Uint8List.fromList([9, 9]),
-            ),
-          );
+        () {
+          fakeAsync((async) {
+            Uint8List? data;
 
-          final data = await repository.getFontData(face);
+            database.fontDao
+                .upsertFont(
+                  FontsCompanion.insert(
+                    family: face.family,
+                    url: face.url,
+                    data: Uint8List.fromList([9, 9]),
+                  ),
+                )
+                .then((_) {});
 
-          expect(data, Uint8List.fromList([9, 9]));
-          verifyNever(client.getFontBytes(any));
+            repository.getFontData(face).then((v) => data = v);
+
+            async.flushMicrotasks();
+
+            expect(data, Uint8List.fromList([9, 9]));
+            verifyNever(client.getFontBytes(any));
+          });
         },
       );
 
       test(
         'when the font is not cached, then fetches and returns its bytes',
-        () async {
-          when(client.getFontBytes(any)).thenAnswer((_) async => fontBytes);
+        () {
+          fakeAsync((async) {
+            Uint8List? data;
+            List<Font> rows = [];
 
-          final data = await repository.getFontData(face);
+            when(client.getFontBytes(any)).thenAnswer((_) async => fontBytes);
 
-          expect(data, fontBytes.bytes);
-          verify(client.getFontBytes(face.url)).called(1);
-          expect(await database.select(database.fonts).get(), isEmpty);
+            repository.getFontData(face).then((v) => data = v);
+            database.select(database.fonts).get().then((v) => rows = v);
+
+            async.flushMicrotasks();
+
+            expect(data, fontBytes.bytes);
+            verify(client.getFontBytes(face.url)).called(1);
+            expect(rows, isEmpty);
+          });
         },
       );
 
       test(
         'when the fetch fails, then returns null',
-        () async {
-          when(client.getFontBytes(any)).thenAnswer((_) async => null);
+        () {
+          fakeAsync((async) {
+            Uint8List? data;
 
-          final data = await repository.getFontData(face);
+            when(client.getFontBytes(any)).thenAnswer((_) async => null);
 
-          expect(data, isNull);
+            repository.getFontData(face).then((v) => data = v);
+
+            async.flushMicrotasks();
+
+            expect(data, isNull);
+          });
         },
       );
     });
 
-    group('cacheFonts', () {
+    group('saveFonts', () {
       test(
-        'when a face is new, then fetches and persists it',
-        () async {
-          when(client.getFontBytes(any)).thenAnswer((_) async => fontBytes);
+        'when a font is new, then fetches and persists it',
+        () {
+          fakeAsync((async) {
+            List<Font> rows = [];
 
-          await repository.cacheFonts([face]);
+            when(client.getFontBytes(any)).thenAnswer((_) async => fontBytes);
 
-          final rows = await database.select(database.fonts).get();
-          expect(rows, hasLength(1));
-          expect(rows.single.family, face.family);
-          expect(rows.single.url, face.url);
-          expect(rows.single.data, fontBytes.bytes);
-          expect(rows.single.mimeType, fontBytes.mimeType);
+            repository.saveFonts([face]).then((_) {
+              database.select(database.fonts).get().then((v) => rows = v);
+            });
+
+            async.flushMicrotasks();
+
+            expect(rows, hasLength(1));
+            expect(rows.single.family, face.family);
+            expect(rows.single.url, face.url);
+            expect(rows.single.data, fontBytes.bytes);
+            expect(rows.single.mimeType, fontBytes.mimeType);
+          });
         },
       );
 
       test(
-        'when a face is already cached, then does not fetch it again',
-        () async {
-          when(client.getFontBytes(any)).thenAnswer((_) async => fontBytes);
-          await repository.cacheFonts([face]);
-          clearInteractions(client);
+        'when a font is already cached, then does not fetch it again',
+        () {
+          fakeAsync((async) {
+            List<Font> rows = [];
 
-          await repository.cacheFonts([face]);
+            when(client.getFontBytes(any)).thenAnswer((_) async => fontBytes);
 
-          verifyNever(client.getFontBytes(any));
-          final rows = await database.select(database.fonts).get();
-          expect(rows, hasLength(1));
+            repository.saveFonts([face]).then((_) {});
+
+            async.flushMicrotasks();
+            clearInteractions(client);
+
+            repository.saveFonts([face]).then((_) {
+              database.select(database.fonts).get().then((v) => rows = v);
+            });
+
+            async.flushMicrotasks();
+
+            verifyNever(client.getFontBytes(any));
+            expect(rows, hasLength(1));
+          });
         },
       );
 
       test(
-        'when a fetch fails, then still caches the remaining faces',
-        () async {
-          const otherFace = FontFace(
-            family: 'OtherFont',
-            url: 'fonts://o/regular.ttf',
-          );
-          when(client.getFontBytes(face.url)).thenAnswer((_) async => null);
-          when(client.getFontBytes(otherFace.url))
-              .thenAnswer((_) async => fontBytes);
+        'when a fetch fails, then still saves the remaining fonts',
+        () {
+          fakeAsync((async) {
+            List<Font> rows = [];
+            const otherFace = FontFace(
+              family: 'OtherFont',
+              url: 'fonts://o/regular.ttf',
+            );
 
-          await repository.cacheFonts([face, otherFace]);
+            when(client.getFontBytes(face.url)).thenAnswer((_) async => null);
+            when(client.getFontBytes(otherFace.url))
+                .thenAnswer((_) async => fontBytes);
 
-          final rows = await database.select(database.fonts).get();
-          expect(rows.map((r) => r.family), ['OtherFont']);
+            repository.saveFonts([face, otherFace]).then((_) {
+              database.select(database.fonts).get().then((v) => rows = v);
+            });
+
+            async.flushMicrotasks();
+
+            expect(rows.map((r) => r.family), ['OtherFont']);
+          });
         },
       );
 
       test(
-        'when two faces share an url, then only one row and one fetch happen',
-        () async {
-          when(client.getFontBytes(any)).thenAnswer((_) async => fontBytes);
+        'when two fonts share an url, then only one row and one fetch happen',
+        () {
+          fakeAsync((async) {
+            List<Font> rows = [];
 
-          await repository.cacheFonts([
-            face,
-            FontFace(
-              family: 'SameFile',
-              weight: 700,
-              url: face.url,
-            ),
-          ]);
+            when(client.getFontBytes(any)).thenAnswer((_) async => fontBytes);
 
-          verify(client.getFontBytes(face.url)).called(1);
-          final rows = await database.select(database.fonts).get();
-          expect(rows, hasLength(1));
+            repository
+                .saveFonts([
+                  face,
+                  FontFace(
+                    family: 'SameFile',
+                    weight: 700,
+                    url: face.url,
+                  ),
+                ])
+                .then((_) {
+                  database.select(database.fonts).get().then((v) => rows = v);
+                });
+
+            async.flushMicrotasks();
+
+            verify(client.getFontBytes(face.url)).called(1);
+            expect(rows, hasLength(1));
+          });
         },
       );
     });

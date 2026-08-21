@@ -20,7 +20,7 @@ Future<void> migrateFrom9To10(
 }
 
 /// Moves the font bytes embedded in pre-migration epub page blobs into the
-/// fonts table and rewrites the blobs to only carry `FontFace` descriptors.
+/// fonts table and rewrites the blobs to only carry [FontFace] models.
 ///
 /// Legacy blobs embed their bytes as a `{family: [bytes]}` map whose order
 /// matches the order of the `@font-face` sources declared in the stored

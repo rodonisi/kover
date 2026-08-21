@@ -131,7 +131,7 @@ class DownloadRepository {
       chapterId: chapterId,
       page: page,
     );
-    await _fontsRepository.cacheFonts(content.fonts);
+    await _fontsRepository.saveFonts(content.fonts);
     return pageContentConverter.toSql(content);
   }
 
