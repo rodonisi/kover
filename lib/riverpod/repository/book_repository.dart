@@ -34,15 +34,18 @@ class BookRepository {
     return _db.bookDao.watchToc(chapterId).map(_buildTree);
   }
 
-  /// Get [page] of [chapterId] as an epub page. Returns the stored page if [chapterId] is
-  /// downloaded, otherwise fetches it from the server.
+  /// Get [page] of [chapterId] as an epub page. Returns the stored page if
+  /// [chapterId] is downloaded, otherwise fetches it from the server. Font
+  /// bytes are not resolved here; the font manager loads them on demand.
   Future<PageContent> getEpubPage({
     required int chapterId,
     required int page,
   }) async {
-    if (await _db.downloadDao
+    final isDownloaded = await _db.downloadDao
         .isChapterDownloaded(chapterId: chapterId)
-        .getSingle()) {
+        .getSingle();
+
+    if (isDownloaded) {
       log.debug(
         'using downloaded page for chapter',
         attributes: {
@@ -53,11 +56,13 @@ class BookRepository {
       final p = await _db.downloadDao
           .getPage(chapterId: chapterId, page: page)
           .getSingle();
-
       return pageContentConverter.fromSql(p.data);
     }
 
-    return await _client.getPageContent(chapterId: chapterId, page: page);
+    return _client.getPageContent(
+      chapterId: chapterId,
+      page: page,
+    );
   }
 
   /// Get [page] of [chapterId] as an image page. Returns the stored page if [chapterId] is

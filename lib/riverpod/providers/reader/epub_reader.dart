@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:html/dom.dart';
 import 'package:kover/models/page_content.dart';
+import 'package:kover/riverpod/managers/font_manager.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
@@ -82,6 +82,10 @@ class EpubReflow extends _$EpubReflow {
         ref.invalidateSelf(asReload: true);
       });
     });
+
+    // keep alive font manager
+    ref.listen(fontManagerProvider, (_, _) {});
+
     final progressFuture = ref.read(
       bookProgressProvider(chapterId: chapterId).future,
     );
@@ -104,14 +108,11 @@ class EpubReflow extends _$EpubReflow {
       resumeScrollId = progress.bookScrollId;
     }
 
-    for (final family in pageContent.fonts.entries) {
-      final loader = FontLoader(family.key);
-      for (final font in family.value) {
-        loader.addFont(
-          Future.value(ByteData.sublistView(font)),
-        );
-      }
-      await loader.load();
+    // The provider can be disposed while the futures above are in flight;
+    // never touch ref after that point.
+    if (ref.mounted) {
+      final fontManager = ref.read(fontManagerProvider.notifier);
+      await fontManager.ensureLoaded(pageContent.fonts);
     }
 
     final existingHighlight = pageContent.root.querySelector(

@@ -6,6 +6,7 @@ import 'package:kover/database/converters/page_content_converter.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
+import 'package:kover/riverpod/repository/font_repository.dart';
 import 'package:kover/sync/book_sync_operations.dart';
 import 'package:kover/sync/chapter_sync_operations.dart';
 import 'package:kover/sync/series_sync_operations.dart';
@@ -20,10 +21,12 @@ part 'download_repository.g.dart';
 DownloadRepository downloadRepository(Ref ref) {
   final db = ref.watch(databaseProvider);
   final client = ref.watch(restClientProvider);
+  final fontsRepository = ref.watch(fontRepositoryProvider);
   final apiKey = ref.watch(apiKeyProvider);
 
   return DownloadRepository(
     db: db,
+    fontsRepository: fontsRepository,
     bookClient: BookSyncOperations(client: client, apiKey: apiKey!),
     chapterClient: ChapterSyncOperations(client: client, apiKey: apiKey),
     volumeClient: VolumeSyncOperations(client: client, apiKey: apiKey),
@@ -33,13 +36,15 @@ DownloadRepository downloadRepository(Ref ref) {
 
 class DownloadRepository {
   final AppDatabase _db;
+  final FontRepository _fontsRepository;
   final BookSyncOperations _bookClient;
   final ChapterSyncOperations _chapterClient;
   final VolumeSyncOperations _volumeClient;
   final SeriesSyncOperations _seriesClient;
 
-  DownloadRepository({
+  const new({
     required this._db,
+    required this._fontsRepository,
     required this._bookClient,
     required this._chapterClient,
     required this._volumeClient,
@@ -93,9 +98,7 @@ class DownloadRepository {
     for (var page = resumePoint; page < totalPages; page++) {
       cancellationToken?.throwIfCancelled();
       final blob = switch (format) {
-        .epub => pageContentConverter.toSql(
-          await _bookClient.getPageContent(chapterId: chapterId, page: page),
-        ),
+        .epub => await _downloadEpubPage(chapterId: chapterId, page: page),
         .archive || .image => await _bookClient.getImagePage(
           chapterId: chapterId,
           page: page,
@@ -115,6 +118,21 @@ class DownloadRepository {
     }
 
     await downloadMissingCovers(chapter);
+  }
+
+  /// Downloads a single epub page, persisting its fonts to the font cache
+  /// and returning the serialized page. Font bytes are stored once in the
+  /// fonts table.
+  Future<Uint8List> _downloadEpubPage({
+    required int chapterId,
+    required int page,
+  }) async {
+    final content = await _bookClient.getPageContent(
+      chapterId: chapterId,
+      page: page,
+    );
+    await _fontsRepository.cacheFonts(content.fonts);
+    return pageContentConverter.toSql(content);
   }
 
   Future<void> downloadMissingCovers(Chapter chapter) async {
