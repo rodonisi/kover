@@ -7,8 +7,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'font_manager.g.dart';
 
 /// Loads fonts into the Flutter engine, pulling their bytes from the font
-/// cache or the server on demand, and ensuring each unique font is only
-/// registered once per session.
+/// cache or the server on demand, and ensuring each unique font family is
+/// only registered once per session.
 @riverpod
 class FontManager extends _$FontManager {
   @override
@@ -16,41 +16,47 @@ class FontManager extends _$FontManager {
     return {};
   }
 
-  /// Registers every font face in [fonts] with the engine. Duplicate faces
-  /// (same family + bytes) are skipped. Unavailable fonts are skipped.
+  /// Registers every font face in [fonts] with the engine.
   Future<void> ensureLoaded(List<FontFace> fonts) async {
     final repository = ref.read(fontRepositoryProvider);
 
+    final grouped = <String, List<Uint8List>>{};
     for (final face in fonts) {
       final data = await repository.getFontData(face);
-      if (data == null) continue;
+      if (data == null || data.isEmpty) continue;
 
-      await _register(face.family, data);
+      grouped.putIfAbsent(face.family, () => []).add(data);
+    }
+
+    if (!ref.mounted) return;
+
+    for (final entry in grouped.entries) {
+      await _register(entry.key, entry.value);
     }
   }
 
-  Future<void> _register(String family, Uint8List bytes) async {
-    if (bytes.isEmpty) return;
-
-    final key = '$family:${Object.hashAll(bytes)}';
+  Future<void> _register(String family, List<Uint8List> datas) async {
+    final key = '$family:${Object.hashAll(datas.map(Object.hashAll))}';
     if (state.contains(key)) return;
 
     try {
       final loader = FontLoader(family);
-      loader.addFont(Future.value(ByteData.sublistView(bytes)));
+      for (final data in datas) {
+        loader.addFont(Future.value(ByteData.sublistView(data)));
+      }
       await loader.load();
     } catch (e) {
       log.warning(
-        'failed to register font, ignoring: $e',
-        attributes: {'family': family, 'size': bytes.length},
+        'failed to register font family, ignoring: $e',
+        attributes: {'family': family, 'count': datas.length},
       );
       return;
     }
     state = {...state, key};
 
     log.debug(
-      'registered font',
-      attributes: {'family': family, 'size': bytes.length},
+      'registered font family',
+      attributes: {'family': family, 'count': datas.length},
     );
   }
 }
