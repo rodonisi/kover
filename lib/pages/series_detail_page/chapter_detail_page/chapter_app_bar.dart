@@ -150,10 +150,15 @@ class _ChapterContinuePointButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final canRead = ref.watch(canReadChapterProvider(chapterId)).value ?? false;
+    final progress = ref
+        .watch(chapterProgressProvider(chapterId: chapterId))
+        .value;
 
     return ContinuePointButton(
       enabled: canRead,
       cover: _ChapterContinueButtonImage(chapterId: chapterId),
+      progress: progress,
+      showProgress: false,
       onTap: () =>
           ReaderRoute(seriesId: seriesId, chapterId: chapterId).push(context),
     );
