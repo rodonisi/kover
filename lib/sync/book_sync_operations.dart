@@ -1,20 +1,22 @@
 import 'dart:convert';
 
-import 'package:csslib/parser.dart' as css;
-import 'package:csslib/visitor.dart';
 import 'package:drift/drift.dart' hide Expression;
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/models/page_content.dart';
+import 'package:kover/utils/epub_font_parser.dart';
 import 'package:kover/utils/logging.dart';
 
 class BookSyncOperations {
   final Openapi _client;
   final String _apiKey;
 
-  const BookSyncOperations({required this._client, required this._apiKey});
+  const BookSyncOperations({
+    required this._client,
+    required this._apiKey,
+  });
 
   /// Get the book chapter to page mapping (aka TOC) for [chapterId].
   Future<Iterable<BookChaptersTableCompanion>> getBookChapters(
@@ -61,22 +63,25 @@ class BookSyncOperations {
     return res.bodyBytes;
   }
 
-  /// Get preprocessed epub page [page] for [chapterId] with all remote content (images, fonts) embedded as base64 data URIs. Also extracts font information from styles and returns it in a structured format.
+  /// Get preprocessed epub page [page] for [chapterId] with all remote images
+  /// embedded as base64 data URIs.
   Future<PageContent> getPageContent({
     required int chapterId,
     required int page,
   }) async {
     final frag = await _getPreprocessedPage(chapterId: chapterId, page: page);
     final styles = <String, Map<String, String>>{};
-    final fonts = <String, List<Uint8List>>{};
-
-    for (final stylesElement in frag.querySelectorAll('style')) {
-      fonts.addAll(await _parseFonts(stylesElement.innerHtml));
-    }
 
     styles['a'] = {'text-decoration': 'none'};
 
+    final fonts = EpubFontParser.parseStyles(frag.querySelectorAll('style'));
+
     return PageContent(root: frag, styles: styles, fonts: fonts);
+  }
+
+  /// Fetches the raw font file at [url].
+  Future<({Uint8List bytes, String mimeType})?> getFontBytes(String url) {
+    return _fetchData(url);
   }
 
   static Iterable<BookChaptersTableCompanion> _flattenChapters(
@@ -217,78 +222,10 @@ class BookSyncOperations {
     return null;
   }
 
-  Future<Map<String, List<Uint8List>>> _parseFonts(String cssString) async {
-    final sheet = css.parse(cssString);
-    final visitor = _FontFaceVisitor();
-    sheet.visit(visitor);
-
-    final res = <String, List<Uint8List>>{};
-    for (final entry in visitor.fontMap.entries) {
-      for (final url in entry.value) {
-        log.debug(
-          'found font',
-          attributes: {'family': entry.key},
-        );
-        final data = await _fetchData(url);
-        if (data == null || data.bytes.isEmpty) continue;
-        res.putIfAbsent(entry.key, () => []).add(data.bytes);
-      }
-    }
-
-    return res;
-  }
-
   String _resolveUrl(String url) {
     if (url.startsWith('//')) {
       return '${_client.client.baseUrl.scheme}:$url';
     }
     return url;
-  }
-}
-
-class _FontFaceVisitor extends Visitor {
-  final Map<String, List<String>> fontMap = {};
-
-  String? _currentFamily;
-  List<String> _currentUrls = [];
-
-  @override
-  void visitFontFaceDirective(FontFaceDirective node) {
-    _currentFamily = null;
-    _currentUrls = [];
-
-    super.visitFontFaceDirective(node);
-
-    if (_currentFamily != null && _currentUrls.isNotEmpty) {
-      fontMap.putIfAbsent(_currentFamily!, () => []).addAll(_currentUrls);
-    }
-  }
-
-  @override
-  void visitDeclaration(Declaration node) {
-    final property = node.property.toLowerCase();
-
-    final expr = node.expression;
-    if (expr == null) return;
-
-    if (property == 'font-family') {
-      final term = expr is Expressions ? expr.expressions.firstOrNull : expr;
-      if (term is LiteralTerm) {
-        final v = term.value;
-        _currentFamily = v is Identifier ? v.name : v as String;
-      }
-    } else if (property == 'src') {
-      _currentUrls = _extractUrls(expr);
-    }
-
-    super.visitDeclaration(node);
-  }
-
-  List<String> _extractUrls(Expression expr) {
-    if (expr is! Expressions) return [];
-    return expr.expressions
-        .whereType<UriTerm>()
-        .map((t) => t.value as String)
-        .toList();
   }
 }

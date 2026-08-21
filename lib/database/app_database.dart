@@ -1,12 +1,13 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
-import 'package:kover/database/app_database.steps.dart';
 import 'package:kover/database/converters/string_list_converter.dart';
 import 'package:kover/database/dao/book_dao.dart';
 import 'package:kover/database/dao/chapters_dao.dart';
 import 'package:kover/database/dao/collections_dao.dart';
 import 'package:kover/database/dao/download_dao.dart';
+import 'package:kover/database/dao/font_dao.dart';
 import 'package:kover/database/dao/libraries_dao.dart';
+import 'package:kover/database/migrations/migration.dart';
 import 'package:kover/database/dao/reader_dao.dart';
 import 'package:kover/database/dao/reading_lists_dao.dart';
 import 'package:kover/database/dao/riverpod_dao.dart';
@@ -19,6 +20,7 @@ import 'package:kover/database/tables/book_info.dart';
 import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/collections.dart';
 import 'package:kover/database/tables/download.dart';
+import 'package:kover/database/tables/fonts.dart';
 import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/on_deck_removal.dart';
 import 'package:kover/database/tables/progress.dart';
@@ -36,7 +38,6 @@ import 'package:kover/models/enums/library_type.dart';
 import 'package:kover/models/enums/person_role.dart';
 import 'package:kover/models/enums/publication_status.dart';
 import 'package:kover/models/enums/sidenav_stream_type.dart';
-import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -75,6 +76,7 @@ part 'app_database.g.dart';
     ReadingListCovers,
     Sidenav,
     OnDeckRemoval,
+    Fonts,
   ],
   daos: [
     StorageDao,
@@ -90,6 +92,7 @@ part 'app_database.g.dart';
     ServerSettingsDao,
     CollectionsDao,
     ReadingListsDao,
+    FontDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -98,7 +101,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   /// Clear all content data from the database. Does not clear app state data (e.g. credentials, settings).
   /// Useful e.g. when switching user.
@@ -123,6 +126,7 @@ class AppDatabase extends _$AppDatabase {
       await delete(onDeckRemoval).go();
       await clearDownloads();
       await clearCovers();
+      await delete(fonts).go();
     });
   }
 
@@ -150,155 +154,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  MigrationStrategy get migration {
-    return MigrationStrategy(
-      onUpgrade: stepByStep(
-        from1To2: (m, schema) async {
-          // Clear legacy credentials entry from database if present.
-          final rows = await (delete(
-            riverpodStorage,
-          )..where((tbl) => tbl.key.equals(Credentials.persistKey))).go();
-
-          if (rows > 0) {
-            await vacuum();
-          }
-
-          await transaction(() async {
-            await m.createTable(schema.serverSettings);
-          });
-        },
-        from2To3: (m, schema) async {
-          await transaction(() async {
-            await m.createTable(schema.collections);
-            await m.createTable(schema.collectionSeries);
-            await m.createTable(schema.collectionCovers);
-          });
-        },
-        from3To4: (m, schema) async {
-          await transaction(() async {
-            await m.alterTable(
-              TableMigration(
-                schema.libraries,
-                newColumns: [
-                  schema.libraries.includeInDashboard,
-                  schema.libraries.includeInRecommended,
-                  schema.libraries.includeInSearch,
-                  schema.libraries.defaultLanguage,
-                  schema.libraries.lastScanned,
-                ],
-              ),
-            );
-          });
-        },
-        from4To5: (m, schema) async {
-          await transaction(() async {
-            await m.createTable(schema.readingLists);
-            await m.createTable(schema.readingListsChapters);
-            await m.createTable(schema.readingListCovers);
-          });
-        },
-        from5To6: (m, schema) async {
-          await transaction(() async {
-            await m.createTable(schema.sidenav);
-          });
-        },
-        from6To7: (m, schema) async {
-          await transaction(() async {
-            await m.alterTable(
-              TableMigration(
-                schema.chapters,
-                newColumns: [
-                  schema.chapters.remoteLastRead,
-                ],
-              ),
-            );
-            await m.alterTable(
-              TableMigration(
-                schema.series,
-                newColumns: [
-                  schema.series.remoteLastRead,
-                ],
-              ),
-            );
-          });
-        },
-        from7To8: (m, schema) async {
-          await transaction(() async {
-            await m.createTable(schema.onDeckRemoval);
-          });
-        },
-        from8To9: (m, schema) async {
-          await transaction(() async {
-            await m.alterTable(
-              TableMigration(
-                schema.seriesMetadata,
-                newColumns: [
-                  schema.seriesMetadata.maxCount,
-                  schema.seriesMetadata.totalCount,
-                  schema.seriesMetadata.publicationStatus,
-                  schema.seriesMetadata.webLinks,
-                ],
-                columnTransformer: {
-                  schema.seriesMetadata.maxCount: const Constant(0),
-                  schema.seriesMetadata.totalCount: const Constant(0),
-                  schema.seriesMetadata.publicationStatus: Constant(
-                    PublicationStatus.unknown.name,
-                  ),
-                  schema.chapters.ageRating: coalesce([
-                    schema.chapters.ageRating,
-                    const Constant(0),
-                  ]),
-                  schema.seriesMetadata.lastUpdated: const Constant(0),
-                },
-              ),
-            );
-            await m.alterTable(
-              TableMigration(
-                schema.people,
-                newColumns: [
-                  schema.people.primaryColor,
-                  schema.people.secondaryColor,
-                  schema.people.description,
-                  schema.people.aliases,
-                ],
-              ),
-            );
-            await m.createTable(schema.chapterPeopleRoles);
-            await m.createTable(schema.chapterGenres);
-            await m.createTable(schema.chapterTags);
-            await m.alterTable(
-              TableMigration(
-                schema.chapters,
-                newColumns: [
-                  schema.chapters.publicationStatus,
-                  schema.chapters.webLinks,
-                ],
-                columnTransformer: {
-                  schema.chapters.publicationStatus: Constant(
-                    PublicationStatus.unknown.name,
-                  ),
-                  schema.chapters.ageRating: coalesce([
-                    schema.chapters.ageRating,
-                    const Constant(0),
-                  ]),
-                },
-              ),
-            );
-            await m.drop(schema.seriesPeopleRoles);
-            await m.createTable(schema.seriesPeopleRoles);
-            await m.alterTable(
-              TableMigration(
-                schema.series,
-                columnTransformer: {
-                  schema.series.lastSynced: const Constant(null),
-                },
-              ),
-            );
-          });
-        },
-      ),
-    );
-  }
+  MigrationStrategy get migration => appDatabaseMigration(this);
 
   static QueryExecutor _openConnection() {
     return driftDatabase(
