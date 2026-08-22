@@ -41,7 +41,11 @@ final class StorageRepository extends Storage<String, String> {
       return null;
     }
 
-    return PersistedData(entry.data);
+    return PersistedData(
+      entry.data,
+      destroyKey: entry.destroyKey,
+      expireAt: entry.expireAt,
+    );
   }
 
   @override
