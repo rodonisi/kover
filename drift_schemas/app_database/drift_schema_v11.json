@@ -3060,8 +3060,8 @@
             "default_client_dart": null,
             "dsl_features": [],
             "type_converter": {
-              "dart_expr": "const EnumNameConverter<DashboardStreamType>(DashboardStreamType.values)",
-              "dart_type_name": "DashboardStreamType"
+              "dart_expr": "const EnumNameConverter<DashboardSectionType>(DashboardSectionType.values)",
+              "dart_type_name": "DashboardSectionType"
             }
           },
           {
