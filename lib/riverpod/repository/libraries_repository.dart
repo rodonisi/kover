@@ -1,4 +1,5 @@
 import 'package:kover/database/app_database.dart';
+import 'package:kover/models/dashboard_section_model.dart';
 import 'package:kover/models/library_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/repository/database.dart';
@@ -51,5 +52,19 @@ class LibrariesRepository {
   Future<void> refreshSidenav() async {
     final sidenav = await _client.getSidenav();
     await _db.librariesDao.upsertSidenav(sidenav);
+  }
+
+  /// Refresh the dashboard ordering
+  Future<void> refreshDashboard() async {
+    final dashboard = await _client.getDashboard();
+    await _db.librariesDao.upsertDashboard(dashboard);
+  }
+
+  /// Watch all visible dashboard entries ordered by position.
+  Stream<List<DashboardSectionModel>> watchDashboard() {
+    return _db.librariesDao.watchDashboard().map(
+      (entries) =>
+          entries.map(DashboardSectionModel.fromDatabaseModel).toList(),
+    );
   }
 }

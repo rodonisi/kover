@@ -12,5 +12,6 @@ Future<void> migrateFrom10To11(
     await m.createTable(schema.smartFilterSeries);
     await m.createTable(schema.smartFilterReadingList);
     await m.createTable(schema.smartFilterPerson);
+    await m.createTable(schema.dashboard);
   });
 }

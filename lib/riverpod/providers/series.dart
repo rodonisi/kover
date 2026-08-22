@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/models/series_model.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
@@ -107,17 +108,17 @@ Stream<SeriesMetadataModel> seriesMetadata(
 @riverpod
 Stream<List<SeriesModel>> onDeck(Ref ref) {
   final repo = ref.watch(seriesRepositoryProvider);
-  return repo.watchOnDeck().distinct();
+  return repo.watchOnDeck().distinct(listEquals);
 }
 
 @riverpod
 Stream<List<SeriesModel>> recentlyUpdated(Ref ref) {
   final repo = ref.watch(seriesRepositoryProvider);
-  return repo.watchRecentlyUpdated().distinct();
+  return repo.watchRecentlyUpdated().distinct(listEquals);
 }
 
 @riverpod
 Stream<List<SeriesModel>> recentlyAdded(Ref ref) {
   final repo = ref.watch(seriesRepositoryProvider);
-  return repo.watchRecentlyAdded().distinct();
+  return repo.watchRecentlyAdded().distinct(listEquals);
 }

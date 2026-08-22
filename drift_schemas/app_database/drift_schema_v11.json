@@ -3000,6 +3000,91 @@
     },
     {
       "id": 30,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "dashboard",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "name",
+            "getter_name": "name",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "order",
+            "getter_name": "order",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "visible",
+            "getter_name": "visible",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"visible\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"visible\" IN (0, 1))"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "stream_type",
+            "getter_name": "streamType",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumNameConverter<DashboardStreamType>(DashboardStreamType.values)",
+              "dart_type_name": "DashboardStreamType"
+            }
+          },
+          {
+            "name": "smart_filter_id",
+            "getter_name": "smartFilterId",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "id"
+        ]
+      }
+    },
+    {
+      "id": 31,
       "references": [
         2
       ],
@@ -3068,7 +3153,7 @@
       }
     },
     {
-      "id": 31,
+      "id": 32,
       "references": [],
       "type": "table",
       "data": {
@@ -3183,7 +3268,7 @@
       }
     },
     {
-      "id": 32,
+      "id": 33,
       "references": [],
       "type": "table",
       "data": {
@@ -3264,9 +3349,9 @@
       }
     },
     {
-      "id": 33,
+      "id": 34,
       "references": [
-        32,
+        33,
         2
       ],
       "type": "table",
@@ -3337,9 +3422,9 @@
       }
     },
     {
-      "id": 34,
+      "id": 35,
       "references": [
-        32,
+        33,
         26
       ],
       "type": "table",
@@ -3410,9 +3495,9 @@
       }
     },
     {
-      "id": 35,
+      "id": 36,
       "references": [
-        32,
+        33,
         5
       ],
       "type": "table",
@@ -3751,6 +3836,15 @@
         {
           "dialect": "sqlite",
           "sql": "CREATE TABLE IF NOT EXISTS \"sidenav\" (\"id\" INTEGER NOT NULL, \"name\" TEXT NULL, \"order\" INTEGER NOT NULL, \"visible\" INTEGER NOT NULL CHECK (\"visible\" IN (0, 1)), \"stream_type\" TEXT NOT NULL, \"library_id\" INTEGER NULL, PRIMARY KEY (\"id\"));"
+        }
+      ]
+    },
+    {
+      "name": "dashboard",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"dashboard\" (\"id\" INTEGER NOT NULL, \"name\" TEXT NULL, \"order\" INTEGER NOT NULL, \"visible\" INTEGER NOT NULL CHECK (\"visible\" IN (0, 1)), \"stream_type\" TEXT NOT NULL, \"smart_filter_id\" INTEGER NULL, PRIMARY KEY (\"id\"));"
         }
       ]
     },

@@ -11,6 +11,7 @@ import 'package:kover/riverpod/repository/reader_repository.dart';
 import 'package:kover/riverpod/repository/reading_lists_repository.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
 import 'package:kover/riverpod/repository/server_settings_repository.dart';
+import 'package:kover/riverpod/repository/smart_filters_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
 import 'package:kover/riverpod/repository/want_to_read_repository.dart';
 import 'package:kover/sync/sync_engine.dart';
@@ -36,7 +37,9 @@ sealed class SyncPhase with _$SyncPhase {
   const factory SyncPhase.covers() = Covers;
   const factory SyncPhase.collections() = Collections;
   const factory SyncPhase.readingLists() = ReadingLists;
+  const factory SyncPhase.smartFilters() = SmartFilters;
   const factory SyncPhase.sidenav() = Sidenav;
+  const factory SyncPhase.dashboard() = Dashboard;
   const factory SyncPhase.refreshServerSettings() = RefreshServerSettings;
   const factory SyncPhase.refreshMetadata({required int seriesId}) =
       RefreshMetadata;
@@ -83,6 +86,7 @@ class SyncManager extends _$SyncManager {
     final serverSettingsRepo = ref.read(serverSettingsRepositoryProvider);
     final collectionsRepo = ref.read(collectionsRepositoryProvider);
     final readingListsRepo = ref.read(readingListsRepositoryProvider);
+    final smartFiltersRepo = ref.read(smartFiltersRepositoryProvider);
 
     return SyncEngine(
       seriesRepo: seriesRepo,
@@ -95,6 +99,7 @@ class SyncManager extends _$SyncManager {
       serverSettingsRepo: serverSettingsRepo,
       collectionsRepo: collectionsRepo,
       readingListsRepo: readingListsRepo,
+      smartFiltersRepo: smartFiltersRepo,
     );
   }
 
@@ -121,8 +126,12 @@ class SyncManager extends _$SyncManager {
         () async => await _engine.syncCollections(),
     readingLists: () =>
         () async => await _engine.syncReadingLists(),
+    smartFilters: () =>
+        () async => await _engine.syncSmartFilters(),
     sidenav: () =>
         () async => await _engine.syncSidenav(),
+    dashboard: () =>
+        () async => await _engine.syncDashboard(),
     refreshServerSettings: () =>
         () async => await _engine.refreshServerSettings(),
     refreshMetadata: (seriesId) =>
@@ -150,18 +159,22 @@ class SyncManager extends _$SyncManager {
     final settings = await ref.read(downloadSettingsProvider.future);
 
     _enqueuePhases({const .allSeries()});
-    _enqueuePhases({const .progress()});
     _enqueuePhases({
+      const .progress(),
       const .libraries(),
-      const .onDeck(),
       const .recentlyUpdated(),
       const .recentlyAdded(),
-      const .collections(),
       const .readingLists(),
+      const .sidenav(),
+      const .dashboard(),
+      const .smartFilters(),
+    });
+    _enqueuePhases({
+      const .onDeck(),
+      const .collections(),
       const .metadata(),
       const .tocs(),
       const .refreshServerSettings(),
-      const .sidenav(),
       if (settings.downloadCovers) const .covers(),
     });
   }

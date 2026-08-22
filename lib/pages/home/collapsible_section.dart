@@ -2,18 +2,25 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
-import 'package:kover/models/series_model.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/widgets/lists/series_sliver_grid.dart';
 
-class CollapsibleSection extends HookConsumerWidget {
+typedef SectionGridBuilder<T> =
+    Widget Function(
+      List<T> items,
+      int? rowCount,
+      void Function(int crossAxisCount) onCrossAxisCountChanged,
+    );
+
+class CollapsibleSection<T> extends HookConsumerWidget {
   final String title;
-  final List<SeriesModel> series;
+  final List<T> items;
+  final SectionGridBuilder<T> gridBuilder;
 
   const CollapsibleSection({
     super.key,
     required this.title,
-    required this.series,
+    required this.items,
+    required this.gridBuilder,
   });
 
   @override
@@ -22,10 +29,10 @@ class CollapsibleSection extends HookConsumerWidget {
     final showAll = useState(false);
     final showCollapseButton = useState(true);
 
-    final total = series.length;
+    final total = items.length;
     final toShow = showAll.value ? total : 1;
 
-    if (series.isEmpty) {
+    if (items.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
@@ -58,15 +65,11 @@ class CollapsibleSection extends HookConsumerWidget {
           padding: const EdgeInsetsGeometry.symmetric(
             horizontal: LayoutConstants.smallPadding,
           ),
-          sliver: SeriesSliverGrid(
-            series: series,
-            rowCount: toShow,
-            onCrossAxisCountChanged: (rowLength) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                showCollapseButton.value = total > rowLength;
-              });
-            },
-          ),
+          sliver: gridBuilder(items, toShow, (rowLength) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              showCollapseButton.value = total > rowLength;
+            });
+          }),
         ),
       ],
     );

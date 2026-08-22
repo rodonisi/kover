@@ -20,6 +20,7 @@ import 'package:kover/database/migrations/migration.dart';
 import 'package:kover/database/tables/book_info.dart';
 import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/collections.dart';
+import 'package:kover/database/tables/dashboard.dart';
 import 'package:kover/database/tables/download.dart';
 import 'package:kover/database/tables/fonts.dart';
 import 'package:kover/database/tables/libraries.dart';
@@ -35,6 +36,7 @@ import 'package:kover/database/tables/smart_filters.dart';
 import 'package:kover/database/tables/volumes.dart';
 import 'package:kover/database/tables/want_to_read.dart';
 import 'package:kover/models/enums/age_rating.dart';
+import 'package:kover/models/enums/dashboard_stream_type.dart';
 import 'package:kover/models/enums/filter_type.dart';
 import 'package:kover/models/enums/format.dart';
 import 'package:kover/models/enums/library_type.dart';
@@ -78,6 +80,7 @@ part 'app_database.g.dart';
     ReadingListsChapters,
     ReadingListCovers,
     Sidenav,
+    Dashboard,
     OnDeckRemoval,
     Fonts,
     SmartFilters,

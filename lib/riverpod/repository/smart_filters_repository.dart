@@ -1,4 +1,7 @@
 import 'package:kover/database/app_database.dart';
+import 'package:kover/models/reading_list_model.dart';
+import 'package:kover/models/series_model.dart';
+import 'package:kover/models/smart_filter_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/smart_filters_sync_operations.dart';
@@ -22,6 +25,32 @@ class const SmartFiltersRepository({
   required final AppDatabase _db,
   required final SmartFiltersSyncOperations _client,
 }) {
+  Stream<SmartFilterModel> watchSmartFilter(int id) {
+    return _db.smartFiltersDao
+        .watchSmartFilter(id)
+        .map(SmartFilterModel.fromDatabaseModel)
+        .distinct();
+  }
+
+  /// Watch the series linked to [smartFilterId].
+  Stream<List<SeriesModel>> watchSeries(int smartFilterId) {
+    return _db.smartFiltersDao
+        .watchSeriesForSmartFilter(smartFilterId)
+        .map(
+          (series) => series.map(SeriesModel.fromDatabaseModel).toList(),
+        );
+  }
+
+  /// Watch the reading lists linked to [smartFilterId].
+  Stream<List<ReadingListModel>> watchReadingLists(int smartFilterId) {
+    return _db.smartFiltersDao
+        .watchReadingListsForSmartFilter(smartFilterId)
+        .map(
+          (readingLists) =>
+              readingLists.map(ReadingListModel.fromDatabaseModel).toList(),
+        );
+  }
+
   /// Syncs all smart filters and their linked entities from the server.
   /// Smart filters and links not present on the server anymore are removed.
   Future<void> syncSmartFilters() async {

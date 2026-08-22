@@ -10393,6 +10393,347 @@ class SidenavCompanion extends UpdateCompanion<SidenavData> {
   }
 }
 
+class Dashboard extends Table with TableInfo<Dashboard, DashboardData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Dashboard(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
+  );
+  late final GeneratedColumn<int> order = GeneratedColumn<int>(
+    'order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<int> visible = GeneratedColumn<int>(
+    'visible',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL CHECK (visible IN (0, 1))',
+  );
+  late final GeneratedColumn<String> streamType = GeneratedColumn<String>(
+    'stream_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<int> smartFilterId = GeneratedColumn<int>(
+    'smart_filter_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    order,
+    visible,
+    streamType,
+    smartFilterId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dashboard';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DashboardData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DashboardData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      ),
+      order: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order'],
+      )!,
+      visible: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}visible'],
+      )!,
+      streamType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stream_type'],
+      )!,
+      smartFilterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}smart_filter_id'],
+      ),
+    );
+  }
+
+  @override
+  Dashboard createAlias(String alias) {
+    return Dashboard(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class DashboardData extends DataClass implements Insertable<DashboardData> {
+  final int id;
+  final String? name;
+  final int order;
+  final int visible;
+  final String streamType;
+  final int? smartFilterId;
+  const DashboardData({
+    required this.id,
+    this.name,
+    required this.order,
+    required this.visible,
+    required this.streamType,
+    this.smartFilterId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    map['order'] = Variable<int>(order);
+    map['visible'] = Variable<int>(visible);
+    map['stream_type'] = Variable<String>(streamType);
+    if (!nullToAbsent || smartFilterId != null) {
+      map['smart_filter_id'] = Variable<int>(smartFilterId);
+    }
+    return map;
+  }
+
+  DashboardCompanion toCompanion(bool nullToAbsent) {
+    return DashboardCompanion(
+      id: Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      order: Value(order),
+      visible: Value(visible),
+      streamType: Value(streamType),
+      smartFilterId: smartFilterId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(smartFilterId),
+    );
+  }
+
+  factory DashboardData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DashboardData(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String?>(json['name']),
+      order: serializer.fromJson<int>(json['order']),
+      visible: serializer.fromJson<int>(json['visible']),
+      streamType: serializer.fromJson<String>(json['streamType']),
+      smartFilterId: serializer.fromJson<int?>(json['smartFilterId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String?>(name),
+      'order': serializer.toJson<int>(order),
+      'visible': serializer.toJson<int>(visible),
+      'streamType': serializer.toJson<String>(streamType),
+      'smartFilterId': serializer.toJson<int?>(smartFilterId),
+    };
+  }
+
+  DashboardData copyWith({
+    int? id,
+    Value<String?> name = const Value.absent(),
+    int? order,
+    int? visible,
+    String? streamType,
+    Value<int?> smartFilterId = const Value.absent(),
+  }) => DashboardData(
+    id: id ?? this.id,
+    name: name.present ? name.value : this.name,
+    order: order ?? this.order,
+    visible: visible ?? this.visible,
+    streamType: streamType ?? this.streamType,
+    smartFilterId: smartFilterId.present
+        ? smartFilterId.value
+        : this.smartFilterId,
+  );
+  DashboardData copyWithCompanion(DashboardCompanion data) {
+    return DashboardData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      order: data.order.present ? data.order.value : this.order,
+      visible: data.visible.present ? data.visible.value : this.visible,
+      streamType: data.streamType.present
+          ? data.streamType.value
+          : this.streamType,
+      smartFilterId: data.smartFilterId.present
+          ? data.smartFilterId.value
+          : this.smartFilterId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DashboardData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('order: $order, ')
+          ..write('visible: $visible, ')
+          ..write('streamType: $streamType, ')
+          ..write('smartFilterId: $smartFilterId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, order, visible, streamType, smartFilterId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DashboardData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.order == this.order &&
+          other.visible == this.visible &&
+          other.streamType == this.streamType &&
+          other.smartFilterId == this.smartFilterId);
+}
+
+class DashboardCompanion extends UpdateCompanion<DashboardData> {
+  final Value<int> id;
+  final Value<String?> name;
+  final Value<int> order;
+  final Value<int> visible;
+  final Value<String> streamType;
+  final Value<int?> smartFilterId;
+  const DashboardCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.order = const Value.absent(),
+    this.visible = const Value.absent(),
+    this.streamType = const Value.absent(),
+    this.smartFilterId = const Value.absent(),
+  });
+  DashboardCompanion.insert({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    required int order,
+    required int visible,
+    required String streamType,
+    this.smartFilterId = const Value.absent(),
+  }) : order = Value(order),
+       visible = Value(visible),
+       streamType = Value(streamType);
+  static Insertable<DashboardData> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<int>? order,
+    Expression<int>? visible,
+    Expression<String>? streamType,
+    Expression<int>? smartFilterId,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (order != null) 'order': order,
+      if (visible != null) 'visible': visible,
+      if (streamType != null) 'stream_type': streamType,
+      if (smartFilterId != null) 'smart_filter_id': smartFilterId,
+    });
+  }
+
+  DashboardCompanion copyWith({
+    Value<int>? id,
+    Value<String?>? name,
+    Value<int>? order,
+    Value<int>? visible,
+    Value<String>? streamType,
+    Value<int?>? smartFilterId,
+  }) {
+    return DashboardCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      order: order ?? this.order,
+      visible: visible ?? this.visible,
+      streamType: streamType ?? this.streamType,
+      smartFilterId: smartFilterId ?? this.smartFilterId,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (order.present) {
+      map['order'] = Variable<int>(order.value);
+    }
+    if (visible.present) {
+      map['visible'] = Variable<int>(visible.value);
+    }
+    if (streamType.present) {
+      map['stream_type'] = Variable<String>(streamType.value);
+    }
+    if (smartFilterId.present) {
+      map['smart_filter_id'] = Variable<int>(smartFilterId.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DashboardCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('order: $order, ')
+          ..write('visible: $visible, ')
+          ..write('streamType: $streamType, ')
+          ..write('smartFilterId: $smartFilterId')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class OnDeckRemoval extends Table
     with TableInfo<OnDeckRemoval, OnDeckRemovalData> {
   @override
@@ -12067,6 +12408,7 @@ class DatabaseAtV11 extends GeneratedDatabase {
   );
   late final ReadingListCovers readingListCovers = ReadingListCovers(this);
   late final Sidenav sidenav = Sidenav(this);
+  late final Dashboard dashboard = Dashboard(this);
   late final OnDeckRemoval onDeckRemoval = OnDeckRemoval(this);
   late final Fonts fonts = Fonts(this);
   late final SmartFilters smartFilters = SmartFilters(this);
@@ -12109,6 +12451,7 @@ class DatabaseAtV11 extends GeneratedDatabase {
     readingListsChapters,
     readingListCovers,
     sidenav,
+    dashboard,
     onDeckRemoval,
     fonts,
     smartFilters,

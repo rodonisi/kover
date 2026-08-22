@@ -6,6 +6,7 @@ import 'package:kover/riverpod/repository/reader_repository.dart';
 import 'package:kover/riverpod/repository/reading_lists_repository.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
 import 'package:kover/riverpod/repository/server_settings_repository.dart';
+import 'package:kover/riverpod/repository/smart_filters_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
 import 'package:kover/riverpod/repository/want_to_read_repository.dart';
 import 'package:pool/pool.dart';
@@ -21,6 +22,7 @@ class SyncEngine {
   final ServerSettingsRepository serverSettingsRepo;
   final CollectionsRepository collectionsRepo;
   final ReadingListsRepository readingListsRepo;
+  final SmartFiltersRepository smartFiltersRepo;
 
   final _pool = Pool(4);
 
@@ -35,6 +37,7 @@ class SyncEngine {
     required this.serverSettingsRepo,
     required this.collectionsRepo,
     required this.readingListsRepo,
+    required this.smartFiltersRepo,
   });
 
   Future<void> syncAllSeries() async {
@@ -92,6 +95,14 @@ class SyncEngine {
 
   Future<void> syncSidenav() async {
     await _pool.withResource(librariesRepo.refreshSidenav);
+  }
+
+  Future<void> syncSmartFilters() async {
+    await _pool.withResource(smartFiltersRepo.syncSmartFilters);
+  }
+
+  Future<void> syncDashboard() async {
+    await _pool.withResource(librariesRepo.refreshDashboard);
   }
 
   Future<void> refreshMetadataAndDetails({required int seriesId}) async {

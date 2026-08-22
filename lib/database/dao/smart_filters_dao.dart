@@ -4,6 +4,7 @@ import 'package:kover/database/tables/reading_lists.dart';
 import 'package:kover/database/tables/series.dart';
 import 'package:kover/database/tables/series_metadata.dart';
 import 'package:kover/database/tables/smart_filters.dart';
+import 'package:rxdart/rxdart.dart';
 
 part 'smart_filters_dao.g.dart';
 
@@ -21,8 +22,15 @@ part 'smart_filters_dao.g.dart';
 class SmartFiltersDao(super.attachedDatabase)
     extends DatabaseAccessor<AppDatabase>
     with _$SmartFiltersDaoMixin {
-  /// Retrieves a list of series associated with a specific smart filter.
-  Future<List<SeriesData>> getSeriesForSmartFilter(int smartFilterId) async {
+  /// Watches a specific smart filter by its [id].
+  Stream<SmartFilter> watchSmartFilter(int id) {
+    return (select(
+      smartFilters,
+    )..where((tbl) => tbl.id.equals(id))).watchSingleOrNull().whereNotNull();
+  }
+
+  /// Watches the list of series associated with a specific smart filter.
+  Stream<List<SeriesData>> watchSeriesForSmartFilter(int smartFilterId) {
     final query = select(series).join([
       innerJoin(
         smartFilterSeries,
@@ -30,15 +38,16 @@ class SmartFiltersDao(super.attachedDatabase)
       ),
     ])..where(smartFilterSeries.smartFilterId.equals(smartFilterId));
 
-    final results = await query.get();
-
-    return results.map((row) => row.readTable(series)).toList();
+    return query.watch().map(
+      (results) => results.map((row) => row.readTable(series)).toList(),
+    );
   }
 
-  /// Retrieves a list of reading lists associated with a specific smart filter.
-  Future<List<ReadingList>> getReadingListsForSmartFilter(
+  /// Watches the list of reading lists associated with a specific smart
+  /// filter.
+  Stream<List<ReadingList>> watchReadingListsForSmartFilter(
     int smartFilterId,
-  ) async {
+  ) {
     final query = select(readingLists).join([
       innerJoin(
         smartFilterReadingList,
@@ -46,23 +55,9 @@ class SmartFiltersDao(super.attachedDatabase)
       ),
     ])..where(smartFilterReadingList.smartFilterId.equals(smartFilterId));
 
-    final results = await query.get();
-
-    return results.map((row) => row.readTable(readingLists)).toList();
-  }
-
-  /// Retrieves a list of people associated with a specific smart filter.
-  Future<List<PeopleData>> getPeopleForSmartFilter(int smartFilterId) async {
-    final query = select(people).join([
-      innerJoin(
-        smartFilterPerson,
-        smartFilterPerson.personId.equalsExp(people.id),
-      ),
-    ])..where(smartFilterPerson.smartFilterId.equals(smartFilterId));
-
-    final results = await query.get();
-
-    return results.map((row) => row.readTable(people)).toList();
+    return query.watch().map(
+      (results) => results.map((row) => row.readTable(readingLists)).toList(),
+    );
   }
 
   /// Upserts a batch of smart filters into the database.
@@ -85,7 +80,9 @@ class SmartFiltersDao(super.attachedDatabase)
   ) async {
     final idsByFilter = <int, List<int>>{};
     for (final link in b) {
-      idsByFilter.putIfAbsent(link.smartFilterId.value, () => []).add(link.seriesId.value);
+      idsByFilter
+          .putIfAbsent(link.smartFilterId.value, () => [])
+          .add(link.seriesId.value);
     }
 
     await batch((batch) {
@@ -93,7 +90,8 @@ class SmartFiltersDao(super.attachedDatabase)
         final seriesIds = entry.value;
         batch.deleteWhere(
           smartFilterSeries,
-          (t) => t.smartFilterId.equals(entry.key) & t.seriesId.isNotIn(seriesIds),
+          (t) =>
+              t.smartFilterId.equals(entry.key) & t.seriesId.isNotIn(seriesIds),
         );
       }
       batch.insertAllOnConflictUpdate(smartFilterSeries, b);
@@ -108,10 +106,12 @@ class SmartFiltersDao(super.attachedDatabase)
   ) async {
     final idsByFilter = <int, List<int>>{};
     for (final link in b) {
-      idsByFilter.putIfAbsent(
-        link.smartFilterId.value,
-        () => [],
-      ).add(link.readingListId.value);
+      idsByFilter
+          .putIfAbsent(
+            link.smartFilterId.value,
+            () => [],
+          )
+          .add(link.readingListId.value);
     }
 
     await batch((batch) {
@@ -135,10 +135,12 @@ class SmartFiltersDao(super.attachedDatabase)
   ) async {
     final idsByFilter = <int, List<int>>{};
     for (final link in b) {
-      idsByFilter.putIfAbsent(
-        link.smartFilterId.value,
-        () => [],
-      ).add(link.personId.value);
+      idsByFilter
+          .putIfAbsent(
+            link.smartFilterId.value,
+            () => [],
+          )
+          .add(link.personId.value);
     }
 
     await batch((batch) {
@@ -146,7 +148,8 @@ class SmartFiltersDao(super.attachedDatabase)
         final personIds = entry.value;
         batch.deleteWhere(
           smartFilterPerson,
-          (t) => t.smartFilterId.equals(entry.key) & t.personId.isNotIn(personIds),
+          (t) =>
+              t.smartFilterId.equals(entry.key) & t.personId.isNotIn(personIds),
         );
       }
       batch.insertAllOnConflictUpdate(smartFilterPerson, b);

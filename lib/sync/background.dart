@@ -15,6 +15,7 @@ import 'package:kover/riverpod/repository/reading_lists_repository.dart';
 import 'package:kover/riverpod/repository/secure_storage.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
 import 'package:kover/riverpod/repository/server_settings_repository.dart';
+import 'package:kover/riverpod/repository/smart_filters_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
 import 'package:kover/riverpod/repository/want_to_read_repository.dart';
 import 'package:kover/sync/book_sync_operations.dart';
@@ -25,6 +26,7 @@ import 'package:kover/sync/reader_sync_operations.dart';
 import 'package:kover/sync/reading_list_sync_operations.dart';
 import 'package:kover/sync/series_sync_operations.dart';
 import 'package:kover/sync/server_settings_sync_operations.dart';
+import 'package:kover/sync/smart_filters_sync_operations.dart';
 import 'package:kover/sync/sync_engine.dart';
 import 'package:kover/sync/volume_sync_operations.dart';
 import 'package:kover/sync/want_to_read_sync_operations.dart';
@@ -100,6 +102,10 @@ void callbackDispatcher() {
         db: db,
         client: ReadingListSyncOperations(client: client, apiKey: apiKey),
       );
+      final smartFiltersRepo = SmartFiltersRepository(
+        db: db,
+        client: SmartFiltersSyncOperations(client: client),
+      );
 
       final engine = SyncEngine(
         seriesRepo: seriesRepo,
@@ -112,6 +118,7 @@ void callbackDispatcher() {
         serverSettingsRepo: serverSettingsRepo,
         collectionsRepo: collectionsRepo,
         readingListsRepo: readingListsRepo,
+        smartFiltersRepo: smartFiltersRepo,
       );
 
       await engine.syncAllSeries();

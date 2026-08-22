@@ -458,9 +458,17 @@
     "@syncingReadingLists": {
         "description": "Label for the syncing reading lists phase"
     },
+    "syncingSmartFilters": "Syncing smart filters",
+    "@syncingSmartFilters": {
+        "description": "Label for the syncing smart filters phase"
+    },
     "syncingSidenav": "Syncing sidenav order",
     "@syncingSidenav": {
         "description": "Label for the sidenav syncing phase"
+    },
+    "syncingDashboard": "Syncing dashboard order",
+    "@syncingDashboard": {
+        "description": "Label for the dashboard syncing phase"
     },
     "refreshingMetadataForSeries": "Refreshing metadata for series {seriesId}",
     "@refreshingMetadataForSeries": {
