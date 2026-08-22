@@ -29,7 +29,7 @@ class StorageDao extends DatabaseAccessor<AppDatabase> with _$StorageDaoMixin {
   Future<RiverpodStorageData?> read(String key) async {
     return await (select(
       riverpodStorage,
-    )..where((row) => row.key.like(key))).getSingleOrNull();
+    )..where((row) => row.key.equals(key))).getSingleOrNull();
   }
 
   /// Write [entry]

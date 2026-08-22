@@ -76,7 +76,11 @@ final class SecureStorageRepository extends Storage<String, String> {
 
     final entry = SecureStorageEntry.fromJson(jsonDecode(value));
 
-    return PersistedData(entry.value);
+    return PersistedData(
+      entry.value,
+      destroyKey: entry.destroyKey,
+      expireAt: entry.expireAt,
+    );
   }
 
   @override
