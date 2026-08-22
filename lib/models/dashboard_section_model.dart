@@ -16,12 +16,12 @@ sealed class DashboardSectionModel with _$DashboardSectionModel {
   }) = _SmartFilterDashboardSectionModel;
 
   factory fromDatabaseModel(DashboardData row) {
-    return switch (row.streamType) {
+    return switch (row.type) {
       .onDeck => const DashboardSectionModel.onDeck(),
       .recentlyUpdated => const DashboardSectionModel.recentlyUpdated(),
       .newlyAdded => const DashboardSectionModel.newlyAdded(),
       .smartFilter => DashboardSectionModel.smartFilter(id: row.smartFilterId!),
-      _ => throw Exception('Unknown dashboard section type'),
+      _ => throw Exception('Unsupported dashboard section type ${row.type}'),
     };
   }
 }

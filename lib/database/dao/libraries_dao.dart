@@ -3,12 +3,11 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/database/tables/dashboard.dart';
 import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/sidenav.dart';
-import 'package:kover/database/tables/smart_filters.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 part 'libraries_dao.g.dart';
 
-@DriftAccessor(tables: [Libraries, Sidenav, Dashboard, SmartFilters])
+@DriftAccessor(tables: [Libraries, Sidenav, Dashboard])
 class LibrariesDao extends DatabaseAccessor<AppDatabase>
     with _$LibrariesDaoMixin {
   LibrariesDao(super.attachedDatabase);
@@ -61,8 +60,7 @@ class LibrariesDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
-  /// Watch all visible dashboard entries ordered by position, with the smart
-  /// filter row resolved for smart filter streams.
+  /// Watch all visible dashboard entries ordered by position
   Stream<List<DashboardData>> watchDashboard() {
     final query = select(dashboard)
       ..where((tbl) => tbl.visible.equals(true))

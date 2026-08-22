@@ -10,12 +10,12 @@ extension DashboardStreamDtoMappings on DashboardStreamDto {
       name: Value.absentIfNull(name),
       order: order!,
       visible: visible!,
-      streamType: _toDashboardStreamType(),
+      type: _toDashboardSectionType(),
       smartFilterId: Value.absentIfNull(smartFilterId),
     );
   }
 
-  DashboardSectionType _toDashboardStreamType() {
+  DashboardSectionType _toDashboardSectionType() {
     return switch (streamType) {
       .ondeck => .onDeck,
       .recentlyupdated => .recentlyUpdated,

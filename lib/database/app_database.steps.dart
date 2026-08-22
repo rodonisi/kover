@@ -5547,10 +5547,10 @@ final class Schema11 extends i0.VersionedSchema {
     readingListsChapters,
     readingListCovers,
     sidenav,
+    smartFilters,
     dashboard,
     onDeckRemoval,
     fonts,
-    smartFilters,
     smartFilterSeries,
     smartFilterReadingList,
     smartFilterPerson,
@@ -6019,7 +6019,25 @@ final class Schema11 extends i0.VersionedSchema {
     ),
     alias: null,
   );
-  late final Shape37 dashboard = Shape37(
+  late final Shape37 smartFilters = Shape37(
+    source: i0.VersionedTable(
+      entityName: 'smart_filters',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_4,
+        _column_40,
+        _column_101,
+        _column_102,
+        _column_63,
+        _column_62,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape38 dashboard = Shape38(
     source: i0.VersionedTable(
       entityName: 'dashboard',
       withoutRowId: false,
@@ -6030,8 +6048,8 @@ final class Schema11 extends i0.VersionedSchema {
         _column_40,
         _column_84,
         _column_85,
-        _column_86,
-        _column_101,
+        _column_6,
+        _column_103,
       ],
       attachedDatabase: database,
     ),
@@ -6064,24 +6082,6 @@ final class Schema11 extends i0.VersionedSchema {
         _column_100,
         _column_62,
         _column_70,
-      ],
-      attachedDatabase: database,
-    ),
-    alias: null,
-  );
-  late final Shape38 smartFilters = Shape38(
-    source: i0.VersionedTable(
-      entityName: 'smart_filters',
-      withoutRowId: false,
-      isStrict: false,
-      tableConstraints: ['PRIMARY KEY(id)'],
-      columns: [
-        _column_4,
-        _column_40,
-        _column_102,
-        _column_103,
-        _column_63,
-        _column_62,
       ],
       attachedDatabase: database,
     ),
@@ -6128,31 +6128,6 @@ class Shape37 extends i0.VersionedTable {
       columnsByName['id']! as i1.GeneratedColumn<int>;
   i1.GeneratedColumn<String> get name =>
       columnsByName['name']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<int> get order =>
-      columnsByName['order']! as i1.GeneratedColumn<int>;
-  i1.GeneratedColumn<int> get visible =>
-      columnsByName['visible']! as i1.GeneratedColumn<int>;
-  i1.GeneratedColumn<String> get streamType =>
-      columnsByName['stream_type']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<int> get smartFilterId =>
-      columnsByName['smart_filter_id']! as i1.GeneratedColumn<int>;
-}
-
-i1.GeneratedColumn<int> _column_101(String aliasedName) =>
-    i1.GeneratedColumn<int>(
-      'smart_filter_id',
-      aliasedName,
-      true,
-      type: i1.DriftSqlType.int,
-      $customConstraints: 'NULL',
-    );
-
-class Shape38 extends i0.VersionedTable {
-  Shape38({required super.source, required super.alias}) : super.aliased();
-  i1.GeneratedColumn<int> get id =>
-      columnsByName['id']! as i1.GeneratedColumn<int>;
-  i1.GeneratedColumn<String> get name =>
-      columnsByName['name']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<String> get filter =>
       columnsByName['filter']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<int> get type =>
@@ -6163,7 +6138,7 @@ class Shape38 extends i0.VersionedTable {
       columnsByName['created']! as i1.GeneratedColumn<int>;
 }
 
-i1.GeneratedColumn<String> _column_102(String aliasedName) =>
+i1.GeneratedColumn<String> _column_101(String aliasedName) =>
     i1.GeneratedColumn<String>(
       'filter',
       aliasedName,
@@ -6171,13 +6146,38 @@ i1.GeneratedColumn<String> _column_102(String aliasedName) =>
       type: i1.DriftSqlType.string,
       $customConstraints: 'NULL',
     );
-i1.GeneratedColumn<int> _column_103(String aliasedName) =>
+i1.GeneratedColumn<int> _column_102(String aliasedName) =>
     i1.GeneratedColumn<int>(
       'type',
       aliasedName,
       false,
       type: i1.DriftSqlType.int,
       $customConstraints: 'NOT NULL',
+    );
+
+class Shape38 extends i0.VersionedTable {
+  Shape38({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get name =>
+      columnsByName['name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get order =>
+      columnsByName['order']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get visible =>
+      columnsByName['visible']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get type =>
+      columnsByName['type']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get smartFilterId =>
+      columnsByName['smart_filter_id']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<int> _column_103(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'smart_filter_id',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NULL REFERENCES smart_filters(id)ON DELETE CASCADE',
     );
 
 class Shape39 extends i0.VersionedTable {

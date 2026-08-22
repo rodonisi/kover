@@ -3003,6 +3003,89 @@
       "references": [],
       "type": "table",
       "data": {
+        "name": "smart_filters",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "name",
+            "getter_name": "name",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "filter",
+            "getter_name": "filter",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "type",
+            "getter_name": "type",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumIndexConverter<FilterType>(FilterType.values)",
+              "dart_type_name": "FilterType"
+            }
+          },
+          {
+            "name": "last_modified",
+            "getter_name": "lastModified",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('CAST(strftime(\\'%s\\', CURRENT_TIMESTAMP) AS INTEGER)')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "created",
+            "getter_name": "created",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('CAST(strftime(\\'%s\\', CURRENT_TIMESTAMP) AS INTEGER)')",
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "id"
+        ]
+      }
+    },
+    {
+      "id": 31,
+      "references": [
+        30
+      ],
+      "type": "table",
+      "data": {
         "name": "dashboard",
         "was_declared_in_moor": false,
         "columns": [
@@ -3051,8 +3134,8 @@
             "dsl_features": []
           },
           {
-            "name": "stream_type",
-            "getter_name": "streamType",
+            "name": "type",
+            "getter_name": "type",
             "moor_type": "string",
             "nullable": false,
             "customConstraints": null,
@@ -3070,9 +3153,25 @@
             "moor_type": "int",
             "nullable": true,
             "customConstraints": null,
+            "defaultConstraints": "REFERENCES smart_filters (id) ON DELETE CASCADE",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "REFERENCES smart_filters (id) ON DELETE CASCADE"
+            },
             "default_dart": null,
             "default_client_dart": null,
-            "dsl_features": []
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "smart_filters",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
           }
         ],
         "is_virtual": false,
@@ -3084,7 +3183,7 @@
       }
     },
     {
-      "id": 31,
+      "id": 32,
       "references": [
         2
       ],
@@ -3153,7 +3252,7 @@
       }
     },
     {
-      "id": 32,
+      "id": 33,
       "references": [],
       "type": "table",
       "data": {
@@ -3268,90 +3367,9 @@
       }
     },
     {
-      "id": 33,
-      "references": [],
-      "type": "table",
-      "data": {
-        "name": "smart_filters",
-        "was_declared_in_moor": false,
-        "columns": [
-          {
-            "name": "id",
-            "getter_name": "id",
-            "moor_type": "int",
-            "nullable": false,
-            "customConstraints": null,
-            "default_dart": null,
-            "default_client_dart": null,
-            "dsl_features": []
-          },
-          {
-            "name": "name",
-            "getter_name": "name",
-            "moor_type": "string",
-            "nullable": true,
-            "customConstraints": null,
-            "default_dart": null,
-            "default_client_dart": null,
-            "dsl_features": []
-          },
-          {
-            "name": "filter",
-            "getter_name": "filter",
-            "moor_type": "string",
-            "nullable": true,
-            "customConstraints": null,
-            "default_dart": null,
-            "default_client_dart": null,
-            "dsl_features": []
-          },
-          {
-            "name": "type",
-            "getter_name": "type",
-            "moor_type": "int",
-            "nullable": false,
-            "customConstraints": null,
-            "default_dart": null,
-            "default_client_dart": null,
-            "dsl_features": [],
-            "type_converter": {
-              "dart_expr": "const EnumIndexConverter<FilterType>(FilterType.values)",
-              "dart_type_name": "FilterType"
-            }
-          },
-          {
-            "name": "last_modified",
-            "getter_name": "lastModified",
-            "moor_type": "dateTime",
-            "nullable": false,
-            "customConstraints": null,
-            "default_dart": "const CustomExpression('CAST(strftime(\\'%s\\', CURRENT_TIMESTAMP) AS INTEGER)')",
-            "default_client_dart": null,
-            "dsl_features": []
-          },
-          {
-            "name": "created",
-            "getter_name": "created",
-            "moor_type": "dateTime",
-            "nullable": false,
-            "customConstraints": null,
-            "default_dart": "const CustomExpression('CAST(strftime(\\'%s\\', CURRENT_TIMESTAMP) AS INTEGER)')",
-            "default_client_dart": null,
-            "dsl_features": []
-          }
-        ],
-        "is_virtual": false,
-        "without_rowid": false,
-        "constraints": [],
-        "explicit_pk": [
-          "id"
-        ]
-      }
-    },
-    {
       "id": 34,
       "references": [
-        33,
+        30,
         2
       ],
       "type": "table",
@@ -3424,7 +3442,7 @@
     {
       "id": 35,
       "references": [
-        33,
+        30,
         26
       ],
       "type": "table",
@@ -3497,7 +3515,7 @@
     {
       "id": 36,
       "references": [
-        33,
+        30,
         5
       ],
       "type": "table",
@@ -3840,11 +3858,20 @@
       ]
     },
     {
+      "name": "smart_filters",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"smart_filters\" (\"id\" INTEGER NOT NULL, \"name\" TEXT NULL, \"filter\" TEXT NULL, \"type\" INTEGER NOT NULL, \"last_modified\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), \"created\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), PRIMARY KEY (\"id\"));"
+        }
+      ]
+    },
+    {
       "name": "dashboard",
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"dashboard\" (\"id\" INTEGER NOT NULL, \"name\" TEXT NULL, \"order\" INTEGER NOT NULL, \"visible\" INTEGER NOT NULL CHECK (\"visible\" IN (0, 1)), \"stream_type\" TEXT NOT NULL, \"smart_filter_id\" INTEGER NULL, PRIMARY KEY (\"id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"dashboard\" (\"id\" INTEGER NOT NULL, \"name\" TEXT NULL, \"order\" INTEGER NOT NULL, \"visible\" INTEGER NOT NULL CHECK (\"visible\" IN (0, 1)), \"type\" TEXT NOT NULL, \"smart_filter_id\" INTEGER NULL REFERENCES smart_filters (id) ON DELETE CASCADE, PRIMARY KEY (\"id\"));"
         }
       ]
     },
@@ -3863,15 +3890,6 @@
         {
           "dialect": "sqlite",
           "sql": "CREATE TABLE IF NOT EXISTS \"fonts\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"family\" TEXT NOT NULL, \"name\" TEXT NULL, \"weight\" INTEGER NULL, \"url\" TEXT NOT NULL, \"data\" BLOB NOT NULL, \"mime_type\" TEXT NULL, \"created\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), \"last_sync\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), UNIQUE (\"url\"));"
-        }
-      ]
-    },
-    {
-      "name": "smart_filters",
-      "sql": [
-        {
-          "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"smart_filters\" (\"id\" INTEGER NOT NULL, \"name\" TEXT NULL, \"filter\" TEXT NULL, \"type\" INTEGER NOT NULL, \"last_modified\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), \"created\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), PRIMARY KEY (\"id\"));"
         }
       ]
     },
