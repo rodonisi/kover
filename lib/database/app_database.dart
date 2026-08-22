@@ -7,15 +7,16 @@ import 'package:kover/database/dao/collections_dao.dart';
 import 'package:kover/database/dao/download_dao.dart';
 import 'package:kover/database/dao/font_dao.dart';
 import 'package:kover/database/dao/libraries_dao.dart';
-import 'package:kover/database/migrations/migration.dart';
 import 'package:kover/database/dao/reader_dao.dart';
 import 'package:kover/database/dao/reading_lists_dao.dart';
 import 'package:kover/database/dao/riverpod_dao.dart';
 import 'package:kover/database/dao/series_dao.dart';
 import 'package:kover/database/dao/series_metadata_dao.dart';
 import 'package:kover/database/dao/server_settings_dao.dart';
+import 'package:kover/database/dao/smart_filters_dao.dart';
 import 'package:kover/database/dao/storage_dao.dart';
 import 'package:kover/database/dao/volumes_dao.dart';
+import 'package:kover/database/migrations/migration.dart';
 import 'package:kover/database/tables/book_info.dart';
 import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/collections.dart';
@@ -34,6 +35,7 @@ import 'package:kover/database/tables/smart_filters.dart';
 import 'package:kover/database/tables/volumes.dart';
 import 'package:kover/database/tables/want_to_read.dart';
 import 'package:kover/models/enums/age_rating.dart';
+import 'package:kover/models/enums/filter_type.dart';
 import 'package:kover/models/enums/format.dart';
 import 'package:kover/models/enums/library_type.dart';
 import 'package:kover/models/enums/person_role.dart';
@@ -98,6 +100,7 @@ part 'app_database.g.dart';
     CollectionsDao,
     ReadingListsDao,
     FontDao,
+    SmartFiltersDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
