@@ -4,12 +4,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/utils/layout_constants.dart';
 
-typedef SectionGridBuilder<T> =
-    Widget Function(
-      List<T> items,
-      int? rowCount,
-      void Function(int crossAxisCount) onCrossAxisCountChanged,
-    );
+typedef SectionGridBuilder<T> = Widget Function(
+  List<T> items,
+  int? rowCount,
+  void Function(int crossAxisCount) onCrossAxisCountChanged,
+);
 
 class CollapsibleSection<T> extends HookConsumerWidget {
   final String title;
