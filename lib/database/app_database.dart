@@ -30,6 +30,7 @@ import 'package:kover/database/tables/series.dart';
 import 'package:kover/database/tables/series_metadata.dart';
 import 'package:kover/database/tables/server_settings.dart';
 import 'package:kover/database/tables/sidenav.dart';
+import 'package:kover/database/tables/smart_filters.dart';
 import 'package:kover/database/tables/volumes.dart';
 import 'package:kover/database/tables/want_to_read.dart';
 import 'package:kover/models/enums/age_rating.dart';
@@ -77,6 +78,10 @@ part 'app_database.g.dart';
     Sidenav,
     OnDeckRemoval,
     Fonts,
+    SmartFilters,
+    SmartFilterSeries,
+    SmartFilterReadingList,
+    SmartFilterPerson,
   ],
   daos: [
     StorageDao,
@@ -101,7 +106,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   /// Clear all content data from the database. Does not clear app state data (e.g. credentials, settings).
   /// Useful e.g. when switching user.
@@ -127,6 +132,7 @@ class AppDatabase extends _$AppDatabase {
       await clearDownloads();
       await clearCovers();
       await delete(fonts).go();
+      await delete(smartFilters).go();
     });
   }
 

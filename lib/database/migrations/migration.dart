@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/app_database.steps.dart';
+import 'package:kover/database/migrations/steps/from_10_to_11.dart';
 import 'package:kover/database/migrations/steps/from_1_to_2.dart';
 import 'package:kover/database/migrations/steps/from_2_to_3.dart';
 import 'package:kover/database/migrations/steps/from_3_to_4.dart';
@@ -22,5 +23,6 @@ MigrationStrategy appDatabaseMigration(AppDatabase db) => MigrationStrategy(
     from7To8: (m, schema) => migrateFrom7To8(db, m, schema),
     from8To9: (m, schema) => migrateFrom8To9(db, m, schema),
     from9To10: (m, schema) => migrateFrom9To10(db, m, schema),
+    from10To11: (m, schema) => migrateFrom10To11(db, m, schema),
   ),
 );
