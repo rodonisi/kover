@@ -1,14 +1,16 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/generated/l10n/app_localizations.dart';
-import 'package:kover/pages/home/collapsible_section.dart';
-import 'package:kover/pages/home/on_deck_scope.dart';
+import 'package:kover/models/dashboard_section_model.dart';
+import 'package:kover/pages/home/sliver_on_deck.dart';
+import 'package:kover/pages/home/sliver_recently_added.dart';
+import 'package:kover/pages/home/sliver_recently_updated.dart';
+import 'package:kover/pages/home/sliver_smart_filter_section.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
-import 'package:kover/riverpod/providers/series.dart';
+import 'package:kover/riverpod/providers/dashboard.dart';
 import 'package:kover/widgets/actions_app_bar/actions_app_bar.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/login_guard.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
+import 'package:material_ui/material_ui.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -27,79 +29,52 @@ class HomePageContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final sections = ref.watch(dashboardSectionsProvider);
     return RefreshIndicator(
       onRefresh: () async {
         await ref.read(syncManagerProvider.notifier).fullSync();
       },
-      child: const CustomScrollView(
+      child: CustomScrollView(
         clipBehavior: .none,
         slivers: [
-          ActionsAppBar(),
+          const ActionsAppBar(),
           SliverSafeArea(
             top: false,
             bottom: false,
-            sliver: SliverMainAxisGroup(
-              slivers: [
-                OnDeck(),
-                RecentlyUpdated(),
-                RecentlyAdded(),
-              ],
+            sliver: AsyncSliver(
+              asyncValue: sections,
+              data: (data) {
+                if (data.isEmpty) {
+                  // Fall back to the default sections until the first dashboard sync
+                  // has populated the database.
+                  return const SliverMainAxisGroup(
+                    slivers: [
+                      SliverOnDeck(),
+                      SliverRecentlyUpdated(),
+                      SliverRecentlyAdded(),
+                    ],
+                  );
+                }
+
+                return SliverMainAxisGroup(
+                  slivers: data
+                      .map(
+                        (section) => section.when(
+                          onDeck: () => const SliverOnDeck(),
+                          recentlyUpdated: () => const SliverRecentlyUpdated(),
+                          newlyAdded: () => const SliverRecentlyAdded(),
+                          smartFilter: (int id) =>
+                              SliverSmartFilterSection(smartFilterId: id),
+                        ),
+                      )
+                      .toList(),
+                );
+              },
             ),
           ),
-          SliverBottomPadding(),
+          const SliverBottomPadding(),
         ],
       ),
-    );
-  }
-}
-
-class OnDeck extends ConsumerWidget {
-  const OnDeck({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final onDeck = ref.watch(onDeckProvider);
-
-    return AsyncSliver(
-      asyncValue: onDeck,
-      data: (data) => OnDeckScope(
-        child: CollapsibleSection(
-          title: l.onDeck,
-          series: data,
-        ),
-      ),
-    );
-  }
-}
-
-class RecentlyUpdated extends ConsumerWidget {
-  const RecentlyUpdated({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final series = ref.watch(recentlyUpdatedProvider);
-
-    return AsyncSliver(
-      asyncValue: series,
-      data: (data) =>
-          CollapsibleSection(title: l.recentlyUpdated, series: data),
-    );
-  }
-}
-
-class RecentlyAdded extends ConsumerWidget {
-  const RecentlyAdded({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final series = ref.watch(recentlyAddedProvider);
-
-    return AsyncSliver(
-      asyncValue: series,
-      data: (data) => CollapsibleSection(title: l.recentlyAdded, series: data),
     );
   }
 }

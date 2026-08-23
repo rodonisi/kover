@@ -1,11 +1,13 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:html/parser.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/app_database.steps.dart';
+import 'package:kover/database/converters/page_content_converter.dart';
 import 'package:kover/models/enums/format.dart';
-import 'package:kover/models/font_face.dart';
+import 'package:kover/models/page_content.dart';
 import 'package:kover/utils/epub_font_parser.dart';
 import 'package:kover/utils/logging.dart';
 
@@ -20,138 +22,109 @@ Future<void> migrateFrom9To10(
   });
 }
 
+@visibleForTesting
+final pageBlobConverter = TypeConverter.jsonb<Map<String, dynamic>>(
+  fromJson: (json) => json as Map<String, dynamic>,
+);
+
 /// Moves the font bytes embedded in pre-migration epub page blobs into the
 /// fonts table and rewrites the blobs to only carry [FontFace] models.
 ///
-/// Legacy blobs embed their bytes as a `{family: font}` map holding at most
-/// one base64-encoded font per family. Every legacy blob is rewritten to the
-/// new format, even when no face can be migrated.
+/// Legacy blobs embed their bytes as a `{family: [bytes]}` map whose order
+/// matches the order of the `@font-face` sources declared in the stored
+/// HTML, so faces and bytes are paired by index within each family. Blobs
+/// that cannot be decoded are skipped; every decodable legacy blob is
+/// rewritten to the new format, even when no face can be migrated, because
+/// leaving the legacy map behind would break JSON decoding of the page at
+/// read time.
 Future<void> _migrateLegacyPageFonts(AppDatabase db) async {
-  final pages = db.downloadedPages;
-  final chapters = db.chapters;
+  final rows = await (db.select(db.downloadedPages).join([
+    innerJoin(
+      db.chapters,
+      db.chapters.id.equalsExp(db.downloadedPages.chapterId),
+    ),
+  ])..where(db.chapters.format.equals(Format.epub.name))).get();
 
-  final chapterId = chapters.id;
-  final relevantChaptersQuery =
-      db.selectOnly(chapters).join([
-          innerJoin(pages, chapterId.equalsExp(pages.chapterId)),
-        ])
-        ..addColumns([chapterId])
-        ..where(chapters.format.equals(Format.epub.name))
-        ..groupBy([chapterId]);
+  for (final row in rows) {
+    final chapterId = row.read(db.chapters.id);
+    final page = row.read(db.downloadedPages.page);
 
-  final relevantChapters = await relevantChaptersQuery
-      .map((result) => result.read(chapters.id))
-      .get();
+    if (chapterId == null || page == null) continue;
 
-  for (final chapter in relevantChapters) {
-    if (chapter == null) continue;
+    try {
+      final blob = pageBlobConverter.fromSql(
+        row.read(db.downloadedPages.data) as Uint8List,
+      );
 
-    final pagesList = await (db.select(
-      pages,
-    )..where((tbl) => tbl.chapterId.equals(chapter))).get();
+      final legacyFonts = blob['fonts'];
+      if (legacyFonts is List) continue;
 
-    for (final page in pagesList) {
-      try {
-        final blob = jsonDecode(utf8.decode(page.data)) as Map<String, dynamic>;
-        final legacyFonts = blob['fonts'];
-        if (legacyFonts is List) continue;
+      final root = parseFragment(blob['root'] as String? ?? '');
+      final faces = EpubFontParser.parseStyles(
+        root.querySelectorAll('style'),
+      );
 
-        final root = parseFragment(blob['root'] as String? ?? '');
-        final faces = EpubFontParser.parseStyles(
-          root.querySelectorAll('style'),
+      final consumedPerFamily = <String, int>{};
+      for (final face in faces) {
+        final familyBytes = legacyFonts is Map
+            ? legacyFonts[face.family]
+            : null;
+        if (familyBytes is! List || familyBytes.isEmpty) continue;
+
+        final index = consumedPerFamily.update(
+          face.family,
+          (count) => count + 1,
+          ifAbsent: () => 0,
         );
+        if (index >= familyBytes.length) continue;
 
-        await _storeFamilyBlobs(db, faces, legacyFonts);
-
-        blob['fonts'] = [for (final face in faces) face.toJson()];
-        await (db.update(pages)..where(
-              (tbl) =>
-                  tbl.chapterId.equals(chapter) & tbl.page.equals(page.page),
-            ))
-            .write(
-              DownloadedPagesCompanion(
-                data: Value(utf8.encode(jsonEncode(blob))),
+        final data = Uint8List.fromList(
+          base64Decode(familyBytes[index] as String),
+        );
+        await db
+            .into(db.fonts)
+            .insert(
+              FontsCompanion.insert(
+                family: face.family,
+                weight: Value(face.weight),
+                url: face.url,
+                data: data,
+              ),
+              onConflict: DoUpdate(
+                (_) => FontsCompanion.insert(
+                  family: face.family,
+                  weight: Value(face.weight),
+                  url: face.url,
+                  data: data,
+                ),
+                target: [db.fonts.url],
               ),
             );
-
-        log.info(
-          'migrated legacy epub page fonts',
-          attributes: {'chapter_id': chapter, 'page': page.page},
-        );
-      } catch (e, stacktrace) {
-        log.error(
-          'failed to migrate fonts of downloaded epub page',
-          error: e,
-          stacktrace: stacktrace,
-          attributes: {'chapter_id': chapter, 'page': page.page},
-        );
       }
-    }
-  }
-}
 
-/// Stores the embedded font bytes of a legacy `{family: font}` map in the
-/// fonts table.
-///
-/// The old schema carried at most one font per family: the first face of a
-/// family claims the stored bytes under its url, later faces of the same
-/// family fall back to fetching from the server at runtime.
-Future<void> _storeFamilyBlobs(
-  AppDatabase db,
-  List<FontFace> faces,
-  Object? legacyFonts,
-) async {
-  if (legacyFonts is! Map || legacyFonts.isEmpty) return;
+      blob['fonts'] = [for (final face in faces) face.toJson()];
+      final updatedContent = PageContent.fromJson(blob);
 
-  final claimedFamilies = <String>{};
-  for (final face in faces) {
-    if (!claimedFamilies.add(face.family)) continue;
-
-    final data = _decodeFontBlob(legacyFonts[face.family]);
-    if (data == null) continue;
-
-    await db
-        .into(db.fonts)
-        .insert(
-          FontsCompanion.insert(
-            family: face.family,
-            weight: Value(face.weight),
-            url: face.url,
-            data: data,
-          ),
-          onConflict: DoUpdate(
-            (_) => FontsCompanion.insert(
-              family: face.family,
-              weight: Value(face.weight),
-              url: face.url,
-              data: data,
+      await (db.update(db.downloadedPages)..where(
+            (tbl) => tbl.chapterId.equals(chapterId) & tbl.page.equals(page),
+          ))
+          .write(
+            DownloadedPagesCompanion(
+              data: Value(pageContentConverter.toSql(updatedContent)),
             ),
-            target: [db.fonts.url],
-          ),
-        );
-  }
-}
+          );
 
-/// Decode the value of a single legacy map entry into raw font bytes.
-Uint8List? _decodeFontBlob(Object? value) {
-  // The old serializer wrote a list of base64 strings per family.
-  if (value is List) {
-    if (value.isEmpty) return null;
-
-    final entry = value.first;
-    if (entry is String) return _decodeBase64(entry);
-
-    return null;
-  }
-
-  return _decodeBase64(value as String? ?? '');
-}
-
-Uint8List? _decodeBase64(String encoded) {
-  if (encoded.isEmpty) return null;
-  try {
-    return base64Decode(encoded);
-  } on FormatException {
-    return null;
+      log.info(
+        'migrated legacy epub page fonts',
+        attributes: {'chapter_id': chapterId, 'page': page},
+      );
+    } catch (e, stacktrace) {
+      log.error(
+        'failed to migrate fonts of downloaded epub page',
+        error: e,
+        stacktrace: stacktrace,
+        attributes: {'chapter_id': chapterId, 'page': page},
+      );
+    }
   }
 }

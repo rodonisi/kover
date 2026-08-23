@@ -120,7 +120,10 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   /// Watch continue point for reading list [readingListId]
   Stream<Chapter> watchReadingListContinuePoint({required int readingListId}) {
     final query = _readingListContinuePointQuery(readingListId: readingListId);
-    return query.map((row) => row.readTable(chapters)).watchSingle();
+    return query
+        .map((row) => row.readTable(chapters))
+        .watchSingleOrNull()
+        .whereNotNull();
   }
 
   /// Watch progress percent for continue point of reading list [readingListId]

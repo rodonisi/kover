@@ -1,12 +1,13 @@
 import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
+import 'package:kover/database/tables/dashboard.dart';
 import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/sidenav.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 part 'libraries_dao.g.dart';
 
-@DriftAccessor(tables: [Libraries, Sidenav])
+@DriftAccessor(tables: [Libraries, Sidenav, Dashboard])
 class LibrariesDao extends DatabaseAccessor<AppDatabase>
     with _$LibrariesDaoMixin {
   LibrariesDao(super.attachedDatabase);
@@ -56,6 +57,25 @@ class LibrariesDao extends DatabaseAccessor<AppDatabase>
     await batch((batch) {
       batch.deleteWhere(sidenav, (t) => t.id.isNotIn(ids));
       batch.insertAllOnConflictUpdate(sidenav, entries);
+    });
+  }
+
+  /// Watch all visible dashboard entries ordered by position
+  Stream<List<DashboardData>> watchDashboard() {
+    final query = select(dashboard)
+      ..where((tbl) => tbl.visible.equals(true))
+      ..orderBy([(tbl) => OrderingTerm.asc(tbl.order)]);
+
+    return query.watch();
+  }
+
+  /// Upsert [entries] and remove all dashboard entries not present in
+  /// [entries]
+  Future<void> upsertDashboard(Iterable<DashboardCompanion> entries) async {
+    final ids = entries.map((e) => e.id.value).toList();
+    await batch((batch) {
+      batch.deleteWhere(dashboard, (t) => t.id.isNotIn(ids));
+      batch.insertAllOnConflictUpdate(dashboard, entries);
     });
   }
 }

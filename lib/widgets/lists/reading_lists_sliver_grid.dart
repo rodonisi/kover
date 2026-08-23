@@ -5,16 +5,22 @@ import 'package:kover/widgets/lists/adaptive_sliver_grid.dart';
 
 class ReadingListsSliverGrid extends StatelessWidget {
   final List<ReadingListModel> readingLists;
+  final int? rowCount;
+  final void Function(int crossAxisCount)? onCrossAxisCountChanged;
 
   const ReadingListsSliverGrid({
     super.key,
     required this.readingLists,
+    this.rowCount,
+    this.onCrossAxisCountChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     return AdaptiveSliverGrid(
       itemCount: readingLists.length,
+      rowCount: rowCount,
+      onCrossAxisCountChanged: onCrossAxisCountChanged,
       builder: (context, index) {
         final readingList = readingLists[index];
         return ReadingListCard(
