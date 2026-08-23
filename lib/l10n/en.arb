@@ -886,5 +886,9 @@
     "removeParagraphIndentationDescription": "If enabled, paragraph indentation is stripped from the text. If disabled, the EPUB's original indentation is preserved.",
     "@removeParagraphIndentationDescription": {
       "description": "Description for the remove paragraphs indent setting"
+    },
+    "startupLoadingMessage": "Setting everything up, please wait...",
+    "@startupLoadingMessage": {
+      "description": "Message shown when the app is starting up and loading data"
     }
 }
