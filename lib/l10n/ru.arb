@@ -749,5 +749,138 @@
     "removeFromOnDeck": "Удалить из очереди",
     "@removeFromOnDeck": {
         "description": "Label for the remove from on deck context menu item"
+    },
+    "coverArtists": "Художники обложек",
+    "@coverArtists": {
+        "description": "Label for the cover artists metadata in the series details page"
+    },
+    "publishers": "Издательства",
+    "@publishers": {
+        "description": "Label for the publishers metadata in the series details page"
+    },
+    "characters": "Персонажи",
+    "@characters": {
+        "description": "Label for the characters metadata in the series details page"
+    },
+    "pencillers": "Прорисовщики",
+    "@pencillers": {
+        "description": "Label for the pencillers metadata in the series details page"
+    },
+    "inkers": "Контуровщики",
+    "@inkers": {
+        "description": "Label for the inkers metadata in the series details page"
+    },
+    "imprints": "Импринты",
+    "@imprints": {
+        "description": "Label for the imprints metadata in the series details page"
+    },
+    "colorists": "Колористы",
+    "@colorists": {
+        "description": "Label for the colorists metadata in the series details page"
+    },
+    "letterers": "Леттереры",
+    "@letterers": {
+        "description": "Label for the letterers metadata in the series details page"
+    },
+    "editors": "Редакторы",
+    "@editors": {
+        "description": "Label for the editors metadata in the series details page"
+    },
+    "translators": "Переводчики",
+    "@translators": {
+        "description": "Label for the translators metadata in the series details page"
+    },
+    "teams": "Команды",
+    "@teams": {
+        "description": "Label for the teams metadata in the series details page"
+    },
+    "locations": "Локации",
+    "@locations": {
+        "description": "Label for the locations metadata in the series details page"
+    },
+    "syncingSmartFilters": "Синхронизация умных фильтров",
+    "@syncingSmartFilters": {
+        "description": "Label for the syncing smart filters phase"
+    },
+    "syncingDashboard": "Синхронизация порядка панели",
+    "@syncingDashboard": {
+        "description": "Label for the dashboard syncing phase"
+    },
+    "startReading": "Начать чтение",
+    "@startReading": {
+        "description": "Label for the start reading button"
+    },
+    "invalidCertificate": "Недействительный сертификат",
+    "@invalidCertificate": {
+        "description": "User display error shown when the server certificate cannot be validated"
+    },
+    "invalidCertificateDescription": "Не удалось проверить HTTPS-сертификат сервера. Проверьте сертификат или включите параметр «Игнорировать проверку сертификата» в настройках (только если вы доверяете этому серверу).",
+    "@invalidCertificateDescription": {
+        "description": "Instructions shown when the server certificate cannot be validated"
+    },
+    "ignoreCertificateValidation": "Игнорировать проверку сертификата",
+    "@ignoreCertificateValidation": {
+        "description": "Setting that allows a trusted server with an invalid HTTPS certificate"
+    },
+    "ignoreCertificateValidationDescription": "Разрешает подключение, даже если HTTPS-сертификат сервера не удалось проверить. Используйте только для серверов, которым доверяете.",
+    "@ignoreCertificateValidationDescription": {
+        "description": "Security warning for ignoring HTTPS certificate validation"
+    },
+    "syncingOnDeck": "Синхронизация «На очереди»",
+    "@syncingOnDeck": {
+        "description": "Label for the syncing on deck phase"
+    },
+    "ongoing": "Выходит",
+    "@ongoing": {
+        "description": "Label for the 'ongoing' publication status"
+    },
+    "completed": "Завершено",
+    "@completed": {
+        "description": "Label for the 'completed' publication status"
+    },
+    "hiatus": "Приостановлено",
+    "@hiatus": {
+        "description": "Label for the 'hiatus' publication status"
+    },
+    "cancelled": "Отменено",
+    "@cancelled": {
+        "description": "Label for the 'cancelled' publication status"
+    },
+    "ended": "Прекращено",
+    "@ended": {
+        "description": "Label for the 'ended' publication status"
+    },
+    "unknown": "Неизвестно",
+    "@unknown": {
+        "description": "Label for the 'unknown' publication status"
+    },
+    "tags": "Теги",
+    "@tags": {
+        "description": "Label for the tags section in the series details page"
+    },
+    "textAlignment": "Выравнивание текста",
+    "@textAlignment": {
+        "description": "Label for the text alignment setting"
+    },
+    "left": "Влево",
+    "@left": {
+        "description": "Label for the left text alignment option"
+    },
+    "center": "По центру",
+    "@center": {
+        "description": "Label for the center text alignment option"
+    },
+    "right": "Вправо",
+    "@right": {
+        "description": "Label for the right text alignment option"
+    },
+    "justify": "По ширине",
+    "@justify": {
+        "description": "Label for the justify text alignment option"
+    },
+    "removeParagraphIndentation": "Убрать отступ первой строки",
+    "removeParagraphIndentationDescription": "Если включено, отступы первой строки убираются из текста. Если выключено, сохраняется исходное форматирование из файла EPUB.",
+    "@removeParagraphIndentationDescription": {
+        "description": "Description for the remove paragraphs indent setting"
     }
 }
