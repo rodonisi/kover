@@ -38,93 +38,102 @@ final pageBlobConverter = TypeConverter.jsonb<Map<String, dynamic>>(
 /// leaving the legacy map behind would break JSON decoding of the page at
 /// read time.
 Future<void> _migrateLegacyPageFonts(AppDatabase db) async {
-  final rows = await (db.select(db.downloadedPages).join([
-    innerJoin(
-      db.chapters,
-      db.chapters.id.equalsExp(db.downloadedPages.chapterId),
-    ),
-  ])..where(db.chapters.format.equals(Format.epub.name))).get();
+  final relevantChaptersQuery =
+      db.selectOnly(db.chapters).join([
+          innerJoin(
+            db.downloadedPages,
+            db.chapters.id.equalsExp(db.downloadedPages.chapterId),
+          ),
+        ])
+        ..addColumns([db.chapters.id])
+        ..where(db.chapters.format.equals(Format.epub.name))
+        ..groupBy([db.chapters.id]);
 
-  for (final row in rows) {
-    final chapterId = row.read(db.chapters.id);
-    final page = row.read(db.downloadedPages.page);
+  final relevantChapters = await relevantChaptersQuery
+      .map((result) => result.read(db.chapters.id))
+      .get();
 
-    if (chapterId == null || page == null) continue;
+  for (final id in relevantChapters) {
+    if (id == null) continue;
 
-    try {
-      final blob = pageBlobConverter.fromSql(
-        row.read(db.downloadedPages.data) as Uint8List,
-      );
+    final pagesQuery = db.select(db.downloadedPages)
+      ..where((tbl) => tbl.chapterId.equals(id));
+    final pages = await pagesQuery.get();
 
-      final legacyFonts = blob['fonts'];
-      if (legacyFonts is List) continue;
+    for (final page in pages) {
+      try {
+        final blob = pageBlobConverter.fromSql(page.data);
 
-      final root = parseFragment(blob['root'] as String? ?? '');
-      final faces = EpubFontParser.parseStyles(
-        root.querySelectorAll('style'),
-      );
+        final legacyFonts = blob['fonts'];
+        if (legacyFonts is List) continue;
 
-      final consumedPerFamily = <String, int>{};
-      for (final face in faces) {
-        final familyBytes = legacyFonts is Map
-            ? legacyFonts[face.family]
-            : null;
-        if (familyBytes is! List || familyBytes.isEmpty) continue;
-
-        final index = consumedPerFamily.update(
-          face.family,
-          (count) => count + 1,
-          ifAbsent: () => 0,
+        final root = parseFragment(blob['root'] as String? ?? '');
+        final faces = EpubFontParser.parseStyles(
+          root.querySelectorAll('style'),
         );
-        if (index >= familyBytes.length) continue;
 
-        final data = Uint8List.fromList(
-          base64Decode(familyBytes[index] as String),
-        );
-        await db
-            .into(db.fonts)
-            .insert(
-              FontsCompanion.insert(
-                family: face.family,
-                weight: Value(face.weight),
-                url: face.url,
-                data: data,
-              ),
-              onConflict: DoUpdate(
-                (_) => FontsCompanion.insert(
+        final consumedPerFamily = <String, int>{};
+        for (final face in faces) {
+          final familyBytes = legacyFonts is Map
+              ? legacyFonts[face.family]
+              : null;
+          if (familyBytes is! List || familyBytes.isEmpty) continue;
+
+          final index = consumedPerFamily.update(
+            face.family,
+            (count) => count + 1,
+            ifAbsent: () => 0,
+          );
+          if (index >= familyBytes.length) continue;
+
+          final data = Uint8List.fromList(
+            base64Decode(familyBytes[index] as String),
+          );
+          await db
+              .into(db.fonts)
+              .insert(
+                FontsCompanion.insert(
                   family: face.family,
                   weight: Value(face.weight),
                   url: face.url,
                   data: data,
                 ),
-                target: [db.fonts.url],
+                onConflict: DoUpdate(
+                  (_) => FontsCompanion.insert(
+                    family: face.family,
+                    weight: Value(face.weight),
+                    url: face.url,
+                    data: data,
+                  ),
+                  target: [db.fonts.url],
+                ),
+              );
+        }
+
+        blob['fonts'] = [for (final face in faces) face.toJson()];
+        final updatedContent = PageContent.fromJson(blob);
+
+        await (db.update(db.downloadedPages)..where(
+              (tbl) => tbl.chapterId.equals(id) & tbl.page.equals(page.page),
+            ))
+            .write(
+              DownloadedPagesCompanion(
+                data: Value(pageContentConverter.toSql(updatedContent)),
               ),
             );
+
+        log.info(
+          'migrated legacy epub page fonts',
+          attributes: {'chapter_id': id, 'page': page},
+        );
+      } catch (e, stacktrace) {
+        log.error(
+          'failed to migrate fonts of downloaded epub page',
+          error: e,
+          stacktrace: stacktrace,
+          attributes: {'chapter_id': id, 'page': page},
+        );
       }
-
-      blob['fonts'] = [for (final face in faces) face.toJson()];
-      final updatedContent = PageContent.fromJson(blob);
-
-      await (db.update(db.downloadedPages)..where(
-            (tbl) => tbl.chapterId.equals(chapterId) & tbl.page.equals(page),
-          ))
-          .write(
-            DownloadedPagesCompanion(
-              data: Value(pageContentConverter.toSql(updatedContent)),
-            ),
-          );
-
-      log.info(
-        'migrated legacy epub page fonts',
-        attributes: {'chapter_id': chapterId, 'page': page},
-      );
-    } catch (e, stacktrace) {
-      log.error(
-        'failed to migrate fonts of downloaded epub page',
-        error: e,
-        stacktrace: stacktrace,
-        attributes: {'chapter_id': chapterId, 'page': page},
-      );
     }
   }
 }
