@@ -1,4 +1,3 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/riverpod/providers/local_log.dart';
@@ -8,9 +7,11 @@ import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/riverpod/repository/sentry_repository.dart';
 import 'package:kover/sync/background.dart';
 import 'package:kover/utils/extensions/kover_theme_mode.dart';
+import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/sentry.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/breakpoints.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 Future<void> main() async {
@@ -63,7 +64,48 @@ class App extends ConsumerWidget {
               return MaterialUiCompatibilityBridge(child: child!);
             },
           ),
-          loading: () => const SizedBox.shrink(),
+          loading: () => const AppLoading(),
+        ),
+      ),
+    );
+  }
+}
+
+class AppLoading extends StatelessWidget {
+  const new({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = const ThemeModel();
+
+    return MaterialApp(
+      title: 'Kover',
+      debugShowCheckedModeBanner: false,
+      theme: theme.lightTheme,
+      darkTheme: theme.darkTheme,
+      localizationsDelegates: const [
+        ...AppLocalizations.localizationsDelegates,
+        ...GlobalMaterialLocalizations.delegates,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: .min,
+            mainAxisAlignment: .center,
+            spacing: LayoutConstants.mediumPadding,
+            children: [
+              const CircularProgressIndicator(),
+              Builder(
+                builder: (context) {
+                  final l = AppLocalizations.of(context);
+                  return Text(l.startupLoadingMessage);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
