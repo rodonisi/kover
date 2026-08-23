@@ -124,14 +124,14 @@ Future<void> _migrateLegacyPageFonts(AppDatabase db) async {
 
         log.info(
           'migrated legacy epub page fonts',
-          attributes: {'chapter_id': id, 'page': page},
+          attributes: {'chapter_id': id, 'page': page.page},
         );
       } catch (e, stacktrace) {
         log.error(
           'failed to migrate fonts of downloaded epub page',
           error: e,
           stacktrace: stacktrace,
-          attributes: {'chapter_id': id, 'page': page},
+          attributes: {'chapter_id': id, 'page': page.page},
         );
       }
     }
