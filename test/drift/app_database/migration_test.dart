@@ -4,8 +4,11 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:drift_dev/api/migrations_native.dart';
+import 'package:html/parser.dart';
+import 'package:kover/database/converters/page_content_converter.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kover/database/migrations/steps/from_9_to_10.dart';
 import 'package:kover/database/tables/series_metadata.dart';
 import 'package:kover/models/enums/format.dart';
 import 'package:kover/models/enums/library_type.dart';
@@ -368,62 +371,91 @@ void main() {
   });
 
   group('from 9 to 10', () {
-    test('moves embedded epub page fonts into the fonts table', () async {
-      final legacyBlob = jsonEncode({
-        'root':
-            '<html><head>'
-            '<style>@font-face { font-family: TestFont; '
-            'src: url(fonts://t/regular.ttf); }</style>'
-            '<style>@font-face { font-family: TestFont; font-weight: 700; '
-            'src: url(fonts://t/bold.ttf); }</style>'
-            '</head><body><p>hello</p></body></html>',
-        'styles': <String, Map<String, String>>{},
-        'fonts': {
-          'TestFont': [
-            base64Encode([1, 2, 3, 4]),
-            base64Encode([5, 6, 7, 8]),
-          ],
-        },
-      });
+    // Font payloads are opaque to the migration; headers only mimic real
+    // font files.
+    final font = Uint8List.fromList([0, 1, 2, 3]);
+    final font2 = Uint8List.fromList([4, 2]);
 
-      final schema = await verifier.schemaAt(9);
-      final oldDb = v9.DatabaseAtV9(schema.newConnection());
-      await oldDb
-          .into(oldDb.chapters)
-          .insert(
-            v9.ChaptersCompanion.insert(
-              id: const Value(1),
-              volumeId: 1,
-              seriesId: 1,
-              minNumber: 1.0,
-              maxNumber: 1.0,
-              pages: 1,
-              wordCount: 0,
-              sortOrder: 1.0,
-              format: 'epub',
-              ageRating: 0,
-              publicationStatus: PublicationStatus.unknown.name,
-              releaseDate: DateTime.now().millisecondsSinceEpoch,
-              created: DateTime.now().millisecondsSinceEpoch,
-              lastModified: DateTime.now().millisecondsSinceEpoch,
-            ),
-          );
-      await oldDb
-          .into(oldDb.downloadedPages)
-          .insert(
-            v9.DownloadedPagesCompanion.insert(
-              chapterId: 1,
-              page: 0,
-              data: utf8.encode(legacyBlob),
-            ),
-          );
-      await oldDb.close();
+    Map<String, dynamic> legacyPage({
+      String root =
+          '<style>@font-face { font-family: TestFont; '
+          'src: url(fonts://t/regular.ttf); }</style>'
+          '<p>hello</p>',
+      Object? fonts,
+    }) => {
+      'root': root,
+      'styles': <String, Map<String, String>>{},
+      'fonts': fonts ?? <String, dynamic>{},
+    };
 
+    Future<void> insertEpubChapter(
+      v9.DatabaseAtV9 oldDb,
+      int id, {
+      String format = 'epub',
+    }) => oldDb
+        .into(oldDb.chapters)
+        .insert(
+          v9.ChaptersCompanion.insert(
+            id: Value(id),
+            volumeId: 1,
+            seriesId: 1,
+            minNumber: 1.0,
+            maxNumber: 1.0,
+            pages: 1,
+            wordCount: 0,
+            sortOrder: 1.0,
+            format: format,
+            ageRating: 0,
+            publicationStatus: PublicationStatus.unknown.name,
+            releaseDate: DateTime.now().millisecondsSinceEpoch,
+            created: DateTime.now().millisecondsSinceEpoch,
+            lastModified: DateTime.now().millisecondsSinceEpoch,
+          ),
+        );
+
+    Future<void> insertLegacyPage(
+      v9.DatabaseAtV9 oldDb,
+      int chapterId,
+      int page,
+      Uint8List data,
+    ) => oldDb
+        .into(oldDb.downloadedPages)
+        .insert(
+          v9.DownloadedPagesCompanion.insert(
+            chapterId: chapterId,
+            page: page,
+            data: data,
+          ),
+        );
+
+    Future<v10.DatabaseAtV10> migrateTo10(dynamic schema) async {
       final db = AppDatabase(schema.newConnection());
       await verifier.migrateAndValidate(db, 10);
       await db.close();
+      return v10.DatabaseAtV10(schema.newConnection());
+    }
 
-      final migratedDb = v10.DatabaseAtV10(schema.newConnection());
+    test('moves embedded epub page fonts into the fonts table', () async {
+      final page = legacyPage(
+        root: parseFragment(
+          '<style>@font-face { font-family: TestFont; '
+          'src: url(fonts://t/regular.ttf); }</style>'
+          '<style>@font-face { font-family: TestFont; font-weight: 700; '
+          'src: url(fonts://t/bold.ttf); }</style>'
+          '<p>hello</p>',
+        ).outerHtml,
+        fonts: {
+          'TestFont': [base64Encode(font), base64Encode(font2)],
+        },
+      );
+
+      final schema = await verifier.schemaAt(9);
+      final oldDb = v9.DatabaseAtV9(schema.newConnection());
+      await insertEpubChapter(oldDb, 1);
+      await insertLegacyPage(oldDb, 1, 0, pageBlobConverter.toSql(page));
+      await oldDb.close();
+
+      final migratedDb = await migrateTo10(schema);
 
       final fonts = await migratedDb.select(migratedDb.fonts).get();
       expect(fonts, hasLength(2));
@@ -433,17 +465,18 @@ void main() {
       );
       expect(regular.family, 'TestFont');
       expect(regular.weight, null);
-      expect(regular.data, Uint8List.fromList([1, 2, 3, 4]));
+      expect(regular.data, font);
 
       final bold = fonts.firstWhere((f) => f.url == 'fonts://t/bold.ttf');
       expect(bold.family, 'TestFont');
       expect(bold.weight, 700);
-      expect(bold.data, Uint8List.fromList([5, 6, 7, 8]));
+      expect(bold.data, font2);
 
       final storedPage = await migratedDb
           .select(migratedDb.downloadedPages)
           .getSingle();
-      final rewritten = jsonDecode(utf8.decode(storedPage.data));
+      final rewritten = pageBlobConverter.fromSql(storedPage.data);
+      expect(rewritten['root'], page['root']);
       expect(rewritten['fonts'], [
         {'family': 'TestFont', 'weight': null, 'url': 'fonts://t/regular.ttf'},
         {'family': 'TestFont', 'weight': 700, 'url': 'fonts://t/bold.ttf'},
@@ -452,61 +485,114 @@ void main() {
       await migratedDb.close();
     });
 
-    test('leaves pages without embedded fonts untouched', () async {
-      final legacyBlob = jsonEncode({
-        'root': '<html><body><p>no fonts here</p></body></html>',
-        'styles': <String, Map<String, String>>{},
-        'fonts': <String, dynamic>{},
-      });
+    test('rewrites pages without embedded fonts to the new format', () async {
+      final page = legacyPage(root: '<p>hello</p>');
 
       final schema = await verifier.schemaAt(9);
       final oldDb = v9.DatabaseAtV9(schema.newConnection());
-      await oldDb
-          .into(oldDb.chapters)
-          .insert(
-            v9.ChaptersCompanion.insert(
-              id: const Value(1),
-              volumeId: 1,
-              seriesId: 1,
-              minNumber: 1.0,
-              maxNumber: 1.0,
-              pages: 1,
-              wordCount: 0,
-              sortOrder: 1.0,
-              format: 'epub',
-              ageRating: 0,
-              publicationStatus: PublicationStatus.unknown.name,
-              releaseDate: DateTime.now().millisecondsSinceEpoch,
-              created: DateTime.now().millisecondsSinceEpoch,
-              lastModified: DateTime.now().millisecondsSinceEpoch,
-            ),
-          );
-      await oldDb
-          .into(oldDb.downloadedPages)
-          .insert(
-            v9.DownloadedPagesCompanion.insert(
-              chapterId: 1,
-              page: 0,
-              data: utf8.encode(legacyBlob),
-            ),
-          );
+      await insertEpubChapter(oldDb, 1);
+      await insertLegacyPage(oldDb, 1, 0, pageBlobConverter.toSql(page));
       await oldDb.close();
 
-      final db = AppDatabase(schema.newConnection());
-      await verifier.migrateAndValidate(db, 10);
-      await db.close();
-
-      final migratedDb = v10.DatabaseAtV10(schema.newConnection());
+      final migratedDb = await migrateTo10(schema);
 
       expect(await migratedDb.select(migratedDb.fonts).get(), isEmpty);
 
       final storedPage = await migratedDb
           .select(migratedDb.downloadedPages)
           .getSingle();
-      expect(
-        utf8.decode(storedPage.data),
-        legacyBlob,
+      final rewritten = pageBlobConverter.fromSql(storedPage.data);
+      expect(rewritten['fonts'], isEmpty);
+
+      await migratedDb.close();
+    });
+
+    test(
+      'drops fonts from pages whose only fonts are unsupported formats',
+      () async {
+        final page = legacyPage(
+          root:
+              '<style>@font-face { font-family: TestFont; '
+              'src: url(fonts://t/book.woff); }</style>'
+              '<p>hello</p>',
+          fonts: {
+            'TestFont': [base64Encode(font)],
+          },
+        );
+
+        final schema = await verifier.schemaAt(9);
+        final oldDb = v9.DatabaseAtV9(schema.newConnection());
+        await insertEpubChapter(oldDb, 1);
+        await insertLegacyPage(oldDb, 1, 0, pageBlobConverter.toSql(page));
+        await oldDb.close();
+
+        final migratedDb = await migrateTo10(schema);
+
+        expect(await migratedDb.select(migratedDb.fonts).get(), isEmpty);
+
+        final storedPage = await migratedDb
+            .select(migratedDb.downloadedPages)
+            .getSingle();
+        final rewritten = pageBlobConverter.fromSql(storedPage.data);
+        expect(rewritten['fonts'], isEmpty);
+
+        await migratedDb.close();
+      },
+    );
+
+    test('skips undecodable blobs and keeps migrating', () async {
+      final page = legacyPage(root: '<p>hello</p>');
+
+      final schema = await verifier.schemaAt(9);
+      final oldDb = v9.DatabaseAtV9(schema.newConnection());
+      await insertEpubChapter(oldDb, 1);
+      await insertLegacyPage(
+        oldDb,
+        1,
+        0,
+        Uint8List.fromList([0x89, 0x50, 0x4e, 0x47]),
       );
+      await insertLegacyPage(oldDb, 1, 1, pageBlobConverter.toSql(page));
+      await oldDb.close();
+
+      final migratedDb = await migrateTo10(schema);
+
+      expect(await migratedDb.select(migratedDb.fonts).get(), isEmpty);
+
+      final pages = await migratedDb.select(migratedDb.downloadedPages).get();
+      expect(pages, hasLength(2));
+
+      // The corrupt row is left exactly as it was stored.
+      final corrupt = pages.singleWhere((p) => p.page == 0);
+      expect(corrupt.data, [0x89, 0x50, 0x4e, 0x47]);
+
+      // The decodable row is rewritten to the new format.
+      final rewritten = pages.singleWhere((p) => p.page == 1);
+      expect(
+        pageBlobConverter.fromSql(rewritten.data)['fonts'],
+        isEmpty,
+      );
+
+      await migratedDb.close();
+    });
+
+    test('leaves downloads of other formats untouched', () async {
+      final rawBytes = Uint8List.fromList([0xff, 0xd8, 0xff, 0xe0]);
+
+      final schema = await verifier.schemaAt(9);
+      final oldDb = v9.DatabaseAtV9(schema.newConnection());
+      await insertEpubChapter(oldDb, 2, format: 'archive');
+      await insertLegacyPage(oldDb, 2, 0, rawBytes);
+      await oldDb.close();
+
+      final migratedDb = await migrateTo10(schema);
+
+      expect(await migratedDb.select(migratedDb.fonts).get(), isEmpty);
+
+      final storedPage = await migratedDb
+          .select(migratedDb.downloadedPages)
+          .getSingle();
+      expect(storedPage.data, rawBytes);
 
       await migratedDb.close();
     });

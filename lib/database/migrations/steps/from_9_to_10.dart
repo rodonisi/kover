@@ -1,10 +1,13 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:html/parser.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/app_database.steps.dart';
+import 'package:kover/database/converters/page_content_converter.dart';
 import 'package:kover/models/enums/format.dart';
+import 'package:kover/models/page_content.dart';
 import 'package:kover/utils/epub_font_parser.dart';
 import 'package:kover/utils/logging.dart';
 
@@ -19,12 +22,21 @@ Future<void> migrateFrom9To10(
   });
 }
 
+@visibleForTesting
+final pageBlobConverter = TypeConverter.jsonb<Map<String, dynamic>>(
+  fromJson: (json) => json as Map<String, dynamic>,
+);
+
 /// Moves the font bytes embedded in pre-migration epub page blobs into the
 /// fonts table and rewrites the blobs to only carry [FontFace] models.
 ///
 /// Legacy blobs embed their bytes as a `{family: [bytes]}` map whose order
 /// matches the order of the `@font-face` sources declared in the stored
-/// HTML, so faces and bytes are paired by index within each family.
+/// HTML, so faces and bytes are paired by index within each family. Blobs
+/// that cannot be decoded are skipped; every decodable legacy blob is
+/// rewritten to the new format, even when no face can be migrated, because
+/// leaving the legacy map behind would break JSON decoding of the page at
+/// read time.
 Future<void> _migrateLegacyPageFonts(AppDatabase db) async {
   final rows = await (db.select(db.downloadedPages).join([
     innerJoin(
@@ -40,25 +52,23 @@ Future<void> _migrateLegacyPageFonts(AppDatabase db) async {
     if (chapterId == null || page == null) continue;
 
     try {
-      final blob = jsonDecode(
-        utf8.decode(row.read(db.downloadedPages.data) as Uint8List),
+      final blob = pageBlobConverter.fromSql(
+        row.read(db.downloadedPages.data) as Uint8List,
       );
-      if (blob is! Map<String, dynamic>) continue;
 
       final legacyFonts = blob['fonts'];
-      if (legacyFonts is! Map<String, dynamic> || legacyFonts.isEmpty) {
-        continue;
-      }
+      if (legacyFonts is List) continue;
 
       final root = parseFragment(blob['root'] as String? ?? '');
       final faces = EpubFontParser.parseStyles(
         root.querySelectorAll('style'),
       );
 
-      var migrated = false;
       final consumedPerFamily = <String, int>{};
       for (final face in faces) {
-        final familyBytes = legacyFonts[face.family];
+        final familyBytes = legacyFonts is Map
+            ? legacyFonts[face.family]
+            : null;
         if (familyBytes is! List || familyBytes.isEmpty) continue;
 
         final index = consumedPerFamily.update(
@@ -90,18 +100,17 @@ Future<void> _migrateLegacyPageFonts(AppDatabase db) async {
                 target: [db.fonts.url],
               ),
             );
-        migrated = true;
       }
 
-      if (!migrated) continue;
-
       blob['fonts'] = [for (final face in faces) face.toJson()];
+      final updatedContent = PageContent.fromJson(blob);
+
       await (db.update(db.downloadedPages)..where(
             (tbl) => tbl.chapterId.equals(chapterId) & tbl.page.equals(page),
           ))
           .write(
             DownloadedPagesCompanion(
-              data: Value(utf8.encode(jsonEncode(blob))),
+              data: Value(pageContentConverter.toSql(updatedContent)),
             ),
           );
 
