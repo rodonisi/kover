@@ -5,6 +5,7 @@ import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:material_ui/material_ui.dart';
 
 class const EpubHorizontalSubpages({
@@ -62,31 +63,37 @@ class const EpubHorizontalSubpages({
       navigationProvider.select(
         (state) => state.whenData(
           (data) {
-            if (data.page != page || data.fromObserver) return null;
+            if (data.page != page) return null;
 
-            return spreads ? data.subpage ~/ 2 : data.subpage;
+            return (
+              fromObserver: data.fromObserver,
+              subpage: spreads ? data.subpage ~/ 2 : data.subpage,
+            );
           },
         ),
       ),
       (previous, next) async {
         next.whenData((next) async {
-          final previousSubpage = previous?.value;
-          if (next == null || next == previousSubpage) {
+          final previousSubpage = previous?.value?.subpage;
+          if (next == null ||
+              next.subpage == previousSubpage ||
+              next.fromObserver ||
+              !controller.hasClients ||
+              controller.page?.round() == next.subpage) {
             return;
           }
 
-          if (controller.hasClients && controller.page?.round() != next) {
-            final isSequential =
-                previousSubpage != null && (next - previousSubpage).abs() == 1;
+          final isSequential =
+              previousSubpage != null &&
+              (next.subpage - previousSubpage).abs() == 1;
 
-            isSequential && !data.reduceAnimations
-                ? controller.animateToPage(
-                    next,
-                    duration: LayoutConstants.pageSlideDuration,
-                    curve: Curves.easeInOut,
-                  )
-                : controller.jumpToPage(next);
-          }
+          isSequential && !data.reduceAnimations
+              ? controller.animateToPage(
+                  next.subpage,
+                  duration: LayoutConstants.pageSlideDuration,
+                  curve: Curves.easeInOut,
+                )
+              : controller.jumpToPage(next.subpage);
         });
       },
     );

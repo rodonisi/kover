@@ -83,4 +83,5 @@ sealed class KoverIcons {
   static const IconData collapsePanel = LucideIcons.panelLeftClose;
   static const IconData carousel = LucideIcons.galleryHorizontalEnd;
   static const IconData grid = LucideIcons.layoutGrid;
+  static const IconData keyboard = LucideIcons.keyboard;
 }
