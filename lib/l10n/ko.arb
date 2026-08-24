@@ -849,5 +849,42 @@
     "tags": "태그",
     "@tags": {
         "description": "Label for the tags section in the series details page"
+    },
+    "syncingSmartFilters": "스마트 필터 동기화 중",
+    "@syncingSmartFilters": {
+        "description": "Label for the syncing smart filters phase"
+    },
+    "syncingDashboard": "대시보드 순서 동기화 중",
+    "@syncingDashboard": {
+        "description": "Label for the dashboard syncing phase"
+    },
+    "textAlignment": "텍스트 정렬",
+    "@textAlignment": {
+        "description": "Label for the text alignment setting"
+    },
+    "left": "왼쪽",
+    "@left": {
+        "description": "Label for the left text alignment option"
+    },
+    "center": "가운데",
+    "@center": {
+        "description": "Label for the center text alignment option"
+    },
+    "right": "오른쪽",
+    "@right": {
+        "description": "Label for the right text alignment option"
+    },
+    "justify": "양쪽",
+    "@justify": {
+        "description": "Label for the justify text alignment option"
+    },
+    "removeParagraphIndentation": "문단 들여쓰기 제거",
+    "removeParagraphIndentationDescription": "활성화하면 문단 들여쓰기를 텍스트에서 제거합니다. 비활성화하면 EPUB의 원본 들여쓰기가 유지됩니다.",
+    "@removeParagraphIndentationDescription": {
+        "description": "Description for the remove paragraphs indent setting"
+    },
+    "startupLoadingMessage": "설정 완료, 잠시 기다려 주십시오...",
+    "@startupLoadingMessage": {
+        "description": "Message shown when the app is starting up and loading data"
     }
 }
