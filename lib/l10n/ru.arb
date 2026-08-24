@@ -882,5 +882,9 @@
     "removeParagraphIndentationDescription": "Если включено, отступы первой строки убираются из текста. Если выключено, сохраняется исходное форматирование из файла EPUB.",
     "@removeParagraphIndentationDescription": {
         "description": "Description for the remove paragraphs indent setting"
+    },
+    "startupLoadingMessage": "Идет настройка, пожалуйста, подождите...",
+    "@startupLoadingMessage": {
+        "description": "Message shown when the app is starting up and loading data"
     }
 }
