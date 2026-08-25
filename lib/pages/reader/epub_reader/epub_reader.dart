@@ -117,58 +117,55 @@ class EpubReader extends HookConsumerWidget {
                   });
                 });
 
-                return SafeArea(
-                  bottom: false,
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: Offstage(
-                          offstage: !navState.ready,
-                          child: PageView.builder(
-                            clipBehavior: .none,
-                            controller: controller,
-                            itemCount: navState.totalPages,
-                            allowImplicitScrolling: true,
-                            scrollCacheExtent: const .viewport(4),
-                            scrollDirection: switch (readerMode) {
-                              .horizontal => .horizontal,
-                              .vertical => .vertical,
-                              .spreads => .horizontal,
-                            },
-                            reverse:
-                                commonSettings.readDirection == .rightToLeft &&
-                                readerMode != .vertical,
-                            physics: const NeverScrollableScrollPhysics(),
-                            onPageChanged: (newPage) {
-                              ref.read(nav.notifier).jumpToPage(newPage);
-                            },
-                            itemBuilder: (context, index) {
-                              return _Page(
-                                seriesId: seriesId,
-                                chapterId: chapterId,
-                                page: index,
-                                reverse:
-                                    commonSettings.readDirection ==
-                                        .rightToLeft &&
-                                    readerMode != .vertical,
-                                mode: readerMode,
-                                outerController: controller,
-                                onSelectionChanged: (selected) {
-                                  if (selected != hasSelection.value) {
-                                    hasSelection.value = selected;
-                                  }
-                                },
-                              );
-                            },
-                          ),
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Offstage(
+                        offstage: !navState.ready,
+                        child: PageView.builder(
+                          clipBehavior: .none,
+                          controller: controller,
+                          itemCount: navState.totalPages,
+                          allowImplicitScrolling: true,
+                          scrollCacheExtent: const .viewport(4),
+                          scrollDirection: switch (readerMode) {
+                            .horizontal => .horizontal,
+                            .vertical => .vertical,
+                            .spreads => .horizontal,
+                          },
+                          reverse:
+                              commonSettings.readDirection == .rightToLeft &&
+                              readerMode != .vertical,
+                          physics: const NeverScrollableScrollPhysics(),
+                          onPageChanged: (newPage) {
+                            ref.read(nav.notifier).jumpToPage(newPage);
+                          },
+                          itemBuilder: (context, index) {
+                            return _Page(
+                              seriesId: seriesId,
+                              chapterId: chapterId,
+                              page: index,
+                              reverse:
+                                  commonSettings.readDirection ==
+                                      .rightToLeft &&
+                                  readerMode != .vertical,
+                              mode: readerMode,
+                              outerController: controller,
+                              onSelectionChanged: (selected) {
+                                if (selected != hasSelection.value) {
+                                  hasSelection.value = selected;
+                                }
+                              },
+                            );
+                          },
                         ),
                       ),
-                      if (!navState.ready)
-                        const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                    ],
-                  ),
+                    ),
+                    if (!navState.ready)
+                      const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                  ],
                 );
               },
             ),
