@@ -10,11 +10,10 @@ import 'package:kover/riverpod/providers/library.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/context_menu/context_menu_button.dart';
-import 'package:kover/widgets/details/filter_input_field.dart';
 import 'package:kover/widgets/lists/series_sliver_grid.dart';
+import 'package:kover/widgets/sliver_list_page/sliver_page_shell.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/login_guard.dart';
-import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart' show LucideIcons;
 
 class AllSeriesPage extends StatelessWidget {
@@ -134,65 +133,41 @@ class SeriesPage extends HookConsumerWidget {
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      body: CustomScrollView(
-        keyboardDismissBehavior: .onDrag,
+      body: SliverPageShell(
+        title: title,
+        filterController: controller,
+        appBarActions: [
+          ContextMenuButton(
+            icon: Icon(
+              sortDirection.value == .ascending
+                  ? LucideIcons.arrowDownNarrowWide
+                  : LucideIcons.arrowDownWideNarrow,
+            ),
+            menu: _menu(
+              sortOption: sortOption,
+              sortDirection: sortDirection,
+              context: context,
+            ),
+          ),
+        ],
         slivers: [
-          SliverAppBar.large(
-            title: Text(title),
-            actionsPadding: const EdgeInsets.symmetric(
-              horizontal: LayoutConstants.smallPadding,
-            ),
-            actions: [
-              ContextMenuButton(
-                icon: Icon(
-                  sortDirection.value == .ascending
-                      ? LucideIcons.arrowDownNarrowWide
-                      : LucideIcons.arrowDownWideNarrow,
-                ),
-                menu: _menu(
-                  sortOption: sortOption,
-                  sortDirection: sortDirection,
-                  context: context,
-                ),
-              ),
-            ],
+          AsyncSliver(
+            asyncValue: allSeries,
+            data: (data) {
+              return AsyncSliver(
+                asyncValue: query,
+                data: (search) {
+                  final filteredData = controller.text.isEmpty ? data : search;
+                  return SliverPadding(
+                    padding: LayoutConstants.smallEdgeInsets,
+                    sliver: SeriesSliverGrid(
+                      series: filteredData,
+                    ),
+                  );
+                },
+              );
+            },
           ),
-          SliverSafeArea(
-            top: false,
-            bottom: false,
-            sliver: SliverMainAxisGroup(
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: LayoutConstants.mediumPadding,
-                  ),
-                  sliver: SliverToBoxAdapter(
-                    child: FilterInputField(controller: controller),
-                  ),
-                ),
-                AsyncSliver(
-                  asyncValue: allSeries,
-                  data: (data) {
-                    return AsyncSliver(
-                      asyncValue: query,
-                      data: (search) {
-                        final filteredData = controller.text.isEmpty
-                            ? data
-                            : search;
-                        return SliverPadding(
-                          padding: LayoutConstants.smallEdgeInsets,
-                          sliver: SeriesSliverGrid(
-                            series: filteredData,
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          const SliverBottomPadding(),
         ],
       ),
     );

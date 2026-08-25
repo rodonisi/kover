@@ -1,10 +1,9 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/models/reading_list_model.dart';
-import 'package:kover/models/series_model.dart';
 import 'package:kover/pages/home/collapsible_section.dart';
+import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/smart_filter.dart';
-import 'package:kover/widgets/lists/reading_lists_sliver_grid.dart';
-import 'package:kover/widgets/lists/series_sliver_grid.dart';
+import 'package:kover/widgets/cards/reading_list_card.dart';
+import 'package:kover/widgets/cards/series_card.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -56,19 +55,13 @@ class _SmartFilterSeriesSection extends ConsumerWidget {
 
     return AsyncSliver(
       asyncValue: series,
-      data: (data) => CollapsibleSection<SeriesModel>(
+      data: (data) => CollapsibleSection.series(
         title: title,
         items: data,
-        gridBuilder:
-            (
-              items,
-              rowCount,
-              onCrossAxisCountChanged,
-            ) => SeriesSliverGrid(
-              series: items,
-              rowCount: rowCount,
-              onCrossAxisCountChanged: onCrossAxisCountChanged,
-            ),
+        itemBuilder: (context, item) =>
+            SeriesCard(key: ValueKey(item.id), seriesId: item.id),
+        onNavigate: () =>
+            SmartFilterRoute(smartFilterId: smartFilterId).push(context),
       ),
     );
   }
@@ -91,19 +84,13 @@ class _SmartFilterReadingListsSection extends ConsumerWidget {
 
     return AsyncSliver(
       asyncValue: readingLists,
-      data: (data) => CollapsibleSection<ReadingListModel>(
+      data: (data) => CollapsibleSection.readingLists(
         title: title,
         items: data,
-        gridBuilder:
-            (
-              items,
-              rowCount,
-              onCrossAxisCountChanged,
-            ) => ReadingListsSliverGrid(
-              readingLists: items,
-              rowCount: rowCount,
-              onCrossAxisCountChanged: onCrossAxisCountChanged,
-            ),
+        itemBuilder: (context, item) =>
+            ReadingListCard(key: ValueKey(item.id), readingListId: item.id),
+        onNavigate: () =>
+            SmartFilterRoute(smartFilterId: smartFilterId).push(context),
       ),
     );
   }

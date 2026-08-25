@@ -1,3 +1,4 @@
+import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,41 +20,30 @@ class AdaptiveSliverGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return SliverLayoutBuilder(
-      builder: (context, constraints) {
-        return HookBuilder(
-          builder: (context) {
-            final crossAxisCount = useMemoized(
-              () => switch (constraints.crossAxisExtent) {
-                final width when width >= LayoutBreakpoints.large => 10,
-                final width when width >= LayoutBreakpoints.expanded => 8,
-                final width when width >= LayoutBreakpoints.medium => 6,
-                final width when width >= LayoutBreakpoints.compact => 4,
-                _ => 3,
-              },
-              [constraints.crossAxisExtent],
-            );
+    return HookBuilder(
+      builder: (context) {
+        final crossAxisCount = ref
+            .watch(breakpointsProvider)
+            .adaptiveCrossAxisCount;
 
-            useEffect(() {
-              onCrossAxisCountChanged?.call(crossAxisCount);
-              return null;
-            }, [crossAxisCount]);
+        useEffect(() {
+          onCrossAxisCountChanged?.call(crossAxisCount);
+          return null;
+        }, [crossAxisCount]);
 
-            final items = rowCount != null
-                ? (rowCount! * crossAxisCount).clamp(0, itemCount)
-                : itemCount;
+        final items = rowCount != null
+            ? (rowCount! * crossAxisCount).clamp(0, itemCount)
+            : itemCount;
 
-            return SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                childAspectRatio: LayoutConstants.chapterCardAspectRatio,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                builder,
-                childCount: items,
-              ),
-            );
-          },
+        return SliverGrid(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: LayoutConstants.chapterCardAspectRatio,
+          ),
+          delegate: SliverChildBuilderDelegate(
+            builder,
+            childCount: items,
+          ),
         );
       },
     );

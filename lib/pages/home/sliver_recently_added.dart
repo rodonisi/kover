@@ -1,9 +1,9 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
-import 'package:kover/models/series_model.dart';
 import 'package:kover/pages/home/collapsible_section.dart';
+import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/series.dart';
-import 'package:kover/widgets/lists/series_sliver_grid.dart';
+import 'package:kover/widgets/cards/series_card.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -17,16 +17,15 @@ class SliverRecentlyAdded extends ConsumerWidget {
 
     return AsyncSliver(
       asyncValue: series,
-      data: (data) => CollapsibleSection<SeriesModel>(
-        title: l.recentlyAdded,
-        items: data,
-        gridBuilder: (items, rowCount, onCrossAxisCountChanged) =>
-            SeriesSliverGrid(
-              series: items,
-              rowCount: rowCount,
-              onCrossAxisCountChanged: onCrossAxisCountChanged,
-            ),
-      ),
+      data: (data) {
+        return CollapsibleSection.series(
+          title: l.recentlyAdded,
+          items: data,
+          itemBuilder: (context, item) =>
+              SeriesCard(key: ValueKey(item.id), seriesId: item.id),
+          onNavigate: () => const RecentlyAddedRoute().push(context),
+        );
+      },
     );
   }
 }
