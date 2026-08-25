@@ -2,11 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/widgets/sliver_list_page/series_list_page.dart';
 import 'package:kover/riverpod/providers/series.dart';
+import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/login_guard.dart';
 import 'package:material_ui/material_ui.dart';
 
 class RecentlyUpdatedPage extends StatelessWidget {
-  const RecentlyUpdatedPage({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,10 +16,14 @@ class RecentlyUpdatedPage extends StatelessWidget {
       extendBody: true,
       body: LoginGuard(
         child: Consumer(
-          builder: (context, ref, _) => SeriesListPage(
-            title: l.recentlyUpdated,
-            series: ref.watch(recentlyUpdatedProvider),
-          ),
+          builder: (context, ref, _) {
+            final series = ref.watch(recentlyUpdatedProvider);
+            return Async(
+              asyncValue: series,
+              data: (data) =>
+                  SeriesListPage(title: l.recentlyUpdated, series: data),
+            );
+          },
         ),
       ),
     );

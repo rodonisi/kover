@@ -1,42 +1,38 @@
-import 'package:kover/riverpod/providers/breakpoints.dart';
-import 'package:kover/utils/constants/kover_icons.dart';
-import 'package:kover/widgets/lists/adaptive_sliver_grid.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/reading_list_model.dart';
 import 'package:kover/models/series_model.dart';
+import 'package:kover/riverpod/providers/breakpoints.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/widgets/cards/reading_list_card.dart';
+import 'package:kover/widgets/cards/series_card.dart';
+import 'package:kover/widgets/lists/adaptive_sliver_grid.dart';
+import 'package:material_ui/material_ui.dart';
 
 class HomeSection<T> extends HookConsumerWidget {
   final String title;
   final List<T> items;
   final Widget Function(BuildContext context, T item) itemBuilder;
-  final String Function(BuildContext context, int count) countLabelBuilder;
   final VoidCallback? onNavigate;
 
   const HomeSection._({
     required this.title,
     required this.items,
     required this.itemBuilder,
-    required this.countLabelBuilder,
     this.onNavigate,
   });
 
   static HomeSection<SeriesModel> series({
     required String title,
     required List<SeriesModel> items,
-    required Widget Function(BuildContext context, SeriesModel item)
-    itemBuilder,
     VoidCallback? onNavigate,
   }) {
     return HomeSection._(
       title: title,
       items: items,
-      itemBuilder: itemBuilder,
-      countLabelBuilder: (context, total) =>
-          AppLocalizations.of(context).seriesCount(total),
+      itemBuilder: (context, item) =>
+          SeriesCard(key: ValueKey('$title-${item.id}'), seriesId: item.id),
       onNavigate: onNavigate,
     );
   }
@@ -44,22 +40,20 @@ class HomeSection<T> extends HookConsumerWidget {
   static HomeSection<ReadingListModel> readingLists({
     required String title,
     required List<ReadingListModel> items,
-    required Widget Function(BuildContext context, ReadingListModel item)
-    itemBuilder,
     VoidCallback? onNavigate,
   }) {
     return HomeSection._(
       title: title,
       items: items,
-      itemBuilder: itemBuilder,
-      countLabelBuilder: (context, total) =>
-          AppLocalizations.of(context).readingListsCount(total),
+      itemBuilder: (context, item) =>
+          ReadingListCard(key: ValueKey(item.id), readingListId: item.id),
       onNavigate: onNavigate,
     );
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final showGrid = useState(false);
 
     final total = items.length;
@@ -74,12 +68,31 @@ class HomeSection<T> extends HookConsumerWidget {
           padding: LayoutConstants.smallEdgeInsets,
           sliver: SliverToBoxAdapter(
             child: Row(
-              spacing: LayoutConstants.smallPadding,
+              mainAxisAlignment: .spaceBetween,
               children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                InkWell(
+                  borderRadius: .circular(LayoutConstants.largeBorderRadius),
+                  onTap: onNavigate,
+                  child: Padding(
+                    padding: const .symmetric(
+                      horizontal: LayoutConstants.smallPadding,
+                      vertical: LayoutConstants.smallestPadding,
+                    ),
+                    child: Row(
+                      mainAxisSize: .min,
+                      children: [
+                        Text(title, style: theme.textTheme.headlineSmall),
+                        const SizedBox(
+                          width: LayoutConstants.smallestPadding,
+                        ),
+                        Icon(
+                          KoverIcons.chevronRight,
+                          color: theme.colorScheme.onSurfaceVariant.withAlpha(
+                            0xdd,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 IconButton(
@@ -88,31 +101,6 @@ class HomeSection<T> extends HookConsumerWidget {
                     showGrid.value ? KoverIcons.carousel : KoverIcons.grid,
                   ),
                 ),
-                if (onNavigate != null)
-                  InkWell(
-                    borderRadius: BorderRadius.circular(
-                      LayoutConstants.largeBorderRadius,
-                    ),
-                    onTap: onNavigate,
-                    child: Padding(
-                      padding: const .all(
-                        LayoutConstants.smallPadding,
-                      ),
-                      child: Row(
-                        mainAxisSize: .min,
-                        children: [
-                          Text(
-                            countLabelBuilder(context, total),
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
-                          const SizedBox(
-                            width: LayoutConstants.smallestPadding,
-                          ),
-                          const Icon(KoverIcons.chevronRight),
-                        ],
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
@@ -129,7 +117,7 @@ class HomeSection<T> extends HookConsumerWidget {
           )
         else
           SliverPadding(
-            padding: const EdgeInsetsGeometry.symmetric(
+            padding: const .symmetric(
               horizontal: LayoutConstants.smallPadding,
             ),
             sliver: AdaptiveSliverGrid(
@@ -168,7 +156,7 @@ class _SectionCarousel extends ConsumerWidget {
           height: height,
           child: ListView.builder(
             scrollDirection: .horizontal,
-            padding: const EdgeInsets.symmetric(
+            padding: const .symmetric(
               horizontal: LayoutConstants.smallPadding,
             ),
             itemBuilder: itemBuilder,

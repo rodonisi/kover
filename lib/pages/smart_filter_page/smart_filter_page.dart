@@ -9,7 +9,7 @@ import 'package:material_ui/material_ui.dart';
 class SmartFilterPage extends HookConsumerWidget {
   final int smartFilterId;
 
-  const SmartFilterPage({
+  const new({
     super.key,
     required this.smartFilterId,
   });
@@ -24,17 +24,24 @@ class SmartFilterPage extends HookConsumerWidget {
         child: Async(
           asyncValue: filter,
           data: (data) => switch (data.type) {
-            .series => SeriesListPage(
-              title: data.name,
-              series: ref.watch(
+            .series => Async(
+              asyncValue: ref.watch(
                 smartFilterSeriesProvider(smartFilterId: smartFilterId),
               ),
+              data: (series) {
+                return SeriesListPage(title: data.name, series: series);
+              },
             ),
-            .readingList => ReadingListsListPage(
-              title: data.name,
-              readingLists: ref.watch(
+            .readingList => Async(
+              asyncValue: ref.watch(
                 smartFilterReadingListsProvider(smartFilterId: smartFilterId),
               ),
+              data: (readingLists) {
+                return ReadingListsListPage(
+                  title: data.name,
+                  readingLists: readingLists,
+                );
+              },
             ),
             _ => const SizedBox.shrink(),
           },

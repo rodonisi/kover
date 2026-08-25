@@ -9,14 +9,13 @@ import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/context_menu/context_menu_button.dart';
 import 'package:kover/widgets/lists/series_sliver_grid.dart';
 import 'package:kover/widgets/sliver_list_page/sliver_page_shell.dart';
-import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
 
 class SeriesListPage extends HookConsumerWidget {
   final String title;
-  final AsyncValue<List<SeriesModel>> series;
+  final List<SeriesModel> series;
 
-  const SeriesListPage({
+  const new({
     super.key,
     required this.title,
     required this.series,
@@ -28,6 +27,9 @@ class SeriesListPage extends HookConsumerWidget {
     final controller = useTextEditingController();
 
     useListenable(controller);
+
+    final filteredData = _filtered(series, controller.text);
+    final sortedData = _sorted(filteredData, sortDirection.value);
 
     return SliverPageShell(
       title: title,
@@ -44,17 +46,9 @@ class SeriesListPage extends HookConsumerWidget {
         ),
       ],
       slivers: [
-        AsyncSliver(
-          asyncValue: series,
-          data: (data) {
-            final filteredData = _filtered(data, controller.text);
-            final sortedData = _sorted(filteredData, sortDirection.value);
-
-            return SliverPadding(
-              padding: LayoutConstants.smallEdgeInsets,
-              sliver: SeriesSliverGrid(series: sortedData),
-            );
-          },
+        SliverPadding(
+          padding: LayoutConstants.smallEdgeInsets,
+          sliver: SeriesSliverGrid(series: sortedData),
         ),
       ],
     );

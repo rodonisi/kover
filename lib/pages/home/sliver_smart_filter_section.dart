@@ -2,8 +2,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/home/home_section.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/smart_filter.dart';
-import 'package:kover/widgets/cards/reading_list_card.dart';
-import 'package:kover/widgets/cards/series_card.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -58,8 +56,6 @@ class _SmartFilterSeriesSection extends ConsumerWidget {
       data: (data) => HomeSection.series(
         title: title,
         items: data,
-        itemBuilder: (context, item) =>
-            SeriesCard(key: ValueKey(item.id), seriesId: item.id),
         onNavigate: () =>
             SmartFilterRoute(smartFilterId: smartFilterId).push(context),
       ),
@@ -87,8 +83,6 @@ class _SmartFilterReadingListsSection extends ConsumerWidget {
       data: (data) => HomeSection.readingLists(
         title: title,
         items: data,
-        itemBuilder: (context, item) =>
-            ReadingListCard(key: ValueKey(item.id), readingListId: item.id),
         onNavigate: () =>
             SmartFilterRoute(smartFilterId: smartFilterId).push(context),
       ),

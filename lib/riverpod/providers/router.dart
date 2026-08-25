@@ -199,14 +199,14 @@ class AllSeriesRoute extends GoRouteData with $AllSeriesRoute {
 }
 
 class OnDeckRoute extends GoRouteData with $OnDeckRoute {
-  const OnDeckRoute();
+  const new();
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const OnDeckPage();
 }
 
 class RecentlyAddedRoute extends GoRouteData with $RecentlyAddedRoute {
-  const RecentlyAddedRoute();
+  const new();
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
@@ -214,7 +214,7 @@ class RecentlyAddedRoute extends GoRouteData with $RecentlyAddedRoute {
 }
 
 class RecentlyUpdatedRoute extends GoRouteData with $RecentlyUpdatedRoute {
-  const RecentlyUpdatedRoute();
+  const new();
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
@@ -224,7 +224,7 @@ class RecentlyUpdatedRoute extends GoRouteData with $RecentlyUpdatedRoute {
 class SmartFilterRoute extends GoRouteData with $SmartFilterRoute {
   final int smartFilterId;
 
-  const SmartFilterRoute({required this.smartFilterId});
+  const new({required this.smartFilterId});
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>

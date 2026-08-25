@@ -9,7 +9,7 @@ class SliverPageShell extends StatelessWidget {
   final TextEditingController filterController;
   final List<Widget> slivers;
 
-  const SliverPageShell({
+  const new({
     super.key,
     required this.title,
     required this.filterController,

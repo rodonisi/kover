@@ -9,14 +9,13 @@ import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/context_menu/context_menu_button.dart';
 import 'package:kover/widgets/lists/reading_lists_sliver_grid.dart';
 import 'package:kover/widgets/sliver_list_page/sliver_page_shell.dart';
-import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
 
 class ReadingListsListPage extends HookConsumerWidget {
   final String title;
-  final AsyncValue<List<ReadingListModel>> readingLists;
+  final List<ReadingListModel> readingLists;
 
-  const ReadingListsListPage({
+  const new({
     super.key,
     required this.title,
     required this.readingLists,
@@ -28,6 +27,15 @@ class ReadingListsListPage extends HookConsumerWidget {
     final controller = useTextEditingController();
 
     useListenable(controller);
+
+    final filteredData = _filteredReadingLists(
+      data: readingLists,
+      query: controller.text,
+    );
+    final sortedData = _sortedReadingLists(
+      data: filteredData,
+      direction: sortDirection.value,
+    );
 
     return SliverPageShell(
       title: title,
@@ -43,23 +51,9 @@ class ReadingListsListPage extends HookConsumerWidget {
         ),
       ],
       slivers: [
-        AsyncSliver(
-          asyncValue: readingLists,
-          data: (data) {
-            final filteredData = _filteredReadingLists(
-              data: data,
-              query: controller.text,
-            );
-            final sortedData = _sortedReadingLists(
-              data: filteredData,
-              direction: sortDirection.value,
-            );
-
-            return SliverPadding(
-              padding: LayoutConstants.smallEdgeInsets,
-              sliver: ReadingListsSliverGrid(readingLists: sortedData),
-            );
-          },
+        SliverPadding(
+          padding: LayoutConstants.smallEdgeInsets,
+          sliver: ReadingListsSliverGrid(readingLists: sortedData),
         ),
       ],
     );
