@@ -1,6 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
-import 'package:kover/pages/home/collapsible_section.dart';
+import 'package:kover/pages/home/home_section.dart';
 import 'package:kover/pages/home/on_deck_scope.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/series.dart';
@@ -20,7 +20,7 @@ class SliverOnDeck extends ConsumerWidget {
       asyncValue: onDeck,
       data: (data) {
         return OnDeckScope(
-          child: CollapsibleSection.series(
+          child: HomeSection.series(
             title: l.onDeck,
             items: data,
             itemBuilder: (context, item) =>

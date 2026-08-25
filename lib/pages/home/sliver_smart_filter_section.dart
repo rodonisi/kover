@@ -1,5 +1,5 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/pages/home/collapsible_section.dart';
+import 'package:kover/pages/home/home_section.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/smart_filter.dart';
 import 'package:kover/widgets/cards/reading_list_card.dart';
@@ -55,7 +55,7 @@ class _SmartFilterSeriesSection extends ConsumerWidget {
 
     return AsyncSliver(
       asyncValue: series,
-      data: (data) => CollapsibleSection.series(
+      data: (data) => HomeSection.series(
         title: title,
         items: data,
         itemBuilder: (context, item) =>
@@ -84,7 +84,7 @@ class _SmartFilterReadingListsSection extends ConsumerWidget {
 
     return AsyncSliver(
       asyncValue: readingLists,
-      data: (data) => CollapsibleSection.readingLists(
+      data: (data) => HomeSection.readingLists(
         title: title,
         items: data,
         itemBuilder: (context, item) =>

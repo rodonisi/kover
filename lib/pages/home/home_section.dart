@@ -9,14 +9,14 @@ import 'package:kover/models/reading_list_model.dart';
 import 'package:kover/models/series_model.dart';
 import 'package:kover/utils/layout_constants.dart';
 
-class CollapsibleSection<T> extends HookConsumerWidget {
+class HomeSection<T> extends HookConsumerWidget {
   final String title;
   final List<T> items;
   final Widget Function(BuildContext context, T item) itemBuilder;
   final String Function(BuildContext context, int count) countLabelBuilder;
   final VoidCallback? onNavigate;
 
-  const CollapsibleSection._({
+  const HomeSection._({
     required this.title,
     required this.items,
     required this.itemBuilder,
@@ -24,14 +24,14 @@ class CollapsibleSection<T> extends HookConsumerWidget {
     this.onNavigate,
   });
 
-  static CollapsibleSection<SeriesModel> series({
+  static HomeSection<SeriesModel> series({
     required String title,
     required List<SeriesModel> items,
     required Widget Function(BuildContext context, SeriesModel item)
     itemBuilder,
     VoidCallback? onNavigate,
   }) {
-    return CollapsibleSection._(
+    return HomeSection._(
       title: title,
       items: items,
       itemBuilder: itemBuilder,
@@ -41,14 +41,14 @@ class CollapsibleSection<T> extends HookConsumerWidget {
     );
   }
 
-  static CollapsibleSection<ReadingListModel> readingLists({
+  static HomeSection<ReadingListModel> readingLists({
     required String title,
     required List<ReadingListModel> items,
     required Widget Function(BuildContext context, ReadingListModel item)
     itemBuilder,
     VoidCallback? onNavigate,
   }) {
-    return CollapsibleSection._(
+    return HomeSection._(
       title: title,
       items: items,
       itemBuilder: itemBuilder,
