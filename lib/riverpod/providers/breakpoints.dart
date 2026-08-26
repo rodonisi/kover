@@ -14,14 +14,6 @@ enum Breakpoint {
   bool operator >=(Breakpoint other) => index >= other.index;
   bool operator <(Breakpoint other) => index < other.index;
   bool operator <=(Breakpoint other) => index <= other.index;
-
-  int get adaptiveCrossAxisCount => switch (this) {
-    .largest => 10,
-    .large => 8,
-    .expanded => 6,
-    .medium => 4,
-    .compact => 3,
-  };
 }
 
 @riverpod

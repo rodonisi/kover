@@ -119,16 +119,15 @@ class _SectionCarousel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final crossAxisCount = ref
-        .watch(breakpointsProvider)
-        .adaptiveCrossAxisCount;
+    final breakpoint = ref.watch(breakpointsProvider);
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final height =
-            (constraints.maxWidth - LayoutConstants.smallPadding * 2) /
-            crossAxisCount /
-            LayoutConstants.chapterCardAspectRatio;
+        final height = switch (breakpoint) {
+          .large => LayoutConstants.largeCardHeight,
+          .expanded => LayoutConstants.expandedCardHeight,
+          _ => LayoutConstants.compactCardHeight,
+        };
 
         return SizedBox(
           height: height,
