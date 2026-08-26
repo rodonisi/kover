@@ -110,37 +110,43 @@ class const EpubVerticalSubpages({
           },
           child: CustomScrollView(
             controller: scrollController,
-            clipBehavior: .none,
             scrollCacheExtent: const .viewport(4),
             physics: const AlwaysScrollableScrollPhysics(
               parent: ClampingScrollPhysics(),
             ),
             slivers: [
-              SliverList.builder(
-                itemCount: count,
-                itemBuilder: (context, index) {
-                  final Widget content =
-                      data.reflow.status == .measuring &&
-                          index >= data.reflow.subpages.length
-                      ? const Center(
-                          child: CircularProgressIndicator(),
-                        )
-                      : RenderEpubContent(
-                          seriesId: seriesId,
-                          html: data.reflow.subpages[index].outerHtml,
-                          styles: data.reflow.page.styles,
-                          imageCache: imageCache,
-                          verticalPadding: false,
-                        );
+              SliverSafeArea(
+                bottom: true,
+                sliver: SliverList.builder(
+                  itemCount: count,
+                  itemBuilder: (context, index) {
+                    final Widget content =
+                        data.reflow.status == .measuring &&
+                            index >= data.reflow.subpages.length
+                        ? const Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : RenderEpubContent(
+                            seriesId: seriesId,
+                            html: data.reflow.subpages[index].outerHtml,
+                            styles: data.reflow.page.styles,
+                            imageCache: imageCache,
+                            verticalPadding: false,
+                          );
 
-                  return ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight:
-                          constraints.maxHeight * 0.9 - data.paragraphSpacing,
-                    ),
-                    child: content,
-                  );
-                },
+                    // ensure the last subpage takes up one viewport
+                    if (index == count - 1) {
+                      return ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
+                        child: content,
+                      );
+                    }
+
+                    return content;
+                  },
+                ),
               ),
             ],
           ),
