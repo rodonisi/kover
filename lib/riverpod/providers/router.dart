@@ -1,12 +1,16 @@
+import 'package:kover/pages/recently_added_page/recently_added_page.dart';
+import 'package:kover/pages/recently_updated_page/recently_updated_page.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kover/pages/download_queue/download_queue_page.dart';
 import 'package:kover/pages/home/home_page.dart';
 import 'package:kover/pages/menu_page/menu_page.dart';
+import 'package:kover/pages/on_deck_page/on_deck_page.dart';
 import 'package:kover/pages/collections_page/collections_page.dart';
 import 'package:kover/pages/reading_list_details_page/reading_lists_details_page.dart';
 import 'package:kover/pages/reading_lists_page/reading_lists_page.dart';
 import 'package:kover/pages/series_page/series_page.dart';
+import 'package:kover/pages/smart_filter_page/smart_filter_page.dart';
 import 'package:kover/pages/reader/reader_page.dart';
 import 'package:kover/pages/series_detail_page/chapter_detail_page/chapter_detail_page.dart';
 import 'package:kover/pages/series_detail_page/chapters_page/chapters_page.dart';
@@ -62,9 +66,13 @@ GoRouter router(Ref ref) {
                 TypedGoRoute<SpecialsRoute>(path: 'specials'),
               ],
             ),
-            TypedGoRoute<SeriesRoute>(
-              path: 'library/:libraryId',
+            TypedGoRoute<OnDeckRoute>(path: 'on-deck'),
+            TypedGoRoute<RecentlyAddedRoute>(path: 'recently-added'),
+            TypedGoRoute<RecentlyUpdatedRoute>(path: 'recently-updated'),
+            TypedGoRoute<SmartFilterRoute>(
+              path: 'smart-filters/:smartFilterId',
             ),
+            TypedGoRoute<SeriesRoute>(path: 'library/:libraryId'),
           ],
         ),
       ],
@@ -188,6 +196,39 @@ class AllSeriesRoute extends GoRouteData with $AllSeriesRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const AllSeriesPage();
+}
+
+class OnDeckRoute extends GoRouteData with $OnDeckRoute {
+  const new();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const OnDeckPage();
+}
+
+class RecentlyAddedRoute extends GoRouteData with $RecentlyAddedRoute {
+  const new();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const RecentlyAddedPage();
+}
+
+class RecentlyUpdatedRoute extends GoRouteData with $RecentlyUpdatedRoute {
+  const new();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const RecentlyUpdatedPage();
+}
+
+class SmartFilterRoute extends GoRouteData with $SmartFilterRoute {
+  final int smartFilterId;
+
+  const new({required this.smartFilterId});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      SmartFilterPage(smartFilterId: smartFilterId);
 }
 
 class CollectionsRoute extends GoRouteData with $CollectionsRoute {
