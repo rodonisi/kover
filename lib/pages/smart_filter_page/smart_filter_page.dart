@@ -29,7 +29,11 @@ class SmartFilterPage extends HookConsumerWidget {
                 smartFilterSeriesProvider(smartFilterId: smartFilterId),
               ),
               data: (series) {
-                return SeriesListPage(title: data.name, series: series);
+                return SeriesListPage(
+                  title: data.name,
+                  series: series,
+                  defaultSortDirection: .ascending,
+                );
               },
             ),
             .readingList => Async(
