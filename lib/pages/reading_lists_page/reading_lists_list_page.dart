@@ -79,16 +79,11 @@ class ReadingListsListPage extends HookConsumerWidget {
     required List<ReadingListModel> data,
     required SortDirection direction,
   }) {
-    final sorted = [...data]
-      ..sort(
-        (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
-      );
-
     if (direction == .descending) {
-      return sorted.reversed.toList();
+      return data.reversed.toList();
     }
 
-    return sorted;
+    return data;
   }
 
   ContextMenu _menu({

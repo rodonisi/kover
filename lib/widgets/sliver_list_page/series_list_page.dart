@@ -14,16 +14,18 @@ import 'package:material_ui/material_ui.dart';
 class SeriesListPage extends HookConsumerWidget {
   final String title;
   final List<SeriesModel> series;
+  final SortDirection defaultSortDirection;
 
   const new({
     super.key,
     required this.title,
     required this.series,
+    this.defaultSortDirection = SortDirection.descending,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sortDirection = useState<SortDirection?>(null);
+    final sortDirection = useState(defaultSortDirection);
     final controller = useTextEditingController();
 
     useListenable(controller);
@@ -68,22 +70,13 @@ class SeriesListPage extends HookConsumerWidget {
 
   List<SeriesModel> _sorted(
     List<SeriesModel> data,
-    SortDirection? direction,
+    SortDirection direction,
   ) {
-    if (direction == null) {
-      return data;
+    if (direction != defaultSortDirection) {
+      return data.reversed.toList();
     }
 
-    final sorted = [...data]
-      ..sort(
-        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-      );
-
-    if (direction == .descending) {
-      return sorted.reversed.toList();
-    }
-
-    return sorted;
+    return data;
   }
 
   ContextMenu _menu({
@@ -93,7 +86,7 @@ class SeriesListPage extends HookConsumerWidget {
     final l = AppLocalizations.of(context);
     return ContextMenu(
       entries: <ContextMenuEntry>[
-        MenuHeader(text: l.sortBy),
+        MenuHeader(text: l.sortDirection),
         MenuItem(
           label: Text(l.ascending),
           icon: _getItemIcon(sortDirection.value == .ascending),

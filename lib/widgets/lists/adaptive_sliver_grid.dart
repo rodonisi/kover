@@ -22,9 +22,15 @@ class AdaptiveSliverGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return HookBuilder(
       builder: (context) {
-        final crossAxisCount = ref
-            .watch(breakpointsProvider)
-            .adaptiveCrossAxisCount;
+        final breakpoint = ref.watch(breakpointsProvider);
+
+        final crossAxisCount = switch (breakpoint) {
+          Breakpoint.largest => 10,
+          Breakpoint.large => 8,
+          Breakpoint.expanded => 6,
+          Breakpoint.medium => 4,
+          Breakpoint.compact => 3,
+        };
 
         useEffect(() {
           onCrossAxisCountChanged?.call(crossAxisCount);
