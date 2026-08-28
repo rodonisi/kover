@@ -133,7 +133,7 @@ class KoverLogger {
         level: level,
         message: scrubLooseUrls(message.toString()),
         attributes: attributes.map(
-          (key, value) => MapEntry(key, value.toString()),
+          (key, value) => MapEntry(key, scrubLooseUrls(value.toString())),
         ),
         error: error != null ? scrubLooseUrls(error.toString()) : null,
       ),

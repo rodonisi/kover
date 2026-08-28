@@ -1,5 +1,4 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -9,6 +8,7 @@ import 'package:kover/pages/reader/overlay/overlay_gestures.dart';
 import 'package:kover/pages/reader/overlay/reader_controls.dart';
 import 'package:kover/pages/reader/overlay/reader_header.dart';
 import 'package:kover/pages/reader/overlay/reader_progress.dart';
+import 'package:kover/pages/reader/overlay/reader_shortcuts.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
@@ -22,14 +22,6 @@ enum ShowSnackbar {
   previous,
   next,
   none,
-}
-
-class NextPageIntent extends Intent {
-  const NextPageIntent();
-}
-
-class PreviousPageIntent extends Intent {
-  const PreviousPageIntent();
 }
 
 class ReaderOverlay extends HookConsumerWidget {
@@ -140,25 +132,9 @@ class ReaderOverlay extends HookConsumerWidget {
           return Scaffold(
             endDrawerEnableOpenDragGesture: false,
             endDrawer: endDrawer,
-            body: FocusableActionDetector(
-              autofocus: true,
-              shortcuts: const {
-                SingleActivator(LogicalKeyboardKey.pageDown): NextPageIntent(),
-                SingleActivator(LogicalKeyboardKey.arrowRight):
-                    NextPageIntent(),
-                SingleActivator(LogicalKeyboardKey.pageUp):
-                    PreviousPageIntent(),
-                SingleActivator(LogicalKeyboardKey.arrowLeft):
-                    PreviousPageIntent(),
-              },
-              actions: {
-                NextPageIntent: CallbackAction<NextPageIntent>(
-                  onInvoke: (_) => onNextPage?.call(),
-                ),
-                PreviousPageIntent: CallbackAction<PreviousPageIntent>(
-                  onInvoke: (_) => onPreviousPage?.call(),
-                ),
-              },
+            body: ReaderShortcuts(
+              onNextPage: onNextPage,
+              onPreviousPage: onPreviousPage,
               child: Stack(
                 children: [
                   Positioned.fill(
