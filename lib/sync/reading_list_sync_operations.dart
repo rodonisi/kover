@@ -4,15 +4,7 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/mapping/dto/reading_list_dto_mappings.dart';
 import 'package:kover/utils/logging.dart';
 
-class ReadingListSyncOperations {
-  final Openapi _client;
-  final String _apiKey;
-
-  const ReadingListSyncOperations({
-    required this._client,
-    required this._apiKey,
-  });
-
+class const ReadingListSyncOperations({required final Openapi _client}) {
   /// Fetch all collections
   Future<Iterable<ReadingListsCompanion>> getReadingLists() async {
     final res = await _client.apiReadingListAllPost(
@@ -73,7 +65,6 @@ class ReadingListSyncOperations {
   ) async {
     final res = await _client.apiImageReadinglistCoverGet(
       readingListId: readingListId,
-      apiKey: _apiKey,
     );
 
     if (!res.isSuccessful) {

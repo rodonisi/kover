@@ -2,7 +2,6 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/models/volume_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
-import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/volume_sync_operations.dart';
 import 'package:kover/utils/chunked_fetch.dart';
@@ -16,20 +15,14 @@ part 'volumes_repository.g.dart';
 VolumesRepository volumesRepository(Ref ref) {
   final db = ref.watch(databaseProvider);
   final restClient = ref.watch(restClientProvider);
-  final apiKey = ref.watch(apiKeyProvider);
-  final client = VolumeSyncOperations(
-    client: restClient,
-    apiKey: apiKey ?? '',
-  );
-  return VolumesRepository(db, client);
+  final client = VolumeSyncOperations(client: restClient);
+  return VolumesRepository(db: db, client: client);
 }
 
-class VolumesRepository {
-  final AppDatabase _db;
-  final VolumeSyncOperations _client;
-
-  VolumesRepository(this._db, this._client);
-
+class const VolumesRepository({
+  required final AppDatabase _db,
+  required final VolumeSyncOperations _client,
+}) {
   /// Watch volume [volumeId]
   Stream<VolumeModel> watchVolume(int volumeId) {
     return _db.volumesDao
