@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/overlay/reader_shortcuts.dart';
+import 'package:kover/riverpod/providers/platform.dart';
 import 'package:kover/riverpod/providers/settings/keybinds_settings.dart';
 import 'package:kover/utils/constants/platform_channels.dart';
 
@@ -34,6 +35,7 @@ void main() {
     }) async {
       final container = ProviderContainer.test(
         overrides: [
+          appPlatformProvider.overrideWithValue(AppPlatform.android),
           keybindsSettingsProvider.overrideWith(
             () => _FakeKeybindsSettings(settings),
           ),

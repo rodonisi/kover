@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/riverpod/providers/platform.dart';
 import 'package:kover/riverpod/providers/settings/keybinds_settings.dart';
 import 'package:kover/utils/constants/platform_channels.dart';
 
@@ -116,6 +117,7 @@ void main() {
 
       final container = ProviderContainer.test(
         overrides: [
+          appPlatformProvider.overrideWithValue(AppPlatform.android),
           keybindsSettingsProvider.overrideWith(
             () => _FakeKeybindsSettings(const KeybindsSettingsState()),
           ),

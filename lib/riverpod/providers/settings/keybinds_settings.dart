@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
+import 'package:kover/riverpod/providers/platform.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:kover/utils/constants/platform_channels.dart';
 import 'package:kover/utils/logging.dart';
@@ -174,6 +175,11 @@ Stream<VolumeKeyEvent> volumeKeys(
   Ref ref, {
   Set<LogicalKeyboardKey>? capturedKeys,
 }) {
+  // Volume key capture is only implemented on Android.
+  if (ref.watch(appPlatformProvider) != .android) {
+    return const Stream<VolumeKeyEvent>.empty();
+  }
+
   final keybindsSettings = ref.watch(keybindsSettingsProvider);
   final keys =
       capturedKeys ??
