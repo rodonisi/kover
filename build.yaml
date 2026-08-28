@@ -21,7 +21,11 @@ targets:
         options:
           input_folder: swaggers/
           input_urls:
-            - url: "https://raw.githubusercontent.com/Kareadita/Kavita/refs/tags/v0.9.0/openapi.json"
+            - url: "https://raw.githubusercontent.com/Kareadita/Kavita/refs/tags/v0.9.1.0/openapi.json"
           output_folder: "lib/api"
           exclude_paths:
             - "api/Person/roles"
+            - "api/Library/metadata-providers"
+            - "api/Library/metadata-enabled-libraries"
+            - "api/Library/scrobble-enabled-libraries"
+            - "api/Scrobbling/expired-tokens"
