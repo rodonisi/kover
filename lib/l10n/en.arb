@@ -799,6 +799,34 @@
     "@navigationGestures": {
         "description": "Label for the enable navigation gestures reader option"
     },
+    "keybinds": "Reader Keybinds",
+    "@keybindsSettings": {
+        "description": "Label for the keybinds settings section"
+    },
+    "keybindNextPage": "Next Page",
+    "@keybindNextPage": {
+        "description": "Label for the next page keyboard binding setting"
+    },
+    "keybindPreviousPage": "Previous Page",
+    "@keybindPreviousPage": {
+        "description": "Label for the previous page keyboard binding setting"
+    },
+    "keybindPressAKey": "Press any key…",
+    "@keybindPressAKey": {
+        "description": "Placeholder shown while waiting for a key press in the keybind capture dialog"
+    },
+    "keybindAlreadyAssigned": "This combination is already assigned",
+    "@keybindAlreadyAssigned": {
+        "description": "Error shown when a captured keybind is already used by another action"
+    },
+    "keybindVolumeUp": "Volume Up",
+    "@keybindVolumeUp": {
+        "description": "Label for the volume up key when shown as a keybinding"
+    },
+    "keybindVolumeDown": "Volume Down",
+    "@keybindVolumeDown": {
+        "description": "Label for the volume down key when shown as a keybinding"
+    },
     "appearance": "Appearance",
     "@appearance": {
       "description": "Label for the appearance settings section"

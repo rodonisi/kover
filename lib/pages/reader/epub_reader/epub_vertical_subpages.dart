@@ -45,23 +45,24 @@ class const EpubVerticalSubpages({
       navigationProvider.select(
         (state) => state.whenData(
           (data) {
-            if (data.page != page || data.fromObserver) return null;
+            if (data.page != page) return null;
 
-            return data.subpage;
+            return (fromObserver: data.fromObserver, subpage: data.subpage);
           },
         ),
       ),
       (previous, next) async {
         next.whenData((next) async {
-          final previousSubpage = previous?.value;
+          final previousSubpage = previous?.value?.subpage;
           if (next == null ||
-              next == previousSubpage ||
+              next.subpage == previousSubpage ||
               !scrollController.hasClients ||
-              count == 0) {
+              count == 0 ||
+              next.fromObserver) {
             return;
           }
 
-          final target = next.clamp(0, count - 1);
+          final target = next.subpage.clamp(0, count - 1);
 
           final isSequential =
               previousSubpage != null && (target - previousSubpage).abs() == 1;
