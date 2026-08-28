@@ -3,7 +3,6 @@ import 'package:kover/models/chapter_model.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/models/reading_list_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
-import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/reading_list_sync_operations.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -14,21 +13,15 @@ part 'reading_lists_repository.g.dart';
 ReadingListsRepository readingListsRepository(Ref ref) {
   final db = ref.watch(databaseProvider);
   final restClient = ref.watch(restClientProvider);
-  final apiKey = ref.watch(apiKeyProvider);
-  final client = ReadingListSyncOperations(
-    client: restClient,
-    apiKey: apiKey!,
-  );
+  final client = ReadingListSyncOperations(client: restClient);
 
   return ReadingListsRepository(db: db, client: client);
 }
 
-class ReadingListsRepository {
-  final AppDatabase _db;
-  final ReadingListSyncOperations _client;
-
-  ReadingListsRepository({required this._db, required this._client});
-
+class const ReadingListsRepository({
+  required final AppDatabase _db,
+  required final ReadingListSyncOperations _client,
+}) {
   /// Watch all reading lists.
   Stream<List<ReadingListModel>> watchReadingLists() {
     return _db.readingListsDao.allReadingLists().watch().map(

@@ -9,15 +9,7 @@ import 'package:kover/mapping/dto/series_metadata_dto_mappings.dart';
 import 'package:kover/mapping/dto/volume_dto_mappings.dart';
 import 'package:kover/utils/logging.dart';
 
-class SeriesSyncOperations {
-  final Openapi _client;
-  final String _apiKey;
-
-  const SeriesSyncOperations({
-    required this._client,
-    required this._apiKey,
-  });
-
+class const SeriesSyncOperations({required final Openapi _client}) {
   Future<Iterable<SeriesCompanion>> getAllSeries({int? libraryId}) async {
     final res = await _fetchAllSeries(libraryId: libraryId);
 
@@ -101,10 +93,7 @@ class SeriesSyncOperations {
   }
 
   Future<SeriesCoversCompanion?> getSeriesCover(int seriesId) async {
-    final res = await _client.apiImageSeriesCoverGet(
-      seriesId: seriesId,
-      apiKey: _apiKey,
-    );
+    final res = await _client.apiImageSeriesCoverGet(seriesId: seriesId);
 
     if (!res.isSuccessful) {
       log.debug(

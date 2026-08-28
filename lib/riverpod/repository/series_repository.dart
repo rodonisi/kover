@@ -4,7 +4,6 @@ import 'package:kover/database/dao/series_metadata_dao.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/models/series_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
-import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/chapter_sync_operations.dart';
 import 'package:kover/sync/series_sync_operations.dart';
@@ -20,19 +19,9 @@ part 'series_repository.g.dart';
 SeriesRepository seriesRepository(Ref ref) {
   final db = ref.watch(databaseProvider);
   final restClient = ref.watch(restClientProvider);
-  final apiKey = ref.watch(apiKeyProvider);
-  final client = SeriesSyncOperations(
-    client: restClient,
-    apiKey: apiKey ?? '',
-  );
-  final volumeClient = VolumeSyncOperations(
-    client: restClient,
-    apiKey: apiKey ?? '',
-  );
-  final chapterClient = ChapterSyncOperations(
-    client: restClient,
-    apiKey: apiKey ?? '',
-  );
+  final client = SeriesSyncOperations(client: restClient);
+  final volumeClient = VolumeSyncOperations(client: restClient);
+  final chapterClient = ChapterSyncOperations(client: restClient);
   return SeriesRepository(
     db: db,
     client: client,
@@ -41,19 +30,12 @@ SeriesRepository seriesRepository(Ref ref) {
   );
 }
 
-class SeriesRepository {
-  final AppDatabase _db;
-  final SeriesSyncOperations _client;
-  final VolumeSyncOperations _volumeClient;
-  final ChapterSyncOperations _chapterClient;
-
-  const SeriesRepository({
-    required this._db,
-    required this._client,
-    required this._volumeClient,
-    required this._chapterClient,
-  });
-
+class const SeriesRepository({
+  required final AppDatabase _db,
+  required final SeriesSyncOperations _client,
+  required final VolumeSyncOperations _volumeClient,
+  required final ChapterSyncOperations _chapterClient,
+}) {
   /// Watch series [seriesId]
   Stream<SeriesModel> watchSeries(int seriesId) {
     return _db.seriesDao

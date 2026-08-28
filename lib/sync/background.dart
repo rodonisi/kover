@@ -62,9 +62,9 @@ void callbackDispatcher() {
 
       final seriesRepo = SeriesRepository(
         db: db,
-        client: SeriesSyncOperations(client: client, apiKey: apiKey),
-        volumeClient: VolumeSyncOperations(client: client, apiKey: apiKey),
-        chapterClient: ChapterSyncOperations(client: client, apiKey: apiKey),
+        client: SeriesSyncOperations(client: client),
+        volumeClient: VolumeSyncOperations(client: client),
+        chapterClient: ChapterSyncOperations(client: client),
       );
       final bookRepo = BookRepository(
         db,
@@ -83,12 +83,12 @@ void callbackDispatcher() {
         readerClient: ReaderSyncOperations(client: client),
       );
       final volumesRepo = VolumesRepository(
-        db,
-        VolumeSyncOperations(client: client, apiKey: apiKey),
+        db: db,
+        client: VolumeSyncOperations(client: client),
       );
       final chaptersRepo = ChaptersRepository(
-        db,
-        ChapterSyncOperations(client: client, apiKey: apiKey),
+        db: db,
+        client: ChapterSyncOperations(client: client),
       );
       final serverSettingsRepo = ServerSettingsRepository(
         db: db,
@@ -96,11 +96,11 @@ void callbackDispatcher() {
       );
       final collectionsRepo = CollectionsRepository(
         db: db,
-        client: CollectionSyncOperations(client: client, apiKey: apiKey),
+        client: CollectionSyncOperations(client: client),
       );
       final readingListsRepo = ReadingListsRepository(
         db: db,
-        client: ReadingListSyncOperations(client: client, apiKey: apiKey),
+        client: ReadingListSyncOperations(client: client),
       );
       final smartFiltersRepo = SmartFiltersRepository(
         db: db,

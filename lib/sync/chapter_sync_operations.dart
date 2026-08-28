@@ -3,21 +3,10 @@ import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/utils/logging.dart';
 
-class ChapterSyncOperations {
-  final Openapi _client;
-  final String _apiKey;
-
-  const ChapterSyncOperations({
-    required this._client,
-    required this._apiKey,
-  });
-
+class const ChapterSyncOperations({required final Openapi _client}) {
   /// Fetch chapter cover for [chapterId]
   Future<ChapterCoversCompanion?> getChapterCover(int chapterId) async {
-    final res = await _client.apiImageChapterCoverGet(
-      chapterId: chapterId,
-      apiKey: _apiKey,
-    );
+    final res = await _client.apiImageChapterCoverGet(chapterId: chapterId);
 
     if (!res.isSuccessful) {
       log.debug(

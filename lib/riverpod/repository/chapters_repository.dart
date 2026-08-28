@@ -2,7 +2,6 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
-import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/chapter_sync_operations.dart';
 import 'package:kover/utils/chunked_fetch.dart';
@@ -16,21 +15,15 @@ part 'chapters_repository.g.dart';
 ChaptersRepository chaptersRepository(Ref ref) {
   final db = ref.watch(databaseProvider);
   final restClient = ref.watch(restClientProvider);
-  final apiKey = ref.watch(apiKeyProvider);
-  final client = ChapterSyncOperations(
-    client: restClient,
-    apiKey: apiKey ?? '',
-  );
+  final client = ChapterSyncOperations(client: restClient);
 
-  return ChaptersRepository(db, client);
+  return ChaptersRepository(db: db, client: client);
 }
 
-class ChaptersRepository {
-  final AppDatabase _db;
-  final ChapterSyncOperations _client;
-
-  ChaptersRepository(this._db, this._client);
-
+class const ChaptersRepository({
+  required final AppDatabase _db,
+  required final ChapterSyncOperations _client,
+}) {
   /// Watch [chapterId]
   Stream<ChapterModel> watchChapter({
     required int chapterId,

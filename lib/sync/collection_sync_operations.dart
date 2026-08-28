@@ -4,15 +4,7 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/mapping/dto/collection_dto_mappings.dart';
 import 'package:kover/utils/logging.dart';
 
-class CollectionSyncOperations {
-  final Openapi _client;
-  final String _apiKey;
-
-  const CollectionSyncOperations({
-    required this._client,
-    required this._apiKey,
-  });
-
+class const CollectionSyncOperations({required final Openapi _client}) {
   /// Fetch all collections
   Future<Iterable<CollectionsCompanion>> getCollections() async {
     final res = await _client.apiCollectionGet();
@@ -69,7 +61,6 @@ class CollectionSyncOperations {
   ) async {
     final res = await _client.apiImageCollectionCoverGet(
       collectionTagId: collectionId,
-      apiKey: _apiKey,
     );
 
     if (!res.isSuccessful) {

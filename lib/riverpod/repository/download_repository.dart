@@ -28,29 +28,20 @@ DownloadRepository downloadRepository(Ref ref) {
     db: db,
     fontsRepository: fontsRepository,
     bookClient: BookSyncOperations(client: client, apiKey: apiKey!),
-    chapterClient: ChapterSyncOperations(client: client, apiKey: apiKey),
-    volumeClient: VolumeSyncOperations(client: client, apiKey: apiKey),
-    seriesClient: SeriesSyncOperations(client: client, apiKey: apiKey),
+    chapterClient: ChapterSyncOperations(client: client),
+    volumeClient: VolumeSyncOperations(client: client),
+    seriesClient: SeriesSyncOperations(client: client),
   );
 }
 
-class DownloadRepository {
-  final AppDatabase _db;
-  final FontRepository _fontsRepository;
-  final BookSyncOperations _bookClient;
-  final ChapterSyncOperations _chapterClient;
-  final VolumeSyncOperations _volumeClient;
-  final SeriesSyncOperations _seriesClient;
-
-  const new({
-    required this._db,
-    required this._fontsRepository,
-    required this._bookClient,
-    required this._chapterClient,
-    required this._volumeClient,
-    required this._seriesClient,
-  });
-
+class const DownloadRepository({
+  required final AppDatabase _db,
+  required final FontRepository _fontsRepository,
+  required final BookSyncOperations _bookClient,
+  required final ChapterSyncOperations _chapterClient,
+  required final VolumeSyncOperations _volumeClient,
+  required final SeriesSyncOperations _seriesClient,
+}) {
   /// Whether every page of [chapterId] is persisted locally.
   Future<bool> isChapterDownloaded({required int chapterId}) {
     return _db.downloadDao
