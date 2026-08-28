@@ -791,5 +791,30 @@
     "startupLoadingMessage": "Configurazione in corso, attendere prego…",
     "@startupLoadingMessage": {
         "description": "Message shown when the app is starting up and loading data"
+    },
+    "keybinds": "Comandi del lettore",
+    "keybindNextPage": "Pagina successiva",
+    "@keybindNextPage": {
+        "description": "Label for the next page keyboard binding setting"
+    },
+    "keybindPreviousPage": "Pagina precedente",
+    "@keybindPreviousPage": {
+        "description": "Label for the previous page keyboard binding setting"
+    },
+    "keybindPressAKey": "Premi un tasto…",
+    "@keybindPressAKey": {
+        "description": "Placeholder shown while waiting for a key press in the keybind capture dialog"
+    },
+    "keybindAlreadyAssigned": "Questa combinazione è già assegnata",
+    "@keybindAlreadyAssigned": {
+        "description": "Error shown when a captured keybind is already used by another action"
+    },
+    "keybindVolumeUp": "Volume su",
+    "@keybindVolumeUp": {
+        "description": "Label for the volume up key when shown as a keybinding"
+    },
+    "keybindVolumeDown": "Volume giù",
+    "@keybindVolumeDown": {
+        "description": "Label for the volume down key when shown as a keybinding"
     }
 }
