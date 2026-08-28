@@ -4,11 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/overlay/reader_shortcuts.dart';
 import 'package:kover/riverpod/providers/settings/keybinds_settings.dart';
+import 'package:kover/utils/constants/platform_channels.dart';
 
 void main() {
   group('ReaderShortcuts', () {
     MockStreamHandlerEventSink? sink;
-    const channel = EventChannel('kover/volume_keys');
+    const channel = PlatformChannels.volumeKeys;
 
     setUp(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

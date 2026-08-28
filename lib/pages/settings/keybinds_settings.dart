@@ -20,7 +20,7 @@ class KeybindsSettings extends ConsumerWidget {
         padding: LayoutConstants.mediumEdgeInsets,
         child: Column(
           mainAxisSize: .min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           spacing: LayoutConstants.largePadding,
           children: [
             Text(

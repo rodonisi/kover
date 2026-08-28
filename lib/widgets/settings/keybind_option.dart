@@ -1,13 +1,13 @@
 import 'package:flutter/services.dart';
-import 'package:kover/riverpod/providers/settings/keybinds_settings.dart';
-import 'package:kover/utils/logging.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
+import 'package:kover/riverpod/providers/settings/keybinds_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:kover/widgets/settings/option_container.dart';
+import 'package:material_ui/material_ui.dart';
 
 class KeybindOption extends ConsumerWidget {
   final String title;
@@ -55,9 +55,8 @@ class KeybindOption extends ConsumerWidget {
 
 class _KeyBindingLabel extends StatelessWidget {
   final ReaderKeyBinding binding;
-  final TextStyle? style;
 
-  const new({required this.binding, this.style});
+  const new({required this.binding});
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +81,6 @@ class _KeyBindingLabel extends StatelessWidget {
         if (binding.meta) materialL.keyboardKeyMeta,
         keyLabel,
       ].join(' + '),
-      style: style,
     );
   }
 }
@@ -125,6 +123,7 @@ class _KeybindCaptureDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final l = AppLocalizations.of(context);
     final captured = useState<ReaderKeyBinding?>(null);
     final pending = captured.value;
@@ -186,13 +185,13 @@ class _KeybindCaptureDialog extends HookConsumerWidget {
             },
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(
+              padding: const .symmetric(
                 horizontal: LayoutConstants.mediumPadding,
-                vertical: LayoutConstants.smallPadding + 4.0,
+                vertical: LayoutConstants.smallPadding,
               ),
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline,
+                border: .all(
+                  color: theme.colorScheme.outline,
                 ),
                 borderRadius: BorderRadius.circular(
                   LayoutConstants.smallerBorderRadius,
@@ -204,12 +203,12 @@ class _KeybindCaptureDialog extends HookConsumerWidget {
                     child: pending == null
                         ? Text(
                             l.keybindPressAKey,
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(color: Theme.of(context).hintColor),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.hintColor,
+                            ),
                           )
                         : _KeyBindingLabel(
                             binding: pending,
-                            style: Theme.of(context).textTheme.bodyLarge,
                           ),
                   ),
                   const Icon(KoverIcons.keyboard),
@@ -220,8 +219,8 @@ class _KeybindCaptureDialog extends HookConsumerWidget {
           if (conflicts)
             Text(
               l.keybindAlreadyAssigned,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.error,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.error,
               ),
             ),
         ],

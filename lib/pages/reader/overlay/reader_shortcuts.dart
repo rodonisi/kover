@@ -31,18 +31,27 @@ class ReaderShortcuts extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final keyBindings = ref.watch(keybindsSettingsProvider);
+    final value = ref.watch(keybindsSettingsProvider).value;
 
     final nextPageIntent = const NextPageIntent();
     final previousPageIntent = const PreviousPageIntent();
 
-    final shortcuts = <ShortcutActivator, Intent>{
-      ?keyBindings.value?.nextPage.activator: nextPageIntent,
-      ?keyBindings.value?.previousPage.activator: previousPageIntent,
-    };
+    final shortcuts = useMemoized(
+      () => <ShortcutActivator, Intent>{
+        ?value?.nextPage.activator: nextPageIntent,
+        ?value?.previousPage.activator: previousPageIntent,
+      },
+      [value],
+    );
 
     final manager = useMemoized(
       () => _ReaderShortcutManager(shortcuts: shortcuts),
+    );
+
+    useEffect(
+      () =>
+          () => manager.dispose(),
+      [manager],
     );
 
     useEffect(() {

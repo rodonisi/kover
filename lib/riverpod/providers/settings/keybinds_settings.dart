@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
+import 'package:kover/utils/constants/platform_channels.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -124,7 +125,7 @@ final capturableVolumeKeys = {
   LogicalKeyboardKey.audioVolumeDown,
 };
 
-const _captureChannel = MethodChannel('kover/volume_key_capture');
+const _captureChannel = PlatformChannels.volumeKeyCapture;
 
 int? _volumeKeyCodeFor(LogicalKeyboardKey key) => switch (key) {
   .audioVolumeUp => volumeUpKeyCode,
@@ -146,7 +147,7 @@ LogicalKeyboardKey? _logicalKeyForVolumeKeyCode(int keyCode) =>
 Future<void> _setCapturedVolumeKeys(Set<LogicalKeyboardKey> keys) async {
   try {
     await _captureChannel.invokeMethod<void>(
-      'setCapturedKeys',
+      PlatformChannels.volumeKeyCaptureSetCapturedKeysMethod,
       keys.map(_volumeKeyCodeFor).nonNulls.toList(),
     );
   } on MissingPluginException {
@@ -190,7 +191,7 @@ Stream<VolumeKeyEvent> volumeKeys(
 
   final controller = StreamController<VolumeKeyEvent>();
 
-  final subscription = const EventChannel('kover/volume_keys')
+  final subscription = PlatformChannels.volumeKeys
       .receiveBroadcastStream()
       .listen(
         (data) {

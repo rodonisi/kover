@@ -919,5 +919,4 @@
     "@startupLoadingMessage": {
       "description": "Message shown when the app is starting up and loading data"
     }
-
 }

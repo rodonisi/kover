@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/settings/keybinds_settings.dart';
+import 'package:kover/utils/constants/platform_channels.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -99,7 +100,7 @@ void main() {
   group('volume keys', () {
     test('emits every press, including repeats of the same key', () async {
       MockStreamHandlerEventSink? sink;
-      const channel = EventChannel('kover/volume_keys');
+      const channel = PlatformChannels.volumeKeys;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockStreamHandler(
             channel,
@@ -113,7 +114,13 @@ void main() {
             .setMockStreamHandler(channel, null),
       );
 
-      final container = ProviderContainer.test();
+      final container = ProviderContainer.test(
+        overrides: [
+          keybindsSettingsProvider.overrideWith(
+            () => _FakeKeybindsSettings(const KeybindsSettingsState()),
+          ),
+        ],
+      );
       addTearDown(container.dispose);
 
       final events = <LogicalKeyboardKey>[];
@@ -121,6 +128,7 @@ void main() {
         volumeKeysProvider(),
         (previous, next) => next.whenData((event) => events.add(event.key)),
       );
+      await pumpEventQueue();
 
       sink!.success(volumeUpKeyCode);
       sink!.success(volumeUpKeyCode);
@@ -132,6 +140,15 @@ void main() {
       ]);
     });
   });
+}
+
+class _FakeKeybindsSettings extends KeybindsSettings {
+  _FakeKeybindsSettings(this._settings);
+
+  final KeybindsSettingsState _settings;
+
+  @override
+  Future<KeybindsSettingsState> build() async => _settings;
 }
 
 class _MockVolumeKeyHandler extends MockStreamHandler {
