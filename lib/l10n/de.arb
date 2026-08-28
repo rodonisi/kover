@@ -886,5 +886,30 @@
     "startupLoadingMessage": "Alles wird vorbereitet, bitte warten…",
     "@startupLoadingMessage": {
         "description": "Message shown when the app is starting up and loading data"
+    },
+    "keybinds": "Reader-Tastenkombinationen",
+    "keybindNextPage": "Nächste Seite",
+    "@keybindNextPage": {
+        "description": "Label for the next page keyboard binding setting"
+    },
+    "keybindPreviousPage": "Vorherige Seite",
+    "@keybindPreviousPage": {
+        "description": "Label for the previous page keyboard binding setting"
+    },
+    "keybindPressAKey": "Drücke eine Taste…",
+    "@keybindPressAKey": {
+        "description": "Placeholder shown while waiting for a key press in the keybind capture dialog"
+    },
+    "keybindAlreadyAssigned": "Diese Kombination ist bereits vergeben",
+    "@keybindAlreadyAssigned": {
+        "description": "Error shown when a captured keybind is already used by another action"
+    },
+    "keybindVolumeUp": "Lauter-Taste",
+    "@keybindVolumeUp": {
+        "description": "Label for the volume up key when shown as a keybinding"
+    },
+    "keybindVolumeDown": "Leiser-Taste",
+    "@keybindVolumeDown": {
+        "description": "Label for the volume down key when shown as a keybinding"
     }
 }
