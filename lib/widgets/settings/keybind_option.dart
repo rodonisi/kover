@@ -129,16 +129,10 @@ class _KeybindCaptureDialog extends HookConsumerWidget {
     final captured = useState<ReaderKeyBinding?>(null);
     final pending = captured.value;
 
-    // Capture both volume keys natively (Android only) while the dialog is
-    // open so either can be bound; released when closed.
-    useEffect(() {
-      setCapturedVolumeKeys(capturableVolumeKeys);
-      return () => setCapturedVolumeKeys(const {});
-    }, []);
-
-    // Volume keys arrive via the volume key stream instead of the focus
-    // system.
-    ref.listen(volumeKeysProvider, (previous, next) {
+    ref.listen(volumeKeysProvider(capturedKeys: capturableVolumeKeys), (
+      previous,
+      next,
+    ) {
       next.whenData((event) {
         captured.value = ReaderKeyBinding(
           id: event.key.keyId,

@@ -4,13 +4,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/settings/keybinds_settings.dart';
 
-class NextPageIntent extends Intent {
-  const NextPageIntent();
-}
+class const NextPageIntent() extends Intent;
 
-class PreviousPageIntent extends Intent {
-  const PreviousPageIntent();
-}
+class const PreviousPageIntent() extends Intent;
 
 /// Exposes [ShortcutManager.handleKeypress] so synthetic key events (volume
 /// keys captured natively) can use the same dispatch path as hardware keys.
@@ -27,7 +23,7 @@ class ReaderShortcuts extends HookConsumerWidget {
   final void Function()? onPreviousPage;
   final Widget child;
 
-  const ReaderShortcuts({
+  const new({
     super.key,
     this.onNextPage,
     this.onPreviousPage,
@@ -55,22 +51,7 @@ class ReaderShortcuts extends HookConsumerWidget {
       return null;
     }, [shortcuts]);
 
-    // Bound volume keys are captured natively (Android only) and re-injected
-    // into the key event pipeline
-    useEffect(() {
-      final keys = (keyBindings.value?.assigned ?? {})
-          .where((binding) => binding.isVolumeKey)
-          .map((binding) => binding.key)
-          .whereType<LogicalKeyboardKey>()
-          .toSet();
-
-      if (keys.isEmpty) return null;
-
-      setCapturedVolumeKeys(keys);
-      return () => setCapturedVolumeKeys(const {});
-    }, [keyBindings]);
-
-    ref.listen(volumeKeysProvider, (previous, next) {
+    ref.listen(volumeKeysProvider(), (previous, next) {
       next.whenData((event) {
         manager.injectKeyEvent(context, event.toKeyDownEvent());
       });

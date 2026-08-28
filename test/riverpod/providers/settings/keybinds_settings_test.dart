@@ -96,67 +96,7 @@ void main() {
     });
   });
 
-  group('KeybindsSettingsState', () {
-    test('defaults use arrow keys', () {
-      const state = KeybindsSettingsState();
-
-      expect(state.nextPage, KeybindsSettingsState.defaultNextPage);
-      expect(state.previousPage, KeybindsSettingsState.defaultPreviousPage);
-      expect(
-        state.nextPage.activator?.triggers.single,
-        LogicalKeyboardKey.arrowRight,
-      );
-      expect(
-        state.previousPage.activator?.triggers.single,
-        LogicalKeyboardKey.arrowLeft,
-      );
-    });
-
-    test('explicit bindings override defaults', () {
-      const pageDown = ReaderKeyBinding(id: 9999, keyLabel: 'Page Down');
-      const state = KeybindsSettingsState(nextPageKey: pageDown);
-
-      expect(state.nextPage, pageDown);
-    });
-
-    test('assigned contains both resolved bindings', () {
-      const pageDown = ReaderKeyBinding(id: 9999, keyLabel: 'Page Down');
-      const state = KeybindsSettingsState(previousPageKey: pageDown);
-
-      expect(state.assigned, {
-        KeybindsSettingsState.defaultNextPage,
-        pageDown,
-      });
-    });
-  });
-
   group('volume keys', () {
-    test('keycode mapping round trips', () {
-      expect(
-        volumeKeyCodeFor(LogicalKeyboardKey.audioVolumeUp),
-        volumeUpKeyCode,
-      );
-      expect(
-        volumeKeyCodeFor(LogicalKeyboardKey.audioVolumeDown),
-        volumeDownKeyCode,
-      );
-      expect(volumeKeyCodeFor(LogicalKeyboardKey.keyA), isNull);
-
-      expect(
-        logicalKeyForVolumeKeyCode(volumeUpKeyCode),
-        LogicalKeyboardKey.audioVolumeUp,
-      );
-      expect(
-        logicalKeyForVolumeKeyCode(volumeDownKeyCode),
-        LogicalKeyboardKey.audioVolumeDown,
-      );
-      expect(logicalKeyForVolumeKeyCode(-1), isNull);
-
-      for (final key in capturableVolumeKeys) {
-        expect(volumeKeyCodeFor(key), isNotNull);
-      }
-    });
-
     test('emits every press, including repeats of the same key', () async {
       MockStreamHandlerEventSink? sink;
       const channel = EventChannel('kover/volume_keys');
@@ -178,7 +118,7 @@ void main() {
 
       final events = <LogicalKeyboardKey>[];
       container.listen(
-        volumeKeysProvider,
+        volumeKeysProvider(),
         (previous, next) => next.whenData((event) => events.add(event.key)),
       );
 

@@ -113,7 +113,9 @@ class KeybindsSettings extends _$KeybindsSettings {
 }
 
 /// Android keycodes for the volume keys.
+@visibleForTesting
 const volumeUpKeyCode = 24;
+@visibleForTesting
 const volumeDownKeyCode = 25;
 
 /// All volume keys that can be captured and bound.
@@ -124,13 +126,13 @@ final capturableVolumeKeys = {
 
 const _captureChannel = MethodChannel('kover/volume_key_capture');
 
-int? volumeKeyCodeFor(LogicalKeyboardKey key) => switch (key) {
+int? _volumeKeyCodeFor(LogicalKeyboardKey key) => switch (key) {
   .audioVolumeUp => volumeUpKeyCode,
   .audioVolumeDown => volumeDownKeyCode,
   _ => null,
 };
 
-LogicalKeyboardKey? logicalKeyForVolumeKeyCode(int keyCode) =>
+LogicalKeyboardKey? _logicalKeyForVolumeKeyCode(int keyCode) =>
     switch (keyCode) {
       volumeUpKeyCode => .audioVolumeUp,
       volumeDownKeyCode => .audioVolumeDown,
@@ -141,11 +143,11 @@ LogicalKeyboardKey? logicalKeyForVolumeKeyCode(int keyCode) =>
 /// [volumeKeysProvider] instead of letting the system handle them.
 ///
 /// Only supported on Android; a no-op on other platforms.
-Future<void> setCapturedVolumeKeys(Set<LogicalKeyboardKey> keys) async {
+Future<void> _setCapturedVolumeKeys(Set<LogicalKeyboardKey> keys) async {
   try {
     await _captureChannel.invokeMethod<void>(
       'setCapturedKeys',
-      keys.map(volumeKeyCodeFor).nonNulls.toList(),
+      keys.map(_volumeKeyCodeFor).nonNulls.toList(),
     );
   } on MissingPluginException {
     // Volume key capture is only implemented on Android.
@@ -167,7 +169,25 @@ final class const VolumeKeyEvent(final LogicalKeyboardKey key) {
 }
 
 @riverpod
-Stream<VolumeKeyEvent> volumeKeys(Ref ref) {
+Stream<VolumeKeyEvent> volumeKeys(
+  Ref ref, {
+  Set<LogicalKeyboardKey>? capturedKeys,
+}) {
+  final keybindsSettings = ref.watch(keybindsSettingsProvider);
+  final keys =
+      capturedKeys ??
+      (keybindsSettings.value?.assigned ?? {})
+          .where((binding) => binding.isVolumeKey)
+          .map((binding) => binding.key)
+          .whereType<LogicalKeyboardKey>()
+          .toSet();
+
+  _setCapturedVolumeKeys(keys);
+
+  ref.onDispose(() {
+    _setCapturedVolumeKeys(const {});
+  });
+
   final controller = StreamController<VolumeKeyEvent>();
 
   final subscription = const EventChannel('kover/volume_keys')
@@ -175,7 +195,7 @@ Stream<VolumeKeyEvent> volumeKeys(Ref ref) {
       .listen(
         (data) {
           if (data case final int keyCode) {
-            final key = logicalKeyForVolumeKeyCode(keyCode);
+            final key = _logicalKeyForVolumeKeyCode(keyCode);
             if (key != null) controller.add(VolumeKeyEvent(key));
           }
         },
