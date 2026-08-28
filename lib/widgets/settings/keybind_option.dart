@@ -16,7 +16,7 @@ class KeybindOption extends ConsumerWidget {
   final ReaderKeyBinding defaultValue;
   final void Function(ReaderKeyBinding value)? onChanged;
 
-  const KeybindOption({
+  const new({
     super.key,
     required this.title,
     required this.value,
@@ -57,7 +57,7 @@ class _KeyBindingLabel extends StatelessWidget {
   final ReaderKeyBinding binding;
   final TextStyle? style;
 
-  const _KeyBindingLabel({required this.binding, this.style});
+  const new({required this.binding, this.style});
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +115,7 @@ class _KeybindCaptureDialog extends HookConsumerWidget {
   final ReaderKeyBinding currentValue;
   final ReaderKeyBinding defaultValue;
 
-  const _KeybindCaptureDialog({
+  const new({
     required this.title,
     required this.currentValue,
     required this.defaultValue,

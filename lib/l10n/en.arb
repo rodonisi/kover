@@ -799,11 +799,15 @@
     "@navigationGestures": {
         "description": "Label for the enable navigation gestures reader option"
     },
-    "keybindNextPage": "Next Page Keybind",
+    "keybinds": "Reader Keybinds",
+    "@keybindsSettings": {
+        "description": "Label for the keybinds settings section"
+    },
+    "keybindNextPage": "Next Page",
     "@keybindNextPage": {
         "description": "Label for the next page keyboard binding setting"
     },
-    "keybindPreviousPage": "Previous Page Keybind",
+    "keybindPreviousPage": "Previous Page",
     "@keybindPreviousPage": {
         "description": "Label for the previous page keyboard binding setting"
     },
@@ -811,7 +815,7 @@
     "@keybindPressAKey": {
         "description": "Placeholder shown while waiting for a key press in the keybind capture dialog"
     },
-    "keybindAlreadyAssigned": "This combination is already assigned to the other action",
+    "keybindAlreadyAssigned": "This combination is already assigned",
     "@keybindAlreadyAssigned": {
         "description": "Error shown when a captured keybind is already used by another action"
     },
@@ -915,4 +919,5 @@
     "@startupLoadingMessage": {
       "description": "Message shown when the app is starting up and loading data"
     }
+
 }

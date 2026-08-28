@@ -4,6 +4,7 @@ import 'package:kover/pages/settings/appearance_settings.dart';
 import 'package:kover/pages/settings/credentials_settings.dart';
 import 'package:kover/pages/settings/data_management_settings.dart';
 import 'package:kover/pages/settings/general_settings.dart';
+import 'package:kover/pages/settings/keybinds_settings.dart';
 import 'package:kover/pages/settings/version_label.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/sliver_adaptive_padding.dart';
@@ -36,6 +37,7 @@ class SettingsPage extends ConsumerWidget {
                     CredentialsSettings(),
                     GeneralSettings(),
                     AppearanceSettings(),
+                    KeybindsSettings(),
                     DataManagementSettings(),
                     VersionLabel(),
                   ],

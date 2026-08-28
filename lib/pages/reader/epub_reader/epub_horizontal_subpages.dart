@@ -5,7 +5,6 @@ import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:kover/utils/logging.dart';
 import 'package:material_ui/material_ui.dart';
 
 class const EpubHorizontalSubpages({

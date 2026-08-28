@@ -1,5 +1,3 @@
-import 'package:kover/riverpod/providers/settings/keybinds_settings.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
@@ -9,10 +7,10 @@ import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
-import 'package:kover/widgets/settings/keybind_option.dart';
 import 'package:kover/widgets/settings/navigate_option.dart';
 import 'package:kover/widgets/settings/select_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
+import 'package:material_ui/material_ui.dart';
 
 class GeneralSettings extends ConsumerWidget {
   const GeneralSettings({super.key});
@@ -35,7 +33,6 @@ class GeneralSettings extends ConsumerWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const _Locale(),
-            const _Keybinds(),
             const NavbarEditor(),
             const _SendDiagnostics(),
             const _LocalLogs(),
@@ -91,47 +88,6 @@ class _Locale extends ConsumerWidget {
           onChanged: (value) {
             ref.read(generalSettingsProvider.notifier).setLocale(value);
           },
-        );
-      },
-    );
-  }
-}
-
-class _Keybinds extends ConsumerWidget {
-  const _Keybinds();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final keybindsSettings = ref.watch(keybindsSettingsProvider);
-
-    return Async(
-      asyncValue: keybindsSettings,
-      data: (data) {
-        return Column(
-          mainAxisSize: .min,
-          crossAxisAlignment: .start,
-          spacing: LayoutConstants.largePadding,
-          children: [
-            KeybindOption(
-              title: l.keybindNextPage,
-              icon: KoverIcons.readingDirectionLTR,
-              value: data.nextPage,
-              defaultValue: KeybindsSettingsState.defaultNextPage,
-              onChanged: (value) => ref
-                  .read(keybindsSettingsProvider.notifier)
-                  .setNextPageKey(value),
-            ),
-            KeybindOption(
-              title: l.keybindPreviousPage,
-              icon: KoverIcons.readingDirectionRTL,
-              value: data.previousPage,
-              defaultValue: KeybindsSettingsState.defaultPreviousPage,
-              onChanged: (value) => ref
-                  .read(keybindsSettingsProvider.notifier)
-                  .setPreviousPageKey(value),
-            ),
-          ],
         );
       },
     );

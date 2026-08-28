@@ -12,9 +12,12 @@ void main() {
 
     setUp(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockStreamHandler(channel, _MockVolumeKeyHandler((eventSink) {
-            sink = eventSink;
-          }));
+          .setMockStreamHandler(
+            channel,
+            _MockVolumeKeyHandler((eventSink) {
+              sink = eventSink;
+            }),
+          );
     });
 
     tearDown(() {
@@ -85,8 +88,6 @@ void main() {
 
       await tester.runAsync(() async {
         sink!.success(volumeUpKeyCode);
-        // Give the event stream + riverpod listener microtasks a chance to
-        // deliver through the real event loop.
         await pumpEventQueue();
       });
       await tester.pump();
