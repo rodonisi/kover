@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/tables/progress.dart';
 import 'package:kover/database/tables/reading_lists.dart';
+import 'package:rxdart/rxdart.dart';
 
 part 'reading_lists_dao.g.dart';
 
@@ -17,9 +18,12 @@ class ReadingListsDao extends DatabaseAccessor<AppDatabase>
     with _$ReadingListsDaoMixin {
   ReadingListsDao(super.attachedDatabase);
 
-  /// Get a single reading list by [readingListId].
-  SingleSelectable<ReadingList> readingList(int readingListId) {
-    return managers.readingLists.filter((f) => f.id.equals(readingListId));
+  /// Watch a single reading list by [readingListId].
+  Stream<ReadingList> watchReadingList(int readingListId) {
+    return managers.readingLists
+        .filter((f) => f.id.equals(readingListId))
+        .watchSingleOrNull()
+        .whereNotNull();
   }
 
   /// Get all reading lists, ordered by title.
