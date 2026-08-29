@@ -886,5 +886,30 @@
     "startupLoadingMessage": "설정 완료, 잠시 기다려 주십시오...",
     "@startupLoadingMessage": {
         "description": "Message shown when the app is starting up and loading data"
+    },
+    "keybinds": "리더 단축키",
+    "keybindNextPage": "다음 페이지",
+    "@keybindNextPage": {
+        "description": "Label for the next page keyboard binding setting"
+    },
+    "keybindPreviousPage": "이전 페이지",
+    "@keybindPreviousPage": {
+        "description": "Label for the previous page keyboard binding setting"
+    },
+    "keybindPressAKey": "키를 입력하십시오…",
+    "@keybindPressAKey": {
+        "description": "Placeholder shown while waiting for a key press in the keybind capture dialog"
+    },
+    "keybindAlreadyAssigned": "이 조합은 이미 할당되어 있습니다",
+    "@keybindAlreadyAssigned": {
+        "description": "Error shown when a captured keybind is already used by another action"
+    },
+    "keybindVolumeUp": "음량 키우기",
+    "@keybindVolumeUp": {
+        "description": "Label for the volume up key when shown as a keybinding"
+    },
+    "keybindVolumeDown": "음량 줄이기",
+    "@keybindVolumeDown": {
+        "description": "Label for the volume down key when shown as a keybinding"
     }
 }
