@@ -329,7 +329,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   ///   - A chapter was added within [ServerSettings.onDeckUpdateDays] days
   ///
   /// Ordered by most recent reading activity, then most recently updated.
-  MultiSelectable<SeriesData> _onDeckQuery({
+  JoinedSelectStatement _buildOnDeckQuery({
     required int progressDays,
     required int updateDays,
   }) {
@@ -341,41 +341,39 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     );
     final cutoffLastAdded = DateTime.now().subtract(Duration(days: updateDays));
 
-    final query =
-        select(series).join([
-            innerJoin(
-              readingProgress,
-              readingProgress.seriesId.equalsExp(series.id),
-            ),
-            innerJoin(
-              libraries,
-              libraries.id.equalsExp(series.libraryId),
-            ),
-          ])
-          ..where(
-            libraries.includeInDashboard.equals(true) &
-                notExistsQuery(
-                  select(onDeckRemoval)
-                    ..where((tbl) => tbl.seriesId.equalsExp(series.id)),
-                ),
-          )
-          ..addColumns([totalPagesRead, latestReadDate])
-          ..groupBy(
-            [series.id],
-            having:
-                totalPagesRead.isBiggerThanValue(0) &
-                totalPagesRead.isSmallerThan(series.pages) &
-                (latestReadDate.isBiggerOrEqualValue(cutoffProgress) |
-                    series.lastChapterAdded.isBiggerOrEqualValue(
-                      cutoffLastAdded,
-                    )),
-          )
-          ..orderBy([
-            OrderingTerm.desc(latestReadDate),
-            OrderingTerm.desc(series.lastChapterAdded),
-          ]);
-
-    return query.map((row) => row.readTable(series));
+    return select(series).join([
+        innerJoin(
+          readingProgress,
+          readingProgress.seriesId.equalsExp(series.id),
+        ),
+        innerJoin(
+          libraries,
+          libraries.id.equalsExp(series.libraryId),
+        ),
+        leftOuterJoin(
+          onDeckRemoval,
+          onDeckRemoval.seriesId.equalsExp(series.id),
+        ),
+      ])
+      ..where(
+        libraries.includeInDashboard.equals(true) &
+            onDeckRemoval.seriesId.isNull(),
+      )
+      ..addColumns([totalPagesRead, latestReadDate])
+      ..groupBy(
+        [series.id],
+        having:
+            totalPagesRead.isBiggerThanValue(0) &
+            totalPagesRead.isSmallerThan(series.pages) &
+            (latestReadDate.isBiggerOrEqualValue(cutoffProgress) |
+                series.lastChapterAdded.isBiggerOrEqualValue(
+                  cutoffLastAdded,
+                )),
+      )
+      ..orderBy([
+        OrderingTerm.desc(latestReadDate),
+        OrderingTerm.desc(series.lastChapterAdded),
+      ]);
   }
 
   /// Watch series on deck.
@@ -389,10 +387,12 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
           final updateDays =
               setting?.onDeckUpdateDays ?? DataConstants.onDeckUpdateDays;
 
-          return _onDeckQuery(
+          return _buildOnDeckQuery(
             progressDays: progressDays,
             updateDays: updateDays,
-          ).watch();
+          ).watch().map(
+            (rows) => rows.map((row) => row.readTable(series)).toList(),
+          );
         });
   }
 
@@ -407,10 +407,14 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     final updateDays =
         setting?.onDeckUpdateDays ?? DataConstants.onDeckUpdateDays;
 
-    return await _onDeckQuery(
-      progressDays: progressDays,
-      updateDays: updateDays,
-    ).get();
+    return await _buildOnDeckQuery(
+          progressDays: progressDays,
+          updateDays: updateDays,
+        )
+        .map(
+          (row) => row.readTable(series),
+        )
+        .get();
   }
 
   /// Watch recently updated series
