@@ -34,8 +34,7 @@ class const ReadingListsRepository({
   /// Watch a single reading list by [readingListId].
   Stream<ReadingListModel> watchReadingList({required int readingListId}) {
     return _db.readingListsDao
-        .readingList(readingListId)
-        .watchSingle()
+        .watchReadingList(readingListId)
         .map(
           (entry) => ReadingListModel.fromDatabaseModel(entry),
         );
