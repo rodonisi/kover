@@ -221,11 +221,11 @@
     "@removeDownload": {
         "description": "Label for the remove download context menu item"
     },
-    "refreshMetadata": "Metadaten aktualisieren",
+    "refreshMetadata": "Aktualisiere Metadaten",
     "@refreshMetadata": {
         "description": "Label for the refresh metadata context menu item"
     },
-    "refreshCovers": "Cover aktualisieren",
+    "refreshCovers": "Aktualisiere Cover",
     "@refreshCovers": {
         "description": "Label for the refresh covers context menu item"
     },
@@ -911,5 +911,21 @@
     "keybindVolumeDown": "Leiser-Taste",
     "@keybindVolumeDown": {
         "description": "Label for the volume down key when shown as a keybinding"
+    },
+    "refreshingServerFonts": "Aktualisiere Server Schriften",
+    "@refreshingServerFonts": {
+        "description": "Message shown while refreshing server fonts"
+    },
+    "font": "Schrift",
+    "@font": {
+        "description": "Label for the font override setting"
+    },
+    "fontDescription": "EPUB-Schriftart mit Benutzer-Schrift überschreiben. Verfügbare Schriften werden vom Server synchronisiert. Hinweis: Nur Benutzerschriftarten werden unterstützt, da integrierte Schriftarten für Clients nicht heruntergeladen werden können.",
+    "@fontDescription": {
+        "description": "Description for the font override setting"
+    },
+    "embeddedFonts": "Eingebettet (Default)",
+    "@embeddedFonts": {
+        "description": "Label for using the EPUB's embedded fonts"
     }
 }
