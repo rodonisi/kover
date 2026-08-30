@@ -55,7 +55,7 @@ class FontSelectOption extends ConsumerWidget {
           options: [
             SelectOptionEntry(
               value: null,
-              label: l.embeddedFonts,
+              label: l.defaultLabel,
             ),
             ...data.availableFamilies.map(
               (family) => SelectOptionEntry(

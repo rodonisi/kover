@@ -927,9 +927,9 @@
     "@fontDescription": {
       "description": "Description for the font override setting"
     },
-    "embeddedFonts": "Embedded (default)",
-    "@embeddedFonts": {
-      "description": "Label for using the EPUB's embedded fonts"
+    "defaultLabel": "Default",
+    "@defaultLabel": {
+      "description": "Label for a default option in a setting"
     },
     "startupLoadingMessage": "Setting everything up, please wait...",
     "@startupLoadingMessage": {
