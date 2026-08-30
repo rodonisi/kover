@@ -816,5 +816,21 @@
     "keybindVolumeDown": "Volume giù",
     "@keybindVolumeDown": {
         "description": "Label for the volume down key when shown as a keybinding"
+    },
+    "refreshingServerFonts": "Aggiorna font del server",
+    "@refreshingServerFonts": {
+        "description": "Message shown while refreshing server fonts"
+    },
+    "font": "Font",
+    "@font": {
+        "description": "Label for the font override setting"
+    },
+    "fontDescription": "Sovrascrivi il font dell'EPUB con un font personalizzato. I font disponibili vengono sincronizzati dal server. Nota: sono supportati solo i font utente, poiché i font integrati non sono disponibili per il download da parte dei client.",
+    "@fontDescription": {
+        "description": "Description for the font override setting"
+    },
+    "embeddedFonts": "Incorporato (predefinito)",
+    "@embeddedFonts": {
+        "description": "Label for using the EPUB's embedded fonts"
     }
 }
