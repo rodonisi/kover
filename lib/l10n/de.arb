@@ -923,5 +923,9 @@
     "fontDescription": "EPUB-Schriftart mit Benutzer-Schrift überschreiben. Verfügbare Schriften werden vom Server synchronisiert. Hinweis: Nur Benutzerschriftarten werden unterstützt, da integrierte Schriftarten für Clients nicht heruntergeladen werden können.",
     "@fontDescription": {
         "description": "Description for the font override setting"
+    },
+    "defaultLabel": "Default",
+    "@defaultLabel": {
+        "description": "Label for a default option in a setting"
     }
 }
