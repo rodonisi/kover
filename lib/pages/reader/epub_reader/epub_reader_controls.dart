@@ -1,6 +1,6 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
+import 'package:kover/pages/reader/epub_reader/font_select_option.dart';
 import 'package:kover/pages/reader/epub_reader/theme_picker.dart';
 import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
@@ -17,6 +17,7 @@ import 'package:kover/widgets/settings/reader/progress_bar_option.dart';
 import 'package:kover/widgets/settings/reader/read_direction_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_ui/material_ui.dart';
 
 class EpubReaderSettingsBottomSheet extends ConsumerWidget {
   final int seriesId;
@@ -81,6 +82,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                               .setMode(newValue);
                         },
                       ),
+                      FontSelectOption(seriesId: seriesId),
                       NumericOption(
                         icon: KoverIcons.fontSize,
                         title: l.fontSize,

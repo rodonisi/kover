@@ -14,6 +14,7 @@ import 'package:kover/riverpod/repository/reader_repository.dart';
 import 'package:kover/riverpod/repository/reading_lists_repository.dart';
 import 'package:kover/riverpod/repository/secure_storage.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
+import 'package:kover/riverpod/repository/server_fonts_repository.dart';
 import 'package:kover/riverpod/repository/server_settings_repository.dart';
 import 'package:kover/riverpod/repository/smart_filters_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
@@ -21,6 +22,7 @@ import 'package:kover/riverpod/repository/want_to_read_repository.dart';
 import 'package:kover/sync/book_sync_operations.dart';
 import 'package:kover/sync/chapter_sync_operations.dart';
 import 'package:kover/sync/collection_sync_operations.dart';
+import 'package:kover/sync/font_sync_operations.dart';
 import 'package:kover/sync/libraries_sync_operations.dart';
 import 'package:kover/sync/reader_sync_operations.dart';
 import 'package:kover/sync/reading_list_sync_operations.dart';
@@ -94,6 +96,10 @@ void callbackDispatcher() {
         db: db,
         client: ServerSettingsSyncOperations(client: client),
       );
+      final serverFontsRepo = ServerFontsRepository(
+        db: db,
+        client: FontSyncOperations(client: client),
+      );
       final collectionsRepo = CollectionsRepository(
         db: db,
         client: CollectionSyncOperations(client: client),
@@ -116,6 +122,7 @@ void callbackDispatcher() {
         volumesRepo: volumesRepo,
         chaptersRepo: chaptersRepo,
         serverSettingsRepo: serverSettingsRepo,
+        serverFontsRepo: serverFontsRepo,
         collectionsRepo: collectionsRepo,
         readingListsRepo: readingListsRepo,
         smartFiltersRepo: smartFiltersRepo,

@@ -165,6 +165,7 @@ String _phaseLabel(AppLocalizations l, SyncPhase phase) {
     refreshMetadata: (seriesId) => l.refreshingMetadataForSeries(seriesId),
     refreshCovers: (seriesId) => l.refreshingCoversForSeries(seriesId),
     refreshServerSettings: () => l.refreshingServerSettings,
+    refreshServerFonts: () => l.refreshingServerFonts,
     refreshToc: (chapterId) => l.refreshingChapterToc(chapterId),
   );
 }

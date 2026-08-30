@@ -106,6 +106,9 @@ class EpubReflow extends _$EpubReflow {
       resumeScrollId = progress.bookScrollId;
     }
 
+    if (settings.fontFamily != null) {
+      await fontManager.ensureServerFontLoaded(settings.fontFamily!);
+    }
     await fontManager.ensureLoaded(pageContent.fonts);
 
     final existingHighlight = pageContent.root.querySelector(

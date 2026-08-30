@@ -72,6 +72,13 @@ class RenderEpubContent extends ConsumerWidget {
                   HtmlConstants.splitParagraphAttribute,
                 );
 
+                final fontOverride = epubSettings.fontFamily;
+                if (fontOverride != null) {
+                  final fontFamily = 'font-family: "$fontOverride"';
+                  element.attributes['style'] =
+                      '${element.attributes['style']}; $fontFamily';
+                }
+
                 if (element.localName == 'p' && considerLast && !isSplit) {
                   final paragraphMargin =
                       'margin-bottom: ${epubSettings.paragraphSpacing}em';
