@@ -49,7 +49,8 @@ class FontSelectOption extends ConsumerWidget {
       data: (data) {
         return SelectOption<String?>(
           icon: KoverIcons.font,
-          title: l.fontFamily,
+          title: l.font,
+          description: l.fontDescription,
           value: data.family,
           options: [
             SelectOptionEntry(

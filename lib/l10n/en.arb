@@ -919,9 +919,13 @@
     "@removeParagraphIndentationDescription": {
       "description": "Description for the remove paragraphs indent setting"
     },
-    "fontFamily": "Font Family",
-    "@fontFamily": {
-      "description": "Label for the font family override setting"
+    "font": "Font",
+    "@font": {
+      "description": "Label for the font override setting"
+    },
+    "fontDescription": "Override the EPUB's font with a custom font. Available fronts are synced from the server. Note: only user fonts are supported, as the built-in fonts are not available to download for clients.",
+    "@fontDescription": {
+      "description": "Description for the font override setting"
     },
     "embeddedFonts": "Embedded (default)",
     "@embeddedFonts": {
