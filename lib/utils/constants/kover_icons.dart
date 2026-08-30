@@ -18,6 +18,7 @@ sealed class KoverIcons {
   static const IconData wordSpacing = LucideIcons.listMinus;
   static const IconData margins = LucideIcons.panelLeftDashed;
   static const IconData fontSize = LucideIcons.aLargeSmallDir;
+  static const IconData font = LucideIcons.type;
   static const IconData textAlignLeft = LucideIcons.textAlignStart;
   static const IconData textAlignCenter = LucideIcons.textAlignCenter;
   static const IconData textAlignRight = LucideIcons.textAlignEnd;

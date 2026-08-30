@@ -1,3 +1,4 @@
+import 'package:kover/riverpod/managers/font_manager.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -53,6 +54,15 @@ class EpubReader extends HookConsumerWidget {
             ) ??
             const ThemeModel().reduceAnimations,
       ),
+    );
+
+    ref.listen(
+      epubReaderSettingsProvider(seriesId: seriesId)
+          .select((state) => state.whenOrNull(data: (data) => data.fontFamily)),
+      (_, next) {
+        if (next == null) return;
+        ref.read(fontManagerProvider.notifier).ensureServerFontLoaded(next);
+      },
     );
 
     return Async2(

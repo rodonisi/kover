@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:kover/models/font_face.dart';
 import 'package:kover/riverpod/repository/font_repository.dart';
+import 'package:kover/riverpod/repository/server_fonts_repository.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -14,6 +15,17 @@ class FontManager extends _$FontManager {
   @override
   Set<String> build() {
     return {};
+  }
+
+  /// Registers the server font family [family] with the engine if it has not
+  /// already been registered.
+  Future<void> ensureServerFontLoaded(String family) async {
+    final repository = ref.read(serverFontsRepositoryProvider);
+    final data = await repository.getBytesByFamily(family);
+
+    if (data.isEmpty) return;
+
+    await _register(family, data);
   }
 
   /// Registers every font face in [fonts] with the engine.

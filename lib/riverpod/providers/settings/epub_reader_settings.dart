@@ -56,6 +56,7 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
     @Default(1.5) double lineHeight,
     @Default(0.0) double wordSpacing,
     @Default(0.0) double letterSpacing,
+    @Default(null) String? fontFamily,
     @Default(true) bool highlightResumePoint,
     @Default(null) EpubTheme? theme,
     @Default(EpubReaderMode.horizontal) EpubReaderMode mode,
@@ -231,6 +232,16 @@ class EpubReaderSettings extends _$EpubReaderSettings {
         'value': newSize,
         'reader': 'epub',
       },
+    );
+  }
+
+  Future<void> setFontFamily(String? family) async {
+    final current = await future;
+
+    state = AsyncData(current.copyWith(fontFamily: family));
+    log.info(
+      'set font family',
+      attributes: {'value': family, 'reader': 'epub'},
     );
   }
 
