@@ -21,30 +21,41 @@ class SelectOption<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OptionContainer(
-      title: title,
-      description: description,
-      icon: icon,
-      sameRow: true,
-      child: DropdownMenu<T>(
-        inputDecorationTheme: const InputDecorationTheme(
-          isDense: true,
-          visualDensity: .compact,
-        ),
-        initialSelection: value,
-        dropdownMenuEntries: options
-            .map(
-              (option) => DropdownMenuEntry<T>(
-                value: option.value,
-                label: option.label,
-                leadingIcon: option.icon != null ? Icon(option.icon) : null,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return OptionContainer(
+          title: title,
+          description: description,
+          icon: icon,
+          sameRow: true,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: constraints.maxWidth * 0.5,
+            ),
+            child: DropdownMenu<T>(
+              inputDecorationTheme: const InputDecorationTheme(
+                isDense: true,
+                visualDensity: .compact,
               ),
-            )
-            .toList(),
-        onSelected: (T? newValue) {
-          onChanged?.call(newValue);
-        },
-      ),
+              initialSelection: value,
+              dropdownMenuEntries: options
+                  .map(
+                    (option) => DropdownMenuEntry<T>(
+                      value: option.value,
+                      label: option.label,
+                      leadingIcon: option.icon != null
+                          ? Icon(option.icon)
+                          : null,
+                    ),
+                  )
+                  .toList(),
+              onSelected: (T? newValue) {
+                onChanged?.call(newValue);
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }
