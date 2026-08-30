@@ -494,11 +494,11 @@
     },
     "refreshingServerSettings": "Refreshing server settings",
     "@refreshingServerSettings": {
-      "description": "Message shown while refreshing server settings"
+        "description": "Message shown while refreshing server settings"
     },
     "refreshingServerFonts": "Refreshing server fonts",
     "@refreshingServerFonts": {
-      "description": "Message shown while refreshing server fonts"
+        "description": "Message shown while refreshing server fonts"
     },
     "series": "Series",
     "@series": {

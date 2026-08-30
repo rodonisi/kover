@@ -17,7 +17,10 @@ class ServerFontsDao extends DatabaseAccessor<AppDatabase>
   /// Watch all font families.
   Stream<List<String>> watchAllFamilies() {
     final query = selectOnly(serverFonts, distinct: true)
-      ..addColumns([serverFonts.family]);
+      ..addColumns([serverFonts.family])
+      ..orderBy([
+        OrderingTerm(expression: serverFonts.family),
+      ]);
 
     return query.map((row) => row.read(serverFonts.family)!).watch();
   }
@@ -34,6 +37,7 @@ class ServerFontsDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
+  /// Delete all fonts with the given [ids].
   Future<void> deleteByIds(Iterable<int> ids) async {
     await (delete(serverFonts)..where((tbl) => tbl.id.isIn(ids))).go();
   }
