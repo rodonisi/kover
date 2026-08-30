@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:integration_test/integration_test.dart';
@@ -10,6 +9,7 @@ import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/pages/reader/overlay/reader_controls.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
+import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
@@ -111,6 +111,10 @@ void main() {
 
       container.listen(seriesProvider(seriesId: targetSeries), (_, _) {});
       container.listen(
+        continuePointProvider(seriesId: targetSeries),
+        (_, _) {},
+      );
+      container.listen(
         readerProvider(seriesId: targetSeries, chapterId: targetChapter),
         (_, _) {},
       );
@@ -188,6 +192,10 @@ void main() {
       final container = await initializeApp(tester);
       container.listen(seriesProvider(seriesId: targetSeries), (_, _) {});
       container.listen(
+        continuePointProvider(seriesId: targetSeries),
+        (_, _) {},
+      );
+      container.listen(
         readerProvider(seriesId: targetSeries, chapterId: targetChapter),
         (_, _) {},
       );
@@ -198,6 +206,7 @@ void main() {
         ),
         (_, _) {},
       );
+
       final sub = container.listen(
         epubNavigationProvider(
           seriesId: targetSeries,
@@ -205,6 +214,7 @@ void main() {
         ),
         (_, _) {},
       );
+
       container
           .read(routerProvider)
           .go(
@@ -213,7 +223,7 @@ void main() {
               chapterId: targetChapter,
             ).location,
           );
-      await tester.pump(5.seconds);
+      await tester.pumpAndSettle();
 
       var chapterReady = false;
       var targetPageReady = false;
@@ -224,11 +234,11 @@ void main() {
         if (++counter % 1000 == 0) {
           log.debug('waiting for chapter to be ready');
         }
-        await tester.pump();
+        await tester.pumpAndSettle();
         final state = sub.read();
         chapterReady = state.value?.ready ?? false;
       }
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       if (sub.read().value?.page != targetPage) {
         log.debug('jumping to target page $targetPage');
@@ -245,12 +255,12 @@ void main() {
           if (++counter % 1000 == 0) {
             log.debug('waiting for target page to be ready');
           }
-          await tester.pump();
+          await tester.pumpAndSettle();
           final state = sub.read();
           targetPageReady =
               state.value?.page == targetPage && (state.value?.ready ?? false);
         }
-        await tester.pump();
+        await tester.pumpAndSettle();
       }
 
       if (sub.read().value?.subpage != 0) {
@@ -263,18 +273,18 @@ void main() {
               ).notifier,
             )
             .jumpToSubpage(0);
-        await tester.pump(1.seconds);
+        await tester.pumpAndSettle();
       }
 
       await binding.screenshot(tester, 'epub_reader');
 
       final center = tester.getCenter(find.byType(ReaderOverlay));
       await tester.tapAt(center);
-      await tester.pump(500.ms);
+      await tester.pumpAndSettle();
       await binding.screenshot(tester, 'epub_reader_overlay');
 
       await tester.tap(find.byType(ReaderSettingsButton));
-      await tester.pump(1000.ms);
+      await tester.pumpAndSettle();
       await binding.screenshot(tester, 'epub_reader_settings');
     });
   });
