@@ -12,6 +12,7 @@ import 'package:kover/database/dao/reading_lists_dao.dart';
 import 'package:kover/database/dao/riverpod_dao.dart';
 import 'package:kover/database/dao/series_dao.dart';
 import 'package:kover/database/dao/series_metadata_dao.dart';
+import 'package:kover/database/dao/server_fonts_dao.dart';
 import 'package:kover/database/dao/server_settings_dao.dart';
 import 'package:kover/database/dao/smart_filters_dao.dart';
 import 'package:kover/database/dao/storage_dao.dart';
@@ -30,6 +31,7 @@ import 'package:kover/database/tables/reading_lists.dart';
 import 'package:kover/database/tables/riverpod_storage.dart';
 import 'package:kover/database/tables/series.dart';
 import 'package:kover/database/tables/series_metadata.dart';
+import 'package:kover/database/tables/server_fonts.dart';
 import 'package:kover/database/tables/server_settings.dart';
 import 'package:kover/database/tables/sidenav.dart';
 import 'package:kover/database/tables/smart_filters.dart';
@@ -38,6 +40,7 @@ import 'package:kover/database/tables/want_to_read.dart';
 import 'package:kover/models/enums/age_rating.dart';
 import 'package:kover/models/enums/dashboard_stream_type.dart';
 import 'package:kover/models/enums/filter_type.dart';
+import 'package:kover/models/enums/font_provider.dart';
 import 'package:kover/models/enums/format.dart';
 import 'package:kover/models/enums/library_type.dart';
 import 'package:kover/models/enums/person_role.dart';
@@ -87,6 +90,7 @@ part 'app_database.g.dart';
     SmartFilterSeries,
     SmartFilterReadingList,
     SmartFilterPerson,
+    ServerFonts,
   ],
   daos: [
     StorageDao,
@@ -104,6 +108,7 @@ part 'app_database.g.dart';
     ReadingListsDao,
     FontDao,
     SmartFiltersDao,
+    ServerFontsDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -112,7 +117,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   /// Clear all content data from the database. Does not clear app state data (e.g. credentials, settings).
   /// Useful e.g. when switching user.
@@ -138,6 +143,7 @@ class AppDatabase extends _$AppDatabase {
       await clearDownloads();
       await clearCovers();
       await delete(fonts).go();
+      await delete(serverFonts).go();
       await delete(smartFilters).go();
     });
   }
