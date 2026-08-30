@@ -494,7 +494,11 @@
     },
     "refreshingServerSettings": "Refreshing server settings",
     "@refreshingServerSettings": {
-        "description": "Label for the refreshing server settings phase"
+      "description": "Message shown while refreshing server settings"
+    },
+    "refreshingServerFonts": "Refreshing server fonts",
+    "@refreshingServerFonts": {
+      "description": "Message shown while refreshing server fonts"
     },
     "series": "Series",
     "@series": {
@@ -914,6 +918,14 @@
     "removeParagraphIndentationDescription": "If enabled, paragraph indentation is stripped from the text. If disabled, the EPUB's original indentation is preserved.",
     "@removeParagraphIndentationDescription": {
       "description": "Description for the remove paragraphs indent setting"
+    },
+    "fontFamily": "Font Family",
+    "@fontFamily": {
+      "description": "Label for the font family override setting"
+    },
+    "embeddedFonts": "Embedded (default)",
+    "@embeddedFonts": {
+      "description": "Label for using the EPUB's embedded fonts"
     },
     "startupLoadingMessage": "Setting everything up, please wait...",
     "@startupLoadingMessage": {

@@ -5,6 +5,7 @@ import 'package:kover/riverpod/repository/libraries_repository.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
 import 'package:kover/riverpod/repository/reading_lists_repository.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
+import 'package:kover/riverpod/repository/server_fonts_repository.dart';
 import 'package:kover/riverpod/repository/server_settings_repository.dart';
 import 'package:kover/riverpod/repository/smart_filters_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
@@ -20,6 +21,7 @@ class SyncEngine {
   final VolumesRepository volumesRepo;
   final ChaptersRepository chaptersRepo;
   final ServerSettingsRepository serverSettingsRepo;
+  final ServerFontsRepository serverFontsRepo;
   final CollectionsRepository collectionsRepo;
   final ReadingListsRepository readingListsRepo;
   final SmartFiltersRepository smartFiltersRepo;
@@ -35,6 +37,7 @@ class SyncEngine {
     required this.volumesRepo,
     required this.chaptersRepo,
     required this.serverSettingsRepo,
+    required this.serverFontsRepo,
     required this.collectionsRepo,
     required this.readingListsRepo,
     required this.smartFiltersRepo,
@@ -125,5 +128,9 @@ class SyncEngine {
 
   Future<void> refreshServerSettings() async {
     await _pool.withResource(serverSettingsRepo.refreshServerSettings);
+  }
+
+  Future<void> refreshServerFonts() async {
+    await _pool.withResource(serverFontsRepo.refreshServerFonts);
   }
 }

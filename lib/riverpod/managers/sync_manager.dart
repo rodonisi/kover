@@ -10,6 +10,7 @@ import 'package:kover/riverpod/repository/libraries_repository.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
 import 'package:kover/riverpod/repository/reading_lists_repository.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
+import 'package:kover/riverpod/repository/server_fonts_repository.dart';
 import 'package:kover/riverpod/repository/server_settings_repository.dart';
 import 'package:kover/riverpod/repository/smart_filters_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
@@ -41,6 +42,7 @@ sealed class SyncPhase with _$SyncPhase {
   const factory SyncPhase.sidenav() = Sidenav;
   const factory SyncPhase.dashboard() = Dashboard;
   const factory SyncPhase.refreshServerSettings() = RefreshServerSettings;
+  const factory SyncPhase.refreshServerFonts() = RefreshServerFonts;
   const factory SyncPhase.refreshMetadata({required int seriesId}) =
       RefreshMetadata;
   const factory SyncPhase.refreshCovers({required int seriesId}) =
@@ -84,6 +86,7 @@ class SyncManager extends _$SyncManager {
     final volumesRepo = ref.read(volumesRepositoryProvider);
     final chaptersRepo = ref.read(chaptersRepositoryProvider);
     final serverSettingsRepo = ref.read(serverSettingsRepositoryProvider);
+    final serverFontsRepo = ref.read(serverFontsRepositoryProvider);
     final collectionsRepo = ref.read(collectionsRepositoryProvider);
     final readingListsRepo = ref.read(readingListsRepositoryProvider);
     final smartFiltersRepo = ref.read(smartFiltersRepositoryProvider);
@@ -97,6 +100,7 @@ class SyncManager extends _$SyncManager {
       volumesRepo: volumesRepo,
       chaptersRepo: chaptersRepo,
       serverSettingsRepo: serverSettingsRepo,
+      serverFontsRepo: serverFontsRepo,
       collectionsRepo: collectionsRepo,
       readingListsRepo: readingListsRepo,
       smartFiltersRepo: smartFiltersRepo,
@@ -134,6 +138,8 @@ class SyncManager extends _$SyncManager {
         () async => await _engine.syncDashboard(),
     refreshServerSettings: () =>
         () async => await _engine.refreshServerSettings(),
+    refreshServerFonts: () =>
+        () async => await _engine.refreshServerFonts(),
     refreshMetadata: (seriesId) =>
         () async => await _engine.refreshMetadataAndDetails(seriesId: seriesId),
     refreshCovers: (seriesId) =>
@@ -175,6 +181,7 @@ class SyncManager extends _$SyncManager {
       const .metadata(),
       const .tocs(),
       const .refreshServerSettings(),
+      const .refreshServerFonts(),
       if (settings.downloadCovers) const .covers(),
     });
   }
