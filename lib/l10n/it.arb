@@ -828,9 +828,5 @@
     "fontDescription": "Sovrascrivi il font dell'EPUB con un font personalizzato. I font disponibili vengono sincronizzati dal server. Nota: sono supportati solo i font utente, poiché i font integrati non sono disponibili per il download da parte dei client.",
     "@fontDescription": {
         "description": "Description for the font override setting"
-    },
-    "embeddedFonts": "Incorporato (predefinito)",
-    "@embeddedFonts": {
-        "description": "Label for using the EPUB's embedded fonts"
     }
 }
