@@ -886,5 +886,46 @@
     "startupLoadingMessage": "Идет настройка, пожалуйста, подождите...",
     "@startupLoadingMessage": {
         "description": "Message shown when the app is starting up and loading data"
+    },
+    "refreshingServerFonts": "Обновление серверных шрифтов",
+    "@refreshingServerFonts": {
+        "description": "Message shown while refreshing server fonts"
+    },
+    "keybinds": "Горячие клавиши читалки",
+    "keybindNextPage": "Следующая страница",
+    "@keybindNextPage": {
+        "description": "Label for the next page keyboard binding setting"
+    },
+    "keybindPreviousPage": "Предыдущая страница",
+    "@keybindPreviousPage": {
+        "description": "Label for the previous page keyboard binding setting"
+    },
+    "keybindPressAKey": "Нажмите любую клавишу…",
+    "@keybindPressAKey": {
+        "description": "Placeholder shown while waiting for a key press in the keybind capture dialog"
+    },
+    "keybindAlreadyAssigned": "Это сочетание уже используется",
+    "@keybindAlreadyAssigned": {
+        "description": "Error shown when a captured keybind is already used by another action"
+    },
+    "keybindVolumeUp": "Увеличить громкость",
+    "@keybindVolumeUp": {
+        "description": "Label for the volume up key when shown as a keybinding"
+    },
+    "keybindVolumeDown": "Уменьшить громкость",
+    "@keybindVolumeDown": {
+        "description": "Label for the volume down key when shown as a keybinding"
+    },
+    "font": "Шрифт",
+    "@font": {
+        "description": "Label for the font override setting"
+    },
+    "fontDescription": "Заменить шрифт EPUB пользовательским шрифтом. Доступные шрифты синхронизируются с сервером. Примечание: поддерживаются только пользовательские шрифты, так как встроенные шрифты недоступны для загрузки клиентами.",
+    "@fontDescription": {
+        "description": "Description for the font override setting"
+    },
+    "defaultLabel": "По умолчанию",
+    "@defaultLabel": {
+        "description": "Label for a default option in a setting"
     }
 }
