@@ -2,20 +2,9 @@ import 'package:flutter/widgets.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/connectivity.dart';
+import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/providers/settings/download_settings.dart';
-import 'package:kover/riverpod/repository/book_repository.dart';
-import 'package:kover/riverpod/repository/chapters_repository.dart';
-import 'package:kover/riverpod/repository/collections_repository.dart';
-import 'package:kover/riverpod/repository/libraries_repository.dart';
-import 'package:kover/riverpod/repository/reader_repository.dart';
-import 'package:kover/riverpod/repository/reading_lists_repository.dart';
-import 'package:kover/riverpod/repository/series_repository.dart';
-import 'package:kover/riverpod/repository/server_fonts_repository.dart';
-import 'package:kover/riverpod/repository/server_settings_repository.dart';
-import 'package:kover/riverpod/repository/smart_filters_repository.dart';
-import 'package:kover/riverpod/repository/volumes_repository.dart';
-import 'package:kover/riverpod/repository/want_to_read_repository.dart';
-import 'package:kover/sync/sync_engine.dart';
+import 'package:kover/sync/sync_worker.dart';
 import 'package:kover/utils/lifecycle.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -25,34 +14,25 @@ part 'sync_manager.g.dart';
 
 @freezed
 sealed class SyncPhase with _$SyncPhase {
-  const SyncPhase._();
-
-  const factory SyncPhase.allSeries() = AllSeries;
-  const factory SyncPhase.metadata() = Metadata;
-  const factory SyncPhase.tocs() = Tocs;
-  const factory SyncPhase.onDeck() = OnDeck;
-  const factory SyncPhase.recentlyAdded() = RecentlyAdded;
-  const factory SyncPhase.recentlyUpdated() = RecentlyUpdated;
-  const factory SyncPhase.libraries() = Libraries;
-  const factory SyncPhase.progress() = Progress;
-  const factory SyncPhase.covers() = Covers;
-  const factory SyncPhase.collections() = Collections;
-  const factory SyncPhase.readingLists() = ReadingLists;
-  const factory SyncPhase.smartFilters() = SmartFilters;
-  const factory SyncPhase.sidenav() = Sidenav;
-  const factory SyncPhase.dashboard() = Dashboard;
-  const factory SyncPhase.refreshServerSettings() = RefreshServerSettings;
-  const factory SyncPhase.refreshServerFonts() = RefreshServerFonts;
-  const factory SyncPhase.refreshMetadata({required int seriesId}) =
-      RefreshMetadata;
-  const factory SyncPhase.refreshCovers({required int seriesId}) =
-      RefreshCovers;
-  const factory SyncPhase.refreshToc({
-    required int chapterId,
-  }) = RefreshToc;
-
-  factory SyncPhase.fromJson(Map<String, dynamic> json) =>
-      _$SyncPhaseFromJson(json);
+  const factory allSeries() = AllSeries;
+  const factory metadata() = Metadata;
+  const factory tocs() = Tocs;
+  const factory onDeck() = OnDeck;
+  const factory recentlyAdded() = RecentlyAdded;
+  const factory recentlyUpdated() = RecentlyUpdated;
+  const factory libraries() = Libraries;
+  const factory progress() = Progress;
+  const factory covers() = Covers;
+  const factory collections() = Collections;
+  const factory readingLists() = ReadingLists;
+  const factory smartFilters() = SmartFilters;
+  const factory sidenav() = Sidenav;
+  const factory dashboard() = Dashboard;
+  const factory refreshServerSettings() = RefreshServerSettings;
+  const factory refreshServerFonts() = RefreshServerFonts;
+  const factory refreshMetadata({required int seriesId}) = RefreshMetadata;
+  const factory refreshCovers({required int seriesId}) = RefreshCovers;
+  const factory refreshToc({required int chapterId}) = RefreshToc;
 }
 
 @freezed
@@ -76,83 +56,14 @@ class SyncManager extends _$SyncManager {
   bool _hasConnection = false;
   final List<Set<SyncPhase>> _queuedPhases = [];
   final Set<SyncPhase> _runningPhases = {};
-
-  SyncEngine get _engine {
-    final seriesRepo = ref.read(seriesRepositoryProvider);
-    final bookRepo = ref.read(bookRepositoryProvider);
-    final librariesRepo = ref.read(librariesRepositoryProvider);
-    final wantToReadRepo = ref.read(wantToReadRepositoryProvider);
-    final readerRepo = ref.read(readerRepositoryProvider);
-    final volumesRepo = ref.read(volumesRepositoryProvider);
-    final chaptersRepo = ref.read(chaptersRepositoryProvider);
-    final serverSettingsRepo = ref.read(serverSettingsRepositoryProvider);
-    final serverFontsRepo = ref.read(serverFontsRepositoryProvider);
-    final collectionsRepo = ref.read(collectionsRepositoryProvider);
-    final readingListsRepo = ref.read(readingListsRepositoryProvider);
-    final smartFiltersRepo = ref.read(smartFiltersRepositoryProvider);
-
-    return SyncEngine(
-      seriesRepo: seriesRepo,
-      bookRepo: bookRepo,
-      librariesRepo: librariesRepo,
-      wantToReadRepo: wantToReadRepo,
-      readerRepo: readerRepo,
-      volumesRepo: volumesRepo,
-      chaptersRepo: chaptersRepo,
-      serverSettingsRepo: serverSettingsRepo,
-      serverFontsRepo: serverFontsRepo,
-      collectionsRepo: collectionsRepo,
-      readingListsRepo: readingListsRepo,
-      smartFiltersRepo: smartFiltersRepo,
-    );
-  }
-
-  Future<void> Function() _getCallback(SyncPhase phase) => phase.when(
-    allSeries: () =>
-        () async => await _engine.syncAllSeries(),
-    metadata: () =>
-        () async => await _engine.syncMetadata(),
-    tocs: () =>
-        () async => await _engine.syncTocs(),
-    onDeck: () =>
-        () async => await _engine.syncOnDeck(),
-    recentlyAdded: () =>
-        () async => await _engine.syncRecentlyAdded(),
-    recentlyUpdated: () =>
-        () async => await _engine.syncRecentlyUpdated(),
-    libraries: () =>
-        () async => await _engine.syncLibraries(),
-    progress: () =>
-        () async => await _engine.syncProgress(),
-    covers: () =>
-        () async => await _engine.syncCovers(),
-    collections: () =>
-        () async => await _engine.syncCollections(),
-    readingLists: () =>
-        () async => await _engine.syncReadingLists(),
-    smartFilters: () =>
-        () async => await _engine.syncSmartFilters(),
-    sidenav: () =>
-        () async => await _engine.syncSidenav(),
-    dashboard: () =>
-        () async => await _engine.syncDashboard(),
-    refreshServerSettings: () =>
-        () async => await _engine.refreshServerSettings(),
-    refreshServerFonts: () =>
-        () async => await _engine.refreshServerFonts(),
-    refreshMetadata: (seriesId) =>
-        () async => await _engine.refreshMetadataAndDetails(seriesId: seriesId),
-    refreshCovers: (seriesId) =>
-        () async => await _engine.refreshCovers(seriesId: seriesId),
-    refreshToc: (chapterId) =>
-        () async => await _engine.refreshToc(chapterId: chapterId),
-  );
+  SyncWorker? _worker;
 
   @override
   SyncState build() {
     _hasUser = ref.read(currentUserProvider).hasValue;
     _hasConnection = ref.read(hasConnectionProvider).value ?? false;
 
+    _listenCredentials();
     _listenUser();
     _listenConnectivity();
     _listenAppLifecycle();
@@ -244,8 +155,7 @@ class SyncManager extends _$SyncManager {
 
       await Future.wait(
         batch.map((phase) async {
-          final callback = _getCallback(phase);
-          await _runPhase(phase, callback);
+          await _runPhase(phase);
         }),
       );
     }
@@ -255,7 +165,6 @@ class SyncManager extends _$SyncManager {
 
   Future<void> _runPhase(
     SyncPhase phase,
-    FutureOr<void> Function() callback,
   ) async {
     if (!_hasUser || !_hasConnection || _runningPhases.contains(phase)) return;
 
@@ -264,7 +173,8 @@ class SyncManager extends _$SyncManager {
 
     var failed = false;
     try {
-      await callback();
+      await _ensureWorker();
+      await _worker!.runPhase(phase);
     } catch (e, stacktrace) {
       failed = true;
       state = SyncState.error(phase: phase, error: e);
@@ -280,6 +190,28 @@ class SyncManager extends _$SyncManager {
         state = SyncState.syncing(phases: Set.unmodifiable(_runningPhases));
       }
     }
+  }
+
+  Future<void> _ensureWorker() async {
+    if (_worker != null) return;
+
+    final credentials = await ref.read(credentialsProvider.future);
+
+    _worker = await SyncWorker.spawn(
+      url: credentials.url!,
+      key: credentials.apiKey!,
+      customHeaders: credentials.customHeaders,
+    );
+  }
+
+  void _listenCredentials() {
+    ref.listen(credentialsProvider, (prev, next) async {
+      if (next.hasValue && next.value != prev?.value) {
+        _worker?.close();
+        _worker = null;
+        await fullSync();
+      }
+    });
   }
 
   void _listenUser() {
