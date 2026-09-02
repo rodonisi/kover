@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:chopper/chopper.dart';
 import 'package:flutter/services.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/sync/sync_engine.dart';

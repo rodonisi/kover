@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/riverpod/providers/auth.dart';
@@ -35,6 +37,22 @@ sealed class SyncPhase with _$SyncPhase {
   const factory refreshToc({required int chapterId}) = RefreshToc;
 }
 
+@Riverpod(keepAlive: true)
+Future<SyncWorker> syncWorker(Ref ref) async {
+  final credentials = await ref.watch(credentialsProvider.future);
+
+  final worker = await SyncWorker.spawn(
+    url: credentials.url!,
+    key: credentials.apiKey!,
+    customHeaders: credentials.customHeaders,
+  );
+
+  // 2. Automatically clean up the isolate
+  ref.onDispose(() => worker.close());
+
+  return worker;
+}
+
 @freezed
 sealed class SyncState with _$SyncState {
   const factory SyncState.idle() = IdleState;
@@ -52,19 +70,12 @@ sealed class SyncState with _$SyncState {
 class SyncManager extends _$SyncManager {
   static const _maxConcurrentPhases = 4;
 
-  bool _hasUser = false;
-  bool _hasConnection = false;
   final List<Set<SyncPhase>> _queuedPhases = [];
   final Set<SyncPhase> _runningPhases = {};
-  SyncWorker? _worker;
 
   @override
   SyncState build() {
-    _hasUser = ref.read(currentUserProvider).hasValue;
-    _hasConnection = ref.read(hasConnectionProvider).value ?? false;
-
     _listenCredentials();
-    _listenUser();
     _listenConnectivity();
     _listenAppLifecycle();
 
@@ -133,12 +144,15 @@ class SyncManager extends _$SyncManager {
   }
 
   void _enqueuePhases(Set<SyncPhase> phases) {
-    final missingPhases = phases.where(
-      (phase) =>
-          !_runningPhases.contains(phase) &&
-          !_queuedPhases.any((queued) => queued.contains(phase)),
-    );
-    _queuedPhases.add(missingPhases.toSet());
+    final missingPhases = phases
+        .where(
+          (phase) =>
+              !_runningPhases.contains(phase) &&
+              !_queuedPhases.any((queued) => queued.contains(phase)),
+        )
+        .toSet();
+    if (missingPhases.isEmpty) return;
+    _queuedPhases.add(missingPhases);
     _processQueue();
   }
 
@@ -166,15 +180,17 @@ class SyncManager extends _$SyncManager {
   Future<void> _runPhase(
     SyncPhase phase,
   ) async {
-    if (!_hasUser || !_hasConnection || _runningPhases.contains(phase)) return;
+    final hasUser = ref.read(currentUserProvider).hasValue;
+    final hasConnection = ref.read(hasConnectionProvider).value ?? false;
+    if (!hasUser || !hasConnection || _runningPhases.contains(phase)) return;
 
     _runningPhases.add(phase);
     state = SyncState.syncing(phases: Set.unmodifiable(_runningPhases));
 
     var failed = false;
     try {
-      await _ensureWorker();
-      await _worker!.runPhase(phase);
+      final worker = await ref.read(syncWorkerProvider.future);
+      await worker.runPhase(phase);
     } catch (e, stacktrace) {
       failed = true;
       state = SyncState.error(phase: phase, error: e);
@@ -192,33 +208,9 @@ class SyncManager extends _$SyncManager {
     }
   }
 
-  Future<void> _ensureWorker() async {
-    if (_worker != null) return;
-
-    final credentials = await ref.read(credentialsProvider.future);
-
-    _worker = await SyncWorker.spawn(
-      url: credentials.url!,
-      key: credentials.apiKey!,
-      customHeaders: credentials.customHeaders,
-    );
-  }
-
   void _listenCredentials() {
     ref.listen(credentialsProvider, (prev, next) async {
       if (next.hasValue && next.value != prev?.value) {
-        _worker?.close();
-        _worker = null;
-        await fullSync();
-      }
-    });
-  }
-
-  void _listenUser() {
-    ref.listen(currentUserProvider, (prev, next) async {
-      _hasUser = next.hasValue;
-      if (next.hasError) return;
-      if (prev != null && next.hasValue && prev.value != next.value) {
         await fullSync();
       }
     });
@@ -227,8 +219,6 @@ class SyncManager extends _$SyncManager {
   void _listenConnectivity() {
     ref.listen(hasConnectionProvider, (prev, next) {
       next.whenData((good) async {
-        _hasConnection = good;
-
         // skip update on first event as we are syncing already
         if (prev != null && good && good != prev.value) {
           await fullSync();
