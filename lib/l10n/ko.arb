@@ -911,5 +911,21 @@
     "keybindVolumeDown": "음량 줄이기",
     "@keybindVolumeDown": {
         "description": "Label for the volume down key when shown as a keybinding"
+    },
+    "refreshingServerFonts": "서버 글꼴 새로고침 중",
+    "@refreshingServerFonts": {
+        "description": "Message shown while refreshing server fonts"
+    },
+    "font": "글꼴",
+    "@font": {
+        "description": "Label for the font override setting"
+    },
+    "fontDescription": "EPUB 글꼴을 사용자 지정 글꼴로 대체합니다. 글꼴 목록은 서버에서 동기화됩니다. 참고: 내장 글꼴은 클라이언트에서 다운로드할 수 없으므로 사용자 글꼴만 지원됩니다.",
+    "@fontDescription": {
+        "description": "Description for the font override setting"
+    },
+    "defaultLabel": "기본값",
+    "@defaultLabel": {
+        "description": "Label for a default option in a setting"
     }
 }
