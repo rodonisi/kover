@@ -11,11 +11,11 @@
     "@onDeck": {
         "description": "Label for the home page on deck section"
     },
-    "recentlyUpdated": "최근 갱신된 책",
+    "recentlyUpdated": "최근 갱신됨",
     "@recentlyUpdated": {
         "description": "Label for the home page recently updated section"
     },
-    "recentlyAdded": "최근 추가된 책",
+    "recentlyAdded": "최근 추가됨",
     "@recentlyAdded": {
         "description": "Label for the home page recently added section"
     },
@@ -341,11 +341,11 @@
     "@removeDownload": {
         "description": "Label for the remove download context menu item"
     },
-    "refreshMetadata": "책 정보 갱신",
+    "refreshMetadata": "메타데이터 새로고침",
     "@refreshMetadata": {
         "description": "Label for the refresh metadata context menu item"
     },
-    "refreshCovers": "책 표지 새로고침",
+    "refreshCovers": "표지 새로고침",
     "@refreshCovers": {
         "description": "Label for the refresh covers context menu item"
     },
@@ -357,7 +357,7 @@
     "@syncingAllSeries": {
         "description": "Label for the syncing all series phase"
     },
-    "syncingMetadata": "책 정보 동기화 중",
+    "syncingMetadata": "메타데이터 동기 중",
     "@syncingMetadata": {
         "description": "Label for the syncing metadata phase"
     },
@@ -377,7 +377,7 @@
     "@syncingProgress": {
         "description": "Label for the syncing progress phase"
     },
-    "syncingCovers": "책 표지 동기화 중",
+    "syncingCovers": "표지 동기화 중",
     "@syncingCovers": {
         "description": "Label for the syncing covers phase"
     },
@@ -393,7 +393,7 @@
     "@syncingSidenav": {
         "description": "Label for the sidenav syncing phase"
     },
-    "refreshingMetadataForSeries": "{seriesId}의 시리즈 정보 새로고침 중",
+    "refreshingMetadataForSeries": "{seriesId} 시리즈 메타데이터 새로고침",
     "@refreshingMetadataForSeries": {
         "description": "Label for the refreshing metadata phase with the series ID",
         "placeholders": {
@@ -493,7 +493,7 @@
     "@cancelAll": {
         "description": "Label for the cancel all downloads button"
     },
-    "noDownloadsInQueue": "내려받는 책 없음",
+    "noDownloadsInQueue": "대기 중인 다운로드 없음",
     "@noDownloadsInQueue": {
         "description": "Message shown when there are no downloads in the queue"
     },
@@ -545,19 +545,19 @@
     "@height": {
         "description": "Label for the fit height image option"
     },
-    "margins": "여백 설정",
+    "margins": "여백",
     "@margins": {
         "description": "Label for the margins setting"
     },
-    "verticalGap": "세로 여백",
+    "verticalGap": "페이지 간격",
     "@verticalGap": {
         "description": "Label for the vertical gap setting"
     },
-    "pageGap": "가로 여백",
+    "pageGap": "쪽 사이 간격",
     "@pageGap": {
         "description": "Label for the page gap setting"
     },
-    "coverPage": "책 표지 설정",
+    "coverPage": "표지 페이지",
     "@coverPage": {
         "description": "Label for the cover page setting"
     },
@@ -623,7 +623,7 @@
     "@read": {
         "description": "Label for the read action button on cover cards"
     },
-    "refreshingChapterToc": "책 {chapterId}의 목차 새로고침 중",
+    "refreshingChapterToc": "{chapterId} 챕터 목차 새로고침 중",
     "@refreshingChapterToc": {
         "description": "Label for the syncing chapter TOC phase with the chapter ID",
         "placeholders": {
@@ -634,7 +634,7 @@
             }
         }
     },
-    "syncingTocs": "책 목차 동기화 중",
+    "syncingTocs": "챕터 목차 동기화 중",
     "@syncingTocs": {
         "description": "Label for the syncing chapters TOCs phase"
     },
@@ -810,7 +810,7 @@
     "@invalidCertificate": {
         "description": "User display error shown when the server certificate cannot be validated"
     },
-    "invalidCertificateDescription": "서버 HTTPS 인증서가 인증되지 않았습니다. 인증서를 확인하거나 (이 서버를 신뢰하는 경우) 설정에서 \"인증서 검증 무시\"를 활성화하십시오.",
+    "invalidCertificateDescription": "서버 HTTPS 인증서를 검증할 수 없습니다. 인증서를 확인하거나 (이 서버를 신뢰하는 경우) 설정에서 \"인증서 검증 무시\"를 활성화하십시오.",
     "@invalidCertificateDescription": {
         "description": "Instructions shown when the server certificate cannot be validated"
     },
