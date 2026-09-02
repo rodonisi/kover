@@ -15,16 +15,18 @@ import 'package:material_ui/material_ui.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 Future<void> main() async {
-  SentryWidgetsFlutterBinding.ensureInitialized();
-  await initializeBackgroundTask();
   await initializeSentry(
-    appRunner: () => runApp(
-      ProviderScope(
-        child: SentryWidget(
-          child: const App(),
+    appRunner: () async {
+      SentryWidgetsFlutterBinding.ensureInitialized();
+      await initializeBackgroundTask();
+      runApp(
+        ProviderScope(
+          child: SentryWidget(
+            child: const App(),
+          ),
         ),
-      ),
-    ),
+      );
+    },
   );
 }
 
