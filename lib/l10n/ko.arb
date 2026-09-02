@@ -31,7 +31,7 @@
     "@menu": {
         "description": "Label for the menu button"
     },
-    "allSeries": "모든 책",
+    "allSeries": "모든 시리즈",
     "@allSeries": {
         "description": "Label for the all series menu entry"
     },
@@ -79,7 +79,7 @@
     "@dark": {
         "description": "Label for the dark theme mode option"
     },
-    "outlinedTheme": "글자 테두리",
+    "outlinedTheme": "외곽선 테마",
     "@outlinedTheme": {
         "description": "Label for the outlined theme setting"
     },
@@ -139,7 +139,7 @@
     "@clearCovers": {
         "description": "Label for the clear covers button"
     },
-    "clearDatabase": "모든 읽기 기록 삭제",
+    "clearDatabase": "데이터베이스 초기화",
     "@clearDatabase": {
         "description": "Label for the clear database button"
     },
@@ -183,11 +183,11 @@
     "@name": {
         "description": "Label for sorting by name option"
     },
-    "dateAdded": "최근 추가한 날짜",
+    "dateAdded": "추가한 날짜",
     "@dateAdded": {
         "description": "Label for sorting by date added option"
     },
-    "lastModified": "최근 수정한 날짜",
+    "lastModified": "마지막 수정일",
     "@lastModified": {
         "description": "Label for sorting by last modified option"
     },
@@ -215,11 +215,11 @@
     "@storyline": {
         "description": "Label for the storyline section in the series details page"
     },
-    "volumes": "책 목록",
+    "volumes": "권",
     "@volumes": {
         "description": "Label for the volumes section in the series details page"
     },
-    "chapters": "목록",
+    "chapters": "챕터",
     "@chapters": {
         "description": "Label for the chapters section in the series details page"
     },
@@ -231,19 +231,19 @@
     "@writers": {
         "description": "Label for the writers metadata in the series details page"
     },
-    "filter": "정렬",
+    "filter": "필터",
     "@filter": {
         "description": "Label for the filter button in lists"
     },
-    "hideRead": "숨기기",
+    "hideRead": "읽은 항목 숨기기",
     "@hideRead": {
         "description": "Label for the hide read filter option in lists"
     },
-    "goToChapter": "해당 권으로 이동",
+    "goToChapter": "해당 챕터로 이동",
     "@goToChapter": {
         "description": "Label for the go to chapter button in the reading list chapter entry context menu"
     },
-    "goToSeries": "작품으로 이동",
+    "goToSeries": "해당 시리즈로 이동",
     "@goToSeries": {
         "description": "Label for the go to series button in the reading list chapter entry context menu"
     },
@@ -353,7 +353,7 @@
     "@noActiveSyncOperations": {
         "description": "Message shown when there are no active sync operations"
     },
-    "syncingAllSeries": "모든 책 동기화 중",
+    "syncingAllSeries": "모든 시리즈 동기화 중",
     "@syncingAllSeries": {
         "description": "Label for the syncing all series phase"
     },
@@ -381,7 +381,7 @@
     "@syncingCovers": {
         "description": "Label for the syncing covers phase"
     },
-    "syncingCollections": "콜렉션 동기화 중",
+    "syncingCollections": "컬렉션 동기화 중",
     "@syncingCollections": {
         "description": "Label for the syncing collections phase"
     },
@@ -393,7 +393,7 @@
     "@syncingSidenav": {
         "description": "Label for the sidenav syncing phase"
     },
-    "refreshingMetadataForSeries": "{seriesId}의 책 정보 새로고침 중",
+    "refreshingMetadataForSeries": "{seriesId}의 시리즈 정보 새로고침 중",
     "@refreshingMetadataForSeries": {
         "description": "Label for the refreshing metadata phase with the series ID",
         "placeholders": {
@@ -404,7 +404,7 @@
             }
         }
     },
-    "refreshingCoversForSeries": "{seriesId}의 책 표지 새로고침 중",
+    "refreshingCoversForSeries": "{seriesId}의 시리즈 표지 새로고침 중",
     "@refreshingCoversForSeries": {
         "description": "Label for the refreshing covers phase with the series ID",
         "placeholders": {
@@ -419,7 +419,7 @@
     "@refreshingServerSettings": {
         "description": "Label for the refreshing server settings phase"
     },
-    "series": "작품",
+    "series": "시리즈",
     "@series": {
         "description": "Label for the series search section header"
     },
@@ -434,7 +434,7 @@
             }
         }
     },
-    "wordCount": "{wordCount}자",
+    "wordCount": "{wordCount}단어",
     "@wordCount": {
         "description": "Label for the word count of a book entry",
         "placeholders": {
@@ -525,7 +525,7 @@
     "@horizontal": {
         "description": "Label for the horizontal reader mode option"
     },
-    "twoPage": "같이 보기",
+    "twoPage": "두 쪽 보기",
     "@twoPage": {
         "description": "Label for the two page reader mode option"
     },
@@ -561,7 +561,7 @@
     "@coverPage": {
         "description": "Label for the cover page setting"
     },
-    "showProgressBar": "내려받기 진행도 보이기",
+    "showProgressBar": "진행률 바 표시",
     "@showProgressBar": {
         "description": "Label for the show progress bar setting"
     },
@@ -573,7 +573,7 @@
     "@fontSize": {
         "description": "Label for the font size setting"
     },
-    "wordSpacing": "글자 간격",
+    "wordSpacing": "단어 간격",
     "@wordSpacing": {
         "description": "Label for the word spacing setting"
     },
@@ -581,7 +581,7 @@
     "@lineHeight": {
         "description": "Label for the line height setting"
     },
-    "letterSpacing": "공백 간격",
+    "letterSpacing": "자간",
     "@letterSpacing": {
         "description": "Label for the letter spacing setting"
     },
@@ -883,7 +883,7 @@
     "@removeParagraphIndentationDescription": {
         "description": "Description for the remove paragraphs indent setting"
     },
-    "startupLoadingMessage": "설정 완료, 잠시 기다려 주십시오...",
+    "startupLoadingMessage": "준비 중입니다. 잠시만 기다려 주세요…",
     "@startupLoadingMessage": {
         "description": "Message shown when the app is starting up and loading data"
     },
