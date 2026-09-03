@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:kover/riverpod/managers/sync_manager.dart';
 import 'package:kover/sync/sync_engine.dart';
@@ -14,16 +15,69 @@ class const SyncWorkerArgs({
   required final Map<String, String> customHeaders,
 });
 
-class SyncWorker {
+abstract class SyncWorker {
+  static Future<SyncWorker> spawn({
+    required String url,
+    required String key,
+    Map<String, String> customHeaders = const {},
+  }) async {
+    if (kIsWeb) {
+      return NativeSyncWorker.fromCredentials(
+        url: url,
+        key: key,
+        customHeaders: customHeaders,
+      );
+    }
+
+    return await IsolatedSyncWorker.spawn(
+      url: url,
+      key: key,
+      customHeaders: customHeaders,
+    );
+  }
+
+  Future<void> runPhase(SyncPhase phase);
+  void close();
+}
+
+class NativeSyncWorker implements SyncWorker {
+  final SyncEngine _engine;
+
+  new _(this._engine);
+
+  factory fromCredentials({
+    required String url,
+    required String key,
+    Map<String, String> customHeaders = const {},
+  }) {
+    final engine = SyncEngine.fromCredentials(
+      url: url,
+      apiKey: key,
+      customHeaders: customHeaders,
+    );
+    return NativeSyncWorker._(engine);
+  }
+
+  @override
+  Future<void> runPhase(SyncPhase phase) => _engine.runPhase(phase);
+
+  @override
+  void close() {
+    log.debug('NativeSyncWorker closed');
+  }
+}
+
+class IsolatedSyncWorker implements SyncWorker {
   final SendPort _sendPort;
   final ReceivePort _receivePort;
   final Map<SyncPhase, Completer<void>> _runningPhases = {};
   bool _closed = false;
 
-  SyncWorker._(this._receivePort, this._sendPort) {
+  new _(this._receivePort, this._sendPort) {
     _receivePort.listen(_handleFromIsolate);
   }
 
+  @override
   Future<void> runPhase(SyncPhase phase) async {
     if (_closed) throw StateError('Closed');
 
@@ -46,6 +100,7 @@ class SyncWorker {
     }
   }
 
+  @override
   void close() {
     if (!_closed) {
       _closed = true;
@@ -94,7 +149,7 @@ class SyncWorker {
     final (ReceivePort receivePort, SendPort sendPort) =
         await connection.future;
 
-    return SyncWorker._(receivePort, sendPort);
+    return IsolatedSyncWorker._(receivePort, sendPort);
   }
 
   static void _startRemoteIsolate(SyncWorkerArgs args) {
@@ -108,7 +163,11 @@ class SyncWorker {
     ReceivePort receivePort,
     SyncWorkerArgs args,
   ) {
-    final engine = SyncEngine.fromCredentials(url: args.url, apiKey: args.key);
+    final engine = SyncEngine.fromCredentials(
+      url: args.url,
+      apiKey: args.key,
+      customHeaders: args.customHeaders,
+    );
 
     receivePort.listen((message) async {
       if (message == 'shutdown') {
