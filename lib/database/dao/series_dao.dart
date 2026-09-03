@@ -381,6 +381,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     return managers.serverSettings
         .filter((f) => f.key.equals(DataConstants.serverSettingsKey))
         .watchSingleOrNull()
+        .distinct()
         .switchMap((setting) {
           final progressDays =
               setting?.onDeckProgressDays ?? DataConstants.onDeckProgressDays;
