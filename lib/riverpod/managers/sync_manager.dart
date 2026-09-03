@@ -16,6 +16,8 @@ part 'sync_manager.g.dart';
 
 @freezed
 sealed class SyncPhase with _$SyncPhase {
+  const new _();
+
   const factory allSeries() = AllSeries;
   const factory metadata() = Metadata;
   const factory tocs() = Tocs;
@@ -35,6 +37,38 @@ sealed class SyncPhase with _$SyncPhase {
   const factory refreshMetadata({required int seriesId}) = RefreshMetadata;
   const factory refreshCovers({required int seriesId}) = RefreshCovers;
   const factory refreshToc({required int chapterId}) = RefreshToc;
+
+  Set<SyncPhase> get dependencies {
+    return switch (this) {
+      Libraries() ||
+      Sidenav() ||
+      RefreshServerSettings() ||
+      RefreshServerFonts() ||
+      RefreshMetadata() ||
+      RefreshCovers() ||
+      RefreshToc() => {},
+      AllSeries() => {const .libraries()},
+      Metadata() ||
+      Tocs() ||
+      RecentlyAdded() ||
+      RecentlyUpdated() ||
+      Progress() ||
+      Collections() ||
+      ReadingLists() => {const .allSeries()},
+      SmartFilters() => {
+        const .allSeries(),
+        const .readingLists(),
+        const .metadata(),
+      },
+      OnDeck() => {const .allSeries(), const .progress()},
+      Covers() => {
+        const .allSeries(),
+        const .collections(),
+        const .readingLists(),
+      },
+      Dashboard() => {const .smartFilters()},
+    };
+  }
 }
 
 @Riverpod(keepAlive: true)
@@ -47,7 +81,6 @@ Future<SyncWorker> syncWorker(Ref ref) async {
     customHeaders: credentials.customHeaders,
   );
 
-  // 2. Automatically clean up the isolate
   ref.onDispose(() => worker.close());
 
   return worker;
@@ -68,9 +101,7 @@ sealed class SyncState with _$SyncState {
 
 @Riverpod(keepAlive: true)
 class SyncManager extends _$SyncManager {
-  static const _maxConcurrentPhases = 4;
-
-  final List<Set<SyncPhase>> _queuedPhases = [];
+  final Set<SyncPhase> _queuedPhases = {};
   final Set<SyncPhase> _runningPhases = {};
 
   @override
@@ -86,19 +117,17 @@ class SyncManager extends _$SyncManager {
   Future<void> fullSync() async {
     final settings = await ref.read(downloadSettingsProvider.future);
 
-    _enqueuePhases({const .allSeries()});
     _enqueuePhases({
+      const .allSeries(),
       const .progress(),
       const .libraries(),
+      const .onDeck(),
       const .recentlyUpdated(),
       const .recentlyAdded(),
       const .readingLists(),
       const .sidenav(),
       const .dashboard(),
       const .smartFilters(),
-    });
-    _enqueuePhases({
-      const .onDeck(),
       const .collections(),
       const .metadata(),
       const .tocs(),
@@ -144,15 +173,7 @@ class SyncManager extends _$SyncManager {
   }
 
   void _enqueuePhases(Set<SyncPhase> phases) {
-    final missingPhases = phases
-        .where(
-          (phase) =>
-              !_runningPhases.contains(phase) &&
-              !_queuedPhases.any((queued) => queued.contains(phase)),
-        )
-        .toSet();
-    if (missingPhases.isEmpty) return;
-    _queuedPhases.add(missingPhases);
+    _queuedPhases.addAll(phases);
     _processQueue();
   }
 
@@ -160,18 +181,26 @@ class SyncManager extends _$SyncManager {
     if (_runningPhases.isNotEmpty || _queuedPhases.isEmpty) return;
 
     while (_queuedPhases.isNotEmpty) {
-      final nextPhases = _queuedPhases.removeAt(0);
-      final batch = nextPhases.take(_maxConcurrentPhases);
-      final remaining = nextPhases.skip(_maxConcurrentPhases);
-      if (remaining.isNotEmpty) {
-        _queuedPhases.insert(0, remaining.toSet());
+      final batch = _queuedPhases
+          .where(
+            (phase) => !phase.dependencies.any(
+              (dep) =>
+                  _queuedPhases.contains(dep) || _runningPhases.contains(dep),
+            ),
+          )
+          .toSet();
+
+      if (batch.isEmpty) {
+        log.error(
+          'sync queue deadlock: unsatisfiable dependencies',
+          attributes: {'phases': _queuedPhases},
+        );
+        _queuedPhases.clear();
+        break;
       }
 
-      await Future.wait(
-        batch.map((phase) async {
-          await _runPhase(phase);
-        }),
-      );
+      await Future.wait(batch.map((phase) async => await _runPhase(phase)));
+      _queuedPhases.removeAll(batch);
     }
 
     state = const SyncState.idle();
