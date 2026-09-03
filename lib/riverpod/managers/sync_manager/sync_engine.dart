@@ -1,6 +1,6 @@
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
-import 'package:kover/riverpod/managers/sync_manager.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/repository/book_repository.dart';
 import 'package:kover/riverpod/repository/chapters_repository.dart';

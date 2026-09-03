@@ -2,7 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/series_model.dart';
 import 'package:kover/pages/series_detail_page/series_app_bar_provider.dart';
 import 'package:kover/riverpod/managers/download_manager.dart';
-import 'package:kover/riverpod/managers/sync_manager.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:kover/riverpod/providers/download.dart';
 import 'package:kover/riverpod/providers/reader.dart';

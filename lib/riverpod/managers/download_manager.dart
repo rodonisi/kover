@@ -5,7 +5,7 @@ import 'package:async/async.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
-import 'package:kover/riverpod/managers/sync_manager.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/riverpod/providers/connectivity.dart';
 import 'package:kover/riverpod/providers/settings/download_settings.dart';
 import 'package:kover/riverpod/repository/download_repository.dart';

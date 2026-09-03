@@ -6,7 +6,7 @@ import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/connectivity.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/providers/settings/download_settings.dart';
-import 'package:kover/sync/sync_worker.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_worker.dart';
 import 'package:kover/utils/lifecycle.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

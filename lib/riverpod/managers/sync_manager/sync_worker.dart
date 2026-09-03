@@ -3,8 +3,8 @@ import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:kover/riverpod/managers/sync_manager.dart';
-import 'package:kover/sync/sync_engine.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_engine.dart';
 import 'package:kover/utils/logging.dart';
 
 class const SyncWorkerArgs({

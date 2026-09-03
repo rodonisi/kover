@@ -8,7 +8,7 @@ import 'package:kover/main.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/pages/reader/overlay/reader_controls.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
-import 'package:kover/riverpod/managers/sync_manager.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';

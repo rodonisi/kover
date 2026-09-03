@@ -29,7 +29,7 @@ import 'package:kover/sync/reading_list_sync_operations.dart';
 import 'package:kover/sync/series_sync_operations.dart';
 import 'package:kover/sync/server_settings_sync_operations.dart';
 import 'package:kover/sync/smart_filters_sync_operations.dart';
-import 'package:kover/sync/sync_engine.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_engine.dart';
 import 'package:kover/sync/volume_sync_operations.dart';
 import 'package:kover/sync/want_to_read_sync_operations.dart';
 import 'package:kover/utils/logging.dart';

@@ -7,7 +7,7 @@ import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/reader/epub_reader/epub_reader.dart';
 import 'package:kover/pages/reader/image_reader/image_reader.dart';
 import 'package:kover/pages/reader/pdf_reader/pdf_reader.dart';
-import 'package:kover/riverpod/managers/sync_manager.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/utils/layout_constants.dart';
