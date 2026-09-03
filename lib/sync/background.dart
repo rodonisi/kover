@@ -2,36 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
-import 'package:kover/riverpod/providers/client.dart';
-import 'package:kover/riverpod/providers/settings/credentials.dart';
-import 'package:kover/riverpod/repository/book_repository.dart';
-import 'package:kover/riverpod/repository/chapters_repository.dart';
-import 'package:kover/riverpod/repository/collections_repository.dart';
-import 'package:kover/riverpod/repository/libraries_repository.dart';
-import 'package:kover/riverpod/repository/reader_repository.dart';
-import 'package:kover/riverpod/repository/reading_lists_repository.dart';
-import 'package:kover/riverpod/repository/secure_storage.dart';
-import 'package:kover/riverpod/repository/series_repository.dart';
-import 'package:kover/riverpod/repository/server_fonts_repository.dart';
-import 'package:kover/riverpod/repository/server_settings_repository.dart';
-import 'package:kover/riverpod/repository/smart_filters_repository.dart';
-import 'package:kover/riverpod/repository/volumes_repository.dart';
-import 'package:kover/riverpod/repository/want_to_read_repository.dart';
-import 'package:kover/sync/book_sync_operations.dart';
-import 'package:kover/sync/chapter_sync_operations.dart';
-import 'package:kover/sync/collection_sync_operations.dart';
-import 'package:kover/sync/font_sync_operations.dart';
-import 'package:kover/sync/libraries_sync_operations.dart';
-import 'package:kover/sync/reader_sync_operations.dart';
-import 'package:kover/sync/reading_list_sync_operations.dart';
-import 'package:kover/sync/series_sync_operations.dart';
-import 'package:kover/sync/server_settings_sync_operations.dart';
-import 'package:kover/sync/smart_filters_sync_operations.dart';
 import 'package:kover/riverpod/managers/sync_manager/sync_engine.dart';
-import 'package:kover/sync/volume_sync_operations.dart';
-import 'package:kover/sync/want_to_read_sync_operations.dart';
+import 'package:kover/riverpod/providers/settings/credentials.dart';
+import 'package:kover/riverpod/repository/secure_storage.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:kover/utils/safe_platform.dart';
 import 'package:workmanager/workmanager.dart';
@@ -53,87 +27,20 @@ void callbackDispatcher() {
 
       final decoded = SecureStorageEntry.fromJson(jsonDecode(storageEntry));
       final settings = CredentialsState.fromJson(jsonDecode(decoded.value));
+      if (settings.url == null || settings.apiKey == null) return false;
 
-      final apiKey = settings.apiKey!;
-      final chopper = getChopperClient(
-        Uri.parse(settings.url!),
-        apiKey,
+      final engine = SyncEngine.fromCredentials(
+        url: settings.url!,
+        apiKey: settings.apiKey!,
         customHeaders: settings.customHeaders,
       );
-      final client = Openapi.create(client: chopper);
-
-      final seriesRepo = SeriesRepository(
-        db: db,
-        client: SeriesSyncOperations(client: client),
-        volumeClient: VolumeSyncOperations(client: client),
-        chapterClient: ChapterSyncOperations(client: client),
-      );
-      final bookRepo = BookRepository(
-        db,
-        BookSyncOperations(client: client, apiKey: apiKey),
-      );
-      final librariesRepo = LibrariesRepository(
-        db: db,
-        client: LibrariesSyncOperations(client),
-      );
-      final wantToReadRepo = WantToReadRepository(
-        db,
-        WantToReadSyncOperations(client: client),
-      );
-      final readerRepo = ReaderRepository(
-        db: db,
-        readerClient: ReaderSyncOperations(client: client),
-      );
-      final volumesRepo = VolumesRepository(
-        db: db,
-        client: VolumeSyncOperations(client: client),
-      );
-      final chaptersRepo = ChaptersRepository(
-        db: db,
-        client: ChapterSyncOperations(client: client),
-      );
-      final serverSettingsRepo = ServerSettingsRepository(
-        db: db,
-        client: ServerSettingsSyncOperations(client: client),
-      );
-      final serverFontsRepo = ServerFontsRepository(
-        db: db,
-        client: FontSyncOperations(client: client),
-      );
-      final collectionsRepo = CollectionsRepository(
-        db: db,
-        client: CollectionSyncOperations(client: client),
-      );
-      final readingListsRepo = ReadingListsRepository(
-        db: db,
-        client: ReadingListSyncOperations(client: client),
-      );
-      final smartFiltersRepo = SmartFiltersRepository(
-        db: db,
-        client: SmartFiltersSyncOperations(client: client),
-      );
-
-      final engine = SyncEngine(
-        seriesRepo: seriesRepo,
-        bookRepo: bookRepo,
-        librariesRepo: librariesRepo,
-        wantToReadRepo: wantToReadRepo,
-        readerRepo: readerRepo,
-        volumesRepo: volumesRepo,
-        chaptersRepo: chaptersRepo,
-        serverSettingsRepo: serverSettingsRepo,
-        serverFontsRepo: serverFontsRepo,
-        collectionsRepo: collectionsRepo,
-        readingListsRepo: readingListsRepo,
-        smartFiltersRepo: smartFiltersRepo,
-      );
-
       await engine.syncAllSeries();
       await engine.syncRecentlyUpdated();
       await engine.syncRecentlyAdded();
       await engine.syncLibraries();
       await engine.syncMetadata();
       await engine.syncProgress();
+      await engine.syncOnDeck();
 
       return true;
     } catch (e, stacktrace) {
