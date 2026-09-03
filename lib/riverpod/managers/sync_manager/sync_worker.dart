@@ -13,6 +13,7 @@ class const SyncWorkerArgs({
   required final String url,
   required final String key,
   required final Map<String, String> customHeaders,
+  required final bool ignoreCertificateValidation,
 });
 
 abstract class SyncWorker {
@@ -20,12 +21,14 @@ abstract class SyncWorker {
     required String url,
     required String key,
     Map<String, String> customHeaders = const {},
+    bool ignoreCertificateValidation = false,
   }) async {
     if (kIsWeb) {
       return NativeSyncWorker.fromCredentials(
         url: url,
         key: key,
         customHeaders: customHeaders,
+        ignoreCertificateValidation: ignoreCertificateValidation,
       );
     }
 
@@ -33,6 +36,7 @@ abstract class SyncWorker {
       url: url,
       key: key,
       customHeaders: customHeaders,
+      ignoreCertificateValidation: ignoreCertificateValidation,
     );
   }
 
@@ -49,11 +53,13 @@ class NativeSyncWorker implements SyncWorker {
     required String url,
     required String key,
     Map<String, String> customHeaders = const {},
+    bool ignoreCertificateValidation = false,
   }) {
     final engine = SyncEngine.fromCredentials(
       url: url,
       apiKey: key,
       customHeaders: customHeaders,
+      ignoreCertificateValidation: ignoreCertificateValidation,
     );
     return NativeSyncWorker._(engine);
   }
@@ -114,6 +120,7 @@ class IsolatedSyncWorker implements SyncWorker {
     required String url,
     required String key,
     Map<String, String> customHeaders = const {},
+    bool ignoreCertificateValidation = false,
   }) async {
     final token = RootIsolateToken.instance;
     if (token == null) {
@@ -139,6 +146,7 @@ class IsolatedSyncWorker implements SyncWorker {
           url: url,
           key: key,
           customHeaders: customHeaders,
+          ignoreCertificateValidation: ignoreCertificateValidation,
         ),
       );
     } on Object {

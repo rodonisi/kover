@@ -33,7 +33,9 @@ void callbackDispatcher() {
         url: settings.url!,
         apiKey: settings.apiKey!,
         customHeaders: settings.customHeaders,
+        ignoreCertificateValidation: settings.ignoreCertificateValidation,
       );
+
       await engine.syncAllSeries();
       await engine.syncRecentlyUpdated();
       await engine.syncRecentlyAdded();

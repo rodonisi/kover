@@ -79,6 +79,7 @@ Future<SyncWorker> syncWorker(Ref ref) async {
     url: credentials.url!,
     key: credentials.apiKey!,
     customHeaders: credentials.customHeaders,
+    ignoreCertificateValidation: credentials.ignoreCertificateValidation,
   );
 
   ref.onDispose(() => worker.close());

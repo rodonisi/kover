@@ -48,12 +48,14 @@ class SyncEngine({
     required String url,
     required String apiKey,
     Map<String, String> customHeaders = const {},
+    bool ignoreCertificateValidation = false,
   }) {
     final db = AppDatabase();
     final chopper = getChopperClient(
       Uri.parse(url),
       apiKey,
       customHeaders: customHeaders,
+      ignoreCertificateValidation: ignoreCertificateValidation,
     );
     final client = Openapi.create(client: chopper);
 
