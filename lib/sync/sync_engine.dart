@@ -42,7 +42,7 @@ class SyncEngine({
   required final ReadingListsRepository readingListsRepo,
   required final SmartFiltersRepository smartFiltersRepo,
 }) {
-  final _pool = Pool(4);
+  final _pool = Pool(8);
 
   factory fromCredentials({
     required String url,
