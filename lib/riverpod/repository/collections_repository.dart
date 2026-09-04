@@ -4,6 +4,7 @@ import 'package:kover/models/image_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/collection_sync_operations.dart';
+import 'package:kover/utils/chunked_fetch.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'collections_repository.g.dart';
@@ -76,10 +77,11 @@ class const CollectionsRepository({
   Future<void> fetchMissingCovers() async {
     final missingIds = await _db.collectionsDao.getMissingCovers();
 
-    final covers = [
-      for (var id in missingIds) await _client.getCollectionCover(id),
-    ].whereType<CollectionCoversCompanion>();
-
-    await _db.collectionsDao.upsertCollectionCoversBatch(covers);
+    await chunkedFetch(
+      items: missingIds,
+      fetchCallback: (id) => _client.getCollectionCover(id),
+      upsertCallback: (batch) =>
+          _db.collectionsDao.upsertCollectionCoversBatch(batch.whereType()),
+    );
   }
 }

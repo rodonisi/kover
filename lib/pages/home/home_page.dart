@@ -4,7 +4,7 @@ import 'package:kover/pages/home/sliver_on_deck.dart';
 import 'package:kover/pages/home/sliver_recently_added.dart';
 import 'package:kover/pages/home/sliver_recently_updated.dart';
 import 'package:kover/pages/home/sliver_smart_filter_section.dart';
-import 'package:kover/riverpod/managers/sync_manager.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/riverpod/providers/dashboard.dart';
 import 'package:kover/widgets/actions_app_bar/actions_app_bar.dart';
 import 'package:kover/widgets/util/async_value.dart';

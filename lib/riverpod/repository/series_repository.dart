@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
+import 'package:kover/database/dao/series_dao.dart';
 import 'package:kover/database/dao/series_metadata_dao.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/models/series_model.dart';
@@ -226,14 +227,24 @@ class const SeriesRepository({
             return neverSynced || hasNewChapter || hasNewProgress;
           },
         )
-        .map((r) => r.id);
+        .map((r) => seriesById[r.id]!);
 
-    final newSeriesIds = seriesById.keys.toSet().difference(
-      rows.map((r) => r.id).toSet(),
-    );
+    final rowIds = rows.map((r) => r.id).toSet();
+    final newSeries = series.where((s) => !rowIds.contains(s.id.value));
+    final outdated = {...detailsToFetch, ...newSeries};
+    final outdatedIds = outdated.map((s) => s.id.value).toSet();
+    final upToDate = series.where((s) => !outdatedIds.contains(s.id.value));
 
-    await refreshSeriesDetails([...detailsToFetch, ...newSeriesIds]);
-    await _db.seriesDao.mergeSeries(series);
+    final removedSeriesIds = rows
+        .map((r) => r.id)
+        .toSet()
+        .difference(
+          seriesById.keys.toSet(),
+        );
+
+    await _db.seriesDao.removeSeriesBatch(removedSeriesIds);
+    await _refreshSeriesAndDetails(outdated);
+    await _db.seriesDao.upsertSeries(upToDate);
   }
 
   /// Fetch missing metadata for all series
@@ -400,24 +411,25 @@ class const SeriesRepository({
   }
 
   /// Refresh series details for a list of series
-  Future<void> refreshSeriesDetails(Iterable<int> seriesIds) async {
-    for (final id in seriesIds) {
-      try {
-        final details = await _client.getSeriesDetail(id);
-        await _db.seriesDao.mergeSeriesDetails(
-          details,
+  Future<void> _refreshSeriesAndDetails(
+    Iterable<SeriesCompanion> series,
+  ) async {
+    await chunkedFetch(
+      items: series,
+      fetchCallback: (series) async {
+        final details = _client.getSeriesDetail(series.id.value);
+        return details;
+      },
+      upsertCallback: (batch) async {
+        final details = batch.whereType<SeriesDetailCompanions>().toList();
+        final ids = details.map((d) => d.seriesId).toSet();
+        final companions = series.where((s) => ids.contains(s.id.value));
+        await _db.seriesDao.upsertSeriesAndDetailsBatch(
+          seriesEntries: companions,
+          detailEntries: details,
         );
-      } catch (e) {
-        log.warning(
-          'failed to fetch series details for series',
-          attributes: {
-            'series_id': id,
-            'error_type': e.runtimeType,
-            'error_message': e,
-          },
-        );
-      }
-    }
+      },
+    );
   }
 
   /// Fetch all missing series covers
@@ -425,10 +437,9 @@ class const SeriesRepository({
     final missingIds = await _db.seriesDao.getMissingCovers();
     await chunkedFetch(
       items: missingIds,
-      fetchCallback: (id) async => _client.getSeriesCover(id),
-      upsertCallback: (covers) async => _db.seriesDao.upsertSeriesCoversBatch(
-        covers.whereType<SeriesCoversCompanion>(),
-      ),
+      fetchCallback: (id) => _client.getSeriesCover(id),
+      upsertCallback: (batch) =>
+          _db.seriesDao.upsertSeriesCoversBatch(batch.whereType()),
     );
   }
 

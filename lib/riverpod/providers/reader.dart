@@ -1,6 +1,6 @@
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/models/progress_model.dart';
-import 'package:kover/riverpod/managers/sync_manager.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/riverpod/providers/connectivity.dart';
 import 'package:kover/riverpod/repository/download_repository.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';

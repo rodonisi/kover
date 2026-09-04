@@ -450,6 +450,10 @@
     "@syncingCovers": {
         "description": "Label for the syncing covers phase"
     },
+    "syncingWantToRead": "Syncing Want to Read",
+    "@syncingWantToRead": {
+        "description": "Label for the syncing Want to Read phase"
+    },
     "syncingCollections": "Syncing collections",
     "@syncingCollections": {
         "description": "Label for the syncing collections phase"

@@ -5,6 +5,7 @@ import 'package:kover/models/reading_list_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/reading_list_sync_operations.dart';
+import 'package:kover/utils/chunked_fetch.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'reading_lists_repository.g.dart';
@@ -102,10 +103,11 @@ class const ReadingListsRepository({
   Future<void> fetchMissingCovers() async {
     final missingIds = await _db.collectionsDao.getMissingCovers();
 
-    final covers = [
-      for (var id in missingIds) await _client.getReadingListCover(id),
-    ].whereType<ReadingListCoversCompanion>();
-
-    await _db.readingListsDao.upsertReadingListCoversBatch(covers);
+    await chunkedFetch(
+      items: missingIds,
+      fetchCallback: (id) => _client.getReadingListCover(id),
+      upsertCallback: (batch) =>
+          _db.readingListsDao.upsertReadingListCoversBatch(batch.whereType()),
+    );
   }
 }

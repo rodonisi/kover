@@ -1,0 +1,207 @@
+import 'dart:async';
+import 'dart:isolate';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_engine.dart';
+import 'package:kover/utils/logging.dart';
+
+class const SyncWorkerArgs({
+  required final SendPort sendPort,
+  required final RootIsolateToken rootIsolateToken,
+  required final String url,
+  required final String key,
+  required final Map<String, String> customHeaders,
+  required final bool ignoreCertificateValidation,
+});
+
+/// A [SyncWorker] is responsible for running sync operations in a separate
+/// context.
+abstract class SyncWorker {
+  /// Spawns a new [SyncWorker] instance. On web, it returns a [RootSyncWorker],
+  /// while on other platforms it returns an [IsolatedSyncWorker].
+  static Future<SyncWorker> spawn({
+    required String url,
+    required String key,
+    Map<String, String> customHeaders = const {},
+    bool ignoreCertificateValidation = false,
+  }) async {
+    if (kIsWeb) {
+      return RootSyncWorker.fromCredentials(
+        url: url,
+        key: key,
+        customHeaders: customHeaders,
+        ignoreCertificateValidation: ignoreCertificateValidation,
+      );
+    }
+
+    return await IsolatedSyncWorker.spawn(
+      url: url,
+      key: key,
+      customHeaders: customHeaders,
+      ignoreCertificateValidation: ignoreCertificateValidation,
+    );
+  }
+
+  /// Runs the given [phase] in the worker context.
+  Future<void> runPhase(SyncPhase phase);
+
+  /// Closes the worker and releases any resources associated with it.
+  void close();
+}
+
+/// A [SyncWorker] that runs sync operations in the main isolate.
+class RootSyncWorker implements SyncWorker {
+  final SyncEngine _engine;
+
+  new _(this._engine);
+
+  factory fromCredentials({
+    required String url,
+    required String key,
+    Map<String, String> customHeaders = const {},
+    bool ignoreCertificateValidation = false,
+  }) {
+    final engine = SyncEngine.fromCredentials(
+      url: url,
+      apiKey: key,
+      customHeaders: customHeaders,
+      ignoreCertificateValidation: ignoreCertificateValidation,
+    );
+    return RootSyncWorker._(engine);
+  }
+
+  @override
+  Future<void> runPhase(SyncPhase phase) => _engine.runPhase(phase);
+
+  @override
+  void close() {
+    log.debug('NativeSyncWorker closed');
+  }
+}
+
+/// A [SyncWorker] that runs sync operations in a separate worker isolate.
+class IsolatedSyncWorker implements SyncWorker {
+  final SendPort _sendPort;
+  final ReceivePort _receivePort;
+  final Map<SyncPhase, Completer<void>> _runningPhases = {};
+  bool _closed = false;
+
+  new _(this._receivePort, this._sendPort) {
+    _receivePort.listen(_handleFromIsolate);
+  }
+
+  @override
+  Future<void> runPhase(SyncPhase phase) async {
+    if (_closed) throw StateError('Closed');
+
+    if (_runningPhases.containsKey(phase)) return;
+
+    final completer = Completer<void>();
+    _runningPhases[phase] = completer;
+    _sendPort.send(phase);
+    return completer.future;
+  }
+
+  void _handleFromIsolate(dynamic message) {
+    final (SyncPhase phase, Object? response) = message as (SyncPhase, Object?);
+    final completer = _runningPhases.remove(phase);
+
+    if (response is RemoteError) {
+      completer?.completeError(response);
+    } else {
+      completer?.complete();
+    }
+  }
+
+  @override
+  void close() {
+    if (!_closed) {
+      _closed = true;
+      _sendPort.send('shutdown');
+      if (_runningPhases.isEmpty) _receivePort.close();
+      log.debug('SyncWorker closed');
+    }
+  }
+
+  static Future<SyncWorker> spawn({
+    required String url,
+    required String key,
+    Map<String, String> customHeaders = const {},
+    bool ignoreCertificateValidation = false,
+  }) async {
+    final token = RootIsolateToken.instance;
+    if (token == null) {
+      throw Exception('RootIsolateToken is not available');
+    }
+
+    final initPort = RawReceivePort();
+    final connection = Completer<(ReceivePort, SendPort)>.sync();
+    initPort.handler = (initialMessage) {
+      final port = initialMessage as SendPort;
+      connection.complete((
+        ReceivePort.fromRawReceivePort(initPort),
+        port,
+      ));
+    };
+
+    try {
+      await Isolate.spawn(
+        _startRemoteIsolate,
+        SyncWorkerArgs(
+          sendPort: initPort.sendPort,
+          rootIsolateToken: token,
+          url: url,
+          key: key,
+          customHeaders: customHeaders,
+          ignoreCertificateValidation: ignoreCertificateValidation,
+        ),
+      );
+    } on Object {
+      initPort.close();
+      rethrow;
+    }
+
+    final (ReceivePort receivePort, SendPort sendPort) =
+        await connection.future;
+
+    return IsolatedSyncWorker._(receivePort, sendPort);
+  }
+
+  static void _startRemoteIsolate(SyncWorkerArgs args) {
+    BackgroundIsolateBinaryMessenger.ensureInitialized(args.rootIsolateToken);
+    final receivePort = ReceivePort();
+    args.sendPort.send(receivePort.sendPort);
+    _handleCommandsToIsolate(receivePort, args);
+  }
+
+  static void _handleCommandsToIsolate(
+    ReceivePort receivePort,
+    SyncWorkerArgs args,
+  ) {
+    final engine = SyncEngine.fromCredentials(
+      url: args.url,
+      apiKey: args.key,
+      customHeaders: args.customHeaders,
+    );
+
+    receivePort.listen((message) async {
+      if (message == 'shutdown') {
+        receivePort.close();
+        return;
+      }
+
+      final phase = message as SyncPhase;
+      try {
+        await engine.runPhase(phase);
+        args.sendPort.send((phase, null));
+      } catch (e, stacktrace) {
+        args.sendPort.send((
+          phase,
+          RemoteError(e.toString(), stacktrace.toString()),
+        ));
+      }
+    });
+  }
+}

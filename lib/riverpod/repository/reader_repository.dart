@@ -8,6 +8,7 @@ import 'package:kover/sync/reader_sync_operations.dart';
 import 'package:kover/utils/chunked_fetch.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:rxdart/rxdart.dart';
 
 part 'reader_repository.g.dart';
 
@@ -43,7 +44,8 @@ class ReaderRepository {
   Stream<ChapterModel> watchContinuePoint({required int seriesId}) {
     return _db.readerDao
         .continuePoint(seriesId: seriesId)
-        .watchSingle()
+        .watchSingleOrNull()
+        .whereNotNull()
         .map(ChapterModel.fromDatabaseModel);
   }
 
