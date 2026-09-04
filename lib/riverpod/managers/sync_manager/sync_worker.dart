@@ -19,7 +19,7 @@ class const SyncWorkerArgs({
 /// A [SyncWorker] is responsible for running sync operations in a separate
 /// context.
 abstract class SyncWorker {
-  /// Spawns a new [SyncWorker] instance. On web, it returns a [NativeSyncWorker],
+  /// Spawns a new [SyncWorker] instance. On web, it returns a [RootSyncWorker],
   /// while on other platforms it returns an [IsolatedSyncWorker].
   static Future<SyncWorker> spawn({
     required String url,
@@ -28,7 +28,7 @@ abstract class SyncWorker {
     bool ignoreCertificateValidation = false,
   }) async {
     if (kIsWeb) {
-      return NativeSyncWorker.fromCredentials(
+      return RootSyncWorker.fromCredentials(
         url: url,
         key: key,
         customHeaders: customHeaders,
@@ -52,7 +52,7 @@ abstract class SyncWorker {
 }
 
 /// A [SyncWorker] that runs sync operations in the main isolate.
-class NativeSyncWorker implements SyncWorker {
+class RootSyncWorker implements SyncWorker {
   final SyncEngine _engine;
 
   new _(this._engine);
@@ -69,7 +69,7 @@ class NativeSyncWorker implements SyncWorker {
       customHeaders: customHeaders,
       ignoreCertificateValidation: ignoreCertificateValidation,
     );
-    return NativeSyncWorker._(engine);
+    return RootSyncWorker._(engine);
   }
 
   @override
