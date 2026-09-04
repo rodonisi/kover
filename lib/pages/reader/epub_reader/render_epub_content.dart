@@ -92,7 +92,7 @@ class RenderEpubContent extends ConsumerWidget {
 
                   if (considerLast && !isSplit) {
                     styles.add(
-                      'margin-bottom: ${epubSettings.paragraphSpacing}',
+                      'margin-bottom: ${epubSettings.paragraphSpacing}em',
                     );
                   }
 
