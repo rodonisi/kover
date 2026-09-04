@@ -425,10 +425,9 @@ class const SeriesRepository({
     final missingIds = await _db.seriesDao.getMissingCovers();
     await chunkedFetch(
       items: missingIds,
-      fetchCallback: (id) async => _client.getSeriesCover(id),
-      upsertCallback: (covers) async => _db.seriesDao.upsertSeriesCoversBatch(
-        covers.whereType<SeriesCoversCompanion>(),
-      ),
+      fetchCallback: (id) => _client.getSeriesCover(id),
+      upsertCallback: (batch) =>
+          _db.seriesDao.upsertSeriesCoversBatch(batch.whereType()),
     );
   }
 

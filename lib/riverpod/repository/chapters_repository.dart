@@ -112,11 +112,9 @@ class const ChaptersRepository({
     final missing = await _db.chaptersDao.getMissingCovers();
     await chunkedFetch(
       items: missing,
-      fetchCallback: (id) async => _client.getChapterCover(id),
-      upsertCallback: (covers) async =>
-          _db.chaptersDao.upsertChapterCoversBatch(
-            covers.whereType<ChapterCoversCompanion>(),
-          ),
+      fetchCallback: (id) => _client.getChapterCover(id),
+      upsertCallback: (batch) =>
+          _db.chaptersDao.upsertChapterCoversBatch(batch.whereType()),
     );
   }
 }

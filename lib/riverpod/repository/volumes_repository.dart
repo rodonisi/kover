@@ -93,10 +93,9 @@ class const VolumesRepository({
     final missing = await _db.volumesDao.getMissingCovers();
     await chunkedFetch(
       items: missing,
-      fetchCallback: (id) async => _client.getVolumeCover(id),
-      upsertCallback: (covers) async => _db.volumesDao.upsertVolumeCoversBatch(
-        covers.whereType<VolumeCoversCompanion>(),
-      ),
+      fetchCallback: (id) => _client.getVolumeCover(id),
+      upsertCallback: (batch) =>
+          _db.volumesDao.upsertVolumeCoversBatch(batch.whereType()),
     );
   }
 }
