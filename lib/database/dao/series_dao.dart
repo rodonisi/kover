@@ -488,110 +488,135 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     });
   }
 
-  /// Upsert series details in [entry] and delete chapters and volumes not part
-  /// of the series anymore
-  Future<void> mergeSeriesDetails(SeriesDetailCompanions entry) async {
-    final volumeChapters = entry.volumes
-        .map((v) => v.chapters)
-        .expand((cs) => cs);
+  /// Remove provided [seriesIds] from the database.
+  Future<void> removeSeriesBatch(Iterable<int> seriesIds) async {
+    final chunked = seriesIds.chunked(500);
+    await batch((batch) {
+      for (final chunk in chunked) {
+        batch.deleteWhere(
+          series,
+          (s) => s.id.isIn(chunk),
+        );
+      }
+    });
+  }
 
-    final csMap = <int, ChapterWithRelationsCompanion>{};
-    for (final c in entry.chapters) {
-      csMap[c.chapter.id.value] = c;
-    }
-    for (final c in entry.storyline) {
-      final existing = csMap[c.chapter.id.value];
-      csMap[c.chapter.id.value] = existing != null
-          ? existing.replace(isStoryline: c.chapter.isStoryline)
-          : c;
-    }
-    for (final c in entry.specials) {
-      final existing = csMap[c.chapter.id.value];
-      csMap[c.chapter.id.value] = existing != null
-          ? existing.replace(isSpecial: c.chapter.isSpecial)
-          : c;
-    }
-    for (final c in volumeChapters) {
-      final existing = csMap[c.chapter.id.value];
-      csMap[c.chapter.id.value] = existing != null
-          ? existing.replace(volumeId: c.chapter.volumeId)
-          : c;
-    }
+  /// Upsert a batch of series and their details in a single transaction.
+  ///
+  /// Equivalent to upserting [seriesEntries] and running [mergeSeriesDetails]
+  /// for each of [detailEntries], except [seriesEntries] are expected to carry
+  /// a fresh `lastSynced` stamp from their DTO mapping.
+  Future<void> upsertSeriesAndDetailsBatch({
+    required Iterable<SeriesCompanion> seriesEntries,
+    required Iterable<SeriesDetailCompanions> detailEntries,
+  }) async {
+    if (seriesEntries.isEmpty && detailEntries.isEmpty) return;
 
-    final chapterIds = csMap.keys;
-    final volumeIds = entry.volumes.map((v) => v.volume.id.value);
+    final volumesBySeries = <int, Iterable<int>>{};
+    final chaptersBySeries = <int, Iterable<int>>{};
+
+    final allVolumes = <VolumesCompanion>[];
+    final allChapters = <ChaptersCompanion>[];
+    final allPeople = <int, PeopleCompanion>{};
+    final allGenres = <int, GenresCompanion>{};
+    final allTags = <int, TagsCompanion>{};
+    final allRoleLinks = <ChapterPeopleRolesCompanion>[];
+    final allGenreLinks = <ChapterGenresCompanion>[];
+    final allTagLinks = <ChapterTagsCompanion>[];
+
+    for (final detail in detailEntries) {
+      final chapters = {
+        ...detail.storyline,
+        ...detail.specials,
+        ...detail.chapters,
+        ...detail.volumes.map((volume) => volume.chapters).expand((c) => c),
+      };
+
+      volumesBySeries[detail.seriesId] = detail.volumes.map(
+        (v) => v.volume.id.value,
+      );
+      chaptersBySeries[detail.seriesId] = chapters.map(
+        (c) => c.chapter.id.value,
+      );
+
+      allVolumes.addAll(detail.volumes.map((v) => v.volume));
+      allChapters.addAll(chapters.map((c) => c.chapter));
+
+      for (final c in chapters) {
+        for (final p in [
+          ...c.writers,
+          ...c.coverArtists,
+          ...c.publishers,
+          ...c.characters,
+          ...c.pencillers,
+          ...c.inkers,
+          ...c.imprints,
+          ...c.colorists,
+          ...c.letterers,
+          ...c.editors,
+          ...c.translators,
+          ...c.teams,
+          ...c.locations,
+        ]) {
+          allPeople[p.id.value] = p;
+        }
+        for (final g in c.genres) {
+          allGenres[g.id.value] = g;
+        }
+        for (final t in c.tags) {
+          allTags[t.id.value] = t;
+        }
+      }
+
+      allRoleLinks.addAll(chapters.expand((c) => c.chapterPeopleRoles));
+      allGenreLinks.addAll(chapters.expand((c) => c.chapterGenres));
+      allTagLinks.addAll(chapters.expand((c) => c.chapterTags));
+    }
 
     await transaction(() async {
       await batch((batch) {
-        batch.deleteWhere(
-          volumes,
-          (t) => t.seriesId.equals(entry.seriesId) & t.id.isNotIn(volumeIds),
-        );
-        batch.insertAllOnConflictUpdate(
-          volumes,
-          entry.volumes.map((v) => v.volume),
-        );
+        batch.insertAllOnConflictUpdate(series, seriesEntries);
       });
 
       await batch((batch) {
-        batch.deleteWhere(
-          chapters,
-          (t) => t.seriesId.equals(entry.seriesId) & t.id.isNotIn(chapterIds),
-        );
-        batch.insertAllOnConflictUpdate(
-          chapters,
-          csMap.values.map((c) => c.chapter),
-        );
+        for (final entry in volumesBySeries.entries) {
+          batch.deleteWhere(
+            volumes,
+            (t) => t.seriesId.equals(entry.key) & t.id.isNotIn(entry.value),
+          );
+        }
+        batch.insertAllOnConflictUpdate(volumes, allVolumes);
       });
 
       await batch((batch) {
-        final peopleList = csMap.values.expand(
-          (c) => [
-            ...c.writers,
-            ...c.coverArtists,
-            ...c.publishers,
-            ...c.characters,
-            ...c.pencillers,
-            ...c.inkers,
-            ...c.imprints,
-            ...c.colorists,
-            ...c.letterers,
-            ...c.editors,
-            ...c.translators,
-            ...c.teams,
-            ...c.locations,
-          ],
-        );
-        final genreLinks = csMap.values.expand((c) => c.chapterGenres);
-        final tagLinks = csMap.values.expand((c) => c.chapterTags);
-
-        batch.deleteWhere(
-          chapterPeopleRoles,
-          (t) => t.chapterId.isIn(chapterIds),
-        );
-        batch.deleteWhere(chapterGenres, (t) => t.chapterId.isIn(chapterIds));
-        batch.deleteWhere(chapterTags, (t) => t.chapterId.isIn(chapterIds));
-
-        batch.insertAllOnConflictUpdate(people, peopleList);
-        batch.insertAllOnConflictUpdate(
-          genres,
-          csMap.values.expand((c) => c.genres),
-        );
-        batch.insertAllOnConflictUpdate(
-          tags,
-          csMap.values.expand((c) => c.tags),
-        );
-        batch.insertAllOnConflictUpdate(
-          chapterPeopleRoles,
-          csMap.values.expand((c) => c.chapterPeopleRoles),
-        );
-        batch.insertAllOnConflictUpdate(chapterGenres, genreLinks);
-        batch.insertAllOnConflictUpdate(chapterTags, tagLinks);
+        for (final entry in chaptersBySeries.entries) {
+          batch.deleteWhere(
+            chapters,
+            (t) => t.seriesId.equals(entry.key) & t.id.isNotIn(entry.value),
+          );
+        }
+        batch.insertAllOnConflictUpdate(chapters, allChapters);
       });
 
-      await managers.series
-          .filter((f) => f.id(entry.seriesId))
-          .update((f) => f(lastSynced: Value(DateTime.timestamp())));
+      await batch((batch) {
+        for (final chapterIds in chaptersBySeries.values) {
+          for (final chunk in chapterIds.chunked(500)) {
+            batch.deleteWhere(
+              chapterPeopleRoles,
+              (t) => t.chapterId.isIn(chunk),
+            );
+            batch.deleteWhere(chapterGenres, (t) => t.chapterId.isIn(chunk));
+            batch.deleteWhere(chapterTags, (t) => t.chapterId.isIn(chunk));
+          }
+        }
+
+        batch.insertAllOnConflictUpdate(people, allPeople.values);
+        batch.insertAllOnConflictUpdate(genres, allGenres.values);
+        batch.insertAllOnConflictUpdate(tags, allTags.values);
+        batch.insertAllOnConflictUpdate(chapterPeopleRoles, allRoleLinks);
+        batch.insertAllOnConflictUpdate(chapterGenres, allGenreLinks);
+        batch.insertAllOnConflictUpdate(chapterTags, allTagLinks);
+      });
     });
   }
 

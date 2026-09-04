@@ -37,6 +37,15 @@ void main() {
 
     when(mockAppDatabase.seriesDao).thenReturn(mockSeriesDao);
     when(mockSeriesDao.allSeries()).thenReturn(selectable);
+    when(mockSeriesSyncOperations.getSeriesDetail(any)).thenAnswer(
+      (inv) async => SeriesDetailCompanions(
+        seriesId: inv.positionalArguments.first as int,
+        storyline: const [],
+        specials: const [],
+        chapters: const [],
+        volumes: const [],
+      ),
+    );
   });
 
   group('series sync', () {
@@ -68,7 +77,12 @@ void main() {
       await repo.refreshAllSeries();
 
       verify(mockSeriesSyncOperations.getSeriesDetail(any)).called(1);
-      verify(mockSeriesDao.mergeSeriesDetails(any)).called(1);
+      verify(
+        mockSeriesDao.upsertSeriesAndDetailsBatch(
+          seriesEntries: anyNamed("seriesEntries"),
+          detailEntries: anyNamed("detailEntries"),
+        ),
+      ).called(1);
     });
 
     test('fetches details when never synced', () async {
@@ -118,7 +132,12 @@ void main() {
       await repo.refreshAllSeries();
 
       verify(mockSeriesSyncOperations.getSeriesDetail(any)).called(1);
-      verify(mockSeriesDao.mergeSeriesDetails(any)).called(1);
+      verify(
+        mockSeriesDao.upsertSeriesAndDetailsBatch(
+          seriesEntries: anyNamed("seriesEntries"),
+          detailEntries: anyNamed("detailEntries"),
+        ),
+      ).called(1);
     });
 
     test('fetches detail when new chapter added', () async {
@@ -169,7 +188,12 @@ void main() {
       await repo.refreshAllSeries();
 
       verify(mockSeriesSyncOperations.getSeriesDetail(any)).called(1);
-      verify(mockSeriesDao.mergeSeriesDetails(any)).called(1);
+      verify(
+        mockSeriesDao.upsertSeriesAndDetailsBatch(
+          seriesEntries: anyNamed("seriesEntries"),
+          detailEntries: anyNamed("detailEntries"),
+        ),
+      ).called(1);
     });
 
     test('fetches details when last read is newer', () async {
@@ -221,7 +245,12 @@ void main() {
       await repo.refreshAllSeries();
 
       verify(mockSeriesSyncOperations.getSeriesDetail(any)).called(1);
-      verify(mockSeriesDao.mergeSeriesDetails(any)).called(1);
+      verify(
+        mockSeriesDao.upsertSeriesAndDetailsBatch(
+          seriesEntries: anyNamed("seriesEntries"),
+          detailEntries: anyNamed("detailEntries"),
+        ),
+      ).called(1);
     });
 
     test('does not fetch details when no updates', () async {
@@ -274,7 +303,12 @@ void main() {
       await repo.refreshAllSeries();
 
       verifyNever(mockSeriesSyncOperations.getSeriesDetail(any));
-      verifyNever(mockSeriesDao.mergeSeriesDetails(any));
+      verifyNever(
+        mockSeriesDao.upsertSeriesAndDetailsBatch(
+          seriesEntries: anyNamed("seriesEntries"),
+          detailEntries: anyNamed("detailEntries"),
+        ),
+      );
     });
   });
 
