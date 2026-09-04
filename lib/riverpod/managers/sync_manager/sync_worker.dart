@@ -16,7 +16,11 @@ class const SyncWorkerArgs({
   required final bool ignoreCertificateValidation,
 });
 
+/// A [SyncWorker] is responsible for running sync operations in a separate
+/// context.
 abstract class SyncWorker {
+  /// Spawns a new [SyncWorker] instance. On web, it returns a [NativeSyncWorker],
+  /// while on other platforms it returns an [IsolatedSyncWorker].
   static Future<SyncWorker> spawn({
     required String url,
     required String key,
@@ -40,10 +44,14 @@ abstract class SyncWorker {
     );
   }
 
+  /// Runs the given [phase] in the worker context.
   Future<void> runPhase(SyncPhase phase);
+
+  /// Closes the worker and releases any resources associated with it.
   void close();
 }
 
+/// A [SyncWorker] that runs sync operations in the main isolate.
 class NativeSyncWorker implements SyncWorker {
   final SyncEngine _engine;
 
@@ -73,6 +81,7 @@ class NativeSyncWorker implements SyncWorker {
   }
 }
 
+/// A [SyncWorker] that runs sync operations in a separate worker isolate.
 class IsolatedSyncWorker implements SyncWorker {
   final SendPort _sendPort;
   final ReceivePort _receivePort;
