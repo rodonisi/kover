@@ -476,14 +476,8 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
 
   /// Upsert series present or absent from the db and remove series not present
   /// in [entries]
-  Future<void> mergeSeries(Iterable<SeriesCompanion> entries) async {
-    final ids = entries.map((e) => e.id.value).toList();
-
+  Future<void> upsertSeries(Iterable<SeriesCompanion> entries) async {
     await batch((batch) {
-      batch.deleteWhere(
-        series,
-        (s) => s.id.isNotIn(ids),
-      );
       batch.insertAllOnConflictUpdate(series, entries);
     });
   }
@@ -515,21 +509,21 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     final volumesBySeries = <int, Iterable<int>>{};
     final chaptersBySeries = <int, Iterable<int>>{};
 
-    final allVolumes = <VolumesCompanion>[];
-    final allChapters = <ChaptersCompanion>[];
-    final allPeople = <int, PeopleCompanion>{};
-    final allGenres = <int, GenresCompanion>{};
-    final allTags = <int, TagsCompanion>{};
-    final allRoleLinks = <ChapterPeopleRolesCompanion>[];
-    final allGenreLinks = <ChapterGenresCompanion>[];
-    final allTagLinks = <ChapterTagsCompanion>[];
+    final allVolumes = <VolumesCompanion>{};
+    final allChapters = <ChaptersCompanion>{};
+    final allPeople = <PeopleCompanion>{};
+    final allGenres = <GenresCompanion>{};
+    final allTags = <TagsCompanion>{};
+    final allRoleLinks = <ChapterPeopleRolesCompanion>{};
+    final allGenreLinks = <ChapterGenresCompanion>{};
+    final allTagLinks = <ChapterTagsCompanion>{};
 
     for (final detail in detailEntries) {
       final chapters = {
+        ...detail.volumes.map((volume) => volume.chapters).expand((c) => c),
         ...detail.storyline,
         ...detail.specials,
         ...detail.chapters,
-        ...detail.volumes.map((volume) => volume.chapters).expand((c) => c),
       };
 
       volumesBySeries[detail.seriesId] = detail.volumes.map(
@@ -543,7 +537,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       allChapters.addAll(chapters.map((c) => c.chapter));
 
       for (final c in chapters) {
-        for (final p in [
+        allPeople.addAll([
           ...c.writers,
           ...c.coverArtists,
           ...c.publishers,
@@ -557,15 +551,9 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
           ...c.translators,
           ...c.teams,
           ...c.locations,
-        ]) {
-          allPeople[p.id.value] = p;
-        }
-        for (final g in c.genres) {
-          allGenres[g.id.value] = g;
-        }
-        for (final t in c.tags) {
-          allTags[t.id.value] = t;
-        }
+        ]);
+        allGenres.addAll(c.genres);
+        allTags.addAll(c.tags);
       }
 
       allRoleLinks.addAll(chapters.expand((c) => c.chapterPeopleRoles));
@@ -575,11 +563,17 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
 
     await transaction(() async {
       await batch((batch) {
-        batch.insertAllOnConflictUpdate(series, seriesEntries);
+        batch.insertAllOnConflictUpdate(
+          series,
+          seriesEntries.map(
+            (s) => s.copyWith(lastSynced: Value(DateTime.timestamp())),
+          ),
+        );
       });
 
       await batch((batch) {
         for (final entry in volumesBySeries.entries) {
+          if (entry.value.isEmpty) continue;
           batch.deleteWhere(
             volumes,
             (t) => t.seriesId.equals(entry.key) & t.id.isNotIn(entry.value),
@@ -590,6 +584,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
 
       await batch((batch) {
         for (final entry in chaptersBySeries.entries) {
+          if (entry.value.isEmpty) continue;
           batch.deleteWhere(
             chapters,
             (t) => t.seriesId.equals(entry.key) & t.id.isNotIn(entry.value),
@@ -599,20 +594,17 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       });
 
       await batch((batch) {
-        for (final chapterIds in chaptersBySeries.values) {
-          for (final chunk in chapterIds.chunked(500)) {
-            batch.deleteWhere(
-              chapterPeopleRoles,
-              (t) => t.chapterId.isIn(chunk),
-            );
-            batch.deleteWhere(chapterGenres, (t) => t.chapterId.isIn(chunk));
-            batch.deleteWhere(chapterTags, (t) => t.chapterId.isIn(chunk));
-          }
+        for (final chunk in allChapters.map((c) => c.id.value).chunked(500)) {
+          batch.deleteWhere(
+            chapterPeopleRoles,
+            (t) => t.chapterId.isIn(chunk),
+          );
+          batch.deleteWhere(chapterGenres, (t) => t.chapterId.isIn(chunk));
+          batch.deleteWhere(chapterTags, (t) => t.chapterId.isIn(chunk));
         }
-
-        batch.insertAllOnConflictUpdate(people, allPeople.values);
-        batch.insertAllOnConflictUpdate(genres, allGenres.values);
-        batch.insertAllOnConflictUpdate(tags, allTags.values);
+        batch.insertAllOnConflictUpdate(people, allPeople);
+        batch.insertAllOnConflictUpdate(genres, allGenres);
+        batch.insertAllOnConflictUpdate(tags, allTags);
         batch.insertAllOnConflictUpdate(chapterPeopleRoles, allRoleLinks);
         batch.insertAllOnConflictUpdate(chapterGenres, allGenreLinks);
         batch.insertAllOnConflictUpdate(chapterTags, allTagLinks);

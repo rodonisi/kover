@@ -25,7 +25,6 @@ extension SeriesDtoMappings on SeriesDto {
       created: Value.absentIfNull(created?.normalizeUtc()),
       lastChapterAdded: Value.absentIfNull(lastChapterAddedUtc?.normalizeUtc()),
       remoteLastRead: Value.absentIfNull(latestReadDate?.normalizeUtc()),
-      lastSynced: Value(DateTime.timestamp()),
     );
   }
 }

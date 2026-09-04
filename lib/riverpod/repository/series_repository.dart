@@ -231,9 +231,7 @@ class const SeriesRepository({
 
     final rowIds = rows.map((r) => r.id).toSet();
     final newSeries = series.where((s) => !rowIds.contains(s.id.value));
-    final outdated = {
-      for (final s in [...detailsToFetch, ...newSeries]) s.id.value: s,
-    }.values;
+    final outdated = {...detailsToFetch, ...newSeries};
     final outdatedIds = outdated.map((s) => s.id.value).toSet();
     final upToDate = series.where((s) => !outdatedIds.contains(s.id.value));
 
@@ -246,7 +244,7 @@ class const SeriesRepository({
 
     await _db.seriesDao.removeSeriesBatch(removedSeriesIds);
     await _refreshSeriesAndDetails(outdated);
-    await _db.seriesDao.mergeSeries(upToDate);
+    await _db.seriesDao.upsertSeries(upToDate);
   }
 
   /// Fetch missing metadata for all series
