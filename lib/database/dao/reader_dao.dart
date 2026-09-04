@@ -96,8 +96,8 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
       ..limit(1);
   }
 
-  /// [SingleSelectable] continue point for series [seriesId]
-  SingleSelectable<Chapter> continuePoint({required int seriesId}) {
+  /// [Selectable] continue point for series [seriesId]
+  Selectable<Chapter> continuePoint({required int seriesId}) {
     return _continuePointQuery(
       seriesId: seriesId,
     ).map((row) => row.readTable(chapters));
