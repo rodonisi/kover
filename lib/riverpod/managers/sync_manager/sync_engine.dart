@@ -143,6 +143,8 @@ class SyncEngine({
           () async => await syncProgress(),
       covers: () =>
           () async => await syncCovers(),
+      wantToRead: () =>
+          () async => await syncWantToRead(),
       collections: () =>
           () async => await syncCollections(),
       readingLists: () =>
@@ -182,7 +184,6 @@ class SyncEngine({
 
   Future<void> syncLibraries() async {
     await librariesRepo.refreshLibraries();
-    await wantToReadRepo.mergeWantToRead();
   }
 
   Future<void> syncOnDeck() async {
@@ -200,6 +201,10 @@ class SyncEngine({
   Future<void> syncProgress() async {
     await readerRepo.refreshOutdatedProgress();
     await readerRepo.mergeProgress();
+  }
+
+  Future<void> syncWantToRead() async {
+    await wantToReadRepo.mergeWantToRead();
   }
 
   Future<void> syncCollections() async {

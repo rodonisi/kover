@@ -157,6 +157,7 @@ String _phaseLabel(AppLocalizations l, SyncPhase phase) {
     libraries: () => l.syncingLibraries,
     progress: () => l.syncingProgress,
     covers: () => l.syncingCovers,
+    wantToRead: () => l.syncingWantToRead,
     collections: () => l.syncingCollections,
     readingLists: () => l.syncingReadingLists,
     smartFilters: () => l.syncingSmartFilters,

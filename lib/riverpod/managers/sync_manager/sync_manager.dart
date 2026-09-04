@@ -27,6 +27,7 @@ sealed class SyncPhase with _$SyncPhase {
   const factory libraries() = Libraries;
   const factory progress() = Progress;
   const factory covers() = Covers;
+  const factory wantToRead() = WantToRead;
   const factory collections() = Collections;
   const factory readingLists() = ReadingLists;
   const factory smartFilters() = SmartFilters;
@@ -53,6 +54,7 @@ sealed class SyncPhase with _$SyncPhase {
       RecentlyAdded() ||
       RecentlyUpdated() ||
       Progress() ||
+      WantToRead() ||
       Collections() ||
       ReadingLists() => {const .allSeries()},
       SmartFilters() => {
