@@ -91,12 +91,14 @@ class const ReadingListsRepository({
 
     await _db.readingListsDao.upsertReadingListsBatch(readingLists);
 
-    for (var list in readingLists) {
-      final chapters = await _client.getReadingListChapters(
-        list.id.value,
-      );
-      await _db.readingListsDao.upsertReadingListChaptersBatch(chapters);
-    }
+    await chunkedFetch(
+      items: readingLists,
+      fetchCallback: (list) => _client.getReadingListChapters(list.id.value),
+      upsertCallback: (batch) async {
+        final flat = batch.expand((e) => e);
+        await _db.readingListsDao.upsertReadingListChaptersBatch(flat);
+      },
+    );
   }
 
   /// Fetch all covers for reading lists missing them.
