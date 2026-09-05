@@ -4,14 +4,6 @@ import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/series.dart';
 import 'package:kover/database/tables/volumes.dart';
 
-// class ContinuePoints extends Table {
-//   IntColumn get seriesId => integer().references(Series, #id)();
-//   IntColumn get chapterId => integer().references(Chapters, #id)();
-//
-//   @override
-//   Set<Column<Object>>? get primaryKey => {seriesId};
-// }
-
 @DataClassName('ReadingProgressData')
 class ReadingProgress extends Table {
   IntColumn get chapterId => integer().references(

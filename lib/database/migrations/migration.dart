@@ -3,6 +3,7 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/database/app_database.steps.dart';
 import 'package:kover/database/migrations/steps/from_10_to_11.dart';
 import 'package:kover/database/migrations/steps/from_11_to_12.dart';
+import 'package:kover/database/migrations/steps/from_12_to_13.dart';
 import 'package:kover/database/migrations/steps/from_1_to_2.dart';
 import 'package:kover/database/migrations/steps/from_2_to_3.dart';
 import 'package:kover/database/migrations/steps/from_3_to_4.dart';
@@ -26,5 +27,6 @@ MigrationStrategy appDatabaseMigration(AppDatabase db) => MigrationStrategy(
     from9To10: (m, schema) => migrateFrom9To10(db, m, schema),
     from10To11: (m, schema) => migrateFrom10To11(db, m, schema),
     from11To12: (m, schema) => migrateFrom11To12(db, m, schema),
+    from12To13: (m, schema) => migrateFrom12To13(db, m, schema),
   ),
 );

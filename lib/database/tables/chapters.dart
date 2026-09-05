@@ -37,8 +37,11 @@ class Chapters extends Table {
   BoolColumn get isStoryline => boolean().withDefault(const Constant(false))();
   DateTimeColumn get releaseDate => dateTime()();
   TextColumn get publicationStatus => textEnum<PublicationStatus>()();
-  DateTimeColumn get remoteLastRead => dateTime().nullable()();
   TextColumn get webLinks => text().nullable()();
+  IntColumn get totalReads => integer().withDefault(const Constant(0))();
+
+  IntColumn get remotePagesRead => integer().nullable()();
+  DateTimeColumn get remoteLastRead => dateTime().nullable()();
   DateTimeColumn get created => dateTime()();
   DateTimeColumn get lastModified => dateTime()();
 

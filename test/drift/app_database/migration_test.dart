@@ -27,6 +27,8 @@ import 'generated/schema_v8.dart' as v8;
 import 'generated/schema_v9.dart' as v9;
 import 'generated/schema_v10.dart' as v10;
 import 'generated/schema_v11.dart' as v11;
+import 'generated/schema_v12.dart' as v12;
+import 'generated/schema_v13.dart' as v13;
 
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -593,6 +595,59 @@ void main() {
           .select(migratedDb.downloadedPages)
           .getSingle();
       expect(storedPage.data, rawBytes);
+
+      await migratedDb.close();
+    });
+  });
+
+  group('from 12 to 13', () {
+    test('does not corrupt existing chapters', () async {
+      final schema = await verifier.schemaAt(12);
+      final oldDb = v12.DatabaseAtV12(schema.newConnection());
+      await oldDb
+          .into(oldDb.chapters)
+          .insert(
+            v12.ChaptersCompanion.insert(
+              id: const Value(1),
+              volumeId: 1,
+              seriesId: 1,
+              format: Format.epub.name,
+              minNumber: 0,
+              maxNumber: 0,
+              sortOrder: 0,
+              pages: 0,
+              wordCount: 0,
+              ageRating: 0,
+              releaseDate: DateTime.now().millisecondsSinceEpoch,
+              publicationStatus: PublicationStatus.unknown.name,
+              created: DateTime.now().millisecondsSinceEpoch,
+              lastModified: DateTime.now().millisecondsSinceEpoch,
+            ),
+          );
+      await oldDb.close();
+
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, 13);
+      await db.close();
+
+      final migratedDb = v13.DatabaseAtV13(schema.newConnection());
+      final chapters = await migratedDb.select(migratedDb.chapters).get();
+
+      expect(chapters, hasLength(1));
+      expect(chapters.first.id, 1);
+      expect(chapters.first.volumeId, 1);
+      expect(chapters.first.seriesId, 1);
+      expect(chapters.first.format, Format.epub.name);
+      expect(chapters.first.minNumber, 0);
+      expect(chapters.first.maxNumber, 0);
+      expect(chapters.first.sortOrder, 0);
+      expect(chapters.first.pages, 0);
+      expect(chapters.first.wordCount, 0);
+      expect(chapters.first.ageRating, 0);
+      expect(chapters.first.publicationStatus, PublicationStatus.unknown.name);
+
+      expect(chapters.first.totalReads, 0);
+      expect(chapters.first.remoteLastRead, null);
 
       await migratedDb.close();
     });
