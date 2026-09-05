@@ -117,7 +117,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   /// Clear all content data from the database. Does not clear app state data (e.g. credentials, settings).
   /// Useful e.g. when switching user.
@@ -133,18 +133,31 @@ class AppDatabase extends _$AppDatabase {
       await delete(readingProgress).go();
       await delete(bookChaptersTable).go();
       await delete(people).go();
+      await delete(seriesPeopleRoles).go();
+      await delete(chapterPeopleRoles).go();
       await delete(genres).go();
+      await delete(seriesGenres).go();
+      await delete(chapterGenres).go();
       await delete(tags).go();
+      await delete(seriesTags).go();
+      await delete(chapterTags).go();
       await delete(collections).go();
       await delete(collectionSeries).go();
       await delete(readingLists).go();
       await delete(readingListsChapters).go();
       await delete(onDeckRemoval).go();
-      await clearDownloads();
-      await clearCovers();
       await delete(fonts).go();
       await delete(serverFonts).go();
       await delete(smartFilters).go();
+      await delete(smartFilterSeries).go();
+      await delete(smartFilterReadingList).go();
+      await delete(smartFilterPerson).go();
+      await delete(serverSettings).go();
+      await delete(sidenav).go();
+      await delete(dashboard).go();
+
+      await clearDownloads();
+      await clearCovers();
     });
   }
 

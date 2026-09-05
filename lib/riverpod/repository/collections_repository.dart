@@ -67,10 +67,15 @@ class const CollectionsRepository({
 
     await _db.collectionsDao.upsertCollectionsBatch(collections);
 
-    for (var collection in collections) {
-      final series = await _client.getCollectionSeries(collection.id.value);
-      await _db.collectionsDao.upsertCollectionSeriesBatch(series);
-    }
+    await chunkedFetch(
+      items: collections,
+      fetchCallback: (collection) =>
+          _client.getCollectionSeries(collection.id.value),
+      upsertCallback: (batch) async {
+        final flat = batch.expand((e) => e);
+        return await _db.collectionsDao.upsertCollectionSeriesBatch(flat);
+      },
+    );
   }
 
   /// Fetch all covers for collections missing them.

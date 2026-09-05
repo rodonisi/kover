@@ -49,11 +49,13 @@ extension ChapterDtoMappings on ChapterDto {
           publicationStatus?.toLocal() ?? .unknown,
         ),
         webLinks: Value.absentIfNull(webLinks),
+        totalReads: Value.absentIfNull(totalReads),
         created: Value.absentIfNull(createdUtc?.normalizeUtc()),
         lastModified: Value.absentIfNull(lastModifiedUtc?.normalizeUtc()),
         remoteLastRead: Value.absentIfNull(
           lastReadingProgressUtc?.normalizeUtc(),
         ),
+        remotePagesRead: Value.absentIfNull(pagesRead),
       ),
       writers: convertPersonDtoList(writers),
       coverArtists: convertPersonDtoList(coverArtists),

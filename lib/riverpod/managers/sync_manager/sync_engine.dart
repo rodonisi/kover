@@ -165,6 +165,8 @@ class SyncEngine({
           () async => await refreshCovers(seriesId: seriesId),
       refreshToc: (chapterId) =>
           () async => await refreshToc(chapterId: chapterId),
+      seriesDetails: () =>
+          () async => await syncSeriesDetails(),
     );
 
     await callback();
@@ -176,6 +178,10 @@ class SyncEngine({
 
   Future<void> syncMetadata() async {
     await seriesRepo.fetchMissingMetadata();
+  }
+
+  Future<void> syncSeriesDetails() async {
+    await seriesRepo.refreshOutdatedDetails();
   }
 
   Future<void> syncTocs() async {

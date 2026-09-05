@@ -149,6 +149,7 @@ class SyncMenuOverlay extends ConsumerWidget {
 String _phaseLabel(AppLocalizations l, SyncPhase phase) {
   return phase.when(
     allSeries: () => l.syncingAllSeries,
+    seriesDetails: () => l.syncingSeriesDetails,
     metadata: () => l.syncingMetadata,
     tocs: () => l.syncingTocs,
     onDeck: () => l.syncingOnDeck,

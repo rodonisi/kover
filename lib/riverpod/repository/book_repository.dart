@@ -8,6 +8,7 @@ import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/book_sync_operations.dart';
+import 'package:kover/utils/chunked_fetch.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -127,25 +128,15 @@ class BookRepository {
   /// Fetch the table of contents for all chapters that are missing it.
   Future<void> fetchMissingChaptersTocs() async {
     final chapters = await _db.bookDao.getMissingTocChapterIds();
-    final tocs = <BookChaptersTableCompanion>[];
 
-    for (final id in chapters) {
-      try {
-        final entries = await _client.getBookChapters(id);
-        tocs.addAll(entries);
-      } catch (e) {
-        log.warning(
-          'failed to fetch toc for chapter',
-          attributes: {
-            'chapter_id': id,
-            'error_type': e.runtimeType,
-            'error_message': e,
-          },
-        );
-      }
-    }
-
-    await _db.bookDao.upsertTocBatch(tocs);
+    await chunkedFetch(
+      items: chapters,
+      fetchCallback: (id) => _client.getBookChapters(id),
+      upsertCallback: (batch) async {
+        final flat = batch.expand((e) => e).toList();
+        return _db.bookDao.upsertTocBatch(flat);
+      },
+    );
   }
 
   static List<BookChapterModel> _buildTree(

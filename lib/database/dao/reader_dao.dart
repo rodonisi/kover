@@ -167,6 +167,12 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
 
   /// Get all chapter ids with outdated progress
   Future<List<int>> getOutdatedChapterIds() async {
+    final hasRemoteProgress = chapters.remotePagesRead.isBiggerThanValue(0);
+    final isMissingLocal = readingProgress.chapterId.isNull();
+    final isLocalOutdated = readingProgress.lastModified.isSmallerThan(
+      chapters.remoteLastRead,
+    );
+
     final q = selectOnly(chapters, distinct: true)
       ..addColumns([chapters.id])
       ..join([
@@ -175,10 +181,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
           readingProgress.chapterId.equalsExp(chapters.id),
         ),
       ])
-      ..where(
-        readingProgress.chapterId.isNull() |
-            readingProgress.lastModified.isSmallerThan(chapters.remoteLastRead),
-      );
+      ..where(hasRemoteProgress & (isMissingLocal | isLocalOutdated));
 
     return await q.map((row) => row.read(chapters.id)!).get();
   }
