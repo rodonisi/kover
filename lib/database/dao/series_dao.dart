@@ -474,14 +474,6 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     });
   }
 
-  /// Upsert series present or absent from the db and remove series not present
-  /// in [entries]
-  Future<void> upsertSeries(Iterable<SeriesCompanion> entries) async {
-    await batch((batch) {
-      batch.insertAllOnConflictUpdate(series, entries);
-    });
-  }
-
   /// Remove provided [seriesIds] from the database.
   Future<void> removeSeriesBatch(Iterable<int> seriesIds) async {
     final chunked = seriesIds.chunked(500);

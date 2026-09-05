@@ -244,7 +244,7 @@ class const SeriesRepository({
 
     await _db.seriesDao.removeSeriesBatch(removedSeriesIds);
     await _refreshSeriesAndDetails(outdated);
-    await _db.seriesDao.upsertSeries(upToDate);
+    await _db.seriesDao.upsertSeriesBatch(upToDate);
   }
 
   /// Fetch missing metadata for all series
