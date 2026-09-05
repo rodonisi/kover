@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
-import 'package:kover/database/dao/series_dao.dart';
 import 'package:kover/database/dao/series_metadata_dao.dart';
 import 'package:kover/models/image_model.dart';
 import 'package:kover/models/series_model.dart';
@@ -198,53 +197,36 @@ class const SeriesRepository({
   /// Refresh all series and align the local library to the remote.
   /// Note: this deletes all series not present on the server anymore.
   Future<void> refreshAllSeries() async {
-    final rows = await _db.seriesDao.allSeries().get();
     final series = await _client.getAllSeries();
-    final seriesById = {for (final s in series) s.id.value: s};
+    await _db.seriesDao.reconcileSeriesBatch(series);
+  }
 
-    final detailsToFetch = rows
-        .where(
-          (r) {
-            final companion = seriesById[r.id];
-            if (companion == null) {
-              return false;
-            }
+  /// Fetch details for all series that have never been synced or that have new
+  /// remote progress or chapters since their last sync.
+  Future<void> refreshOutdatedDetails() async {
+    final ids = await _db.seriesDao.getOutdatedDetailsSeriesIds();
 
-            final neverSynced = r.lastSynced == null;
-            final hasNewChapter =
-                companion.lastChapterAdded.value != null &&
-                (r.lastChapterAdded == null ||
-                    r.lastChapterAdded!.isBefore(
-                      companion.lastChapterAdded.value!,
-                    ));
-            final hasNewProgress =
-                companion.remoteLastRead.value != null &&
-                (r.remoteLastRead == null ||
-                    r.remoteLastRead!.isBefore(
-                      companion.remoteLastRead.value!,
-                    ));
-
-            return neverSynced || hasNewChapter || hasNewProgress;
-          },
-        )
-        .map((r) => seriesById[r.id]!);
-
-    final rowIds = rows.map((r) => r.id).toSet();
-    final newSeries = series.where((s) => !rowIds.contains(s.id.value));
-    final outdated = {...detailsToFetch, ...newSeries};
-    final outdatedIds = outdated.map((s) => s.id.value).toSet();
-    final upToDate = series.where((s) => !outdatedIds.contains(s.id.value));
-
-    final removedSeriesIds = rows
-        .map((r) => r.id)
-        .toSet()
-        .difference(
-          seriesById.keys.toSet(),
-        );
-
-    await _db.seriesDao.removeSeriesBatch(removedSeriesIds);
-    await _refreshSeriesAndDetails(outdated);
-    await _db.seriesDao.upsertSeriesBatch(upToDate);
+    await chunkedFetch(
+      items: ids,
+      fetchCallback: (id) async {
+        try {
+          return await _client.getSeriesDetail(id);
+        } catch (e) {
+          log.warning(
+            'failed to fetch series details for series',
+            attributes: {
+              'series_id': id,
+              'error_type': e.runtimeType,
+              'error_message': e,
+            },
+          );
+          return null;
+        }
+      },
+      upsertCallback: (batch) async {
+        await _db.seriesDao.upsertDetailsBatch(batch.whereType());
+      },
+    );
   }
 
   /// Fetch missing metadata for all series
@@ -408,28 +390,6 @@ class const SeriesRepository({
   Future<void> refreshRecentlyUpdated() async {
     final series = await _client.getRecentlyUpdated();
     await _db.seriesDao.upsertRecentlyUpdated(series);
-  }
-
-  /// Refresh series details for a list of series
-  Future<void> _refreshSeriesAndDetails(
-    Iterable<SeriesCompanion> series,
-  ) async {
-    await chunkedFetch(
-      items: series,
-      fetchCallback: (series) async {
-        final details = _client.getSeriesDetail(series.id.value);
-        return details;
-      },
-      upsertCallback: (batch) async {
-        final details = batch.whereType<SeriesDetailCompanions>().toList();
-        final ids = details.map((d) => d.seriesId).toSet();
-        final companions = series.where((s) => ids.contains(s.id.value));
-        await _db.seriesDao.upsertSeriesAndDetailsBatch(
-          seriesEntries: companions,
-          detailEntries: details,
-        );
-      },
-    );
   }
 
   /// Fetch all missing series covers

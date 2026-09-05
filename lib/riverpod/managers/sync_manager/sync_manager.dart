@@ -38,6 +38,7 @@ sealed class SyncPhase with _$SyncPhase {
   const factory refreshMetadata({required int seriesId}) = RefreshMetadata;
   const factory refreshCovers({required int seriesId}) = RefreshCovers;
   const factory refreshToc({required int chapterId}) = RefreshToc;
+  const factory seriesDetails() = SeriesDetails;
 
   Set<SyncPhase> get dependencies {
     return switch (this) {
@@ -49,14 +50,14 @@ sealed class SyncPhase with _$SyncPhase {
       RefreshCovers() ||
       RefreshToc() => {},
       AllSeries() => {const .libraries()},
+      SeriesDetails() => {const .allSeries()},
       Metadata() ||
-      Tocs() ||
       RecentlyAdded() ||
       RecentlyUpdated() ||
-      Progress() ||
       WantToRead() ||
       Collections() ||
       ReadingLists() => {const .allSeries()},
+      Tocs() || Progress() => {const .allSeries(), const .seriesDetails()},
       SmartFilters() => {
         const .allSeries(),
         const .readingLists(),
@@ -67,6 +68,7 @@ sealed class SyncPhase with _$SyncPhase {
         const .allSeries(),
         const .collections(),
         const .readingLists(),
+        const .seriesDetails(),
       },
       Dashboard() => {const .smartFilters()},
     };
@@ -134,6 +136,7 @@ class SyncManager extends _$SyncManager {
       const .collections(),
       const .metadata(),
       const .tocs(),
+      const .seriesDetails(),
       const .refreshServerSettings(),
       const .refreshServerFonts(),
       if (settings.downloadCovers) const .covers(),

@@ -426,6 +426,10 @@
     "@syncingAllSeries": {
         "description": "Label for the syncing all series phase"
     },
+    "syncingSeriesDetails": "Syncing series details",
+    "@syncingSeriesDetails": {
+        "description": "Label for the syncing series details phase"
+    },
     "syncingMetadata": "Syncing metadata",
     "@syncingMetadata": {
         "description": "Label for the syncing metadata phase"

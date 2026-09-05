@@ -49,43 +49,7 @@ void main() {
   });
 
   group('series sync', () {
-    test('fetches details when series not present', () async {
-      final repo = SeriesRepository(
-        db: mockAppDatabase,
-        client: mockSeriesSyncOperations,
-        volumeClient: mockVolumeSyncOperations,
-        chapterClient: mockChapterSyncOperations,
-      );
-
-      final entries = [
-        SeriesCompanion(
-          id: const Value(1),
-          libraryId: const Value(1),
-          name: const Value('name'),
-          format: const Value(.epub),
-          created: Value(DateTime.now()),
-          lastChapterAdded: Value(DateTime.now()),
-        ),
-      ];
-
-      when(mockSeriesSyncOperations.getAllSeries()).thenAnswer(
-        (_) async => entries,
-      );
-
-      when(selectable.get()).thenAnswer((_) async => []);
-
-      await repo.refreshAllSeries();
-
-      verify(mockSeriesSyncOperations.getSeriesDetail(any)).called(1);
-      verify(
-        mockSeriesDao.upsertSeriesAndDetailsBatch(
-          seriesEntries: anyNamed("seriesEntries"),
-          detailEntries: anyNamed("detailEntries"),
-        ),
-      ).called(1);
-    });
-
-    test('fetches details when never synced', () async {
+    test('upserts fetched series and removes series not on server', () async {
       final repo = SeriesRepository(
         db: mockAppDatabase,
         client: mockSeriesSyncOperations,
@@ -102,177 +66,6 @@ void main() {
           name: const Value('name'),
           format: const Value(.epub),
           created: Value(now),
-          lastChapterAdded: Value(now),
-        ),
-      ];
-
-      final existingRows = [
-        SeriesData(
-          id: 1,
-          libraryId: 1,
-          name: 'name',
-          format: .epub,
-          pages: 0,
-          wordCount: 0,
-          isBlacklisted: false,
-          isRecentlyAdded: false,
-          isRecentlyUpdated: false,
-          created: now,
-          lastChapterAdded: now,
-          lastSynced: null,
-        ),
-      ];
-
-      when(mockSeriesSyncOperations.getAllSeries()).thenAnswer(
-        (_) async => entries,
-      );
-
-      when(selectable.get()).thenAnswer((_) async => existingRows);
-
-      await repo.refreshAllSeries();
-
-      verify(mockSeriesSyncOperations.getSeriesDetail(any)).called(1);
-      verify(
-        mockSeriesDao.upsertSeriesAndDetailsBatch(
-          seriesEntries: anyNamed("seriesEntries"),
-          detailEntries: anyNamed("detailEntries"),
-        ),
-      ).called(1);
-    });
-
-    test('fetches detail when new chapter added', () async {
-      final repo = SeriesRepository(
-        db: mockAppDatabase,
-        client: mockSeriesSyncOperations,
-        volumeClient: mockVolumeSyncOperations,
-        chapterClient: mockChapterSyncOperations,
-      );
-
-      final now = DateTime.now();
-      final yesterday = now.subtract(const Duration(days: 1));
-
-      final entries = [
-        SeriesCompanion(
-          id: const Value(1),
-          libraryId: const Value(1),
-          name: const Value('name'),
-          format: const Value(.epub),
-          created: Value(now),
-          lastChapterAdded: Value(now),
-        ),
-      ];
-
-      final existingRows = [
-        SeriesData(
-          id: 1,
-          libraryId: 1,
-          name: 'name',
-          format: .epub,
-          pages: 0,
-          wordCount: 0,
-          isBlacklisted: false,
-          isRecentlyAdded: false,
-          isRecentlyUpdated: false,
-          created: now,
-          lastChapterAdded: yesterday,
-          lastSynced: now,
-        ),
-      ];
-
-      when(mockSeriesSyncOperations.getAllSeries()).thenAnswer(
-        (_) async => entries,
-      );
-
-      when(selectable.get()).thenAnswer((_) async => existingRows);
-
-      await repo.refreshAllSeries();
-
-      verify(mockSeriesSyncOperations.getSeriesDetail(any)).called(1);
-      verify(
-        mockSeriesDao.upsertSeriesAndDetailsBatch(
-          seriesEntries: anyNamed("seriesEntries"),
-          detailEntries: anyNamed("detailEntries"),
-        ),
-      ).called(1);
-    });
-
-    test('fetches details when last read is newer', () async {
-      final repo = SeriesRepository(
-        db: mockAppDatabase,
-        client: mockSeriesSyncOperations,
-        volumeClient: mockVolumeSyncOperations,
-        chapterClient: mockChapterSyncOperations,
-      );
-
-      final now = DateTime.now();
-      final yesterday = now.subtract(const Duration(days: 1));
-
-      final entries = [
-        SeriesCompanion(
-          id: const Value(1),
-          libraryId: const Value(1),
-          name: const Value('name'),
-          format: const Value(.epub),
-          created: Value(now),
-          lastChapterAdded: Value(now),
-          remoteLastRead: Value(now),
-        ),
-      ];
-      final existingRows = [
-        SeriesData(
-          id: 1,
-          libraryId: 1,
-          name: 'name',
-          format: .epub,
-          pages: 0,
-          wordCount: 0,
-          isBlacklisted: false,
-          isRecentlyAdded: false,
-          isRecentlyUpdated: false,
-          created: now,
-          lastChapterAdded: now,
-          lastSynced: now,
-          remoteLastRead: yesterday,
-        ),
-      ];
-
-      when(mockSeriesSyncOperations.getAllSeries()).thenAnswer(
-        (_) async => entries,
-      );
-
-      when(selectable.get()).thenAnswer((_) async => existingRows);
-
-      await repo.refreshAllSeries();
-
-      verify(mockSeriesSyncOperations.getSeriesDetail(any)).called(1);
-      verify(
-        mockSeriesDao.upsertSeriesAndDetailsBatch(
-          seriesEntries: anyNamed("seriesEntries"),
-          detailEntries: anyNamed("detailEntries"),
-        ),
-      ).called(1);
-    });
-
-    test('does not fetch details when no updates', () async {
-      final repo = SeriesRepository(
-        db: mockAppDatabase,
-        client: mockSeriesSyncOperations,
-        volumeClient: mockVolumeSyncOperations,
-        chapterClient: mockChapterSyncOperations,
-      );
-
-      final now = DateTime.now();
-
-      final entries = [
-        SeriesCompanion(
-          id: const Value(1),
-          libraryId: const Value(1),
-          name: const Value('name'),
-          format: const Value(.epub),
-          created: Value(now),
-          lastChapterAdded: Value(now),
-          lastSynced: Value(now),
-          remoteLastRead: Value(now),
         ),
       ];
 
@@ -290,7 +83,20 @@ void main() {
           created: now,
           lastChapterAdded: now,
           lastSynced: now,
-          remoteLastRead: now,
+        ),
+        SeriesData(
+          id: 2,
+          libraryId: 1,
+          name: 'name2',
+          format: .epub,
+          pages: 0,
+          wordCount: 0,
+          isBlacklisted: false,
+          isRecentlyAdded: false,
+          isRecentlyUpdated: false,
+          created: now,
+          lastChapterAdded: now,
+          lastSynced: now,
         ),
       ];
 
@@ -301,14 +107,46 @@ void main() {
       when(selectable.get()).thenAnswer((_) async => existingRows);
 
       await repo.refreshAllSeries();
+
+      verify(mockSeriesDao.reconcileSeriesBatch(any)).called(1);
+      verifyNever(mockSeriesSyncOperations.getSeriesDetail(any));
+    });
+
+    test('fetches details for ids returned by the outdated query', () async {
+      final repo = SeriesRepository(
+        db: mockAppDatabase,
+        client: mockSeriesSyncOperations,
+        volumeClient: mockVolumeSyncOperations,
+        chapterClient: mockChapterSyncOperations,
+      );
+
+      when(mockSeriesDao.getOutdatedDetailsSeriesIds()).thenAnswer(
+        (_) async => [1, 2],
+      );
+
+      await repo.refreshOutdatedDetails();
+
+      verify(mockSeriesSyncOperations.getSeriesDetail(1)).called(1);
+      verify(mockSeriesSyncOperations.getSeriesDetail(2)).called(1);
+      verify(mockSeriesDao.upsertDetailsBatch(any)).called(1);
+    });
+
+    test('does not fetch details when no outdated ids', () async {
+      final repo = SeriesRepository(
+        db: mockAppDatabase,
+        client: mockSeriesSyncOperations,
+        volumeClient: mockVolumeSyncOperations,
+        chapterClient: mockChapterSyncOperations,
+      );
+
+      when(mockSeriesDao.getOutdatedDetailsSeriesIds()).thenAnswer(
+        (_) async => [],
+      );
+
+      await repo.refreshOutdatedDetails();
 
       verifyNever(mockSeriesSyncOperations.getSeriesDetail(any));
-      verifyNever(
-        mockSeriesDao.upsertSeriesAndDetailsBatch(
-          seriesEntries: anyNamed("seriesEntries"),
-          detailEntries: anyNamed("detailEntries"),
-        ),
-      );
+      verifyNever(mockSeriesDao.upsertDetailsBatch(any));
     });
   });
 

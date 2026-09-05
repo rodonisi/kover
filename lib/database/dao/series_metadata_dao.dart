@@ -167,10 +167,7 @@ class SeriesMetadataDao extends DatabaseAccessor<AppDatabase>
   }) async {
     await transaction(() async {
       await upsertMetadataBatch([metadata]);
-      await attachedDatabase.seriesDao.upsertSeriesAndDetailsBatch(
-        seriesEntries: [],
-        detailEntries: [details],
-      );
+      await attachedDatabase.seriesDao.upsertDetailsBatch([details]);
     });
   }
 }
