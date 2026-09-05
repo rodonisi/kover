@@ -13,7 +13,6 @@ import 'package:kover/database/tables/volumes.dart';
 import 'package:kover/database/tables/want_to_read.dart';
 import 'package:kover/utils/chunked_operation.dart';
 import 'package:kover/utils/data_constants.dart';
-import 'package:kover/utils/extensions/iterable.dart';
 import 'package:rxdart/rxdart.dart';
 
 part 'series_dao.g.dart';
@@ -488,9 +487,12 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     final ids = entries.map((e) => e.id.value).toSet();
 
     await transaction(() async {
-      for (final batch in ids.chunked(500)) {
-        await (delete(series)..where((tbl) => tbl.id.isNotIn(batch))).go();
-      }
+      await chunkedOperation(
+        items: ids,
+        operation: (b) async {
+          await (delete(series)..where((tbl) => tbl.id.isNotIn(b))).go();
+        },
+      );
       await upsertSeriesBatch(entries);
     });
   }
@@ -499,19 +501,6 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   Future<void> upsertSeriesBatch(Iterable<SeriesCompanion> entries) async {
     await batch((batch) {
       batch.insertAllOnConflictUpdate(series, entries);
-    });
-  }
-
-  /// Remove provided [seriesIds] from the database.
-  Future<void> removeSeriesBatch(Iterable<int> seriesIds) async {
-    final chunked = seriesIds.chunked(500);
-    await batch((batch) {
-      for (final chunk in chunked) {
-        batch.deleteWhere(
-          series,
-          (s) => s.id.isIn(chunk),
-        );
-      }
     });
   }
 
@@ -619,14 +608,17 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     });
 
     await batch((batch) {
-      for (final chunk in allChapters.map((c) => c.id.value).chunked(500)) {
-        batch.deleteWhere(
-          chapterPeopleRoles,
-          (t) => t.chapterId.isIn(chunk),
-        );
-        batch.deleteWhere(chapterGenres, (t) => t.chapterId.isIn(chunk));
-        batch.deleteWhere(chapterTags, (t) => t.chapterId.isIn(chunk));
-      }
+      chunkedOperation(
+        items: allChapters.map((c) => c.id.value),
+        operation: (chunk) {
+          batch.deleteWhere(
+            chapterPeopleRoles,
+            (t) => t.chapterId.isIn(chunk),
+          );
+          batch.deleteWhere(chapterGenres, (t) => t.chapterId.isIn(chunk));
+          batch.deleteWhere(chapterTags, (t) => t.chapterId.isIn(chunk));
+        },
+      );
       batch.insertAllOnConflictUpdate(people, allPeople);
       batch.insertAllOnConflictUpdate(genres, allGenres);
       batch.insertAllOnConflictUpdate(tags, allTags);
@@ -640,7 +632,15 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   Future<void> upsertRecentlyUpdated(Iterable<SeriesCompanion> entries) async {
     await transaction(() async {
       await clearIsRecentlyUpdated();
-      await upsertSeriesBatch(entries);
+      await batch((batch) {
+        for (final entry in entries) {
+          batch.update(
+            series,
+            entry,
+            where: (tbl) => tbl.id.equals(entry.id.value),
+          );
+        }
+      });
     });
   }
 
@@ -725,10 +725,14 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   /// Clear dirty flags for OnDeckRemoval entries for series [seriesIds]
   Future<void> clearDirtyOnDeckRemovalForSeries(Iterable<int> seriesIds) async {
     await transaction(() async {
-      for (final batch in seriesIds.chunked(100)) {
-        await (update(onDeckRemoval)..where((tbl) => tbl.seriesId.isIn(batch)))
-            .write(const OnDeckRemovalCompanion(dirty: Value(false)));
-      }
+      await chunkedOperation(
+        items: seriesIds,
+        operation: (batch) async {
+          await (update(onDeckRemoval)
+                ..where((tbl) => tbl.seriesId.isIn(batch)))
+              .write(const OnDeckRemovalCompanion(dirty: Value(false)));
+        },
+      );
     });
   }
 
