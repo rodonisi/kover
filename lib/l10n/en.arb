@@ -662,6 +662,10 @@
     "@ignoreSafeAreas": {
         "description": "Label for the ignore safe areas setting"
     },
+    "lockHorizontalPan": "Lock Horizontal Scrolling",
+    "@lockHorizontalPan": {
+        "description": "Label for the lock horizontal panning setting in the vertical reader"
+    },
     "showProgressBar": "Show Progress Bar",
     "@showProgressBar": {
         "description": "Label for the show progress bar setting"

@@ -46,6 +46,7 @@ sealed class ImageReaderSettingsState with _$ImageReaderSettingsState {
     @Default(0.0) double spreadReaderGap,
     @Default(true) bool spreadCoverPage,
     @Default(true) bool ignoreSafeAreas,
+    @Default(false) bool lockHorizontalPan,
   }) = _ImageReaderSettingsState;
 
   factory ImageReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -199,6 +200,16 @@ class ImageReaderSettings extends _$ImageReaderSettings {
     log.info(
       'set ignore safe areas',
       attributes: {'value': ignore, 'reader': 'image'},
+    );
+  }
+
+  Future<void> setLockHorizontalPan(bool value) async {
+    final current = await future;
+
+    state = AsyncData(current.copyWith(lockHorizontalPan: value));
+    log.info(
+      'set lock horizontal pan',
+      attributes: {'value': value, 'reader': 'image'},
     );
   }
 

@@ -8,12 +8,14 @@ import 'package:kover/pages/reader/image_reader/vertical_reader_gesture_controll
 class ZoomableVerticalScrollView extends HookWidget {
   final ScrollController scrollController;
   final VerticalReaderGestureController gestureController;
+  final bool lockHorizontalPan;
   final Widget child;
 
   const ZoomableVerticalScrollView({
     super.key,
     required this.scrollController,
     required this.gestureController,
+    this.lockHorizontalPan = false,
     required this.child,
   });
 
@@ -140,7 +142,7 @@ class ZoomableVerticalScrollView extends HookWidget {
 
       if (gestureIncludedPinch.value) return;
 
-      gestureController.panHorizontally(focalPointDelta.dx);
+      if (!lockHorizontalPan) gestureController.panHorizontally(focalPointDelta.dx);
       scrollByVisualDelta(focalPointDelta.dy);
     }
 
@@ -171,7 +173,7 @@ class ZoomableVerticalScrollView extends HookWidget {
           onPointerSignal: (pointerSignal) {
             if (pointerSignal is PointerScrollEvent) {
               scrollByVisualDelta(-pointerSignal.scrollDelta.dy);
-              gestureController.panHorizontally(-pointerSignal.scrollDelta.dx);
+              if (!lockHorizontalPan) gestureController.panHorizontally(-pointerSignal.scrollDelta.dx);
             }
           },
           child: GestureDetector(

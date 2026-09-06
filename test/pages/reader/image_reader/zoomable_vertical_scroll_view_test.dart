@@ -126,6 +126,39 @@ void main() {
     expect(gestureController.translation, Offset.zero);
   });
 
+  testWidgets('lockHorizontalPan prevents horizontal pan when zoomed', (
+    tester,
+  ) async {
+    final scrollController = ScrollController();
+    final gestureController = VerticalReaderGestureController();
+    addTearDown(scrollController.dispose);
+    addTearDown(gestureController.dispose);
+    await tester.pumpWidget(
+      _buildScrollView(
+        scrollController: scrollController,
+        gestureController: gestureController,
+        lockHorizontalPan: true,
+      ),
+    );
+    await tester.pump();
+    gestureController.zoomViewport(
+      scaleFactor: 2,
+      focalPoint: const Offset(150, 150),
+      focalPointDelta: Offset.zero,
+      visualScrollOffset: 0,
+    );
+
+    await tester.timedDrag(
+      find.byType(ZoomableVerticalScrollView),
+      const Offset(100, 0),
+      const Duration(seconds: 1),
+    );
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0);
+    expect(gestureController.translation, Offset.zero);
+  });
+
   testWidgets('pinch sequence cannot scroll after one pointer lifts', (
     tester,
   ) async {
@@ -160,6 +193,7 @@ void main() {
 Widget _buildScrollView({
   required ScrollController scrollController,
   required VerticalReaderGestureController gestureController,
+  bool lockHorizontalPan = false,
 }) {
   return MaterialApp(
     home: Scaffold(
@@ -171,6 +205,7 @@ Widget _buildScrollView({
           child: ZoomableVerticalScrollView(
             scrollController: scrollController,
             gestureController: gestureController,
+            lockHorizontalPan: lockHorizontalPan,
             child: ListView(
               controller: scrollController,
               children: List.generate(

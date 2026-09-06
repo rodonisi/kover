@@ -126,6 +126,7 @@ class VerticalContinuousReader extends HookConsumerWidget {
             final content = ZoomableVerticalScrollView(
               scrollController: scrollController,
               gestureController: gestureController,
+              lockHorizontalPan: settings.lockHorizontalPan,
               child: SliverViewObserver(
                 controller: observerController,
                 onObserve: (ObserveModel model) {
