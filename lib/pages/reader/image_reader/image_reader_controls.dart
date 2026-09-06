@@ -142,6 +142,14 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                               .read(imageSettings.notifier)
                               .setVerticalReaderGap(newValue),
                         ),
+                        BooleanOption(
+                          title: l.lockHorizontalPan,
+                          icon: LucideIcons.lockKeyhole,
+                          value: settings.lockHorizontalPan,
+                          onChanged: (newValue) async => await ref
+                              .read(imageSettings.notifier)
+                              .setLockHorizontalPan(newValue),
+                        ),
                       ],
                       if (settings.readerMode == .spread) ...[
                         NumericOption(
