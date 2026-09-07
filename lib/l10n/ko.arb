@@ -357,7 +357,7 @@
     "@syncingAllSeries": {
         "description": "Label for the syncing all series phase"
     },
-    "syncingMetadata": "메타데이터 동기 중",
+    "syncingMetadata": "메타데이터 동기화 중",
     "@syncingMetadata": {
         "description": "Label for the syncing metadata phase"
     },
@@ -927,5 +927,13 @@
     "defaultLabel": "기본값",
     "@defaultLabel": {
         "description": "Label for a default option in a setting"
+    },
+    "syncingSeriesDetails": "시리즈 정보 동기화 중",
+    "@syncingSeriesDetails": {
+        "description": "Label for the syncing series details phase"
+    },
+    "syncingWantToRead": "읽고 싶어요 동기화 중",
+    "@syncingWantToRead": {
+        "description": "Label for the syncing Want to Read phase"
     }
 }
