@@ -165,17 +165,17 @@ class SyncManager extends _$SyncManager {
 
   /// Refresh metadata and details for series [seriesId]
   void refreshMetadataAndDetails({required int seriesId}) {
-    _enqueuePhases({SyncPhase.refreshMetadata(seriesId: seriesId)});
+    _runPhase(.refreshMetadata(seriesId: seriesId));
   }
 
   /// Refresh covers for series [seriesId]
   void refreshCovers({required int seriesId}) {
-    _enqueuePhases({SyncPhase.refreshCovers(seriesId: seriesId)});
+    _runPhase(.refreshCovers(seriesId: seriesId));
   }
 
   /// Refresh chapter toc for chapter [chapterId]
   void refreshChapterToc({required int chapterId}) {
-    _enqueuePhases({SyncPhase.refreshToc(chapterId: chapterId)});
+    _runPhase(.refreshToc(chapterId: chapterId));
   }
 
   void _enqueuePhases(Set<SyncPhase> phases) {
@@ -209,7 +209,9 @@ class SyncManager extends _$SyncManager {
       _queuedPhases.removeAll(batch);
     }
 
-    state = const SyncState.idle();
+    if (_runningPhases.isEmpty) {
+      state = const SyncState.idle();
+    }
   }
 
   Future<void> _runPhase(
@@ -237,10 +239,13 @@ class SyncManager extends _$SyncManager {
       );
     } finally {
       _runningPhases.remove(phase);
-      if (!failed && _runningPhases.isNotEmpty) {
-        state = SyncState.syncing(phases: Set.unmodifiable(_runningPhases));
-      }
     }
+
+    if (failed) return;
+
+    state = _runningPhases.isEmpty
+        ? const SyncState.idle()
+        : SyncState.syncing(phases: Set.unmodifiable(_runningPhases));
   }
 
   void _listenCredentials() {

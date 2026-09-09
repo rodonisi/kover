@@ -3,6 +3,7 @@ import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/series_detail_page/carousel_tile.dart';
 import 'package:kover/pages/series_detail_page/sliver_metadata_display.dart';
 import 'package:kover/pages/series_detail_page/series_app_bar.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -13,13 +14,19 @@ import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
 import 'package:material_ui/material_ui.dart';
 
-class SeriesDetailPage extends StatelessWidget {
+class SeriesDetailPage extends ConsumerWidget {
   final int seriesId;
 
   const SeriesDetailPage({super.key, required this.seriesId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(syncManagerProvider.notifier)
+          .refreshMetadataAndDetails(seriesId: seriesId);
+    });
+
     return Scaffold(
       body: MetadataScope(
         metadataId: .series(seriesId: seriesId),
