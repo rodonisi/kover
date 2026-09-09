@@ -54,7 +54,9 @@ class SliverMetadataDisplay extends ConsumerWidget {
           return [
             SliverCrossAxisGroup(
               slivers: [
-                const SliverSummary(),
+                if (metadata.value?.summary != null &&
+                    metadata.value!.summary!.isNotEmpty)
+                  const SliverSummary(),
                 ?sliverCarousels,
               ],
             ),
