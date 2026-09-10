@@ -1,1 +1,955 @@
-{}
+{
+    "languageName": "فارسی",
+    "@languageName": {
+        "description": "The localized name of this locale"
+    },
+    "language": "زبان",
+    "@language": {
+        "description": "Title for the language settings entry"
+    },
+    "onDeck": "میز مطالعه",
+    "@onDeck": {
+        "description": "Label for the home page on deck section"
+    },
+    "recentlyUpdated": "اخیرا بروز شده",
+    "@recentlyUpdated": {
+        "description": "Label for the home page recently updated section"
+    },
+    "recentlyAdded": "به تازگی اضافه شده",
+    "@recentlyAdded": {
+        "description": "Label for the home page recently added section"
+    },
+    "home": "خانه",
+    "@home": {
+        "description": "Label for the home page"
+    },
+    "wantToRead": "می‌خواهم بخوانم",
+    "@wantToRead": {
+        "description": "Label for the want to read shelf"
+    },
+    "menu": "منو",
+    "@menu": {
+        "description": "Label for the menu button"
+    },
+    "allSeries": "همه مجموعه‌ها",
+    "@allSeries": {
+        "description": "Label for the all series menu entry"
+    },
+    "collections": "مجموعه‌ها",
+    "@collections": {
+        "description": "Label for the collections menu entry"
+    },
+    "readingLists": "لیست مطالعه",
+    "@readingLists": {
+        "description": "Label for the reading lists menu entry"
+    },
+    "libraries": "کتابخوانه‌ها",
+    "@libraries": {
+        "description": "Label for the libraries menu entry"
+    },
+    "settings": "تنظیمات",
+    "@settings": {
+        "description": "Label for the settings menu entry"
+    },
+    "more": "بیشتر",
+    "@more": {
+        "description": "Label for the more section"
+    },
+    "downloadQueue": "صف دانلود",
+    "@downloadQueue": {
+        "description": "Label for the download queue menu entry"
+    },
+    "general": "عمومی",
+    "@general": {
+        "description": "Label for the general settings section"
+    },
+    "themeMode": "حالت رنگ بندی",
+    "@themeMode": {
+        "description": "Label for the theme mode setting"
+    },
+    "theme": "رنگ بندی",
+    "@theme": {
+        "description": "Label for the epub reader theme setting"
+    },
+    "system": "سیستم",
+    "@system": {
+        "description": "Label for the system theme mode option"
+    },
+    "light": "روشن",
+    "@light": {
+        "description": "Label for the light theme mode option"
+    },
+    "dark": "تاریک",
+    "@dark": {
+        "description": "Label for the dark theme mode option"
+    },
+    "black": "مشکی",
+    "@black": {
+        "description": "Label for the black theme option"
+    },
+    "sepia": "قهوه‌ای",
+    "@sepia": {
+        "description": "Label for the sepia theme option"
+    },
+    "matchAppTheme": "هماهنگ با رنگ بندی برنامه",
+    "@matchAppTheme": {
+        "description": "Label for the epub reader match app theme option"
+    },
+    "outlinedTheme": "حالت خط‌کشی شده",
+    "@outlinedTheme": {
+        "description": "Label for the outlined theme setting"
+    },
+    "sendDiagnostics": "ارسال گزارشات کرش و لاگ بصورت ناشناس",
+    "@sendDiagnostics": {
+        "description": "Label for the send diagnostics setting"
+    },
+    "sendDiagnosticsDescription": "با ارسال گزارش خطاها و آمار برنامه بصورت ناشناس به توسعه آن کمک کنید. این گزارشات حاوی هیچگونه اطلاعات شخصی نیست و صرفا به جهت بهبود برنامه استفاده می‌شود.",
+    "@sendDiagnosticsDescription": {
+        "description": "Description for the send diagnostics setting"
+    },
+    "version": "نسخه: {version} ({buildNumber})",
+    "@version": {
+        "description": "Label for the app version, with placeholders for version and build number",
+        "placeholders": {
+            "version": {
+                "description": "The version string of the application",
+                "type": "String",
+                "example": "1.0.0"
+            },
+            "buildNumber": {
+                "description": "The build number of the application",
+                "type": "String",
+                "example": "123"
+            }
+        }
+    },
+    "github": "گیت‌هاب",
+    "@github": {
+        "description": "Label for the GitHub link"
+    },
+    "madeWithLove": "ساخته شده با ❤️",
+    "@madeWithLove": {
+        "description": "Label for the made with love message"
+    },
+    "dataManagement": "مدیریت داده‌ها",
+    "@dataManagement": {
+        "description": "Label for the data management section"
+    },
+    "downloadAllCovers": "دانلود همه تصویر جلدها",
+    "@downloadAllCovers": {
+        "description": "Label for the download all covers option"
+    },
+    "downloadAllCoversDescription": "اگر فعال نباشد، تصویر جلدها فقط هنگام دریافت چپترها دانلود خواهد شد. در هر صورت، اگر اتصال به سرور برقرار باشد، تصویر جلدهایی که موجود نیستند دانلود می‌شود.",
+    "@downloadAllCoversDescription": {
+        "description": "Description for the download all covers option"
+    },
+    "maxConcurrentDownloads": "بیشینه تعداد دانلود همزمان",
+    "@maxConcurrentDownloads": {
+        "description": "Label for the max concurrent downloads setting"
+    },
+    "reclaimSpace": "آزادسازی حافظه",
+    "@reclaimSpace": {
+        "description": "Label for the reclaim space button"
+    },
+    "clearDownloads": "پاکسازی دانلودها",
+    "@clearDownloads": {
+        "description": "Label for the clear downloads button"
+    },
+    "clearCovers": "پاکسازی تصویر جلدها",
+    "@clearCovers": {
+        "description": "Label for the clear covers button"
+    },
+    "clearDatabase": "پاکسازی پایگاه داده",
+    "@clearDatabase": {
+        "description": "Label for the clear database button"
+    },
+    "clearDatabaseDialogTitle": "آیا مطمئن هستید؟",
+    "@clearDatabaseDialogTitle": {
+        "description": "Title for the clear database confirmation dialog"
+    },
+    "clearDatabaseDialogContent": "در صورت ادامه کل پایگاه داده محلی به همراه اطلاعات آفلاین دانلود شده و همچنین پیشرفت‌های مطالعه همگام نشده با سرور، حذف خواهد شد. این عملیات قابل برگشت نیست.",
+    "@clearDatabaseDialogContent": {
+        "description": "Content for the clear database confirmation dialog"
+    },
+    "cancel": "لغو",
+    "@cancel": {
+        "description": "Label for the cancel button in dialogs"
+    },
+    "databaseBusy": "پایگاه داده مشغول است…",
+    "@databaseBusy": {
+        "description": "Message shown when the database is busy with an operation"
+    },
+    "databaseSize": "حجم پایگاه داده",
+    "@databaseSize": {
+        "description": "Label for the database size information"
+    },
+    "credentials": "مشخصات سرور",
+    "@credentials": {
+        "description": "Label for the credentials section in settings"
+    },
+    "baseUrl": "آدرس URL پایه",
+    "@baseUrl": {
+        "description": "Label for the base URL input field"
+    },
+    "apiKey": "کلید API",
+    "@apiKey": {
+        "description": "Label for the API key input field"
+    },
+    "save": "ذخیره",
+    "@save": {
+        "description": "Label for the save credentials button"
+    },
+    "sortBy": "ترتیب با",
+    "@sortBy": {
+        "description": "Label for the sort by option in list"
+    },
+    "name": "نام",
+    "@name": {
+        "description": "Label for sorting by name option"
+    },
+    "sortOrder": "ترتیب مرتب‌سازی",
+    "@sortOrder": {
+        "description": "Label for the sort order option in list"
+    },
+    "dateAdded": "تاریخ افزودن",
+    "@dateAdded": {
+        "description": "Label for sorting by date added option"
+    },
+    "lastModified": "آخرین ویرایش",
+    "@lastModified": {
+        "description": "Label for sorting by last modified option"
+    },
+    "progress": "پیشرفت",
+    "@progress": {
+        "description": "Label for sorting by progress option"
+    },
+    "lastRead": "آخرین مطالعه",
+    "@lastRead": {
+        "description": "Label for sorting by last read option"
+    },
+    "sortDirection": "جهت مرتب‌سازی",
+    "@sortDirection": {
+        "description": "Label for the sort direction option in list"
+    },
+    "ascending": "صعودی",
+    "@ascending": {
+        "description": "Label for ascending sort direction option"
+    },
+    "descending": "نزولی",
+    "@descending": {
+        "description": "Label for descending sort direction option"
+    },
+    "specials": "ویژه‌ها",
+    "@specials": {
+        "description": "Label for the specials section in the series details page"
+    },
+    "storyline": "داستان اصلی",
+    "@storyline": {
+        "description": "Label for the storyline section in the series details page"
+    },
+    "volumes": "جلدها",
+    "@volumes": {
+        "description": "Label for the volumes section in the series details page"
+    },
+    "chapters": "فصل‌ها",
+    "@chapters": {
+        "description": "Label for the chapters section in the series details page"
+    },
+    "genres": "ژانرها",
+    "@genres": {
+        "description": "Label for the genres chips in the series details page"
+    },
+    "writers": "نویسندگان",
+    "@writers": {
+        "description": "Label for the writers metadata in the series details page"
+    },
+    "coverArtists": "طراحان جلد",
+    "@coverArtists": {
+        "description": "Label for the cover artists metadata in the series details page"
+    },
+    "publishers": "ناشران",
+    "@publishers": {
+        "description": "Label for the publishers metadata in the series details page"
+    },
+    "characters": "شخصیت‌ها",
+    "@characters": {
+        "description": "Label for the characters metadata in the series details page"
+    },
+    "pencillers": "مدادکارها",
+    "@pencillers": {
+        "description": "Label for the pencillers metadata in the series details page"
+    },
+    "inkers": "جوهرزن‌ها",
+    "@inkers": {
+        "description": "Label for the inkers metadata in the series details page"
+    },
+    "imprints": "زیرمجوعه انتشارات",
+    "@imprints": {
+        "description": "Label for the imprints metadata in the series details page"
+    },
+    "colorists": "رنگ‌آمیزها",
+    "@colorists": {
+        "description": "Label for the colorists metadata in the series details page"
+    },
+    "letterers": "حروف‌چین‌ها",
+    "@letterers": {
+        "description": "Label for the letterers metadata in the series details page"
+    },
+    "editors": "ویرایش کنندگان",
+    "@editors": {
+        "description": "Label for the editors metadata in the series details page"
+    },
+    "translators": "مترجمان",
+    "@translators": {
+        "description": "Label for the translators metadata in the series details page"
+    },
+    "teams": "تیم‌ها",
+    "@teams": {
+        "description": "Label for the teams metadata in the series details page"
+    },
+    "locations": "موقعیت‌ جغرافیایی",
+    "@locations": {
+        "description": "Label for the locations metadata in the series details page"
+    },
+    "filter": "فیلتر",
+    "@filter": {
+        "description": "Label for the filter button in lists"
+    },
+    "hideRead": "حذف خوانده‌ شده‌ها",
+    "@hideRead": {
+        "description": "Label for the hide read filter option in lists"
+    },
+    "goToChapter": "رفتن به فصل",
+    "@goToChapter": {
+        "description": "Label for the go to chapter button in the reading list chapter entry context menu"
+    },
+    "goToSeries": "رفتن به مجموعه",
+    "@goToSeries": {
+        "description": "Label for the go to series button in the reading list chapter entry context menu"
+    },
+    "markAsRead": "علامت زدن بعنوان خوانده‌شده",
+    "@markAsRead": {
+        "description": "Label for the mark as read button in context menus"
+    },
+    "markAsUnread": "علامت زدن بعنوان خوانده نشده",
+    "@markAsUnread": {
+        "description": "Label for the mark as unread button in context menus"
+    },
+    "items": "{count, plural, =0{{count} مورد} =1{{count} مورد} other{{count} مورد}}",
+    "@items": {
+        "description": "Label for the number of items, with pluralization",
+        "placeholders": {
+            "count": {
+                "description": "The amount of items",
+                "type": "int",
+                "example": "2"
+            }
+        }
+    },
+    "unsupportedFormat": "فرمت ناسازگار: {format}",
+    "@unsupportedFormat": {
+        "description": "Message shown when trying to open a chapter in an unsupported format",
+        "placeholders": {
+            "format": {
+                "description": "The format enum name for the unsupported format",
+                "type": "String",
+                "example": "epub"
+            }
+        }
+    },
+    "back": "برگشتن",
+    "@back": {
+        "description": "Label for back buttons"
+    },
+    "tableOfContents": "فهرست",
+    "@tableOfContents": {
+        "description": "Label for the table of contents drawer in the reader"
+    },
+    "notSignedIn": "وارد حساب نشده",
+    "@notSignedIn": {
+        "description": "Heading text when user is not signed in"
+    },
+    "noCredentialsDescription": "مشخصات سرور تعیین نشده است. لطفا در تنظیمات، آدرس URL پایه سرور و کلید API را وارد نمایید.",
+    "@noCredentialsDescription": {
+        "description": "Description text when no credentials are configured"
+    },
+    "openSettings": "باز کردن تنظیمات",
+    "@openSettings": {
+        "description": "Label for the button to open settings"
+    },
+    "connectionError": "اتصال ناموفق",
+    "@connectionError": {
+        "description": "Heading text when a connection error occurs"
+    },
+    "connectionErrorDescription": "خطا در دریافت کاربر. لطفا مشخصات سرور را بررسی کنید یا دوباره امتحان کنید.",
+    "@connectionErrorDescription": {
+        "description": "Description text when a connection error occurs"
+    },
+    "retry": "تلاش دوباره",
+    "@retry": {
+        "description": "Label for the retry button"
+    },
+    "sendDiagnosticsDialogTitle": "ارسال گزارشات کرش و خطاها بصورت ناشناس؟",
+    "@sendDiagnosticsDialogTitle": {
+        "description": "Title for the monitoring opt-out dialog"
+    },
+    "sendDiagnosticsChangeable": "این مورد هر وقت بخواهید در قسمت تنظیمات قابل تغییر است.",
+    "@sendDiagnosticsChangeable": {
+        "description": "Message shown in the monitoring opt-out dialog indicating the setting can be changed later"
+    },
+    "noThanks": "نه، متشکرم",
+    "@noThanks": {
+        "description": "Label for the decline button in the monitoring opt-out dialog"
+    },
+    "imIn": "حتما!",
+    "@imIn": {
+        "description": "Label for the accept button in the monitoring opt-out dialog"
+    },
+    "addToWantToRead": "اضافه به لیست مطالعه آینده",
+    "@addToWantToRead": {
+        "description": "Label for the add to want to read context menu item"
+    },
+    "removeFromWantToRead": "حذف از لیست مطالعه آینده",
+    "@removeFromWantToRead": {
+        "description": "Label for the remove from want to read context menu item"
+    },
+    "download": "دانلود",
+    "@download": {
+        "description": "Label for the download context menu item"
+    },
+    "removeDownload": "حذف دانلود",
+    "@removeDownload": {
+        "description": "Label for the remove download context menu item"
+    },
+    "refreshMetadata": "بروزرسانی متادیتا",
+    "@refreshMetadata": {
+        "description": "Label for the refresh metadata context menu item"
+    },
+    "refreshCovers": "بروزرسانی تصاویر جلد",
+    "@refreshCovers": {
+        "description": "Label for the refresh covers context menu item"
+    },
+    "noActiveSyncOperations": "هیچ عملیات همگام‌سازی فعال نیست",
+    "@noActiveSyncOperations": {
+        "description": "Message shown when there are no active sync operations"
+    },
+    "syncingAllSeries": "همگام‌سازی همه مجموعه‌ها",
+    "@syncingAllSeries": {
+        "description": "Label for the syncing all series phase"
+    },
+    "syncingSeriesDetails": "همگام‌سازی جزئیات مجموعه‌ها",
+    "@syncingSeriesDetails": {
+        "description": "Label for the syncing series details phase"
+    },
+    "syncingMetadata": "همگام‌سازی متادیتا",
+    "@syncingMetadata": {
+        "description": "Label for the syncing metadata phase"
+    },
+    "syncingRecentlyAdded": "همگام‌سازی اخیرا اضافه شده",
+    "@syncingRecentlyAdded": {
+        "description": "Label for the syncing recently added phase"
+    },
+    "syncingRecentlyUpdated": "همگام‌سازی اخیرا بروز شده",
+    "@syncingRecentlyUpdated": {
+        "description": "Label for the syncing recently updated phase"
+    },
+    "syncingLibraries": "همگام‌سازی کتابخوانه‌ها",
+    "@syncingLibraries": {
+        "description": "Label for the syncing libraries phase"
+    },
+    "syncingProgress": "همگام‌سازی پیشرفت",
+    "@syncingProgress": {
+        "description": "Label for the syncing progress phase"
+    },
+    "syncingCovers": "همگام‌سازی تصویر جلدها",
+    "@syncingCovers": {
+        "description": "Label for the syncing covers phase"
+    },
+    "syncingWantToRead": "همگام‌سازی لیست مطالعه آینده",
+    "@syncingWantToRead": {
+        "description": "Label for the syncing Want to Read phase"
+    },
+    "syncingCollections": "همگام‌سازی مجموعه‌ها",
+    "@syncingCollections": {
+        "description": "Label for the syncing collections phase"
+    },
+    "syncingReadingLists": "همگام‌سازی لیست مطالعه",
+    "@syncingReadingLists": {
+        "description": "Label for the syncing reading lists phase"
+    },
+    "syncingSmartFilters": "همگام‌سازی فیلترهای هوشمند",
+    "@syncingSmartFilters": {
+        "description": "Label for the syncing smart filters phase"
+    },
+    "syncingSidenav": "همگام‌سازی ترتیب منوی کناری",
+    "@syncingSidenav": {
+        "description": "Label for the sidenav syncing phase"
+    },
+    "syncingDashboard": "همگام‌سازی ترتیب داشبورد",
+    "@syncingDashboard": {
+        "description": "Label for the dashboard syncing phase"
+    },
+    "refreshingMetadataForSeries": "بروزرسانی متادیتای مجموعه {seriesId}",
+    "@refreshingMetadataForSeries": {
+        "description": "Label for the refreshing metadata phase with the series ID",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "refreshingCoversForSeries": "بروزرسانی تصاویر جلد مجموعه {seriesId}",
+    "@refreshingCoversForSeries": {
+        "description": "Label for the refreshing covers phase with the series ID",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series which covers are being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "refreshingServerSettings": "بروزرسانی تنظیمات سرور",
+    "@refreshingServerSettings": {
+        "description": "Message shown while refreshing server settings"
+    },
+    "refreshingServerFonts": "بروزرسانی فونت‌های سرور",
+    "@refreshingServerFonts": {
+        "description": "Message shown while refreshing server fonts"
+    },
+    "series": "سری‌ها",
+    "@series": {
+        "description": "Label for the series search section header"
+    },
+    "moreCount": "+{count} بیشتر",
+    "@moreCount": {
+        "description": "Label indicating there are more items beyond the displayed amount",
+        "placeholders": {
+            "count": {
+                "description": "The count of items beyond the displayed amount",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "wordCount": "{wordCount} کلمه",
+    "@wordCount": {
+        "description": "Label for the word count of a book entry",
+        "placeholders": {
+            "wordCount": {
+                "description": "The amount of words",
+                "type": "int",
+                "format": "compact",
+                "example": "42000"
+            }
+        }
+    },
+    "hoursCount": "~{hours} ساعت",
+    "@hoursCount": {
+        "description": "Label for the estimated reading time in hours",
+        "placeholders": {
+            "hours": {
+                "description": "The estimated amount of hours",
+                "type": "double",
+                "format": "decimalPatternDigits",
+                "optionalParameters": {
+                    "decimalDigits": 1
+                },
+                "example": "4.2"
+            }
+        }
+    },
+    "pagesCount": "{pages} صفحه",
+    "@pagesCount": {
+        "description": "Label for the page count of a an entry",
+        "placeholders": {
+            "pages": {
+                "description": "The amount of pages",
+                "type": "int",
+                "format": "compact",
+                "example": "42000"
+            }
+        }
+    },
+    "startReading": "شروع مطالعه",
+    "@startReading": {
+        "description": "Label for the start reading button"
+    },
+    "continueReading": "ادامه مطالعه",
+    "@continueReading": {
+        "description": "Label for the continue reading button"
+    },
+    "summary": "خلاصه",
+    "@summary": {
+        "description": "Label for the summary section heading"
+    },
+    "showMore": "نمایش بیشتر",
+    "@showMore": {
+        "description": "Label for the show more button"
+    },
+    "showLess": "نمایش کمتر",
+    "@showLess": {
+        "description": "Label for the show less button"
+    },
+    "cancelAll": "لغو همگی",
+    "@cancelAll": {
+        "description": "Label for the cancel all downloads button"
+    },
+    "noDownloadsInQueue": "صف دانلود خالی است",
+    "@noDownloadsInQueue": {
+        "description": "Message shown when there are no downloads in the queue"
+    },
+    "readerSettings": "تنظیمات مطالعه",
+    "@readerSettings": {
+        "description": "Label for the reader settings bottom sheet title"
+    },
+    "readingDirection": "جهت مطالعه",
+    "@readingDirection": {
+        "description": "Label for the reading direction setting"
+    },
+    "leftToRight": "چپ به راست",
+    "@leftToRight": {
+        "description": "Label for the left to right reading direction option"
+    },
+    "rightToLeft": "راست به چپ",
+    "@rightToLeft": {
+        "description": "Label for the right to left reading direction option"
+    },
+    "readerMode": "نحوه مطالعه",
+    "@readerMode": {
+        "description": "Label for the reader mode setting"
+    },
+    "vertical": "شکل عمودی",
+    "@vertical": {
+        "description": "Label for the vertical reader mode option"
+    },
+    "horizontal": "شکل افقی",
+    "@horizontal": {
+        "description": "Label for the horizontal reader mode option"
+    },
+    "twoPage": "دو صفحه‌ای",
+    "@twoPage": {
+        "description": "Label for the two page reader mode option"
+    },
+    "fitDirection": "نحوه قرارگیری تصویر",
+    "@fitDirection": {
+        "description": "Label for the image fit direction setting"
+    },
+    "contain": "نمایش کامل",
+    "@contain": {
+        "description": "Label for the contain image fit option"
+    },
+    "width": "عرض",
+    "@width": {
+        "description": "Label for the fit width image option"
+    },
+    "height": "ارتفاع",
+    "@height": {
+        "description": "Label for the fit height image option"
+    },
+    "margins": "حاشیه‌ها",
+    "@margins": {
+        "description": "Label for the margins setting"
+    },
+    "verticalGap": "فاصله عمودی",
+    "@verticalGap": {
+        "description": "Label for the vertical gap setting"
+    },
+    "pageGap": "فاصله صفحه",
+    "@pageGap": {
+        "description": "Label for the page gap setting"
+    },
+    "coverPage": "تصویر جلد",
+    "@coverPage": {
+        "description": "Label for the cover page setting"
+    },
+    "coverPageDescription": "اولین صفحه را بعنوان تصویر جلد در نظر بگیر",
+    "@coverPageDescription": {
+        "description": "Description for the cover page setting"
+    },
+    "ignoreSafeAreas": "نادیده گرفتن حاشیه‌های امن",
+    "@ignoreSafeAreas": {
+        "description": "Label for the ignore safe areas setting"
+    },
+    "lockHorizontalPan": "قفل اسکرول عمودی",
+    "@lockHorizontalPan": {
+        "description": "Label for the lock horizontal panning setting in the vertical reader"
+    },
+    "showProgressBar": "نمایش میزان پیشرفت",
+    "@showProgressBar": {
+        "description": "Label for the show progress bar setting"
+    },
+    "setDefaults": "برگشت تنظیمات اولیه",
+    "@setDefaults": {
+        "description": "Label for the set defaults button"
+    },
+    "reset": "بازنشانی",
+    "@reset": {
+        "description": "Label for the reset button"
+    },
+    "fontSize": "اندازه فونت",
+    "@fontSize": {
+        "description": "Label for the font size setting"
+    },
+    "lineHeight": "فاصله خطوط",
+    "@lineHeight": {
+        "description": "Label for the line height setting"
+    },
+    "wordSpacing": "فاصله کلمات",
+    "@wordSpacing": {
+        "description": "Label for the word spacing setting"
+    },
+    "letterSpacing": "فاصله حروف",
+    "@letterSpacing": {
+        "description": "Label for the letter spacing setting"
+    },
+    "highlightResumeParagraph": "هایلایت آخرین پاراگراف خوانده",
+    "@highlightResumeParagraph": {
+        "description": "Label for the highlight resume paragraph setting"
+    },
+    "dismiss": "بستن",
+    "@dismiss": {
+        "description": "Label for the dismiss button in chapter snackbar"
+    },
+    "go": "رفتن",
+    "@go": {
+        "description": "Label for the go button in chapter snackbar"
+    },
+    "previousChapter": "قبلی: {chapterTitle}",
+    "@previousChapter": {
+        "description": "Label for the previous chapter snackbar with the chapter title",
+        "placeholders": {
+            "chapterTitle": {
+                "description": "The title of the previous chapter",
+                "type": "String",
+                "example": "Chapter 2"
+            }
+        }
+    },
+    "nextChapter": "بعدی: {chapterTitle}",
+    "@nextChapter": {
+        "description": "Label for the next chapter snackbar with the chapter title",
+        "placeholders": {
+            "chapterTitle": {
+                "description": "The title of the next chapter",
+                "type": "String",
+                "example": "Chapter 3"
+            }
+        }
+    },
+    "read": "خواندن",
+    "@read": {
+        "description": "Label for the read action button on cover cards"
+    },
+    "syncingTocs": "همگام‌سازی فهرست‌ها",
+    "@syncingTocs": {
+        "description": "Label for the syncing chapters TOCs phase"
+    },
+    "refreshingChapterToc": "بروزرسانی فهرست برای فصل {chapterId}",
+    "@refreshingChapterToc": {
+        "description": "Label for the syncing chapter TOC phase with the chapter ID",
+        "placeholders": {
+            "chapterId": {
+                "description": "The ID of the chapter which TOC is being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "invalidCredentials": "مشخصات سرور نامعتبر",
+    "@invalidCredentials": {
+        "description": "User display error displayed when credentials are invalid"
+    },
+    "invalidCertificate": "گواهینامه نامعتبر",
+    "@invalidCertificate": {
+        "description": "User display error shown when the server certificate cannot be validated"
+    },
+    "invalidCertificateDescription": "گواهی SSL سرور اعتبارسنجی نشد. گواهینامه را بررسی کنید، یا در بخش تنظیمات گزینه \"نادیده گرفتن اعتبارسنجی گواهینامه\" (فقط در صورتی که به این سرور اعتماد دارید) فعال کنید.",
+    "@invalidCertificateDescription": {
+        "description": "Instructions shown when the server certificate cannot be validated"
+    },
+    "ignoreCertificateValidation": "نادیده گرفتن اعتبارسنجی گواهینامه",
+    "@ignoreCertificateValidation": {
+        "description": "Setting that allows a trusted server with an invalid HTTPS certificate"
+    },
+    "ignoreCertificateValidationDescription": "مجوز دادن برای برقراری اتصال حتی به سروری که امکان اعتبارسنجی گواهینامه‌اش وجود ندارد. فقط برای سرورهایی که اعتماد دارید استفاده کنید.",
+    "@ignoreCertificateValidationDescription": {
+        "description": "Security warning for ignoring HTTPS certificate validation"
+    },
+    "orientation": "جهت نمایش",
+    "@orientation": {
+        "description": "Label for the orientation setting"
+    },
+    "portrait": "عمودی",
+    "@portrait": {
+        "description": "Label for the portrait orientation option"
+    },
+    "landscape": "افقی",
+    "@landscape": {
+        "description": "Label for the landscape orientation option"
+    },
+    "manageHeaders": "تنظیمات هدر",
+    "@manageHeaders": {
+        "description": "Label for the manage headers settings entry"
+    },
+    "headerName": "نام هدر",
+    "@headerName": {
+        "description": "Label for the header name input field"
+    },
+    "headerValue": "مقدار هدر",
+    "@headerValue": {
+        "description": "Label for the header value input field"
+    },
+    "addHeader": "اضافه کردن هدر",
+    "@addHeader": {
+        "description": "Label for the add header button"
+    },
+    "savedHeaders": "هدرهای ذخیره شده",
+    "@savedHeaders": {
+        "description": "Label for the saved headers section"
+    },
+    "clearAll": "پاک کردن همه",
+    "@clearAll": {
+        "description": "Label for the clear all button"
+    },
+    "reorderNavigationBar": "تغییر ترتیب منوی ناوبری",
+    "@reorderNavigationBar": {
+        "description": "Label for the reorder navigation bar settings entry"
+    },
+    "availableDestinations": "مقصدهای موجود",
+    "@availableDestinations": {
+        "description": "Label for the available destinations section"
+    },
+    "navigationGestures": "حرکات ناوبری",
+    "@navigationGestures": {
+        "description": "Label for the enable navigation gestures reader option"
+    },
+    "keybinds": "دکمه‌های تنظیم شده",
+    "keybindNextPage": "صفحه بعدی",
+    "@keybindNextPage": {
+        "description": "Label for the next page keyboard binding setting"
+    },
+    "keybindPreviousPage": "صفحه قبلی",
+    "@keybindPreviousPage": {
+        "description": "Label for the previous page keyboard binding setting"
+    },
+    "keybindPressAKey": "کلیدی را فشار دهید…",
+    "@keybindPressAKey": {
+        "description": "Placeholder shown while waiting for a key press in the keybind capture dialog"
+    },
+    "keybindAlreadyAssigned": "این ترکیب قبلا تنظیم شده",
+    "@keybindAlreadyAssigned": {
+        "description": "Error shown when a captured keybind is already used by another action"
+    },
+    "keybindVolumeUp": "دکمه ولوم زیاد",
+    "@keybindVolumeUp": {
+        "description": "Label for the volume up key when shown as a keybinding"
+    },
+    "keybindVolumeDown": "دکمه ولوم کم",
+    "@keybindVolumeDown": {
+        "description": "Label for the volume down key when shown as a keybinding"
+    },
+    "appearance": "ظاهر",
+    "@appearance": {
+        "description": "Label for the appearance settings section"
+    },
+    "reduceAnimations": "کاهش انیمیشن‌ها",
+    "@reduceAnimations": {
+        "description": "Label for the reduce animation setting"
+    },
+    "reduceAnimationsDescription": "بیشتر انیمیشن‌ها و انیمیشن جابجایی بین صفحات را غیرفعال می‌کند. توجه: وقتی این گزینه فعال باشد، حرکت کشیدن انگشت (swipe gesture) در حالات مطالعه افقی غیرفعال خواهد شد.",
+    "@reduceAnimationsDescription": {
+        "description": "Description for the reduce animation setting"
+    },
+    "paragraphSpacing": "فاصله پاراگراف",
+    "@paragraphSpacing": {
+        "description": "Label for the paragraph spacing setting"
+    },
+    "logs": "لاگ‌ها",
+    "@logs": {
+        "description": "Label for the logs settings section"
+    },
+    "copiedToClipboard": "کپی شد",
+    "@copiedToClipboard": {
+        "description": "Message shown when a value is copied to the clipboard"
+    },
+    "removeFromOnDeck": "از میز مطالعه حذف شد",
+    "@removeFromOnDeck": {
+        "description": "Label for the remove from on deck context menu item"
+    },
+    "syncingOnDeck": "همگام‌سازی میز مطالعه",
+    "@syncingOnDeck": {
+        "description": "Label for the syncing on deck phase"
+    },
+    "ongoing": "درحال پخش",
+    "@ongoing": {
+        "description": "Label for the 'ongoing' publication status"
+    },
+    "completed": "تکمیل شده",
+    "@completed": {
+        "description": "Label for the 'completed' publication status"
+    },
+    "hiatus": "وقفه",
+    "@hiatus": {
+        "description": "Label for the 'hiatus' publication status"
+    },
+    "cancelled": "لغو شده",
+    "@cancelled": {
+        "description": "Label for the 'cancelled' publication status"
+    },
+    "ended": "پایان یافته",
+    "@ended": {
+        "description": "Label for the 'ended' publication status"
+    },
+    "unknown": "نامشخص",
+    "@unknown": {
+        "description": "Label for the 'unknown' publication status"
+    },
+    "tags": "تگ‌ها",
+    "@tags": {
+        "description": "Label for the tags section in the series details page"
+    },
+    "textAlignment": "تراز متن",
+    "@textAlignment": {
+        "description": "Label for the text alignment setting"
+    },
+    "left": "چپ چین",
+    "@left": {
+        "description": "Label for the left text alignment option"
+    },
+    "center": "وسط",
+    "@center": {
+        "description": "Label for the center text alignment option"
+    },
+    "right": "راست چین",
+    "@right": {
+        "description": "Label for the right text alignment option"
+    },
+    "justify": "هم‌تراز",
+    "@justify": {
+        "description": "Label for the justify text alignment option"
+    },
+    "removeParagraphIndentation": "حذف فاصله ابتدای هر پاراگراف",
+    "removeParagraphIndentationDescription": "اگر فعال شود، فاصله ابتدای هر پاراگراف از متن حذف می‌شود. اگر غیرفعال باشد، فاصله اورجینال خود EPUB حفظ می‌گردد.",
+    "@removeParagraphIndentationDescription": {
+        "description": "Description for the remove paragraphs indent setting"
+    },
+    "font": "فونت",
+    "@font": {
+        "description": "Label for the font override setting"
+    },
+    "fontDescription": "فونت اصلی EPUB را با یک فونت سفارشی جایگزین کنید. فونت‌های موجود از سرور همگام‌سازی می‌شوند. توجه: فقط فونت‌های کاربر پشتیبانی می‌شوند، زیرا فونت‌های موجود در سیستم برای دانلود در دسترس نیستند.",
+    "@fontDescription": {
+        "description": "Description for the font override setting"
+    },
+    "defaultLabel": "پيش‌ فرض",
+    "@defaultLabel": {
+        "description": "Label for a default option in a setting"
+    },
+    "startupLoadingMessage": "همه چیز در حال تنظیم است، لطفا صبر کنید...",
+    "@startupLoadingMessage": {
+        "description": "Message shown when the app is starting up and loading data"
+    }
+}
