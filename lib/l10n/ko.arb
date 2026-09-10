@@ -935,5 +935,21 @@
     "syncingWantToRead": "읽고 싶어요 동기화 중",
     "@syncingWantToRead": {
         "description": "Label for the syncing Want to Read phase"
+    },
+    "sortOrder": "정렬 순서",
+    "@sortOrder": {
+        "description": "Label for the sort order option in list"
+    },
+    "progress": "진행도",
+    "@progress": {
+        "description": "Label for sorting by progress option"
+    },
+    "lastRead": "최근 읽은 날짜",
+    "@lastRead": {
+        "description": "Label for sorting by last read option"
+    },
+    "lockHorizontalPan": "가로 스크롤 잠금",
+    "@lockHorizontalPan": {
+        "description": "Label for the lock horizontal panning setting in the vertical reader"
     }
 }
