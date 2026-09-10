@@ -927,5 +927,29 @@
     "defaultLabel": "Default",
     "@defaultLabel": {
         "description": "Label for a default option in a setting"
+    },
+    "sortOrder": "Sortierreihenfolge",
+    "@sortOrder": {
+        "description": "Label for the sort order option in list"
+    },
+    "progress": "Fortschritt",
+    "@progress": {
+        "description": "Label for sorting by progress option"
+    },
+    "lastRead": "Zuletzt gelesen",
+    "@lastRead": {
+        "description": "Label for sorting by last read option"
+    },
+    "syncingSeriesDetails": "Synchronisiere Serie Details",
+    "@syncingSeriesDetails": {
+        "description": "Label for the syncing series details phase"
+    },
+    "syncingWantToRead": "Synchronisiere möchte lesen",
+    "@syncingWantToRead": {
+        "description": "Label for the syncing Want to Read phase"
+    },
+    "lockHorizontalPan": "Horizontales Scrollen sperren",
+    "@lockHorizontalPan": {
+        "description": "Label for the lock horizontal panning setting in the vertical reader"
     }
 }
