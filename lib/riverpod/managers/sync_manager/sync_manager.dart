@@ -130,6 +130,7 @@ class SyncManager extends _$SyncManager {
       const .recentlyUpdated(),
       const .recentlyAdded(),
       const .readingLists(),
+      const .wantToRead(),
       const .sidenav(),
       const .dashboard(),
       const .smartFilters(),
