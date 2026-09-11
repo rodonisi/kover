@@ -59,18 +59,18 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                           ChoiceOptionEntry(
                             value: .horizontal,
                             label: l.horizontal,
-                            icon: KoverIcons.horizontalReaderMode,
+                            icon: KoverIcons.horizontalReader,
                           ),
                           ChoiceOptionEntry(
                             value: .vertical,
                             label: l.vertical,
-                            icon: KoverIcons.verticalReaderMode,
+                            icon: KoverIcons.verticalReader,
                           ),
                           if (breakpoint != .compact)
                             ChoiceOptionEntry(
                               value: .spread,
                               label: l.twoPage,
-                              icon: KoverIcons.twoPageReaderMode,
+                              icon: KoverIcons.twoPageReader,
                             ),
                         ],
                         value: settings.readerMode,
