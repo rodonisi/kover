@@ -173,6 +173,9 @@ class EpubReflow extends _$EpubReflow {
     if (!state.hasValue || state.value?.status != .initial) return;
     state = AsyncData(state.value!.copyWith(status: .measuring));
 
+    // Ensure css is hot and ready
+    await ref.read(customCssProvider(seriesId: seriesId).future);
+
     _pipeline.attach(size: viewport, devicePixelRatio: devicePixelRatio);
 
     try {
