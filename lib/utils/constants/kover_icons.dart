@@ -2,35 +2,47 @@ import 'package:material_ui/material_ui.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 sealed class KoverIcons {
+  // Read direction — must not mirror
+  static const IconData ltr = LucideIcons.chevronsRight;
+  static const IconData rtl = LucideIcons.chevronsLeft;
+
+  // Reader layout
   static const IconData verticalReader = LucideIcons.moveVerticalDir;
   static const IconData horizontalReader = LucideIcons.moveHorizontalDir;
   static const IconData twoPageReader = LucideIcons.columns2Dir;
   static const IconData fitWidth = LucideIcons.chevronsLeftRightDir;
   static const IconData fitHeight = LucideIcons.chevronsUpDownDir;
   static const IconData fitContain = LucideIcons.fullscreenDir;
+  static const IconData margins = LucideIcons.panelLeftDashedDir;
+  static const IconData verticalGap = LucideIcons.unfoldVerticalDir;
+  static const IconData pageGap = LucideIcons.unfoldHorizontalDir;
+  static const IconData safeArea = LucideIcons.expandDir;
+  static const IconData progressBar = LucideIcons.minusDir;
+  static const IconData coverPage = LucideIcons.bookImageDir;
+
+  // Reader typography
   static const IconData paragraphSpacing = LucideIcons.betweenHorizonalEndDir;
   static const IconData removeParagraphIndent = LucideIcons.indentDecreaseDir;
   static const IconData highlight = LucideIcons.highlighterDir;
   static const IconData letterSpacing = LucideIcons.wholeWordDir;
   static const IconData lineHeight = LucideIcons.listChevronsUpDownDir;
   static const IconData wordSpacing = LucideIcons.listMinusDir;
-  static const IconData margins = LucideIcons.panelLeftDashedDir;
-  static const IconData verticalGap = LucideIcons.unfoldVerticalDir;
-  static const IconData pageGap = LucideIcons.unfoldHorizontalDir;
-  static const IconData coverPage = LucideIcons.bookImageDir;
   static const IconData fontSize = LucideIcons.aLargeSmallDir;
   static const IconData font = LucideIcons.typeDir;
   static const IconData textAlignLeft = LucideIcons.textAlignStartDir;
   static const IconData textAlignCenter = LucideIcons.textAlignCenterDir;
   static const IconData textAlignRight = LucideIcons.textAlignEndDir;
   static const IconData textAlignJustify = LucideIcons.textAlignJustifyDir;
-  static const IconData progressBar = LucideIcons.minusDir;
-  static const IconData safeArea = LucideIcons.expandDir;
-  static const IconData save = LucideIcons.saveDir;
-  static const IconData reset = LucideIcons.rotateCcwDir;
-  static const IconData analytics = LucideIcons.barChart2Dir;
-  static const IconData logs = LucideIcons.fileTextDir;
+
+  // Reader interaction
   static const IconData navigationGestures = LucideIcons.pointerDir;
+  static const IconData horizontalPan = LucideIcons.lockKeyholeDir;
+  static const IconData zoomIn = LucideIcons.zoomInDir;
+  static const IconData zoomOut = LucideIcons.zoomOutDir;
+  static const IconData zoomReset = LucideIcons.scanDir;
+  static const IconData keyboard = LucideIcons.keyboardDir;
+
+  // Appearance
   static const IconData animation = Icons.animation_sharp;
   static const IconData outline = LucideIcons.squareDashedDir;
   static const IconData theme = LucideIcons.paletteDir;
@@ -38,93 +50,105 @@ sealed class KoverIcons {
   static const IconData lightTheme = LucideIcons.sunDir;
   static const IconData darkTheme = LucideIcons.moonDir;
   static const IconData blackTheme = LucideIcons.moonStarDir;
+
+  // Navigation
+  static const IconData play = Icons.play_arrow_rounded;
+  static const IconData read = LucideIcons.bookOpenDir;
+  static const IconData home = LucideIcons.homeDir;
+  static const IconData library = LucideIcons.libraryDir;
+  static const IconData navbar = LucideIcons.ellipsisDir;
+  static const IconData header = LucideIcons.listPlusDir;
+  static const IconData expandPanel = LucideIcons.panelLeftOpenDir;
+  static const IconData collapsePanel = LucideIcons.panelLeftCloseDir;
+  static const IconData chevronRight = LucideIcons.chevronRightDir;
+  static const IconData chevronLeft = LucideIcons.chevronLeftDir;
+  static const IconData arrowBack = LucideIcons.arrowLeftDir;
+  static const IconData search = LucideIcons.searchDir;
+  static const IconData filter = LucideIcons.listFilterDir;
+  static const IconData contextMenu = LucideIcons.ellipsisVerticalDir;
+  static const IconData dragHandle = LucideIcons.gripHorizontalDir;
+
+  // Sorting
   static const IconData ascending = LucideIcons.arrowDownNarrowWideDir;
   static const IconData descending = LucideIcons.arrowDownWideNarrowDir;
-  static const IconData home = LucideIcons.homeDir;
+
+  // Library entities
+  static const IconData series = LucideIcons.listDir;
+  static const IconData chapter = LucideIcons.fileTextDir;
+  static const IconData collection = LucideIcons.layoutGridDir;
+  static const IconData readingList = LucideIcons.layoutListDir;
+  static const IconData book = LucideIcons.bookTextDir;
+  static const IconData comic = LucideIcons.bookOpenDir;
+  static const IconData image = LucideIcons.imageDir;
+  static const IconData grid = LucideIcons.layoutGridDir;
+  static const IconData list = LucideIcons.stretchHorizontalDir;
+
+  // Book metadata
+  static const IconData metadata = LucideIcons.fileBracesCornerDir;
+  static const IconData person = LucideIcons.userDir;
+  static const IconData tag = LucideIcons.tagDir;
+  static const IconData publicationStatus = LucideIcons.activityDir;
+  static const IconData wordCount = LucideIcons.fileTextDir;
+  static const IconData pageCount = LucideIcons.fileStackDir;
+  static const IconData releaseYear = LucideIcons.calendarDir;
+  static const IconData readTime = LucideIcons.clockDir;
+  static const IconData coverPlaceholder = LucideIcons.imageDir;
+  static const IconData tableOfContents = LucideIcons.tableOfContentsDir;
+
+  // Formats
+  static const IconData epubFormat = LucideIcons.bookTextDir;
+  static const IconData archiveFormat = LucideIcons.fileArchiveDir;
+  static const IconData imageFormat = LucideIcons.imagesDir;
+  static const IconData pdfFormat = LucideIcons.fileTextDir;
+  static const IconData unknownFormat = LucideIcons.fileQuestionMarkDir;
+
+  // Actions
   static const IconData wantToRead = LucideIcons.starDir;
   static const IconData removeWantToRead = LucideIcons.starOffDir;
   static const IconData markRead = LucideIcons.bookCheckDir;
   static const IconData markUnread = LucideIcons.bookXDir;
   static const IconData download = LucideIcons.downloadDir;
   static const IconData downloading = LucideIcons.refreshCwDir;
-  static const IconData metadata = LucideIcons.fileBracesCornerDir;
   static const IconData refreshCovers = LucideIcons.imageDownDir;
   static const IconData refresh = LucideIcons.refreshCwDir;
+  static const IconData copy = LucideIcons.copyDir;
+  static const IconData trash = LucideIcons.trashDir;
+  static const IconData remove = LucideIcons.xDir;
+  static const IconData minus = LucideIcons.minusDir;
+  static const IconData add = LucideIcons.plusDir;
+  static const IconData save = LucideIcons.saveDir;
+  static const IconData reset = LucideIcons.rotateCcwDir;
+  static const IconData retry = LucideIcons.rotateCcwDir;
+  static const IconData clearCovers = LucideIcons.imageOffDir;
+  static const IconData clearDownloads = Icons.file_download_off;
+  static const IconData coverDownload = LucideIcons.imageDownDir;
+  static const IconData reclaimSpace = LucideIcons.databaseZapDir;
+
+  // Status/feedback
   static const IconData close = LucideIcons.xDir;
   static const IconData clear = LucideIcons.xDir;
   static const IconData cancel = LucideIcons.xDir;
-  static const IconData series = LucideIcons.listDir;
-  static const IconData chapter = LucideIcons.fileTextDir;
-  static const IconData collection = LucideIcons.layoutGridDir;
-  static const IconData readingList = LucideIcons.layoutListDir;
-  static const IconData chevronRight = LucideIcons.chevronRightDir;
-  static const IconData chevronLeft = LucideIcons.chevronLeftDir;
-  static const IconData search = LucideIcons.searchDir;
-  static const IconData filter = LucideIcons.listFilterDir;
-  static const IconData contextMenu = LucideIcons.ellipsisVerticalDir;
   static const IconData check = LucideIcons.checkDir;
   static const IconData info = LucideIcons.infoDir;
   static const IconData debug = LucideIcons.bugDir;
   static const IconData warning = LucideIcons.alertTriangleDir;
   static const IconData error = LucideIcons.circleXDir;
   static const IconData fatal = LucideIcons.bombDir;
-  static const IconData copy = LucideIcons.copyDir;
-  static const IconData language = LucideIcons.languagesDir;
-  static const IconData trash = LucideIcons.trashDir;
-  static const IconData remove = LucideIcons.xDir;
-  static const IconData minus = LucideIcons.minusDir;
-  static const IconData dragHandle = LucideIcons.gripHorizontalDir;
-  static const IconData navbar = LucideIcons.ellipsisDir;
+  static const IconData alert = LucideIcons.triangleAlertDir;
+  static const IconData noConnection = LucideIcons.wifiOffDir;
+  static const IconData missingUser = LucideIcons.userLockDir;
   static const IconData visible = LucideIcons.eyeDir;
   static const IconData hidden = LucideIcons.eyeOffDir;
-  static const IconData play = Icons.play_arrow_rounded;
-  static const IconData noConnection = LucideIcons.wifiOffDir;
-  static const IconData read = LucideIcons.bookOpenDir;
+
+  // Settings/account
+  static const IconData settings = LucideIcons.settingsDir;
+  static const IconData readerSettings = LucideIcons.slidersHorizontalDir;
+  static const IconData analytics = LucideIcons.barChart2Dir;
+  static const IconData logs = LucideIcons.fileTextDir;
+  static const IconData language = LucideIcons.languagesDir;
   static const IconData unlockedOrientation = LucideIcons.rotateCwSquareDir;
   static const IconData landscape = LucideIcons.rectangleHorizontalDir;
   static const IconData portrait = LucideIcons.rectangleVerticalDir;
-  // Read direction — must not mirror.
-  static const IconData ltr = LucideIcons.chevronsRight;
-  static const IconData rtl = LucideIcons.chevronsLeft;
-  static const IconData header = LucideIcons.listPlusDir;
   static const IconData ignoreCertificateValidation = LucideIcons.shieldOffDir;
   static const IconData invalidCertificate = LucideIcons.shieldAlertDir;
-  static const IconData settings = LucideIcons.settingsDir;
-  static const IconData readerSettings = LucideIcons.slidersHorizontalDir;
-  static const IconData publicationStatus = LucideIcons.activityDir;
-  static const IconData person = LucideIcons.userDir;
-  static const IconData tag = LucideIcons.tagDir;
-  static const IconData expandPanel = LucideIcons.panelLeftOpenDir;
-  static const IconData collapsePanel = LucideIcons.panelLeftCloseDir;
-  static const IconData grid = LucideIcons.layoutGridDir;
-  static const IconData list = LucideIcons.stretchHorizontalDir;
-  static const IconData keyboard = LucideIcons.keyboardDir;
-  static const IconData horizontalPan = LucideIcons.lockKeyholeDir;
-  static const IconData wordCount = LucideIcons.fileTextDir;
-  static const IconData pageCount = LucideIcons.fileStackDir;
-  static const IconData releaseYear = LucideIcons.calendarDir;
-  static const IconData readTime = LucideIcons.clockDir;
-  static const IconData coverPlaceholder = LucideIcons.imageDir;
-  static const IconData epubFormat = LucideIcons.bookTextDir;
-  static const IconData archiveFormat = LucideIcons.fileArchiveDir;
-  static const IconData imageFormat = LucideIcons.imagesDir;
-  static const IconData pdfFormat = LucideIcons.fileTextDir;
-  static const IconData unknownFormat = LucideIcons.fileQuestionMarkDir;
-  static const IconData missingUser = LucideIcons.userLockDir;
-  static const IconData alert = LucideIcons.triangleAlertDir;
-  static const IconData retry = LucideIcons.rotateCcwDir;
-  static const IconData library = LucideIcons.libraryDir;
-  static const IconData book = LucideIcons.bookTextDir;
-  static const IconData comic = LucideIcons.bookOpenDir;
-  static const IconData image = LucideIcons.imageDir;
-  static const IconData zoomIn = LucideIcons.zoomInDir;
-  static const IconData zoomOut = LucideIcons.zoomOutDir;
-  static const IconData zoomReset = LucideIcons.scanDir;
-  static const IconData add = LucideIcons.plusDir;
-  static const IconData coverDownload = LucideIcons.imageDownDir;
-  static const IconData reclaimSpace = LucideIcons.databaseZapDir;
-  static const IconData clearCovers = LucideIcons.imageOffDir;
-  static const IconData clearDownloads = Icons.file_download_off;
-  static const IconData tableOfContents = LucideIcons.tableOfContentsDir;
-  static const IconData arrowBack = LucideIcons.arrowLeftDir;
 }
