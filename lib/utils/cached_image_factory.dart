@@ -33,6 +33,17 @@ class CachedImageFactory extends WidgetFactory {
         image: provider,
         gaplessPlayback: true,
         fit: .fill,
+        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+          if (wasSynchronouslyLoaded || frame != null) {
+            return child;
+          }
+          return SizedBox(
+            height: maxHeight,
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        },
       ),
     );
   }
