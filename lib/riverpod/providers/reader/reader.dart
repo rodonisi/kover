@@ -43,21 +43,29 @@ class Reader extends _$Reader {
     int? chapterId,
     int? readingListId,
   }) async {
-    final chapter = chapterId != null
-        ? await ref.watch(
-            chapterProvider(chapterId: chapterId).future,
-          )
-        : await ref.read(
-            continuePointProvider(seriesId: seriesId).future,
-          );
-
-    final progress = await ref.read(
-      bookProgressProvider(chapterId: chapter.id).future,
-    );
-
-    final series = await ref.read(
+    final seriesFuture = ref.watch(
       seriesProvider(seriesId: seriesId).future,
     );
+    final chapterFuture = chapterId != null
+        ? ref.watch(
+            chapterProvider(chapterId: chapterId).future,
+          )
+        : ref.read(
+            continuePointProvider(seriesId: seriesId).future,
+          );
+    final progressFuture = chapterId != null
+        ? ref.read(
+            bookProgressProvider(chapterId: chapterId).future,
+          )
+        : chapterFuture.then(
+            (chapter) => ref.read(
+              bookProgressProvider(chapterId: chapter.id).future,
+            ),
+          );
+
+    final series = await seriesFuture;
+    final chapter = await chapterFuture;
+    final progress = await progressFuture;
 
     final initialPage = progress?.pageNum ?? 0;
 

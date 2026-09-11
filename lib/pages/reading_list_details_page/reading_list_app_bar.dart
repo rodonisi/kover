@@ -1,3 +1,4 @@
+import 'package:kover/pages/reading_list_details_page/reading_list_app_bar_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
@@ -73,18 +74,16 @@ class _ReadingListContinueButtonImage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final continuePoint = ref.watch(
-      readingListContinuePointProvider(readingListId: readingListId),
+    final model = ref.watch(
+      readingListAppBarProvider(readingListId: readingListId),
     );
-    final canRead = ref.watch(canReadReadingListProvider(readingListId));
 
-    return Async2(
-      asyncValue1: continuePoint,
-      asyncValue2: canRead,
-      data: (chapter, canRead) => ContinueButtonImage(
-        enabled: canRead,
+    return Async(
+      asyncValue: model,
+      data: (data) => ContinueButtonImage(
+        enabled: data.canRead,
         image: ChapterCoverImage(
-          chapterId: chapter.id,
+          chapterId: data.chapter.id,
           usePlaceholder: false,
         ),
       ),
@@ -99,27 +98,23 @@ class _ReadingListContinuePointButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final continuePoint = ref.watch(
-      readingListContinuePointProvider(readingListId: readingListId),
+    final model = ref.watch(
+      readingListAppBarProvider(readingListId: readingListId),
     );
     final progress = ref.watch(
       readingListContinuePointProgressProvider(readingListId: readingListId),
     );
-    final canRead = ref.watch(
-      canReadReadingListProvider(readingListId),
-    );
 
-    return Async2(
-      asyncValue1: continuePoint,
-      asyncValue2: canRead,
-      data: (chapter, canRead) => ContinuePointButton(
-        enabled: canRead,
-        title: chapter.title,
+    return Async(
+      asyncValue: model,
+      data: (data) => ContinuePointButton(
+        enabled: data.canRead,
+        title: data.chapter.title,
         cover: _ReadingListContinueButtonImage(readingListId: readingListId),
         progress: progress.value,
         onTap: () => ReaderRoute(
-          seriesId: chapter.seriesId,
-          chapterId: chapter.id,
+          seriesId: data.chapter.seriesId,
+          chapterId: data.chapter.id,
           readingListId: readingListId,
         ).push(context),
       ),

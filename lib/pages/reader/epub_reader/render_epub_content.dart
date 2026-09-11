@@ -1,11 +1,11 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/riverpod/providers/book.dart';
+import 'package:kover/pages/reader/epub_reader/render_epub_content_provider.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/utils/html_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
+import 'package:material_ui/material_ui.dart';
 
 class RenderEpubContent extends ConsumerWidget {
   final int seriesId;
@@ -25,19 +25,15 @@ class RenderEpubContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final epubSettings = ref.watch(
-      epubReaderSettingsProvider(seriesId: seriesId),
-    );
-    final css = ref.watch(
-      customCssProvider(seriesId: seriesId),
+    final model = ref.watch(
+      renderEpubContentProvider(seriesId: seriesId),
     );
 
-    return Async2(
-      asyncValue1: epubSettings,
-      asyncValue2: css,
-      data: (epubSettings, css) {
+    return Async(
+      asyncValue: model,
+      data: (data) {
         final mergedStyles = Map<String, Map<String, String>>.from(styles);
-        for (final entry in css.entries) {
+        for (final entry in data.customCss.entries) {
           mergedStyles[entry.key] = {
             ...mergedStyles[entry.key] ?? {},
             ...entry.value,
@@ -48,8 +44,8 @@ class RenderEpubContent extends ConsumerWidget {
           bottom: false,
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: epubSettings.marginSize,
-              vertical: verticalPadding ? epubSettings.marginSize : 0,
+              horizontal: data.epubSettings.marginSize,
+              vertical: verticalPadding ? data.epubSettings.marginSize : 0,
             ),
             child: HtmlWidget(
               html,
@@ -72,7 +68,7 @@ class RenderEpubContent extends ConsumerWidget {
                   HtmlConstants.splitParagraphAttribute,
                 );
 
-                final fontOverride = epubSettings.fontFamily;
+                final fontOverride = data.epubSettings.fontFamily;
                 if (fontOverride != null) {
                   final fontFamily = 'font-family: "$fontOverride"';
                   element.attributes['style'] =
@@ -82,7 +78,7 @@ class RenderEpubContent extends ConsumerWidget {
                 if (element.localName == 'p') {
                   final styles = [?element.attributes['style']];
 
-                  final alignment = switch (epubSettings.textAlignment) {
+                  final alignment = switch (data.epubSettings.textAlignment) {
                     EpubTextAlignment.left => 'left',
                     EpubTextAlignment.center => 'center',
                     EpubTextAlignment.right => 'right',
@@ -92,7 +88,7 @@ class RenderEpubContent extends ConsumerWidget {
 
                   if (considerLast && !isSplit) {
                     styles.add(
-                      'margin-bottom: ${epubSettings.paragraphSpacing}em',
+                      'margin-bottom: ${data.epubSettings.paragraphSpacing}em',
                     );
                   }
 
@@ -101,7 +97,7 @@ class RenderEpubContent extends ConsumerWidget {
                   );
                 }
 
-                if (epubSettings.removeParagraphIndent &&
+                if (data.epubSettings.removeParagraphIndent &&
                     element.attributes.containsKey(
                       HtmlConstants.textIndentSpanAttribute,
                     )) {
@@ -113,14 +109,14 @@ class RenderEpubContent extends ConsumerWidget {
                 return s;
               },
               textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: epubSettings.fontSize,
-                height: epubSettings.lineHeight,
-                wordSpacing: epubSettings.wordSpacing,
-                letterSpacing: epubSettings.letterSpacing,
+                fontSize: data.epubSettings.fontSize,
+                height: data.epubSettings.lineHeight,
+                wordSpacing: data.epubSettings.wordSpacing,
+                letterSpacing: data.epubSettings.letterSpacing,
               ),
               rebuildTriggers: [
                 mergedStyles.toString(),
-                epubSettings,
+                data.epubSettings,
               ],
             ),
           ),

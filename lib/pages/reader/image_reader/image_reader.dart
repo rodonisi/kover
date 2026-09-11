@@ -1,13 +1,12 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/image_reader/horizontal_paged_reader.dart';
 import 'package:kover/pages/reader/image_reader/horizontal_spreads_reader.dart';
+import 'package:kover/pages/reader/image_reader/image_reader_provider.dart';
 import 'package:kover/pages/reader/image_reader/vertical_continuous_reader.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
-import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
-import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/widgets/util/async_value.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ImageReader extends ConsumerWidget {
   final int seriesId;
@@ -23,21 +22,17 @@ class ImageReader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(imageReaderSettingsProvider(seriesId: seriesId));
-    final commonSettings = ref.watch(
-      commonReaderSettingsProvider(seriesId: seriesId),
-    );
+    final model = ref.watch(imageReaderProvider(seriesId: seriesId));
 
-    return Async2(
-      asyncValue1: settings,
-      asyncValue2: commonSettings,
-      data: (settings, commonSettings) {
+    return Async(
+      asyncValue: model,
+      data: (data) {
         final navProvider = readerNavigationProvider(
           seriesId: seriesId,
           chapterId: chapterId,
         );
 
-        if (settings.readerMode == .spread) {
+        if (data.mode == .spread) {
           return HorizontalSpreadsReader(
             seriesId: seriesId,
             chapterId: chapterId,
@@ -50,19 +45,19 @@ class ImageReader extends ConsumerWidget {
           chapterId: chapterId,
           readingListId: readingListId,
           onNextPage: () {
-            commonSettings.readDirection == .leftToRight
+            data.direction == .leftToRight
                 ? ref.read(navProvider.notifier).nextPage()
                 : ref.read(navProvider.notifier).previousPage();
           },
           onPreviousPage: () {
-            commonSettings.readDirection == .leftToRight
+            data.direction == .leftToRight
                 ? ref.read(navProvider.notifier).previousPage()
                 : ref.read(navProvider.notifier).nextPage();
           },
           onJumpToPage: (page) {
             ref.read(navProvider.notifier).jumpToPage(page);
           },
-          child: switch (settings.readerMode) {
+          child: switch (data.mode) {
             .horizontal => HorizontalPagedReader(
               seriesId: seriesId,
               chapterId: chapterId,
@@ -72,7 +67,7 @@ class ImageReader extends ConsumerWidget {
               chapterId: chapterId,
             ),
             _ => throw UnimplementedError(
-              'Reader mode ${settings.readerMode} not supported here',
+              'Reader mode ${data.mode} not supported here',
             ),
           },
         );

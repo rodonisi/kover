@@ -1,15 +1,12 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/pages/reader/image_reader/horizontal_paged_reader_provider.dart';
 import 'package:kover/pages/reader/image_reader/zoomable_horizontal_page_image.dart';
 import 'package:kover/riverpod/providers/book.dart';
-import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
-import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
-import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
-import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
+import 'package:material_ui/material_ui.dart';
 
 class HorizontalPagedReader extends HookConsumerWidget {
   final int seriesId;
@@ -23,41 +20,25 @@ class HorizontalPagedReader extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider = readerProvider(seriesId: seriesId, chapterId: chapterId);
-
-    final settings = ref.watch(imageReaderSettingsProvider(seriesId: seriesId));
-    final commonSettings = ref.watch(
-      commonReaderSettingsProvider(seriesId: seriesId),
-    );
-    final reader = ref.watch(provider);
-
     final navProvider = readerNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
     );
 
-    final navState = ref.watch(navProvider);
-
-    final reduceAnimations = ref.watch(
-      themeProvider.select(
-        (value) =>
-            value.whenOrNull(
-              data: (data) => data.reduceAnimations,
-            ) ??
-            const ThemeModel().reduceAnimations,
+    final model = ref.watch(
+      horizontalPagedReaderProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
       ),
     );
 
-    return Async4(
-      asyncValue1: reader,
-      asyncValue2: navState,
-      asyncValue3: settings,
-      asyncValue4: commonSettings,
-      data: (reader, navState, settings, commonSettings) {
+    return Async(
+      asyncValue: model,
+      data: (data) {
         return HookConsumer(
           builder: (context, ref, _) {
             final pageController = usePageController(
-              initialPage: navState.currentPage,
+              initialPage: data.navState.currentPage,
             );
             final zoomedPageIndexes = useState(<int>{});
             // Number of touch pointers down. With 2+ fingers we hand the
@@ -79,7 +60,7 @@ class HorizontalPagedReader extends HookConsumerWidget {
                         previous.value != null &&
                         (next - previous.value!).abs() == 1;
 
-                    isSequential && !reduceAnimations
+                    isSequential && !data.reduceAnimations
                         ? pageController.animateToPage(
                             next,
                             duration: LayoutConstants.pageSlideDuration,
@@ -91,13 +72,14 @@ class HorizontalPagedReader extends HookConsumerWidget {
               },
             );
             final enabledScrollPhysics =
-                zoomedPageIndexes.value.contains(navState.currentPage) ||
+                zoomedPageIndexes.value.contains(data.navState.currentPage) ||
                     pointerCount.value >= 2
                 ? const NeverScrollableScrollPhysics()
                 : const BouncingScrollPhysics();
 
             final scrollPhysics =
-                commonSettings.navigationGersturesEnabled && !reduceAnimations
+                data.commonSettings.navigationGersturesEnabled &&
+                    !data.reduceAnimations
                 ? enabledScrollPhysics
                 : const NeverScrollableScrollPhysics();
 
@@ -105,8 +87,8 @@ class HorizontalPagedReader extends HookConsumerWidget {
               controller: pageController,
               allowImplicitScrolling: true,
               scrollDirection: .horizontal,
-              reverse: commonSettings.readDirection == .rightToLeft,
-              itemCount: reader.totalPages,
+              reverse: data.commonSettings.readDirection == .rightToLeft,
+              itemCount: data.reader.totalPages,
               pageSnapping: true,
               physics: scrollPhysics,
               onPageChanged: (index) {
@@ -120,7 +102,7 @@ class HorizontalPagedReader extends HookConsumerWidget {
                       page: index,
                     ),
                   ),
-                  data: (data) {
+                  data: (page) {
                     return ZoomableHorizontalPageImage(
                       key: ValueKey(index),
                       outerController: pageController,
@@ -139,8 +121,8 @@ class HorizontalPagedReader extends HookConsumerWidget {
                         zoomedPageIndexes.value = nextZoomedPageIndexes;
                       },
                       child: Image.memory(
-                        data.data,
-                        fit: switch (settings.scaleType) {
+                        page.data,
+                        fit: switch (data.settings.scaleType) {
                           .contain => .contain,
                           .fitWidth => .fitWidth,
                           .fitHeight => .fitHeight,
@@ -161,7 +143,7 @@ class HorizontalPagedReader extends HookConsumerWidget {
               child: content,
             );
 
-            if (settings.ignoreSafeAreas) {
+            if (data.settings.ignoreSafeAreas) {
               return listenedContent;
             }
 

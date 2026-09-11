@@ -1,11 +1,12 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reading_list_details_page/reading_list_app_bar.dart';
 import 'package:kover/pages/reading_list_details_page/reading_list_chapter_entry.dart';
 import 'package:kover/riverpod/providers/reading_lists.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
+import 'package:kover/widgets/util/sliver_adaptive_padding.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ReadingListsDetailsPage extends ConsumerWidget {
   final int readingListId;
@@ -28,7 +29,7 @@ class ReadingListsDetailsPage extends ConsumerWidget {
           return CustomScrollView(
             slivers: [
               ReadingListAppBar(readingListId: readingListId),
-              SliverPadding(
+              SliverAdaptivePadding(
                 padding: const EdgeInsetsGeometry.only(
                   top: LayoutConstants.mediumPadding,
                   left: LayoutConstants.mediumPadding,
@@ -46,7 +47,7 @@ class ReadingListsDetailsPage extends ConsumerWidget {
                         );
                       },
                       separatorBuilder: (context, index) => const SizedBox(
-                        height: LayoutConstants.mediumPadding,
+                        height: LayoutConstants.listSpacing,
                       ),
                       itemCount: chapters.length,
                     );
