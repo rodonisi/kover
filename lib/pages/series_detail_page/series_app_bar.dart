@@ -8,6 +8,7 @@ import 'package:kover/riverpod/providers/download.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/series.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/cards/cover_image.dart';
 import 'package:kover/widgets/context_menu/actions_menu.dart';
@@ -15,7 +16,6 @@ import 'package:kover/widgets/details/detail_app_bar.dart';
 import 'package:kover/widgets/details/info_widgets.dart';
 import 'package:kover/widgets/details/metadata_sections.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 class SeriesAppBar extends HookConsumerWidget {
@@ -87,7 +87,7 @@ class SeriesAppBar extends HookConsumerWidget {
                     .read(syncManagerProvider.notifier)
                     .refreshCovers(seriesId: seriesId);
               },
-              child: const Icon(LucideIcons.ellipsisVertical),
+              child: const Icon(KoverIcons.contextMenu),
             ),
           ],
           primaryColor: data.primaryColor,

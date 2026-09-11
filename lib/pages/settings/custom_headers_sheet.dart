@@ -7,7 +7,6 @@ import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class CustomHeadersSheet extends ConsumerWidget {
   const CustomHeadersSheet({super.key});
@@ -151,7 +150,7 @@ class _AddHeaderForm extends HookConsumerWidget {
               children: [
                 FilledButton.icon(
                   label: Text(l.addHeader),
-                  icon: const Icon(LucideIcons.plus),
+                  icon: const Icon(KoverIcons.add),
                   onPressed: canAdd
                       ? () async {
                           await ref

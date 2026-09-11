@@ -8,9 +8,9 @@ import 'package:kover/pages/reader/pdf_reader/pdf_reader_provider.dart';
 import 'package:kover/pages/reader/pdf_reader/pdf_toc_drawer.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:pdfrx/pdfrx.dart';
 
@@ -261,13 +261,13 @@ class _PdfExtraControls extends StatelessWidget {
           onPressed: () {
             controller.zoomUp();
           },
-          icon: const Icon(LucideIcons.zoomIn),
+          icon: const Icon(KoverIcons.zoomIn),
         ),
         IconButton(
           onPressed: () {
             controller.zoomDown();
           },
-          icon: const Icon(LucideIcons.zoomOut),
+          icon: const Icon(KoverIcons.zoomOut),
         ),
         IconButton(
           onPressed: () {
@@ -276,7 +276,7 @@ class _PdfExtraControls extends StatelessWidget {
               defaultZoom.value,
             );
           },
-          icon: const Icon(LucideIcons.scan),
+          icon: const Icon(KoverIcons.zoomReset),
         ),
       ],
     );

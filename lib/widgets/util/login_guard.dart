@@ -6,7 +6,6 @@ import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class LoginGuard extends ConsumerWidget {
   final Widget child;
@@ -27,7 +26,7 @@ class LoginGuard extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                LucideIcons.userLock,
+                KoverIcons.missingUser,
                 size: LayoutConstants.largerIcon,
                 color: Theme.of(context).colorScheme.primary,
               ),
@@ -106,7 +105,7 @@ class LoginGuard extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                LucideIcons.triangleAlert,
+                KoverIcons.alert,
                 size: LayoutConstants.largerIcon,
                 color: Theme.of(context).colorScheme.error,
               ),
@@ -135,7 +134,7 @@ class LoginGuard extends ConsumerWidget {
                   FilledButton.icon(
                     onPressed: () => ref.invalidate(currentUserProvider),
                     icon: Icon(
-                      LucideIcons.rotateCcw,
+                      KoverIcons.retry,
                       size: LayoutConstants.smallIcon,
                       color: Theme.of(context).colorScheme.onPrimary,
                     ),

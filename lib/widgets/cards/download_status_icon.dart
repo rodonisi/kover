@@ -1,6 +1,6 @@
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// A small icon overlay that conveys the download state of a chapter, volume,
 /// or series.
@@ -40,7 +40,7 @@ class DownloadStatusIcon extends StatelessWidget {
       child: Padding(
         padding: LayoutConstants.smallEdgeInsets,
         child: Icon(
-          LucideIcons.download,
+          KoverIcons.download,
           color: Theme.of(context).colorScheme.secondary,
           size: 16,
         ),

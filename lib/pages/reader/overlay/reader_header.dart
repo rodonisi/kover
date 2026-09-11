@@ -1,9 +1,9 @@
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay_provider.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 class ReaderHeader extends ConsumerWidget {
@@ -44,7 +44,7 @@ class ReaderHeader extends ConsumerWidget {
               spacing: LayoutConstants.smallPadding,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(KoverIcons.arrowBack),
                   onPressed: () => context.pop(),
                 ),
                 Expanded(
@@ -77,7 +77,7 @@ class ReaderHeader extends ConsumerWidget {
                 ),
                 if (hasDrawer || data.reader.series.format == .epub)
                   IconButton(
-                    icon: const Icon(LucideIcons.tableOfContents),
+                    icon: const Icon(KoverIcons.tableOfContents),
                     onPressed: () => Scaffold.of(context).openEndDrawer(),
                   )
                 else

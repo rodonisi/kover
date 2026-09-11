@@ -11,7 +11,6 @@ import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/bottom_sheet_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class CredentialsSettings extends ConsumerWidget {
   const CredentialsSettings({super.key});
@@ -81,7 +80,7 @@ class _CredentialsForm extends HookConsumerWidget {
                   obscureKey.value = !obscureKey.value;
                 },
                 icon: Icon(
-                  obscureKey.value ? LucideIcons.eye : LucideIcons.eyeOff,
+                  obscureKey.value ? KoverIcons.visible : KoverIcons.hidden,
                 ),
               ),
             ),
@@ -120,7 +119,7 @@ class _CredentialsForm extends HookConsumerWidget {
                           );
                     },
               label: Text(l.save),
-              icon: const Icon(LucideIcons.save),
+              icon: const Icon(KoverIcons.save),
             ),
           ],
         ),
@@ -162,7 +161,7 @@ class _User extends ConsumerWidget {
         spacing: LayoutConstants.smallPadding,
         children: [
           Icon(
-            LucideIcons.circleX,
+            KoverIcons.error,
             color: Theme.of(context).colorScheme.error,
           ),
           Text(
@@ -209,7 +208,7 @@ class _LoggedInUser extends ConsumerWidget {
       spacing: LayoutConstants.smallPadding,
       children: [
         Icon(
-          LucideIcons.check,
+          KoverIcons.check,
           color: theme.colorScheme.primary,
           size: LayoutConstants.mediumIcon,
         ),

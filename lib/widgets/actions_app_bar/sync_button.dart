@@ -1,3 +1,4 @@
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -5,7 +6,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SyncButton extends HookConsumerWidget {
   const SyncButton({super.key});
@@ -27,13 +27,13 @@ class SyncButton extends HookConsumerWidget {
 
     final icon = syncState.when(
       idle: () =>
-          const Icon(LucideIcons.refreshCw, size: LayoutConstants.smallIcon),
+          const Icon(KoverIcons.refresh, size: LayoutConstants.smallIcon),
       syncing: (_) => const Icon(
-        LucideIcons.refreshCw,
+        KoverIcons.refresh,
         size: LayoutConstants.smallIcon,
       ).animate(onPlay: (c) => c.repeat()).rotate(duration: 1500.ms),
       error: (_, _) => Icon(
-        LucideIcons.circleAlert,
+        KoverIcons.error,
         size: LayoutConstants.smallIcon,
         color: Theme.of(context).colorScheme.error,
       ),

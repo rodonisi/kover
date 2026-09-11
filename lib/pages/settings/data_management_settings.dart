@@ -1,3 +1,4 @@
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
@@ -8,7 +9,6 @@ import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/numeric_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class DataManagementSettings extends ConsumerWidget {
   const DataManagementSettings({super.key});
@@ -37,7 +37,7 @@ class DataManagementSettings extends ConsumerWidget {
               BooleanOption(
                 title: l.downloadAllCovers,
                 description: l.downloadAllCoversDescription,
-                icon: LucideIcons.imageDownDir,
+                icon: KoverIcons.coverDownload,
                 value: data.downloadCovers,
                 onChanged: (value) async {
                   await ref
@@ -47,7 +47,7 @@ class DataManagementSettings extends ConsumerWidget {
               ),
               NumericOption(
                 title: l.maxConcurrentDownloads,
-                icon: LucideIcons.download,
+                icon: KoverIcons.download,
                 min: 1,
                 max: 10,
                 step: 1,
@@ -71,7 +71,7 @@ class DataManagementSettings extends ConsumerWidget {
                         DatabaseClearOperationButton(
                           asyncValue: ref.watch(reclaimSpaceProvider),
                           text: l.reclaimSpace,
-                          icon: const Icon(LucideIcons.databaseZap),
+                          icon: const Icon(KoverIcons.reclaimSpace),
                           onPressed: () async {
                             await ref
                                 .read(reclaimSpaceProvider.notifier)
@@ -81,7 +81,7 @@ class DataManagementSettings extends ConsumerWidget {
                         DatabaseClearOperationButton(
                           asyncValue: ref.watch(clearDownloadsProvider),
                           text: l.clearDownloads,
-                          icon: const Icon(Icons.file_download_off),
+                          icon: const Icon(KoverIcons.clearDownloads),
                           onPressed: () async {
                             await ref
                                 .read(clearDownloadsProvider.notifier)
@@ -91,7 +91,7 @@ class DataManagementSettings extends ConsumerWidget {
                         DatabaseClearOperationButton(
                           asyncValue: ref.watch(clearCoversProvider),
                           text: l.clearCovers,
-                          icon: const Icon(LucideIcons.imageOff),
+                          icon: const Icon(KoverIcons.clearCovers),
                           onPressed: () async {
                             await ref
                                 .read(clearCoversProvider.notifier)
@@ -101,7 +101,7 @@ class DataManagementSettings extends ConsumerWidget {
                         DatabaseClearOperationButton(
                           asyncValue: ref.watch(clearDatabaseProvider),
                           text: l.clearDatabase,
-                          icon: const Icon(LucideIcons.trash),
+                          icon: const Icon(KoverIcons.trash),
                           onPressed: () async {
                             final confirmed = await showDialog<bool>(
                               context: context,
@@ -214,7 +214,7 @@ class DatabaseClearOperationButton extends ConsumerWidget {
               onPressed();
             },
             icon: Icon(
-              LucideIcons.circleX,
+              KoverIcons.error,
               color: Theme.of(context).colorScheme.error,
             ),
             label: Text(text),

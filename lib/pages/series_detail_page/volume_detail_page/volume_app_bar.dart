@@ -1,5 +1,6 @@
 import 'package:kover/pages/series_detail_page/volume_detail_page/volume_app_bar_provider.dart';
 import 'package:kover/riverpod/providers/breakpoints.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/volume_model.dart';
@@ -16,7 +17,6 @@ import 'package:kover/widgets/details/detail_app_bar.dart';
 import 'package:kover/widgets/details/info_widgets.dart';
 import 'package:kover/widgets/details/metadata_sections.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class VolumeAppBar extends ConsumerWidget {
   final int volumeId;
@@ -88,7 +88,7 @@ class VolumeAppBar extends ConsumerWidget {
                         .deleteVolume(data.id);
                   }
                 : null,
-            child: const Icon(LucideIcons.ellipsisVertical),
+            child: const Icon(KoverIcons.contextMenu),
           ),
         ],
       ),

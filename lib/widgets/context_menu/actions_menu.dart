@@ -4,7 +4,6 @@ import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/extensions/iterable.dart';
 import 'package:kover/widgets/context_menu/context_menu_button.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ActionsContextMenu extends StatelessWidget {
   final VoidCallback? onMarkRead;
@@ -174,13 +173,13 @@ List<ContextMenuEntry> _wantToReadEntries({
     if (onAddWantToRead != null)
       MenuItem(
         label: Text(l.addToWantToRead),
-        icon: const Icon(LucideIcons.star),
+        icon: const Icon(KoverIcons.wantToRead),
         onSelected: (_) => onAddWantToRead(),
       ),
     if (onRemoveWantToRead != null)
       MenuItem(
         label: Text(l.removeFromWantToRead),
-        icon: const Icon(LucideIcons.starOff),
+        icon: const Icon(KoverIcons.removeWantToRead),
         onSelected: (_) => onRemoveWantToRead(),
       ),
   ];
@@ -196,13 +195,13 @@ List<ContextMenuEntry> _markReadEntries({
     if (onMarkRead != null)
       MenuItem(
         label: Text(l.markAsRead),
-        icon: const Icon(LucideIcons.bookCheck),
+        icon: const Icon(KoverIcons.markRead),
         onSelected: (_) => onMarkRead(),
       ),
     if (onMarkUnread != null)
       MenuItem(
         label: Text(l.markAsUnread),
-        icon: const Icon(LucideIcons.bookX),
+        icon: const Icon(KoverIcons.markUnread),
         onSelected: (_) => onMarkUnread(),
       ),
   ];
@@ -218,13 +217,13 @@ List<ContextMenuEntry> _downloadEntries({
     if (onDownload != null)
       MenuItem(
         label: Text(l.download),
-        icon: const Icon(LucideIcons.download),
+        icon: const Icon(KoverIcons.download),
         onSelected: (_) => onDownload(),
       ),
     if (onRemoveDownload != null)
       MenuItem(
         label: Text(l.removeDownload),
-        icon: const Icon(LucideIcons.trash2),
+        icon: const Icon(KoverIcons.trash),
         onSelected: (_) => onRemoveDownload(),
       ),
   ];
@@ -240,13 +239,13 @@ List<ContextMenuEntry> _refreshEntries({
     if (onRefreshMetadata != null)
       MenuItem(
         label: Text(l.refreshMetadata),
-        icon: const Icon(LucideIcons.fileBracesCorner),
+        icon: const Icon(KoverIcons.metadata),
         onSelected: (_) => onRefreshMetadata(),
       ),
     if (onRefreshCovers != null)
       MenuItem(
         label: Text(l.refreshCovers),
-        icon: const Icon(LucideIcons.imageDown),
+        icon: const Icon(KoverIcons.refreshCovers),
         onSelected: (_) => onRefreshCovers(),
       ),
   ];

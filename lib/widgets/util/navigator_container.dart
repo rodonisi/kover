@@ -13,7 +13,6 @@ import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/monitoring_opt_out_popup.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class NavigatorContainer extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
@@ -168,7 +167,7 @@ class _CompactNavigationShell extends ConsumerWidget {
                         );
                       }),
                       NavigationDestination(
-                        icon: const Icon(LucideIcons.library),
+                        icon: const Icon(KoverIcons.library),
                         label: l.menu,
                       ),
                     ],
@@ -235,7 +234,7 @@ class _ExpandedNavigationLayout extends HookWidget {
                 );
               }),
               NavigationRailDestination(
-                icon: const Icon(LucideIcons.library),
+                icon: const Icon(KoverIcons.library),
                 label: Text(AppLocalizations.of(context).menu),
               ),
             ],

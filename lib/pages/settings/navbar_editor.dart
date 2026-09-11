@@ -142,7 +142,7 @@ class _NavbarEditorSheet extends ConsumerWidget {
                         return _NavbarEntry(
                           destination: destination,
                           trailing: IconButton(
-                            icon: const Icon(Icons.add_rounded),
+                            icon: const Icon(KoverIcons.add),
                             onPressed: () async {
                               final updatedShown = [
                                 ...destinations,
