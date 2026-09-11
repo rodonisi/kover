@@ -8,7 +8,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'reading_list_card_provider.freezed.dart';
 part 'reading_list_card_provider.g.dart';
 
-
 @freezed
 class ReadingListCardModel({
   required final ReadingListModel readingList,
