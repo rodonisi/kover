@@ -8,7 +8,6 @@ import 'package:kover/pages/reader/image_reader/image_measure_root.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
-import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/utils/headless_measure_pipeline.dart';
 import 'package:kover/utils/logging.dart';
@@ -313,28 +312,14 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
 
   Future<void> nextPage() async {
     final current = await future;
-    final settings = await ref.read(
-      commonReaderSettingsProvider(seriesId: seriesId).future,
-    );
 
-    final nextSpread = settings.readDirection == .leftToRight
-        ? current.currentSpread + 1
-        : current.currentSpread - 1;
-
-    await jumpToSpread(nextSpread);
+    await jumpToSpread(current.currentSpread + 1);
   }
 
   Future<void> previousPage() async {
     final current = await future;
-    final settings = await ref.read(
-      commonReaderSettingsProvider(seriesId: seriesId).future,
-    );
 
-    final nextSpread = settings.readDirection == .leftToRight
-        ? current.currentSpread - 1
-        : current.currentSpread + 1;
-
-    await jumpToSpread(nextSpread);
+    await jumpToSpread(current.currentSpread - 1);
   }
 
   Future<void> jumpToPage(int page) async {

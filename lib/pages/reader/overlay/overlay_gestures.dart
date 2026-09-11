@@ -1,6 +1,8 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
+import 'package:kover/mapping/enums/read_direction.dart';
+import 'package:kover/pages/reader/overlay/overlay_gestures_provider.dart';
+import 'package:kover/widgets/util/async_value.dart';
+import 'package:material_ui/material_ui.dart';
 
 class OverlayGestures extends ConsumerWidget {
   final int seriesId;
@@ -8,7 +10,6 @@ class OverlayGestures extends ConsumerWidget {
   final VoidCallback? onLeftTap;
   final VoidCallback? onRightTap;
   final bool disableGestures;
-  final Widget? child;
 
   const OverlayGestures({
     super.key,
@@ -17,48 +18,47 @@ class OverlayGestures extends ConsumerWidget {
     this.onLeftTap,
     this.onRightTap,
     this.disableGestures = false,
-    this.child,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final navigationGestures = ref.watch(
-      commonReaderSettingsProvider(
-        seriesId: seriesId,
-      ).select(
-        (value) =>
-            value.whenOrNull(
-              data: (data) => data.navigationGersturesEnabled,
-            ) ??
-            const CommonReaderSettingsState().navigationGersturesEnabled,
-      ),
-    );
+    final model = ref.watch(overlayGesturesProvider(seriesId: seriesId));
 
     return IgnorePointer(
       ignoring: disableGestures,
-      child: Row(
-        children: [
-          if (navigationGestures)
-            Flexible(
-              flex: 1,
-              child: GestureDetector(
-                behavior: .translucent,
-                onTap: onLeftTap,
+      child: Async(
+        asyncValue: model,
+        data: (data) {
+          return Row(
+            textDirection: data.readDirection.toTextDirection(),
+            children: [
+              if (data.navigationGestures)
+                Flexible(
+                  flex: 1,
+                  child: GestureDetector(
+                    behavior: .translucent,
+                    onTap: onLeftTap,
+                  ),
+                ),
+              Flexible(
+                flex: 2,
+                child: GestureDetector(
+                  behavior: .translucent,
+                  onTap: onCenterTap,
+                ),
               ),
-            ),
-          Flexible(
-            flex: 2,
-            child: GestureDetector(behavior: .translucent, onTap: onCenterTap),
-          ),
-          if (navigationGestures)
-            Flexible(
-              flex: 1,
-              child: GestureDetector(
-                behavior: .translucent,
-                onTap: onRightTap,
-              ),
-            ),
-        ],
+              if (data.navigationGestures)
+                Flexible(
+                  flex: 1,
+                  child: GestureDetector(
+                    behavior: .translucent,
+                    onTap: onRightTap,
+                  ),
+                ),
+            ],
+          );
+        },
+        loading: () => const SizedBox.shrink(),
       ),
     );
   }

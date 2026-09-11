@@ -1,5 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/mapping/enums/read_direction.dart';
 import 'package:kover/pages/reader/image_reader/horizontal_spreads_reader_provider.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/book.dart';
@@ -177,68 +178,70 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
                 !data.reduceAnimations
             ? null
             : const NeverScrollableScrollPhysics();
-        return PageView.builder(
-          controller: controller,
-          allowImplicitScrolling: true,
-          scrollDirection: .horizontal,
-          reverse: data.commonSettings.readDirection == .rightToLeft,
-          itemCount: data.spreads.spreads.length,
-          pageSnapping: true,
-          physics: scrollPhysics,
-          onPageChanged: (spreadIndex) {
-            ref.read(navProvider.notifier).jumpToSpread(spreadIndex);
-          },
-          itemBuilder: (context, spreadIndex) {
-            final spread = data.spreads.spreads[spreadIndex];
+        return Directionality(
+          textDirection: data.commonSettings.readDirection.toTextDirection(),
+          child: PageView.builder(
+            controller: controller,
+            allowImplicitScrolling: true,
+            scrollDirection: .horizontal,
+            itemCount: data.spreads.spreads.length,
+            pageSnapping: true,
+            physics: scrollPhysics,
+            onPageChanged: (spreadIndex) {
+              ref.read(navProvider.notifier).jumpToSpread(spreadIndex);
+            },
+            itemBuilder: (context, spreadIndex) {
+              final spread = data.spreads.spreads[spreadIndex];
 
-            return Row(
-              textDirection: data.commonSettings.readDirection == .rightToLeft
-                  ? .rtl
-                  : .ltr,
-              children: spread
-                  .map<Widget>((page) {
-                    Alignment alignment;
+              return Row(
+                textDirection: data.commonSettings.readDirection == .rightToLeft
+                    ? .rtl
+                    : .ltr,
+                children: spread
+                    .map<Widget>((page) {
+                      Alignment alignment;
 
-                    if (spread.length == 1) {
-                      alignment = .center;
-                    } else if (data.commonSettings.readDirection ==
-                        .rightToLeft) {
-                      alignment = page == spread.first
-                          ? .centerLeft
-                          : .centerRight;
-                    } else {
-                      alignment = page == spread.first
-                          ? .centerRight
-                          : .centerLeft;
-                    }
+                      if (spread.length == 1) {
+                        alignment = .center;
+                      } else if (data.commonSettings.readDirection ==
+                          .rightToLeft) {
+                        alignment = page == spread.first
+                            ? .centerLeft
+                            : .centerRight;
+                      } else {
+                        alignment = page == spread.first
+                            ? .centerRight
+                            : .centerLeft;
+                      }
 
-                    final width =
-                        (MediaQuery.of(context).size.width *
-                                MediaQuery.of(context).devicePixelRatio)
-                            .toInt();
+                      final width =
+                          (MediaQuery.of(context).size.width *
+                                  MediaQuery.of(context).devicePixelRatio)
+                              .toInt();
 
-                    final imageCacheWidth = spread.length == 1
-                        ? width
-                        : width ~/ 2;
+                      final imageCacheWidth = spread.length == 1
+                          ? width
+                          : width ~/ 2;
 
-                    return Expanded(
-                      child: _RenderPage(
-                        chapterId: chapterId,
-                        seriesId: seriesId,
-                        page: page,
-                        alignment: alignment,
-                        imageCacheWidth: imageCacheWidth,
+                      return Expanded(
+                        child: _RenderPage(
+                          chapterId: chapterId,
+                          seriesId: seriesId,
+                          page: page,
+                          alignment: alignment,
+                          imageCacheWidth: imageCacheWidth,
+                        ),
+                      );
+                    })
+                    .interleave(
+                      SizedBox.square(
+                        dimension: data.settings.spreadReaderGap,
                       ),
-                    );
-                  })
-                  .interleave(
-                    SizedBox.square(
-                      dimension: data.settings.spreadReaderGap,
-                    ),
-                  )
-                  .toList(),
-            );
-          },
+                    )
+                    .toList(),
+              );
+            },
+          ),
         );
       },
     );

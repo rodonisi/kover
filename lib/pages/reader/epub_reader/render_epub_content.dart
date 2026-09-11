@@ -47,77 +47,82 @@ class RenderEpubContent extends ConsumerWidget {
               horizontal: data.epubSettings.marginSize,
               vertical: verticalPadding ? data.epubSettings.marginSize : 0,
             ),
-            child: HtmlWidget(
-              html,
-              buildAsync: false,
-              enableCaching: true,
-              factoryBuilder: () => imageCache ?? CachedImageFactory(),
-              customStylesBuilder: (element) {
-                final s = Map<String, String>.from(
-                  mergedStyles[element.localName] ?? {},
-                );
+            child: Directionality(
+              textDirection: WidgetsLocalizations.of(context).textDirection,
+              child: HtmlWidget(
+                html,
+                buildAsync: false,
+                enableCaching: true,
+                factoryBuilder: () => imageCache ?? CachedImageFactory(),
+                customStylesBuilder: (element) {
+                  final s = Map<String, String>.from(
+                    mergedStyles[element.localName] ?? {},
+                  );
 
-                for (final className in element.classes) {
-                  s.addAll(mergedStyles['.$className'] ?? {});
-                }
-
-                final considerLast =
-                    !verticalPadding || element.nextElementSibling != null;
-
-                final isSplit = element.attributes.containsKey(
-                  HtmlConstants.splitParagraphAttribute,
-                );
-
-                final fontOverride = data.epubSettings.fontFamily;
-                if (fontOverride != null) {
-                  final fontFamily = 'font-family: "$fontOverride"';
-                  element.attributes['style'] =
-                      '${element.attributes['style']}; $fontFamily';
-                }
-
-                if (element.localName == 'p') {
-                  final styles = [?element.attributes['style']];
-
-                  final alignment = switch (data.epubSettings.textAlignment) {
-                    EpubTextAlignment.left => 'left',
-                    EpubTextAlignment.center => 'center',
-                    EpubTextAlignment.right => 'right',
-                    EpubTextAlignment.justify => 'justify',
-                  };
-                  styles.add('text-align: $alignment');
-
-                  if (considerLast && !isSplit) {
-                    styles.add(
-                      'margin-bottom: ${data.epubSettings.paragraphSpacing}em',
-                    );
+                  for (final className in element.classes) {
+                    s.addAll(mergedStyles['.$className'] ?? {});
                   }
 
-                  element.attributes['style'] = styles.whereType<String>().join(
-                    '; ',
+                  final considerLast =
+                      !verticalPadding || element.nextElementSibling != null;
+
+                  final isSplit = element.attributes.containsKey(
+                    HtmlConstants.splitParagraphAttribute,
                   );
-                }
 
-                if (data.epubSettings.removeParagraphIndent &&
-                    element.attributes.containsKey(
-                      HtmlConstants.textIndentSpanAttribute,
-                    )) {
-                  final textIndent = 'width: 0';
-                  element.attributes['style'] =
-                      '${element.attributes['style']}; $textIndent';
-                }
+                  final fontOverride = data.epubSettings.fontFamily;
+                  if (fontOverride != null) {
+                    final fontFamily = 'font-family: "$fontOverride"';
+                    element.attributes['style'] =
+                        '${element.attributes['style']}; $fontFamily';
+                  }
 
-                return s;
-              },
-              textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: data.epubSettings.fontSize,
-                height: data.epubSettings.lineHeight,
-                wordSpacing: data.epubSettings.wordSpacing,
-                letterSpacing: data.epubSettings.letterSpacing,
+                  if (element.localName == 'p') {
+                    final styles = [?element.attributes['style']];
+
+                    final alignment = switch (data.epubSettings.textAlignment) {
+                      EpubTextAlignment.left => 'left',
+                      EpubTextAlignment.center => 'center',
+                      EpubTextAlignment.right => 'right',
+                      EpubTextAlignment.justify => 'justify',
+                    };
+                    styles.add('text-align: $alignment');
+
+                    if (considerLast && !isSplit) {
+                      styles.add(
+                        'margin-bottom: ${data.epubSettings.paragraphSpacing}em',
+                      );
+                    }
+
+                    element.attributes['style'] = styles
+                        .whereType<String>()
+                        .join(
+                          '; ',
+                        );
+                  }
+
+                  if (data.epubSettings.removeParagraphIndent &&
+                      element.attributes.containsKey(
+                        HtmlConstants.textIndentSpanAttribute,
+                      )) {
+                    final textIndent = 'width: 0';
+                    element.attributes['style'] =
+                        '${element.attributes['style']}; $textIndent';
+                  }
+
+                  return s;
+                },
+                textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: data.epubSettings.fontSize,
+                  height: data.epubSettings.lineHeight,
+                  wordSpacing: data.epubSettings.wordSpacing,
+                  letterSpacing: data.epubSettings.letterSpacing,
+                ),
+                rebuildTriggers: [
+                  mergedStyles.toString(),
+                  data.epubSettings,
+                ],
               ),
-              rebuildTriggers: [
-                mergedStyles.toString(),
-                data.epubSettings,
-              ],
             ),
           ),
         );

@@ -1,5 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/mapping/enums/read_direction.dart';
 import 'package:kover/pages/reader/image_reader/horizontal_paged_reader_provider.dart';
 import 'package:kover/pages/reader/image_reader/zoomable_horizontal_page_image.dart';
 import 'package:kover/riverpod/providers/book.dart';
@@ -83,55 +84,59 @@ class HorizontalPagedReader extends HookConsumerWidget {
                 ? enabledScrollPhysics
                 : const NeverScrollableScrollPhysics();
 
-            final content = PageView.builder(
-              controller: pageController,
-              allowImplicitScrolling: true,
-              scrollDirection: .horizontal,
-              reverse: data.commonSettings.readDirection == .rightToLeft,
-              itemCount: data.reader.totalPages,
-              pageSnapping: true,
-              physics: scrollPhysics,
-              onPageChanged: (index) {
-                ref.read(navProvider.notifier).jumpToPage(index);
-              },
-              itemBuilder: (context, index) {
-                return Async(
-                  asyncValue: ref.watch(
-                    imagePageProvider(
-                      chapterId: chapterId,
-                      page: index,
-                    ),
-                  ),
-                  data: (page) {
-                    return ZoomableHorizontalPageImage(
-                      key: ValueKey(index),
-                      outerController: pageController,
-                      onZoomChanged: (zoomed) {
-                        if (zoomedPageIndexes.value.contains(index) == zoomed) {
-                          return;
-                        }
-
-                        final nextZoomedPageIndexes = {
-                          ...zoomedPageIndexes.value,
-                        };
-
-                        zoomed
-                            ? nextZoomedPageIndexes.add(index)
-                            : nextZoomedPageIndexes.remove(index);
-                        zoomedPageIndexes.value = nextZoomedPageIndexes;
-                      },
-                      child: Image.memory(
-                        page.data,
-                        fit: switch (data.settings.scaleType) {
-                          .contain => .contain,
-                          .fitWidth => .fitWidth,
-                          .fitHeight => .fitHeight,
-                        },
+            final content = Directionality(
+              textDirection: data.commonSettings.readDirection
+                  .toTextDirection(),
+              child: PageView.builder(
+                controller: pageController,
+                allowImplicitScrolling: true,
+                scrollDirection: .horizontal,
+                itemCount: data.reader.totalPages,
+                pageSnapping: true,
+                physics: scrollPhysics,
+                onPageChanged: (index) {
+                  ref.read(navProvider.notifier).jumpToPage(index);
+                },
+                itemBuilder: (context, index) {
+                  return Async(
+                    asyncValue: ref.watch(
+                      imagePageProvider(
+                        chapterId: chapterId,
+                        page: index,
                       ),
-                    );
-                  },
-                );
-              },
+                    ),
+                    data: (page) {
+                      return ZoomableHorizontalPageImage(
+                        key: ValueKey(index),
+                        outerController: pageController,
+                        onZoomChanged: (zoomed) {
+                          if (zoomedPageIndexes.value.contains(index) ==
+                              zoomed) {
+                            return;
+                          }
+
+                          final nextZoomedPageIndexes = {
+                            ...zoomedPageIndexes.value,
+                          };
+
+                          zoomed
+                              ? nextZoomedPageIndexes.add(index)
+                              : nextZoomedPageIndexes.remove(index);
+                          zoomedPageIndexes.value = nextZoomedPageIndexes;
+                        },
+                        child: Image.memory(
+                          page.data,
+                          fit: switch (data.settings.scaleType) {
+                            .contain => .contain,
+                            .fitWidth => .fitWidth,
+                            .fitHeight => .fitHeight,
+                          },
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             );
 
             final listenedContent = Listener(
