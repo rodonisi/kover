@@ -1,20 +1,17 @@
 import 'dart:math';
 
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/read_direction.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
+import 'package:kover/pages/reader/pdf_reader/pdf_reader_provider.dart';
 import 'package:kover/pages/reader/pdf_reader/pdf_toc_drawer.dart';
 import 'package:kover/riverpod/providers/book.dart';
-import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
-import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
-import 'package:kover/riverpod/providers/settings/pdf_reader_settings.dart';
-import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 class PdfControllerHook extends Hook<PdfViewerController> {
@@ -65,28 +62,14 @@ class PdfReader extends HookConsumerWidget {
       chapterId: chapterId,
     );
 
-    final reader = ref.watch(
-      readerProvider(
+    final model = ref.watch(
+      pdfReaderProvider(
         seriesId: seriesId,
         chapterId: chapterId,
         readingListId: readingListId,
       ),
     );
-    final settings = ref.watch(
-      pdfReaderSettingsProvider(seriesId: seriesId),
-    );
-    final commonSettings = ref.watch(
-      commonReaderSettingsProvider(seriesId: seriesId),
-    );
-    final reduceAnimations = ref.watch(
-      themeProvider.select(
-        (value) =>
-            value.whenOrNull(
-              data: (data) => data.reduceAnimations,
-            ) ??
-            const ThemeModel().reduceAnimations,
-      ),
-    );
+
     final pdf = ref.watch(pdfProvider(chapterId: chapterId));
 
     ref.listen(navProvider, (previous, next) async {
@@ -97,7 +80,7 @@ class PdfReader extends HookConsumerWidget {
           lastUpdateFromProvider.value = true;
           await controller.goToPage(
             pageNumber: next.currentPage + 1,
-            duration: reduceAnimations
+            duration: model.value?.reduceAnimations ?? false
                 ? .zero
                 : LayoutConstants.pageSlideDuration,
           );
@@ -105,25 +88,23 @@ class PdfReader extends HookConsumerWidget {
       });
     });
 
-    return Async3(
-      asyncValue1: reader,
-      asyncValue2: settings,
-      asyncValue3: commonSettings,
-      data: (readerState, settings, commonSettings) {
+    return Async(
+      asyncValue: model,
+      data: (data) {
         return ReaderOverlay(
           chapterId: chapterId,
           seriesId: seriesId,
           readingListId: readingListId,
           disableGestures: hasSelection.value,
           onNextPage: () {
-            if (commonSettings.readDirection == .leftToRight) {
+            if (data.commonSettings.readDirection == .leftToRight) {
               ref.read(navProvider.notifier).nextPage();
             } else {
               ref.read(navProvider.notifier).previousPage();
             }
           },
           onPreviousPage: () {
-            if (commonSettings.readDirection == .leftToRight) {
+            if (data.commonSettings.readDirection == .leftToRight) {
               ref.read(navProvider.notifier).previousPage();
             } else {
               ref.read(navProvider.notifier).nextPage();
@@ -146,23 +127,23 @@ class PdfReader extends HookConsumerWidget {
           ),
           child: Async(
             asyncValue: pdf,
-            data: (data) {
+            data: (pdf) {
               final scrollPhysics =
-                  (commonSettings.navigationGersturesEnabled &&
-                          !reduceAnimations) ||
-                      settings.readerMode == .vertical
+                  (data.commonSettings.navigationGersturesEnabled &&
+                          !data.reduceAnimations) ||
+                      data.settings.readerMode == .vertical
                   ? null
                   : const NeverScrollableScrollPhysics();
               final content = PdfViewer.data(
-                data.data,
+                pdf.data,
                 controller: controller,
                 sourceName: chapterId.toString(),
-                initialPageNumber: readerState.initialPage + 1,
+                initialPageNumber: data.reader.initialPage + 1,
                 params: PdfViewerParams(
                   scrollPhysics: scrollPhysics,
                   panAxis:
-                      settings.lockHorizontalPan &&
-                          settings.readerMode == .vertical
+                      data.settings.lockHorizontalPan &&
+                          data.settings.readerMode == .vertical
                       ? .vertical
                       : .free,
                   textSelectionParams: PdfTextSelectionParams(
@@ -185,11 +166,11 @@ class PdfReader extends HookConsumerWidget {
                     // alwo fires an event with the same page, while the next ones
                     // go back by layout order.
                     final int navIndex;
-                    if (commonSettings.readDirection == .rightToLeft &&
-                        settings.readerMode == .horizontal) {
+                    if (data.commonSettings.readDirection == .rightToLeft &&
+                        data.settings.readerMode == .horizontal) {
                       navIndex = lastUpdateFromProvider.value
                           ? page - 1
-                          : (readerState.totalPages - page - 1);
+                          : (data.reader.totalPages - page - 1);
                     } else {
                       navIndex = page - 1;
                     }
@@ -200,18 +181,18 @@ class PdfReader extends HookConsumerWidget {
 
                     lastUpdateFromProvider.value = false;
                   },
-                  layoutPages: switch (settings.readerMode) {
+                  layoutPages: switch (data.settings.readerMode) {
                     .vertical => null,
                     .horizontal => (pages, params) => horizontalLayout(
                       pages,
                       params,
-                      commonSettings.readDirection,
+                      data.commonSettings.readDirection,
                     ),
                   },
                 ),
               );
 
-              if (settings.ignoreSafeAreas) {
+              if (data.settings.ignoreSafeAreas) {
                 return content;
               }
 

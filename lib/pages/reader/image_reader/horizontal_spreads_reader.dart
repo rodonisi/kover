@@ -1,15 +1,13 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/pages/reader/image_reader/horizontal_spreads_reader_provider.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/image_spreads_reader.dart';
-import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
-import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
-import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/utils/extensions/iterable.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
+import 'package:material_ui/material_ui.dart';
 
 class HorizontalSpreadsReader extends HookConsumerWidget {
   final int seriesId;
@@ -67,17 +65,16 @@ class _SpreadsContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final nav = ref.watch(
-      imageSpreadsReaderNavigationProvider(
+    final model = ref.watch(
+      horizontalSpreadsReaderProvider(
         seriesId: seriesId,
         chapterId: chapterId,
       ),
     );
-    final settings = ref.watch(imageReaderSettingsProvider(seriesId: seriesId));
-    return Async2(
-      asyncValue1: nav,
-      asyncValue2: settings,
-      data: (navState, settings) {
+
+    return Async(
+      asyncValue: model,
+      data: (data) {
         return LayoutBuilder(
           builder: (context, constraints) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -97,7 +94,7 @@ class _SpreadsContent extends ConsumerWidget {
                   );
             });
 
-            if (!navState.ready) {
+            if (!data.navState.ready) {
               return const Center(
                 child: CircularProgressIndicator(),
               );
@@ -106,10 +103,10 @@ class _SpreadsContent extends ConsumerWidget {
             final content = _ImageSpreadsReaderContent(
               seriesId: seriesId,
               chapterId: chapterId,
-              initialSpread: navState.currentSpread,
+              initialSpread: data.navState.currentSpread,
             );
 
-            if (settings.ignoreSafeAreas) {
+            if (data.ignoreSafeAreas) {
               return content;
             }
 
@@ -143,22 +140,10 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
       chapterId: chapterId,
     );
 
-    final settings = ref.watch(
-      imageReaderSettingsProvider(seriesId: seriesId),
-    );
-    final commonSettings = ref.watch(
-      commonReaderSettingsProvider(seriesId: seriesId),
-    );
-    final spreads = ref.watch(
-      spreadsProvider(seriesId: seriesId, chapterId: chapterId),
-    );
-    final reduceAnimations = ref.watch(
-      themeProvider.select(
-        (value) =>
-            value.whenOrNull(
-              data: (data) => data.reduceAnimations,
-            ) ??
-            const ThemeModel().reduceAnimations,
+    final model = ref.watch(
+      horizontalSpreadsReaderContentProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
       ),
     );
 
@@ -173,7 +158,7 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
               prev.hasValue &&
               (next.currentSpread - prev.value!.currentSpread).abs() == 1;
 
-          isSequential && !reduceAnimations
+          isSequential && !(model.value?.reduceAnimations ?? false)
               ? controller.animateToPage(
                   next.currentSpread,
                   duration: LayoutConstants.pageSlideDuration,
@@ -184,31 +169,30 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
       });
     });
 
-    return Async3(
-      asyncValue1: settings,
-      asyncValue2: commonSettings,
-      asyncValue3: spreads,
-      data: (settings, commonSettings, spreads) {
+    return Async(
+      asyncValue: model,
+      data: (data) {
         final scrollPhysics =
-            commonSettings.navigationGersturesEnabled && !reduceAnimations
+            data.commonSettings.navigationGersturesEnabled &&
+                !data.reduceAnimations
             ? null
             : const NeverScrollableScrollPhysics();
         return PageView.builder(
           controller: controller,
           allowImplicitScrolling: true,
           scrollDirection: .horizontal,
-          reverse: commonSettings.readDirection == .rightToLeft,
-          itemCount: spreads.spreads.length,
+          reverse: data.commonSettings.readDirection == .rightToLeft,
+          itemCount: data.spreads.spreads.length,
           pageSnapping: true,
           physics: scrollPhysics,
           onPageChanged: (spreadIndex) {
             ref.read(navProvider.notifier).jumpToSpread(spreadIndex);
           },
           itemBuilder: (context, spreadIndex) {
-            final spread = spreads.spreads[spreadIndex];
+            final spread = data.spreads.spreads[spreadIndex];
 
             return Row(
-              textDirection: commonSettings.readDirection == .rightToLeft
+              textDirection: data.commonSettings.readDirection == .rightToLeft
                   ? .rtl
                   : .ltr,
               children: spread
@@ -217,7 +201,8 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
 
                     if (spread.length == 1) {
                       alignment = .center;
-                    } else if (commonSettings.readDirection == .rightToLeft) {
+                    } else if (data.commonSettings.readDirection ==
+                        .rightToLeft) {
                       alignment = page == spread.first
                           ? .centerLeft
                           : .centerRight;
@@ -248,7 +233,7 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
                   })
                   .interleave(
                     SizedBox.square(
-                      dimension: settings.spreadReaderGap,
+                      dimension: data.settings.spreadReaderGap,
                     ),
                   )
                   .toList(),

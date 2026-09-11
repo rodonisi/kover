@@ -1,4 +1,3 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -7,16 +6,16 @@ import 'package:kover/pages/reader/overlay/chapter_snackbar.dart';
 import 'package:kover/pages/reader/overlay/overlay_gestures.dart';
 import 'package:kover/pages/reader/overlay/reader_controls.dart';
 import 'package:kover/pages/reader/overlay/reader_header.dart';
+import 'package:kover/pages/reader/overlay/reader_overlay_provider.dart';
 import 'package:kover/pages/reader/overlay/reader_progress.dart';
 import 'package:kover/pages/reader/overlay/reader_shortcuts.dart';
 import 'package:kover/riverpod/providers/reader.dart';
-import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/router.dart';
-import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:kover/widgets/util/async_value.dart';
+import 'package:material_ui/material_ui.dart';
 
 enum ShowSnackbar {
   previous,
@@ -60,28 +59,27 @@ class ReaderOverlay extends HookConsumerWidget {
     final uiVisible = useState(false);
     final snackbarDismissed = useState(false);
     final showSnackbar = useState(ShowSnackbar.none);
-    final provider = readerProvider(
-      seriesId: seriesId,
-      chapterId: chapterId,
-      readingListId: readingListId,
+
+    final model = ref.watch(
+      readerOverlayProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: readingListId,
+      ),
     );
 
-    final settings = ref.watch(
-      commonReaderSettingsProvider(seriesId: seriesId),
-    );
     final shouldShowSnackbar =
         showSnackbar.value != ShowSnackbar.none &&
         (!snackbarDismissed.value || uiVisible.value);
 
-    return Async2(
-      asyncValue1: ref.watch(provider),
-      asyncValue2: settings,
-      data: (state, settings) => Consumer(
+    return Async(
+      asyncValue: model,
+      data: (data) => Consumer(
         builder: (context, ref, _) {
           final prevChapter = ref.watch(
             prevChapterProvider(
               seriesId: seriesId,
-              volumeId: state.volumeId,
+              volumeId: data.reader.volumeId,
               chapterId: chapterId,
               readingListId: readingListId,
             ),
@@ -90,7 +88,7 @@ class ReaderOverlay extends HookConsumerWidget {
           final nextChapter = ref.watch(
             nextChapterProvider(
               seriesId: seriesId,
-              volumeId: state.volumeId,
+              volumeId: data.reader.volumeId,
               chapterId: chapterId,
               readingListId: readingListId,
             ),
@@ -120,7 +118,8 @@ class ReaderOverlay extends HookConsumerWidget {
                 if (next <= 0 && prevChapter.value != null) {
                   showSnackbar.value = .previous;
                 } else if (isLastPage?.call(next) ??
-                    next >= state.totalPages - 1 && nextChapter.value != null) {
+                    next >= data.reader.totalPages - 1 &&
+                        nextChapter.value != null) {
                   showSnackbar.value = .next;
                 } else {
                   showSnackbar.value = .none;
@@ -142,8 +141,8 @@ class ReaderOverlay extends HookConsumerWidget {
                       mainAxisSize: .min,
                       children: [
                         Expanded(child: child),
-                        if (settings.showProgressBar &&
-                            state.series.format == .epub)
+                        if (data.showProgressBar &&
+                            data.reader.series.format == .epub)
                           SubpageProgress(
                                 seriesId: seriesId,
                                 chapterId: chapterId,
@@ -152,7 +151,7 @@ class ReaderOverlay extends HookConsumerWidget {
                                 target: uiVisible.value ? 0.0 : 1.0,
                               )
                               .fadeIn(duration: progressFadeDuration)
-                        else if (settings.showProgressBar)
+                        else if (data.showProgressBar)
                           ReaderProgress(
                                 seriesId: seriesId,
                                 chapterId: chapterId,
@@ -179,6 +178,7 @@ class ReaderOverlay extends HookConsumerWidget {
                         ReaderHeader(
                               seriesId: seriesId,
                               chapterId: chapterId,
+                              readingListId: readingListId,
                               hasDrawer: endDrawer != null,
                             )
                             .animate(target: uiVisible.value ? 1.0 : 0.0)

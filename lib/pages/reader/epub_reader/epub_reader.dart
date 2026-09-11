@@ -2,14 +2,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/epub_reader/epub_horizontal_subpages.dart';
 import 'package:kover/pages/reader/epub_reader/epub_measure_root.dart';
+import 'package:kover/pages/reader/epub_reader/epub_reader_provider.dart';
 import 'package:kover/pages/reader/epub_reader/epub_theme_override.dart';
 import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
 import 'package:kover/pages/reader/epub_reader/epub_vertical_subpages.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
-import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
-import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
@@ -35,41 +34,24 @@ class EpubReader extends HookConsumerWidget {
       chapterId: chapterId,
     );
 
-    final commonSettings = ref.watch(
-      commonReaderSettingsProvider(seriesId: seriesId),
+    final model = ref.watch(
+      epubReaderProvider(seriesId: seriesId),
     );
 
-    final readerMode = ref.watch(
-      epubReaderSettingsProvider(seriesId: seriesId).select(
-        (state) => state.whenData((data) => data.mode),
-      ),
-    );
-
-    final reduceAnimations = ref.watch(
-      themeProvider.select(
-        (value) =>
-            value.whenOrNull(
-              data: (data) => data.reduceAnimations,
-            ) ??
-            const ThemeModel().reduceAnimations,
-      ),
-    );
-
-    return Async2(
-      asyncValue1: commonSettings,
-      asyncValue2: readerMode,
-      data: (commonSettings, readerMode) => ReaderOverlay(
+    return Async(
+      asyncValue: model,
+      data: (data) => ReaderOverlay(
         seriesId: seriesId,
         chapterId: chapterId,
         readingListId: readingListId,
         disableGestures: hasSelection.value,
         onNextPage: () {
-          commonSettings.readDirection == .leftToRight
+          data.commonSettings.readDirection == .leftToRight
               ? ref.read(nav.notifier).nextPage()
               : ref.read(nav.notifier).previousPage();
         },
         onPreviousPage: () {
-          commonSettings.readDirection == .leftToRight
+          data.commonSettings.readDirection == .leftToRight
               ? ref.read(nav.notifier).previousPage()
               : ref.read(nav.notifier).nextPage();
         },
@@ -106,7 +88,7 @@ class EpubReader extends HookConsumerWidget {
                           previousPage != null &&
                           (nextPage - previousPage).abs() == 1;
 
-                      isSequential && !reduceAnimations
+                      isSequential && !data.reduceAnimations
                           ? controller.animateToPage(
                               nextPage,
                               duration: LayoutConstants.pageSlideDuration,
@@ -128,14 +110,15 @@ class EpubReader extends HookConsumerWidget {
                           itemCount: navState.totalPages,
                           allowImplicitScrolling: true,
                           scrollCacheExtent: const .viewport(4),
-                          scrollDirection: switch (readerMode) {
+                          scrollDirection: switch (data.mode) {
                             .horizontal => .horizontal,
                             .vertical => .vertical,
                             .spreads => .horizontal,
                           },
                           reverse:
-                              commonSettings.readDirection == .rightToLeft &&
-                              readerMode != .vertical,
+                              data.commonSettings.readDirection ==
+                                  .rightToLeft &&
+                              data.mode != .vertical,
                           physics: const NeverScrollableScrollPhysics(),
                           onPageChanged: (newPage) {
                             ref.read(nav.notifier).jumpToPage(newPage);
@@ -146,10 +129,10 @@ class EpubReader extends HookConsumerWidget {
                               chapterId: chapterId,
                               page: index,
                               reverse:
-                                  commonSettings.readDirection ==
+                                  data.commonSettings.readDirection ==
                                       .rightToLeft &&
-                                  readerMode != .vertical,
-                              mode: readerMode,
+                                  data.mode != .vertical,
+                              mode: data.mode,
                               outerController: controller,
                               onSelectionChanged: (selected) {
                                 if (selected != hasSelection.value) {

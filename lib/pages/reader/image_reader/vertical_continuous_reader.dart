@@ -1,3 +1,4 @@
+import 'package:kover/pages/reader/image_reader/vertical_continuous_reader_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -31,10 +32,11 @@ class VerticalContinuousReader extends HookConsumerWidget {
       chapterId: chapterId,
     );
 
-    final nav = ref.watch(navProvider);
-
-    final settings = ref.watch(
-      imageReaderSettingsProvider(seriesId: seriesId),
+    final model = ref.watch(
+      verticalContinuousReaderProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+      ),
     );
 
     ref.listen(
@@ -55,10 +57,9 @@ class VerticalContinuousReader extends HookConsumerWidget {
       },
     );
 
-    return Async2(
-      asyncValue1: nav,
-      asyncValue2: settings,
-      data: (nav, settings) {
+    return Async(
+      asyncValue: model,
+      data: (data) {
         return HookConsumer(
           builder: (context, ref, _) {
             final scrollController = useScrollController();
@@ -67,7 +68,7 @@ class VerticalContinuousReader extends HookConsumerWidget {
             );
             final observerController = useSliverObserverController(
               controller: scrollController,
-              initialIndex: nav.currentPage,
+              initialIndex: data.navState.currentPage,
             );
 
             useEffect(() => gestureController.dispose, [gestureController]);
@@ -76,7 +77,7 @@ class VerticalContinuousReader extends HookConsumerWidget {
             void handleScrollEnd() {
               final pos = scrollController.position;
               if (pos.atEdge && pos.pixels >= pos.maxScrollExtent) {
-                final lastIndex = nav.totalPages - 1;
+                final lastIndex = data.navState.totalPages - 1;
                 final navProvider = readerNavigationProvider(
                   seriesId: seriesId,
                   chapterId: chapterId,
@@ -126,7 +127,7 @@ class VerticalContinuousReader extends HookConsumerWidget {
             final content = ZoomableVerticalScrollView(
               scrollController: scrollController,
               gestureController: gestureController,
-              lockHorizontalPan: settings.lockHorizontalPan,
+              lockHorizontalPan: data.settings.lockHorizontalPan,
               child: SliverViewObserver(
                 controller: observerController,
                 onObserve: (ObserveModel model) {
@@ -136,11 +137,14 @@ class VerticalContinuousReader extends HookConsumerWidget {
                   if (firstVisibleIndex == null) return;
 
                   if (model.displayingChildIndexList.contains(
-                    nav.totalPages - 1,
+                    data.navState.totalPages - 1,
                   )) {
                     ref
                         .read(navProvider.notifier)
-                        .jumpToPage(nav.totalPages - 1, fromObserver: true);
+                        .jumpToPage(
+                          data.navState.totalPages - 1,
+                          fromObserver: true,
+                        );
                     return;
                   }
 
@@ -161,11 +165,11 @@ class VerticalContinuousReader extends HookConsumerWidget {
                         return SliverSafeArea(
                           sliver: SliverPadding(
                             padding: EdgeInsets.symmetric(
-                              horizontal: settings.verticalReaderPadding,
+                              horizontal: data.settings.verticalReaderPadding,
                               vertical: gestureController.verticalScrollPadding,
                             ),
                             sliver: SliverList.separated(
-                              itemCount: nav.totalPages,
+                              itemCount: data.navState.totalPages,
                               itemBuilder: (context, index) =>
                                   _VerticalReaderItem(
                                     chapterId: chapterId,
@@ -173,7 +177,7 @@ class VerticalContinuousReader extends HookConsumerWidget {
                                     page: index,
                                   ),
                               separatorBuilder: (context, index) => SizedBox(
-                                height: settings.verticalReaderGap,
+                                height: data.settings.verticalReaderGap,
                               ),
                             ),
                           ),
@@ -197,17 +201,17 @@ class VerticalContinuousReader extends HookConsumerWidget {
                         ).notifier,
                       )
                       .measurePreviousPages(
-                        currentPage: nav.currentPage,
+                        currentPage: data.navState.currentPage,
                         viewport: constraints.biggest,
                         devicePixelRatio: MediaQuery.devicePixelRatioOf(
                           context,
                         ),
-                        horizontalPadding: settings.verticalReaderPadding,
+                        horizontalPadding: data.settings.verticalReaderPadding,
                         refreshRate: View.of(context).display.refreshRate,
                       );
                 });
 
-                if (settings.ignoreSafeAreas) {
+                if (data.settings.ignoreSafeAreas) {
                   return content;
                 }
 

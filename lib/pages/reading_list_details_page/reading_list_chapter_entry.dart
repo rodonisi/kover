@@ -71,6 +71,7 @@ class ReadingListChapterEntry extends ConsumerWidget {
           ),
         );
       },
+      loading: () => const CoverListEntryPlaceholder(),
     );
   }
 }

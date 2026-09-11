@@ -93,6 +93,24 @@ class ReaderPage extends HookConsumerWidget {
             },
           );
         },
+        error: (_, _) => Center(
+          child: Column(
+            mainAxisAlignment: .center,
+            crossAxisAlignment: .center,
+            spacing: LayoutConstants.mediumPadding,
+            children: [
+              Icon(
+                LucideIcons.circleX,
+                size: LayoutConstants.largeIcon,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              TextButton(
+                onPressed: () => context.pop(),
+                child: Text(l.back),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
