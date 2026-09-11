@@ -1,7 +1,7 @@
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class FilterInputField extends HookWidget {
   const FilterInputField({
@@ -19,13 +19,13 @@ class FilterInputField extends HookWidget {
       controller: controller,
       decoration: InputDecoration(
         hintText: l.filter,
-        prefixIcon: const Icon(LucideIcons.listFilter),
+        prefixIcon: const Icon(KoverIcons.filter),
         suffixIcon: controller.text.isNotEmpty
             ? IconButton(
                 onPressed: () {
                   controller.clear();
                 },
-                icon: const Icon(LucideIcons.x),
+                icon: const Icon(KoverIcons.clear),
               )
             : null,
       ),

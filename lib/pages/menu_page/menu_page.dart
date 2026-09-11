@@ -1,4 +1,5 @@
 import 'package:kover/pages/menu_page/sliver_hidden_destinations.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/widgets/util/sliver_adaptive_padding.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -14,7 +15,6 @@ import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/actions_app_bar/actions_app_bar.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class MenuPage extends ConsumerWidget {
   const MenuPage({super.key});
@@ -60,18 +60,18 @@ class MenuPage extends ConsumerWidget {
                         AppListTile(
                           title: l.downloadQueue,
                           icon: isDownloading
-                              ? const Icon(LucideIcons.refreshCw)
+                              ? const Icon(KoverIcons.downloading)
                                     .animate(
                                       onPlay: (controller) =>
                                           controller.repeat(),
                                     )
                                     .rotate(duration: 1500.ms)
-                              : const Icon(LucideIcons.download),
+                              : const Icon(KoverIcons.download),
                           onTap: () => const DownloadQueueRoute().push(context),
                         ),
                         AppListTile(
                           title: l.settings,
-                          icon: const Icon(LucideIcons.settings),
+                          icon: const Icon(KoverIcons.settings),
                           onTap: () => const SettingsRoute().push(context),
                         ),
                       ],

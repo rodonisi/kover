@@ -9,11 +9,11 @@ import 'package:kover/riverpod/providers/library.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/riverpod/providers/volume.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/cards/cover_image.dart';
 import 'package:kover/widgets/lists/cover_list_entry.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 class SearchButton extends HookConsumerWidget {
@@ -33,7 +33,7 @@ class SearchButton extends HookConsumerWidget {
           visualDensity: .compact,
         ),
         icon: const Icon(
-          LucideIcons.chevronLeft,
+          KoverIcons.chevronLeft,
           size: LayoutConstants.mediumIcon,
         ),
         onPressed: () => controller.closeView(null),
@@ -42,7 +42,7 @@ class SearchButton extends HookConsumerWidget {
         IconButton(
           style: IconButton.styleFrom(visualDensity: .compact),
           icon: const Icon(
-            LucideIcons.x,
+            KoverIcons.close,
             size: LayoutConstants.mediumIcon,
           ),
           onPressed: () => controller.clear(),
@@ -56,7 +56,7 @@ class SearchButton extends HookConsumerWidget {
             visualDensity: .compact,
           ),
           icon: const Icon(
-            LucideIcons.search,
+            KoverIcons.search,
             size: LayoutConstants.smallIcon,
           ),
           onPressed: () {
@@ -159,7 +159,7 @@ class SearchSeriesEntry extends ConsumerWidget {
       subtitle: libraryName,
       cover: SeriesCoverImage(seriesId: series.id),
       progress: progress.value,
-      trailing: const Icon(LucideIcons.chevronRight),
+      trailing: const Icon(KoverIcons.chevronRight),
       margin: EdgeInsets.zero,
       onTap: () {
         controller.closeView(null);
@@ -195,7 +195,7 @@ class SearchVolumeEntry extends ConsumerWidget {
         volumeId: volume.id,
       ),
       progress: progress.value,
-      trailing: const Icon(LucideIcons.chevronRight),
+      trailing: const Icon(KoverIcons.chevronRight),
       margin: EdgeInsets.zero,
       onTap: () {
         controller.closeView(null);
@@ -239,7 +239,7 @@ class SearchChapterEntry extends ConsumerWidget {
       subtitle: subtitle,
       cover: ChapterCoverImage(chapterId: chapter.id),
       progress: progress.value,
-      trailing: const Icon(LucideIcons.chevronRight),
+      trailing: const Icon(KoverIcons.chevronRight),
       margin: EdgeInsets.zero,
       onTap: () {
         controller.closeView(null);

@@ -1,3 +1,4 @@
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
@@ -9,7 +10,6 @@ import 'package:kover/riverpod/providers/reader//reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/utils/layout_constants.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ReaderControls extends HookConsumerWidget {
   final int seriesId;
@@ -100,7 +100,7 @@ class ReaderSettingsButton extends ConsumerWidget {
         : null;
 
     return IconButton(
-      icon: const Icon(LucideIcons.slidersHorizontal),
+      icon: const Icon(KoverIcons.readerSettings),
       tooltip: l.readerSettings,
       onPressed: () {
         showModalBottomSheet(

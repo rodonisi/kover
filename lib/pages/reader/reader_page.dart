@@ -1,3 +1,4 @@
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -12,7 +13,6 @@ import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ReaderPage extends HookConsumerWidget {
   final int seriesId;
@@ -74,7 +74,7 @@ class ReaderPage extends HookConsumerWidget {
                   spacing: LayoutConstants.mediumPadding,
                   children: [
                     Icon(
-                      LucideIcons.circleX,
+                      KoverIcons.error,
                       size: LayoutConstants.largeIcon,
                       color: Theme.of(context).colorScheme.error,
                     ),
@@ -100,7 +100,7 @@ class ReaderPage extends HookConsumerWidget {
             spacing: LayoutConstants.mediumPadding,
             children: [
               Icon(
-                LucideIcons.circleX,
+                KoverIcons.error,
                 size: LayoutConstants.largeIcon,
                 color: Theme.of(context).colorScheme.error,
               ),

@@ -53,7 +53,7 @@ class _Keybinds extends ConsumerWidget {
           children: [
             KeybindOption(
               title: l.keybindNextPage,
-              icon: KoverIcons.readingDirectionLTR,
+              icon: KoverIcons.chevronRight,
               value: data.nextPage,
               defaultValue: KeybindsSettingsState.defaultNextPage,
               onChanged: (value) => ref
@@ -62,7 +62,7 @@ class _Keybinds extends ConsumerWidget {
             ),
             KeybindOption(
               title: l.keybindPreviousPage,
-              icon: KoverIcons.readingDirectionRTL,
+              icon: KoverIcons.chevronLeft,
               value: data.previousPage,
               defaultValue: KeybindsSettingsState.defaultPreviousPage,
               onChanged: (value) => ref

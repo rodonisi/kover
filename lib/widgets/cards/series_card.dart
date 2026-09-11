@@ -1,3 +1,4 @@
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/home/on_deck_scope.dart';
@@ -14,7 +15,6 @@ import 'package:kover/widgets/cards/cover_image.dart';
 import 'package:kover/widgets/cards/download_status_icon.dart';
 import 'package:kover/widgets/context_menu/actions_menu.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SeriesCard extends HookConsumerWidget {
   final int seriesId;
@@ -86,11 +86,11 @@ class SeriesCard extends HookConsumerWidget {
           title: series.name,
           icon: Icon(
             switch (series.format) {
-              .epub => LucideIcons.bookText,
-              .archive => LucideIcons.fileArchive,
-              .image => LucideIcons.images,
-              .pdf => LucideIcons.fileText,
-              _ => LucideIcons.fileQuestionMark,
+              .epub => KoverIcons.epubFormat,
+              .archive => KoverIcons.archiveFormat,
+              .image => KoverIcons.imageFormat,
+              .pdf => KoverIcons.pdfFormat,
+              _ => KoverIcons.unknownFormat,
             },
             size: LayoutConstants.smallIcon,
           ),

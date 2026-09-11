@@ -15,7 +15,6 @@ import 'package:kover/widgets/settings/reader/orientation_option.dart';
 import 'package:kover/widgets/settings/reader/progress_bar_option.dart';
 import 'package:kover/widgets/settings/reader/read_direction_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ImageReaderSettingsBottomSheet extends ConsumerWidget {
   final int seriesId;
@@ -60,18 +59,18 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                           ChoiceOptionEntry(
                             value: .horizontal,
                             label: l.horizontal,
-                            icon: KoverIcons.horizontalReaderMode,
+                            icon: KoverIcons.horizontalReader,
                           ),
                           ChoiceOptionEntry(
                             value: .vertical,
                             label: l.vertical,
-                            icon: KoverIcons.verticalReaderMode,
+                            icon: KoverIcons.verticalReader,
                           ),
                           if (breakpoint != .compact)
                             ChoiceOptionEntry(
                               value: .spread,
                               label: l.twoPage,
-                              icon: KoverIcons.twoPageReaderMode,
+                              icon: KoverIcons.twoPageReader,
                             ),
                         ],
                         value: settings.readerMode,
@@ -119,7 +118,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                       if (settings.readerMode == .vertical) ...[
                         NumericOption(
                           title: l.margins,
-                          icon: LucideIcons.panelLeftDashed,
+                          icon: KoverIcons.margins,
                           value: settings.verticalReaderPadding,
                           min: ImageReaderSettingsLimits
                               .verticalReaderPaddingMin,
@@ -133,7 +132,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                         ),
                         NumericOption(
                           title: l.verticalGap,
-                          icon: LucideIcons.unfoldVertical,
+                          icon: KoverIcons.verticalGap,
                           value: settings.verticalReaderGap,
                           min: ImageReaderSettingsLimits.verticalReaderGapMin,
                           max: ImageReaderSettingsLimits.verticalReaderGapMax,
@@ -154,7 +153,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                       if (settings.readerMode == .spread) ...[
                         NumericOption(
                           title: l.pageGap,
-                          icon: LucideIcons.unfoldHorizontal,
+                          icon: KoverIcons.pageGap,
                           value: settings.spreadReaderGap,
                           min: ImageReaderSettingsLimits.spreadReaderGapMin,
                           max: ImageReaderSettingsLimits.spreadReaderGapMax,
@@ -167,7 +166,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                         BooleanOption(
                           title: l.coverPage,
                           description: l.coverPageDescription,
-                          icon: LucideIcons.bookImage,
+                          icon: KoverIcons.coverPage,
                           value: settings.spreadCoverPage,
                           onChanged: (newValue) async => await ref
                               .read(imageSettings.notifier)
@@ -210,7 +209,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                         await ref.read(imageSettings.notifier).setDefault();
                         await ref.read(commonSettings.notifier).setDefault();
                       },
-                      icon: const Icon(LucideIcons.save),
+                      icon: const Icon(KoverIcons.save),
                       label: Text(l.setDefaults),
                     ),
                   ),
@@ -220,7 +219,7 @@ class ImageReaderSettingsBottomSheet extends ConsumerWidget {
                         await ref.read(imageSettings.notifier).reset();
                         await ref.read(commonSettings.notifier).reset();
                       },
-                      icon: const Icon(LucideIcons.rotateCcw),
+                      icon: const Icon(KoverIcons.reset),
                       label: Text(l.reset),
                     ),
                   ),

@@ -16,7 +16,6 @@ import 'package:kover/widgets/settings/reader/orientation_option.dart';
 import 'package:kover/widgets/settings/reader/progress_bar_option.dart';
 import 'package:kover/widgets/settings/reader/read_direction_option.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 class EpubReaderSettingsBottomSheet extends ConsumerWidget {
@@ -62,18 +61,18 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                           ChoiceOptionEntry(
                             value: .horizontal,
                             label: l.horizontal,
-                            icon: KoverIcons.horizontalReaderMode,
+                            icon: KoverIcons.horizontalReader,
                           ),
                           ChoiceOptionEntry(
                             value: .vertical,
                             label: l.vertical,
-                            icon: KoverIcons.verticalReaderMode,
+                            icon: KoverIcons.verticalReader,
                           ),
                           if (breakpoint != .compact)
                             ChoiceOptionEntry(
                               value: .spreads,
                               label: l.twoPage,
-                              icon: KoverIcons.twoPageReaderMode,
+                              icon: KoverIcons.twoPageReader,
                             ),
                         ],
                         onChanged: (newValue) async {
@@ -232,7 +231,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                         await ref.read(epubSettings.notifier).setDefault();
                         await ref.read(commonSettings.notifier).setDefault();
                       },
-                      icon: const Icon(LucideIcons.save),
+                      icon: const Icon(KoverIcons.save),
                       label: Text(l.setDefaults),
                     ),
                   ),
@@ -242,7 +241,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                         await ref.read(epubSettings.notifier).reset();
                         await ref.read(commonSettings.notifier).reset();
                       },
-                      icon: const Icon(LucideIcons.rotateCcw),
+                      icon: const Icon(KoverIcons.reset),
                       label: Text(l.reset),
                     ),
                   ),

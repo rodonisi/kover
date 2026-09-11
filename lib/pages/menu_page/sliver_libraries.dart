@@ -1,3 +1,4 @@
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/library_model.dart';
@@ -6,7 +7,6 @@ import 'package:kover/riverpod/providers/library.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SliverLibraries extends ConsumerWidget {
   final EdgeInsets? padding;
@@ -52,10 +52,10 @@ class LibraryListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final leading = Icon(switch (lib.type) {
-      .book || .lightNovel => LucideIcons.bookText,
-      .manga || .comic || .comicLegacy => LucideIcons.bookOpen,
-      .image => LucideIcons.image,
-      _ => LucideIcons.fileQuestionMark,
+      .book || .lightNovel => KoverIcons.book,
+      .manga || .comic || .comicLegacy => KoverIcons.comic,
+      .image => KoverIcons.image,
+      _ => KoverIcons.unknownFormat,
     });
 
     return AppListTile(

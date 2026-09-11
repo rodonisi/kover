@@ -1,5 +1,6 @@
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -10,7 +11,6 @@ import 'package:kover/riverpod/providers/reading_lists.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/riverpod/providers/volume.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SeriesCoverImage extends ConsumerWidget {
   final int seriesId;
@@ -217,7 +217,7 @@ class PlaceholderCoverImage extends StatelessWidget {
               width: width,
               height: height,
               child: const Center(
-                child: Icon(LucideIcons.image),
+                child: Icon(KoverIcons.coverPlaceholder),
               ),
             )
           : const SizedBox.shrink();

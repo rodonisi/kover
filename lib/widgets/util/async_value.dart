@@ -1,7 +1,7 @@
+import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/utils/logging.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Helper widget to display an [AsyncValue] in the UI.
 /// If no loading builder is probided, a [CircularProgressIndicator] is shown.
@@ -92,7 +92,7 @@ class _Error extends StatelessWidget {
     log.error('provider errored', error: error, stacktrace: stacktrace);
     return Center(
       child: Icon(
-        LucideIcons.circleX,
+        KoverIcons.error,
         color: Theme.of(context).colorScheme.error,
       ),
     );

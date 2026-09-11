@@ -6,7 +6,6 @@ import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/riverpod/providers/want_to_read.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class LimitedList extends StatelessWidget {
   final String? title;
@@ -61,7 +60,9 @@ class WantToReadToggle extends ConsumerWidget {
       asyncValue: wantToRead,
       data: (data) {
         return IconButton(
-          icon: Icon(data ? LucideIcons.star : LucideIcons.starOff),
+          icon: Icon(
+            data ? KoverIcons.wantToRead : KoverIcons.removeWantToRead,
+          ),
           color: data ? Theme.of(context).colorScheme.primary : null,
           onPressed: () async {
             final notifier = ref.read(
@@ -91,7 +92,7 @@ class WordCount extends StatelessWidget {
       spacing: LayoutConstants.smallPadding,
       children: [
         const Icon(
-          LucideIcons.fileText,
+          KoverIcons.wordCount,
           size: LayoutConstants.smallIcon,
         ),
         Text(
@@ -116,7 +117,7 @@ class ReleaseYear extends StatelessWidget {
       spacing: LayoutConstants.smallPadding,
       children: [
         const Icon(
-          LucideIcons.calendar,
+          KoverIcons.releaseYear,
           size: LayoutConstants.smallIcon,
         ),
         Text(releaseYear.toString()),
@@ -141,7 +142,7 @@ class RemainingHours extends StatelessWidget {
       spacing: LayoutConstants.smallPadding,
       children: [
         const Icon(
-          LucideIcons.clock,
+          KoverIcons.readTime,
           size: LayoutConstants.smallIcon,
         ),
         Text(
@@ -167,7 +168,7 @@ class Pages extends StatelessWidget {
       spacing: LayoutConstants.smallPadding,
       children: [
         const Icon(
-          LucideIcons.fileStack,
+          KoverIcons.pageCount,
           size: LayoutConstants.smallIcon,
         ),
         Text(l.pagesCount(pages)),
