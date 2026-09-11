@@ -38,7 +38,8 @@ class CachedImageFactory extends WidgetFactory {
             return child;
           }
           return SizedBox(
-            height: maxHeight,
+            height: src.height ?? maxHeight,
+            width: src.width,
             child: const Center(
               child: CircularProgressIndicator(),
             ),
