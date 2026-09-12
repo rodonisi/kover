@@ -115,13 +115,18 @@ void main() {
         (_, _) {},
       );
       container.listen(
-        readerProvider(seriesId: targetSeries, chapterId: targetChapter),
+        readerProvider(
+          seriesId: targetSeries,
+          chapterId: targetChapter,
+          readingListId: null,
+        ),
         (_, _) {},
       );
       container.listen(
         readerNavigationProvider(
           seriesId: targetSeries,
           chapterId: targetChapter,
+          readingListId: null,
         ),
         (_, _) {},
       );
@@ -144,6 +149,7 @@ void main() {
             ReaderRoute(
               seriesId: targetSeries,
               chapterId: targetChapter,
+              readingListId: null,
             ).location,
           );
 
@@ -154,6 +160,7 @@ void main() {
             readerNavigationProvider(
               seriesId: targetSeries,
               chapterId: targetChapter,
+              readingListId: null,
             ).notifier,
           )
           .jumpToPage(targetPage);
@@ -196,13 +203,18 @@ void main() {
         (_, _) {},
       );
       container.listen(
-        readerProvider(seriesId: targetSeries, chapterId: targetChapter),
+        readerProvider(
+          seriesId: targetSeries,
+          chapterId: targetChapter,
+          readingListId: null,
+        ),
         (_, _) {},
       );
       container.listen(
         readerNavigationProvider(
           seriesId: targetSeries,
           chapterId: targetChapter,
+          readingListId: null,
         ),
         (_, _) {},
       );
@@ -211,6 +223,7 @@ void main() {
         epubNavigationProvider(
           seriesId: targetSeries,
           chapterId: targetChapter,
+          readingListId: null,
         ),
         (_, _) {},
       );
@@ -221,6 +234,7 @@ void main() {
             ReaderRoute(
               seriesId: targetSeries,
               chapterId: targetChapter,
+              readingListId: null,
             ).location,
           );
       await tester.pumpAndSettle();
@@ -247,6 +261,7 @@ void main() {
               epubNavigationProvider(
                 seriesId: targetSeries,
                 chapterId: targetChapter,
+                readingListId: null,
               ).notifier,
             )
             .jumpToPage(targetPage);
@@ -270,6 +285,7 @@ void main() {
               epubNavigationProvider(
                 seriesId: targetSeries,
                 chapterId: targetChapter,
+                readingListId: null,
               ).notifier,
             )
             .jumpToSubpage(0);

@@ -21,11 +21,16 @@ class ReaderNavigation extends _$ReaderNavigation {
   @override
   Future<ReaderNavigationState> build({
     required int seriesId,
-    int? chapterId,
+    required int chapterId,
+    required int? readingListId,
   }) async {
     // Initialize from reader state's last saved page
     final readerState = await ref.watch(
-      readerProvider(seriesId: seriesId, chapterId: chapterId).future,
+      readerProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: readingListId,
+      ).future,
     );
 
     listenSelf((prev, next) {
@@ -74,6 +79,7 @@ class ReaderNavigation extends _$ReaderNavigation {
           readerProvider(
             seriesId: seriesId,
             chapterId: chapterId,
+            readingListId: readingListId,
           ).notifier,
         )
         .saveProgress(

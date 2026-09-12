@@ -30,6 +30,7 @@ class ImageReader extends ConsumerWidget {
         final navProvider = readerNavigationProvider(
           seriesId: seriesId,
           chapterId: chapterId,
+          readingListId: readingListId,
         );
 
         if (data.mode == .spread) {
@@ -57,10 +58,12 @@ class ImageReader extends ConsumerWidget {
             .horizontal => HorizontalPagedReader(
               seriesId: seriesId,
               chapterId: chapterId,
+              readingListId: readingListId,
             ),
             .vertical => VerticalContinuousReader(
               seriesId: seriesId,
               chapterId: chapterId,
+              readingListId: readingListId,
             ),
             _ => throw UnimplementedError(
               'Reader mode ${data.mode} not supported here',

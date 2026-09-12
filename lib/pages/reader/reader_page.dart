@@ -16,14 +16,14 @@ import 'package:kover/widgets/util/async_value.dart';
 
 class ReaderPage extends HookConsumerWidget {
   final int seriesId;
-  final int? chapterId;
+  final int chapterId;
   final int? readingListId;
 
   const ReaderPage({
     super.key,
     required this.seriesId,
-    this.chapterId,
-    this.readingListId,
+    required this.chapterId,
+    required this.readingListId,
   });
 
   @override
@@ -35,6 +35,7 @@ class ReaderPage extends HookConsumerWidget {
       chapterId: chapterId,
       readingListId: readingListId,
     );
+    final reader = ref.watch(provider);
 
     return PopScope(
       onPopInvokedWithResult: (didPop, _) {
@@ -47,7 +48,7 @@ class ReaderPage extends HookConsumerWidget {
         );
       },
       child: Async(
-        asyncValue: ref.watch(provider),
+        asyncValue: reader,
         data: (data) {
           return _ReaderSystemChrome(
             seriesId: seriesId,

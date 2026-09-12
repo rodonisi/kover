@@ -60,6 +60,7 @@ class PdfReader extends HookConsumerWidget {
     final navProvider = readerNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
+      readingListId: readingListId,
     );
 
     final model = ref.watch(
@@ -109,6 +110,7 @@ class PdfReader extends HookConsumerWidget {
               ? PdfTocDrawer(
                   seriesId: seriesId,
                   chapterId: chapterId,
+                  readingListId: readingListId,
                   controller: controller,
                   toc: toc.value,
                 )

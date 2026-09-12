@@ -12,11 +12,13 @@ import 'package:material_ui/material_ui.dart';
 class HorizontalPagedReader extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
+  final int? readingListId;
 
-  const HorizontalPagedReader({
+  const new({
     super.key,
     required this.seriesId,
     required this.chapterId,
+    required this.readingListId,
   });
 
   @override
@@ -24,12 +26,14 @@ class HorizontalPagedReader extends HookConsumerWidget {
     final navProvider = readerNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
+      readingListId: readingListId,
     );
 
     final model = ref.watch(
       horizontalPagedReaderProvider(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
       ),
     );
 

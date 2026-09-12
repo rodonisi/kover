@@ -24,7 +24,7 @@ class EpubReader extends HookConsumerWidget {
     super.key,
     required this.seriesId,
     required this.chapterId,
-    this.readingListId,
+    required this.readingListId,
   });
 
   @override
@@ -33,6 +33,7 @@ class EpubReader extends HookConsumerWidget {
     final nav = epubNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
+      readingListId: readingListId,
     );
 
     final model = ref.watch(
@@ -58,6 +59,7 @@ class EpubReader extends HookConsumerWidget {
         endDrawer: EpubTocDrawer(
           seriesId: seriesId,
           chapterId: chapterId,
+          readingListId: readingListId,
         ),
         child: EpubThemeOverride(
           seriesId: seriesId,
@@ -123,6 +125,7 @@ class EpubReader extends HookConsumerWidget {
                               return _Page(
                                 seriesId: seriesId,
                                 chapterId: chapterId,
+                                readingListId: readingListId,
                                 page: index,
                                 reverse:
                                     data.commonSettings.readDirection ==
@@ -159,15 +162,17 @@ class EpubReader extends HookConsumerWidget {
 class _Page extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
+  final int? readingListId;
   final int page;
   final bool reverse;
   final EpubReaderMode mode;
   final PageController outerController;
   final void Function(bool)? onSelectionChanged;
 
-  const _Page({
+  const new({
     required this.seriesId,
     required this.chapterId,
+    required this.readingListId,
     required this.page,
     required this.mode,
     this.reverse = false,
@@ -234,6 +239,7 @@ class _Page extends HookConsumerWidget {
       epubReaderSubpageProvider(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
         page: page,
       ),
     );
@@ -306,6 +312,7 @@ class _Page extends HookConsumerWidget {
                         key: ValueKey(page),
                         seriesId: seriesId,
                         chapterId: chapterId,
+                        readingListId: readingListId,
                         page: page,
                         imageCache: imageCache,
                       )
@@ -313,6 +320,7 @@ class _Page extends HookConsumerWidget {
                         key: ValueKey(page),
                         seriesId: seriesId,
                         chapterId: chapterId,
+                        readingListId: readingListId,
                         page: page,
                         imageCache: imageCache,
                       ),

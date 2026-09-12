@@ -10,6 +10,7 @@ class const EpubHorizontalSubpages({
   super.key,
   required final int seriesId,
   required final int chapterId,
+  required final int? readingListId,
   required final int page,
   required final CachedImageFactory imageCache,
 }) extends HookConsumerWidget {
@@ -19,6 +20,7 @@ class const EpubHorizontalSubpages({
       epubReaderSubpageProvider(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
         page: page,
       ),
     );
@@ -26,6 +28,7 @@ class const EpubHorizontalSubpages({
     final navigationProvider = epubNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
+      readingListId: readingListId,
     );
     final data = subpageState.requireValue;
 

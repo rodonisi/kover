@@ -41,7 +41,7 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
   ChaptersDao(super.attachedDatabase);
 
   /// Get a [SingleOrNullSelectable] for chapter [chapterId]
-  SingleOrNullSelectable<Chapter> chapter(int chapterId) {
+  Selectable<Chapter> chapter(int chapterId) {
     return managers.chapters.filter((f) => f.id.equals(chapterId));
   }
 

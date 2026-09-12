@@ -142,6 +142,7 @@ class _VolumeTitleContinueButton extends ConsumerWidget {
             ? ReaderRoute(
                 seriesId: seriesId,
                 chapterId: data.chapter.id,
+                readingListId: null,
               ).push(context)
             : null,
       ),
@@ -176,6 +177,7 @@ class _VolumeContinuePointButton extends ConsumerWidget {
         onTap: () => ReaderRoute(
           seriesId: seriesId,
           chapterId: data.chapter.id,
+          readingListId: null,
         ).push(context),
       ),
     );

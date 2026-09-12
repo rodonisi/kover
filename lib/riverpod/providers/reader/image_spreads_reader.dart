@@ -34,6 +34,7 @@ class Spreads extends _$Spreads {
   Future<SpreadsState> build({
     required int seriesId,
     required int chapterId,
+    required int? readingListId,
   }) async {
     ref.onDispose(_pipeline.dispose);
 
@@ -41,6 +42,7 @@ class Spreads extends _$Spreads {
       readerProvider(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
       ).future,
     );
 
@@ -71,6 +73,7 @@ class Spreads extends _$Spreads {
       readerNavigationProvider(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
       ).future,
     )).currentPage;
 
@@ -172,6 +175,7 @@ class Spreads extends _$Spreads {
       readerNavigationProvider(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
       ).future,
     );
 
@@ -242,17 +246,20 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
   ReaderProvider get _readerProvider => readerProvider(
     seriesId: seriesId,
     chapterId: chapterId,
+    readingListId: readingListId,
   );
   ReaderNavigationProvider get _readerNavigationProvider =>
       readerNavigationProvider(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
       );
 
   @override
   Future<ImageSpreadsNavigationState> build({
     required int seriesId,
     required int chapterId,
+    required int? readingListId,
   }) async {
     ref.listen(_readerNavigationProvider, (prev, next) async {
       final current = await future;
@@ -266,38 +273,46 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
       });
     });
 
-    ref.listen(spreadsProvider(seriesId: seriesId, chapterId: chapterId), (
-      prev,
-      next,
-    ) {
-      next.whenData((spreadsState) async {
-        final current = state.value;
-        if (current == null) return;
+    ref.listen(
+      spreadsProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: readingListId,
+      ),
+      (
+        prev,
+        next,
+      ) {
+        next.whenData((spreadsState) async {
+          final current = state.value;
+          if (current == null) return;
 
-        final readerNavigation = await ref.read(
-          readerNavigationProvider(
-            seriesId: seriesId,
-            chapterId: chapterId,
-          ).future,
-        );
+          final readerNavigation = await ref.read(
+            readerNavigationProvider(
+              seriesId: seriesId,
+              chapterId: chapterId,
+              readingListId: readingListId,
+            ).future,
+          );
 
-        final targetSpread = spreadsState.spreads.indexWhere(
-          (spread) => spread.contains(readerNavigation.currentPage),
-        );
+          final targetSpread = spreadsState.spreads.indexWhere(
+            (spread) => spread.contains(readerNavigation.currentPage),
+          );
 
-        if (targetSpread == -1) return;
+          if (targetSpread == -1) return;
 
-        state = AsyncData(
-          current.copyWith(
-            currentSpread: targetSpread,
-            ready: _containsAllPrevious(
-              set: spreadsState.checkedPages,
-              page: readerNavigation.currentPage,
+          state = AsyncData(
+            current.copyWith(
+              currentSpread: targetSpread,
+              ready: _containsAllPrevious(
+                set: spreadsState.checkedPages,
+                page: readerNavigation.currentPage,
+              ),
             ),
-          ),
-        );
-      });
-    });
+          );
+        });
+      },
+    );
 
     final reader = await ref.read(_readerProvider.future);
 
@@ -329,7 +344,11 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
 
   Future<void> jumpToSpread(int spread) async {
     final spreadsState = await ref.read(
-      spreadsProvider(seriesId: seriesId, chapterId: chapterId).future,
+      spreadsProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: readingListId,
+      ).future,
     );
 
     if (spread < 0 || spread >= spreadsState.spreads.length) {
@@ -345,7 +364,11 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
 
   Future<int> _getSpreadForPage(int page) async {
     final spreadsState = await ref.read(
-      spreadsProvider(seriesId: seriesId, chapterId: chapterId).future,
+      spreadsProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: readingListId,
+      ).future,
     );
 
     final targetSpread = spreadsState.spreads.indexWhere(
@@ -357,7 +380,11 @@ class ImageSpreadsReaderNavigation extends _$ImageSpreadsReaderNavigation {
 
   Future<bool> _isReadyForPage(int page) async {
     final spreadsState = await ref.read(
-      spreadsProvider(seriesId: seriesId, chapterId: chapterId).future,
+      spreadsProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: readingListId,
+      ).future,
     );
 
     return _containsAllPrevious(set: spreadsState.checkedPages, page: page);

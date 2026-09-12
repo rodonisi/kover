@@ -19,7 +19,7 @@ class HorizontalSpreadsReader extends HookConsumerWidget {
     super.key,
     required this.seriesId,
     required this.chapterId,
-    this.readingListId,
+    required this.readingListId,
   });
 
   @override
@@ -27,6 +27,7 @@ class HorizontalSpreadsReader extends HookConsumerWidget {
     final navProvider = imageSpreadsReaderNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
+      readingListId: readingListId,
     );
 
     return ReaderOverlay(
@@ -44,25 +45,36 @@ class HorizontalSpreadsReader extends HookConsumerWidget {
       },
       isLastPage: (page) =>
           ref
-              .read(spreadsProvider(seriesId: seriesId, chapterId: chapterId))
+              .read(
+                spreadsProvider(
+                  seriesId: seriesId,
+                  chapterId: chapterId,
+                  readingListId: readingListId,
+                ),
+              )
               .value
               ?.spreads
               .last
               .contains(page) ??
           false,
-      child: _SpreadsContent(seriesId: seriesId, chapterId: chapterId),
+      child: _SpreadsContent(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: readingListId,
+      ),
     );
   }
 }
 
 class _SpreadsContent extends ConsumerWidget {
-  const _SpreadsContent({
-    required this.seriesId,
-    required this.chapterId,
-  });
-
   final int seriesId;
   final int chapterId;
+  final int? readingListId;
+  const new({
+    required this.seriesId,
+    required this.chapterId,
+    required this.readingListId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -70,6 +82,7 @@ class _SpreadsContent extends ConsumerWidget {
       horizontalSpreadsReaderProvider(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
       ),
     );
 
@@ -86,6 +99,7 @@ class _SpreadsContent extends ConsumerWidget {
                     spreadsProvider(
                       seriesId: seriesId,
                       chapterId: chapterId,
+                      readingListId: readingListId,
                     ).notifier,
                   )
                   .checkLandscapePages(
@@ -104,6 +118,7 @@ class _SpreadsContent extends ConsumerWidget {
             final content = _ImageSpreadsReaderContent(
               seriesId: seriesId,
               chapterId: chapterId,
+              readingListId: readingListId,
               initialSpread: data.navState.currentSpread,
             );
 
@@ -124,11 +139,13 @@ class _SpreadsContent extends ConsumerWidget {
 class _ImageSpreadsReaderContent extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
+  final int? readingListId;
   final int initialSpread;
 
-  const _ImageSpreadsReaderContent({
+  const new({
     required this.seriesId,
     required this.chapterId,
+    required this.readingListId,
     required this.initialSpread,
   });
 
@@ -139,12 +156,14 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
     final navProvider = imageSpreadsReaderNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
+      readingListId: readingListId,
     );
 
     final model = ref.watch(
       horizontalSpreadsReaderContentProvider(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
       ),
     );
 
@@ -227,6 +246,7 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
                         child: _RenderPage(
                           chapterId: chapterId,
                           seriesId: seriesId,
+                          readingListId: readingListId,
                           page: page,
                           alignment: alignment,
                           imageCacheWidth: imageCacheWidth,
@@ -251,6 +271,7 @@ class _ImageSpreadsReaderContent extends HookConsumerWidget {
 class _RenderPage extends ConsumerWidget {
   final int seriesId;
   final int chapterId;
+  final int? readingListId;
   final int page;
   final Alignment alignment;
   final int? imageCacheWidth;
@@ -258,6 +279,7 @@ class _RenderPage extends ConsumerWidget {
   const _RenderPage({
     required this.seriesId,
     required this.chapterId,
+    required this.readingListId,
     required this.page,
     this.imageCacheWidth,
     this.alignment = .center,
@@ -287,6 +309,7 @@ class _RenderPage extends ConsumerWidget {
                   spreadsProvider(
                     seriesId: seriesId,
                     chapterId: chapterId,
+                    readingListId: readingListId,
                   ).notifier,
                 )
                 .markRendered(page);
@@ -296,6 +319,7 @@ class _RenderPage extends ConsumerWidget {
                     spreadsProvider(
                       seriesId: seriesId,
                       chapterId: chapterId,
+                      readingListId: readingListId,
                     ).notifier,
                   )
                   .markLandscape(page);

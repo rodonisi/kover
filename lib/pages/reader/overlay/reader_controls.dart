@@ -6,21 +6,23 @@ import 'package:kover/pages/reader/epub_reader/epub_reader_controls.dart';
 import 'package:kover/pages/reader/image_reader/image_reader_controls.dart';
 import 'package:kover/pages/reader/overlay/page_slider.dart';
 import 'package:kover/pages/reader/pdf_reader/pdf_reader_controls.dart';
-import 'package:kover/riverpod/providers/reader//reader.dart';
+import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/utils/layout_constants.dart';
 
 class ReaderControls extends HookConsumerWidget {
   final int seriesId;
-  final int? chapterId;
+  final int chapterId;
+  final int? readingListId;
   final void Function(int page)? onJumpToPage;
   final Widget? extraControls;
 
   const ReaderControls({
     super.key,
     required this.seriesId,
-    this.chapterId,
+    required this.chapterId,
+    required this.readingListId,
     this.onJumpToPage,
     this.extraControls,
   });
@@ -28,7 +30,11 @@ class ReaderControls extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final format = ref.watch(
-      readerProvider(seriesId: seriesId, chapterId: chapterId).select(
+      readerProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: readingListId,
+      ).select(
         (state) => state.value?.series.format,
       ),
     );
@@ -49,11 +55,13 @@ class ReaderControls extends HookConsumerWidget {
                     child: PageSlider(
                       seriesId: seriesId,
                       chapterId: chapterId,
+                      readingListId: readingListId,
                       onJumpToPage: (page) => ref
                           .read(
                             readerNavigationProvider(
                               seriesId: seriesId,
                               chapterId: chapterId,
+                              readingListId: readingListId,
                             ).notifier,
                           )
                           .jumpToPage(page),

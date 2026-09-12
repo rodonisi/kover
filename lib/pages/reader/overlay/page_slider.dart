@@ -7,13 +7,15 @@ import 'package:kover/widgets/util/async_value.dart';
 
 class PageSlider extends ConsumerWidget {
   final int seriesId;
-  final int? chapterId;
+  final int chapterId;
+  final int? readingListId;
   final void Function(int page)? onJumpToPage;
 
   const PageSlider({
     super.key,
     required this.seriesId,
     required this.chapterId,
+    required this.readingListId,
     this.onJumpToPage,
   });
 
@@ -23,6 +25,7 @@ class PageSlider extends ConsumerWidget {
       readerNavigationProvider(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
       ),
     );
 

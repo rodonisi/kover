@@ -12,10 +12,13 @@ import 'package:kover/widgets/util/async_value.dart';
 class EpubTocDrawer extends HookConsumerWidget {
   final int chapterId;
   final int seriesId;
-  const EpubTocDrawer({
+  final int? readingListId;
+
+  const new({
     super.key,
     required this.chapterId,
     required this.seriesId,
+    required this.readingListId,
   });
 
   @override
@@ -54,6 +57,7 @@ class EpubTocDrawer extends HookConsumerWidget {
             return TocEntry(
               seriesId: seriesId,
               chapterId: chapterId,
+              readingListId: readingListId,
               chapter: chapter,
               onSelected: (key) {
                 selectedKey.value = key;
@@ -99,15 +103,18 @@ class EpubTocDrawer extends HookConsumerWidget {
 }
 
 class TocEntry extends HookConsumerWidget {
-  final int chapterId;
   final int seriesId;
+  final int chapterId;
+  final int? readingListId;
   final BookChapterModel chapter;
   final int depth;
   final void Function(GlobalKey) onSelected;
-  const TocEntry({
+
+  const new({
     super.key,
-    required this.chapterId,
     required this.seriesId,
+    required this.chapterId,
+    required this.readingListId,
     required this.chapter,
     required this.onSelected,
     this.depth = 0,
@@ -117,7 +124,11 @@ class TocEntry extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final key = useMemoized(() => GlobalKey(), []);
     final nav = ref.watch(
-      readerNavigationProvider(seriesId: seriesId, chapterId: chapterId),
+      readerNavigationProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: readingListId,
+      ),
     );
 
     return Async(
@@ -149,6 +160,7 @@ class TocEntry extends HookConsumerWidget {
                       readerNavigationProvider(
                         chapterId: chapterId,
                         seriesId: seriesId,
+                        readingListId: readingListId,
                       ).notifier,
                     )
                     .jumpToPage(chapter.page);
@@ -156,8 +168,9 @@ class TocEntry extends HookConsumerWidget {
             ),
             ...chapter.children.map<Widget>(
               (child) => TocEntry(
-                chapterId: chapterId,
                 seriesId: seriesId,
+                chapterId: chapterId,
+                readingListId: readingListId,
                 chapter: child,
                 depth: depth + 1,
                 onSelected: onSelected,

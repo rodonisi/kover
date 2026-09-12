@@ -38,6 +38,12 @@ class const SeriesRepository({
   required final VolumeSyncOperations _volumeClient,
   required final ChapterSyncOperations _chapterClient,
 }) {
+  /// Get series by [seriesId]
+  Future<SeriesModel> getSeries({required int seriesId}) async {
+    final series = await _db.seriesDao.getSeries(seriesId);
+    return SeriesModel.fromDatabaseModel(series);
+  }
+
   /// Watch series [seriesId]
   Stream<SeriesModel> watchSeries(int seriesId) {
     return _db.seriesDao

@@ -23,12 +23,21 @@ Future<HorizontalPageReaderModel> horizontalPagedReader(
   Ref ref, {
   required int seriesId,
   required int chapterId,
+  required int? readingListId,
 }) async {
   final reader = await ref.watch(
-    readerProvider(seriesId: seriesId, chapterId: chapterId).future,
+    readerProvider(
+      seriesId: seriesId,
+      chapterId: chapterId,
+      readingListId: readingListId,
+    ).future,
   );
   final navState = await ref.watch(
-    readerNavigationProvider(seriesId: seriesId, chapterId: chapterId).future,
+    readerNavigationProvider(
+      seriesId: seriesId,
+      chapterId: chapterId,
+      readingListId: readingListId,
+    ).future,
   );
   final commonSettings = await ref.watch(
     commonReaderSettingsProvider(seriesId: seriesId).future,

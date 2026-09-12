@@ -16,8 +16,8 @@ class ReaderOverlayModel({
 Future<ReaderOverlayModel> readerOverlay(
   Ref ref, {
   required int seriesId,
-  int? chapterId,
-  int? readingListId,
+  required int chapterId,
+  required int? readingListId,
 }) async {
   final reader = await ref.watch(
     readerProvider(
