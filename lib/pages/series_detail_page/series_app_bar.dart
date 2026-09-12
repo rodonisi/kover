@@ -141,13 +141,22 @@ class _SeriesTitleContinueButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final canRead = ref.watch(canReadSeriesProvider(seriesId)).value ?? false;
+    final model = ref.watch(
+      seriesAppBarContinueButtonProvider(seriesId: seriesId),
+    );
 
-    return TitleContinueButton(
-      onTap: canRead
-          ? () => ReaderRoute(seriesId: seriesId).push(context)
-          : null,
-      child: _SeriesContinueButtonImage(seriesId: seriesId),
+    return Async(
+      asyncValue: model,
+      data: (data) => TitleContinueButton(
+        onTap: data.canRead
+            ? () => ReaderRoute(
+                seriesId: seriesId,
+                chapterId: data.chapter.id,
+                readingListId: null,
+              ).push(context)
+            : null,
+        child: _SeriesContinueButtonImage(seriesId: seriesId),
+      ),
     );
   }
 }
@@ -159,18 +168,22 @@ class _SeriesContinuePointButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(
+    final model = ref.watch(
       seriesAppBarContinueButtonProvider(seriesId: seriesId),
     );
 
     return Async(
-      asyncValue: state,
+      asyncValue: model,
       data: (data) => ContinuePointButton(
         enabled: data.canRead,
         title: data.chapter.title,
         cover: _SeriesContinueButtonImage(seriesId: seriesId),
         progress: data.progress,
-        onTap: () => ReaderRoute(seriesId: seriesId).push(context),
+        onTap: () => ReaderRoute(
+          seriesId: seriesId,
+          chapterId: data.chapter.id,
+          readingListId: null,
+        ).push(context),
       ),
     );
   }

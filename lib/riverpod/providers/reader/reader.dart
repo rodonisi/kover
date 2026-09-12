@@ -1,15 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/models/progress_model.dart';
 import 'package:kover/models/series_model.dart';
-import 'package:kover/riverpod/providers/chapter.dart';
-import 'package:kover/riverpod/providers/reader.dart';
-import 'package:kover/riverpod/providers/series.dart';
+import 'package:kover/riverpod/repository/chapters_repository.dart';
 import 'package:kover/riverpod/repository/reader_repository.dart';
-import 'package:kover/utils/extensions/ref.dart';
+import 'package:kover/riverpod/repository/series_repository.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -34,34 +33,58 @@ sealed class ReaderState with _$ReaderState {
 }
 
 @riverpod
+Future<SeriesModel> readerSeries(
+  Ref ref, {
+  required int seriesId,
+}) async {
+  final repo = ref.watch(seriesRepositoryProvider);
+  return repo.getSeries(seriesId: seriesId);
+}
+
+@riverpod
+Future<ChapterModel> readerChapter(
+  Ref ref, {
+  required int seriesId,
+  required int chapterId,
+}) async {
+  final repo = ref.watch(chaptersRepositoryProvider);
+  return repo.getChapter(chapterId: chapterId);
+}
+
+@riverpod
+Future<ProgressModel?> readerProgress(
+  Ref ref, {
+  required int seriesId,
+  required int chapterId,
+}) async {
+  final repo = ref.watch(readerRepositoryProvider);
+  final chapter = await ref.read(
+    readerChapterProvider(seriesId: seriesId, chapterId: chapterId).future,
+  );
+
+  return repo.getProgress(chapter.id);
+}
+
+@riverpod
 class Reader extends _$Reader {
   Timer? _saveProgressDebounce;
+  KeepAliveLink? _saveProgressKeepAlive;
 
   @override
   Future<ReaderState> build({
     required int seriesId,
-    int? chapterId,
-    int? readingListId,
+    required int chapterId,
+    required int? readingListId,
   }) async {
-    final seriesFuture = ref.watch(
-      seriesProvider(seriesId: seriesId).future,
+    final seriesFuture = ref.read(
+      readerSeriesProvider(seriesId: seriesId).future,
     );
-    final chapterFuture = chapterId != null
-        ? ref.watch(
-            chapterProvider(chapterId: chapterId).future,
-          )
-        : ref.read(
-            continuePointProvider(seriesId: seriesId).future,
-          );
-    final progressFuture = chapterId != null
-        ? ref.read(
-            bookProgressProvider(chapterId: chapterId).future,
-          )
-        : chapterFuture.then(
-            (chapter) => ref.read(
-              bookProgressProvider(chapterId: chapter.id).future,
-            ),
-          );
+    final chapterFuture = ref.read(
+      readerChapterProvider(seriesId: seriesId, chapterId: chapterId).future,
+    );
+    final progressFuture = ref.read(
+      readerProgressProvider(seriesId: seriesId, chapterId: chapterId).future,
+    );
 
     final series = await seriesFuture;
     final chapter = await chapterFuture;
@@ -87,13 +110,18 @@ class Reader extends _$Reader {
     String? scrollId,
     bool handleCompletion = true,
   }) async {
-    await ref.withKeepAlive(() async {
-      if (state.isLoading) return;
-      final current = await future;
+    final current = await future;
 
-      _saveProgressDebounce?.cancel();
+    if (!ref.mounted) return;
 
-      _saveProgressDebounce = Timer(200.ms, () async {
+    _saveProgressDebounce?.cancel();
+    _saveProgressKeepAlive?.close();
+
+    final link = ref.keepAlive();
+    _saveProgressKeepAlive = link;
+
+    _saveProgressDebounce = Timer(100.ms, () async {
+      try {
         if (!ref.mounted) return;
 
         if (handleCompletion && page >= current.totalPages - 1) {
@@ -122,7 +150,12 @@ class Reader extends _$Reader {
             'chapter_id': current.chapter.id,
           },
         );
-      });
+      } finally {
+        link.close();
+        if (identical(_saveProgressKeepAlive, link)) {
+          _saveProgressKeepAlive = null;
+        }
+      }
     });
   }
 

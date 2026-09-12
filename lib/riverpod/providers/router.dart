@@ -386,13 +386,13 @@ class DownloadQueueRoute extends GoRouteData with $DownloadQueueRoute {
 @TypedGoRoute<ReaderRoute>(path: '/reader/:seriesId')
 class ReaderRoute extends GoRouteData with $ReaderRoute {
   final int seriesId;
-  final int? chapterId;
+  final int chapterId;
   final int? readingListId;
 
   const ReaderRoute({
     required this.seriesId,
-    this.chapterId,
-    this.readingListId,
+    required this.chapterId,
+    required this.readingListId,
   });
 
   @override

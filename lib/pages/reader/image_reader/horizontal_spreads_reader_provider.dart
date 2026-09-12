@@ -19,11 +19,13 @@ Future<HorizontalSpreadsReaderModel> horizontalSpreadsReader(
   Ref ref, {
   required int seriesId,
   required int chapterId,
+  required int? readingListId,
 }) async {
   final navState = await ref.watch(
     imageSpreadsReaderNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
+      readingListId: readingListId,
     ).future,
   );
   final settings = await ref.watch(
@@ -49,9 +51,14 @@ Future<HorizontalSpreadsReaderContentModel> horizontalSpreadsReaderContent(
   Ref ref, {
   required int seriesId,
   required int chapterId,
+  required int? readingListId,
 }) async {
   final spreads = await ref.watch(
-    spreadsProvider(seriesId: seriesId, chapterId: chapterId).future,
+    spreadsProvider(
+      seriesId: seriesId,
+      chapterId: chapterId,
+      readingListId: readingListId,
+    ).future,
   );
   final commonSettings = await ref.watch(
     commonReaderSettingsProvider(seriesId: seriesId).future,

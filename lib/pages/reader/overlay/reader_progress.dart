@@ -6,18 +6,24 @@ import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 
 class ReaderProgress extends ConsumerWidget {
   final int seriesId;
-  final int? chapterId;
+  final int chapterId;
+  final int? readingListId;
 
   const ReaderProgress({
     super.key,
     required this.seriesId,
-    this.chapterId,
+    required this.chapterId,
+    required this.readingListId,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final navState = ref.watch(
-      readerNavigationProvider(seriesId: seriesId, chapterId: chapterId ?? 0),
+      readerNavigationProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: readingListId,
+      ),
     );
 
     final progress = navState.hasValue
@@ -33,10 +39,13 @@ class ReaderProgress extends ConsumerWidget {
 class SubpageProgress extends ConsumerWidget {
   final int seriesId;
   final int chapterId;
-  const SubpageProgress({
+  final int? readingListId;
+
+  const new({
     super.key,
     required this.seriesId,
     required this.chapterId,
+    required this.readingListId,
   });
 
   @override
@@ -44,7 +53,11 @@ class SubpageProgress extends ConsumerWidget {
     final theme = Theme.of(context);
 
     final reader = ref.watch(
-      epubNavigationProvider(seriesId: seriesId, chapterId: chapterId),
+      epubNavigationProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: readingListId,
+      ),
     );
 
     final spreads =

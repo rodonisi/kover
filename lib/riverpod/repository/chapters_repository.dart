@@ -27,6 +27,12 @@ class const ChaptersRepository({
   required final AppDatabase _db,
   required final ChapterSyncOperations _client,
 }) {
+  /// Get chapter by [chapterId]
+  Future<ChapterModel> getChapter({required int chapterId}) async {
+    final chapter = await _db.chaptersDao.chapter(chapterId).getSingle();
+    return ChapterModel.fromDatabaseModel(chapter);
+  }
+
   /// Watch [chapterId]
   Stream<ChapterModel> watchChapter({
     required int chapterId,

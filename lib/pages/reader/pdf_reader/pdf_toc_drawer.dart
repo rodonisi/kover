@@ -12,12 +12,15 @@ class PdfTocDrawer extends HookConsumerWidget {
   final List<PdfOutlineNode> toc;
   final int seriesId;
   final int chapterId;
+  final int? readingListId;
+
   const PdfTocDrawer({
     super.key,
     required this.controller,
     required this.toc,
     required this.seriesId,
     required this.chapterId,
+    required this.readingListId,
   });
 
   @override
@@ -28,7 +31,11 @@ class PdfTocDrawer extends HookConsumerWidget {
 
     final list = _getOutlineList(toc, 0).toList();
     final nav = ref.watch(
-      readerNavigationProvider(seriesId: seriesId, chapterId: chapterId),
+      readerNavigationProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: readingListId,
+      ),
     );
 
     return Drawer(

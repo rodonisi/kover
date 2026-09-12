@@ -109,6 +109,7 @@ class ReaderOverlay extends HookConsumerWidget {
             readerNavigationProvider(
               seriesId: seriesId,
               chapterId: chapterId,
+              readingListId: readingListId,
             ).select((state) => state.whenData((state) => state.currentPage)),
             (previous, next) {
               // Avoid showing the snackbar on initial load
@@ -146,6 +147,7 @@ class ReaderOverlay extends HookConsumerWidget {
                           SubpageProgress(
                                 seriesId: seriesId,
                                 chapterId: chapterId,
+                                readingListId: readingListId,
                               )
                               .animate(
                                 target: uiVisible.value ? 0.0 : 1.0,
@@ -155,6 +157,7 @@ class ReaderOverlay extends HookConsumerWidget {
                           ReaderProgress(
                                 seriesId: seriesId,
                                 chapterId: chapterId,
+                                readingListId: readingListId,
                               )
                               .animate(
                                 target: uiVisible.value ? 0.0 : 1.0,
@@ -203,6 +206,7 @@ class ReaderOverlay extends HookConsumerWidget {
                                 ReaderRoute(
                                   seriesId: seriesId,
                                   chapterId: prevChapter.value!.id,
+                                  readingListId: readingListId,
                                 ).replace(context);
                               },
                               onDismiss: snackbarDismissed.value
@@ -242,6 +246,7 @@ class ReaderOverlay extends HookConsumerWidget {
                                 ReaderRoute(
                                   seriesId: seriesId,
                                   chapterId: nextChapter.value!.id,
+                                  readingListId: readingListId,
                                 ).replace(context);
                               },
                               onDismiss: snackbarDismissed.value
@@ -267,8 +272,9 @@ class ReaderOverlay extends HookConsumerWidget {
                     alignment: .bottomCenter,
                     child:
                         ReaderControls(
-                              chapterId: chapterId,
                               seriesId: seriesId,
+                              chapterId: chapterId,
+                              readingListId: readingListId,
                               onJumpToPage: onJumpToPage,
                               extraControls: extraControls,
                             )

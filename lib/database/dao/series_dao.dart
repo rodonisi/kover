@@ -74,6 +74,11 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     };
   }
 
+  /// Get series by [seriesId]
+  Future<SeriesData> getSeries(int seriesId) async {
+    return await managers.series.filter((s) => s.id(seriesId)).getSingle();
+  }
+
   /// Watch series [seriesId]
   Stream<SeriesData?> watchSeries(int seriesId) {
     return managers.series

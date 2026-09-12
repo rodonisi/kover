@@ -10,7 +10,7 @@ import 'package:kover/models/page_content.dart';
 import 'package:kover/riverpod/managers/font_manager.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader.dart';
-import 'package:kover/riverpod/providers/reader//reader.dart';
+import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
@@ -366,9 +366,14 @@ class EpubNavigation extends _$EpubNavigation {
   Future<EpubNavigationState> build({
     required int seriesId,
     required int chapterId,
+    required int? readingListId,
   }) async {
     final reader = await ref.read(
-      readerProvider(seriesId: seriesId, chapterId: chapterId).future,
+      readerProvider(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: readingListId,
+      ).future,
     );
 
     ref.listen(
@@ -428,24 +433,33 @@ class EpubNavigation extends _$EpubNavigation {
                 readerProvider(
                   seriesId: seriesId,
                   chapterId: chapterId,
+                  readingListId: readingListId,
                 ).notifier,
               )
               .markComplete();
           return;
         }
 
-        await ref
-            .read(
-              readerProvider(
-                seriesId: seriesId,
-                chapterId: chapterId,
-              ).notifier,
-            )
-            .saveProgress(
-              page: data.page,
-              scrollId: scrollId,
-              handleCompletion: false,
-            );
+        try {
+          final reader = ref.read(
+            readerProvider(
+              seriesId: seriesId,
+              chapterId: chapterId,
+              readingListId: readingListId,
+            ).notifier,
+          );
+          await reader.saveProgress(
+            page: data.page,
+            scrollId: scrollId,
+            handleCompletion: false,
+          );
+        } catch (e, stacktrace) {
+          log.error(
+            'handleProgress save failed',
+            error: e,
+            stacktrace: stacktrace,
+          );
+        }
       });
     });
   }
@@ -455,6 +469,7 @@ class EpubNavigation extends _$EpubNavigation {
       readerNavigationProvider(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
       ).select((state) => state.whenData((state) => state.currentPage)),
       (prev, next) async {
         next.whenData(
@@ -491,6 +506,7 @@ class EpubNavigation extends _$EpubNavigation {
           readerNavigationProvider(
             seriesId: seriesId,
             chapterId: chapterId,
+            readingListId: readingListId,
           ).notifier,
         )
         .handleCompletion(false);
@@ -581,6 +597,7 @@ class EpubNavigation extends _$EpubNavigation {
           readerNavigationProvider(
             seriesId: seriesId,
             chapterId: chapterId,
+            readingListId: readingListId,
           ).notifier,
         )
         .jumpToPage(page);
@@ -647,12 +664,14 @@ Future<EpubReaderSubpageState> epubReaderSubpage(
   Ref ref, {
   required int seriesId,
   required int chapterId,
+  required int? readingListId,
   required int page,
 }) async {
   final navigationFuture = ref.watch(
     epubNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
+      readingListId: readingListId,
     ).future,
   );
   final reflowFuture = ref.watch(

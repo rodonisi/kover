@@ -13,6 +13,7 @@ import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/cards/cover_card.dart';
 import 'package:kover/widgets/cards/cover_image.dart';
 import 'package:kover/widgets/cards/download_status_icon.dart';
+import 'package:kover/widgets/cards/series_card_provider.dart';
 import 'package:kover/widgets/context_menu/actions_menu.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
@@ -26,12 +27,10 @@ class SeriesCard extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final series = ref.watch(seriesProvider(seriesId: seriesId));
+    final model = ref.watch(seriesCardProvider(seriesId: seriesId));
     final progress = ref
         .watch(seriesProgressProvider(seriesId: seriesId))
         .value;
-
-    final canRead = ref.watch(canReadSeriesProvider(seriesId)).value ?? false;
 
     final wantToRead = wantToReadProvider(seriesId: seriesId);
     final isWantToRead = ref.watch(wantToRead).value ?? false;
@@ -43,8 +42,8 @@ class SeriesCard extends HookConsumerWidget {
         0.0;
 
     return Async(
-      asyncValue: series,
-      data: (series) => ActionsContextMenu(
+      asyncValue: model,
+      data: (data) => ActionsContextMenu(
         onMarkRead: () async {
           await ref.read(markReadProvider.notifier).markRead();
         },
@@ -83,9 +82,9 @@ class SeriesCard extends HookConsumerWidget {
               }
             : null,
         child: CoverCard(
-          title: series.name,
+          title: data.series.name,
           icon: Icon(
-            switch (series.format) {
+            switch (data.series.format) {
               .epub => KoverIcons.epubFormat,
               .archive => KoverIcons.archiveFormat,
               .image => KoverIcons.imageFormat,
@@ -105,9 +104,13 @@ class SeriesCard extends HookConsumerWidget {
             ).push(context);
           },
           onActionTap: () {
-            ReaderRoute(seriesId: seriesId).push(context);
+            ReaderRoute(
+              seriesId: seriesId,
+              chapterId: data.continuePoint.id,
+              readingListId: null,
+            ).push(context);
           },
-          actionDisabled: !canRead,
+          actionDisabled: !data.canRead,
         ),
       ),
     );

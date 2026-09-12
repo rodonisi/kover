@@ -12,6 +12,7 @@ class const EpubVerticalSubpages({
   super.key,
   required final int seriesId,
   required final int chapterId,
+  required final int? readingListId,
   required final int page,
   required final CachedImageFactory imageCache,
 }) extends HookConsumerWidget {
@@ -20,11 +21,13 @@ class const EpubVerticalSubpages({
     final navigationProvider = epubNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
+      readingListId: readingListId,
     );
     final subpageState = ref.watch(
       epubReaderSubpageProvider(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
         page: page,
       ),
     );

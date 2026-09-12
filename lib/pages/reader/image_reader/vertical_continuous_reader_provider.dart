@@ -17,9 +17,14 @@ Future<VerticalContinuousReaderModel> verticalContinuousReader(
   Ref ref, {
   required int seriesId,
   required int chapterId,
+  required int? readingListId,
 }) async {
   final navState = await ref.watch(
-    readerNavigationProvider(seriesId: seriesId, chapterId: chapterId).future,
+    readerNavigationProvider(
+      seriesId: seriesId,
+      chapterId: chapterId,
+      readingListId: readingListId,
+    ).future,
   );
   final settings = await ref.watch(
     imageReaderSettingsProvider(seriesId: seriesId).future,

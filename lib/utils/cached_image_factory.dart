@@ -32,7 +32,7 @@ class CachedImageFactory extends WidgetFactory {
         key: ValueKey(hash),
         image: provider,
         gaplessPlayback: true,
-        fit: .fill,
+        fit: .contain,
         frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
           if (wasSynchronouslyLoaded || frame != null) {
             return child;

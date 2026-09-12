@@ -8,15 +8,15 @@ import 'package:material_ui/material_ui.dart';
 
 class ReaderHeader extends ConsumerWidget {
   final int seriesId;
-  final int? chapterId;
+  final int chapterId;
   final int? readingListId;
   final bool hasDrawer;
 
   const new({
     super.key,
     required this.seriesId,
-    this.chapterId,
-    this.readingListId,
+    required this.chapterId,
+    required this.readingListId,
     this.hasDrawer = false,
   });
 

@@ -78,6 +78,7 @@ class ChapterCard extends HookConsumerWidget {
             ReaderRoute(
               seriesId: seriesId,
               chapterId: chapterId,
+              readingListId: null,
             ).push(context);
           },
           actionDisabled: !canRead,

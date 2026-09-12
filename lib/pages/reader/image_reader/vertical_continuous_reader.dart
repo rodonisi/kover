@@ -18,11 +18,13 @@ import 'package:scrollview_observer/scrollview_observer.dart';
 class VerticalContinuousReader extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
+  final int? readingListId;
 
-  const VerticalContinuousReader({
+  const new({
     super.key,
     required this.seriesId,
     required this.chapterId,
+    required this.readingListId,
   });
 
   @override
@@ -30,12 +32,14 @@ class VerticalContinuousReader extends HookConsumerWidget {
     final navProvider = readerNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
+      readingListId: readingListId,
     );
 
     final model = ref.watch(
       verticalContinuousReaderProvider(
         seriesId: seriesId,
         chapterId: chapterId,
+        readingListId: readingListId,
       ),
     );
 
@@ -81,6 +85,7 @@ class VerticalContinuousReader extends HookConsumerWidget {
                 final navProvider = readerNavigationProvider(
                   seriesId: seriesId,
                   chapterId: chapterId,
+                  readingListId: readingListId,
                 );
                 ref.read(navProvider).whenData((navState) {
                   ref

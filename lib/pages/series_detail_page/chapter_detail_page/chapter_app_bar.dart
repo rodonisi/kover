@@ -131,6 +131,7 @@ class _ChapterTitleContinueButton extends ConsumerWidget {
           ? () => ReaderRoute(
               seriesId: seriesId,
               chapterId: chapterId,
+              readingListId: null,
             ).push(context)
           : null,
       child: _ChapterContinueButtonImage(chapterId: chapterId),
@@ -159,8 +160,11 @@ class _ChapterContinuePointButton extends ConsumerWidget {
       cover: _ChapterContinueButtonImage(chapterId: chapterId),
       progress: progress,
       showProgress: false,
-      onTap: () =>
-          ReaderRoute(seriesId: seriesId, chapterId: chapterId).push(context),
+      onTap: () => ReaderRoute(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        readingListId: null,
+      ).push(context),
     );
   }
 }
