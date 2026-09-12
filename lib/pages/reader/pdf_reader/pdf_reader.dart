@@ -97,18 +97,10 @@ class PdfReader extends HookConsumerWidget {
           readingListId: readingListId,
           disableGestures: hasSelection.value,
           onNextPage: () {
-            if (data.commonSettings.readDirection == .leftToRight) {
-              ref.read(navProvider.notifier).nextPage();
-            } else {
-              ref.read(navProvider.notifier).previousPage();
-            }
+            ref.read(navProvider.notifier).nextPage();
           },
           onPreviousPage: () {
-            if (data.commonSettings.readDirection == .leftToRight) {
-              ref.read(navProvider.notifier).previousPage();
-            } else {
-              ref.read(navProvider.notifier).nextPage();
-            }
+            ref.read(navProvider.notifier).previousPage();
           },
           onJumpToPage: (page) =>
               ref.read(navProvider.notifier).jumpToPage(page),

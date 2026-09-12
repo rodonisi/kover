@@ -2,7 +2,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/epub_reader/render_epub_content.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
-import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
@@ -42,14 +41,6 @@ class const EpubHorizontalSubpages({
         ? data.reflow.subpages.length + 1
         : data.reflow.subpages.length;
     final spreadCount = (count + 1) ~/ 2;
-
-    final readDirection = ref.watch(
-      commonReaderSettingsProvider(
-        seriesId: seriesId,
-      ).select(
-        (value) => value.requireValue.readDirection,
-      ),
-    );
 
     final canScroll = data.navigationGesturesEnabled && !data.reduceAnimations;
     final scrollPhysics = canScroll
@@ -125,7 +116,6 @@ class const EpubHorizontalSubpages({
       controller: controller,
       allowImplicitScrolling: true,
       scrollCacheExtent: const .viewport(4),
-      reverse: data.reverse,
       itemCount: spreads ? spreadCount : count,
       physics: scrollPhysics,
       onPageChanged: (newPage) {
@@ -144,10 +134,6 @@ class const EpubHorizontalSubpages({
         }
 
         return Row(
-          textDirection: switch (readDirection) {
-            .leftToRight => .ltr,
-            .rightToLeft => .rtl,
-          },
           children: [
             Expanded(child: buildColumn(index * 2)),
             Expanded(child: buildColumn(index * 2 + 1)),

@@ -1,5 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/mapping/enums/read_direction.dart';
 import 'package:kover/pages/reader/epub_reader/epub_horizontal_subpages.dart';
 import 'package:kover/pages/reader/epub_reader/epub_measure_root.dart';
 import 'package:kover/pages/reader/epub_reader/epub_reader_provider.dart';
@@ -46,14 +47,10 @@ class EpubReader extends HookConsumerWidget {
         readingListId: readingListId,
         disableGestures: hasSelection.value,
         onNextPage: () {
-          data.commonSettings.readDirection == .leftToRight
-              ? ref.read(nav.notifier).nextPage()
-              : ref.read(nav.notifier).previousPage();
+          ref.read(nav.notifier).nextPage();
         },
         onPreviousPage: () {
-          data.commonSettings.readDirection == .leftToRight
-              ? ref.read(nav.notifier).previousPage()
-              : ref.read(nav.notifier).nextPage();
+          ref.read(nav.notifier).previousPage();
         },
         onJumpToPage: (page) {
           ref.read(nav.notifier).jumpToPage(page);
@@ -104,43 +101,43 @@ class EpubReader extends HookConsumerWidget {
                     Positioned.fill(
                       child: Offstage(
                         offstage: !navState.ready,
-                        child: PageView.builder(
-                          clipBehavior: .none,
-                          controller: controller,
-                          itemCount: navState.totalPages,
-                          allowImplicitScrolling: true,
-                          scrollCacheExtent: const .viewport(4),
-                          scrollDirection: switch (data.mode) {
-                            .horizontal => .horizontal,
-                            .vertical => .vertical,
-                            .spreads => .horizontal,
-                          },
-                          reverse:
-                              data.commonSettings.readDirection ==
-                                  .rightToLeft &&
-                              data.mode != .vertical,
-                          physics: const NeverScrollableScrollPhysics(),
-                          onPageChanged: (newPage) {
-                            ref.read(nav.notifier).jumpToPage(newPage);
-                          },
-                          itemBuilder: (context, index) {
-                            return _Page(
-                              seriesId: seriesId,
-                              chapterId: chapterId,
-                              page: index,
-                              reverse:
-                                  data.commonSettings.readDirection ==
-                                      .rightToLeft &&
-                                  data.mode != .vertical,
-                              mode: data.mode,
-                              outerController: controller,
-                              onSelectionChanged: (selected) {
-                                if (selected != hasSelection.value) {
-                                  hasSelection.value = selected;
-                                }
-                              },
-                            );
-                          },
+                        child: Directionality(
+                          textDirection: data.commonSettings.readDirection
+                              .toTextDirection(),
+                          child: PageView.builder(
+                            clipBehavior: .none,
+                            controller: controller,
+                            itemCount: navState.totalPages,
+                            allowImplicitScrolling: true,
+                            scrollCacheExtent: const .viewport(4),
+                            scrollDirection: switch (data.mode) {
+                              .horizontal => .horizontal,
+                              .vertical => .vertical,
+                              .spreads => .horizontal,
+                            },
+                            physics: const NeverScrollableScrollPhysics(),
+                            onPageChanged: (newPage) {
+                              ref.read(nav.notifier).jumpToPage(newPage);
+                            },
+                            itemBuilder: (context, index) {
+                              return _Page(
+                                seriesId: seriesId,
+                                chapterId: chapterId,
+                                page: index,
+                                reverse:
+                                    data.commonSettings.readDirection ==
+                                        .rightToLeft &&
+                                    data.mode != .vertical,
+                                mode: data.mode,
+                                outerController: controller,
+                                onSelectionChanged: (selected) {
+                                  if (selected != hasSelection.value) {
+                                    hasSelection.value = selected;
+                                  }
+                                },
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
