@@ -927,5 +927,29 @@
     "defaultLabel": "По умолчанию",
     "@defaultLabel": {
         "description": "Label for a default option in a setting"
+    },
+    "sortOrder": "Порядок сортировки",
+    "@sortOrder": {
+        "description": "Label for the sort order option in list"
+    },
+    "progress": "Прогресс",
+    "@progress": {
+        "description": "Label for sorting by progress option"
+    },
+    "lastRead": "Последнее прочитанное",
+    "@lastRead": {
+        "description": "Label for sorting by last read option"
+    },
+    "syncingSeriesDetails": "Синхронизация данных о серии",
+    "@syncingSeriesDetails": {
+        "description": "Label for the syncing series details phase"
+    },
+    "syncingWantToRead": "Синхронизация «Хочу прочитать»",
+    "@syncingWantToRead": {
+        "description": "Label for the syncing Want to Read phase"
+    },
+    "lockHorizontalPan": "Заблокировать горизонтальную прокрутку",
+    "@lockHorizontalPan": {
+        "description": "Label for the lock horizontal panning setting in the vertical reader"
     }
 }
