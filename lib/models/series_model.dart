@@ -26,6 +26,7 @@ sealed class SeriesModel with _$SeriesModel {
     required int? wordCount,
     required String? primaryColor,
     required String? secondaryColor,
+    required DateTime? lastSynced,
   }) = _SeriesModel;
 
   factory SeriesModel.fromJson(Map<String, Object?> json) =>
@@ -42,6 +43,7 @@ sealed class SeriesModel with _$SeriesModel {
       wordCount: table.wordCount,
       primaryColor: table.primaryColor,
       secondaryColor: table.secondaryColor,
+      lastSynced: table.lastSynced,
     );
   }
 }

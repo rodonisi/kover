@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/models/chapter_model.dart';
 import 'package:kover/models/series_model.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -25,6 +26,15 @@ Future<SeriesCardModel> seriesCard(
   final series = await ref.watch(
     seriesProvider(seriesId: seriesId).future,
   );
+
+  if (series.lastSynced == null) {
+    ref
+        .read(syncManagerProvider.notifier)
+        .refreshMetadataAndDetails(
+          seriesId: seriesId,
+        );
+  }
+
   final continuePoint = await ref.watch(
     continuePointProvider(seriesId: seriesId).future,
   );
