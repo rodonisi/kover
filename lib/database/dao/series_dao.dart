@@ -449,7 +449,6 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     UnorderedSortOption orderBy = .dateAdded,
     SortDirection direction = .descending,
     bool hideRead = false,
-    bo,
   }) {
     final q =
         select(series).join([
@@ -563,10 +562,16 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     final ids = entries.map((e) => e.id.value).toSet();
 
     await transaction(() async {
+      final localIds = await (selectOnly(
+        series,
+      )..addColumns([series.id])).map((row) => row.read(series.id)!).get();
+
+      final toDelete = localIds.where((id) => !ids.contains(id));
+
       await chunkedOperation(
-        items: ids,
+        items: toDelete,
         operation: (b) async {
-          await (delete(series)..where((tbl) => tbl.id.isNotIn(b))).go();
+          await (delete(series)..where((tbl) => tbl.id.isIn(b))).go();
         },
       );
       await upsertSeriesBatch(entries);
@@ -683,18 +688,21 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       batch.insertAllOnConflictUpdate(chapters, allChapters);
     });
 
-    await batch((batch) {
-      chunkedOperation(
-        items: allChapters.map((c) => c.id.value),
-        operation: (chunk) {
+    await chunkedOperation(
+      items: allChapters.map((c) => c.id.value),
+      operation: (chunk) async {
+        await batch((batch) {
           batch.deleteWhere(
             chapterPeopleRoles,
             (t) => t.chapterId.isIn(chunk),
           );
           batch.deleteWhere(chapterGenres, (t) => t.chapterId.isIn(chunk));
           batch.deleteWhere(chapterTags, (t) => t.chapterId.isIn(chunk));
-        },
-      );
+        });
+      },
+    );
+
+    await batch((batch) {
       batch.insertAllOnConflictUpdate(people, allPeople);
       batch.insertAllOnConflictUpdate(genres, allGenres);
       batch.insertAllOnConflictUpdate(tags, allTags);
