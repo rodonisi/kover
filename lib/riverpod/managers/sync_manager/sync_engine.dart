@@ -26,6 +26,7 @@ import 'package:kover/sync/server_settings_sync_operations.dart';
 import 'package:kover/sync/smart_filters_sync_operations.dart';
 import 'package:kover/sync/volume_sync_operations.dart';
 import 'package:kover/sync/want_to_read_sync_operations.dart';
+import 'package:pool/pool.dart';
 
 class SyncEngine({
   required final SeriesRepository seriesRepo,
@@ -41,6 +42,8 @@ class SyncEngine({
   required final ReadingListsRepository readingListsRepo,
   required final SmartFiltersRepository smartFiltersRepo,
 }) {
+  final _pool = Pool(8);
+
   factory fromCredentials({
     required String url,
     required String apiKey,
@@ -173,93 +176,99 @@ class SyncEngine({
   }
 
   Future<void> syncAllSeries() async {
-    await seriesRepo.refreshAllSeries();
+    await _pool.withResource(seriesRepo.refreshAllSeries);
   }
 
   Future<void> syncMetadata() async {
-    await seriesRepo.fetchMissingMetadata();
+    await _pool.withResource(seriesRepo.fetchMissingMetadata);
   }
 
   Future<void> syncSeriesDetails() async {
-    await seriesRepo.refreshOutdatedDetails();
+    await _pool.withResource(seriesRepo.refreshOutdatedDetails);
   }
 
   Future<void> syncTocs() async {
-    await bookRepo.fetchMissingChaptersTocs();
+    await _pool.withResource(bookRepo.fetchMissingChaptersTocs);
   }
 
   Future<void> syncLibraries() async {
-    await librariesRepo.refreshLibraries();
+    await _pool.withResource(librariesRepo.refreshLibraries);
   }
 
   Future<void> syncOnDeck() async {
-    await seriesRepo.syncOnDeck();
+    await _pool.withResource(seriesRepo.syncOnDeck);
   }
 
   Future<void> syncRecentlyUpdated() async {
-    await seriesRepo.refreshRecentlyUpdated();
+    await _pool.withResource(seriesRepo.refreshRecentlyUpdated);
   }
 
   Future<void> syncRecentlyAdded() async {
-    await seriesRepo.refreshRecentlyAdded();
+    await _pool.withResource(seriesRepo.refreshRecentlyAdded);
   }
 
   Future<void> syncProgress() async {
-    await readerRepo.refreshOutdatedProgress();
-    await readerRepo.mergeProgress();
+    await _pool.withResource(readerRepo.refreshOutdatedProgress);
+    await _pool.withResource(readerRepo.mergeProgress);
   }
 
   Future<void> syncWantToRead() async {
-    await wantToReadRepo.mergeWantToRead();
+    await _pool.withResource(wantToReadRepo.mergeWantToRead);
   }
 
   Future<void> syncCollections() async {
-    await collectionsRepo.refreshCollections();
+    await _pool.withResource(collectionsRepo.refreshCollections);
   }
 
   Future<void> syncReadingLists() async {
-    await readingListsRepo.refreshReadingLists();
+    await _pool.withResource(readingListsRepo.refreshReadingLists);
   }
 
   Future<void> syncCovers() async {
     await Future.wait([
-      seriesRepo.fetchMissingCovers(),
-      volumesRepo.fetchMissingCovers(),
-      chaptersRepo.fetchMissingCovers(),
-      collectionsRepo.fetchMissingCovers(),
-      readingListsRepo.fetchMissingCovers(),
+      _pool.withResource(seriesRepo.fetchMissingCovers),
+      _pool.withResource(volumesRepo.fetchMissingCovers),
+      _pool.withResource(chaptersRepo.fetchMissingCovers),
+      _pool.withResource(collectionsRepo.fetchMissingCovers),
+      _pool.withResource(readingListsRepo.fetchMissingCovers),
     ]);
   }
 
   Future<void> syncSidenav() async {
-    await librariesRepo.refreshSidenav();
+    await _pool.withResource(librariesRepo.refreshSidenav);
   }
 
   Future<void> syncSmartFilters() async {
-    await smartFiltersRepo.syncSmartFilters();
+    await _pool.withResource(smartFiltersRepo.syncSmartFilters);
   }
 
   Future<void> syncDashboard() async {
-    await librariesRepo.refreshDashboard();
+    await _pool.withResource(librariesRepo.refreshDashboard);
   }
 
   Future<void> refreshMetadataAndDetails({required int seriesId}) async {
-    await seriesRepo.refreshMetadataAndDetails(seriesId: seriesId);
+    await _pool.withResource(
+      () => seriesRepo.refreshMetadataAndDetails(seriesId: seriesId),
+    );
   }
 
   Future<void> refreshCovers({required int seriesId}) async {
-    await seriesRepo.refreshCovers(seriesId: seriesId);
+    await _pool.withResource(
+      () => seriesRepo.refreshCovers(seriesId: seriesId),
+    );
   }
 
   Future<void> refreshToc({required int chapterId}) async {
-    await bookRepo.refreshChapterToc(chapterId: chapterId);
+    await _pool.withResource(
+      () => bookRepo.refreshChapterToc(chapterId: chapterId),
+    );
   }
 
   Future<void> refreshServerSettings() async {
-    await serverSettingsRepo.refreshServerSettings();
+    await _pool.withResource(serverSettingsRepo.refreshServerSettings);
   }
 
   Future<void> refreshServerFonts() async {
-    await serverFontsRepo.refreshServerFonts();
+    await _pool.withResource(serverFontsRepo.refreshServerFonts);
   }
 }
