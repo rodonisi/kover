@@ -11,7 +11,7 @@
     "@onDeck": {
         "description": "Label for the home page on deck section"
     },
-    "recentlyUpdated": "اخیرا بروز شده",
+    "recentlyUpdated": "به تازگی بروز شده",
     "@recentlyUpdated": {
         "description": "Label for the home page recently updated section"
     },
@@ -35,7 +35,7 @@
     "@allSeries": {
         "description": "Label for the all series menu entry"
     },
-    "collections": "مجموعه‌ها",
+    "collections": "کالکشن‌ها",
     "@collections": {
         "description": "Label for the collections menu entry"
     },
@@ -103,7 +103,7 @@
     "@sendDiagnostics": {
         "description": "Label for the send diagnostics setting"
     },
-    "sendDiagnosticsDescription": "با ارسال گزارش خطاها و آمار برنامه بصورت ناشناس به توسعه آن کمک کنید. این گزارشات حاوی هیچگونه اطلاعات شخصی نیست و صرفا به جهت بهبود برنامه استفاده می‌شود.",
+    "sendDiagnosticsDescription": "با ارسال ناشناس گزارش خطاها و آمار برنامه به توسعه آن کمک کنید. این گزارشات حاوی هیچگونه اطلاعات شخصی نیست و صرفا جهت بهبود برنامه استفاده می‌شود.",
     "@sendDiagnosticsDescription": {
         "description": "Description for the send diagnostics setting"
     },
@@ -135,15 +135,15 @@
     "@dataManagement": {
         "description": "Label for the data management section"
     },
-    "downloadAllCovers": "دانلود همه تصویر جلدها",
+    "downloadAllCovers": "ذخیره آفلاین تصاویر جلدها",
     "@downloadAllCovers": {
         "description": "Label for the download all covers option"
     },
-    "downloadAllCoversDescription": "اگر فعال نباشد، تصویر جلدها فقط هنگام دریافت چپترها دانلود خواهد شد. در هر صورت، اگر اتصال به سرور برقرار باشد، تصویر جلدهایی که موجود نیستند دانلود می‌شود.",
+    "downloadAllCoversDescription": "اگر گزینه فعال نباشد، تصاویر جلدها فقط هنگام دانلود چپترها دریافت خواهد شد. در هر صورت، اگر اتصال به سرور برقرار باشد، تصاویر جلدهایی که موجود نیستند دانلود می‌شود.",
     "@downloadAllCoversDescription": {
         "description": "Description for the download all covers option"
     },
-    "maxConcurrentDownloads": "بیشینه تعداد دانلود همزمان",
+    "maxConcurrentDownloads": "حداکثر دانلود همزمان",
     "@maxConcurrentDownloads": {
         "description": "Label for the max concurrent downloads setting"
     },
@@ -155,7 +155,7 @@
     "@clearDownloads": {
         "description": "Label for the clear downloads button"
     },
-    "clearCovers": "پاکسازی تصویر جلدها",
+    "clearCovers": "پاکسازی تصاویر جلدها",
     "@clearCovers": {
         "description": "Label for the clear covers button"
     },
@@ -167,7 +167,7 @@
     "@clearDatabaseDialogTitle": {
         "description": "Title for the clear database confirmation dialog"
     },
-    "clearDatabaseDialogContent": "در صورت ادامه کل پایگاه داده محلی به همراه اطلاعات آفلاین دانلود شده و همچنین پیشرفت‌های مطالعه همگام نشده با سرور، حذف خواهد شد. این عملیات قابل برگشت نیست.",
+    "clearDatabaseDialogContent": "در صورت ادامه کل پایگاه داده محلی به همراه فایل‌های دانلود شده و همچنین پیشرفت‌های مطالعه همگام نشده با سرور، حذف خواهد شد. این عملیات قابل برگشت نیست.",
     "@clearDatabaseDialogContent": {
         "description": "Content for the clear database confirmation dialog"
     },
@@ -199,7 +199,7 @@
     "@save": {
         "description": "Label for the save credentials button"
     },
-    "sortBy": "ترتیب با",
+    "sortBy": "ترتیب بر اساس",
     "@sortBy": {
         "description": "Label for the sort by option in list"
     },
@@ -215,11 +215,11 @@
     "@dateAdded": {
         "description": "Label for sorting by date added option"
     },
-    "lastModified": "آخرین ویرایش",
+    "lastModified": "تاریخ ویرایش",
     "@lastModified": {
         "description": "Label for sorting by last modified option"
     },
-    "progress": "پیشرفت",
+    "progress": "میزان پیشرفت",
     "@progress": {
         "description": "Label for sorting by progress option"
     },
@@ -239,7 +239,7 @@
     "@descending": {
         "description": "Label for descending sort direction option"
     },
-    "specials": "ویژه‌ها",
+    "specials": "قسمت‌های ویژه‌",
     "@specials": {
         "description": "Label for the specials section in the series details page"
     },
@@ -327,11 +327,11 @@
     "@goToSeries": {
         "description": "Label for the go to series button in the reading list chapter entry context menu"
     },
-    "markAsRead": "علامت زدن بعنوان خوانده‌شده",
+    "markAsRead": "علامت بعنوان خوانده‌",
     "@markAsRead": {
         "description": "Label for the mark as read button in context menus"
     },
-    "markAsUnread": "علامت زدن بعنوان خوانده نشده",
+    "markAsUnread": "علامت بعنوان خوانده نشده",
     "@markAsUnread": {
         "description": "Label for the mark as unread button in context menus"
     },
@@ -369,7 +369,7 @@
     "@notSignedIn": {
         "description": "Heading text when user is not signed in"
     },
-    "noCredentialsDescription": "مشخصات سرور تعیین نشده است. لطفا در تنظیمات، آدرس URL پایه سرور و کلید API را وارد نمایید.",
+    "noCredentialsDescription": "مشخصات سرور وارد نشده است. لطفا در قسمت تنظیمات، آدرس URL پایه سرور و کلید API را بنویسید.",
     "@noCredentialsDescription": {
         "description": "Description text when no credentials are configured"
     },
@@ -385,7 +385,7 @@
     "@connectionErrorDescription": {
         "description": "Description text when a connection error occurs"
     },
-    "retry": "تلاش دوباره",
+    "retry": "تلاش مجدد",
     "@retry": {
         "description": "Label for the retry button"
     },
@@ -405,11 +405,11 @@
     "@imIn": {
         "description": "Label for the accept button in the monitoring opt-out dialog"
     },
-    "addToWantToRead": "اضافه به لیست مطالعه آینده",
+    "addToWantToRead": "اضافه به لیست می‌خواهم بخوانم",
     "@addToWantToRead": {
         "description": "Label for the add to want to read context menu item"
     },
-    "removeFromWantToRead": "حذف از لیست مطالعه آینده",
+    "removeFromWantToRead": "حذف از لیست می‌خواهم بخوانم",
     "@removeFromWantToRead": {
         "description": "Label for the remove from want to read context menu item"
     },
@@ -425,11 +425,11 @@
     "@refreshMetadata": {
         "description": "Label for the refresh metadata context menu item"
     },
-    "refreshCovers": "بروزرسانی تصاویر جلد",
+    "refreshCovers": "بروزرسانی تصاویر جلدها",
     "@refreshCovers": {
         "description": "Label for the refresh covers context menu item"
     },
-    "noActiveSyncOperations": "هیچ عملیات همگام‌سازی فعال نیست",
+    "noActiveSyncOperations": "هیچ عملیات همگام‌سازی در جریان نیست",
     "@noActiveSyncOperations": {
         "description": "Message shown when there are no active sync operations"
     },
@@ -445,11 +445,11 @@
     "@syncingMetadata": {
         "description": "Label for the syncing metadata phase"
     },
-    "syncingRecentlyAdded": "همگام‌سازی اخیرا اضافه شده",
+    "syncingRecentlyAdded": "همگام‌سازی به تازگی اضافه شده",
     "@syncingRecentlyAdded": {
         "description": "Label for the syncing recently added phase"
     },
-    "syncingRecentlyUpdated": "همگام‌سازی اخیرا بروز شده",
+    "syncingRecentlyUpdated": "همگام‌سازی به تازگی بروز شده",
     "@syncingRecentlyUpdated": {
         "description": "Label for the syncing recently updated phase"
     },
@@ -457,19 +457,19 @@
     "@syncingLibraries": {
         "description": "Label for the syncing libraries phase"
     },
-    "syncingProgress": "همگام‌سازی پیشرفت",
+    "syncingProgress": "همگام‌سازی پیشرفت مطالعه",
     "@syncingProgress": {
         "description": "Label for the syncing progress phase"
     },
-    "syncingCovers": "همگام‌سازی تصویر جلدها",
+    "syncingCovers": "همگام‌سازی تصاویر جلدها",
     "@syncingCovers": {
         "description": "Label for the syncing covers phase"
     },
-    "syncingWantToRead": "همگام‌سازی لیست مطالعه آینده",
+    "syncingWantToRead": "همگام‌سازی لیست می‌خواهم بخوانم",
     "@syncingWantToRead": {
         "description": "Label for the syncing Want to Read phase"
     },
-    "syncingCollections": "همگام‌سازی مجموعه‌ها",
+    "syncingCollections": "همگام‌سازی کالکشن‌ها",
     "@syncingCollections": {
         "description": "Label for the syncing collections phase"
     },
@@ -519,7 +519,7 @@
     "@refreshingServerFonts": {
         "description": "Message shown while refreshing server fonts"
     },
-    "series": "سری‌ها",
+    "series": "Series",
     "@series": {
         "description": "Label for the series search section header"
     },
@@ -593,7 +593,7 @@
     "@showLess": {
         "description": "Label for the show less button"
     },
-    "cancelAll": "لغو همگی",
+    "cancelAll": "لغو همه",
     "@cancelAll": {
         "description": "Label for the cancel all downloads button"
     },
@@ -605,7 +605,7 @@
     "@readerSettings": {
         "description": "Label for the reader settings bottom sheet title"
     },
-    "readingDirection": "جهت مطالعه",
+    "readingDirection": "جهت صفحات",
     "@readingDirection": {
         "description": "Label for the reading direction setting"
     },
@@ -621,11 +621,11 @@
     "@readerMode": {
         "description": "Label for the reader mode setting"
     },
-    "vertical": "شکل عمودی",
+    "vertical": "اسکرول",
     "@vertical": {
         "description": "Label for the vertical reader mode option"
     },
-    "horizontal": "شکل افقی",
+    "horizontal": "ورق زدن",
     "@horizontal": {
         "description": "Label for the horizontal reader mode option"
     },
@@ -673,7 +673,7 @@
     "@ignoreSafeAreas": {
         "description": "Label for the ignore safe areas setting"
     },
-    "lockHorizontalPan": "قفل اسکرول عمودی",
+    "lockHorizontalPan": "قفل حرکت افقی هنگام اسکرول",
     "@lockHorizontalPan": {
         "description": "Label for the lock horizontal panning setting in the vertical reader"
     },
@@ -681,7 +681,7 @@
     "@showProgressBar": {
         "description": "Label for the show progress bar setting"
     },
-    "setDefaults": "برگشت تنظیمات اولیه",
+    "setDefaults": "تنظیمات پیش‌فرض",
     "@setDefaults": {
         "description": "Label for the set defaults button"
     },
@@ -774,7 +774,7 @@
     "@ignoreCertificateValidation": {
         "description": "Setting that allows a trusted server with an invalid HTTPS certificate"
     },
-    "ignoreCertificateValidationDescription": "مجوز دادن برای برقراری اتصال حتی به سروری که امکان اعتبارسنجی گواهینامه‌اش وجود ندارد. فقط برای سرورهایی که اعتماد دارید استفاده کنید.",
+    "ignoreCertificateValidationDescription": "اجازه برقراری اتصال به سروری که امکان اعتبارسنجی گواهینامه‌اش وجود ندارد. فقط برای سرورهایی که اعتماد دارید استفاده کنید.",
     "@ignoreCertificateValidationDescription": {
         "description": "Security warning for ignoring HTTPS certificate validation"
     },
@@ -822,7 +822,7 @@
     "@availableDestinations": {
         "description": "Label for the available destinations section"
     },
-    "navigationGestures": "حرکات ناوبری",
+    "navigationGestures": "حرکات ناوبری (برای ورق زدن)",
     "@navigationGestures": {
         "description": "Label for the enable navigation gestures reader option"
     },
@@ -859,7 +859,7 @@
     "@reduceAnimations": {
         "description": "Label for the reduce animation setting"
     },
-    "reduceAnimationsDescription": "بیشتر انیمیشن‌ها و انیمیشن جابجایی بین صفحات را غیرفعال می‌کند. توجه: وقتی این گزینه فعال باشد، حرکت کشیدن انگشت (swipe gesture) در حالات مطالعه افقی غیرفعال خواهد شد.",
+    "reduceAnimationsDescription": "بیشتر انیمیشن‌ها و انیمیشن جابجایی بین صفحات را غیرفعال می‌کند. توجه: وقتی این گزینه فعال باشد، حرکت کشیدن انگشت (swipe gesture) در حالت مطالعه افقی غیرفعال خواهد شد.",
     "@reduceAnimationsDescription": {
         "description": "Description for the reduce animation setting"
     },
@@ -875,7 +875,7 @@
     "@copiedToClipboard": {
         "description": "Message shown when a value is copied to the clipboard"
     },
-    "removeFromOnDeck": "از میز مطالعه حذف شد",
+    "removeFromOnDeck": "حذف از میز مطالعه",
     "@removeFromOnDeck": {
         "description": "Label for the remove from on deck context menu item"
     },
@@ -919,7 +919,7 @@
     "@left": {
         "description": "Label for the left text alignment option"
     },
-    "center": "وسط",
+    "center": "وسط چین",
     "@center": {
         "description": "Label for the center text alignment option"
     },
@@ -932,7 +932,7 @@
         "description": "Label for the justify text alignment option"
     },
     "removeParagraphIndentation": "حذف فاصله ابتدای هر پاراگراف",
-    "removeParagraphIndentationDescription": "اگر فعال شود، فاصله ابتدای هر پاراگراف از متن حذف می‌شود. اگر غیرفعال باشد، فاصله اورجینال خود EPUB حفظ می‌گردد.",
+    "removeParagraphIndentationDescription": "اگر فعال شود، فاصله ابتدای هر پاراگراف از متن حذف می‌شود. اگر غیرفعال باشد، فاصله اصلی خود EPUB حفظ می‌گردد.",
     "@removeParagraphIndentationDescription": {
         "description": "Description for the remove paragraphs indent setting"
     },
@@ -944,7 +944,7 @@
     "@fontDescription": {
         "description": "Description for the font override setting"
     },
-    "defaultLabel": "پيش‌ فرض",
+    "defaultLabel": "پيش‌‌فرض",
     "@defaultLabel": {
         "description": "Label for a default option in a setting"
     },
