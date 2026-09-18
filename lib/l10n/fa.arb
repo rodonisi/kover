@@ -669,7 +669,7 @@
     "@coverPageDescription": {
         "description": "Description for the cover page setting"
     },
-    "ignoreSafeAreas": "نادیده گرفتن حاشیه‌های امن",
+    "ignoreSafeAreas": "حالت تمام صفحه",
     "@ignoreSafeAreas": {
         "description": "Label for the ignore safe areas setting"
     },
@@ -747,7 +747,7 @@
     "@syncingTocs": {
         "description": "Label for the syncing chapters TOCs phase"
     },
-    "refreshingChapterToc": "بروزرسانی فهرست برای فصل {chapterId}",
+    "refreshingChapterToc": "در حال بروزرسانی فهرست برای فصل {chapterId}",
     "@refreshingChapterToc": {
         "description": "Label for the syncing chapter TOC phase with the chapter ID",
         "placeholders": {
