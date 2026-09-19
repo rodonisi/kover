@@ -690,10 +690,6 @@
     "@coverPageDescription": {
         "description": "Description for the cover page setting"
     },
-    "ignoreSafeAreas": "안전 영역 무시",
-    "@ignoreSafeAreas": {
-        "description": "Label for the ignore safe areas setting"
-    },
     "reset": "초기화",
     "@reset": {
         "description": "Label for the reset button"

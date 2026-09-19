@@ -490,10 +490,6 @@
     "@fitDirection": {
         "description": "Label for the image fit direction setting"
     },
-    "ignoreSafeAreas": "Sichere Gebiete ignorieren",
-    "@ignoreSafeAreas": {
-        "description": "Label for the ignore safe areas setting"
-    },
     "lineHeight": "Zeilenhöhe",
     "@lineHeight": {
         "description": "Label for the line height setting"

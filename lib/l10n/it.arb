@@ -191,10 +191,6 @@
     "@hoursCount": {
         "description": "Label for the estimated reading time in hours"
     },
-    "ignoreSafeAreas": "Ignora aree sicure",
-    "@ignoreSafeAreas": {
-        "description": "Label for the ignore safe areas setting"
-    },
     "imIn": "Ci sto!",
     "@imIn": {
         "description": "Label for the accept button in the monitoring opt-out dialog"
