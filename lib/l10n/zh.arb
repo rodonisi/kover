@@ -569,10 +569,6 @@
     "@coverPageDescription": {
         "description": "Description for the cover page setting"
     },
-    "ignoreSafeAreas": "忽略安全区域",
-    "@ignoreSafeAreas": {
-        "description": "Label for the ignore safe areas setting"
-    },
     "showProgressBar": "显示进度条",
     "@showProgressBar": {
         "description": "Label for the show progress bar setting"

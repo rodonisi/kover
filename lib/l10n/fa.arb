@@ -669,10 +669,6 @@
     "@coverPageDescription": {
         "description": "Description for the cover page setting"
     },
-    "ignoreSafeAreas": "حالت تمام صفحه",
-    "@ignoreSafeAreas": {
-        "description": "Label for the ignore safe areas setting"
-    },
     "lockHorizontalPan": "قفل حرکت افقی هنگام اسکرول",
     "@lockHorizontalPan": {
         "description": "Label for the lock horizontal panning setting in the vertical reader"

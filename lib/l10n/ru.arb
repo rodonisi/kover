@@ -669,10 +669,6 @@
     "@pageGap": {
         "description": "Label for the page gap setting"
     },
-    "ignoreSafeAreas": "Игнорировать безопасные зоны",
-    "@ignoreSafeAreas": {
-        "description": "Label for the ignore safe areas setting"
-    },
     "dismiss": "Скрыть",
     "@dismiss": {
         "description": "Label for the dismiss button in chapter snackbar"
