@@ -146,6 +146,7 @@ sealed class KoverIcons {
   static const IconData analytics = LucideIcons.barChart2;
   static const IconData logs = LucideIcons.fileText;
   static const IconData language = LucideIcons.languages;
+  static const IconData directionality = LucideIcons.globeCode;
   static const IconData unlockedOrientation = LucideIcons.rotateCwSquare;
   static const IconData landscape = LucideIcons.rectangleHorizontal;
   static const IconData portrait = LucideIcons.rectangleVertical;

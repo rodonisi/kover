@@ -1,5 +1,5 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/settings/navbar_editor.dart';
 import 'package:kover/riverpod/providers/router.dart';
@@ -33,6 +33,7 @@ class GeneralSettings extends ConsumerWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const _Locale(),
+            const _DirectionalityOverride(),
             const NavbarEditor(),
             const _SendDiagnostics(),
             const _LocalLogs(),
@@ -90,6 +91,49 @@ class _Locale extends ConsumerWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _DirectionalityOverride extends ConsumerWidget {
+  const _DirectionalityOverride();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final generalSettings = ref.watch(
+      generalSettingsProvider.select(
+        (state) => state.whenData((data) => data.textDirection),
+      ),
+    );
+
+    return Async(
+      asyncValue: generalSettings,
+      data: (textDirection) => SelectOption<TextDirection?>(
+        title: l.directionality,
+        description: l.directionalityDescription,
+        value: textDirection,
+        options: [
+          SelectOptionEntry(
+            value: null,
+            label: l.localeDefault,
+            icon: KoverIcons.directionality,
+          ),
+          SelectOptionEntry(
+            value: .ltr,
+            label: l.leftToRight,
+            icon: KoverIcons.ltr,
+          ),
+          SelectOptionEntry(
+            value: .rtl,
+            label: l.rightToLeft,
+            icon: KoverIcons.rtl,
+          ),
+        ],
+        onChanged: (value) {
+          ref.read(generalSettingsProvider.notifier).setTextDirection(value);
+        },
+      ),
     );
   }
 }
