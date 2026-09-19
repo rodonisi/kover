@@ -41,6 +41,11 @@ class App extends ConsumerWidget {
         (t) => t.whenOrNull(data: (data) => data.locale),
       ),
     );
+    final textDirection = ref.watch(
+      generalSettingsProvider.select(
+        (t) => t.whenOrNull(data: (data) => data.textDirection),
+      ),
+    );
 
     return EagerProviders(
       child: BreakpointsWatcher(
@@ -60,10 +65,17 @@ class App extends ConsumerWidget {
             supportedLocales: AppLocalizations.supportedLocales,
             locale: locale,
             builder: (context, child) {
+              final content = textDirection != null
+                  ? Directionality(
+                      textDirection: textDirection,
+                      child: child!,
+                    )
+                  : child!;
+
               // TODO: Remove once dependencies are updated to the standalone UI packages.
               // Known incompatibilities: context_menu does not apply theme.
               // ignore: deprecated_member_use
-              return MaterialUiCompatibilityBridge(child: child!);
+              return MaterialUiCompatibilityBridge(child: content);
             },
           ),
           loading: () => const AppLoading(),

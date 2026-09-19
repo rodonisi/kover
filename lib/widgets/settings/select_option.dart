@@ -1,5 +1,6 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:collection/collection.dart';
 import 'package:kover/widgets/settings/option_container.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SelectOption<T> extends StatelessWidget {
   final String title;
@@ -23,10 +24,15 @@ class SelectOption<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        // selected item or null
+        final selectedItem = options.firstWhereOrNull(
+          (option) => option.value == value,
+        );
+
         return OptionContainer(
           title: title,
           description: description,
-          icon: icon,
+          icon: icon ?? selectedItem?.icon,
           sameRow: true,
           child: ConstrainedBox(
             constraints: BoxConstraints(

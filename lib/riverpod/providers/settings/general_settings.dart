@@ -28,7 +28,8 @@ sealed class GeneralSettingsState with _$GeneralSettingsState {
 
   const factory GeneralSettingsState({
     @Default(false) bool sendDiagnostics,
-    String? localeString,
+    @Default(null) String? localeString,
+    @Default(null) TextDirection? textDirection,
     @Default(<NavbarDestinations>[.home, .wantToRead])
     List<NavbarDestinations> navbarDestinations,
   }) = _GeneralSettingsState;
@@ -65,6 +66,15 @@ class GeneralSettings extends _$GeneralSettings {
       attributes: {'value': value?.languageCode ?? 'null'},
     );
     state = AsyncData(current.copyWith(localeString: value?.languageCode));
+  }
+
+  Future<void> setTextDirection(TextDirection? value) async {
+    final current = await future;
+    log.info(
+      'set text direction',
+      attributes: {'value': value?.toString() ?? 'null'},
+    );
+    state = AsyncData(current.copyWith(textDirection: value));
   }
 
   Future<void> setNavbarDestinations(List<NavbarDestinations> value) async {

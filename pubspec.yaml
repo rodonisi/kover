@@ -50,6 +50,7 @@ dependencies:
   url_launcher: ^6.3.2
   pool: ^1.5.2
   sentry_flutter: ^9.30.0
+  collection: ^1.19.1
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0
   flutter_test:

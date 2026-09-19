@@ -958,5 +958,17 @@
     "startupLoadingMessage": "Setting everything up, please wait...",
     "@startupLoadingMessage": {
       "description": "Message shown when the app is starting up and loading data"
+    },
+    "directionality": "Directionality",
+    "@directionality": {
+      "description": "Label for the layout directionality setting, which determines the global ltr/rtl layout of the app"
+    },
+    "directionalityDescription": "Override the locale's default layout directionality for the entire app.",
+    "@directionalityDescription": {
+      "description": "Description for the layout directionality setting"
+    },
+    "localeDefault": "Locale Default",
+    "@locale": {
+      "description": "Label for the layout directionality locale default setting"
     }
 }
