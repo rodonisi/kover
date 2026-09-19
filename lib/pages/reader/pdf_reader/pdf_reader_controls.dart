@@ -86,7 +86,8 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                       if (SafePlatform.isMobile)
                         OrientationOption(seriesId: seriesId),
                       BooleanOption(
-                        title: l.ignoreSafeAreas,
+                        title: l.expandToEdges,
+                        description: l.expandToEdgesDescription,
                         icon: KoverIcons.safeArea,
                         value: settings.ignoreSafeAreas,
                         onChanged: (newValue) async {

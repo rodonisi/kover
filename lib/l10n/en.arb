@@ -670,9 +670,13 @@
     "@coverPageDescription": {
         "description": "Description for the cover page setting"
     },
-    "ignoreSafeAreas": "Ignore Safe Areas",
-    "@ignoreSafeAreas": {
-        "description": "Label for the ignore safe areas setting"
+    "expandToEdges": "Expand to Edges",
+    "@expandToEdges": {
+        "description": "Label for the expand to edges reader setting"
+    },
+    "expandToEdgesDescription": "Expand the content to the edges of the screen, ignoring safe areas. This may cause content to be cut off or rendered below hardware on some devices, such as hole-punch cameras.",
+    "@expandToEdgesDescription": {
+        "description": "Description for the expand to edges reader setting"
     },
     "lockHorizontalPan": "Lock Horizontal Scrolling",
     "@lockHorizontalPan": {
