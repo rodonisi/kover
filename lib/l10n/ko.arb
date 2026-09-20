@@ -947,5 +947,22 @@
     "lockHorizontalPan": "가로 스크롤 잠금",
     "@lockHorizontalPan": {
         "description": "Label for the lock horizontal panning setting in the vertical reader"
-    }
+    },
+    "expandToEdges": "모서리로 확장",
+    "@expandToEdges": {
+        "description": "Label for the expand to edges reader setting"
+    },
+    "expandToEdgesDescription": "안전 영역을 무시하고 화면 가장자리까지 컨텐츠를 확장합니다. 일부 기기, 예를 들어 홀 펀치 카메라에서는 콘텐츠가 잘리거나 하드웨어 아래에 표시될 수 있습니다.",
+    "@expandToEdgesDescription": {
+        "description": "Description for the expand to edges reader setting"
+    },
+    "directionality": "방향",
+    "@directionality": {
+        "description": "Label for the layout directionality setting, which determines the global ltr/rtl layout of the app"
+    },
+    "directionalityDescription": "앱 전체 로케일 기본 레이아웃 방향을 재정의합니다.",
+    "@directionalityDescription": {
+        "description": "Description for the layout directionality setting"
+    },
+    "localeDefault": "로케일 기본값"
 }
