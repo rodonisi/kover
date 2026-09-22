@@ -775,6 +775,17 @@
     "@invalidCertificateDescription": {
         "description": "Instructions shown when the server certificate cannot be validated"
     },
+    "unsupportedKavitaVersion": "This version of Kover uses the API definition for Kavita {supported}. Some features may not work as expected.",
+    "@unsupportedKavitaVersion": {
+        "description": "Warning shown when the connected Kavita server version is not supported by this version of Kover",
+        "placeholders": {
+            "supported": {
+                "description": "The Kavita version this version of Kover supports",
+                "type": "String",
+                "example": "0.9.1.0"
+            }
+        }
+    },
     "ignoreCertificateValidation": "Ignore certificate validation",
     "@ignoreCertificateValidation": {
         "description": "Setting that allows a trusted server with an invalid HTTPS certificate"

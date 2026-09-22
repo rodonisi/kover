@@ -1,3 +1,4 @@
+import "package:kover/utils/app_colors.dart";
 import "package:material_ui/material_ui.dart";
 
 class MaterialTheme {
@@ -339,6 +340,11 @@ class MaterialTheme {
     useMaterial3: true,
     brightness: colorScheme.brightness,
     colorScheme: colorScheme,
+    extensions: [
+      colorScheme.brightness == Brightness.dark
+          ? AppColors.dark
+          : AppColors.light,
+    ],
     textTheme: textTheme.apply(
       bodyColor: colorScheme.onSurface,
       displayColor: colorScheme.onSurface,

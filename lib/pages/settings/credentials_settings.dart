@@ -6,6 +6,8 @@ import 'package:kover/pages/settings/custom_headers_sheet.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/server_settings.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
+import 'package:kover/utils/app_colors.dart';
+import 'package:kover/utils/constants/kavita_version.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
@@ -219,26 +221,68 @@ class _LoggedInUser extends ConsumerWidget {
             context,
           ).textTheme.titleMedium,
         ),
-        if (version != null)
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: LayoutConstants.smallPadding,
-              vertical: LayoutConstants.smallerPadding,
+        if (version != null) _ServerVersionBadge(version: version),
+      ],
+    );
+  }
+}
+
+class _ServerVersionBadge extends StatelessWidget {
+  final String version;
+
+  const _ServerVersionBadge({required this.version});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final unsupported = !isSupportedKavitaVersion(version);
+
+    final background = unsupported
+        ? theme.extension<AppColors>()?.warningContainer
+        : theme.colorScheme.primaryContainer;
+    final foreground = unsupported
+        ? theme.extension<AppColors>()?.onWarningContainer
+        : theme.colorScheme.onPrimaryContainer;
+
+    final badge = Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: LayoutConstants.smallPadding,
+        vertical: LayoutConstants.smallerPadding,
+      ),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(
+          LayoutConstants.smallPadding,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: LayoutConstants.smallerPadding,
+        children: [
+          if (unsupported)
+            Icon(
+              KoverIcons.warning,
+              size: LayoutConstants.smallIcon,
+              color: foreground,
             ),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(
-                LayoutConstants.smallPadding,
-              ),
-            ),
-            child: Text(
-              'v$version',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onPrimaryContainer,
-              ),
+          Text(
+            'v$version',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: foreground,
             ),
           ),
-      ],
+        ],
+      ),
+    );
+
+    if (!unsupported) {
+      return badge;
+    }
+
+    return Tooltip(
+      message: l.unsupportedKavitaVersion(supportedKavitaVersion),
+      child: badge,
     );
   }
 }
