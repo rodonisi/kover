@@ -17,7 +17,7 @@ jobs:
   build-and-deploy-ios:
     name: Build & Deploy iOS
     needs: version
-    runs-on: macos-26
+    runs-on: xcode-27
 
     steps:
       - name: Checkout code
@@ -71,7 +71,7 @@ jobs:
   build-and-deploy-macos:
     name: Build & Deploy MacOS
     needs: version
-    runs-on: macos-26
+    runs-on: xcode-27
 
     steps:
       - name: Checkout code
