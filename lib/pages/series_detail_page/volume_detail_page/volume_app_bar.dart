@@ -185,7 +185,7 @@ class _VolumeContinuePointButton extends ConsumerWidget {
 }
 
 class _VolumeInfo extends ConsumerWidget {
-  final VolumeModel volume;
+  final VolumeDetailsModel volume;
 
   const _VolumeInfo({required this.volume});
 

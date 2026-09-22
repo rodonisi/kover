@@ -9,13 +9,11 @@ part 'volume_card_provider.freezed.dart';
 part 'volume_card_provider.g.dart';
 
 @freezed
-sealed class VolumeCardModel with _$VolumeCardModel {
-  const factory VolumeCardModel({
-    required VolumeModel volume,
-    required ChapterModel continuePoint,
-    required bool canRead,
-  }) = _VolumeCardModel;
-}
+class VolumeCardModel({
+  required final VolumeDetailsModel volume,
+  required final ChapterModel continuePoint,
+  required final bool canRead,
+}) with _$VolumeCardModel;
 
 @riverpod
 Future<VolumeCardModel> volumeCard(
