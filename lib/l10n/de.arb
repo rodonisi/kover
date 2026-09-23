@@ -316,7 +316,7 @@
     "@lastModified": {
         "description": "Label for sorting by last modified option"
     },
-    "sortDirection": "Sortierreihenfolge",
+    "sortDirection": "Sortierrichtung",
     "@sortDirection": {
         "description": "Label for the sort direction option in list"
     },
@@ -947,5 +947,33 @@
     "lockHorizontalPan": "Horizontales Scrollen sperren",
     "@lockHorizontalPan": {
         "description": "Label for the lock horizontal panning setting in the vertical reader"
-    }
+    },
+    "expandToEdges": "Auf Bildschirmränder ausdehnen",
+    "@expandToEdges": {
+        "description": "Label for the expand to edges reader setting"
+    },
+    "expandToEdgesDescription": "Inhalte bis zu den Bildschirmrändern erweitern und Safe Areas ignorieren. Dies kann dazu führen, dass Inhalte abgeschnitten oder unter Hardware-Elementen dargestellt werden, wie z. B. Punch-Hole-Kameras.",
+    "@expandToEdgesDescription": {
+        "description": "Description for the expand to edges reader setting"
+    },
+    "unsupportedKavitaVersion": "Diese Version von Kover verwendet die API-Definition für Kavita {supported}. Einige Funktionen funktionieren möglicherweise nicht wie erwartet.",
+    "@unsupportedKavitaVersion": {
+        "description": "Warning shown when the connected Kavita server version is not supported by this version of Kover",
+        "placeholders": {
+            "supported": {
+                "description": "The Kavita version this version of Kover supports",
+                "type": "String",
+                "example": "0.9.1.0"
+            }
+        }
+    },
+    "directionality": "Layout-Richtung",
+    "@directionality": {
+        "description": "Label for the layout directionality setting, which determines the global ltr/rtl layout of the app"
+    },
+    "directionalityDescription": "Die standardmäßige Layout-Richtung der Spracheinstellungen für die gesamte App überschreiben.",
+    "@directionalityDescription": {
+        "description": "Description for the layout directionality setting"
+    },
+    "localeDefault": "Spracheinstellung Default"
 }
