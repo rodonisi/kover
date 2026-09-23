@@ -852,5 +852,33 @@
     "lockHorizontalPan": "Blocca scorrimento orizzontale",
     "@lockHorizontalPan": {
         "description": "Label for the lock horizontal panning setting in the vertical reader"
-    }
+    },
+    "expandToEdges": "Espandi a bordi",
+    "@expandToEdges": {
+        "description": "Label for the expand to edges reader setting"
+    },
+    "expandToEdgesDescription": "Espandere il contenuto fino ai bordi dello schermo, ignorando le aree sicure. Ciò potrebbe causare il taglio del contenuto o la sua visualizzazione al di sotto dell'hardware su alcuni dispositivi, come le fotocamere con foro nello schermo.",
+    "@expandToEdgesDescription": {
+        "description": "Description for the expand to edges reader setting"
+    },
+    "unsupportedKavitaVersion": "Questa versione di Kover utilizza la definizione API per Kavita {supported}. Alcune funzionalità potrebbero non funzionare come previsto.",
+    "@unsupportedKavitaVersion": {
+        "description": "Warning shown when the connected Kavita server version is not supported by this version of Kover",
+        "placeholders": {
+            "supported": {
+                "description": "The Kavita version this version of Kover supports",
+                "type": "String",
+                "example": "0.9.1.0"
+            }
+        }
+    },
+    "directionality": "Direzionalità",
+    "@directionality": {
+        "description": "Label for the layout directionality setting, which determines the global ltr/rtl layout of the app"
+    },
+    "directionalityDescription": "Sovrascrivi la direzionalità di layout predefinita della lingua per l'intera app.",
+    "@directionalityDescription": {
+        "description": "Description for the layout directionality setting"
+    },
+    "localeDefault": "Predefinito della lingua"
 }
