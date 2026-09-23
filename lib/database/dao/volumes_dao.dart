@@ -44,14 +44,11 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
   }
 
   /// Search volumes by [query]. Optionally filter by [seriesId]
-  Future<List<VolumeWithRelations>> searchVolumes(
+  Future<List<Volume>> searchVolumes(
     String query, {
     int? seriesId,
   }) async {
     final q = managers.volumes
-        .withReferences(
-          (prefetch) => prefetch(chaptersRefs: true),
-        )
         .filter((f) => f.seriesId.libraryId.includeInSearch(true))
         .filter((f) => f.name.contains(query));
 
@@ -61,13 +58,7 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
 
     q.orderBy((o) => o.minNumber.asc() & o.name.asc());
 
-    return await q.map((result) {
-      final (vol, refs) = result;
-      final chapters = refs.chaptersRefs.prefetchedData ?? [];
-      chapters.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-
-      return VolumeWithRelations(volume: vol, chapters: chapters);
-    }).get();
+    return await q.get();
   }
 
   /// Watch pages read for volume [volumeId]

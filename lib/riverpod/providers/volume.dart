@@ -30,7 +30,7 @@ Stream<List<VolumeModel>> volumes(
 }
 
 @riverpod
-Stream<VolumeModel> volume(Ref ref, {required int volumeId}) {
+Stream<VolumeDetailsModel> volume(Ref ref, {required int volumeId}) {
   final repo = ref.watch(volumesRepositoryProvider);
   return repo.watchVolume(volumeId).distinct();
 }

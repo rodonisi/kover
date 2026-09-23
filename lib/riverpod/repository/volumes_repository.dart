@@ -1,5 +1,4 @@
 import 'package:kover/database/app_database.dart';
-import 'package:kover/database/dao/volumes_dao.dart';
 import 'package:kover/models/enums/order_by_option.dart';
 import 'package:kover/models/enums/sort_direction.dart';
 import 'package:kover/models/image_model.dart';
@@ -27,12 +26,12 @@ class const VolumesRepository({
   required final VolumeSyncOperations _client,
 }) {
   /// Watch volume [volumeId]
-  Stream<VolumeModel> watchVolume(int volumeId) {
+  Stream<VolumeDetailsModel> watchVolume(int volumeId) {
     return _db.volumesDao
         .volume(volumeId)
         .watchSingleOrNull()
         .whereNotNull()
-        .map(VolumeModel.fromDatabaseModel);
+        .map(VolumeDetailsModel.fromDatabaseModel);
   }
 
   /// Search volumes by [query]. Optionally filter by [seriesId]
@@ -77,13 +76,7 @@ class const VolumesRepository({
         )
         .watch()
         .map(
-          (volumes) => volumes
-              .map(
-                (v) => VolumeModel.fromDatabaseModel(
-                  VolumeWithRelations(volume: v, chapters: const []),
-                ),
-              )
-              .toList(),
+          (volumes) => volumes.map(VolumeModel.fromDatabaseModel).toList(),
         );
   }
 

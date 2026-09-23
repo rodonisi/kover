@@ -52,7 +52,7 @@ sealed class SeriesModel with _$SeriesModel {
 sealed class SeriesDetailModel with _$SeriesDetailModel {
   const factory SeriesDetailModel({
     required List<ChapterModel> storyline,
-    required List<VolumeModel> volumes,
+    required List<VolumeDetailsModel> volumes,
     required List<ChapterModel> chapters,
     required List<ChapterModel> specials,
   }) = _SeriesDetailModel;
@@ -62,7 +62,7 @@ sealed class SeriesDetailModel with _$SeriesDetailModel {
       storyline: model.storylineChapters
           .map(ChapterModel.fromDatabaseModel)
           .toList(),
-      volumes: model.volumes.map(VolumeModel.fromDatabaseModel).toList(),
+      volumes: model.volumes.map(VolumeDetailsModel.fromDatabaseModel).toList(),
       chapters: model.chapters.map(ChapterModel.fromDatabaseModel).toList(),
       specials: model.specials.map(ChapterModel.fromDatabaseModel).toList(),
     );
