@@ -1,1 +1,6 @@
-{}
+{
+    "languageName": "Inglês",
+    "@languageName": {
+        "description": "The localized name of this locale"
+    }
+}
