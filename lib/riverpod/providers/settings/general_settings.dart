@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
+import 'package:kover/utils/locale_tag.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -37,7 +38,18 @@ sealed class GeneralSettingsState with _$GeneralSettingsState {
   factory GeneralSettingsState.fromJson(Map<String, Object?> json) =>
       _$GeneralSettingsStateFromJson(json);
 
-  Locale? get locale => localeString != null ? Locale(localeString!) : null;
+  /// [localeString] holds a full locale tag, e.g. `en`, `pt-BR`.
+  ///
+  /// Null when unset or when the stored tag cannot be parsed, which leaves the
+  /// locale to the platform.
+  Locale? get locale {
+    final tag = localeString;
+    if (tag == null || tag.isEmpty) {
+      return null;
+    }
+
+    return parseLocale(tag);
+  }
 }
 
 @riverpod
@@ -63,9 +75,9 @@ class GeneralSettings extends _$GeneralSettings {
     final current = await future;
     log.info(
       'set locale',
-      attributes: {'value': value?.languageCode ?? 'null'},
+      attributes: {'value': value?.toLanguageTag()},
     );
-    state = AsyncData(current.copyWith(localeString: value?.languageCode));
+    state = AsyncData(current.copyWith(localeString: value?.toLanguageTag()));
   }
 
   Future<void> setTextDirection(TextDirection? value) async {
