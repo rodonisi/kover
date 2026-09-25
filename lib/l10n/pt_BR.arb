@@ -23,7 +23,7 @@
     "@home": {
         "description": "Label for the home page"
     },
-    "wantToRead": "Quero Ler",
+    "wantToRead": "Quero ler",
     "@wantToRead": {
         "description": "Label for the want to read shelf"
     },
@@ -91,7 +91,7 @@
     "@sepia": {
         "description": "Label for the sepia theme option"
     },
-    "matchAppTheme": "Tema do aplicativo",
+    "matchAppTheme": "Seguir tema do aplicativo",
     "@matchAppTheme": {
         "description": "Label for the epub reader match app theme option"
     },
@@ -167,7 +167,7 @@
     "@clearDatabaseDialogTitle": {
         "description": "Title for the clear database confirmation dialog"
     },
-    "clearDatabaseDialogContent": "Isso vai apagar todo o banco de dados local, incluindo o progresso não sincronizado e os dados baixados. Essa ação não pode ser desfeita.",
+    "clearDatabaseDialogContent": "Isso vai apagar todo o banco de dados local, incluindo o progresso não sincronizado e os dados baixados. Esta ação não pode ser desfeita.",
     "@clearDatabaseDialogContent": {
         "description": "Content for the clear database confirmation dialog"
     },
@@ -365,7 +365,7 @@
     "@tableOfContents": {
         "description": "Label for the table of contents drawer in the reader"
     },
-    "notSignedIn": "Não conectado",
+    "notSignedIn": "Você não fez login",
     "@notSignedIn": {
         "description": "Heading text when user is not signed in"
     },
@@ -381,7 +381,7 @@
     "@connectionError": {
         "description": "Heading text when a connection error occurs"
     },
-    "connectionErrorDescription": "Não foi possível obter o usuário. Verifique as credenciais ou tente novamente.",
+    "connectionErrorDescription": "Falha ao obter o usuário. Verifique as credenciais ou tente novamente.",
     "@connectionErrorDescription": {
         "description": "Description text when a connection error occurs"
     },
@@ -397,7 +397,7 @@
     "@sendDiagnosticsChangeable": {
         "description": "Message shown in the monitoring opt-out dialog indicating the setting can be changed later"
     },
-    "noThanks": "Não quero",
+    "noThanks": "Agora não",
     "@noThanks": {
         "description": "Label for the decline button in the monitoring opt-out dialog"
     },
@@ -405,11 +405,11 @@
     "@imIn": {
         "description": "Label for the accept button in the monitoring opt-out dialog"
     },
-    "addToWantToRead": "Adicionar ao Quero Ler",
+    "addToWantToRead": "Adicionar ao Quero ler",
     "@addToWantToRead": {
         "description": "Label for the add to want to read context menu item"
     },
-    "removeFromWantToRead": "Remover do Quero Ler",
+    "removeFromWantToRead": "Remover do Quero ler",
     "@removeFromWantToRead": {
         "description": "Label for the remove from want to read context menu item"
     },
@@ -465,7 +465,7 @@
     "@syncingCovers": {
         "description": "Label for the syncing covers phase"
     },
-    "syncingWantToRead": "Sincronizando o Quero Ler",
+    "syncingWantToRead": "Sincronizando o Quero ler",
     "@syncingWantToRead": {
         "description": "Label for the syncing Want to Read phase"
     },
@@ -629,11 +629,11 @@
     "@horizontal": {
         "description": "Label for the horizontal reader mode option"
     },
-    "twoPage": "Duas páginas",
+    "twoPage": "Página dupla",
     "@twoPage": {
         "description": "Label for the two page reader mode option"
     },
-    "fitDirection": "Ajuste da imagem",
+    "fitDirection": "Tipo de escala",
     "@fitDirection": {
         "description": "Label for the image fit direction setting"
     },
@@ -713,7 +713,7 @@
     "@highlightResumeParagraph": {
         "description": "Label for the highlight resume paragraph setting"
     },
-    "dismiss": "Fechar",
+    "dismiss": "Dispensar",
     "@dismiss": {
         "description": "Label for the dismiss button in chapter snackbar"
     },
@@ -890,11 +890,11 @@
     "@copiedToClipboard": {
         "description": "Message shown when a value is copied to the clipboard"
     },
-    "removeFromOnDeck": "Remover da seção Em andamento",
+    "removeFromOnDeck": "Remover da seção Lendo agora",
     "@removeFromOnDeck": {
         "description": "Label for the remove from on deck context menu item"
     },
-    "syncingOnDeck": "Sincronizando a seção Em andamento",
+    "syncingOnDeck": "Sincronizando a seção Lendo agora",
     "@syncingOnDeck": {
         "description": "Label for the syncing on deck phase"
     },
@@ -914,7 +914,7 @@
     "@cancelled": {
         "description": "Label for the 'cancelled' publication status"
     },
-    "ended": "Encerrado",
+    "ended": "Finalizado",
     "@ended": {
         "description": "Label for the 'ended' publication status"
     },
