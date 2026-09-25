@@ -6,6 +6,7 @@ import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/locale_tag.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/navigate_option.dart';
 import 'package:kover/widgets/settings/select_option.dart';
@@ -47,6 +48,14 @@ class GeneralSettings extends ConsumerWidget {
 class _Locale extends ConsumerWidget {
   const _Locale();
 
+  static Locale get _systemLocale {
+    final system = parseLocale(Intl.systemLocale);
+
+    return system != null && AppLocalizations.delegate.isSupported(system)
+        ? system
+        : AppLocalizations.supportedLocales.first;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
@@ -62,9 +71,7 @@ class _Locale extends ConsumerWidget {
           options: [
             SelectOptionEntry(
               value: null,
-              label: lookupAppLocalizations(
-                Locale(Intl.systemLocale.split('_').first),
-              ).system,
+              label: lookupAppLocalizations(_systemLocale).system,
             ),
             ...AppLocalizations.supportedLocales
                 .where((locale) {
