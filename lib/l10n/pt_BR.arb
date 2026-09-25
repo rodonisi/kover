@@ -1,0 +1,979 @@
+{
+    "languageName": "Português (Brasil)",
+    "@languageName": {
+        "description": "The localized name of this locale"
+    },
+    "language": "Idioma",
+    "@language": {
+        "description": "Title for the language settings entry"
+    },
+    "onDeck": "Lendo agora",
+    "@onDeck": {
+        "description": "Label for the home page on deck section"
+    },
+    "recentlyUpdated": "Atualizadas recentemente",
+    "@recentlyUpdated": {
+        "description": "Label for the home page recently updated section"
+    },
+    "recentlyAdded": "Adicionadas recentemente",
+    "@recentlyAdded": {
+        "description": "Label for the home page recently added section"
+    },
+    "home": "Início",
+    "@home": {
+        "description": "Label for the home page"
+    },
+    "wantToRead": "Quero Ler",
+    "@wantToRead": {
+        "description": "Label for the want to read shelf"
+    },
+    "menu": "Menu",
+    "@menu": {
+        "description": "Label for the menu button"
+    },
+    "allSeries": "Todas as séries",
+    "@allSeries": {
+        "description": "Label for the all series menu entry"
+    },
+    "collections": "Coleções",
+    "@collections": {
+        "description": "Label for the collections menu entry"
+    },
+    "readingLists": "Listas de leitura",
+    "@readingLists": {
+        "description": "Label for the reading lists menu entry"
+    },
+    "libraries": "Bibliotecas",
+    "@libraries": {
+        "description": "Label for the libraries menu entry"
+    },
+    "settings": "Configurações",
+    "@settings": {
+        "description": "Label for the settings menu entry"
+    },
+    "more": "Mais",
+    "@more": {
+        "description": "Label for the more section"
+    },
+    "downloadQueue": "Fila de downloads",
+    "@downloadQueue": {
+        "description": "Label for the download queue menu entry"
+    },
+    "general": "Geral",
+    "@general": {
+        "description": "Label for the general settings section"
+    },
+    "themeMode": "Modo do tema",
+    "@themeMode": {
+        "description": "Label for the theme mode setting"
+    },
+    "theme": "Tema",
+    "@theme": {
+        "description": "Label for the epub reader theme setting"
+    },
+    "system": "Sistema",
+    "@system": {
+        "description": "Label for the system theme mode option"
+    },
+    "light": "Claro",
+    "@light": {
+        "description": "Label for the light theme mode option"
+    },
+    "dark": "Escuro",
+    "@dark": {
+        "description": "Label for the dark theme mode option"
+    },
+    "black": "Preto",
+    "@black": {
+        "description": "Label for the black theme option"
+    },
+    "sepia": "Sépia",
+    "@sepia": {
+        "description": "Label for the sepia theme option"
+    },
+    "matchAppTheme": "Tema do aplicativo",
+    "@matchAppTheme": {
+        "description": "Label for the epub reader match app theme option"
+    },
+    "outlinedTheme": "Tema com contornos",
+    "@outlinedTheme": {
+        "description": "Label for the outlined theme setting"
+    },
+    "sendDiagnostics": "Enviar relatórios de falhas e diagnósticos anônimos",
+    "@sendDiagnostics": {
+        "description": "Label for the send diagnostics setting"
+    },
+    "sendDiagnosticsDescription": "Ajude a melhorar o aplicativo enviando estatísticas anônimas de erros e desempenho. Os dados não contêm informações pessoais e são usados apenas para melhorar o aplicativo.",
+    "@sendDiagnosticsDescription": {
+        "description": "Description for the send diagnostics setting"
+    },
+    "version": "Versão: {version} ({buildNumber})",
+    "@version": {
+        "description": "Label for the app version, with placeholders for version and build number",
+        "placeholders": {
+            "version": {
+                "description": "The version string of the application",
+                "type": "String",
+                "example": "1.0.0"
+            },
+            "buildNumber": {
+                "description": "The build number of the application",
+                "type": "String",
+                "example": "123"
+            }
+        }
+    },
+    "github": "GitHub",
+    "@github": {
+        "description": "Label for the GitHub link"
+    },
+    "madeWithLove": "Feito com ❤️",
+    "@madeWithLove": {
+        "description": "Label for the made with love message"
+    },
+    "dataManagement": "Gerenciamento de dados",
+    "@dataManagement": {
+        "description": "Label for the data management section"
+    },
+    "downloadAllCovers": "Baixar todas as capas",
+    "@downloadAllCovers": {
+        "description": "Label for the download all covers option"
+    },
+    "downloadAllCoversDescription": "Se desativado, as capas só são baixadas junto com os capítulos. As capas não baixadas continuam sendo buscadas no servidor quando necessário, se houver conexão.",
+    "@downloadAllCoversDescription": {
+        "description": "Description for the download all covers option"
+    },
+    "maxConcurrentDownloads": "Máximo de downloads simultâneos",
+    "@maxConcurrentDownloads": {
+        "description": "Label for the max concurrent downloads setting"
+    },
+    "reclaimSpace": "Liberar espaço",
+    "@reclaimSpace": {
+        "description": "Label for the reclaim space button"
+    },
+    "clearDownloads": "Limpar downloads",
+    "@clearDownloads": {
+        "description": "Label for the clear downloads button"
+    },
+    "clearCovers": "Limpar capas",
+    "@clearCovers": {
+        "description": "Label for the clear covers button"
+    },
+    "clearDatabase": "Limpar banco de dados",
+    "@clearDatabase": {
+        "description": "Label for the clear database button"
+    },
+    "clearDatabaseDialogTitle": "Tem certeza?",
+    "@clearDatabaseDialogTitle": {
+        "description": "Title for the clear database confirmation dialog"
+    },
+    "clearDatabaseDialogContent": "Isso vai apagar todo o banco de dados local, incluindo o progresso não sincronizado e os dados baixados. Essa ação não pode ser desfeita.",
+    "@clearDatabaseDialogContent": {
+        "description": "Content for the clear database confirmation dialog"
+    },
+    "cancel": "Cancelar",
+    "@cancel": {
+        "description": "Label for the cancel button in dialogs"
+    },
+    "databaseBusy": "Banco de dados ocupado…",
+    "@databaseBusy": {
+        "description": "Message shown when the database is busy with an operation"
+    },
+    "databaseSize": "Tamanho do banco de dados",
+    "@databaseSize": {
+        "description": "Label for the database size information"
+    },
+    "credentials": "Credenciais",
+    "@credentials": {
+        "description": "Label for the credentials section in settings"
+    },
+    "baseUrl": "URL base",
+    "@baseUrl": {
+        "description": "Label for the base URL input field"
+    },
+    "apiKey": "Chave de API",
+    "@apiKey": {
+        "description": "Label for the API key input field"
+    },
+    "save": "Salvar",
+    "@save": {
+        "description": "Label for the save credentials button"
+    },
+    "sortBy": "Ordenar por",
+    "@sortBy": {
+        "description": "Label for the sort by option in list"
+    },
+    "name": "Nome",
+    "@name": {
+        "description": "Label for sorting by name option"
+    },
+    "sortOrder": "Ordem padrão",
+    "@sortOrder": {
+        "description": "Label for the sort order option in list"
+    },
+    "dateAdded": "Data de adição",
+    "@dateAdded": {
+        "description": "Label for sorting by date added option"
+    },
+    "lastModified": "Última modificação",
+    "@lastModified": {
+        "description": "Label for sorting by last modified option"
+    },
+    "progress": "Progresso",
+    "@progress": {
+        "description": "Label for sorting by progress option"
+    },
+    "lastRead": "Última leitura",
+    "@lastRead": {
+        "description": "Label for sorting by last read option"
+    },
+    "sortDirection": "Sentido da ordenação",
+    "@sortDirection": {
+        "description": "Label for the sort direction option in list"
+    },
+    "ascending": "Crescente",
+    "@ascending": {
+        "description": "Label for ascending sort direction option"
+    },
+    "descending": "Decrescente",
+    "@descending": {
+        "description": "Label for descending sort direction option"
+    },
+    "specials": "Especiais",
+    "@specials": {
+        "description": "Label for the specials section in the series details page"
+    },
+    "storyline": "Enredo",
+    "@storyline": {
+        "description": "Label for the storyline section in the series details page"
+    },
+    "volumes": "Volumes",
+    "@volumes": {
+        "description": "Label for the volumes section in the series details page"
+    },
+    "chapters": "Capítulos",
+    "@chapters": {
+        "description": "Label for the chapters section in the series details page"
+    },
+    "genres": "Gêneros",
+    "@genres": {
+        "description": "Label for the genres chips in the series details page"
+    },
+    "writers": "Escritores",
+    "@writers": {
+        "description": "Label for the writers metadata in the series details page"
+    },
+    "coverArtists": "Artistas de capa",
+    "@coverArtists": {
+        "description": "Label for the cover artists metadata in the series details page"
+    },
+    "publishers": "Editoras",
+    "@publishers": {
+        "description": "Label for the publishers metadata in the series details page"
+    },
+    "characters": "Personagens",
+    "@characters": {
+        "description": "Label for the characters metadata in the series details page"
+    },
+    "pencillers": "Desenhistas",
+    "@pencillers": {
+        "description": "Label for the pencillers metadata in the series details page"
+    },
+    "inkers": "Arte-finalistas",
+    "@inkers": {
+        "description": "Label for the inkers metadata in the series details page"
+    },
+    "imprints": "Selos",
+    "@imprints": {
+        "description": "Label for the imprints metadata in the series details page"
+    },
+    "colorists": "Coloristas",
+    "@colorists": {
+        "description": "Label for the colorists metadata in the series details page"
+    },
+    "letterers": "Letristas",
+    "@letterers": {
+        "description": "Label for the letterers metadata in the series details page"
+    },
+    "editors": "Editores",
+    "@editors": {
+        "description": "Label for the editors metadata in the series details page"
+    },
+    "translators": "Tradutores",
+    "@translators": {
+        "description": "Label for the translators metadata in the series details page"
+    },
+    "teams": "Equipes",
+    "@teams": {
+        "description": "Label for the teams metadata in the series details page"
+    },
+    "locations": "Locais",
+    "@locations": {
+        "description": "Label for the locations metadata in the series details page"
+    },
+    "filter": "Filtrar",
+    "@filter": {
+        "description": "Label for the filter button in lists"
+    },
+    "hideRead": "Ocultar lidos",
+    "@hideRead": {
+        "description": "Label for the hide read filter option in lists"
+    },
+    "goToChapter": "Ir para o capítulo",
+    "@goToChapter": {
+        "description": "Label for the go to chapter button in the reading list chapter entry context menu"
+    },
+    "goToSeries": "Ir para a série",
+    "@goToSeries": {
+        "description": "Label for the go to series button in the reading list chapter entry context menu"
+    },
+    "markAsRead": "Marcar como lido",
+    "@markAsRead": {
+        "description": "Label for the mark as read button in context menus"
+    },
+    "markAsUnread": "Marcar como não lido",
+    "@markAsUnread": {
+        "description": "Label for the mark as unread button in context menus"
+    },
+    "items": "{count, plural, =0{{count} itens} =1{{count} item} other{{count} itens}}",
+    "@items": {
+        "description": "Label for the number of items, with pluralization",
+        "placeholders": {
+            "count": {
+                "description": "The amount of items",
+                "type": "int",
+                "example": "2"
+            }
+        }
+    },
+    "unsupportedFormat": "Formato não suportado: {format}",
+    "@unsupportedFormat": {
+        "description": "Message shown when trying to open a chapter in an unsupported format",
+        "placeholders": {
+            "format": {
+                "description": "The format enum name for the unsupported format",
+                "type": "String",
+                "example": "epub"
+            }
+        }
+    },
+    "back": "Voltar",
+    "@back": {
+        "description": "Label for back buttons"
+    },
+    "tableOfContents": "Índice",
+    "@tableOfContents": {
+        "description": "Label for the table of contents drawer in the reader"
+    },
+    "notSignedIn": "Não conectado",
+    "@notSignedIn": {
+        "description": "Heading text when user is not signed in"
+    },
+    "noCredentialsDescription": "Nenhuma credencial configurada. Adicione a URL do servidor e a chave de API em Configurações.",
+    "@noCredentialsDescription": {
+        "description": "Description text when no credentials are configured"
+    },
+    "openSettings": "Abrir configurações",
+    "@openSettings": {
+        "description": "Label for the button to open settings"
+    },
+    "connectionError": "Erro de conexão",
+    "@connectionError": {
+        "description": "Heading text when a connection error occurs"
+    },
+    "connectionErrorDescription": "Não foi possível obter o usuário. Verifique as credenciais ou tente novamente.",
+    "@connectionErrorDescription": {
+        "description": "Description text when a connection error occurs"
+    },
+    "retry": "Tentar novamente",
+    "@retry": {
+        "description": "Label for the retry button"
+    },
+    "sendDiagnosticsDialogTitle": "Enviar relatórios de falhas e diagnósticos anônimos?",
+    "@sendDiagnosticsDialogTitle": {
+        "description": "Title for the monitoring opt-out dialog"
+    },
+    "sendDiagnosticsChangeable": "Você pode mudar isso nas configurações a qualquer momento.",
+    "@sendDiagnosticsChangeable": {
+        "description": "Message shown in the monitoring opt-out dialog indicating the setting can be changed later"
+    },
+    "noThanks": "Não quero",
+    "@noThanks": {
+        "description": "Label for the decline button in the monitoring opt-out dialog"
+    },
+    "imIn": "Topo!",
+    "@imIn": {
+        "description": "Label for the accept button in the monitoring opt-out dialog"
+    },
+    "addToWantToRead": "Adicionar ao Quero Ler",
+    "@addToWantToRead": {
+        "description": "Label for the add to want to read context menu item"
+    },
+    "removeFromWantToRead": "Remover do Quero Ler",
+    "@removeFromWantToRead": {
+        "description": "Label for the remove from want to read context menu item"
+    },
+    "download": "Baixar",
+    "@download": {
+        "description": "Label for the download context menu item"
+    },
+    "removeDownload": "Remover download",
+    "@removeDownload": {
+        "description": "Label for the remove download context menu item"
+    },
+    "refreshMetadata": "Atualizar metadados",
+    "@refreshMetadata": {
+        "description": "Label for the refresh metadata context menu item"
+    },
+    "refreshCovers": "Atualizar capas",
+    "@refreshCovers": {
+        "description": "Label for the refresh covers context menu item"
+    },
+    "noActiveSyncOperations": "Nenhuma sincronização ativa",
+    "@noActiveSyncOperations": {
+        "description": "Message shown when there are no active sync operations"
+    },
+    "syncingAllSeries": "Sincronizando todas as séries",
+    "@syncingAllSeries": {
+        "description": "Label for the syncing all series phase"
+    },
+    "syncingSeriesDetails": "Sincronizando os detalhes das séries",
+    "@syncingSeriesDetails": {
+        "description": "Label for the syncing series details phase"
+    },
+    "syncingMetadata": "Sincronizando os metadados",
+    "@syncingMetadata": {
+        "description": "Label for the syncing metadata phase"
+    },
+    "syncingRecentlyAdded": "Sincronizando séries adicionadas recentemente",
+    "@syncingRecentlyAdded": {
+        "description": "Label for the syncing recently added phase"
+    },
+    "syncingRecentlyUpdated": "Sincronizando séries atualizadas recentemente",
+    "@syncingRecentlyUpdated": {
+        "description": "Label for the syncing recently updated phase"
+    },
+    "syncingLibraries": "Sincronizando as bibliotecas",
+    "@syncingLibraries": {
+        "description": "Label for the syncing libraries phase"
+    },
+    "syncingProgress": "Sincronizando o progresso",
+    "@syncingProgress": {
+        "description": "Label for the syncing progress phase"
+    },
+    "syncingCovers": "Sincronizando as capas",
+    "@syncingCovers": {
+        "description": "Label for the syncing covers phase"
+    },
+    "syncingWantToRead": "Sincronizando o Quero Ler",
+    "@syncingWantToRead": {
+        "description": "Label for the syncing Want to Read phase"
+    },
+    "syncingCollections": "Sincronizando as coleções",
+    "@syncingCollections": {
+        "description": "Label for the syncing collections phase"
+    },
+    "syncingReadingLists": "Sincronizando as listas de leitura",
+    "@syncingReadingLists": {
+        "description": "Label for the syncing reading lists phase"
+    },
+    "syncingSmartFilters": "Sincronizando os filtros inteligentes",
+    "@syncingSmartFilters": {
+        "description": "Label for the syncing smart filters phase"
+    },
+    "syncingSidenav": "Sincronizando a ordem da barra lateral",
+    "@syncingSidenav": {
+        "description": "Label for the sidenav syncing phase"
+    },
+    "syncingDashboard": "Sincronizando a ordem do painel",
+    "@syncingDashboard": {
+        "description": "Label for the dashboard syncing phase"
+    },
+    "refreshingMetadataForSeries": "Atualizando os metadados da série {seriesId}",
+    "@refreshingMetadataForSeries": {
+        "description": "Label for the refreshing metadata phase with the series ID",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "refreshingCoversForSeries": "Atualizando as capas da série {seriesId}",
+    "@refreshingCoversForSeries": {
+        "description": "Label for the refreshing covers phase with the series ID",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series which covers are being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "refreshingServerSettings": "Atualizando as configurações do servidor",
+    "@refreshingServerSettings": {
+        "description": "Message shown while refreshing server settings"
+    },
+    "refreshingServerFonts": "Atualizando as fontes do servidor",
+    "@refreshingServerFonts": {
+        "description": "Message shown while refreshing server fonts"
+    },
+    "series": "Séries",
+    "@series": {
+        "description": "Label for the series search section header"
+    },
+    "moreCount": "Mais {count}",
+    "@moreCount": {
+        "description": "Label indicating there are more items beyond the displayed amount",
+        "placeholders": {
+            "count": {
+                "description": "The count of items beyond the displayed amount",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "wordCount": "{wordCount} palavras",
+    "@wordCount": {
+        "description": "Label for the word count of a book entry",
+        "placeholders": {
+            "wordCount": {
+                "description": "The amount of words",
+                "type": "int",
+                "format": "compact",
+                "example": "42000"
+            }
+        }
+    },
+    "hoursCount": "Cerca de {hours} horas",
+    "@hoursCount": {
+        "description": "Label for the estimated reading time in hours",
+        "placeholders": {
+            "hours": {
+                "description": "The estimated amount of hours",
+                "type": "double",
+                "format": "decimalPatternDigits",
+                "optionalParameters": {
+                    "decimalDigits": 1
+                },
+                "example": "4.2"
+            }
+        }
+    },
+    "pagesCount": "{pages} páginas",
+    "@pagesCount": {
+        "description": "Label for the page count of a an entry",
+        "placeholders": {
+            "pages": {
+                "description": "The amount of pages",
+                "type": "int",
+                "format": "compact",
+                "example": "42000"
+            }
+        }
+    },
+    "startReading": "Começar a ler",
+    "@startReading": {
+        "description": "Label for the start reading button"
+    },
+    "continueReading": "Continuar lendo",
+    "@continueReading": {
+        "description": "Label for the continue reading button"
+    },
+    "summary": "Resumo",
+    "@summary": {
+        "description": "Label for the summary section heading"
+    },
+    "showMore": "Mostrar mais",
+    "@showMore": {
+        "description": "Label for the show more button"
+    },
+    "showLess": "Mostrar menos",
+    "@showLess": {
+        "description": "Label for the show less button"
+    },
+    "cancelAll": "Cancelar todos",
+    "@cancelAll": {
+        "description": "Label for the cancel all downloads button"
+    },
+    "noDownloadsInQueue": "Nenhum download na fila",
+    "@noDownloadsInQueue": {
+        "description": "Message shown when there are no downloads in the queue"
+    },
+    "readerSettings": "Configurações do leitor",
+    "@readerSettings": {
+        "description": "Label for the reader settings bottom sheet title"
+    },
+    "readingDirection": "Direção de leitura",
+    "@readingDirection": {
+        "description": "Label for the reading direction setting"
+    },
+    "leftToRight": "Esquerda para direita",
+    "@leftToRight": {
+        "description": "Label for the left to right reading direction option"
+    },
+    "rightToLeft": "Direita para esquerda",
+    "@rightToLeft": {
+        "description": "Label for the right to left reading direction option"
+    },
+    "readerMode": "Modo de leitura",
+    "@readerMode": {
+        "description": "Label for the reader mode setting"
+    },
+    "vertical": "Vertical",
+    "@vertical": {
+        "description": "Label for the vertical reader mode option"
+    },
+    "horizontal": "Horizontal",
+    "@horizontal": {
+        "description": "Label for the horizontal reader mode option"
+    },
+    "twoPage": "Duas páginas",
+    "@twoPage": {
+        "description": "Label for the two page reader mode option"
+    },
+    "fitDirection": "Ajuste da imagem",
+    "@fitDirection": {
+        "description": "Label for the image fit direction setting"
+    },
+    "contain": "Tela",
+    "@contain": {
+        "description": "Label for the contain image fit option"
+    },
+    "width": "Largura",
+    "@width": {
+        "description": "Label for the fit width image option"
+    },
+    "height": "Altura",
+    "@height": {
+        "description": "Label for the fit height image option"
+    },
+    "margins": "Margens",
+    "@margins": {
+        "description": "Label for the margins setting"
+    },
+    "verticalGap": "Espaço vertical",
+    "@verticalGap": {
+        "description": "Label for the vertical gap setting"
+    },
+    "pageGap": "Espaço entre páginas",
+    "@pageGap": {
+        "description": "Label for the page gap setting"
+    },
+    "coverPage": "Página de capa",
+    "@coverPage": {
+        "description": "Label for the cover page setting"
+    },
+    "coverPageDescription": "Trata a primeira página como capa, exibindo-a sozinha",
+    "@coverPageDescription": {
+        "description": "Description for the cover page setting"
+    },
+    "expandToEdges": "Expandir até as bordas",
+    "@expandToEdges": {
+        "description": "Label for the expand to edges reader setting"
+    },
+    "expandToEdgesDescription": "Expande o conteúdo até as bordas da tela, ignorando as áreas seguras. Em alguns aparelhos, isso pode cortar parte do conteúdo ou exibi-lo por baixo de componentes de hardware, como câmeras em furo na tela.",
+    "@expandToEdgesDescription": {
+        "description": "Description for the expand to edges reader setting"
+    },
+    "lockHorizontalPan": "Travar rolagem horizontal",
+    "@lockHorizontalPan": {
+        "description": "Label for the lock horizontal panning setting in the vertical reader"
+    },
+    "showProgressBar": "Mostrar barra de progresso",
+    "@showProgressBar": {
+        "description": "Label for the show progress bar setting"
+    },
+    "setDefaults": "Salvar como padrão",
+    "@setDefaults": {
+        "description": "Label for the set defaults button"
+    },
+    "reset": "Redefinir",
+    "@reset": {
+        "description": "Label for the reset button"
+    },
+    "fontSize": "Tamanho da fonte",
+    "@fontSize": {
+        "description": "Label for the font size setting"
+    },
+    "lineHeight": "Espaçamento entre linhas",
+    "@lineHeight": {
+        "description": "Label for the line height setting"
+    },
+    "wordSpacing": "Espaçamento entre palavras",
+    "@wordSpacing": {
+        "description": "Label for the word spacing setting"
+    },
+    "letterSpacing": "Espaçamento entre letras",
+    "@letterSpacing": {
+        "description": "Label for the letter spacing setting"
+    },
+    "highlightResumeParagraph": "Destacar parágrafo onde parou",
+    "@highlightResumeParagraph": {
+        "description": "Label for the highlight resume paragraph setting"
+    },
+    "dismiss": "Fechar",
+    "@dismiss": {
+        "description": "Label for the dismiss button in chapter snackbar"
+    },
+    "go": "Ir",
+    "@go": {
+        "description": "Label for the go button in chapter snackbar"
+    },
+    "previousChapter": "Anterior: {chapterTitle}",
+    "@previousChapter": {
+        "description": "Label for the previous chapter snackbar with the chapter title",
+        "placeholders": {
+            "chapterTitle": {
+                "description": "The title of the previous chapter",
+                "type": "String",
+                "example": "Chapter 2"
+            }
+        }
+    },
+    "nextChapter": "Próximo: {chapterTitle}",
+    "@nextChapter": {
+        "description": "Label for the next chapter snackbar with the chapter title",
+        "placeholders": {
+            "chapterTitle": {
+                "description": "The title of the next chapter",
+                "type": "String",
+                "example": "Chapter 3"
+            }
+        }
+    },
+    "read": "Ler",
+    "@read": {
+        "description": "Label for the read action button on cover cards"
+    },
+    "syncingTocs": "Sincronizando os índices dos capítulos",
+    "@syncingTocs": {
+        "description": "Label for the syncing chapters TOCs phase"
+    },
+    "refreshingChapterToc": "Atualizando o índice do capítulo {chapterId}",
+    "@refreshingChapterToc": {
+        "description": "Label for the syncing chapter TOC phase with the chapter ID",
+        "placeholders": {
+            "chapterId": {
+                "description": "The ID of the chapter which TOC is being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "invalidCredentials": "Credenciais inválidas",
+    "@invalidCredentials": {
+        "description": "User display error displayed when credentials are invalid"
+    },
+    "invalidCertificate": "Certificado inválido",
+    "@invalidCertificate": {
+        "description": "User display error shown when the server certificate cannot be validated"
+    },
+    "invalidCertificateDescription": "Não foi possível verificar o certificado HTTPS do servidor. Confira o certificado ou ative \"Ignorar validação do certificado\" em Configurações (só se você confiar neste servidor).",
+    "@invalidCertificateDescription": {
+        "description": "Instructions shown when the server certificate cannot be validated"
+    },
+    "unsupportedKavitaVersion": "Esta versão do Kover usa a definição de API do Kavita {supported}. Alguns recursos podem não funcionar como esperado.",
+    "@unsupportedKavitaVersion": {
+        "description": "Warning shown when the connected Kavita server version is not supported by this version of Kover",
+        "placeholders": {
+            "supported": {
+                "description": "The Kavita version this version of Kover supports",
+                "type": "String",
+                "example": "0.9.1.0"
+            }
+        }
+    },
+    "ignoreCertificateValidation": "Ignorar validação do certificado",
+    "@ignoreCertificateValidation": {
+        "description": "Setting that allows a trusted server with an invalid HTTPS certificate"
+    },
+    "ignoreCertificateValidationDescription": "Permite conexões mesmo quando o certificado HTTPS do servidor não pode ser verificado. Use apenas com servidores em que você confia.",
+    "@ignoreCertificateValidationDescription": {
+        "description": "Security warning for ignoring HTTPS certificate validation"
+    },
+    "orientation": "Orientação",
+    "@orientation": {
+        "description": "Label for the orientation setting"
+    },
+    "portrait": "Retrato",
+    "@portrait": {
+        "description": "Label for the portrait orientation option"
+    },
+    "landscape": "Paisagem",
+    "@landscape": {
+        "description": "Label for the landscape orientation option"
+    },
+    "manageHeaders": "Gerenciar cabeçalhos",
+    "@manageHeaders": {
+        "description": "Label for the manage headers settings entry"
+    },
+    "headerName": "Nome do cabeçalho",
+    "@headerName": {
+        "description": "Label for the header name input field"
+    },
+    "headerValue": "Valor do cabeçalho",
+    "@headerValue": {
+        "description": "Label for the header value input field"
+    },
+    "addHeader": "Adicionar cabeçalho",
+    "@addHeader": {
+        "description": "Label for the add header button"
+    },
+    "savedHeaders": "Cabeçalhos salvos",
+    "@savedHeaders": {
+        "description": "Label for the saved headers section"
+    },
+    "clearAll": "Limpar tudo",
+    "@clearAll": {
+        "description": "Label for the clear all button"
+    },
+    "reorderNavigationBar": "Reordenar barra de navegação",
+    "@reorderNavigationBar": {
+        "description": "Label for the reorder navigation bar settings entry"
+    },
+    "availableDestinations": "Destinos disponíveis",
+    "@availableDestinations": {
+        "description": "Label for the available destinations section"
+    },
+    "navigationGestures": "Gestos de navegação",
+    "@navigationGestures": {
+        "description": "Label for the enable navigation gestures reader option"
+    },
+    "keybinds": "Atalhos do leitor",
+    "keybindNextPage": "Próxima página",
+    "@keybindNextPage": {
+        "description": "Label for the next page keyboard binding setting"
+    },
+    "keybindPreviousPage": "Página anterior",
+    "@keybindPreviousPage": {
+        "description": "Label for the previous page keyboard binding setting"
+    },
+    "keybindPressAKey": "Pressione uma tecla…",
+    "@keybindPressAKey": {
+        "description": "Placeholder shown while waiting for a key press in the keybind capture dialog"
+    },
+    "keybindAlreadyAssigned": "Essa combinação já está em uso",
+    "@keybindAlreadyAssigned": {
+        "description": "Error shown when a captured keybind is already used by another action"
+    },
+    "keybindVolumeUp": "Aumentar volume",
+    "@keybindVolumeUp": {
+        "description": "Label for the volume up key when shown as a keybinding"
+    },
+    "keybindVolumeDown": "Diminuir volume",
+    "@keybindVolumeDown": {
+        "description": "Label for the volume down key when shown as a keybinding"
+    },
+    "appearance": "Aparência",
+    "@appearance": {
+        "description": "Label for the appearance settings section"
+    },
+    "reduceAnimations": "Reduzir animações",
+    "@reduceAnimations": {
+        "description": "Label for the reduce animation setting"
+    },
+    "reduceAnimationsDescription": "Desativa a maioria das animações e das transições de página do leitor. Observação: com esta opção ativada, os gestos de deslizar nos modos de leitura horizontais ficam indisponíveis.",
+    "@reduceAnimationsDescription": {
+        "description": "Description for the reduce animation setting"
+    },
+    "paragraphSpacing": "Espaçamento entre parágrafos",
+    "@paragraphSpacing": {
+        "description": "Label for the paragraph spacing setting"
+    },
+    "logs": "Registros",
+    "@logs": {
+        "description": "Label for the logs settings section"
+    },
+    "copiedToClipboard": "Copiado para a área de transferência",
+    "@copiedToClipboard": {
+        "description": "Message shown when a value is copied to the clipboard"
+    },
+    "removeFromOnDeck": "Remover da seção Em andamento",
+    "@removeFromOnDeck": {
+        "description": "Label for the remove from on deck context menu item"
+    },
+    "syncingOnDeck": "Sincronizando a seção Em andamento",
+    "@syncingOnDeck": {
+        "description": "Label for the syncing on deck phase"
+    },
+    "ongoing": "Em andamento",
+    "@ongoing": {
+        "description": "Label for the 'ongoing' publication status"
+    },
+    "completed": "Concluído",
+    "@completed": {
+        "description": "Label for the 'completed' publication status"
+    },
+    "hiatus": "Em hiato",
+    "@hiatus": {
+        "description": "Label for the 'hiatus' publication status"
+    },
+    "cancelled": "Cancelado",
+    "@cancelled": {
+        "description": "Label for the 'cancelled' publication status"
+    },
+    "ended": "Encerrado",
+    "@ended": {
+        "description": "Label for the 'ended' publication status"
+    },
+    "unknown": "Desconhecido",
+    "@unknown": {
+        "description": "Label for the 'unknown' publication status"
+    },
+    "tags": "Etiquetas",
+    "@tags": {
+        "description": "Label for the tags section in the series details page"
+    },
+    "textAlignment": "Alinhamento do texto",
+    "@textAlignment": {
+        "description": "Label for the text alignment setting"
+    },
+    "left": "Esquerda",
+    "@left": {
+        "description": "Label for the left text alignment option"
+    },
+    "center": "Centro",
+    "@center": {
+        "description": "Label for the center text alignment option"
+    },
+    "right": "Direita",
+    "@right": {
+        "description": "Label for the right text alignment option"
+    },
+    "justify": "Justificado",
+    "@justify": {
+        "description": "Label for the justify text alignment option"
+    },
+    "removeParagraphIndentation": "Remover recuo dos parágrafos",
+    "removeParagraphIndentationDescription": "Se ativado, o recuo dos parágrafos é removido do texto. Se desativado, o recuo original do EPUB é mantido.",
+    "@removeParagraphIndentationDescription": {
+        "description": "Description for the remove paragraphs indent setting"
+    },
+    "font": "Fonte",
+    "@font": {
+        "description": "Label for the font override setting"
+    },
+    "fontDescription": "Substitui a fonte do EPUB por uma fonte personalizada. As fontes disponíveis são sincronizadas do servidor. Observação: só as fontes enviadas pelo usuário são suportadas, porque as fontes integradas não ficam disponíveis para download nos clientes.",
+    "@fontDescription": {
+        "description": "Description for the font override setting"
+    },
+    "defaultLabel": "Padrão",
+    "@defaultLabel": {
+        "description": "Label for a default option in a setting"
+    },
+    "startupLoadingMessage": "Preparando tudo, aguarde...",
+    "@startupLoadingMessage": {
+        "description": "Message shown when the app is starting up and loading data"
+    },
+    "directionality": "Direção do layout",
+    "@directionality": {
+        "description": "Label for the layout directionality setting, which determines the global ltr/rtl layout of the app"
+    },
+    "directionalityDescription": "Substitui a direção de layout padrão do idioma em todo o aplicativo.",
+    "@directionalityDescription": {
+        "description": "Description for the layout directionality setting"
+    },
+    "localeDefault": "Padrão do idioma"
+}

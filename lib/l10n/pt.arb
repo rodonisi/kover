@@ -1,1 +1,6 @@
-{}
+{
+    "language": "Linguagem",
+    "@language": {
+        "description": "Title for the language settings entry"
+    }
+}
