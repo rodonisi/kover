@@ -2,5 +2,9 @@
     "languageName": "Português",
     "@languageName": {
         "description": "The localized name of this locale"
+    },
+    "language": "Linguagem",
+    "@language": {
+        "description": "Title for the language settings entry"
     }
 }
