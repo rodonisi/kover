@@ -4,6 +4,24 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/utils/logging.dart';
 
 class const VolumeSyncOperations({required final Openapi _client}) {
+  /// Fetch volume metadata for [volumeId] from the server.
+  Future<VolumeDto?> getVolume(int volumeId) async {
+    final res = await _client.apiSeriesVolumeGet(volumeId: volumeId);
+
+    if (!res.isSuccessful || res.body == null) {
+      log.debug(
+        'failed to fetch volume',
+        attributes: {
+          'volume_id': volumeId,
+          'status_code': res.statusCode,
+        },
+      );
+      return null;
+    }
+
+    return res.body;
+  }
+
   /// Get cover for volume [volumeId]
   Future<VolumeCoversCompanion?> getVolumeCover(int volumeId) async {
     final res = await _client.apiImageVolumeCoverGet(

@@ -2,7 +2,7 @@ import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/home/on_deck_scope.dart';
-import 'package:kover/riverpod/managers/download_manager.dart';
+import 'package:kover/riverpod/managers/download_manager/download_manager.dart';
 import 'package:kover/riverpod/providers/download.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/router.dart';

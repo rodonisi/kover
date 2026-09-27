@@ -116,6 +116,14 @@ class const VolumesRepository({
     return volume?.chapters.map((c) => c.id).toList() ?? [];
   }
 
+  /// Fetch the ids of all chapters belonging to volume [volumeId] from the
+  /// server, without relying on locally synced metadata.
+  Future<List<int>> fetchChapterIds({required int volumeId}) async {
+    final volume = await _client.getVolume(volumeId);
+
+    return volume?.chapters?.map((c) => c.id).whereType<int>().toList() ?? [];
+  }
+
   /// Fetch missing covers for all volumes
   Future<void> fetchMissingCovers() async {
     final missing = await _db.volumesDao.getMissingCovers();

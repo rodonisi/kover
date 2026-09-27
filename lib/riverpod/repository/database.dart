@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/riverpod/managers/download_manager.dart';
+import 'package:kover/riverpod/managers/download_manager/download_manager.dart';
 import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/utils/safe_platform.dart';
 import 'package:path/path.dart' as p;

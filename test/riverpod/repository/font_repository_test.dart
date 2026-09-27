@@ -26,7 +26,7 @@ void main() {
       ),
     );
     client = MockBookSyncOperations();
-    repository = FontRepository(database, client);
+    repository = FontRepository(db: database, client: client);
   });
 
   tearDown(() async {

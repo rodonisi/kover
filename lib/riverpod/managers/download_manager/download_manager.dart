@@ -5,14 +5,14 @@ import 'package:async/async.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
-import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
+import 'package:kover/riverpod/managers/download_manager/download_worker.dart';
 import 'package:kover/riverpod/providers/connectivity.dart';
+import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/providers/settings/download_settings.dart';
 import 'package:kover/riverpod/repository/download_repository.dart';
 import 'package:kover/riverpod/repository/series_repository.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
-import 'package:kover/utils/cancellation_token.dart';
 import 'package:kover/utils/lifecycle.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
@@ -33,18 +33,34 @@ sealed class DownloadManagerState with _$DownloadManagerState {
 }
 
 @Riverpod(keepAlive: true)
+Future<DownloadWorker> downloadWorker(Ref ref) async {
+  final credentials = await ref.watch(credentialsProvider.future);
+
+  final worker = await DownloadWorker.spawn(
+    url: credentials.url!,
+    key: credentials.apiKey!,
+    customHeaders: credentials.customHeaders,
+    ignoreCertificateValidation: credentials.ignoreCertificateValidation,
+  );
+
+  ref.onDispose(worker.close);
+
+  return worker;
+}
+
+@Riverpod(keepAlive: true)
 @JsonPersist()
 class DownloadManager extends _$DownloadManager {
   final Map<int, CancelableOperation<void>> _activeTasks = {};
+  int _nextRequestId = 0;
 
   @override
   Future<DownloadManagerState> build() async {
     listenSelf((previous, next) {
-      _processQueue();
+      unawaited(_processQueue());
     });
     _listenConnectivity();
     _listenAppLifecycle();
-    _listenSyncManager();
     _listenDownloadSettings();
 
     await persist(ref.watch(storageProvider.future)).future;
@@ -70,9 +86,9 @@ class DownloadManager extends _$DownloadManager {
 
   Future<void> enqueueVolume(int volumeId) async {
     final current = await future;
-    final ids = await ref
-        .read(volumesRepositoryProvider)
-        .getChapterIds(volumeId: volumeId);
+    final repository = ref.read(volumesRepositoryProvider);
+    final ids = await repository.fetchChapterIds(volumeId: volumeId);
+
     state = AsyncData(
       current.copyWith(
         downloadQueue: {...current.downloadQueue, ...ids},
@@ -89,9 +105,9 @@ class DownloadManager extends _$DownloadManager {
 
   Future<void> enqueueSeries(int seriesId) async {
     final current = await future;
-    final ids = await ref
-        .read(seriesRepositoryProvider)
-        .allChapterIds(seriesId: seriesId);
+    final repository = ref.read(seriesRepositoryProvider);
+    final ids = await repository.fetchChapterIds(seriesId: seriesId);
+
     state = AsyncData(
       current.copyWith(
         downloadQueue: {...current.downloadQueue, ...ids},
@@ -157,8 +173,7 @@ class DownloadManager extends _$DownloadManager {
   }
 
   Future<void> _processQueue() async {
-    if (ref.read(hasConnectionProvider).value != true ||
-        ref.read(syncManagerProvider) is SyncingState) {
+    if (ref.read(hasConnectionProvider).value != true) {
       return;
     }
 
@@ -176,7 +191,13 @@ class DownloadManager extends _$DownloadManager {
         .where((i) => !_activeTasks.containsKey(i))
         .take(max(0, concurrentDownloads - activeCount));
 
+    if (toStart.isEmpty) return;
+
+    final worker = await ref.read(downloadWorkerProvider.future);
+
     for (final chapterId in toStart) {
+      if (_activeTasks.containsKey(chapterId)) continue;
+
       log.info(
         'starting download for chapter',
         attributes: {
@@ -184,7 +205,7 @@ class DownloadManager extends _$DownloadManager {
         },
       );
 
-      unawaited(_startDownload(chapterId));
+      unawaited(_startDownload(chapterId, worker));
     }
   }
 
@@ -200,28 +221,20 @@ class DownloadManager extends _$DownloadManager {
     }
   }
 
-  Future<void> _startDownload(int chapterId) async {
-    final repo = ref.read(downloadRepositoryProvider);
-    final cancellationToken = CancellationToken();
+  Future<void> _startDownload(int chapterId, DownloadWorker worker) async {
+    final requestId = _nextRequestId++;
 
     final task = CancelableOperation.fromFuture(
-      repo
-          .downloadChapter(
-            chapterId: chapterId,
-            cancellationToken: cancellationToken,
-          )
-          .timeout(
-            const Duration(minutes: 5),
-          ),
+      worker.downloadChapter(requestId: requestId, chapterId: chapterId),
       onCancel: () {
-        cancellationToken.cancel();
+        worker.cancel(requestId);
       },
     );
 
     _activeTasks[chapterId] = task;
 
     try {
-      await task.value;
+      await task.valueOrCancellation();
     } catch (e, stacktrace) {
       log.error(
         'download failed for chapter',
@@ -232,7 +245,9 @@ class DownloadManager extends _$DownloadManager {
         },
       );
     } finally {
-      _activeTasks.remove(chapterId);
+      if (identical(_activeTasks[chapterId], task)) {
+        _activeTasks.remove(chapterId);
+      }
 
       if (!task.isCanceled) {
         log.info(
@@ -261,16 +276,6 @@ class DownloadManager extends _$DownloadManager {
     final newQueue = Set<int>.from(current.downloadQueue)
       ..removeAll(chapterIds);
     state = AsyncData(current.copyWith(downloadQueue: newQueue));
-  }
-
-  void _listenSyncManager() {
-    ref.listen(syncManagerProvider, (previous, next) async {
-      if (next is SyncingState && previous is! SyncingState) {
-        await _clearActiveTasks();
-      } else if (next is! SyncingState) {
-        await _processQueue();
-      }
-    });
   }
 
   void _listenConnectivity() {

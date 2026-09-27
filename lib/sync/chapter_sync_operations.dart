@@ -4,6 +4,24 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/utils/logging.dart';
 
 class const ChapterSyncOperations({required final Openapi _client}) {
+  /// Fetch chapter metadata for [chapterId] from the server.
+  Future<ChapterDto?> getChapter(int chapterId) async {
+    final res = await _client.apiChapterGet(chapterId: chapterId);
+
+    if (!res.isSuccessful || res.body == null) {
+      log.debug(
+        'failed to fetch chapter',
+        attributes: {
+          'chapter_id': chapterId,
+          'status_code': res.statusCode,
+        },
+      );
+      return null;
+    }
+
+    return res.body;
+  }
+
   /// Fetch chapter cover for [chapterId]
   Future<ChapterCoversCompanion?> getChapterCover(int chapterId) async {
     final res = await _client.apiImageChapterCoverGet(chapterId: chapterId);

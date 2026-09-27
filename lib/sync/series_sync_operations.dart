@@ -17,6 +17,17 @@ class const SeriesSyncOperations({required final Openapi _client}) {
     return res.map((dto) => dto.toSeriesCompanion());
   }
 
+  /// Fetch the ids of all chapters belonging to [seriesId] from the server.
+  Future<List<int>> getSeriesChapterIds({required int seriesId}) async {
+    final res = await _client.apiSearchChaptersBySeriesGet(seriesId: seriesId);
+
+    if (!res.isSuccessful || res.body == null) {
+      throw Exception('Failed to load series chapters: ${res.error}');
+    }
+
+    return res.body!.map((dto) => dto.id).whereType<int>().toList();
+  }
+
   Future<Iterable<SeriesCompanion>> getOnDeck() async {
     final res = await _client.apiSeriesOnDeckPost();
 

@@ -17,7 +17,7 @@ class DownloadDao extends DatabaseAccessor<AppDatabase>
   }) {
     final countColumn = downloadedPages.chapterId.count();
     return selectOnly(downloadedPages).join([
-        innerJoin(
+        leftOuterJoin(
           chapters,
           chapters.id.equalsExp(downloadedPages.chapterId),
         ),
@@ -43,11 +43,14 @@ class DownloadDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
-  /// Returns the number of pages currently stored for chapter [chapterId].
-  Future<int> downloadedPageCount({required int chapterId}) {
-    return managers.downloadedPages
-        .filter((f) => f.chapterId.id(chapterId))
-        .count();
+  /// Returns the page indices currently stored for chapter [chapterId].
+  Future<Set<int>> downloadedPageNumbers({required int chapterId}) async {
+    final query = selectOnly(downloadedPages)
+      ..addColumns([downloadedPages.page])
+      ..where(downloadedPages.chapterId.equals(chapterId));
+
+    final rows = await query.get();
+    return rows.map((row) => row.read(downloadedPages.page)!).toSet();
   }
 
   /// Returns download progress percentage for chapter [chapterId].
@@ -82,6 +85,16 @@ class DownloadDao extends DatabaseAccessor<AppDatabase>
   /// (chapterId, page) composite key.
   Future<void> insertPage(DownloadedPagesCompanion entry) {
     return into(downloadedPages).insertOnConflictUpdate(entry);
+  }
+
+  /// Persists multiple page blobs in a single batch. Replaces existing entries
+  /// for the same (chapterId, page) composite keys.
+  Future<void> insertPagesBatch(
+    Iterable<DownloadedPagesCompanion> entries,
+  ) async {
+    if (entries.isEmpty) return;
+
+    await batch((b) => b.insertAllOnConflictUpdate(downloadedPages, entries));
   }
 
   /// Deletes all downloaded pages for a chapter.

@@ -96,6 +96,12 @@ class const SeriesRepository({
     return chapters.map((c) => c.id).toList();
   }
 
+  /// Fetch the ids of all chapters belonging to [seriesId] from the server,
+  /// without relying on locally synced metadata.
+  Future<List<int>> fetchChapterIds({required int seriesId}) {
+    return _client.getSeriesChapterIds(seriesId: seriesId);
+  }
+
   Stream<SeriesModel> watchSeriesForChapter(int chapterId) {
     return _db.seriesDao
         .watchSeriesForChapter(chapterId)

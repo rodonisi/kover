@@ -219,5 +219,71 @@ void main() {
         },
       );
     });
+
+    group('downloadedPageNumbers', () {
+      test('returns stored page indices, including holes', () async {
+        const chapterId = 0;
+
+        for (final page in [0, 2, 3]) {
+          await database
+              .into(database.downloadedPages)
+              .insert(
+                DownloadedPagesCompanion.insert(
+                  chapterId: chapterId,
+                  page: page,
+                  data: Uint8List.fromList([]),
+                ),
+              );
+        }
+
+        final pages = await database.downloadDao.downloadedPageNumbers(
+          chapterId: chapterId,
+        );
+
+        expect(pages, {0, 2, 3});
+      });
+    });
+
+    group('without synced chapter metadata', () {
+      test('isChapterDownloaded returns false', () async {
+        const chapterId = 42;
+
+        await database
+            .into(database.downloadedPages)
+            .insert(
+              DownloadedPagesCompanion.insert(
+                chapterId: chapterId,
+                page: 0,
+                data: Uint8List.fromList([]),
+              ),
+            );
+
+        final downloaded = await database.downloadDao
+            .isChapterDownloaded(chapterId: chapterId)
+            .getSingle();
+
+        expect(downloaded, isFalse);
+      });
+
+      test('dowloadPercent returns 0', () async {
+        const chapterId = 42;
+
+        await database
+            .into(database.downloadedPages)
+            .insert(
+              DownloadedPagesCompanion.insert(
+                chapterId: chapterId,
+                page: 0,
+                data: Uint8List.fromList([]),
+              ),
+            );
+
+        final percent = await database.downloadDao
+            .dowloadPercent(chapterId: chapterId)
+            .getSingle();
+
+        expect(percent, 0.0);
+      });
+    });
   });
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/converters/page_content_converter.dart';
+import 'package:kover/models/enums/format.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
@@ -12,6 +13,7 @@ import 'package:kover/sync/chapter_sync_operations.dart';
 import 'package:kover/sync/series_sync_operations.dart';
 import 'package:kover/sync/volume_sync_operations.dart';
 import 'package:kover/utils/cancellation_token.dart';
+import 'package:kover/utils/chunked_fetch.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -63,52 +65,77 @@ class const DownloadRepository({
 
   /// Downloads every page of [chapterId] and persists the blobs to the DB.
   ///
-  /// - Progress is observable via [watchDownloadedPageCount].
-  /// - Any page that is already stored in the DB is skipped so that partial
-  ///   downloads can be resumed.
+  /// Chapter metadata is fetched directly from the server instead of the local
+  /// DB, so a download can run before (or during) a sync without depending on
+  /// chapter metadata having been synced yet. Only download data is written to
+  /// the DB.
   Future<void> downloadChapter({
     required int chapterId,
     CancellationToken? cancellationToken,
   }) async {
-    final chapter = await _db.chaptersDao.chapter(chapterId).getSingleOrNull();
-    if (chapter == null) return;
-    final format = chapter.format;
-    final totalPages = switch (format) {
-      .pdf => 1,
-      _ => chapter.pages,
-    };
+    final chapter = await _chapterClient.getChapter(chapterId);
+    final volumeId = chapter?.volumeId;
+    if (chapter == null || volumeId == null) {
+      throw Exception('Chapter $chapterId not found on server');
+    }
 
-    if (totalPages == 0) {
+    final format = chapter.format != null
+        ? Format.fromDtoFormat(chapter.format!)
+        : Format.unknown;
+
+    if (format == Format.unknown) {
+      throw Exception('Chapter $chapterId has an unsupported format');
+    }
+
+    if (chapter.pages == null || chapter.pages! <= 0) {
       throw Exception('Chapter $chapterId has no pages to download');
     }
 
-    final resumePoint = await _db.downloadDao.downloadedPageCount(
+    final totalPages = switch (format) {
+      .pdf => 1,
+      _ => chapter.pages!,
+    };
+
+    final existing = await _db.downloadDao.downloadedPageNumbers(
       chapterId: chapterId,
     );
 
-    for (var page = resumePoint; page < totalPages; page++) {
-      cancellationToken?.throwIfCancelled();
-      final blob = switch (format) {
-        .epub => await _downloadEpubPage(chapterId: chapterId, page: page),
-        .archive || .image => await _bookClient.getImagePage(
-          chapterId: chapterId,
-          page: page,
-        ),
-        .pdf => await _bookClient.getPdf(chapterId: chapterId),
-        _ => throw Exception('unsupported format'),
-      };
+    final missing = [
+      for (var page = 0; page < totalPages; page++)
+        if (!existing.contains(page)) page,
+    ];
 
-      await _db.downloadDao.insertPage(
-        DownloadedPagesCompanion.insert(
+    await chunkedFetch<int, DownloadedPagesCompanion>(
+      items: missing,
+      chunkSize: 2,
+      fetchCallback: (page) async {
+        cancellationToken?.throwIfCancelled();
+        final blob = switch (format) {
+          .epub => await _downloadEpubPage(chapterId: chapterId, page: page),
+          .archive || .image => await _bookClient.getImagePage(
+            chapterId: chapterId,
+            page: page,
+          ),
+          .pdf => await _bookClient.getPdf(chapterId: chapterId),
+          _ => throw Exception('unsupported format'),
+        };
+
+        return DownloadedPagesCompanion.insert(
           chapterId: chapterId,
           page: page,
           data: blob,
           lastSync: Value(DateTime.timestamp()),
-        ),
-      );
-    }
+        );
+      },
+      upsertCallback: (batch) => _db.downloadDao.insertPagesBatch(batch),
+    );
 
-    await downloadMissingCovers(chapter);
+    final volume = await _volumeClient.getVolume(volumeId);
+    await downloadMissingCovers(
+      chapterId: chapterId,
+      volumeId: volumeId,
+      seriesId: volume?.seriesId,
+    );
   }
 
   /// Downloads a single epub page, persisting its fonts to the font cache
@@ -126,16 +153,18 @@ class const DownloadRepository({
     return pageContentConverter.toSql(content);
   }
 
-  Future<void> downloadMissingCovers(Chapter chapter) async {
+  Future<void> downloadMissingCovers({
+    required int chapterId,
+    required int volumeId,
+    int? seriesId,
+  }) async {
     try {
       final chapterCover = await _db.chaptersDao
-          .chapterCover(chapterId: chapter.id)
+          .chapterCover(chapterId: chapterId)
           .getSingleOrNull();
 
       if (chapterCover == null) {
-        final remoteCover = await _chapterClient.getChapterCover(
-          chapter.id,
-        );
+        final remoteCover = await _chapterClient.getChapterCover(chapterId);
         if (remoteCover != null) {
           await _db.chaptersDao.upsertChapterCover(remoteCover);
         }
@@ -145,18 +174,16 @@ class const DownloadRepository({
         'failed to fetch cover for chapter',
         error: e,
         stacktrace: stacktrace,
-        attributes: {'chapter_id': chapter.id},
+        attributes: {'chapter_id': chapterId},
       );
     }
 
     try {
       final volumeCover = await _db.volumesDao
-          .volumeCover(volumeId: chapter.volumeId)
+          .volumeCover(volumeId: volumeId)
           .getSingleOrNull();
       if (volumeCover == null) {
-        final remoteCover = await _volumeClient.getVolumeCover(
-          chapter.volumeId,
-        );
+        final remoteCover = await _volumeClient.getVolumeCover(volumeId);
         if (remoteCover != null) {
           await _db.volumesDao.upsertVolumeCover(remoteCover);
         }
@@ -166,18 +193,18 @@ class const DownloadRepository({
         'failed to fetch cover for volume',
         error: e,
         stacktrace: stacktrace,
-        attributes: {'volume_id': chapter.volumeId},
+        attributes: {'volume_id': volumeId},
       );
     }
 
+    if (seriesId == null) return;
+
     try {
       final seriesCover = await _db.seriesDao
-          .seriesCover(seriesId: chapter.seriesId)
+          .seriesCover(seriesId: seriesId)
           .getSingleOrNull();
       if (seriesCover == null) {
-        final remoteCover = await _seriesClient.getSeriesCover(
-          chapter.seriesId,
-        );
+        final remoteCover = await _seriesClient.getSeriesCover(seriesId);
         if (remoteCover != null) {
           await _db.seriesDao.upsertSeriesCover(remoteCover);
         }
@@ -187,7 +214,7 @@ class const DownloadRepository({
         'failed to fetch cover for series',
         error: e,
         stacktrace: stacktrace,
-        attributes: {'series_id': chapter.seriesId},
+        attributes: {'series_id': seriesId},
       );
     }
   }

@@ -12,20 +12,18 @@ part 'font_repository.g.dart';
 @Riverpod(keepAlive: true)
 FontRepository fontRepository(Ref ref) {
   return FontRepository(
-    ref.watch(databaseProvider),
-    BookSyncOperations(
+    db: ref.watch(databaseProvider),
+    client: BookSyncOperations(
       client: ref.watch(restClientProvider),
       apiKey: ref.watch(apiKeyProvider)!,
     ),
   );
 }
 
-class FontRepository {
-  final AppDatabase _db;
-  final BookSyncOperations _client;
-
-  const FontRepository(this._db, this._client);
-
+class const FontRepository({
+  required final AppDatabase _db,
+  required final BookSyncOperations _client,
+}) {
   /// Returns the bytes of [font], reading them from the cache first and
   /// fetching them from the server when missing.
   Future<Uint8List?> getFontData(FontFace font) async {
