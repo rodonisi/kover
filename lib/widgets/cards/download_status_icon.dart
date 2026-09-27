@@ -1,3 +1,4 @@
+import 'package:kover/models/download_status.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -11,39 +12,41 @@ import 'package:kover/utils/layout_constants.dart';
 /// - **Downloaded** (`isDownloaded == true`): shows a static download icon.
 /// - **Neither**: renders nothing (`null`-safe; returns `SizedBox.shrink()`).
 class DownloadStatusIcon extends StatelessWidget {
+  final DownloadStatus? status;
+
   const DownloadStatusIcon({
     super.key,
-    this.progress,
+    this.status,
   });
-
-  /// Download progress as a fraction (0.0–1.0), or `null` for indeterminate.
-  /// Only meaningful when [isDownloading] is true.
-  final double? progress;
 
   @override
   Widget build(BuildContext context) {
-    if (progress == null || progress! <= 0.0) return const SizedBox.shrink();
+    if (status == null) return const SizedBox.shrink();
 
-    if (progress! < 1.0) {
-      return Card(
-        child: Padding(
-          padding: LayoutConstants.smallEdgeInsets,
-          child: SizedBox.square(
-            dimension: 16,
-            child: CircularProgressIndicator(value: progress),
-          ),
-        ),
-      );
-    }
+    final theme = Theme.of(context);
+    final iconColor = theme.colorScheme.secondary;
+
+    final content = status!.when(
+      queued: () => Icon(
+        KoverIcons.queued,
+        color: iconColor,
+        size: LayoutConstants.smallIcon,
+      ),
+      downloading: (progress) => SizedBox.square(
+        dimension: LayoutConstants.smallIcon,
+        child: CircularProgressIndicator(value: progress),
+      ),
+      downloaded: () => Icon(
+        KoverIcons.download,
+        color: iconColor,
+        size: LayoutConstants.smallIcon,
+      ),
+    );
 
     return Card(
       child: Padding(
         padding: LayoutConstants.smallEdgeInsets,
-        child: Icon(
-          KoverIcons.download,
-          color: Theme.of(context).colorScheme.secondary,
-          size: 16,
-        ),
+        child: content,
       ),
     );
   }

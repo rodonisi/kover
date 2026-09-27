@@ -41,6 +41,10 @@ class SeriesCard extends HookConsumerWidget {
         ref.watch(seriesDownloadProgressProvider(seriesId: seriesId)).value ??
         0.0;
 
+    final downloadStatus = ref.watch(
+      seriesDownloadStatusProvider(seriesId: seriesId),
+    );
+
     return Async(
       asyncValue: model,
       data: (data) => ActionsContextMenu(
@@ -95,9 +99,7 @@ class SeriesCard extends HookConsumerWidget {
           ),
           progress: progress,
           coverImage: SeriesCoverImage(seriesId: seriesId),
-          downloadStatusIcon: DownloadStatusIcon(
-            progress: downloadProgress,
-          ),
+          downloadStatusIcon: DownloadStatusIcon(status: downloadStatus.value),
           onTap: () {
             SeriesDetailRoute(
               seriesId: seriesId,

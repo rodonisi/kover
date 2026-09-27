@@ -96,6 +96,14 @@ class const SeriesRepository({
     return chapters.map((c) => c.id).toList();
   }
 
+  /// Watch the ids of all chapters belonging to series [seriesId].
+  Stream<List<int>> watchChapterIds({required int seriesId}) {
+    return _db.seriesDao
+        .allChapters(seriesId: seriesId)
+        .watch()
+        .map((chapters) => chapters.map((c) => c.id).toList());
+  }
+
   /// Fetch the ids of all chapters belonging to [seriesId] from the server,
   /// without relying on locally synced metadata.
   Future<List<int>> fetchChapterIds({required int seriesId}) {

@@ -116,6 +116,14 @@ class const VolumesRepository({
     return volume?.chapters.map((c) => c.id).toList() ?? [];
   }
 
+  /// Watch the ids of all chapters belonging to volume [volumeId].
+  Stream<List<int>> watchChapterIds({required int volumeId}) {
+    return _db.volumesDao
+        .volume(volumeId)
+        .watchSingleOrNull()
+        .map((volume) => volume?.chapters.map((c) => c.id).toList() ?? []);
+  }
+
   /// Fetch the ids of all chapters belonging to volume [volumeId] from the
   /// server, without relying on locally synced metadata.
   Future<List<int>> fetchChapterIds({required int volumeId}) async {

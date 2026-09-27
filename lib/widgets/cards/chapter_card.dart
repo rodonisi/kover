@@ -36,9 +36,9 @@ class ChapterCard extends HookConsumerWidget {
 
     final canRead = ref.watch(canReadChapterProvider(chapterId)).value ?? false;
 
-    final downloadProgress = ref
-        .watch(chapterDownloadProgressProvider(chapterId: chapterId))
-        .value;
+    final downloadStatus = ref.watch(
+      chapterDownloadStatusProvider(chapterId: chapterId),
+    );
 
     return Async(
       asyncValue: chapter,
@@ -68,7 +68,7 @@ class ChapterCard extends HookConsumerWidget {
           coverImage: ChapterCoverImage(chapterId: chapterId),
           progress: progress,
           downloadStatusIcon: DownloadStatusIcon(
-            progress: downloadProgress,
+            status: downloadStatus.value,
           ),
           onTap: () => ChapterDetailRoute(
             seriesId: seriesId,

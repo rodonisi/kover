@@ -62,6 +62,13 @@ Stream<SeriesModel> seriesForChapter(Ref ref, {required int chapterId}) {
   return repo.watchSeriesForChapter(chapterId).distinct();
 }
 
+/// The ids of all chapters belonging to series [seriesId]
+@riverpod
+Stream<List<int>> seriesChapterIds(Ref ref, {required int seriesId}) {
+  final repo = ref.watch(seriesRepositoryProvider);
+  return repo.watchChapterIds(seriesId: seriesId).distinct(listEquals);
+}
+
 @riverpod
 Stream<double> seriesProgress(Ref ref, {required int seriesId}) {
   final repo = ref.watch(seriesRepositoryProvider);

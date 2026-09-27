@@ -109,6 +109,7 @@ sealed class KoverIcons {
   static const IconData markUnread = LucideIcons.bookX;
   static const IconData download = LucideIcons.download;
   static const IconData downloading = LucideIcons.refreshCw;
+  static const IconData queued = LucideIcons.hourglass;
   static const IconData refreshCovers = LucideIcons.imageDown;
   static const IconData refresh = LucideIcons.refreshCw;
   static const IconData copy = LucideIcons.copy;
@@ -144,7 +145,7 @@ sealed class KoverIcons {
   static const IconData settings = LucideIcons.settings;
   static const IconData readerSettings = LucideIcons.slidersHorizontal;
   static const IconData analytics = LucideIcons.barChart2;
-  static const IconData logs = LucideIcons.fileText;
+  static const IconData logs = LucideIcons.logs;
   static const IconData language = LucideIcons.languages;
   static const IconData directionality = LucideIcons.globeCode;
   static const IconData unlockedOrientation = LucideIcons.rotateCwSquare;

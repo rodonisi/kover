@@ -35,6 +35,10 @@ class VolumeCard extends HookConsumerWidget {
         ref.watch(volumeDownloadProgressProvider(volumeId: volumeId)).value ??
         0.0;
 
+    final downloadStatus = ref.watch(
+      volumeDownloadStatusProvider(volumeId: volumeId),
+    );
+
     return Async(
       asyncValue: model,
       data: (data) => ActionsContextMenu(
@@ -62,9 +66,7 @@ class VolumeCard extends HookConsumerWidget {
           title: data.volume.name,
           coverImage: VolumeCoverImage(volumeId: data.volume.id),
           progress: progress,
-          downloadStatusIcon: DownloadStatusIcon(
-            progress: downloadProgress,
-          ),
+          downloadStatusIcon: DownloadStatusIcon(status: downloadStatus.value),
           actionDisabled: !data.canRead,
           onActionTap: () {
             ReaderRoute(

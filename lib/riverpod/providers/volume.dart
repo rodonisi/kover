@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:kover/models/enums/order_by_option.dart';
 import 'package:kover/models/enums/sort_direction.dart';
 import 'package:kover/models/image_model.dart';
@@ -61,4 +62,11 @@ Stream<double> volumeProgress(Ref ref, {required int volumeId}) {
 Stream<ImageModel?> volumeCover(Ref ref, {required int volumeId}) {
   final repo = ref.watch(volumesRepositoryProvider);
   return repo.watchVolumeCover(volumeId).distinct();
+}
+
+/// The ids of all chapters belonging to volume [volumeId]
+@riverpod
+Stream<List<int>> volumeChapterIds(Ref ref, {required int volumeId}) {
+  final repo = ref.watch(volumesRepositoryProvider);
+  return repo.watchChapterIds(volumeId: volumeId).distinct(listEquals);
 }
