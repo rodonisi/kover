@@ -35,6 +35,7 @@ Stream<List<SeriesModel>> wantToReadList(
   UnorderedSortOption orderBy = .name,
   SortDirection direction = .ascending,
   bool hideRead = false,
+  bool downloadedOnly = false,
 }) {
   final repo = ref.watch(wantToReadRepositoryProvider);
   return repo
@@ -43,6 +44,7 @@ Stream<List<SeriesModel>> wantToReadList(
         orderBy: orderBy,
         direction: direction,
         hideRead: hideRead,
+        downloadedOnly: downloadedOnly,
       )
       .distinct();
 }

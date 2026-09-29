@@ -90,6 +90,7 @@ class const ChaptersRepository({
     OrderedSortOption orderBy = .sortOrder,
     SortDirection direction = .ascending,
     bool hideRead = false,
+    bool downloadedOnly = false,
   }) {
     return _db.chaptersDao
         .watchFilteredChapters(
@@ -100,6 +101,7 @@ class const ChaptersRepository({
           orderBy: orderBy,
           direction: direction,
           hideRead: hideRead,
+          downloadedOnly: downloadedOnly,
         )
         .watch()
         .map(

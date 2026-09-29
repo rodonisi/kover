@@ -4,6 +4,7 @@ import 'package:kover/database/dao/chapters_dao.dart';
 import 'package:kover/database/dao/list_query_helpers.dart';
 import 'package:kover/database/dao/volumes_dao.dart';
 import 'package:kover/database/tables/chapters.dart';
+import 'package:kover/database/tables/download.dart';
 import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/on_deck_removal.dart';
 import 'package:kover/database/tables/progress.dart';
@@ -38,6 +39,7 @@ part 'series_dao.g.dart';
     ChapterPeopleRoles,
     ChapterGenres,
     ChapterTags,
+    DownloadedPages,
   ],
 )
 class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
@@ -45,6 +47,18 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
 
   Expression<bool> get _hasUnreadProgress =>
       hasUnreadProgress(readingProgress.pagesRead.sum(), series.pages);
+
+  /// Whether series has at least one page stored locally.
+  Expression<bool> get _hasDownloads => series.id.isInQuery(
+    selectOnly(chapters)
+      ..addColumns([chapters.seriesId])
+      ..join([
+        innerJoin(
+          downloadedPages,
+          downloadedPages.chapterId.equalsExp(chapters.id),
+        ),
+      ]),
+  );
 
   Expression<double> get _progressRatio =>
       progressRatio(readingProgress.pagesRead.sum(), series.pages);
@@ -110,6 +124,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     UnorderedSortOption orderBy = .name,
     SortDirection direction = .ascending,
     bool hideRead = false,
+    bool downloadedOnly = false,
   }) async {
     final q =
         (select(series).join([
@@ -141,6 +156,10 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
             ..where(db.collectionSeries.collectionId.equals(collectionId)),
         ),
       );
+    }
+
+    if (downloadedOnly) {
+      q.where(_hasDownloads);
     }
 
     final mode = direction.toOrderingMode();
@@ -243,6 +262,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     UnorderedSortOption orderBy = .name,
     SortDirection direction = .ascending,
     bool hideRead = false,
+    bool downloadedOnly = false,
   }) {
     final query = select(series).join([
       leftOuterJoin(
@@ -263,6 +283,10 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
             ..where(db.collectionSeries.collectionId.equals(collectionId)),
         ),
       );
+    }
+
+    if (downloadedOnly) {
+      query.where(_hasDownloads);
     }
 
     final orderMode = direction.toOrderingMode();
@@ -343,6 +367,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     String query = '',
     UnorderedSortOption orderBy = .lastRead,
     SortDirection direction = .descending,
+    bool downloadedOnly = false,
   }) {
     return managers.serverSettings
         .filter((f) => f.key.equals(DataConstants.serverSettingsKey))
@@ -371,6 +396,10 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
                 ],
               ),
             );
+          }
+
+          if (downloadedOnly) {
+            q.where(_hasDownloads);
           }
 
           q.orderBy([
@@ -415,6 +444,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     UnorderedSortOption orderBy = .dateUpdated,
     SortDirection direction = .descending,
     bool hideRead = false,
+    bool downloadedOnly = false,
   }) {
     final q =
         select(series).join([
@@ -438,6 +468,10 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       );
     }
 
+    if (downloadedOnly) {
+      q.where(_hasDownloads);
+    }
+
     q.orderBy([_orderingTerm(orderBy, direction.toOrderingMode())]);
 
     return q.map((row) => row.readTable(series)).watch();
@@ -449,6 +483,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     UnorderedSortOption orderBy = .dateAdded,
     SortDirection direction = .descending,
     bool hideRead = false,
+    bool downloadedOnly = false,
   }) {
     final q =
         select(series).join([
@@ -472,6 +507,10 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       );
     }
 
+    if (downloadedOnly) {
+      q.where(_hasDownloads);
+    }
+
     q.orderBy([_orderingTerm(orderBy, direction.toOrderingMode())]);
 
     return q.map((row) => row.readTable(series)).watch();
@@ -493,6 +532,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     UnorderedSortOption orderBy = .name,
     SortDirection direction = .ascending,
     bool hideRead = false,
+    bool downloadedOnly = false,
   }) {
     final q = select(series).join([
       innerJoin(wantToRead, wantToRead.seriesId.equalsExp(series.id)),
@@ -514,6 +554,10 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
           ],
         ),
       );
+    }
+
+    if (downloadedOnly) {
+      q.where(_hasDownloads);
     }
 
     q

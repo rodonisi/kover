@@ -23,6 +23,7 @@ Stream<List<SeriesModel>> smartFilterSeries(
   UnorderedSortOption orderBy = .name,
   SortDirection direction = .ascending,
   bool hideRead = false,
+  bool downloadedOnly = false,
 }) {
   final repo = ref.watch(smartFiltersRepositoryProvider);
   return repo
@@ -32,6 +33,7 @@ Stream<List<SeriesModel>> smartFilterSeries(
         orderBy: orderBy,
         direction: direction,
         hideRead: hideRead,
+        downloadedOnly: downloadedOnly,
       )
       .distinct(listEquals);
 }

@@ -62,6 +62,7 @@ class const VolumesRepository({
   Stream<List<VolumeModel>> watchVolumes({
     required int seriesId,
     bool hideRead = false,
+    bool downloadedOnly = false,
     String query = '',
     OrderedSortOption orderBy = .sortOrder,
     SortDirection direction = .ascending,
@@ -70,6 +71,7 @@ class const VolumesRepository({
         .watchVolumes(
           seriesId: seriesId,
           hideRead: hideRead,
+          downloadedOnly: downloadedOnly,
           query: query,
           orderBy: orderBy,
           direction: direction,

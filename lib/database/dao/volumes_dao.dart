@@ -3,6 +3,7 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/database/dao/chapters_dao.dart';
 import 'package:kover/database/dao/list_query_helpers.dart';
 import 'package:kover/database/tables/chapters.dart';
+import 'package:kover/database/tables/download.dart';
 import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/progress.dart';
 import 'package:kover/database/tables/series.dart';
@@ -21,10 +22,23 @@ part 'volumes_dao.g.dart';
     ReadingProgress,
     Series,
     Libraries,
+    DownloadedPages,
   ],
 )
 class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
   VolumesDao(super.attachedDatabase);
+
+  /// Whether volume has at least one page stored locally.
+  Expression<bool> get _hasDownloads => volumes.id.isInQuery(
+    selectOnly(chapters)
+      ..addColumns([chapters.volumeId])
+      ..join([
+        innerJoin(
+          downloadedPages,
+          downloadedPages.chapterId.equalsExp(chapters.id),
+        ),
+      ]),
+  );
 
   /// Get a [SingleOrNullSelectable] for volume [volumeId] with its chapters
   SingleOrNullSelectable<VolumeWithRelations> volume(int volumeId) {
@@ -74,10 +88,13 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
   }
 
   /// Watch volumes for series [seriesId], optionally filtering by [query]
-  /// (volume name) and excluding fully read volumes when [hideRead] is true.
+  /// (volume name), excluding fully read volumes when [hideRead] is true, and
+  /// excluding volumes without any downloaded page when [downloadedOnly] is
+  /// true.
   MultiSelectable<Volume> watchVolumes({
     required int seriesId,
     bool hideRead = false,
+    bool downloadedOnly = false,
     String query = '',
     OrderedSortOption orderBy = .sortOrder,
     SortDirection direction = .ascending,
@@ -98,6 +115,10 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
 
     if (query.isNotEmpty) {
       q.where(containsAny(query, [volumes.name]));
+    }
+
+    if (downloadedOnly) {
+      q.where(_hasDownloads);
     }
 
     q

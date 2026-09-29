@@ -19,6 +19,7 @@ Stream<List<ChapterModel>> filteredChapters(
   OrderedSortOption orderBy = .sortOrder,
   SortDirection direction = .ascending,
   bool hideRead = false,
+  bool downloadedOnly = false,
 }) {
   final repo = ref.watch(chaptersRepositoryProvider);
   return repo
@@ -30,6 +31,7 @@ Stream<List<ChapterModel>> filteredChapters(
         orderBy: orderBy,
         direction: direction,
         hideRead: hideRead,
+        downloadedOnly: downloadedOnly,
       )
       .distinct();
 }

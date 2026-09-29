@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/dao/list_query_helpers.dart';
 import 'package:kover/database/tables/chapters.dart';
+import 'package:kover/database/tables/download.dart';
 import 'package:kover/database/tables/progress.dart';
 import 'package:kover/database/tables/reading_lists.dart';
 import 'package:kover/database/tables/series.dart';
@@ -26,6 +27,7 @@ part 'smart_filters_dao.g.dart';
     SmartFilterReadingList,
     SmartFilterPerson,
     ReadingProgress,
+    DownloadedPages,
   ],
 )
 class SmartFiltersDao(super.attachedDatabase)
@@ -33,6 +35,18 @@ class SmartFiltersDao(super.attachedDatabase)
     with _$SmartFiltersDaoMixin {
   Expression<bool> get _hasUnreadProgress =>
       hasUnreadProgress(readingProgress.pagesRead.sum(), series.pages);
+
+  /// Whether series has at least one page stored locally.
+  Expression<bool> get _hasDownloads => series.id.isInQuery(
+    selectOnly(chapters)
+      ..addColumns([chapters.seriesId])
+      ..join([
+        innerJoin(
+          downloadedPages,
+          downloadedPages.chapterId.equalsExp(chapters.id),
+        ),
+      ]),
+  );
 
   Expression<double> get _progressRatio =>
       progressRatio(readingProgress.pagesRead.sum(), series.pages);
@@ -76,6 +90,7 @@ class SmartFiltersDao(super.attachedDatabase)
     UnorderedSortOption orderBy = .name,
     SortDirection direction = .ascending,
     bool hideRead = false,
+    bool downloadedOnly = false,
   }) {
     final q =
         select(series).join([
@@ -106,6 +121,10 @@ class SmartFiltersDao(super.attachedDatabase)
           ],
         ),
       );
+    }
+
+    if (downloadedOnly) {
+      q.where(_hasDownloads);
     }
 
     q.orderBy([_orderingTerm(orderBy, direction.toOrderingMode())]);

@@ -30,6 +30,7 @@ Future<List<SeriesModel>> filterSeries(
   UnorderedSortOption orderBy = .name,
   SortDirection direction = .ascending,
   bool hideRead = false,
+  bool downloadedOnly = false,
 }) async {
   final repo = ref.watch(seriesRepositoryProvider);
   final allSeries = await ref.watch(
@@ -39,6 +40,7 @@ Future<List<SeriesModel>> filterSeries(
       orderBy: orderBy,
       direction: direction,
       hideRead: hideRead,
+      downloadedOnly: downloadedOnly,
     ).future,
   );
 
@@ -53,6 +55,7 @@ Future<List<SeriesModel>> filterSeries(
     orderBy: orderBy,
     direction: direction,
     hideRead: hideRead,
+    downloadedOnly: downloadedOnly,
   );
 }
 
@@ -92,6 +95,7 @@ Stream<List<SeriesModel>> allSeries(
   UnorderedSortOption orderBy = .name,
   SortDirection direction = .ascending,
   bool hideRead = false,
+  bool downloadedOnly = false,
 }) {
   final repo = ref.watch(seriesRepositoryProvider);
 
@@ -102,6 +106,7 @@ Stream<List<SeriesModel>> allSeries(
         orderBy: orderBy,
         direction: direction,
         hideRead: hideRead,
+        downloadedOnly: downloadedOnly,
       )
       .distinct();
 }
@@ -130,10 +135,16 @@ Stream<List<SeriesModel>> onDeck(
   String query = '',
   UnorderedSortOption orderBy = .lastRead,
   SortDirection direction = .descending,
+  bool downloadedOnly = false,
 }) {
   final repo = ref.watch(seriesRepositoryProvider);
   return repo
-      .watchOnDeck(query: query, orderBy: orderBy, direction: direction)
+      .watchOnDeck(
+        query: query,
+        orderBy: orderBy,
+        direction: direction,
+        downloadedOnly: downloadedOnly,
+      )
       .distinct(listEquals);
 }
 
@@ -144,6 +155,7 @@ Stream<List<SeriesModel>> recentlyUpdated(
   UnorderedSortOption orderBy = .dateUpdated,
   SortDirection direction = .descending,
   bool hideRead = false,
+  bool downloadedOnly = false,
 }) {
   final repo = ref.watch(seriesRepositoryProvider);
   return repo
@@ -152,6 +164,7 @@ Stream<List<SeriesModel>> recentlyUpdated(
         direction: direction,
         orderBy: orderBy,
         hideRead: hideRead,
+        downloadedOnly: downloadedOnly,
       )
       .distinct(listEquals);
 }
@@ -163,6 +176,7 @@ Stream<List<SeriesModel>> recentlyAdded(
   UnorderedSortOption orderBy = .dateAdded,
   SortDirection direction = .descending,
   bool hideRead = false,
+  bool downloadedOnly = false,
 }) {
   final repo = ref.watch(seriesRepositoryProvider);
   return repo
@@ -171,6 +185,7 @@ Stream<List<SeriesModel>> recentlyAdded(
         orderBy: orderBy,
         direction: direction,
         hideRead: hideRead,
+        downloadedOnly: downloadedOnly,
       )
       .distinct(listEquals);
 }

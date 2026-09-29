@@ -14,6 +14,7 @@ Stream<List<VolumeModel>> volumes(
   Ref ref, {
   required int seriesId,
   bool hideRead = false,
+  bool downloadedOnly = false,
   String query = '',
   OrderedSortOption orderBy = .sortOrder,
   SortDirection direction = .ascending,
@@ -23,6 +24,7 @@ Stream<List<VolumeModel>> volumes(
       .watchVolumes(
         seriesId: seriesId,
         hideRead: hideRead,
+        downloadedOnly: downloadedOnly,
         query: query,
         orderBy: orderBy,
         direction: direction,

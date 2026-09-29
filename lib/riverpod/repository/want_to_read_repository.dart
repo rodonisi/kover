@@ -37,6 +37,7 @@ class WantToReadRepository {
     UnorderedSortOption orderBy = .name,
     SortDirection direction = .ascending,
     bool hideRead = false,
+    bool downloadedOnly = false,
   }) {
     return _db.seriesDao
         .watchWantToReadList(
@@ -44,6 +45,7 @@ class WantToReadRepository {
           orderBy: orderBy,
           direction: direction,
           hideRead: hideRead,
+          downloadedOnly: downloadedOnly,
         )
         .map((list) => list.map(SeriesModel.fromDatabaseModel).toList());
   }

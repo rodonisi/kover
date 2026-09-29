@@ -94,6 +94,7 @@ class SeriesPage extends HookConsumerWidget {
     final orderBy = useState(UnorderedSortOption.name);
     final sortDirection = useState(SortDirection.ascending);
     final hideRead = useState(false);
+    final downloadedOnly = useState(false);
     final controller = useTextEditingController();
 
     final query = ref.watch(
@@ -104,6 +105,7 @@ class SeriesPage extends HookConsumerWidget {
         orderBy: orderBy.value,
         direction: sortDirection.value,
         hideRead: hideRead.value,
+        downloadedOnly: downloadedOnly.value,
       ),
     );
 
@@ -122,6 +124,8 @@ class SeriesPage extends HookConsumerWidget {
           onOrderByChanged: (onOrder) => orderBy.value = onOrder,
           hideRead: hideRead.value,
           onHideReadChanged: (onHideRead) => hideRead.value = onHideRead,
+          downloadedOnly: downloadedOnly.value,
+          onDownloadedOnlyChanged: (value) => downloadedOnly.value = value,
         ),
         series: query,
       ),

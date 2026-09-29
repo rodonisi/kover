@@ -18,6 +18,7 @@ class ChaptersPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final hideRead = useState(false);
+    final downloadedOnly = useState(false);
     final sortDirection = useState(SortDirection.ascending);
     final orderBy = useState(OrderedSortOption.sortOrder);
     final controller = useTextEditingController();
@@ -32,6 +33,7 @@ class ChaptersPage extends HookConsumerWidget {
         orderBy: orderBy.value,
         direction: sortDirection.value,
         hideRead: hideRead.value,
+        downloadedOnly: downloadedOnly.value,
       ),
     );
 
@@ -47,6 +49,8 @@ class ChaptersPage extends HookConsumerWidget {
         onOrderByChanged: (value) => orderBy.value = value,
         hideRead: hideRead.value,
         onHideReadChanged: (newHideRead) => hideRead.value = newHideRead,
+        downloadedOnly: downloadedOnly.value,
+        onDownloadedOnlyChanged: (value) => downloadedOnly.value = value,
       ),
     );
   }
@@ -62,6 +66,7 @@ class StorylinePage extends HookConsumerWidget {
     final orderBy = useState(OrderedSortOption.sortOrder);
     final sortDirection = useState(SortDirection.ascending);
     final hideRead = useState(false);
+    final downloadedOnly = useState(false);
     final controller = useTextEditingController();
 
     useListenable(controller);
@@ -74,6 +79,7 @@ class StorylinePage extends HookConsumerWidget {
         orderBy: orderBy.value,
         direction: sortDirection.value,
         hideRead: hideRead.value,
+        downloadedOnly: downloadedOnly.value,
       ),
     );
 
@@ -88,6 +94,8 @@ class StorylinePage extends HookConsumerWidget {
         onOrderByChanged: (value) => orderBy.value = value,
         hideRead: hideRead.value,
         onHideReadChanged: (value) => hideRead.value = value,
+        downloadedOnly: downloadedOnly.value,
+        onDownloadedOnlyChanged: (value) => downloadedOnly.value = value,
       ),
     );
   }
@@ -103,6 +111,7 @@ class SpecialsPage extends HookConsumerWidget {
     final orderBy = useState(OrderedSortOption.sortOrder);
     final sortDirection = useState(SortDirection.ascending);
     final hideRead = useState(false);
+    final downloadedOnly = useState(false);
     final controller = useTextEditingController();
 
     useListenable(controller);
@@ -115,6 +124,7 @@ class SpecialsPage extends HookConsumerWidget {
         orderBy: orderBy.value,
         direction: sortDirection.value,
         hideRead: hideRead.value,
+        downloadedOnly: downloadedOnly.value,
       ),
     );
 
@@ -130,6 +140,8 @@ class SpecialsPage extends HookConsumerWidget {
         onOrderByChanged: (newOrderBy) => orderBy.value = newOrderBy,
         hideRead: hideRead.value,
         onHideReadChanged: (newHideRead) => hideRead.value = newHideRead,
+        downloadedOnly: downloadedOnly.value,
+        onDownloadedOnlyChanged: (value) => downloadedOnly.value = value,
       ),
     );
   }

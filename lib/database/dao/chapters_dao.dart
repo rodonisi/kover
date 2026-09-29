@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/dao/list_query_helpers.dart';
 import 'package:kover/database/tables/chapters.dart';
+import 'package:kover/database/tables/download.dart';
 import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/progress.dart';
 import 'package:kover/database/tables/series.dart';
@@ -34,11 +35,17 @@ enum ChapterKind {
     ChapterPeopleRoles,
     ChapterGenres,
     ChapterTags,
+    DownloadedPages,
   ],
 )
 class ChaptersDao extends DatabaseAccessor<AppDatabase>
     with _$ChaptersDaoMixin {
   ChaptersDao(super.attachedDatabase);
+
+  /// Whether chapter has at least one page stored locally.
+  Expression<bool> get _hasDownloads => chapters.id.isInQuery(
+    selectOnly(downloadedPages)..addColumns([downloadedPages.chapterId]),
+  );
 
   /// Get a [SingleOrNullSelectable] for chapter [chapterId]
   Selectable<Chapter> chapter(int chapterId) {
@@ -78,8 +85,9 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
   }
 
   /// Watch chapters for series [seriesId], sliced by [kind], optionally
-  /// restricted to [volumeId], filtered by [query] (chapter title), and
-  /// excluding fully read chapters when [hideRead] is true.
+  /// restricted to [volumeId], filtered by [query] (chapter title), excluding
+  /// fully read chapters when [hideRead] is true, and excluding chapters
+  /// without any downloaded page when [downloadedOnly] is true.
   MultiSelectable<Chapter> watchFilteredChapters({
     required int seriesId,
     int? volumeId,
@@ -88,6 +96,7 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     OrderedSortOption orderBy = .sortOrder,
     SortDirection direction = .ascending,
     bool hideRead = false,
+    bool downloadedOnly = false,
   }) {
     final pagesReadSum = readingProgress.pagesRead.sum();
 
@@ -101,9 +110,15 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     q.where(
       chapters.seriesId.equals(seriesId) &
           switch (kind) {
-            .chapters => chapters.minNumber.isBiggerThanValue(
-              DataConstants.singleVolumeChapterMinNumber,
-            ),
+            // Single-volume "book" chapters (minNumber == -100000) are surfaced
+            // as volumes at series level, so they are excluded there. When
+            // scoped to a volume they are the actual chapters and must be kept.
+            .chapters =>
+              volumeId == null
+                  ? chapters.minNumber.isBiggerThanValue(
+                      DataConstants.singleVolumeChapterMinNumber,
+                    )
+                  : const Constant(true),
             .storyline => chapters.isStoryline.equals(true),
             .specials => chapters.isSpecial.equals(true),
           },
@@ -115,6 +130,10 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
 
     if (query.isNotEmpty) {
       q.where(containsAny(query, [chapters.title]));
+    }
+
+    if (downloadedOnly) {
+      q.where(_hasDownloads);
     }
 
     q

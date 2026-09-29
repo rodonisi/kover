@@ -32,12 +32,14 @@ class _OnDeckPageContent extends HookConsumerWidget {
     final controller = useTextEditingController();
     final sortDirection = useState(SortDirection.descending);
     final orderBy = useState(UnorderedSortOption.lastRead);
+    final downloadedOnly = useState(false);
 
     final series = ref.watch(
       onDeckProvider(
         query: controller.text,
         orderBy: orderBy.value,
         direction: sortDirection.value,
+        downloadedOnly: downloadedOnly.value,
       ),
     );
 
@@ -51,6 +53,8 @@ class _OnDeckPageContent extends HookConsumerWidget {
         onSortDirectionChanged: (sort) => sortDirection.value = sort,
         orderBy: orderBy.value,
         onOrderByChanged: (order) => orderBy.value = order,
+        downloadedOnly: downloadedOnly.value,
+        onDownloadedOnlyChanged: (value) => downloadedOnly.value = value,
       ),
       series: series,
     );

@@ -73,6 +73,7 @@ class const SeriesRepository({
     UnorderedSortOption orderBy = .name,
     SortDirection direction = .ascending,
     bool hideRead = false,
+    bool downloadedOnly = false,
   }) async {
     if (query.isEmpty) {
       return [];
@@ -85,6 +86,7 @@ class const SeriesRepository({
       orderBy: orderBy,
       direction: direction,
       hideRead: hideRead,
+      downloadedOnly: downloadedOnly,
     );
 
     return result.map(SeriesModel.fromDatabaseModel).toList();
@@ -175,6 +177,7 @@ class const SeriesRepository({
     UnorderedSortOption orderBy = .name,
     SortDirection direction = .ascending,
     bool hideRead = false,
+    bool downloadedOnly = false,
   }) {
     return _db.seriesDao
         .allSeries(
@@ -183,6 +186,7 @@ class const SeriesRepository({
           orderBy: orderBy,
           direction: direction,
           hideRead: hideRead,
+          downloadedOnly: downloadedOnly,
         )
         .watch()
         .distinct()
@@ -196,9 +200,15 @@ class const SeriesRepository({
     String query = '',
     UnorderedSortOption orderBy = .lastRead,
     SortDirection direction = .descending,
+    bool downloadedOnly = false,
   }) {
     return _db.seriesDao
-        .watchOnDeck(query: query, orderBy: orderBy, direction: direction)
+        .watchOnDeck(
+          query: query,
+          orderBy: orderBy,
+          direction: direction,
+          downloadedOnly: downloadedOnly,
+        )
         .map(
           (list) => list.map(SeriesModel.fromDatabaseModel).toList(),
         );
@@ -210,6 +220,7 @@ class const SeriesRepository({
     UnorderedSortOption orderBy = .dateAdded,
     SortDirection direction = .descending,
     bool hideRead = false,
+    bool downloadedOnly = false,
   }) {
     return _db.seriesDao
         .watchRecentlyAdded(
@@ -217,6 +228,7 @@ class const SeriesRepository({
           orderBy: orderBy,
           direction: direction,
           hideRead: hideRead,
+          downloadedOnly: downloadedOnly,
         )
         .map(
           (list) => list.map(SeriesModel.fromDatabaseModel).toList(),
@@ -229,6 +241,7 @@ class const SeriesRepository({
     UnorderedSortOption orderBy = .dateUpdated,
     SortDirection direction = .descending,
     bool hideRead = false,
+    bool downloadedOnly = false,
   }) {
     return _db.seriesDao
         .watchRecentlyUpdated(
@@ -236,6 +249,7 @@ class const SeriesRepository({
           orderBy: orderBy,
           direction: direction,
           hideRead: hideRead,
+          downloadedOnly: downloadedOnly,
         )
         .map(
           (list) => list.map(SeriesModel.fromDatabaseModel).toList(),

@@ -32,6 +32,7 @@ class _RecentlyUpdatedPageContent extends HookConsumerWidget {
     final sortDirection = useState(SortDirection.descending);
     final orderBy = useState(UnorderedSortOption.dateUpdated);
     final hideRead = useState(false);
+    final downloadedOnly = useState(false);
     final controller = useTextEditingController();
 
     useListenable(controller);
@@ -42,6 +43,7 @@ class _RecentlyUpdatedPageContent extends HookConsumerWidget {
         direction: sortDirection.value,
         orderBy: orderBy.value,
         hideRead: hideRead.value,
+        downloadedOnly: downloadedOnly.value,
       ),
     );
 
@@ -56,6 +58,8 @@ class _RecentlyUpdatedPageContent extends HookConsumerWidget {
         onOrderByChanged: (order) => orderBy.value = order,
         hideRead: hideRead.value,
         onHideReadChanged: (hide) => hideRead.value = hide,
+        downloadedOnly: downloadedOnly.value,
+        onDownloadedOnlyChanged: (hide) => downloadedOnly.value = hide,
       ),
     );
   }

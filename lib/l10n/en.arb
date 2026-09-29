@@ -320,6 +320,10 @@
     "@hideRead": {
         "description": "Label for the hide read filter option in lists"
     },
+    "downloadedOnly": "Downloaded Only",
+    "@downloadedOnly": {
+        "description": "Label for the downloaded only filter option in lists"
+    },
     "goToChapter": "Go to Chapter",
     "@goToChapter": {
         "description": "Label for the go to chapter button in the reading list chapter entry context menu"

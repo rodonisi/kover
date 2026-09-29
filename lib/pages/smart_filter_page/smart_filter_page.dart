@@ -98,6 +98,7 @@ class _SmartFilterSeriesContent extends HookConsumerWidget {
     final orderBy = useState(UnorderedSortOption.name);
     final sortDirection = useState(SortDirection.ascending);
     final hideRead = useState(false);
+    final downloadedOnly = useState(false);
     final controller = useTextEditingController();
 
     useListenable(controller);
@@ -109,6 +110,7 @@ class _SmartFilterSeriesContent extends HookConsumerWidget {
         orderBy: orderBy.value,
         direction: sortDirection.value,
         hideRead: hideRead.value,
+        downloadedOnly: downloadedOnly.value,
       ),
     );
 
@@ -122,6 +124,8 @@ class _SmartFilterSeriesContent extends HookConsumerWidget {
         onSortDirectionChanged: (value) => sortDirection.value = value,
         hideRead: hideRead.value,
         onHideReadChanged: (value) => hideRead.value = value,
+        downloadedOnly: downloadedOnly.value,
+        onDownloadedOnlyChanged: (value) => downloadedOnly.value = value,
       ),
       series: series,
     );

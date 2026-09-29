@@ -15,6 +15,8 @@ class UnorderedSortMenu extends StatelessWidget {
   final void Function(UnorderedSortOption) onOrderByChanged;
   final bool? hideRead;
   final void Function(bool)? onHideReadChanged;
+  final bool? downloadedOnly;
+  final void Function(bool)? onDownloadedOnlyChanged;
   const new({
     super.key,
     required this.sortDirection,
@@ -23,6 +25,8 @@ class UnorderedSortMenu extends StatelessWidget {
     required this.onOrderByChanged,
     this.hideRead,
     this.onHideReadChanged,
+    this.downloadedOnly,
+    this.onDownloadedOnlyChanged,
   });
 
   @override
@@ -34,9 +38,10 @@ class UnorderedSortMenu extends StatelessWidget {
         l: l,
         sortDirection: sortDirection,
         onSortDirectionChanged: onSortDirectionChanged,
-        showHideRead: hideRead != null && onHideReadChanged != null,
         hideRead: hideRead,
         onHideReadChanged: onHideReadChanged,
+        downloadedOnly: downloadedOnly,
+        onDownloadedOnlyChanged: onDownloadedOnlyChanged,
         orderEntries: [
           (l.name, orderBy == .name, () => onOrderByChanged(.name)),
           (l.lastRead, orderBy == .lastRead, () => onOrderByChanged(.lastRead)),
@@ -66,6 +71,8 @@ class OrderedSortMenu extends StatelessWidget {
   final void Function(OrderedSortOption) onOrderByChanged;
   final bool? hideRead;
   final void Function(bool)? onHideReadChanged;
+  final bool? downloadedOnly;
+  final void Function(bool)? onDownloadedOnlyChanged;
   const new({
     super.key,
     required this.sortDirection,
@@ -74,6 +81,8 @@ class OrderedSortMenu extends StatelessWidget {
     required this.onOrderByChanged,
     this.hideRead,
     this.onHideReadChanged,
+    this.downloadedOnly,
+    this.onDownloadedOnlyChanged,
   });
 
   @override
@@ -85,9 +94,10 @@ class OrderedSortMenu extends StatelessWidget {
         l: l,
         sortDirection: sortDirection,
         onSortDirectionChanged: onSortDirectionChanged,
-        showHideRead: hideRead != null && onHideReadChanged != null,
         hideRead: hideRead,
         onHideReadChanged: onHideReadChanged,
+        downloadedOnly: downloadedOnly,
+        onDownloadedOnlyChanged: onDownloadedOnlyChanged,
         orderEntries: [
           (
             l.sortOrder,
@@ -117,19 +127,32 @@ ContextMenu _buildSortMenu({
   required AppLocalizations l,
   required SortDirection sortDirection,
   required void Function(SortDirection) onSortDirectionChanged,
-  required bool showHideRead,
   bool? hideRead,
   ValueChanged<bool>? onHideReadChanged,
+  bool? downloadedOnly,
+  ValueChanged<bool>? onDownloadedOnlyChanged,
   required List<(String, bool, VoidCallback)> orderEntries,
 }) {
+  final showHideRead = hideRead != null && onHideReadChanged != null;
+  final showDownloadedOnly =
+      downloadedOnly != null && onDownloadedOnlyChanged != null;
   return ContextMenu(
     entries: <ContextMenuEntry>[
       if (showHideRead) ...[
         MenuItem(
           label: Text(l.hideRead),
-          icon: _getItemIcon(hideRead!),
+          icon: _getItemIcon(hideRead),
           onSelected: (_) {
-            onHideReadChanged!(!hideRead);
+            onHideReadChanged(!hideRead);
+          },
+        ),
+      ],
+      if (showDownloadedOnly) ...[
+        MenuItem(
+          label: Text(l.downloadedOnly),
+          icon: _getItemIcon(downloadedOnly),
+          onSelected: (_) {
+            onDownloadedOnlyChanged(!downloadedOnly);
           },
         ),
       ],

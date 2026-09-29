@@ -16,6 +16,7 @@ class VolumesPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final hideRead = useState(false);
+    final downloadedOnly = useState(false);
     final orderBy = useState(OrderedSortOption.sortOrder);
     final sortDirection = useState(SortDirection.ascending);
     final controller = useTextEditingController();
@@ -29,6 +30,7 @@ class VolumesPage extends HookConsumerWidget {
         orderBy: orderBy.value,
         direction: sortDirection.value,
         hideRead: hideRead.value,
+        downloadedOnly: downloadedOnly.value,
       ),
     );
 
@@ -44,6 +46,8 @@ class VolumesPage extends HookConsumerWidget {
           onSortDirectionChanged: (value) => sortDirection.value = value,
           hideRead: hideRead.value,
           onHideReadChanged: (value) => hideRead.value = value,
+          downloadedOnly: downloadedOnly.value,
+          onDownloadedOnlyChanged: (value) => downloadedOnly.value = value,
         ),
         volumes: volumes,
       ),

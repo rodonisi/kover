@@ -41,6 +41,7 @@ class const SmartFiltersRepository({
     UnorderedSortOption orderBy = .name,
     SortDirection direction = .ascending,
     bool hideRead = false,
+    bool downloadedOnly = false,
   }) {
     return _db.smartFiltersDao
         .watchSeriesForSmartFilter(
@@ -49,6 +50,7 @@ class const SmartFiltersRepository({
           orderBy: orderBy,
           direction: direction,
           hideRead: hideRead,
+          downloadedOnly: downloadedOnly,
         )
         .map(
           (series) => series.map(SeriesModel.fromDatabaseModel).toList(),

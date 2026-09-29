@@ -32,12 +32,14 @@ class WantToReadPageContent extends HookConsumerWidget {
     final orderBy = useState(UnorderedSortOption.name);
     final sortDirection = useState(SortDirection.ascending);
     final hideRead = useState(false);
+    final downloadedOnly = useState(false);
     final series = ref.watch(
       wantToReadListProvider(
         query: controller.text,
         orderBy: orderBy.value,
         direction: sortDirection.value,
         hideRead: hideRead.value,
+        downloadedOnly: downloadedOnly.value,
       ),
     );
 
@@ -62,6 +64,10 @@ class WantToReadPageContent extends HookConsumerWidget {
         hideRead: hideRead.value,
         onHideReadChanged: (bool newHideRead) {
           hideRead.value = newHideRead;
+        },
+        downloadedOnly: downloadedOnly.value,
+        onDownloadedOnlyChanged: (bool value) {
+          downloadedOnly.value = value;
         },
       ),
       series: series,
