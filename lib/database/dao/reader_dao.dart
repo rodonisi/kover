@@ -165,13 +165,26 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     return await managers.readingProgress.filter((f) => f.dirty(true)).get();
   }
 
-  /// Get all chapter ids with outdated progress
-  Future<List<int>> getOutdatedChapterIds() async {
+  /// Get all chapter ids with outdated progress. Optionally restrict to series
+  /// [seriesId] and/or chapters that have never been fetched locally
+  /// ([onlyMissing]).
+  Future<List<int>> getOutdatedChapterIds({
+    int? seriesId,
+    bool onlyMissing = false,
+  }) async {
     final hasRemoteProgress = chapters.remotePagesRead.isBiggerThanValue(0);
     final isMissingLocal = readingProgress.chapterId.isNull();
     final isLocalOutdated = readingProgress.lastModified.isSmallerThan(
       chapters.remoteLastRead,
     );
+
+    var condition =
+        hasRemoteProgress &
+        (onlyMissing ? isMissingLocal : (isMissingLocal | isLocalOutdated));
+
+    if (seriesId != null) {
+      condition = condition & chapters.seriesId.equals(seriesId);
+    }
 
     final q = selectOnly(chapters, distinct: true)
       ..addColumns([chapters.id])
@@ -181,7 +194,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
           readingProgress.chapterId.equalsExp(chapters.id),
         ),
       ])
-      ..where(hasRemoteProgress & (isMissingLocal | isLocalOutdated));
+      ..where(condition);
 
     return await q.map((row) => row.read(chapters.id)!).get();
   }

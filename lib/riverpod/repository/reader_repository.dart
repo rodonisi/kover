@@ -172,6 +172,19 @@ class ReaderRepository {
     );
   }
 
+  /// Fetch progress for series if never fetched before.
+  Future<void> ensureSeriesProgress({required int seriesId}) async {
+    final outdated = await _db.readerDao.getOutdatedChapterIds(
+      seriesId: seriesId,
+      onlyMissing: true,
+    );
+    await chunkedFetch(
+      items: outdated,
+      fetchCallback: (id) async => _readerClient.getProgress(id),
+      upsertCallback: (batch) async => _db.readerDao.mergeProgressBatch(batch),
+    );
+  }
+
   /// Synchronize all dirty progress entries by sending them to the backend,
   /// refetching the updated state and finally merging it with the local state.
   Future<void> mergeProgress() async {

@@ -30,7 +30,7 @@ Future<SeriesCardModel> seriesCard(
   if (series.lastSynced == null) {
     ref
         .read(syncManagerProvider.notifier)
-        .refreshMetadataAndDetails(
+        .ensureDetailsAndProgress(
           seriesId: seriesId,
         );
   }

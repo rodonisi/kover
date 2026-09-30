@@ -58,6 +58,34 @@ void main() {
 
       verify(mockReaderDao.mergeProgressBatch([expected])).called(1);
     });
+
+    test('ensureSeriesProgress only fetches never-fetched chapters', () async {
+      final repo = ReaderRepository(
+        db: mockDb,
+        readerClient: mockReaderClient,
+      );
+
+      final expected = const ReadingProgressCompanion(
+        chapterId: Value(1),
+        seriesId: Value(1),
+        pagesRead: Value(10),
+      );
+
+      when(
+        mockReaderDao.getOutdatedChapterIds(
+          seriesId: 1,
+          onlyMissing: true,
+        ),
+      ).thenAnswer((_) async => [1]);
+      when(mockReaderClient.getProgress(1)).thenAnswer((_) async => expected);
+
+      await repo.ensureSeriesProgress(seriesId: 1);
+
+      verify(
+        mockReaderDao.getOutdatedChapterIds(seriesId: 1, onlyMissing: true),
+      ).called(1);
+      verify(mockReaderDao.mergeProgressBatch([expected])).called(1);
+    });
   });
 }
 

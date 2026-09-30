@@ -551,7 +551,12 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         series.lastSynced.isNull() |
             series.remoteLastRead.isBiggerThan(series.lastSynced) |
             series.lastChapterAdded.isBiggerThan(series.lastSynced),
-      );
+      )
+      ..orderBy([
+        OrderingTerm.desc(series.remoteLastRead),
+        OrderingTerm.desc(series.lastChapterAdded),
+        OrderingTerm.desc(series.isRecentlyAdded),
+      ]);
 
     return await query.map((row) => row.read(series.id)!).get();
   }

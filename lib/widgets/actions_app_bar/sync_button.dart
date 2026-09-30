@@ -165,6 +165,8 @@ String _phaseLabel(AppLocalizations l, SyncPhase phase) {
     sidenav: () => l.syncingSidenav,
     dashboard: () => l.syncingDashboard,
     refreshMetadata: (seriesId) => l.refreshingMetadataForSeries(seriesId),
+    ensureDetailsAndProgress: (seriesId) =>
+        l.ensureSeriesDetailsAndProgress(seriesId),
     refreshCovers: (seriesId) => l.refreshingCoversForSeries(seriesId),
     refreshServerSettings: () => l.refreshingServerSettings,
     refreshServerFonts: () => l.refreshingServerFonts,

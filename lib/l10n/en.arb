@@ -520,6 +520,17 @@
     "@refreshingServerFonts": {
         "description": "Message shown while refreshing server fonts"
     },
+    "ensureSeriesDetailsAndProgress": "Ensure details and progress for series {seriesId}",
+    "@ensureSeriesDetailsAndProgress": {
+        "description": "Label for the sync phase ensuring details and progress are fetched for the series with given seriesId",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series which details and progress are being fetched",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
     "series": "Series",
     "@series": {
         "description": "Label for the series search section header"

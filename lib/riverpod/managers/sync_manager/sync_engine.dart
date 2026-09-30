@@ -168,6 +168,8 @@ class SyncEngine({
           () async => await refreshCovers(seriesId: seriesId),
       refreshToc: (chapterId) =>
           () async => await refreshToc(chapterId: chapterId),
+      ensureDetailsAndProgress: (seriesId) =>
+          () async => await ensureDetailsAndProgress(seriesId: seriesId),
       seriesDetails: () =>
           () async => await syncSeriesDetails(),
     );
@@ -249,6 +251,15 @@ class SyncEngine({
   Future<void> refreshMetadataAndDetails({required int seriesId}) async {
     await _pool.withResource(
       () => seriesRepo.refreshMetadataAndDetails(seriesId: seriesId),
+    );
+  }
+
+  Future<void> ensureDetailsAndProgress({required int seriesId}) async {
+    await _pool.withResource(
+      () => seriesRepo.refreshMetadataAndDetails(seriesId: seriesId),
+    );
+    await _pool.withResource(
+      () => readerRepo.ensureSeriesProgress(seriesId: seriesId),
     );
   }
 

@@ -38,6 +38,8 @@ sealed class SyncPhase with _$SyncPhase {
   const factory refreshMetadata({required int seriesId}) = RefreshMetadata;
   const factory refreshCovers({required int seriesId}) = RefreshCovers;
   const factory refreshToc({required int chapterId}) = RefreshToc;
+  const factory ensureDetailsAndProgress({required int seriesId}) =
+      EnsureDetailsAndProgress;
   const factory seriesDetails() = SeriesDetails;
 
   Set<SyncPhase> get dependencies {
@@ -56,7 +58,8 @@ sealed class SyncPhase with _$SyncPhase {
       RecentlyUpdated() ||
       WantToRead() ||
       Collections() ||
-      ReadingLists() => {const .allSeries()},
+      ReadingLists() ||
+      EnsureDetailsAndProgress() => {const .allSeries()},
       Tocs() || Progress() => {const .allSeries(), const .seriesDetails()},
       SmartFilters() => {
         const .allSeries(),
@@ -167,6 +170,11 @@ class SyncManager extends _$SyncManager {
   /// Refresh metadata and details for series [seriesId]
   void refreshMetadataAndDetails({required int seriesId}) {
     _runPhase(.refreshMetadata(seriesId: seriesId));
+  }
+
+  /// Ensure series [seriesId] has details and progress if never fetched.
+  void ensureDetailsAndProgress({required int seriesId}) {
+    _runPhase(.ensureDetailsAndProgress(seriesId: seriesId));
   }
 
   /// Refresh covers for series [seriesId]
