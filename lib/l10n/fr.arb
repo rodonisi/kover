@@ -1,1 +1,26 @@
-{}
+{
+    "languageName": "Français",
+    "@languageName": {
+        "description": "The localized name of this locale"
+    },
+    "language": "Langue",
+    "@language": {
+        "description": "Title for the language settings entry"
+    },
+    "onDeck": "À lire",
+    "@onDeck": {
+        "description": "Label for the home page on deck section"
+    },
+    "recentlyUpdated": "Récemment modifié",
+    "@recentlyUpdated": {
+        "description": "Label for the home page recently updated section"
+    },
+    "recentlyAdded": "Récemment ajouté",
+    "@recentlyAdded": {
+        "description": "Label for the home page recently added section"
+    },
+    "home": "Accueil",
+    "@home": {
+        "description": "Label for the home page"
+    }
+}
