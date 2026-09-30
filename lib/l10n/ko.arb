@@ -975,5 +975,9 @@
                 "example": "0.9.1.0"
             }
         }
+    },
+    "downloadedOnly": "다운로드한 항목만 보기",
+    "@downloadedOnly": {
+        "description": "Label for the downloaded only filter option in lists"
     }
 }
