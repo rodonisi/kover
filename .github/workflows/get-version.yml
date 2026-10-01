@@ -24,7 +24,7 @@ jobs:
 
       - name: Get semantic version
         id: versioning
-        uses: PaulHatch/semantic-version@v6.0.3
+        uses: PaulHatch/semantic-version@v6.0.4
         with:
           bump_each_commit: false
           bump_each_commit_patch_pattern: "fix"
