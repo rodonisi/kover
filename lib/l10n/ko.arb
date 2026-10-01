@@ -979,5 +979,16 @@
     "downloadedOnly": "다운로드한 항목만 보기",
     "@downloadedOnly": {
         "description": "Label for the downloaded only filter option in lists"
+    },
+    "ensureSeriesDetailsAndProgress": "{seriesId} 시리즈 정보 및 읽은 기록 확인 중",
+    "@ensureSeriesDetailsAndProgress": {
+        "description": "Label for the sync phase ensuring details and progress are fetched for the series with given seriesId",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series which details and progress are being fetched",
+                "type": "int",
+                "example": "42"
+            }
+        }
     }
 }
