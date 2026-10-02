@@ -1,1 +1,246 @@
-{}
+{
+    "languageName": "Français",
+    "@languageName": {
+        "description": "The localized name of this locale"
+    },
+    "language": "Langue",
+    "@language": {
+        "description": "Title for the language settings entry"
+    },
+    "onDeck": "À suivre",
+    "@onDeck": {
+        "description": "Label for the home page on deck section"
+    },
+    "recentlyUpdated": "Récemment mis à jour",
+    "@recentlyUpdated": {
+        "description": "Label for the home page recently updated section"
+    },
+    "recentlyAdded": "Récemment ajouté",
+    "@recentlyAdded": {
+        "description": "Label for the home page recently added section"
+    },
+    "home": "Accueil",
+    "@home": {
+        "description": "Label for the home page"
+    },
+    "wantToRead": "À lire",
+    "@wantToRead": {
+        "description": "Label for the want to read shelf"
+    },
+    "menu": "Menu",
+    "@menu": {
+        "description": "Label for the menu button"
+    },
+    "allSeries": "Toutes les séries",
+    "@allSeries": {
+        "description": "Label for the all series menu entry"
+    },
+    "collections": "Collections",
+    "@collections": {
+        "description": "Label for the collections menu entry"
+    },
+    "readingLists": "Listes de lecture",
+    "@readingLists": {
+        "description": "Label for the reading lists menu entry"
+    },
+    "libraries": "Bibliothèques",
+    "@libraries": {
+        "description": "Label for the libraries menu entry"
+    },
+    "settings": "Paramètres",
+    "@settings": {
+        "description": "Label for the settings menu entry"
+    },
+    "more": "Plus",
+    "@more": {
+        "description": "Label for the more section"
+    },
+    "downloadQueue": "File de téléchargement",
+    "@downloadQueue": {
+        "description": "Label for the download queue menu entry"
+    },
+    "general": "Général",
+    "@general": {
+        "description": "Label for the general settings section"
+    },
+    "themeMode": "Mode du thème",
+    "@themeMode": {
+        "description": "Label for the theme mode setting"
+    },
+    "theme": "Thème",
+    "@theme": {
+        "description": "Label for the epub reader theme setting"
+    },
+    "system": "Système",
+    "@system": {
+        "description": "Label for the system theme mode option"
+    },
+    "light": "Clair",
+    "@light": {
+        "description": "Label for the light theme mode option"
+    },
+    "dark": "Sombre",
+    "@dark": {
+        "description": "Label for the dark theme mode option"
+    },
+    "black": "Noir",
+    "@black": {
+        "description": "Label for the black theme option"
+    },
+    "sepia": "Sépia",
+    "@sepia": {
+        "description": "Label for the sepia theme option"
+    },
+    "matchAppTheme": "Utiliser le thème de l’application",
+    "@matchAppTheme": {
+        "description": "Label for the epub reader match app theme option"
+    },
+    "outlinedTheme": "Thème avec contours",
+    "@outlinedTheme": {
+        "description": "Label for the outlined theme setting"
+    },
+    "sendDiagnostics": "Envoyer des rapports de plantage et des diagnostics anonymes",
+    "@sendDiagnostics": {
+        "description": "Label for the send diagnostics setting"
+    },
+    "sendDiagnosticsDescription": "Aidez à améliorer l’application en envoyant des statistiques anonymes sur les erreurs et les performances. Ces données ne contiennent aucune information personnelle et sont utilisées uniquement pour améliorer l’application.",
+    "@sendDiagnosticsDescription": {
+        "description": "Description for the send diagnostics setting"
+    },
+    "version": "Version : {version} ({buildNumber})",
+    "@version": {
+        "description": "Label for the app version, with placeholders for version and build number",
+        "placeholders": {
+            "version": {
+                "description": "The version string of the application",
+                "type": "String",
+                "example": "1.0.0"
+            },
+            "buildNumber": {
+                "description": "The build number of the application",
+                "type": "String",
+                "example": "123"
+            }
+        }
+    },
+    "github": "GitHub",
+    "@github": {
+        "description": "Label for the GitHub link"
+    },
+    "madeWithLove": "Fait avec ❤️",
+    "@madeWithLove": {
+        "description": "Label for the made with love message"
+    },
+    "dataManagement": "Gestion des données",
+    "@dataManagement": {
+        "description": "Label for the data management section"
+    },
+    "downloadAllCovers": "Télécharger toutes les couvertures",
+    "@downloadAllCovers": {
+        "description": "Label for the download all covers option"
+    },
+    "downloadAllCoversDescription": "Si cette option est désactivée, les couvertures seront téléchargées uniquement avec les chapitres. Les couvertures non téléchargées pourront toujours être récupérées à la demande depuis le serveur lorsqu’une connexion est disponible.",
+    "@downloadAllCoversDescription": {
+        "description": "Description for the download all covers option"
+    },
+    "maxConcurrentDownloads": "Téléchargements simultanés maximum",
+    "@maxConcurrentDownloads": {
+        "description": "Label for the max concurrent downloads setting"
+    },
+    "reclaimSpace": "Libérer de l’espace",
+    "@reclaimSpace": {
+        "description": "Label for the reclaim space button"
+    },
+    "clearDownloads": "Supprimer les téléchargements",
+    "@clearDownloads": {
+        "description": "Label for the clear downloads button"
+    },
+    "clearCovers": "Supprimer les couvertures",
+    "@clearCovers": {
+        "description": "Label for the clear covers button"
+    },
+    "clearDatabase": "Vider la base de données",
+    "@clearDatabase": {
+        "description": "Label for the clear database button"
+    },
+    "clearDatabaseDialogTitle": "Êtes-vous sûr(e) ?",
+    "@clearDatabaseDialogTitle": {
+        "description": "Title for the clear database confirmation dialog"
+    },
+    "clearDatabaseDialogContent": "Cette opération effacera toute la base de données locale, y compris la progression non synchronisée et les données téléchargées. Cette action est irréversible.",
+    "@clearDatabaseDialogContent": {
+        "description": "Content for the clear database confirmation dialog"
+    },
+    "cancel": "Annuler",
+    "@cancel": {
+        "description": "Label for the cancel button in dialogs"
+    },
+    "databaseBusy": "Base de données occupée…",
+    "@databaseBusy": {
+        "description": "Message shown when the database is busy with an operation"
+    },
+    "databaseSize": "Taille de la base de données",
+    "@databaseSize": {
+        "description": "Label for the database size information"
+    },
+    "credentials": "Identifiants",
+    "@credentials": {
+        "description": "Label for the credentials section in settings"
+    },
+    "baseUrl": "URL de base",
+    "@baseUrl": {
+        "description": "Label for the base URL input field"
+    },
+    "apiKey": "Clé API",
+    "@apiKey": {
+        "description": "Label for the API key input field"
+    },
+    "save": "Enregistrer",
+    "@save": {
+        "description": "Label for the save credentials button"
+    },
+    "sortBy": "Trier par",
+    "@sortBy": {
+        "description": "Label for the sort by option in list"
+    },
+    "name": "Nom",
+    "@name": {
+        "description": "Label for sorting by name option"
+    },
+    "sortOrder": "Critère de tri",
+    "@sortOrder": {
+        "description": "Label for the sort order option in list"
+    },
+    "dateAdded": "Date d'ajout",
+    "@dateAdded": {
+        "description": "Label for sorting by date added option"
+    },
+    "lastModified": "Dernière modification",
+    "@lastModified": {
+        "description": "Label for sorting by last modified option"
+    },
+    "progress": "Progression",
+    "@progress": {
+        "description": "Label for sorting by progress option"
+    },
+    "lastRead": "Dernière lecture",
+    "@lastRead": {
+        "description": "Label for sorting by last read option"
+    },
+    "sortDirection": "Ordre de tri",
+    "@sortDirection": {
+        "description": "Label for the sort direction option in list"
+    },
+    "ascending": "Croissant",
+    "@ascending": {
+        "description": "Label for ascending sort direction option"
+    },
+    "descending": "Décroissant",
+    "@descending": {
+        "description": "Label for descending sort direction option"
+    },
+    "specials": "Hors-série",
+    "@specials": {
+        "description": "Label for the specials section in the series details page"
+    }
+}
