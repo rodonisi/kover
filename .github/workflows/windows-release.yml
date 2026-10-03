@@ -1,0 +1,56 @@
+name: Build Windows Application
+
+on:
+  push:
+    branches: [ "main" ] # Se ejecutará cada vez que subas algo a la rama main
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: # Esto te permite ejecutar el proceso manualmente desde la pestaña "Actions"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    # 1. Descargar el código del repositorio
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. Configurar el entorno de Java (Requerido por algunas herramientas de Flutter)
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    # 3. Configurar Flutter en el sistema
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        architecture: x64
+
+    # 4. Habilitar la compilación para escritorio de Windows
+    - name: Enable Windows desktop support
+      run: flutter config --enable-windows-desktop
+
+    # 5. Descargar las librerías y dependencias de Flutter
+    - name: Install dependencies
+      run: flutter pub get
+
+    # 6. Generar el código dinámico (Paso crítico que pide el autor en el README)
+    - name: Generate annotated code (Build Runner)
+      run: dart run build_runner build --delete-conflicting-outputs
+
+    # 7. Compilar la aplicación nativa para Windows en modo Release
+    - name: Build Windows Executable
+      run: flutter build windows --release
+
+    # 8. Subir los archivos compilados directamente sin comprimir previamente
+    - name: Upload Windows Executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: Kover-Windows-v1.0.0
+        path: build\windows\x64\runner\Release\
+        if-no-files-found: error
+

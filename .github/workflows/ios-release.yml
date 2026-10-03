@@ -1,0 +1,49 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch: # Permite lanzarlo manualmente desde la pestaña Actions
+
+jobs:
+  build-ios:
+    runs-on: macos-latest # Requiere macOS obligatoriamente para usar las herramientas de Xcode
+
+    steps:
+    # 1. Descargar el código fuente
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. Configurar el entorno de Flutter
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        architecture: x64
+
+    # 3. Descargar dependencias
+    - name: Install dependencies
+      run: flutter pub get
+
+    # 4. Generar el código dinámico del proyecto (Requerido por Kover)
+    - name: Generate annotated code (Build Runner)
+      run: dart run build_runner build --delete-conflicting-outputs
+
+    # 5. Compilar la aplicación para iOS SIN FIRMA DIGITAL (--no-codesign)
+    - name: Build iOS Application (Unsigned)
+      run: flutter build ios --release --no-codesign
+
+    # 6. Empaquetar la app en la estructura oficial de un archivo .ipa
+    # Se crea el directorio obligatorio 'Payload', se mueve el binario .app dentro y se comprime
+    - name: Package IPA for Sideloading
+      run: |
+        mkdir Payload
+        cp -r build/ios/iphoneos/Runner.app Payload/
+        zip -r Kover-iOS.ipa Payload
+        rm -rf Payload
+
+    # 7. Subir el archivo .ipa directamente (Sin empaquetados extras)
+    - name: Upload IPA Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Kover-IPA
+        path: Kover-iOS.ipa
+        if-no-files-found: error
