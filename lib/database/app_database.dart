@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:kover/database/converters/string_list_converter.dart';
 import 'package:kover/database/dao/book_dao.dart';
+import 'package:kover/database/dao/bookmark_dao.dart';
 import 'package:kover/database/dao/chapters_dao.dart';
 import 'package:kover/database/dao/collections_dao.dart';
 import 'package:kover/database/dao/download_dao.dart';
@@ -19,6 +20,7 @@ import 'package:kover/database/dao/storage_dao.dart';
 import 'package:kover/database/dao/volumes_dao.dart';
 import 'package:kover/database/migrations/migration.dart';
 import 'package:kover/database/tables/book_info.dart';
+import 'package:kover/database/tables/bookmarks.dart';
 import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/collections.dart';
 import 'package:kover/database/tables/dashboard.dart';
@@ -74,6 +76,7 @@ part 'app_database.g.dart';
     ReadingProgress,
     BookChaptersTable,
     WantToRead,
+    Bookmarks,
     DownloadedPages,
     ServerSettings,
     Collections,
@@ -101,6 +104,7 @@ part 'app_database.g.dart';
     ChaptersDao,
     ReaderDao,
     BookDao,
+    BookmarkDao,
     DownloadDao,
     RiverpodDao,
     ServerSettingsDao,
@@ -117,7 +121,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   /// Clear all content data from the database. Does not clear app state data (e.g. credentials, settings).
   /// Useful e.g. when switching user.
@@ -130,6 +134,7 @@ class AppDatabase extends _$AppDatabase {
       await delete(series).go();
       await delete(seriesMetadata).go();
       await delete(wantToRead).go();
+      await delete(bookmarks).go();
       await delete(readingProgress).go();
       await delete(bookChaptersTable).go();
       await delete(people).go();
