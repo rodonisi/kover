@@ -3,6 +3,7 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/repository/book_repository.dart';
+import 'package:kover/riverpod/repository/bookmark_repository.dart';
 import 'package:kover/riverpod/repository/chapters_repository.dart';
 import 'package:kover/riverpod/repository/collections_repository.dart';
 import 'package:kover/riverpod/repository/libraries_repository.dart';
@@ -15,6 +16,7 @@ import 'package:kover/riverpod/repository/smart_filters_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
 import 'package:kover/riverpod/repository/want_to_read_repository.dart';
 import 'package:kover/sync/book_sync_operations.dart';
+import 'package:kover/sync/bookmark_sync_operations.dart';
 import 'package:kover/sync/chapter_sync_operations.dart';
 import 'package:kover/sync/collection_sync_operations.dart';
 import 'package:kover/sync/font_sync_operations.dart';
@@ -31,6 +33,7 @@ import 'package:pool/pool.dart';
 class SyncEngine({
   required final SeriesRepository seriesRepo,
   required final BookRepository bookRepo,
+  required final BookmarkRepository bookmarkRepo,
   required final LibrariesRepository librariesRepo,
   required final WantToReadRepository wantToReadRepo,
   required final ReaderRepository readerRepo,
@@ -69,6 +72,7 @@ class SyncEngine({
       db,
       BookSyncOperations(client: client, apiKey: apiKey),
     );
+    final bookmarkRepo = BookmarkRepository(db, BookmarkSyncOperations(client));
     final librariesRepo = LibrariesRepository(
       db: db,
       client: LibrariesSyncOperations(client),
@@ -113,6 +117,7 @@ class SyncEngine({
     return SyncEngine(
       seriesRepo: seriesRepo,
       bookRepo: bookRepo,
+      bookmarkRepo: bookmarkRepo,
       librariesRepo: librariesRepo,
       wantToReadRepo: wantToReadRepo,
       readerRepo: readerRepo,
@@ -148,6 +153,8 @@ class SyncEngine({
           () async => await syncCovers(),
       wantToRead: () =>
           () async => await syncWantToRead(),
+      bookmarks: () =>
+          () async => await syncBookmarks(),
       collections: () =>
           () async => await syncCollections(),
       readingLists: () =>
@@ -216,6 +223,11 @@ class SyncEngine({
 
   Future<void> syncWantToRead() async {
     await _pool.withResource(wantToReadRepo.mergeWantToRead);
+  }
+
+  Future<void> syncBookmarks() async {
+    await _pool.withResource(bookmarkRepo.mergeBookmarks);
+    await _pool.withResource(bookmarkRepo.refreshAllBookmarks);
   }
 
   Future<void> syncCollections() async {

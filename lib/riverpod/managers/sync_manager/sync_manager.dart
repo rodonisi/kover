@@ -28,6 +28,7 @@ sealed class SyncPhase with _$SyncPhase {
   const factory progress() = Progress;
   const factory covers() = Covers;
   const factory wantToRead() = WantToRead;
+  const factory bookmarks() = Bookmarks;
   const factory collections() = Collections;
   const factory readingLists() = ReadingLists;
   const factory smartFilters() = SmartFilters;
@@ -61,6 +62,7 @@ sealed class SyncPhase with _$SyncPhase {
       ReadingLists() ||
       EnsureDetailsAndProgress() => {const .allSeries()},
       Tocs() || Progress() => {const .allSeries(), const .seriesDetails()},
+      Bookmarks() => {const .allSeries(), const .seriesDetails()},
       SmartFilters() => {
         const .allSeries(),
         const .readingLists(),
@@ -134,6 +136,7 @@ class SyncManager extends _$SyncManager {
       const .recentlyAdded(),
       const .readingLists(),
       const .wantToRead(),
+      const .bookmarks(),
       const .sidenav(),
       const .dashboard(),
       const .smartFilters(),
@@ -165,6 +168,11 @@ class SyncManager extends _$SyncManager {
   /// Sync progress
   void syncProgress() {
     _enqueuePhases({const .progress()});
+  }
+
+  /// Sync bookmarks
+  void syncBookmarks() {
+    _enqueuePhases({const .bookmarks()});
   }
 
   /// Refresh metadata and details for series [seriesId]
