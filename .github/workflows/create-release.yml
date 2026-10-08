@@ -71,6 +71,20 @@ jobs:
     secrets:
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
+  bundle-linux-appimage:
+    name: Bundle Linux AppImage
+    needs:
+      - version
+      - create-release
+    permissions:
+      contents: write
+    uses: ./.github/workflows/bundle-linux.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+      build_number: ${{ needs.version.outputs.build_number }}
+    secrets:
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
   get-release-body:
     name: Get Release Body
     needs:
