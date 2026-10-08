@@ -975,5 +975,20 @@
     "@directionalityDescription": {
         "description": "Description for the layout directionality setting"
     },
-    "localeDefault": "Spracheinstellung Default"
+    "localeDefault": "Spracheinstellung Default",
+    "downloadedOnly": "Nur Heruntergeladene",
+    "@downloadedOnly": {
+        "description": "Label for the downloaded only filter option in lists"
+    },
+    "ensureSeriesDetailsAndProgress": "Details und Fortschritt für Serie {seriesId} sicherstellen",
+    "@ensureSeriesDetailsAndProgress": {
+        "description": "Label for the sync phase ensuring details and progress are fetched for the series with given seriesId",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series which details and progress are being fetched",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    }
 }
