@@ -57,6 +57,20 @@ jobs:
       GOOGLE_PLAY_KEYSTORE_ALIAS: ${{ secrets.GOOGLE_PLAY_KEYSTORE_ALIAS }}
       GOOGLE_PLAY_KEY_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEY_PASSWORD }}
 
+  bundle-windows:
+    name: Bundle Windows
+    needs:
+      - version
+      - create-release
+    permissions:
+      contents: write
+    uses: ./.github/workflows/bundle-windows.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+      build_number: ${{ needs.version.outputs.build_number }}
+    secrets:
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
   get-release-body:
     name: Get Release Body
     needs:
