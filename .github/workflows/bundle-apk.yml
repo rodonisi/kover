@@ -1,0 +1,77 @@
+name: Bundle APK
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "The semantic version"
+        required: true
+        type: string
+      build_number:
+        description: "The build number"
+        required: true
+        type: string
+    secrets:
+      GOOGLE_PLAY_KEYSTORE:
+        required: true
+      GOOGLE_PLAY_KEYSTORE_PASSWORD:
+        required: true
+      GOOGLE_PLAY_KEYSTORE_ALIAS:
+        required: true
+      GOOGLE_PLAY_KEY_PASSWORD:
+        required: true
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The semantic version"
+        required: true
+        type: string
+      build_number:
+        description: "The build number"
+        required: true
+        type: string
+
+jobs:
+  build-and-upload-apk:
+    name: Build and upload APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Get FVM Configuration
+        uses: kuhnroyal/flutter-fvm-config-action@v3
+        id: fvm-config-action
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.fvm-config-action.outputs.FLUTTER_VERSION }}
+          channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Decode Keystore
+        run: echo "${{ secrets.GOOGLE_PLAY_KEYSTORE }}" | base64 --decode > android/app/upload-keystore.jks
+
+      - name: Codegen
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build
+        run: |
+          flutter build apk --release --build-name=${{ inputs.version }} --build-number=${{ inputs.build_number }}
+        env:
+          KEYSTORE_PATH: "upload-keystore.jks"
+          KEYSTORE_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.GOOGLE_PLAY_KEYSTORE_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEY_PASSWORD }}
+
+      - name: Attach to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RELEASE_NAME="Kover-${{ inputs.version }}.apk"
+          mv build/app/outputs/flutter-apk/app-release.apk "$RELEASE_NAME"
+          gh release upload ${{ inputs.version }} "$RELEASE_NAME"
