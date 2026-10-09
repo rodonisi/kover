@@ -40,54 +40,22 @@ jobs:
           tag_name: ${{ needs.version.outputs.version }}
           generate_release_notes: true
 
-  build-and-deploy-apk:
+  bundle-apk:
     name: Build & Deploy apk
     needs:
       - version
       - create-release
-    runs-on: ubuntu-latest
     permissions:
       contents: "write"
-      id-token: "write"
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Get FVM Configuration
-        uses: kuhnroyal/flutter-fvm-config-action@v3
-        id: fvm-config-action
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ steps.fvm-config-action.outputs.FLUTTER_VERSION }}
-          channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
-          cache: true
-
-      - name: Decode Keystore
-        run: echo "${{ secrets.GOOGLE_PLAY_KEYSTORE }}" | base64 --decode > android/app/upload-keystore.jks
-
-      - name: Codegen
-        run: |
-          dart run build_runner build --delete-conflicting-outputs
-
-      - name: Build
-        run: |
-          flutter build apk --release --build-name=${{ needs.version.outputs.version }} --build-number=${{ needs.version.outputs.build_number }}
-        env:
-          KEYSTORE_PATH: "upload-keystore.jks"
-          KEYSTORE_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.GOOGLE_PLAY_KEYSTORE_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEY_PASSWORD }}
-
-      - name: Upload artifact
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          RELEASE_NAME="Kover-${{ needs.version.outputs.version }}.apk"
-          mv build/app/outputs/flutter-apk/app-release.apk "$RELEASE_NAME"
-          gh release upload ${{ needs.version.outputs.version }} "$RELEASE_NAME"
+    uses: ./.github/workflows/bundle-apk.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+      build_number: ${{ needs.version.outputs.build_number }}
+    secrets:
+      GOOGLE_PLAY_KEYSTORE: ${{ secrets.GOOGLE_PLAY_KEYSTORE }}
+      GOOGLE_PLAY_KEYSTORE_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEYSTORE_PASSWORD }}
+      GOOGLE_PLAY_KEYSTORE_ALIAS: ${{ secrets.GOOGLE_PLAY_KEYSTORE_ALIAS }}
+      GOOGLE_PLAY_KEY_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEY_PASSWORD }}
 
   get-release-body:
     name: Get Release Body
