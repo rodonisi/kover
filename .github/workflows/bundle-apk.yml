@@ -20,16 +20,6 @@ on:
         required: true
       GOOGLE_PLAY_KEY_PASSWORD:
         required: true
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "The semantic version"
-        required: true
-        type: string
-      build_number:
-        description: "The build number"
-        required: true
-        type: string
 
 jobs:
   build-and-upload-apk:

@@ -41,7 +41,7 @@ jobs:
           generate_release_notes: true
 
   bundle-apk:
-    name: Build & Deploy apk
+    name: Bundle APK
     needs:
       - version
       - create-release
