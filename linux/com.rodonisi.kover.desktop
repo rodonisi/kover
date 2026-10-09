@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Kover
+Comment=An unofficial cross-platform Kavita frontend.
+Exec=kover
+Icon=com.rodonisi.kover
+Terminal=false
+Categories=Network;
+Keywords=kavita;manga;comics;
+StartupWMClass=com.rodonisi.kover
