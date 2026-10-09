@@ -1,0 +1,73 @@
+name: Bundle Windows
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "The semantic version"
+        required: true
+        type: string
+      build_number:
+        description: "The build number"
+        required: true
+        type: string
+    secrets:
+      SENTRY_AUTH_TOKEN:
+        required: true
+
+jobs:
+  build-and-upload-windows:
+    name: Build and upload Windows
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Get FVM Configuration
+        uses: kuhnroyal/flutter-fvm-config-action@v3
+        id: fvm-config-action
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.fvm-config-action.outputs.FLUTTER_VERSION }}
+          channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Codegen
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build
+        run: |
+          flutter build windows --release --build-name=${{ inputs.version }} --build-number=${{ inputs.build_number }} --dart-define="SENTRY_DSN=${{ vars.SENTRY_DSN }}"
+
+      - name: Upload Debug Symbols to Sentry
+        env:
+          SENTRY_RELEASE: ${{ vars.SENTRY_PROJECT }}@${{ inputs.version }}+${{ inputs.build_number }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: dart run sentry_dart_plugin
+
+      - name: Zip release build
+        id: zip
+        shell: pwsh
+        env:
+          RELEASE_NAME: Kover-${{ inputs.version }}-windows-x64.zip
+        run: |
+          Compress-Archive -Path build/windows/x64/runner/Release/* `
+            -DestinationPath $env:RELEASE_NAME
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "release_name=$env:RELEASE_NAME"
+
+      - name: Attach to release
+        if: ${{ inputs.upload_to_release }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_NAME: ${{ steps.zip.outputs.release_name }}
+        run: |
+          gh release upload ${{ inputs.version }} $env:RELEASE_NAME
