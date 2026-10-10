@@ -1,19 +1,16 @@
-import 'package:drift/drift.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 
 extension BookmarkDtoMappings on BookmarkDto {
   BookmarksCompanion toBookmarkCompanion() {
     return BookmarksCompanion.insert(
-      serverId: Value(id),
+      serverId: .absentIfNull(id),
       seriesId: seriesId,
       volumeId: volumeId,
       chapterId: chapterId,
       page: page,
-      imageOffset: Value(imageOffset ?? -1),
-      xPath: Value(xPath ?? ''),
-      dirty: const Value(false),
-      removed: const Value(false),
+      imageOffset: .absentIfNull(imageOffset),
+      xPath: .absentIfNull(xPath),
     );
   }
 }
@@ -21,15 +18,13 @@ extension BookmarkDtoMappings on BookmarkDto {
 extension BookmarkDataMappings on BookmarkData {
   BookmarkDto toBookmarkDto() {
     return BookmarkDto(
-      // The server's BookmarkDto declares non-nullable `Id` and `ImageOffset`,
-      // so send concrete integers rather than nulls for local bookmarks.
-      id: serverId ?? 0,
+      id: serverId,
       page: page,
       volumeId: volumeId,
       seriesId: seriesId,
       chapterId: chapterId,
-      imageOffset: imageOffset < 0 ? 0 : imageOffset,
-      xPath: xPath.isEmpty ? null : xPath,
+      imageOffset: imageOffset,
+      xPath: xPath,
     );
   }
 }

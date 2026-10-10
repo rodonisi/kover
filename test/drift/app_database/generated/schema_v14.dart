@@ -7791,17 +7791,16 @@ class Bookmarks extends Table with TableInfo<Bookmarks, BookmarksData> {
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT (-1)',
-    defaultValue: const CustomExpression('-1'),
+    $customConstraints: 'NOT NULL DEFAULT 0',
+    defaultValue: const CustomExpression('0'),
   );
   late final GeneratedColumn<String> xPath = GeneratedColumn<String>(
     'x_path',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT \'\'',
-    defaultValue: const CustomExpression('\'\''),
+    $customConstraints: 'NULL',
   );
   late final GeneratedColumn<int> created = GeneratedColumn<int>(
     'created',
@@ -7892,7 +7891,7 @@ class Bookmarks extends Table with TableInfo<Bookmarks, BookmarksData> {
       xPath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}x_path'],
-      )!,
+      ),
       created: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}created'],
@@ -7929,7 +7928,7 @@ class BookmarksData extends DataClass implements Insertable<BookmarksData> {
   final int chapterId;
   final int page;
   final int imageOffset;
-  final String xPath;
+  final String? xPath;
   final int created;
   final int dirty;
   final int removed;
@@ -7941,7 +7940,7 @@ class BookmarksData extends DataClass implements Insertable<BookmarksData> {
     required this.chapterId,
     required this.page,
     required this.imageOffset,
-    required this.xPath,
+    this.xPath,
     required this.created,
     required this.dirty,
     required this.removed,
@@ -7958,7 +7957,9 @@ class BookmarksData extends DataClass implements Insertable<BookmarksData> {
     map['chapter_id'] = Variable<int>(chapterId);
     map['page'] = Variable<int>(page);
     map['image_offset'] = Variable<int>(imageOffset);
-    map['x_path'] = Variable<String>(xPath);
+    if (!nullToAbsent || xPath != null) {
+      map['x_path'] = Variable<String>(xPath);
+    }
     map['created'] = Variable<int>(created);
     map['dirty'] = Variable<int>(dirty);
     map['removed'] = Variable<int>(removed);
@@ -7976,7 +7977,9 @@ class BookmarksData extends DataClass implements Insertable<BookmarksData> {
       chapterId: Value(chapterId),
       page: Value(page),
       imageOffset: Value(imageOffset),
-      xPath: Value(xPath),
+      xPath: xPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(xPath),
       created: Value(created),
       dirty: Value(dirty),
       removed: Value(removed),
@@ -7996,7 +7999,7 @@ class BookmarksData extends DataClass implements Insertable<BookmarksData> {
       chapterId: serializer.fromJson<int>(json['chapterId']),
       page: serializer.fromJson<int>(json['page']),
       imageOffset: serializer.fromJson<int>(json['imageOffset']),
-      xPath: serializer.fromJson<String>(json['xPath']),
+      xPath: serializer.fromJson<String?>(json['xPath']),
       created: serializer.fromJson<int>(json['created']),
       dirty: serializer.fromJson<int>(json['dirty']),
       removed: serializer.fromJson<int>(json['removed']),
@@ -8013,7 +8016,7 @@ class BookmarksData extends DataClass implements Insertable<BookmarksData> {
       'chapterId': serializer.toJson<int>(chapterId),
       'page': serializer.toJson<int>(page),
       'imageOffset': serializer.toJson<int>(imageOffset),
-      'xPath': serializer.toJson<String>(xPath),
+      'xPath': serializer.toJson<String?>(xPath),
       'created': serializer.toJson<int>(created),
       'dirty': serializer.toJson<int>(dirty),
       'removed': serializer.toJson<int>(removed),
@@ -8028,7 +8031,7 @@ class BookmarksData extends DataClass implements Insertable<BookmarksData> {
     int? chapterId,
     int? page,
     int? imageOffset,
-    String? xPath,
+    Value<String?> xPath = const Value.absent(),
     int? created,
     int? dirty,
     int? removed,
@@ -8040,7 +8043,7 @@ class BookmarksData extends DataClass implements Insertable<BookmarksData> {
     chapterId: chapterId ?? this.chapterId,
     page: page ?? this.page,
     imageOffset: imageOffset ?? this.imageOffset,
-    xPath: xPath ?? this.xPath,
+    xPath: xPath.present ? xPath.value : this.xPath,
     created: created ?? this.created,
     dirty: dirty ?? this.dirty,
     removed: removed ?? this.removed,
@@ -8120,7 +8123,7 @@ class BookmarksCompanion extends UpdateCompanion<BookmarksData> {
   final Value<int> chapterId;
   final Value<int> page;
   final Value<int> imageOffset;
-  final Value<String> xPath;
+  final Value<String?> xPath;
   final Value<int> created;
   final Value<int> dirty;
   final Value<int> removed;
@@ -8189,7 +8192,7 @@ class BookmarksCompanion extends UpdateCompanion<BookmarksData> {
     Value<int>? chapterId,
     Value<int>? page,
     Value<int>? imageOffset,
-    Value<String>? xPath,
+    Value<String?>? xPath,
     Value<int>? created,
     Value<int>? dirty,
     Value<int>? removed,

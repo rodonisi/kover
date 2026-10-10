@@ -29,3 +29,4 @@ targets:
             - "api/Library/metadata-enabled-libraries"
             - "api/Library/scrobble-enabled-libraries"
             - "api/Scrobbling/expired-tokens"
+          include_if_null: false

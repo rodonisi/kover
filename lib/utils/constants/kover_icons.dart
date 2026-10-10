@@ -41,6 +41,8 @@ sealed class KoverIcons {
   static const IconData zoomOut = LucideIcons.zoomOut;
   static const IconData zoomReset = LucideIcons.scan;
   static const IconData keyboard = LucideIcons.keyboard;
+  static const IconData bookmarked = LucideIcons.bookmark;
+  static const IconData bookmark = LucideIcons.bookmarkOff;
 
   // Appearance
   static const IconData animation = Icons.animation_sharp;
