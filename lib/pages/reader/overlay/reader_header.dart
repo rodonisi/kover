@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay_provider.dart';
+import 'package:kover/riverpod/providers/bookmark.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
@@ -80,6 +81,12 @@ class ReaderHeader extends ConsumerWidget {
                     icon: const Icon(KoverIcons.tableOfContents),
                     onPressed: () => Scaffold.of(context).openEndDrawer(),
                   )
+                else if (data.reader.series.format == .archive)
+                  BookmarkButton(
+                    seriesId: seriesId,
+                    chapterId: chapterId,
+                    readingListId: readingListId,
+                  )
                 else
                   const SizedBox.square(
                     dimension: LayoutConstants.mediumIcon,
@@ -89,6 +96,43 @@ class ReaderHeader extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class BookmarkButton extends ConsumerWidget {
+  final int seriesId;
+  final int chapterId;
+  final int? readingListId;
+
+  const new({
+    super.key,
+    required this.chapterId,
+    required this.seriesId,
+    required this.readingListId,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = currentPageBookmarkProvider(
+      seriesId: seriesId,
+      chapterId: chapterId,
+      readingListId: readingListId,
+    );
+    final isBookmarked = ref.watch(provider);
+
+    return Async(
+      asyncValue: isBookmarked,
+      data: (bookmarked) {
+        final icon = bookmarked ? KoverIcons.bookmarked : KoverIcons.bookmark;
+        final color = bookmarked ? Theme.of(context).colorScheme.primary : null;
+        return IconButton(
+          icon: Icon(icon, color: color),
+          onPressed: () {
+            ref.read(provider.notifier).toggle();
+          },
+        );
+      },
     );
   }
 }

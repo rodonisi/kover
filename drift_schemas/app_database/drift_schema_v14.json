@@ -2432,7 +2432,7 @@
             "moor_type": "int",
             "nullable": false,
             "customConstraints": null,
-            "default_dart": "const CustomExpression('-1')",
+            "default_dart": "const CustomExpression('0')",
             "default_client_dart": null,
             "dsl_features": []
           },
@@ -2440,9 +2440,9 @@
             "name": "x_path",
             "getter_name": "xPath",
             "moor_type": "string",
-            "nullable": false,
+            "nullable": true,
             "customConstraints": null,
-            "default_dart": "const CustomExpression('\\'\\'')",
+            "default_dart": null,
             "default_client_dart": null,
             "dsl_features": []
           },
@@ -4100,7 +4100,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"bookmarks\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"server_id\" INTEGER NULL, \"series_id\" INTEGER NOT NULL REFERENCES series (id) ON DELETE CASCADE, \"volume_id\" INTEGER NOT NULL REFERENCES volumes (id), \"chapter_id\" INTEGER NOT NULL REFERENCES chapters (id) ON DELETE CASCADE, \"page\" INTEGER NOT NULL, \"image_offset\" INTEGER NOT NULL DEFAULT -1, \"x_path\" TEXT NOT NULL DEFAULT '', \"created\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), \"dirty\" INTEGER NOT NULL DEFAULT 0 CHECK (\"dirty\" IN (0, 1)), \"removed\" INTEGER NOT NULL DEFAULT 0 CHECK (\"removed\" IN (0, 1)), UNIQUE (\"chapter_id\", \"page\", \"x_path\", \"image_offset\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"bookmarks\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"server_id\" INTEGER NULL, \"series_id\" INTEGER NOT NULL REFERENCES series (id) ON DELETE CASCADE, \"volume_id\" INTEGER NOT NULL REFERENCES volumes (id), \"chapter_id\" INTEGER NOT NULL REFERENCES chapters (id) ON DELETE CASCADE, \"page\" INTEGER NOT NULL, \"image_offset\" INTEGER NOT NULL DEFAULT 0, \"x_path\" TEXT NULL, \"created\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), \"dirty\" INTEGER NOT NULL DEFAULT 0 CHECK (\"dirty\" IN (0, 1)), \"removed\" INTEGER NOT NULL DEFAULT 0 CHECK (\"removed\" IN (0, 1)), UNIQUE (\"chapter_id\", \"page\", \"x_path\", \"image_offset\"));"
         }
       ]
     },

@@ -1,5 +1,9 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/database/app_database.dart';
 
+part 'bookmark_model.freezed.dart';
+
+@freezed
 class BookmarkModel({
   required final int id,
   final int? serverId,
@@ -7,10 +11,10 @@ class BookmarkModel({
   required final int volumeId,
   required final int chapterId,
   required final int page,
-  required final int imageOffset,
-  required final String xPath,
+  final int? imageOffset,
+  final String? xPath,
   required final DateTime created,
-}) {
+}) with _$BookmarkModel {
   factory fromDatabaseModel(BookmarkData data) => BookmarkModel(
     id: data.id,
     serverId: data.serverId,
@@ -22,15 +26,4 @@ class BookmarkModel({
     xPath: data.xPath,
     created: data.created,
   );
-
-  @override
-  bool operator ==(Object other) =>
-      other is BookmarkModel &&
-      other.id == id &&
-      other.page == page &&
-      other.imageOffset == imageOffset &&
-      other.xPath == xPath;
-
-  @override
-  int get hashCode => Object.hash(id, page, imageOffset, xPath);
 }

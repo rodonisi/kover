@@ -8309,17 +8309,16 @@ i1.GeneratedColumn<int> _column_112(String aliasedName) =>
       aliasedName,
       false,
       type: i1.DriftSqlType.int,
-      $customConstraints: 'NOT NULL DEFAULT (-1)',
-      defaultValue: const i1.CustomExpression('-1'),
+      $customConstraints: 'NOT NULL DEFAULT 0',
+      defaultValue: const i1.CustomExpression('0'),
     );
 i1.GeneratedColumn<String> _column_113(String aliasedName) =>
     i1.GeneratedColumn<String>(
       'x_path',
       aliasedName,
-      false,
+      true,
       type: i1.DriftSqlType.string,
-      $customConstraints: 'NOT NULL DEFAULT \'\'',
-      defaultValue: const i1.CustomExpression('\'\''),
+      $customConstraints: 'NULL',
     );
 i1.GeneratedColumn<int> _column_114(String aliasedName) =>
     i1.GeneratedColumn<int>(

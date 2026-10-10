@@ -8,13 +8,13 @@ class Bookmarks extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get serverId => integer().nullable()();
   IntColumn get seriesId =>
-      integer().references(Series, #id, onDelete: KeyAction.cascade)();
+      integer().references(Series, #id, onDelete: .cascade)();
   IntColumn get volumeId => integer().references(Volumes, #id)();
   IntColumn get chapterId =>
-      integer().references(Chapters, #id, onDelete: KeyAction.cascade)();
+      integer().references(Chapters, #id, onDelete: .cascade)();
   IntColumn get page => integer()();
-  IntColumn get imageOffset => integer().withDefault(const Constant(-1))();
-  TextColumn get xPath => text().withDefault(const Constant(''))();
+  IntColumn get imageOffset => integer().withDefault(const Constant(0))();
+  TextColumn get xPath => text().nullable()();
   DateTimeColumn get created => dateTime().withDefault(currentDateAndTime)();
   BoolColumn get dirty => boolean().withDefault(const Constant(false))();
   BoolColumn get removed => boolean().withDefault(const Constant(false))();

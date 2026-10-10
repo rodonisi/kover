@@ -2,11 +2,6 @@ import 'package:drift/drift.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/mapping/dto/bookmark_dto_mappings.dart';
-import 'package:kover/models/bookmark_model.dart';
-import 'package:kover/models/chapter_model.dart';
-import 'package:kover/models/image_model.dart';
-import 'package:kover/models/series_model.dart';
-import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/bookmark_sync_operations.dart';
@@ -22,137 +17,114 @@ BookmarkRepository bookmarkRepository(Ref ref) {
   return BookmarkRepository(db, BookmarkSyncOperations(client));
 }
 
-@riverpod
-Future<ImageModel> bookmarkImage(Ref ref, BookmarkModel bookmark) async {
-  return ref.watch(
-    imagePageProvider(
-      chapterId: bookmark.chapterId,
-      page: bookmark.page,
-    ).future,
-  );
-}
-
-@riverpod
-Stream<List<BookmarkModel>> chapterBookmarks(
-  Ref ref, {
-  required int chapterId,
-}) {
-  final repo = ref.watch(bookmarkRepositoryProvider);
-  return repo.watchChapterBookmarks(chapterId);
-}
-
-@riverpod
-Stream<List<int>> chapterIdsWithBookmarks(
-  Ref ref, {
-  int? seriesId,
-  int? volumeId,
-}) {
-  final repo = ref.watch(bookmarkRepositoryProvider);
-  return repo.watchChapterIdsWithBookmarks(
-    seriesId: seriesId,
-    volumeId: volumeId,
-  );
-}
-
-@riverpod
-Stream<List<SeriesModel>> bookmarkedSeries(Ref ref) {
-  final repo = ref.watch(bookmarkRepositoryProvider);
-  return repo.watchBookmarkedSeries();
-}
-
-@riverpod
-Stream<List<ChapterModel>> bookmarkedChapters(
-  Ref ref, {
-  int? seriesId,
-  int? volumeId,
-}) {
-  final repo = ref.watch(bookmarkRepositoryProvider);
-  return repo.watchBookmarkedChapters(
-    seriesId: seriesId,
-    volumeId: volumeId,
-  );
-}
-
 class BookmarkRepository(
   final AppDatabase _db,
   final BookmarkSyncOperations _client,
 ) {
-  Stream<List<BookmarkModel>> watchChapterBookmarks(int chapterId) => _db
-      .bookmarkDao
-      .watchChapterBookmarks(chapterId)
-      .map((l) => l.map(BookmarkModel.fromDatabaseModel).toList());
+  /// Whether a bookmark exists for [page] of [chapterId] and is not marked as
+  /// removed.
+  Stream<bool> watchPageBookmark({
+    required int chapterId,
+    required int page,
+    int pageOffset = 0,
+    String? xPath,
+  }) {
+    return _db.bookmarkDao.watchPageBookmark(
+      chapterId: chapterId,
+      page: page,
+      pageOffset: pageOffset,
+      xPath: xPath,
+    );
+  }
 
-  Stream<List<BookmarkModel>> watchVolumeBookmarks(int volumeId) => _db
-      .bookmarkDao
-      .watchVolumeBookmarks(volumeId)
-      .map((l) => l.map(BookmarkModel.fromDatabaseModel).toList());
-
-  Stream<List<BookmarkModel>> watchSeriesBookmarks(int seriesId) => _db
-      .bookmarkDao
-      .watchSeriesBookmarks(seriesId)
-      .map((l) => l.map(BookmarkModel.fromDatabaseModel).toList());
-
-  Stream<List<int>> watchChapterIdsWithBookmarks({
-    int? seriesId,
-    int? volumeId,
-  }) => _db.bookmarkDao.watchChapterIdsWithBookmarks(
-    seriesId: seriesId,
-    volumeId: volumeId,
-  );
-
-  Stream<List<SeriesModel>> watchBookmarkedSeries() => _db.bookmarkDao
-      .watchBookmarkedSeries()
-      .map((l) => l.map(SeriesModel.fromDatabaseModel).toList());
-
-  Stream<List<ChapterModel>> watchBookmarkedChapters({
-    int? seriesId,
-    int? volumeId,
-  }) => _db.bookmarkDao
-      .watchBookmarkedChapters(seriesId: seriesId, volumeId: volumeId)
-      .map((l) => l.map(ChapterModel.fromDatabaseModel).toList());
-
+  //
+  // Stream<List<BookmarkModel>> watchChapterBookmarks(int chapterId) => _db
+  //     .bookmarkDao
+  //     .watchChapterBookmarks(chapterId)
+  //     .map((l) => l.map(BookmarkModel.fromDatabaseModel).toList());
+  //
+  // Stream<List<BookmarkModel>> watchVolumeBookmarks(int volumeId) => _db
+  //     .bookmarkDao
+  //     .watchVolumeBookmarks(volumeId)
+  //     .map((l) => l.map(BookmarkModel.fromDatabaseModel).toList());
+  //
+  // Stream<List<BookmarkModel>> watchSeriesBookmarks(int seriesId) => _db
+  //     .bookmarkDao
+  //     .watchSeriesBookmarks(seriesId)
+  //     .map((l) => l.map(BookmarkModel.fromDatabaseModel).toList());
+  //
+  // Stream<List<int>> watchChapterIdsWithBookmarks({
+  //   int? seriesId,
+  //   int? volumeId,
+  // }) => _db.bookmarkDao.watchChapterIdsWithBookmarks(
+  //   seriesId: seriesId,
+  //   volumeId: volumeId,
+  // );
+  //
+  // Stream<List<SeriesModel>> watchBookmarkedSeries() => _db.bookmarkDao
+  //     .watchBookmarkedSeries()
+  //     .map((l) => l.map(SeriesModel.fromDatabaseModel).toList());
+  //
+  // Stream<List<ChapterModel>> watchBookmarkedChapters({
+  //   int? seriesId,
+  //   int? volumeId,
+  // }) => _db.bookmarkDao
+  //     .watchBookmarkedChapters(seriesId: seriesId, volumeId: volumeId)
+  //     .map((l) => l.map(ChapterModel.fromDatabaseModel).toList());
+  //
   Future<void> addBookmark({
     required int seriesId,
     required int volumeId,
     required int chapterId,
     required int page,
-    int imageOffset = -1,
-    String xPath = '',
+    int imageOffset = 0,
+    String? xPath,
   }) async {
-    final existing = await _db.bookmarkDao.getByLocation(
-      chapterId: chapterId,
-      page: page,
-      imageOffset: imageOffset,
+    // final existing = await _db.bookmarkDao.getBookmark(
+    //   chapterId: chapterId,
+    //   page: page,
+    //   imageOffset: imageOffset,
+    //   xPath: xPath,
+    // );
+    //
+    // final BookmarkData stored;
+    // if (existing != null) {
+    //   stored = await _db.bookmarkDao.updateById(
+    //     existing.id,
+    //     BookmarksCompanion(
+    //       seriesId: Value(seriesId),
+    //       volumeId: Value(volumeId),
+    //       xPath: Value(xPath),
+    //       dirty: const Value(true),
+    //       removed: const Value(false),
+    //     ),
+    //   );
+    // } else {
+    //   stored = await _db.bookmarkDao.upsertByNaturalKey(
+    //     BookmarksCompanion.insert(
+    //       seriesId: seriesId,
+    //       volumeId: volumeId,
+    //       chapterId: chapterId,
+    //       page: page,
+    //       imageOffset: Value(imageOffset),
+    //       xPath: Value(xPath),
+    //       dirty: const Value(true),
+    //       removed: const Value(false),
+    //     ),
+    //   );
+    // }
+    final stored = await _db.bookmarkDao.upsert(
+      BookmarksCompanion(
+        seriesId: Value(seriesId),
+        volumeId: Value(volumeId),
+        chapterId: Value(chapterId),
+        page: Value(page),
+        imageOffset: Value(imageOffset),
+        xPath: Value(xPath),
+        dirty: const Value(true),
+        removed: const Value(false),
+      ),
     );
-
-    final BookmarkData stored;
-    if (existing != null) {
-      // Reuse the row: `xPath` is metadata, not identity, so an existing row at
-      // the same location is updated in place instead of inserting a duplicate.
-      stored = await _db.bookmarkDao.updateById(
-        existing.id,
-        BookmarksCompanion(
-          seriesId: Value(seriesId),
-          volumeId: Value(volumeId),
-          xPath: Value(xPath),
-          dirty: const Value(true),
-          removed: const Value(false),
-        ),
-      );
-    } else {
-      stored = await _db.bookmarkDao.upsertByNaturalKey(
-        BookmarksCompanion.insert(
-          seriesId: seriesId,
-          volumeId: volumeId,
-          chapterId: chapterId,
-          page: page,
-          imageOffset: Value(imageOffset),
-          xPath: Value(xPath),
-          dirty: const Value(true),
-          removed: const Value(false),
-        ),
-      );
-    }
 
     try {
       await _client.add(stored.toBookmarkDto());
@@ -165,16 +137,27 @@ class BookmarkRepository(
   Future<void> removeBookmark({
     required int chapterId,
     required int page,
-    int imageOffset = -1,
-    String xPath = '',
+    int imageOffset = 0,
+    String? xPath,
   }) async {
-    // Identity is `(chapterId, page, imageOffset)`; `xPath` is reflow-dependent
-    // metadata and must not participate in the lookup.
-    final existing = await _db.bookmarkDao.getByLocation(
+    final existing = await _db.bookmarkDao.getBookmark(
       chapterId: chapterId,
       page: page,
       imageOffset: imageOffset,
+      xPath: xPath,
     );
+
+    log.debug(
+      'removing bookmark',
+      attributes: {
+        'chapter_id': chapterId,
+        'page': page,
+        'image_offset': imageOffset,
+        'xpath': xPath,
+        'existing': existing,
+      },
+    );
+
     if (existing == null) return;
 
     if (existing.serverId == null && existing.dirty) {
@@ -227,10 +210,10 @@ class BookmarkRepository(
   /// never deleted: they hold unsynced local intent.
   Future<void> _deleteMissingRemote(Iterable<BookmarkDto> remote) async {
     final remoteLocations = remote
-        .map((dto) => (dto.chapterId, dto.page, dto.imageOffset ?? -1))
+        .map((dto) => (dto.chapterId, dto.page, dto.imageOffset ?? 0))
         .toSet();
 
-    final local = await _db.bookmarkDao.getLocalBookmarks();
+    final local = await _db.bookmarkDao.getBookmarks();
     final stale = local
         .where(
           (b) =>
@@ -254,10 +237,11 @@ class BookmarkRepository(
         );
         continue;
       }
-      final local = await _db.bookmarkDao.getByLocation(
+      final local = await _db.bookmarkDao.getBookmark(
         chapterId: dto.chapterId,
         page: dto.page,
-        imageOffset: dto.imageOffset ?? -1,
+        imageOffset: dto.imageOffset ?? 0,
+        xPath: dto.xPath,
       );
       if (local != null && local.dirty) {
         log.warning(
@@ -269,13 +253,14 @@ class BookmarkRepository(
         );
         continue;
       }
-      if (local != null) {
-        // Update in place so the row id (and any dependent state) is preserved
-        // even when the remote `xPath` differs from the reflowed local value.
-        await _db.bookmarkDao.updateById(local.id, dto.toBookmarkCompanion());
-      } else {
-        await _db.bookmarkDao.upsertByNaturalKey(dto.toBookmarkCompanion());
-      }
+      await _db.bookmarkDao.upsert(dto.toBookmarkCompanion());
+
+      //   // Update in place so the row id (and any dependent state) is preserved
+      //   // even when the remote `xPath` differs from the reflowed local value.
+      //   await _db.bookmarkDao.updateById(local.id, dto.toBookmarkCompanion());
+      // } else {
+      //   await _db.bookmarkDao.upsertByNaturalKey(dto.toBookmarkCompanion());
+      // }
     }
   }
 }
