@@ -1,6 +1,10 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/bookmark_model.dart';
 import 'package:kover/riverpod/providers/bookmark.dart';
+import 'package:kover/riverpod/providers/reader.dart';
+import 'package:kover/utils/constants/kover_icons.dart';
+import 'package:kover/utils/logging.dart';
+import 'package:kover/widgets/cards/cover_image.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -19,16 +23,24 @@ class BookmarkPreviewCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final image = ref.watch(bookmarkImageProvider(bookmark));
+    final canRead =
+        ref.watch(canReadChapterProvider(bookmark.chapterId)).value ?? false;
 
     return Card(
       clipBehavior: .antiAlias,
       child: InkWell(
-        onTap: onTap,
+        onTap: canRead ? onTap : null,
         child: Async(
           asyncValue: image,
-          loading: () => ColoredBox(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          ),
+          loading: () => const LoadingCover(),
+          error: (error, stacktrace) {
+            log.error(
+              'failed to load bookmark image',
+              error: error,
+              stacktrace: stacktrace,
+            );
+            return const _BookmarkPlaceholder();
+          },
           data: (data) => Image.memory(
             data.data,
             fit: .cover,
@@ -37,6 +49,20 @@ class BookmarkPreviewCard extends ConsumerWidget {
             gaplessPlayback: true,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _BookmarkPlaceholder extends StatelessWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Card.filled(
+      margin: EdgeInsets.zero,
+      child: Center(
+        child: Icon(KoverIcons.coverPlaceholder),
       ),
     );
   }
