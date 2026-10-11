@@ -169,11 +169,13 @@ class BookmarkRepository(
   }
 
   /// Deletes local rows that are clean (not dirty, not removed) and whose
-  /// `(chapterId, page, imageOffset)` is absent from [remote]. Dirty rows are
-  /// never deleted: they hold unsynced local intent.
+  /// `(chapterId, page, imageOffset, xPath)` is absent from [remote]. Dirty rows
+  /// are never deleted: they hold unsynced local intent.
   Future<void> _deleteMissingRemote(Iterable<BookmarkDto> remote) async {
     final remoteLocations = remote
-        .map((dto) => (dto.chapterId, dto.page, dto.imageOffset ?? 0))
+        .map(
+          (dto) => (dto.chapterId, dto.page, dto.imageOffset ?? 0, dto.xPath),
+        )
         .toSet();
 
     final local = await _db.bookmarkDao.getBookmarks();
@@ -181,7 +183,12 @@ class BookmarkRepository(
         .where(
           (b) =>
               !b.dirty &&
-              !remoteLocations.contains((b.chapterId, b.page, b.imageOffset)),
+              !remoteLocations.contains((
+                b.chapterId,
+                b.page,
+                b.imageOffset,
+                b.xPath,
+              )),
         )
         .map((b) => b.id)
         .toList();

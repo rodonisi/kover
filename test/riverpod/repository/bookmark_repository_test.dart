@@ -227,6 +227,33 @@ void main() {
     },
   );
 
+  test(
+    'refreshAllBookmarks matches remote by xPath',
+    () async {
+      final epub = storedBookmark(id: 7, serverId: 7, page: 5, xPath: '/p[1]');
+      final image = storedBookmark(id: 8, serverId: 8, page: 5);
+      when(mockClient.getAllBookmarks()).thenAnswer(
+        (_) async => [
+          const BookmarkDto(
+            id: 7,
+            page: 5,
+            volumeId: 1,
+            seriesId: 1,
+            chapterId: 1,
+            xPath: '/p[1]',
+          ),
+        ],
+      );
+      when(mockDao.getExistingChapterIds()).thenAnswer((_) async => [1]);
+      when(mockDao.getBookmarks()).thenAnswer((_) async => [epub, image]);
+
+      await repo.refreshAllBookmarks();
+
+      verify(mockDao.deleteByIds([8])).called(1);
+      verifyNever(mockDao.deleteByIds(argThat(contains(7))));
+    },
+  );
+
   test('watchBookmarks maps rows and forwards the scope', () async {
     when(
       mockDao.watchBookmarks(seriesId: 1, volumeId: 2, chapterId: null),

@@ -13,7 +13,7 @@ extension NavbarDestinationsExtension on NavbarDestinations {
       .wantToRead => KoverIcons.wantToRead,
       .collections => KoverIcons.collection,
       .readingLists => KoverIcons.readingList,
-      .bookmarks => KoverIcons.bookmarked,
+      .bookmarks => KoverIcons.bookmarkOn,
     };
   }
 

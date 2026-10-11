@@ -127,7 +127,9 @@ class BookmarkButton extends ConsumerWidget {
       asyncValue: isBookmarked,
       data: (bookmarked) {
         final l = AppLocalizations.of(context);
-        final icon = bookmarked ? KoverIcons.bookmarked : KoverIcons.bookmark;
+        final icon = bookmarked
+            ? KoverIcons.bookmarkOn
+            : KoverIcons.bookmarkOff;
         final color = bookmarked ? Theme.of(context).colorScheme.primary : null;
         return IconButton(
           icon: Icon(icon, color: color),
