@@ -47,7 +47,7 @@ void main() {
             id: const Value(1),
             volumeId: 1,
             seriesId: 1,
-            format: Format.epub,
+            format: Format.image,
             minNumber: 0,
             maxNumber: 0,
             sortOrder: 0,
@@ -90,6 +90,7 @@ void main() {
       volumeId: volumeId,
       chapterId: chapterId,
       page: page,
+      imageOffset: const Value(-1),
     );
   }
 
@@ -136,7 +137,7 @@ void main() {
             id: Value(id),
             volumeId: volumeId,
             seriesId: seriesId,
-            format: Format.epub,
+            format: Format.image,
             minNumber: 0,
             maxNumber: 0,
             sortOrder: sortOrder,
@@ -151,17 +152,17 @@ void main() {
         );
   }
 
-  test('upsertByNaturalKey does not duplicate the same key', () async {
-    await db.bookmarkDao.upsertByNaturalKey(entry());
-    await db.bookmarkDao.upsertByNaturalKey(entry());
+  test('upsert does not duplicate the same natural key', () async {
+    await db.bookmarkDao.upsert(entry());
+    await db.bookmarkDao.upsert(entry());
     final all = await db.select(db.bookmarks).get();
     expect(all, hasLength(1));
   });
 
-  test('upsertByNaturalKey updates an existing tombstone', () async {
-    final row = await db.bookmarkDao.upsertByNaturalKey(entry());
+  test('upsert updates an existing tombstone', () async {
+    final row = await db.bookmarkDao.upsert(entry());
     await db.bookmarkDao.markRemoved(row.id);
-    await db.bookmarkDao.upsertByNaturalKey(
+    await db.bookmarkDao.upsert(
       entry().copyWith(dirty: const Value(true), removed: const Value(false)),
     );
     final all = await db.select(db.bookmarks).get();
@@ -171,9 +172,9 @@ void main() {
   });
 
   test('markRemoved sets dirty and removed', () async {
-    final row = await db.bookmarkDao.upsertByNaturalKey(entry());
+    final row = await db.bookmarkDao.upsert(entry());
     await db.bookmarkDao.markRemoved(row.id);
-    final stored = await db.bookmarkDao.getByNaturalKey(
+    final stored = await db.bookmarkDao.getBookmark(
       chapterId: 1,
       page: 0,
       xPath: '',
@@ -183,126 +184,67 @@ void main() {
     expect(stored.dirty, isTrue);
   });
 
-  test('getByLocation finds the row by location ignoring xPath', () async {
-    final row = await db.bookmarkDao.upsertByNaturalKey(
-      entry(xPath: 'xpath-A'),
-    );
-    final found = await db.bookmarkDao.getByLocation(
-      chapterId: 1,
-      page: 0,
-      imageOffset: -1,
-    );
-    expect(found, isNot(null));
-    expect(found!.id, row.id);
-  });
-
-  test('updateById preserves the row id and rewrites metadata', () async {
-    final row = await db.bookmarkDao.upsertByNaturalKey(
-      entry(xPath: 'xpath-A'),
-    );
-    final updated = await db.bookmarkDao.updateById(
-      row.id,
-      const BookmarksCompanion(
-        xPath: Value('xpath-B'),
-        dirty: Value(true),
-      ),
-    );
-    expect(updated.id, row.id);
-    expect(updated.xPath, 'xpath-B');
-    expect(updated.dirty, isTrue);
-    final all = await db.select(db.bookmarks).get();
-    expect(all, hasLength(1));
-  });
-
-  test('watchChapterBookmarks hides removed rows', () async {
-    final row = await db.bookmarkDao.upsertByNaturalKey(entry(page: 1));
-    await db.bookmarkDao.upsertByNaturalKey(entry(page: 2));
+  test('watchBookmarks hides removed rows', () async {
+    final row = await db.bookmarkDao.upsert(entry(page: 1));
+    await db.bookmarkDao.upsert(entry(page: 2));
     await db.bookmarkDao.markRemoved(row.id);
-    final list = await db.bookmarkDao.watchChapterBookmarks(1).first;
+    final list = await db.bookmarkDao.watchBookmarks(chapterId: 1).first;
     expect(list.map((b) => b.page), [2]);
   });
 
   test('getDirtyBookmarks returns dirty rows only', () async {
-    await db.bookmarkDao.upsertByNaturalKey(
+    await db.bookmarkDao.upsert(
       entry(page: 1).copyWith(dirty: const Value(true)),
     );
-    await db.bookmarkDao.upsertByNaturalKey(entry(page: 2));
+    await db.bookmarkDao.upsert(entry(page: 2));
     final dirty = await db.bookmarkDao.getDirtyBookmarks();
     expect(dirty.map((b) => b.page), [1]);
   });
 
   test(
-    'watchBookmarkedSeries returns distinct series ordered by name',
-    () async {
-      await insertSeries(2, 'A');
-      await insertVolume(2, 2);
-      await insertChapter(id: 2, volumeId: 2, seriesId: 2);
-
-      await db.bookmarkDao.upsertByNaturalKey(entry(page: 1));
-      await db.bookmarkDao.upsertByNaturalKey(entry(page: 2));
-      await db.bookmarkDao.upsertByNaturalKey(
-        bookmark(seriesId: 2, volumeId: 2, chapterId: 2),
-      );
-
-      final list = await db.bookmarkDao.watchBookmarkedSeries().first;
-      expect(list.map((s) => s.name), ['A', 'S']);
-    },
-  );
-
-  test('watchBookmarkedSeries ignores removed bookmarks', () async {
-    final row = await db.bookmarkDao.upsertByNaturalKey(entry());
-    await db.bookmarkDao.markRemoved(row.id);
-
-    final list = await db.bookmarkDao.watchBookmarkedSeries().first;
-    expect(list, isEmpty);
-  });
-
-  test(
-    'watchBookmarkedChapters returns distinct chapters ordered by sort order',
+    'watchBookmarks orders by chapter sort order then page',
     () async {
       await insertChapter(id: 2, volumeId: 1, seriesId: 1, sortOrder: 2);
       await insertChapter(id: 3, volumeId: 1, seriesId: 1, sortOrder: 1);
 
-      await db.bookmarkDao.upsertByNaturalKey(entry(page: 1));
-      await db.bookmarkDao.upsertByNaturalKey(entry(page: 2));
-      await db.bookmarkDao.upsertByNaturalKey(
+      await db.bookmarkDao.upsert(entry(page: 1));
+      await db.bookmarkDao.upsert(
         bookmark(seriesId: 1, volumeId: 1, chapterId: 2),
       );
-      await db.bookmarkDao.upsertByNaturalKey(
+      await db.bookmarkDao.upsert(
         bookmark(seriesId: 1, volumeId: 1, chapterId: 3),
       );
 
-      final list = await db.bookmarkDao.watchBookmarkedChapters().first;
-      expect(list.map((c) => c.id), [1, 3, 2]);
+      final list = await db.bookmarkDao.watchBookmarks(seriesId: 1).first;
+      expect(list.map((b) => b.chapterId), [1, 3, 2]);
     },
   );
 
-  test('watchBookmarkedChapters filters by series and volume', () async {
+  test('watchBookmarks filters by series, volume and chapter', () async {
     await insertSeries(2, 'A');
     await insertVolume(2, 2);
     await insertChapter(id: 2, volumeId: 2, seriesId: 2);
 
-    await db.bookmarkDao.upsertByNaturalKey(entry());
-    await db.bookmarkDao.upsertByNaturalKey(
+    await db.bookmarkDao.upsert(entry());
+    await db.bookmarkDao.upsert(
       bookmark(seriesId: 2, volumeId: 2, chapterId: 2),
     );
 
-    final bySeries = await db.bookmarkDao
-        .watchBookmarkedChapters(seriesId: 2)
-        .first;
-    expect(bySeries.map((c) => c.id), [2]);
+    final bySeries = await db.bookmarkDao.watchBookmarks(seriesId: 2).first;
+    expect(bySeries.map((b) => b.chapterId), [2]);
 
-    final byVolume = await db.bookmarkDao
-        .watchBookmarkedChapters(volumeId: 1)
-        .first;
-    expect(byVolume.map((c) => c.id), [1]);
+    final byVolume = await db.bookmarkDao.watchBookmarks(volumeId: 1).first;
+    expect(byVolume.map((b) => b.chapterId), [1]);
+
+    final byChapter = await db.bookmarkDao.watchBookmarks(chapterId: 2).first;
+    expect(byChapter.map((b) => b.chapterId), [2]);
   });
 
-  test('watchBookmarkedChapters ignores removed bookmarks', () async {
-    final row = await db.bookmarkDao.upsertByNaturalKey(entry());
+  test('watchBookmarks ignores removed bookmarks', () async {
+    final row = await db.bookmarkDao.upsert(entry());
     await db.bookmarkDao.markRemoved(row.id);
 
-    final list = await db.bookmarkDao.watchBookmarkedChapters().first;
+    final list = await db.bookmarkDao.watchBookmarks(seriesId: 1).first;
     expect(list, isEmpty);
   });
 }

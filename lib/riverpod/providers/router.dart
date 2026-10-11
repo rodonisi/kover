@@ -11,6 +11,8 @@ import 'package:kover/pages/reading_list_details_page/reading_lists_details_page
 import 'package:kover/pages/reading_lists_page/reading_lists_page.dart';
 import 'package:kover/pages/series_page/series_page.dart';
 import 'package:kover/pages/smart_filter_page/smart_filter_page.dart';
+import 'package:kover/pages/bookmarks/bookmark_viewer_page.dart';
+import 'package:kover/pages/bookmarks/bookmarks_grid_page.dart';
 import 'package:kover/pages/reader/reader_page.dart';
 import 'package:kover/pages/series_detail_page/chapter_detail_page/chapter_detail_page.dart';
 import 'package:kover/pages/series_detail_page/chapters_page/chapters_page.dart';
@@ -53,13 +55,24 @@ GoRouter router(Ref ref) {
                   routes: [
                     TypedGoRoute<VolumeDetailRoute>(
                       path: ':volumeId',
+                      routes: [
+                        TypedGoRoute<VolumeBookmarksRoute>(path: 'bookmarks'),
+                      ],
                     ),
                   ],
                 ),
+                TypedGoRoute<SeriesBookmarksRoute>(path: 'bookmarks'),
                 TypedGoRoute<ChaptersRoute>(
                   path: 'chapters',
                   routes: [
-                    TypedGoRoute<ChapterDetailRoute>(path: ':chapterId'),
+                    TypedGoRoute<ChapterDetailRoute>(
+                      path: ':chapterId',
+                      routes: [
+                        TypedGoRoute<ChapterBookmarksRoute>(
+                          path: 'bookmarks',
+                        ),
+                      ],
+                    ),
                   ],
                 ),
                 TypedGoRoute<StorylineRoute>(path: 'storyline'),
@@ -355,7 +368,22 @@ class ChapterDetailRoute extends GoRouteData with $ChapterDetailRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ChapterDetailPage(chapterId: chapterId);
+    return ChapterDetailPage(seriesId: seriesId, chapterId: chapterId);
+  }
+}
+
+class ChapterBookmarksRoute extends GoRouteData with $ChapterBookmarksRoute {
+  const ChapterBookmarksRoute({
+    required this.seriesId,
+    required this.chapterId,
+  });
+
+  final int seriesId;
+  final int chapterId;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return BookmarksGridPage(seriesId: seriesId, chapterId: chapterId);
   }
 }
 
@@ -381,6 +409,116 @@ class DownloadQueueRoute extends GoRouteData with $DownloadQueueRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const DownloadQueuePage();
+}
+
+class SeriesBookmarksRoute extends GoRouteData with $SeriesBookmarksRoute {
+  const SeriesBookmarksRoute({required this.seriesId});
+
+  final int seriesId;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return BookmarksGridPage(seriesId: seriesId);
+  }
+}
+
+class VolumeBookmarksRoute extends GoRouteData with $VolumeBookmarksRoute {
+  const VolumeBookmarksRoute({
+    required this.seriesId,
+    required this.volumeId,
+  });
+
+  final int seriesId;
+  final int volumeId;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return BookmarksGridPage(seriesId: seriesId, volumeId: volumeId);
+  }
+}
+
+@TypedGoRoute<SeriesBookmarkViewerRoute>(
+  path: '/bookmarks/series/:seriesId/:index',
+)
+class SeriesBookmarkViewerRoute extends GoRouteData
+    with $SeriesBookmarkViewerRoute {
+  final int seriesId;
+  final int index;
+
+  const SeriesBookmarkViewerRoute({
+    required this.seriesId,
+    required this.index,
+  });
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return MaterialPage(
+      key: state.pageKey,
+      fullscreenDialog: true,
+      child: BookmarkViewerPage(
+        seriesId: seriesId,
+        initialIndex: index,
+      ),
+    );
+  }
+}
+
+@TypedGoRoute<VolumeBookmarkViewerRoute>(
+  path: '/bookmarks/volume/:seriesId/:volumeId/:index',
+)
+class VolumeBookmarkViewerRoute extends GoRouteData
+    with $VolumeBookmarkViewerRoute {
+  final int seriesId;
+  final int volumeId;
+  final int index;
+
+  const VolumeBookmarkViewerRoute({
+    required this.seriesId,
+    required this.volumeId,
+    required this.index,
+  });
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return MaterialPage(
+      key: state.pageKey,
+      fullscreenDialog: true,
+      child: BookmarkViewerPage(
+        seriesId: seriesId,
+        volumeId: volumeId,
+        initialIndex: index,
+      ),
+    );
+  }
+}
+
+@TypedGoRoute<ChapterBookmarkViewerRoute>(
+  path: '/bookmarks/chapter/:seriesId/:chapterId/:index',
+)
+class ChapterBookmarkViewerRoute extends GoRouteData
+    with $ChapterBookmarkViewerRoute {
+  final int seriesId;
+  final int chapterId;
+  final int index;
+
+  const ChapterBookmarkViewerRoute({
+    required this.seriesId,
+    required this.chapterId,
+    required this.index,
+  });
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return MaterialPage(
+      key: state.pageKey,
+      fullscreenDialog: true,
+      child: BookmarkViewerPage(
+        seriesId: seriesId,
+        chapterId: chapterId,
+        initialIndex: index,
+      ),
+    );
+  }
 }
 
 @TypedGoRoute<ReaderRoute>(path: '/reader/:seriesId')

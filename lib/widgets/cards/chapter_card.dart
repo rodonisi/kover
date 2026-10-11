@@ -12,14 +12,16 @@ import 'package:kover/widgets/context_menu/actions_menu.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
 class ChapterCard extends HookConsumerWidget {
+  final int chapterId;
+  final int seriesId;
+  final bool hideAction;
+
   const ChapterCard({
     super.key,
     required this.chapterId,
     required this.seriesId,
+    this.hideAction = false,
   });
-
-  final int chapterId;
-  final int seriesId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -74,13 +76,15 @@ class ChapterCard extends HookConsumerWidget {
             seriesId: seriesId,
             chapterId: chapterId,
           ).push(context),
-          onActionTap: () {
-            ReaderRoute(
-              seriesId: seriesId,
-              chapterId: chapterId,
-              readingListId: null,
-            ).push(context);
-          },
+          onActionTap: hideAction
+              ? null
+              : () {
+                  ReaderRoute(
+                    seriesId: seriesId,
+                    chapterId: chapterId,
+                    readingListId: null,
+                  ).push(context);
+                },
           actionDisabled: !canRead,
         ),
       ),

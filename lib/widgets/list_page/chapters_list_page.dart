@@ -10,6 +10,7 @@ class ChaptersListPage extends StatelessWidget {
   final TextEditingController controller;
   final AsyncValue<List<ChapterModel>> chapters;
   final Widget? sortMenu;
+  final bool hideAction;
 
   const new({
     super.key,
@@ -17,6 +18,7 @@ class ChaptersListPage extends StatelessWidget {
     required this.controller,
     required this.chapters,
     this.sortMenu,
+    this.hideAction = false,
   });
 
   @override
@@ -30,6 +32,7 @@ class ChaptersListPage extends StatelessWidget {
         key: ValueKey(chapter.id),
         chapterId: chapter.id,
         seriesId: chapter.seriesId,
+        hideAction: hideAction,
       ),
       listBuilder: (context, chapter) => ChapterListEntry(
         key: ValueKey(chapter.id),

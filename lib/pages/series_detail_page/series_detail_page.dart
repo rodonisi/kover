@@ -4,9 +4,11 @@ import 'package:kover/pages/series_detail_page/carousel_tile.dart';
 import 'package:kover/pages/series_detail_page/sliver_metadata_display.dart';
 import 'package:kover/pages/series_detail_page/series_app_bar.dart';
 import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
+import 'package:kover/riverpod/providers/bookmark.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/widgets/cards/bookmark_preview_card.dart';
 import 'package:kover/widgets/cards/chapter_card.dart';
 import 'package:kover/widgets/cards/volume_card.dart';
 import 'package:kover/widgets/details/metadata_sections.dart';
@@ -63,6 +65,8 @@ class _SliverCarouselTiles extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final details = ref.watch(seriesDetailProvider(seriesId: seriesId));
+    final bookmarks =
+        ref.watch(bookmarksProvider(seriesId: seriesId)).value ?? const [];
 
     return AsyncSliver(
       asyncValue: details,
@@ -140,6 +144,23 @@ class _SliverCarouselTiles extends ConsumerWidget {
                       ),
                     );
                   },
+                ),
+              if (bookmarks.isNotEmpty)
+                CarouselTile(
+                  title: '${l.bookmarks} (${bookmarks.length})',
+                  onTap: () =>
+                      SeriesBookmarksRoute(seriesId: seriesId).push(context),
+                  listItemCount: bookmarks.length,
+                  listItemBuilder: (context, index) => AspectRatio(
+                    aspectRatio: LayoutConstants.bookmarkCardAspectRatio,
+                    child: BookmarkPreviewCard(
+                      bookmark: bookmarks[index],
+                      onTap: () => SeriesBookmarkViewerRoute(
+                        seriesId: seriesId,
+                        index: index,
+                      ).push(context),
+                    ),
+                  ),
                 ),
             ],
           ),

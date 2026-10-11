@@ -32,6 +32,7 @@ sealed class LayoutConstants {
 
   static const double chapterCardAspectRatio = 3 / 5;
   static const double coverAspectRatio = 2 / 3;
+  static const double bookmarkCardAspectRatio = 2 / 3;
   static const double carouselHeight = 200.0;
   static const double compactCardHeight = 250.0;
   static const double expandedCardHeight = 300.0;

@@ -1,11 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kover/api/openapi.swagger.dart'
-    hide AgeRating, PublicationStatus;
+import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/dao/bookmark_dao.dart';
-import 'package:kover/models/enums/age_rating.dart';
-import 'package:kover/models/enums/format.dart';
-import 'package:kover/models/enums/publication_status.dart';
 import 'package:kover/riverpod/repository/bookmark_repository.dart';
 import 'package:kover/sync/bookmark_sync_operations.dart';
 import 'package:mockito/annotations.dart';
@@ -32,25 +28,38 @@ void main() {
     repo = BookmarkRepository(mockDb, mockClient);
   });
 
-  test('addBookmark pushes and clears dirty on success', () async {
-    final stored = BookmarkData(
-      id: 1,
+  BookmarkData storedBookmark({
+    int id = 1,
+    int? serverId,
+    int page = 2,
+    int imageOffset = 0,
+    String? xPath,
+    bool dirty = false,
+    bool removed = false,
+  }) {
+    return BookmarkData(
+      id: id,
+      serverId: serverId,
       seriesId: 1,
       volumeId: 1,
       chapterId: 1,
-      page: 2,
-      imageOffset: -1,
-      xPath: '',
+      page: page,
+      imageOffset: imageOffset,
+      xPath: xPath,
       created: DateTime(2026),
-      dirty: true,
-      removed: false,
+      dirty: dirty,
+      removed: removed,
     );
-    when(mockDao.upsertByNaturalKey(any)).thenAnswer((_) async => stored);
+  }
+
+  test('addBookmark pushes and clears dirty on success', () async {
+    final stored = storedBookmark(dirty: true);
+    when(mockDao.upsert(any)).thenAnswer((_) async => stored);
     when(mockClient.add(any)).thenAnswer((_) async {});
 
     await repo.addBookmark(seriesId: 1, volumeId: 1, chapterId: 1, page: 2);
 
-    verify(mockDao.upsertByNaturalKey(any)).called(1);
+    verify(mockDao.upsert(any)).called(1);
     verify(mockClient.add(any)).called(1);
     verify(mockDao.clearDirtyFlags([1])).called(1);
   });
@@ -58,20 +67,9 @@ void main() {
   test(
     'removeBookmark hard-deletes a never-synced row without server call',
     () async {
-      final stored = BookmarkData(
-        id: 1,
-        seriesId: 1,
-        volumeId: 1,
-        chapterId: 1,
-        page: 2,
-        imageOffset: -1,
-        xPath: '',
-        created: DateTime(2026),
-        dirty: true,
-        removed: false,
-      );
+      final stored = storedBookmark(dirty: true);
       when(
-        mockDao.getByLocation(chapterId: 1, page: 2, imageOffset: -1),
+        mockDao.getBookmark(chapterId: 1, page: 2, imageOffset: 0),
       ).thenAnswer((_) async => stored);
 
       await repo.removeBookmark(chapterId: 1, page: 2);
@@ -82,25 +80,9 @@ void main() {
   );
 
   test('removeBookmark tombstones a synced row and pushes', () async {
-    final stored = BookmarkData(
-      id: 1,
-      serverId: 9,
-      seriesId: 1,
-      volumeId: 1,
-      chapterId: 1,
-      page: 2,
-      imageOffset: -1,
-      xPath: '',
-      created: DateTime(2026),
-      dirty: false,
-      removed: false,
-    );
+    final stored = storedBookmark(serverId: 9);
     when(
-      mockDao.getByLocation(
-        chapterId: 1,
-        page: 2,
-        imageOffset: -1,
-      ),
+      mockDao.getBookmark(chapterId: 1, page: 2, imageOffset: 0),
     ).thenAnswer((_) async => stored);
     when(mockClient.remove(any)).thenAnswer((_) async {});
 
@@ -111,67 +93,27 @@ void main() {
     verify(mockDao.deleteByIds([1])).called(1);
   });
 
-  test(
-    're-add after pending removal reuses the row and pushes an add',
-    () async {
-      final tombstone = BookmarkData(
-        id: 1,
-        serverId: 9,
-        seriesId: 1,
-        volumeId: 1,
-        chapterId: 1,
-        page: 2,
-        imageOffset: -1,
-        xPath: '',
-        created: DateTime(2026),
-        dirty: true,
-        removed: true,
-      );
-      when(
-        mockDao.getByLocation(
-          chapterId: 1,
-          page: 2,
-          imageOffset: -1,
-        ),
-      ).thenAnswer((_) async => tombstone);
-      final reused = tombstone.copyWith(dirty: true, removed: false);
-      when(mockDao.updateById(1, any)).thenAnswer((_) async => reused);
-      when(mockClient.add(any)).thenAnswer((_) async {});
+  test('removeBookmark failed push leaves tombstone intact', () async {
+    final stored = storedBookmark(serverId: 9);
+    when(
+      mockDao.getBookmark(chapterId: 1, page: 2, imageOffset: 0),
+    ).thenAnswer((_) async => stored);
+    when(mockClient.remove(any)).thenThrow(Exception('boom'));
 
-      await repo.addBookmark(seriesId: 1, volumeId: 1, chapterId: 1, page: 2);
+    await repo.removeBookmark(chapterId: 1, page: 2);
 
-      verify(mockDao.updateById(1, any)).called(1);
-      verifyNever(mockDao.upsertByNaturalKey(any));
-      verify(mockClient.add(any)).called(1);
-      verifyNever(mockClient.remove(any));
-    },
-  );
+    verify(mockDao.markRemoved(1)).called(1);
+    verifyNever(mockDao.deleteByIds(any));
+  });
 
   test(
     'mergeBookmarks pushes dirty adds and removes then deletes tombstones',
     () async {
-      final toAdd = BookmarkData(
-        id: 1,
-        seriesId: 1,
-        volumeId: 1,
-        chapterId: 1,
-        page: 2,
-        imageOffset: -1,
-        xPath: '',
-        created: DateTime(2026),
-        dirty: true,
-        removed: false,
-      );
-      final toRemove = BookmarkData(
+      final toAdd = storedBookmark(dirty: true);
+      final toRemove = storedBookmark(
         id: 2,
         serverId: 5,
-        seriesId: 1,
-        volumeId: 1,
-        chapterId: 1,
         page: 3,
-        imageOffset: -1,
-        xPath: '',
-        created: DateTime(2026),
         dirty: true,
         removed: true,
       );
@@ -211,29 +153,18 @@ void main() {
         ],
       );
       when(mockDao.getExistingChapterIds()).thenAnswer((_) async => [1]);
+      when(mockDao.getBookmarks()).thenAnswer((_) async => []);
 
       await repo.refreshAllBookmarks();
 
-      final captured = verify(mockDao.upsertByNaturalKey(captureAny)).captured;
+      final captured = verify(mockDao.upsert(captureAny)).captured;
       expect(captured, hasLength(1));
       expect((captured.single as BookmarksCompanion).chapterId.value, 1);
     },
   );
 
   test('refreshAllBookmarks does not resurrect a dirty local row', () async {
-    final tombstone = BookmarkData(
-      id: 1,
-      serverId: 9,
-      seriesId: 1,
-      volumeId: 1,
-      chapterId: 1,
-      page: 2,
-      imageOffset: -1,
-      xPath: '',
-      created: DateTime(2026),
-      dirty: true,
-      removed: true,
-    );
+    final tombstone = storedBookmark(serverId: 9, dirty: true, removed: true);
     when(mockClient.getAllBookmarks()).thenAnswer(
       (_) async => [
         const BookmarkDto(
@@ -247,225 +178,19 @@ void main() {
     );
     when(mockDao.getExistingChapterIds()).thenAnswer((_) async => [1]);
     when(
-      mockDao.getByLocation(
-        chapterId: 1,
-        page: 2,
-        imageOffset: -1,
-      ),
+      mockDao.getBookmark(chapterId: 1, page: 2, imageOffset: 0),
     ).thenAnswer((_) async => tombstone);
+    when(mockDao.getBookmarks()).thenAnswer((_) async => []);
 
     await repo.refreshAllBookmarks();
 
-    verifyNever(mockDao.upsertByNaturalKey(any));
+    verifyNever(mockDao.upsert(any));
   });
-
-  test(
-    'removeBookmark after successful add pushes remove then deletes',
-    () async {
-      final stored = BookmarkData(
-        id: 1,
-        seriesId: 1,
-        volumeId: 1,
-        chapterId: 1,
-        page: 2,
-        imageOffset: -1,
-        xPath: '',
-        created: DateTime(2026),
-        dirty: false,
-        removed: false,
-      );
-      when(
-        mockDao.getByLocation(
-          chapterId: 1,
-          page: 2,
-          imageOffset: -1,
-        ),
-      ).thenAnswer((_) async => stored);
-      when(mockClient.remove(any)).thenAnswer((_) async {});
-
-      await repo.removeBookmark(chapterId: 1, page: 2);
-
-      verify(mockClient.remove(any)).called(1);
-      verify(mockDao.deleteByIds([1])).called(1);
-    },
-  );
-
-  test('watchBookmarkedSeries maps database rows to models', () async {
-    when(mockDao.watchBookmarkedSeries()).thenAnswer(
-      (_) => Stream.value([
-        SeriesData(
-          id: 1,
-          libraryId: 1,
-          name: 'S',
-          format: Format.epub,
-          pages: 0,
-          wordCount: 0,
-          isBlacklisted: false,
-          isRecentlyAdded: false,
-          isRecentlyUpdated: false,
-          created: DateTime(2026),
-        ),
-      ]),
-    );
-
-    final list = await repo.watchBookmarkedSeries().first;
-
-    expect(list, hasLength(1));
-    expect(list.single.name, 'S');
-  });
-
-  test('watchBookmarkedChapters maps rows and forwards filters', () async {
-    when(
-      mockDao.watchBookmarkedChapters(seriesId: 1, volumeId: 2),
-    ).thenAnswer(
-      (_) => Stream.value([
-        Chapter(
-          id: 3,
-          volumeId: 2,
-          seriesId: 1,
-          format: Format.epub,
-          minNumber: 0,
-          maxNumber: 0,
-          sortOrder: 0,
-          pages: 10,
-          wordCount: 0,
-          ageRating: AgeRating.unknown,
-          publicationStatus: PublicationStatus.unknown,
-          isSpecial: false,
-          isStoryline: false,
-          releaseDate: DateTime(2026),
-          totalReads: 0,
-          created: DateTime(2026),
-          lastModified: DateTime(2026),
-        ),
-      ]),
-    );
-
-    final list = await repo
-        .watchBookmarkedChapters(seriesId: 1, volumeId: 2)
-        .first;
-
-    expect(list, hasLength(1));
-    expect(list.single.id, 3);
-    verify(mockDao.watchBookmarkedChapters(seriesId: 1, volumeId: 2)).called(1);
-  });
-
-  test('removeBookmark failed push leaves tombstone intact', () async {
-    final stored = BookmarkData(
-      id: 1,
-      serverId: 9,
-      seriesId: 1,
-      volumeId: 1,
-      chapterId: 1,
-      page: 2,
-      imageOffset: -1,
-      xPath: '',
-      created: DateTime(2026),
-      dirty: false,
-      removed: false,
-    );
-    when(
-      mockDao.getByLocation(
-        chapterId: 1,
-        page: 2,
-        imageOffset: -1,
-      ),
-    ).thenAnswer((_) async => stored);
-    when(mockClient.remove(any)).thenThrow(Exception('boom'));
-
-    await repo.removeBookmark(chapterId: 1, page: 2);
-
-    verify(mockDao.markRemoved(1)).called(1);
-    verifyNever(mockDao.deleteByIds(any));
-  });
-
-  test(
-    'addBookmark updates the existing row in place when xPath changes',
-    () async {
-      final existing = BookmarkData(
-        id: 5,
-        serverId: 9,
-        seriesId: 1,
-        volumeId: 1,
-        chapterId: 1,
-        page: 2,
-        imageOffset: -1,
-        xPath: 'xpath-A',
-        created: DateTime(2026),
-        dirty: false,
-        removed: false,
-      );
-      final updated = existing.copyWith(xPath: 'xpath-B', dirty: true);
-      when(
-        mockDao.getByLocation(chapterId: 1, page: 2, imageOffset: -1),
-      ).thenAnswer((_) async => existing);
-      when(mockDao.updateById(5, any)).thenAnswer((_) async => updated);
-      when(mockClient.add(any)).thenAnswer((_) async {});
-
-      await repo.addBookmark(
-        seriesId: 1,
-        volumeId: 1,
-        chapterId: 1,
-        page: 2,
-        xPath: 'xpath-B',
-      );
-
-      verify(mockDao.updateById(5, any)).called(1);
-      verifyNever(mockDao.upsertByNaturalKey(any));
-      verify(mockClient.add(any)).called(1);
-      verify(mockDao.clearDirtyFlags([5])).called(1);
-    },
-  );
-
-  test(
-    'removeBookmark matches by location and ignores a changed xPath',
-    () async {
-      final stored = BookmarkData(
-        id: 1,
-        serverId: 9,
-        seriesId: 1,
-        volumeId: 1,
-        chapterId: 1,
-        page: 2,
-        imageOffset: -1,
-        xPath: 'xpath-A',
-        created: DateTime(2026),
-        dirty: false,
-        removed: false,
-      );
-      when(
-        mockDao.getByLocation(chapterId: 1, page: 2, imageOffset: -1),
-      ).thenAnswer((_) async => stored);
-      when(mockClient.remove(any)).thenAnswer((_) async {});
-
-      // Same chapter/page/imageOffset, different (reflowed) xPath.
-      await repo.removeBookmark(chapterId: 1, page: 2, xPath: 'xpath-B');
-
-      verify(
-        mockDao.getByLocation(chapterId: 1, page: 2, imageOffset: -1),
-      ).called(1);
-      verify(mockDao.markRemoved(1)).called(1);
-      verify(mockClient.remove(any)).called(1);
-      verify(mockDao.deleteByIds([1])).called(1);
-    },
-  );
 
   test(
     'refreshAllBookmarks deletes clean local rows absent from remote',
     () async {
-      final stale = BookmarkData(
-        id: 7,
-        serverId: 7,
-        seriesId: 1,
-        volumeId: 1,
-        chapterId: 1,
-        page: 5,
-        imageOffset: -1,
-        xPath: '',
-        created: DateTime(2026),
-        dirty: false,
-        removed: false,
-      );
+      final stale = storedBookmark(id: 7, serverId: 7, page: 5);
       when(mockClient.getAllBookmarks()).thenAnswer(
         (_) async => [
           const BookmarkDto(
@@ -478,7 +203,7 @@ void main() {
         ],
       );
       when(mockDao.getExistingChapterIds()).thenAnswer((_) async => [1]);
-      when(mockDao.getLocalBookmarks()).thenAnswer((_) async => [stale]);
+      when(mockDao.getBookmarks()).thenAnswer((_) async => [stale]);
 
       await repo.refreshAllBookmarks();
 
@@ -489,36 +214,11 @@ void main() {
   test(
     'refreshAllBookmarks keeps dirty local rows absent from remote',
     () async {
-      final clean = BookmarkData(
-        id: 7,
-        serverId: 7,
-        seriesId: 1,
-        volumeId: 1,
-        chapterId: 1,
-        page: 5,
-        imageOffset: -1,
-        xPath: '',
-        created: DateTime(2026),
-        dirty: false,
-        removed: false,
-      );
-      final dirty = BookmarkData(
-        id: 8,
-        seriesId: 1,
-        volumeId: 1,
-        chapterId: 1,
-        page: 9,
-        imageOffset: -1,
-        xPath: '',
-        created: DateTime(2026),
-        dirty: true,
-        removed: false,
-      );
+      final clean = storedBookmark(id: 7, serverId: 7, page: 5);
+      final dirty = storedBookmark(id: 8, page: 9, dirty: true);
       when(mockClient.getAllBookmarks()).thenAnswer((_) async => []);
       when(mockDao.getExistingChapterIds()).thenAnswer((_) async => [1]);
-      when(
-        mockDao.getLocalBookmarks(),
-      ).thenAnswer((_) async => [clean, dirty]);
+      when(mockDao.getBookmarks()).thenAnswer((_) async => [clean, dirty]);
 
       await repo.refreshAllBookmarks();
 
@@ -526,4 +226,21 @@ void main() {
       verifyNever(mockDao.deleteByIds(argThat(contains(8))));
     },
   );
+
+  test('watchBookmarks maps rows and forwards the scope', () async {
+    when(
+      mockDao.watchBookmarks(seriesId: 1, volumeId: 2, chapterId: null),
+    ).thenAnswer(
+      (_) => Stream.value([storedBookmark(id: 3, page: 4)]),
+    );
+
+    final list = await repo.watchBookmarks(seriesId: 1, volumeId: 2).first;
+
+    expect(list, hasLength(1));
+    expect(list.single.id, 3);
+    expect(list.single.page, 4);
+    verify(
+      mockDao.watchBookmarks(seriesId: 1, volumeId: 2, chapterId: null),
+    ).called(1);
+  });
 }

@@ -4,9 +4,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/series_detail_page/carousel_tile.dart';
 import 'package:kover/pages/series_detail_page/volume_detail_page/volume_app_bar.dart';
+import 'package:kover/riverpod/providers/bookmark.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/volume.dart';
 import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/widgets/cards/bookmark_preview_card.dart';
 import 'package:kover/widgets/cards/chapter_card.dart';
 import 'package:kover/widgets/details/metadata_sections.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';
@@ -25,31 +27,62 @@ class VolumeDetailPage extends ConsumerWidget {
     final volume = ref.watch(volumeProvider(volumeId: volumeId)).value;
 
     if (volume == null) return const SizedBox.shrink();
-    final carousel = volume.chapters.isNotEmpty
-        ? SliverPadding(
+    final bookmarks =
+        ref.watch(bookmarksProvider(volumeId: volumeId)).value ?? const [];
+
+    final carousels = <Widget>[
+      if (volume.chapters.isNotEmpty)
+        CarouselTile(
+          title: '${l.chapters} (${volume.chapters.length})',
+          onTap: () => ChaptersRoute(
+            seriesId: volume.seriesId,
+            volumeId: volume.id,
+          ).push(context),
+          listItemCount: volume.chapters.length,
+          listItemBuilder: (context, index) {
+            final chapter = volume.chapters[index];
+            return AspectRatio(
+              aspectRatio: LayoutConstants.chapterCardAspectRatio,
+              child: ChapterCard(
+                seriesId: volume.seriesId,
+                chapterId: chapter.id,
+              ),
+            );
+          },
+        ),
+      if (bookmarks.isNotEmpty)
+        CarouselTile(
+          title: '${l.bookmarks} (${bookmarks.length})',
+          onTap: () => VolumeBookmarksRoute(
+            seriesId: volume.seriesId,
+            volumeId: volume.id,
+          ).push(context),
+          listItemCount: bookmarks.length,
+          listItemBuilder: (context, index) => AspectRatio(
+            aspectRatio: LayoutConstants.bookmarkCardAspectRatio,
+            child: BookmarkPreviewCard(
+              bookmark: bookmarks[index],
+              onTap: () => VolumeBookmarkViewerRoute(
+                seriesId: volume.seriesId,
+                volumeId: volume.id,
+                index: index,
+              ).push(context),
+            ),
+          ),
+        ),
+    ];
+
+    final carousel = carousels.isEmpty
+        ? null
+        : SliverPadding(
             padding: const .only(top: LayoutConstants.mediumPadding),
             sliver: SliverToBoxAdapter(
-              child: CarouselTile(
-                title: '${l.chapters} (${volume.chapters.length})',
-                onTap: () => ChaptersRoute(
-                  seriesId: volume.seriesId,
-                  volumeId: volume.id,
-                ).push(context),
-                listItemCount: volume.chapters.length,
-                listItemBuilder: (context, index) {
-                  final chapter = volume.chapters[index];
-                  return AspectRatio(
-                    aspectRatio: LayoutConstants.chapterCardAspectRatio,
-                    child: ChapterCard(
-                      seriesId: volume.seriesId,
-                      chapterId: chapter.id,
-                    ),
-                  );
-                },
+              child: Column(
+                spacing: LayoutConstants.smallPadding,
+                children: carousels,
               ),
             ),
-          )
-        : null;
+          );
 
     return Scaffold(
       body: MetadataScope(

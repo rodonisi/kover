@@ -7,6 +7,9 @@ import 'package:kover/utils/layout_constants.dart';
 class AdaptiveSliverGrid extends ConsumerWidget {
   final int itemCount;
   final int? rowCount;
+  final double childAspectRatio;
+  final double mainAxisSpacing;
+  final double crossAxisSpacing;
   final NullableIndexedWidgetBuilder builder;
   final void Function(int crossAxisCount)? onCrossAxisCountChanged;
 
@@ -15,6 +18,9 @@ class AdaptiveSliverGrid extends ConsumerWidget {
     required this.builder,
     required this.itemCount,
     this.rowCount,
+    this.childAspectRatio = LayoutConstants.chapterCardAspectRatio,
+    this.mainAxisSpacing = 0,
+    this.crossAxisSpacing = 0,
     this.onCrossAxisCountChanged,
   });
 
@@ -44,7 +50,9 @@ class AdaptiveSliverGrid extends ConsumerWidget {
         return SliverGrid(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            childAspectRatio: LayoutConstants.chapterCardAspectRatio,
+            childAspectRatio: childAspectRatio,
+            mainAxisSpacing: mainAxisSpacing,
+            crossAxisSpacing: crossAxisSpacing,
           ),
           delegate: SliverChildBuilderDelegate(
             builder,

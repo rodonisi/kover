@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/mapping/dto/bookmark_dto_mappings.dart';
+import 'package:kover/models/bookmark_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/bookmark_sync_operations.dart';
@@ -37,41 +38,20 @@ class BookmarkRepository(
     );
   }
 
-  //
-  // Stream<List<BookmarkModel>> watchChapterBookmarks(int chapterId) => _db
-  //     .bookmarkDao
-  //     .watchChapterBookmarks(chapterId)
-  //     .map((l) => l.map(BookmarkModel.fromDatabaseModel).toList());
-  //
-  // Stream<List<BookmarkModel>> watchVolumeBookmarks(int volumeId) => _db
-  //     .bookmarkDao
-  //     .watchVolumeBookmarks(volumeId)
-  //     .map((l) => l.map(BookmarkModel.fromDatabaseModel).toList());
-  //
-  // Stream<List<BookmarkModel>> watchSeriesBookmarks(int seriesId) => _db
-  //     .bookmarkDao
-  //     .watchSeriesBookmarks(seriesId)
-  //     .map((l) => l.map(BookmarkModel.fromDatabaseModel).toList());
-  //
-  // Stream<List<int>> watchChapterIdsWithBookmarks({
-  //   int? seriesId,
-  //   int? volumeId,
-  // }) => _db.bookmarkDao.watchChapterIdsWithBookmarks(
-  //   seriesId: seriesId,
-  //   volumeId: volumeId,
-  // );
-  //
-  // Stream<List<SeriesModel>> watchBookmarkedSeries() => _db.bookmarkDao
-  //     .watchBookmarkedSeries()
-  //     .map((l) => l.map(SeriesModel.fromDatabaseModel).toList());
-  //
-  // Stream<List<ChapterModel>> watchBookmarkedChapters({
-  //   int? seriesId,
-  //   int? volumeId,
-  // }) => _db.bookmarkDao
-  //     .watchBookmarkedChapters(seriesId: seriesId, volumeId: volumeId)
-  //     .map((l) => l.map(ChapterModel.fromDatabaseModel).toList());
-  //
+  /// Every non-removed image bookmark in the given scope, ordered by chapter
+  /// sort order then page.
+  Stream<List<BookmarkModel>> watchBookmarks({
+    int? seriesId,
+    int? volumeId,
+    int? chapterId,
+  }) => _db.bookmarkDao
+      .watchBookmarks(
+        seriesId: seriesId,
+        volumeId: volumeId,
+        chapterId: chapterId,
+      )
+      .map((l) => l.map(BookmarkModel.fromDatabaseModel).toList());
+
   Future<void> addBookmark({
     required int seriesId,
     required int volumeId,
@@ -80,39 +60,6 @@ class BookmarkRepository(
     int imageOffset = 0,
     String? xPath,
   }) async {
-    // final existing = await _db.bookmarkDao.getBookmark(
-    //   chapterId: chapterId,
-    //   page: page,
-    //   imageOffset: imageOffset,
-    //   xPath: xPath,
-    // );
-    //
-    // final BookmarkData stored;
-    // if (existing != null) {
-    //   stored = await _db.bookmarkDao.updateById(
-    //     existing.id,
-    //     BookmarksCompanion(
-    //       seriesId: Value(seriesId),
-    //       volumeId: Value(volumeId),
-    //       xPath: Value(xPath),
-    //       dirty: const Value(true),
-    //       removed: const Value(false),
-    //     ),
-    //   );
-    // } else {
-    //   stored = await _db.bookmarkDao.upsertByNaturalKey(
-    //     BookmarksCompanion.insert(
-    //       seriesId: seriesId,
-    //       volumeId: volumeId,
-    //       chapterId: chapterId,
-    //       page: page,
-    //       imageOffset: Value(imageOffset),
-    //       xPath: Value(xPath),
-    //       dirty: const Value(true),
-    //       removed: const Value(false),
-    //     ),
-    //   );
-    // }
     final stored = await _db.bookmarkDao.upsert(
       BookmarksCompanion(
         seriesId: Value(seriesId),
@@ -134,6 +81,12 @@ class BookmarkRepository(
     }
   }
 
+  /// Removes the bookmark for [page] of [chapterId], if it exists. If the
+  /// bookmark has never been successfully pushed to the server, it is
+  /// hard-deleted. If it has been pushed, it is marked as removed and a
+  /// request is sent to the server to remove it. If the server request fails,
+  /// the bookmark remains marked as removed and will be retried on the next
+  /// sync.
   Future<void> removeBookmark({
     required int chapterId,
     required int page,
@@ -175,6 +128,11 @@ class BookmarkRepository(
     }
   }
 
+  /// Merges all dirty bookmarks with the server. Dirty bookmarks are those that
+  /// have been added or removed locally but not yet successfully pushed to the
+  /// server. If a dirty bookmark is successfully pushed, its dirty flag is
+  /// cleared. If a dirty bookmark is marked as removed and successfully pushed,
+  /// it is hard-deleted locally.
   Future<void> mergeBookmarks() async {
     final dirty = await _db.bookmarkDao.getDirtyBookmarks();
     if (dirty.isEmpty) return;
@@ -199,6 +157,11 @@ class BookmarkRepository(
     if (added.isNotEmpty) await _db.bookmarkDao.clearDirtyFlags(added);
   }
 
+  /// Fetches all bookmarks from the server and merges them with the local
+  /// database. This is a full refresh that ensures the local state matches the
+  /// server state. It merges remote bookmarks into the local database and
+  /// deletes any local bookmarks that are not present on the server, as long
+  /// as they are not dirty (i.e., they have no unsynced changes).
   Future<void> refreshAllBookmarks() async {
     final remote = await _client.getAllBookmarks();
     await _mergeRemote(remote);
@@ -254,13 +217,6 @@ class BookmarkRepository(
         continue;
       }
       await _db.bookmarkDao.upsert(dto.toBookmarkCompanion());
-
-      //   // Update in place so the row id (and any dependent state) is preserved
-      //   // even when the remote `xPath` differs from the reflowed local value.
-      //   await _db.bookmarkDao.updateById(local.id, dto.toBookmarkCompanion());
-      // } else {
-      //   await _db.bookmarkDao.upsertByNaturalKey(dto.toBookmarkCompanion());
-      // }
     }
   }
 }
