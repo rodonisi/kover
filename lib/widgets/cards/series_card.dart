@@ -1,28 +1,35 @@
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/pages/home/on_deck_scope.dart';
-import 'package:kover/riverpod/managers/download_manager/download_manager.dart';
 import 'package:kover/riverpod/providers/download.dart';
-import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/series.dart';
-import 'package:kover/riverpod/providers/want_to_read.dart';
-import 'package:kover/riverpod/repository/series_repository.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/cards/cover_card.dart';
 import 'package:kover/widgets/cards/cover_image.dart';
 import 'package:kover/widgets/cards/download_status_icon.dart';
 import 'package:kover/widgets/cards/series_card_provider.dart';
-import 'package:kover/widgets/context_menu/actions_menu.dart';
+import 'package:kover/widgets/context_menu/series_actions_menu.dart';
 import 'package:kover/widgets/util/async_value.dart';
 
 class SeriesCard extends HookConsumerWidget {
   final int seriesId;
 
+  /// Overrides the default navigation to the series detail page.
+  final VoidCallback? onTap;
+
+  /// Hides the read action button.
+  final bool hideAction;
+
+  /// When set, adds a "Series details" entry to the context menu.
+  final VoidCallback? onViewDetails;
+
   const SeriesCard({
     super.key,
     required this.seriesId,
+    this.onTap,
+    this.hideAction = false,
+    this.onViewDetails,
   });
 
   @override
@@ -32,59 +39,15 @@ class SeriesCard extends HookConsumerWidget {
         .watch(seriesProgressProvider(seriesId: seriesId))
         .value;
 
-    final wantToRead = wantToReadProvider(seriesId: seriesId);
-    final isWantToRead = ref.watch(wantToRead).value ?? false;
-
-    final markReadProvider = markSeriesReadProvider(seriesId: seriesId);
-
-    final downloadProgress =
-        ref.watch(seriesDownloadProgressProvider(seriesId: seriesId)).value ??
-        0.0;
-
     final downloadStatus = ref.watch(
       seriesDownloadStatusProvider(seriesId: seriesId),
     );
 
     return Async(
       asyncValue: model,
-      data: (data) => ActionsContextMenu(
-        onMarkRead: () async {
-          await ref.read(markReadProvider.notifier).markRead();
-        },
-        onMarkUnread: () async {
-          await ref.read(markReadProvider.notifier).markUnread();
-        },
-        onAddWantToRead: isWantToRead
-            ? null
-            : () async {
-                await ref.read(wantToRead.notifier).add();
-              },
-        onRemoveWantToRead: isWantToRead
-            ? () async {
-                await ref.read(wantToRead.notifier).remove();
-              }
-            : null,
-        onRemoveOnDeck: OnDeckScope.of(context)
-            ? () async {
-                await ref
-                    .read(seriesRepositoryProvider)
-                    .removeFromOnDeck(seriesId: seriesId);
-              }
-            : null,
-        onDownload: downloadProgress < 1.0
-            ? () async {
-                await ref
-                    .read(downloadManagerProvider.notifier)
-                    .enqueueSeries(seriesId);
-              }
-            : null,
-        onRemoveDownload: downloadProgress > 0.0
-            ? () async {
-                await ref
-                    .read(downloadManagerProvider.notifier)
-                    .deleteSeries(seriesId);
-              }
-            : null,
+      data: (data) => SeriesActionsContextMenu(
+        seriesId: seriesId,
+        onViewDetails: onViewDetails,
         child: CoverCard(
           title: data.series.name,
           icon: Icon(
@@ -100,18 +63,20 @@ class SeriesCard extends HookConsumerWidget {
           progress: progress,
           coverImage: SeriesCoverImage(seriesId: seriesId),
           downloadStatusIcon: DownloadStatusIcon(status: downloadStatus.value),
-          onTap: () {
-            SeriesDetailRoute(
-              seriesId: seriesId,
-            ).push(context);
-          },
-          onActionTap: () {
-            ReaderRoute(
-              seriesId: seriesId,
-              chapterId: data.continuePoint.id,
-              readingListId: null,
-            ).push(context);
-          },
+          onTap:
+              onTap ??
+              () {
+                SeriesDetailRoute(seriesId: seriesId).push(context);
+              },
+          onActionTap: hideAction
+              ? null
+              : () {
+                  ReaderRoute(
+                    seriesId: seriesId,
+                    chapterId: data.continuePoint.id,
+                    readingListId: null,
+                  ).push(context);
+                },
           actionDisabled: !data.canRead,
         ),
       ),

@@ -1,4 +1,10 @@
 import 'package:drift/drift.dart';
+import 'package:kover/models/enums/format.dart';
+
+/// Matches chapter [format] values whose pages are single images and therefore
+/// support bookmarks.
+Expression<bool> isBookmarkableChapterFormat(Expression<String> format) =>
+    format.isIn([Format.image.name, Format.archive.name]);
 
 /// Build an OR of [columns] each containing [query].
 Expression<bool> containsAny(

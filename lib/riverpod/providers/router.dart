@@ -13,6 +13,7 @@ import 'package:kover/pages/series_page/series_page.dart';
 import 'package:kover/pages/smart_filter_page/smart_filter_page.dart';
 import 'package:kover/pages/bookmarks/bookmark_viewer_page.dart';
 import 'package:kover/pages/bookmarks/bookmarks_grid_page.dart';
+import 'package:kover/pages/bookmarks/bookmarks_page.dart';
 import 'package:kover/pages/reader/reader_page.dart';
 import 'package:kover/pages/series_detail_page/chapter_detail_page/chapter_detail_page.dart';
 import 'package:kover/pages/series_detail_page/chapters_page/chapters_page.dart';
@@ -124,6 +125,11 @@ GoRouter router(Ref ref) {
         ),
       ],
     ),
+    TypedStatefulShellBranch<BookmarksBranch>(
+      routes: [
+        TypedGoRoute<BookmarksRoute>(path: '/bookmarks'),
+      ],
+    ),
     TypedStatefulShellBranch<MenuBranch>(
       routes: [
         TypedGoRoute<MenuRoute>(
@@ -177,6 +183,10 @@ class ReadingListsBranch extends StatefulShellBranchData {
   const ReadingListsBranch();
 }
 
+class BookmarksBranch extends StatefulShellBranchData {
+  const BookmarksBranch();
+}
+
 class MenuBranch extends StatefulShellBranchData {
   const MenuBranch();
 }
@@ -209,6 +219,14 @@ class AllSeriesRoute extends GoRouteData with $AllSeriesRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const AllSeriesPage();
+}
+
+class BookmarksRoute extends GoRouteData with $BookmarksRoute {
+  const BookmarksRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const BookmarksPage();
 }
 
 class OnDeckRoute extends GoRouteData with $OnDeckRoute {

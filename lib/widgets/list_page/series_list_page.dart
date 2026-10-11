@@ -11,12 +11,24 @@ class SeriesListPage extends StatelessWidget {
   final AsyncValue<List<SeriesModel>> series;
   final Widget? sortMenu;
 
+  /// Hides the read action button on the grid cards.
+  final bool hideAction;
+
+  /// Overrides the default series tap navigation.
+  final void Function(SeriesModel series)? onSeriesTap;
+
+  /// Adds a "Series details" entry to each entry's context menu.
+  final void Function(SeriesModel series)? onViewDetails;
+
   const new({
     super.key,
     required this.title,
     required this.controller,
     required this.series,
     this.sortMenu,
+    this.hideAction = false,
+    this.onSeriesTap,
+    this.onViewDetails,
   });
 
   @override
@@ -26,10 +38,23 @@ class SeriesListPage extends StatelessWidget {
       filterController: controller,
       items: series,
       sortMenu: sortMenu,
-      gridBuilder: (context, series) =>
-          SeriesCard(key: ValueKey(series.id), seriesId: series.id),
-      listBuilder: (context, series) =>
-          SeriesListEntry(key: ValueKey(series.id), seriesId: series.id),
+      gridBuilder: (context, series) => SeriesCard(
+        key: ValueKey(series.id),
+        seriesId: series.id,
+        hideAction: hideAction,
+        onTap: onSeriesTap == null ? null : () => onSeriesTap!(series),
+        onViewDetails: onViewDetails == null
+            ? null
+            : () => onViewDetails!(series),
+      ),
+      listBuilder: (context, series) => SeriesListEntry(
+        key: ValueKey(series.id),
+        seriesId: series.id,
+        onTap: onSeriesTap == null ? null : () => onSeriesTap!(series),
+        onViewDetails: onViewDetails == null
+            ? null
+            : () => onViewDetails!(series),
+      ),
     );
   }
 }

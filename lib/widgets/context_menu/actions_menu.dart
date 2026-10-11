@@ -15,6 +15,7 @@ class ActionsContextMenu extends StatelessWidget {
   final VoidCallback? onRemoveDownload;
   final VoidCallback? onRefreshMetadata;
   final VoidCallback? onRefreshCovers;
+  final List<ContextMenuEntry> extraEntries;
   final Widget child;
 
   const ActionsContextMenu({
@@ -28,6 +29,7 @@ class ActionsContextMenu extends StatelessWidget {
     this.onRemoveDownload,
     this.onRefreshMetadata,
     this.onRefreshCovers,
+    this.extraEntries = const [],
     required this.child,
   });
 
@@ -45,6 +47,7 @@ class ActionsContextMenu extends StatelessWidget {
         onRemoveDownload: onRemoveDownload,
         onRefreshMetadata: onRefreshMetadata,
         onRefreshCovers: onRefreshCovers,
+        extraEntries: extraEntries,
       ),
       child: child,
     );
@@ -117,6 +120,7 @@ ContextMenu _getContextMenu({
   VoidCallback? onRemoveDownload,
   VoidCallback? onRefreshMetadata,
   VoidCallback? onRefreshCovers,
+  List<ContextMenuEntry> extraEntries = const [],
 }) {
   final wantToReadEntries = _wantToReadEntries(
     context: context,
@@ -150,6 +154,7 @@ ContextMenu _getContextMenu({
         removeOnDeckEntries,
         downloadEntries,
         refreshEntries,
+        extraEntries,
       ],
     ),
   );

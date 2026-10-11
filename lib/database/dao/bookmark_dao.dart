@@ -1,9 +1,9 @@
 import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
+import 'package:kover/database/dao/list_query_helpers.dart';
 import 'package:kover/database/tables/bookmarks.dart';
 import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/series.dart';
-import 'package:kover/models/enums/format.dart';
 
 part 'bookmark_dao.g.dart';
 
@@ -44,10 +44,7 @@ class BookmarkDao extends DatabaseAccessor<AppDatabase>
           innerJoin(chapters, chapters.id.equalsExp(bookmarks.chapterId)),
         ])..where(
           bookmarks.removed.equals(false) &
-              chapters.format.isIn([
-                Format.image.name,
-                Format.archive.name,
-              ]),
+              isBookmarkableChapterFormat(chapters.format),
         );
 
     if (seriesId != null) {

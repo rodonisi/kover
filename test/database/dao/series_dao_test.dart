@@ -64,6 +64,7 @@ void main() {
   Future<void> insertChapter(
     int id, {
     required int seriesId,
+    Format format = .epub,
   }) async {
     await database
         .into(database.chapters)
@@ -72,7 +73,7 @@ void main() {
             id: Value(id),
             volumeId: 0,
             seriesId: seriesId,
-            format: .epub,
+            format: format,
             minNumber: 0,
             maxNumber: 0,
             sortOrder: 0,
@@ -95,6 +96,25 @@ void main() {
             chapterId: chapterId,
             page: 0,
             data: Uint8List.fromList([]),
+          ),
+        );
+  }
+
+  Future<void> insertBookmark({
+    required int seriesId,
+    required int chapterId,
+    bool removed = false,
+  }) async {
+    await database
+        .into(database.bookmarks)
+        .insert(
+          BookmarksCompanion.insert(
+            seriesId: seriesId,
+            volumeId: 0,
+            chapterId: chapterId,
+            page: 0,
+            imageOffset: const Value(0),
+            removed: Value(removed),
           ),
         );
   }
@@ -212,6 +232,33 @@ void main() {
 
         await subscription.cancel();
       });
+    });
+
+    group('allSeries bookmarkedOnly', () {
+      test(
+        'returns only series with a non-removed bookmark on an image chapter',
+        () async {
+          await insertLibrary(1);
+
+          await insertSeries(1);
+          await insertSeries(2);
+          await insertSeries(3);
+
+          await insertChapter(10, seriesId: 1, format: .image);
+          await insertChapter(20, seriesId: 2, format: .epub);
+          await insertChapter(30, seriesId: 3, format: .image);
+
+          await insertBookmark(seriesId: 1, chapterId: 10);
+          await insertBookmark(seriesId: 2, chapterId: 20);
+          await insertBookmark(seriesId: 3, chapterId: 30, removed: true);
+
+          final result = await database.seriesDao
+              .allSeries(bookmarkedOnly: true)
+              .get();
+
+          expect(result.map((s) => s.id).toSet(), equals({1}));
+        },
+      );
     });
 
     group('watchOnDeck downloadedOnly', () {

@@ -31,6 +31,7 @@ Future<List<SeriesModel>> filterSeries(
   SortDirection direction = .ascending,
   bool hideRead = false,
   bool downloadedOnly = false,
+  bool bookmarkedOnly = false,
 }) async {
   final repo = ref.watch(seriesRepositoryProvider);
   final allSeries = await ref.watch(
@@ -41,6 +42,7 @@ Future<List<SeriesModel>> filterSeries(
       direction: direction,
       hideRead: hideRead,
       downloadedOnly: downloadedOnly,
+      bookmarkedOnly: bookmarkedOnly,
     ).future,
   );
 
@@ -56,6 +58,7 @@ Future<List<SeriesModel>> filterSeries(
     direction: direction,
     hideRead: hideRead,
     downloadedOnly: downloadedOnly,
+    bookmarkedOnly: bookmarkedOnly,
   );
 }
 
@@ -96,6 +99,7 @@ Stream<List<SeriesModel>> allSeries(
   SortDirection direction = .ascending,
   bool hideRead = false,
   bool downloadedOnly = false,
+  bool bookmarkedOnly = false,
 }) {
   final repo = ref.watch(seriesRepositoryProvider);
 
@@ -107,6 +111,7 @@ Stream<List<SeriesModel>> allSeries(
         direction: direction,
         hideRead: hideRead,
         downloadedOnly: downloadedOnly,
+        bookmarkedOnly: bookmarkedOnly,
       )
       .distinct();
 }

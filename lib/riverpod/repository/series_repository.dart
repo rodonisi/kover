@@ -74,6 +74,7 @@ class const SeriesRepository({
     SortDirection direction = .ascending,
     bool hideRead = false,
     bool downloadedOnly = false,
+    bool bookmarkedOnly = false,
   }) async {
     if (query.isEmpty) {
       return [];
@@ -87,6 +88,7 @@ class const SeriesRepository({
       direction: direction,
       hideRead: hideRead,
       downloadedOnly: downloadedOnly,
+      bookmarkedOnly: bookmarkedOnly,
     );
 
     return result.map(SeriesModel.fromDatabaseModel).toList();
@@ -178,6 +180,7 @@ class const SeriesRepository({
     SortDirection direction = .ascending,
     bool hideRead = false,
     bool downloadedOnly = false,
+    bool bookmarkedOnly = false,
   }) {
     return _db.seriesDao
         .allSeries(
@@ -187,6 +190,7 @@ class const SeriesRepository({
           direction: direction,
           hideRead: hideRead,
           downloadedOnly: downloadedOnly,
+          bookmarkedOnly: bookmarkedOnly,
         )
         .watch()
         .distinct()

@@ -13,6 +13,7 @@ extension NavbarDestinationsExtension on NavbarDestinations {
       .wantToRead => KoverIcons.wantToRead,
       .collections => KoverIcons.collection,
       .readingLists => KoverIcons.readingList,
+      .bookmarks => KoverIcons.bookmarked,
     };
   }
 
@@ -23,6 +24,7 @@ extension NavbarDestinationsExtension on NavbarDestinations {
       .wantToRead => l.wantToRead,
       .collections => l.collections,
       .readingLists => l.readingLists,
+      .bookmarks => l.bookmarks,
     };
   }
 
@@ -33,6 +35,7 @@ extension NavbarDestinationsExtension on NavbarDestinations {
       .wantToRead => const WantToReadRoute(),
       .collections => const CollectionsRoute(),
       .readingLists => const ReadingListsRoute(),
+      .bookmarks => const BookmarksRoute(),
     };
   }
 }

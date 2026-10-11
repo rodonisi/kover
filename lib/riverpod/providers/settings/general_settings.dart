@@ -16,7 +16,8 @@ enum NavbarDestinations {
   allSeries(1),
   wantToRead(2),
   collections(3),
-  readingLists(4);
+  readingLists(4),
+  bookmarks(5);
 
   const NavbarDestinations(this.value);
 
