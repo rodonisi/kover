@@ -29,6 +29,7 @@ import 'generated/schema_v10.dart' as v10;
 import 'generated/schema_v11.dart' as v11;
 import 'generated/schema_v12.dart' as v12;
 import 'generated/schema_v13.dart' as v13;
+import 'generated/schema_v14.dart' as v14;
 
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;

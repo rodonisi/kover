@@ -52,6 +52,10 @@ class BookmarkRepository(
       )
       .map((l) => l.map(BookmarkModel.fromDatabaseModel).toList());
 
+  /// Adds a bookmark for [page] of [chapterId]. If a bookmark already exists for
+  /// that page, it is updated. The bookmark is marked as dirty and a request is
+  /// sent to the server to add it. If the server request fails, the bookmark
+  /// remains dirty and will be retried on the next sync.
   Future<void> addBookmark({
     required int seriesId,
     required int volumeId,
@@ -73,11 +77,24 @@ class BookmarkRepository(
       ),
     );
 
+    log.debug(
+      'adding bookmark',
+      attributes: {
+        'series_id': seriesId,
+        'volume_id': volumeId,
+        'chapter_id': chapterId,
+        'page': page,
+        'image_offset': imageOffset,
+        'xpath': xPath,
+        'stored': stored,
+      },
+    );
+
     try {
       await _client.add(stored.toBookmarkDto());
       await _db.bookmarkDao.clearDirtyFlags([stored.id]);
-    } catch (e, stacktrace) {
-      log.error('could not add bookmark', error: e, stacktrace: stacktrace);
+    } catch (e) {
+      log.info('could not add bookmark', attributes: {'error': e});
     }
   }
 
@@ -93,7 +110,7 @@ class BookmarkRepository(
     int imageOffset = 0,
     String? xPath,
   }) async {
-    final existing = await _db.bookmarkDao.getBookmark(
+    final stored = await _db.bookmarkDao.getBookmark(
       chapterId: chapterId,
       page: page,
       imageOffset: imageOffset,
@@ -107,24 +124,24 @@ class BookmarkRepository(
         'page': page,
         'image_offset': imageOffset,
         'xpath': xPath,
-        'existing': existing,
+        'existing': stored,
       },
     );
 
-    if (existing == null) return;
+    if (stored == null) return;
 
-    if (existing.serverId == null && existing.dirty) {
+    if (stored.serverId == null && stored.dirty) {
       // Never successfully pushed: no server copy exists, safe to hard-delete.
-      await _db.bookmarkDao.deleteByIds([existing.id]);
+      await _db.bookmarkDao.deleteByIds([stored.id]);
       return;
     }
 
-    await _db.bookmarkDao.markRemoved(existing.id);
+    await _db.bookmarkDao.markRemoved(stored.id);
     try {
-      await _client.remove(existing.toBookmarkDto());
-      await _db.bookmarkDao.deleteByIds([existing.id]);
-    } catch (e, stacktrace) {
-      log.error('could not remove bookmark', error: e, stacktrace: stacktrace);
+      await _client.remove(stored.toBookmarkDto());
+      await _db.bookmarkDao.deleteByIds([stored.id]);
+    } catch (e) {
+      log.info('could not remove bookmark', attributes: {'error': e});
     }
   }
 

@@ -4,7 +4,9 @@ import 'package:kover/models/image_model.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/connectivity.dart';
 import 'package:kover/riverpod/providers/reader.dart';
+import 'package:kover/riverpod/providers/reader/image_spreads_reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
+import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/riverpod/repository/bookmark_repository.dart';
 import 'package:kover/riverpod/repository/chapters_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -29,6 +31,49 @@ Stream<bool> pageBookmarked(
       );
 }
 
+/// The pages that should be bookmarked for the currently visible view. In
+/// spread mode this is every page of the current spread, otherwise it is the
+/// single current page.
+@riverpod
+Future<List<int>> currentBookmarkPages(
+  Ref ref, {
+  required int seriesId,
+  required int chapterId,
+  required int? readingListId,
+}) async {
+  final nav = await ref.watch(
+    readerNavigationProvider(
+      seriesId: seriesId,
+      chapterId: chapterId,
+      readingListId: readingListId,
+    ).future,
+  );
+
+  final mode = await ref.watch(
+    imageReaderSettingsProvider(
+      seriesId: seriesId,
+    ).selectAsync((settings) => settings.readerMode),
+  );
+
+  if (mode != ReaderMode.spread) return [nav.currentPage];
+
+  final spreads = await ref.watch(
+    spreadsProvider(
+      seriesId: seriesId,
+      chapterId: chapterId,
+      readingListId: readingListId,
+    ).future,
+  );
+
+  final spreadIndex = spreads.spreads.indexWhere(
+    (spread) => spread.contains(nav.currentPage),
+  );
+
+  if (spreadIndex == -1) return [nav.currentPage];
+
+  return spreads.spreads[spreadIndex];
+}
+
 @riverpod
 class CurrentPageBookmark extends _$CurrentPageBookmark {
   @override
@@ -37,24 +82,31 @@ class CurrentPageBookmark extends _$CurrentPageBookmark {
     required int chapterId,
     required int? readingListId,
   }) async {
-    final nav = await ref.watch(
-      readerNavigationProvider(
+    final pages = await ref.watch(
+      currentBookmarkPagesProvider(
         seriesId: seriesId,
         chapterId: chapterId,
         readingListId: readingListId,
       ).future,
     );
-    return ref.watch(
-      pageBookmarkedProvider(
-        chapterId: chapterId,
-        page: nav.currentPage,
-      ).future,
+
+    final bookmarked = await Future.wait(
+      pages.map(
+        (page) => ref.watch(
+          pageBookmarkedProvider(
+            chapterId: chapterId,
+            page: page,
+          ).future,
+        ),
+      ),
     );
+
+    return bookmarked.every((bookmarked) => bookmarked);
   }
 
   Future<void> toggle() async {
-    final nav = await ref.read(
-      readerNavigationProvider(
+    final pages = await ref.read(
+      currentBookmarkPagesProvider(
         seriesId: seriesId,
         chapterId: chapterId,
         readingListId: readingListId,
@@ -62,17 +114,21 @@ class CurrentPageBookmark extends _$CurrentPageBookmark {
     );
     final repo = ref.read(bookmarkRepositoryProvider);
     if (await future) {
-      await repo.removeBookmark(chapterId: chapterId, page: nav.currentPage);
+      for (final page in pages) {
+        await repo.removeBookmark(chapterId: chapterId, page: page);
+      }
     } else {
       final chapter = await ref
           .read(chaptersRepositoryProvider)
           .getChapter(chapterId: chapterId);
-      await repo.addBookmark(
-        seriesId: chapter.seriesId,
-        volumeId: chapter.volumeId,
-        chapterId: chapterId,
-        page: nav.currentPage,
-      );
+      for (final page in pages) {
+        await repo.addBookmark(
+          seriesId: chapter.seriesId,
+          volumeId: chapter.volumeId,
+          chapterId: chapterId,
+          page: page,
+        );
+      }
     }
   }
 }
@@ -84,8 +140,6 @@ Future<ImageModel> bookmarkImage(Ref ref, BookmarkModel bookmark) {
     page: bookmark.page,
   );
 
-  // A failed page fetch is cached until the provider is disposed. Drop it when
-  // connectivity is regained so previews recover.
   ref.listen(hasConnectionProvider, (previous, next) {
     if (next.value ?? false) ref.invalidate(page);
   });
@@ -93,8 +147,6 @@ Future<ImageModel> bookmarkImage(Ref ref, BookmarkModel bookmark) {
   return ref.watch(page.future);
 }
 
-/// Every non-removed image bookmark in the given scope, ordered by chapter
-/// sort order then page.
 @riverpod
 Stream<List<BookmarkModel>> bookmarks(
   Ref ref, {
@@ -112,8 +164,6 @@ Stream<List<BookmarkModel>> bookmarks(
       .distinct(listEquals);
 }
 
-/// The subset of [bookmarks] whose chapter can currently be read, i.e. it is
-/// downloaded or there is connectivity. Non-fetchable bookmarks are excluded.
 @riverpod
 List<BookmarkModel> readableBookmarks(
   Ref ref, {

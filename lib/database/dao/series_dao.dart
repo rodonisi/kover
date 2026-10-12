@@ -3,6 +3,7 @@ import 'package:kover/database/app_database.dart';
 import 'package:kover/database/dao/chapters_dao.dart';
 import 'package:kover/database/dao/list_query_helpers.dart';
 import 'package:kover/database/dao/volumes_dao.dart';
+import 'package:kover/database/tables/bookmarks.dart';
 import 'package:kover/database/tables/chapters.dart';
 import 'package:kover/database/tables/download.dart';
 import 'package:kover/database/tables/libraries.dart';
@@ -40,6 +41,7 @@ part 'series_dao.g.dart';
     ChapterGenres,
     ChapterTags,
     DownloadedPages,
+    Bookmarks,
   ],
 )
 class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {

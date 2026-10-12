@@ -62,14 +62,16 @@ class BookmarkDao extends DatabaseAccessor<AppDatabase>
       OrderingTerm.asc(bookmarks.page),
     ]);
 
-    return q.watch().map(
-      (rows) => rows.map((row) => row.readTable(bookmarks)).toList(),
-    );
+    return q.map((r) => r.readTable(bookmarks)).watch();
   }
 
-  Future<List<BookmarkData>> getDirtyBookmarks() =>
-      (select(bookmarks)..where((b) => b.dirty.equals(true))).get();
+  /// Get every locally stored bookmark row that has been modified since the
+  /// last sync.
+  Future<List<BookmarkData>> getDirtyBookmarks() {
+    return (select(bookmarks)..where((b) => b.dirty.equals(true))).get();
+  }
 
+  /// Get the bookmark for [page] of [chapterId].
   Future<BookmarkData?> getBookmark({
     required int chapterId,
     required int page,
@@ -91,25 +93,31 @@ class BookmarkDao extends DatabaseAccessor<AppDatabase>
 
   /// Every locally stored, non-removed bookmark row, dirty and clean alike.
   /// Used to reconcile against the remote set during a full refresh.
-  Future<List<BookmarkData>> getBookmarks() =>
-      (select(bookmarks)..where((b) => b.removed.equals(false))).get();
+  Future<List<BookmarkData>> getBookmarks() {
+    return (select(bookmarks)..where((b) => b.removed.equals(false))).get();
+  }
 
+  /// Mark the bookmark with [id] as removed.
   Future<void> markRemoved(int id) {
     return (update(bookmarks)..where((b) => b.id.equals(id))).write(
       const BookmarksCompanion(dirty: Value(true), removed: Value(true)),
     );
   }
 
+  /// Delete the bookmarks with the given [ids] from the local database.
   Future<void> deleteByIds(Iterable<int> ids) async {
     await (delete(bookmarks)..where((b) => b.id.isIn(ids))).go();
   }
 
+  /// Mark the bookmarks with the given [ids] as clean, indicating that they have
+  /// been successfully synced with the server.
   Future<void> clearDirtyFlags(Iterable<int> ids) async {
     await (update(bookmarks)..where((b) => b.id.isIn(ids))).write(
       const BookmarksCompanion(dirty: Value(false)),
     );
   }
 
+  /// Add or update a bookmark entry.
   Future<BookmarkData> upsert(BookmarksCompanion entry) {
     return transaction(() async {
       final existing = await getBookmark(
@@ -129,6 +137,7 @@ class BookmarkDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
+  /// Get the IDs of all chapters that have at least one bookmark. This is used to
   Future<List<int>> getExistingChapterIds() async {
     final q = selectOnly(chapters, distinct: true)..addColumns([chapters.id]);
     return q.map((row) => row.read(chapters.id)!).get();

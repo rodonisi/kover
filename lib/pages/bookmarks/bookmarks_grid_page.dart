@@ -91,8 +91,6 @@ class BookmarksGridPage extends ConsumerWidget {
                   sliver: AdaptiveSliverGrid(
                     itemCount: items.length,
                     childAspectRatio: LayoutConstants.bookmarkCardAspectRatio,
-                    mainAxisSpacing: LayoutConstants.smallPadding,
-                    crossAxisSpacing: LayoutConstants.smallPadding,
                     builder: (context, index) => BookmarkPreviewCard(
                       bookmark: items[index],
                       onTap: () => openViewer(index),

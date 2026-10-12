@@ -11,7 +11,7 @@ class BookmarkModel({
   required final int volumeId,
   required final int chapterId,
   required final int page,
-  final int? imageOffset,
+  required final int imageOffset,
   final String? xPath,
   required final DateTime created,
 }) with _$BookmarkModel {
