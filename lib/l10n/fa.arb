@@ -947,5 +947,18 @@
     "startupLoadingMessage": "همه چیز در حال تنظیم است، لطفا صبر کنید...",
     "@startupLoadingMessage": {
         "description": "Message shown when the app is starting up and loading data"
-    }
+    },
+    "downloadedOnly": "فقط دانلود شده‌ها",
+    "@downloadedOnly": {
+        "description": "Label for the downloaded only filter option in lists"
+    },
+    "directionality": "جهت برنامه",
+    "@directionality": {
+        "description": "Label for the layout directionality setting, which determines the global ltr/rtl layout of the app"
+    },
+    "directionalityDescription": "تغییر جهت نمایش المان های برنامه بصورت راست چین یا چپ چین.",
+    "@directionalityDescription": {
+        "description": "Description for the layout directionality setting"
+    },
+    "localeDefault": "پیش‌فرض زبان"
 }
