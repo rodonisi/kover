@@ -9,7 +9,8 @@ import 'package:kover/pages/reader/image_reader/zoomable_horizontal_page_image.d
 import 'package:kover/pages/reader/overlay/overlay_gestures.dart';
 import 'package:kover/pages/reader/overlay/reader_shortcuts.dart';
 import 'package:kover/riverpod/providers/bookmark.dart';
-import 'package:kover/riverpod/providers/theme.dart';
+import 'package:kover/riverpod/providers/theme.dart' hide Theme;
+import 'package:kover/riverpod/repository/bookmark_repository.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
@@ -130,6 +131,30 @@ class _ViewerBody extends HookConsumerWidget {
       }
     }
 
+    void removeCurrentBookmark() {
+      final index = currentIndex();
+      if (index < 0 || index >= items.length) return;
+      final bookmark = items[index];
+      ref
+          .read(bookmarkRepositoryProvider)
+          .removeBookmark(
+            chapterId: bookmark.chapterId,
+            page: bookmark.page,
+            imageOffset: bookmark.imageOffset,
+            xPath: bookmark.xPath,
+          );
+    }
+
+    useEffect(() {
+      if (items.isEmpty || current.value < items.length) return null;
+      final last = items.length - 1;
+      current.value = last;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (controller.hasClients) controller.jumpToPage(last);
+      });
+      return null;
+    }, [items.length]);
+
     final physics =
         zoomedIndexes.value.contains(current.value) || pointerCount.value >= 2
         ? const NeverScrollableScrollPhysics()
@@ -162,7 +187,7 @@ class _ViewerBody extends HookConsumerWidget {
                   return Async(
                     asyncValue: ref.watch(bookmarkImageProvider(bookmark)),
                     data: (image) => ZoomableHorizontalPageImage(
-                      key: ValueKey(index),
+                      key: ValueKey(bookmark.id),
                       outerController: controller,
                       onZoomChanged: (zoomed) {
                         final next = {...zoomedIndexes.value};
@@ -192,8 +217,10 @@ class _ViewerBody extends HookConsumerWidget {
               alignment: .topCenter,
               child:
                   _ViewerHeader(
-                        position: '${current.value + 1} / ${items.length}',
+                        position:
+                            '${current.value.clamp(0, items.length - 1) + 1} / ${items.length}',
                         onClose: () => context.pop(),
+                        onRemoveBookmark: removeCurrentBookmark,
                       )
                       .animate(target: uiVisible.value ? 1.0 : 0.0)
                       .show(duration: 10.ms, maintain: false)
@@ -209,14 +236,18 @@ class _ViewerBody extends HookConsumerWidget {
 class _ViewerHeader extends StatelessWidget {
   final String position;
   final VoidCallback onClose;
+  final VoidCallback onRemoveBookmark;
 
   const _ViewerHeader({
     required this.position,
     required this.onClose,
+    required this.onRemoveBookmark,
   });
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+
     return SafeArea(
       child: Padding(
         padding: LayoutConstants.smallEdgeInsets,
@@ -227,7 +258,7 @@ class _ViewerHeader extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.black54,
                 borderRadius: BorderRadius.circular(
-                  LayoutConstants.mediumBorderRadius,
+                  LayoutConstants.largeBorderRadius,
                 ),
               ),
               child: IconButton(
@@ -240,7 +271,7 @@ class _ViewerHeader extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.black54,
                 borderRadius: BorderRadius.circular(
-                  LayoutConstants.smallBorderRadius,
+                  LayoutConstants.mediumBorderRadius,
                 ),
               ),
               child: Padding(
@@ -248,9 +279,19 @@ class _ViewerHeader extends StatelessWidget {
                   horizontal: LayoutConstants.smallPadding,
                   vertical: LayoutConstants.smallerPadding,
                 ),
-                child: Text(
-                  position,
-                  style: const TextStyle(color: Colors.white),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(KoverIcons.bookmarkOn),
+                      color: Theme.of(context).colorScheme.primary,
+                      tooltip: l.removeBookmark,
+                      onPressed: onRemoveBookmark,
+                    ),
+                    Text(
+                      position,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ],
                 ),
               ),
             ),

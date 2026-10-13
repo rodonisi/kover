@@ -332,6 +332,10 @@
     "@goToSeries": {
         "description": "Label for the go to series button in the reading list chapter entry context menu"
     },
+    "goToVolume": "Go to Volume",
+    "@goToVolume": {
+        "description": "Label for the go to volume button in context menus"
+    },
     "markAsRead": "Mark as Read",
     "@markAsRead": {
         "description": "Label for the mark as read button in context menus"

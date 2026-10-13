@@ -77,6 +77,7 @@ sealed class KoverIcons {
   // Library entities
   static const IconData series = LucideIcons.list;
   static const IconData chapter = LucideIcons.fileText;
+  static const IconData volume = LucideIcons.book;
   static const IconData collection = LucideIcons.layoutGrid;
   static const IconData readingList = LucideIcons.layoutList;
   static const IconData book = LucideIcons.bookText;

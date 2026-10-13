@@ -86,6 +86,7 @@ class _ChapterBookmarkCarousel extends ConsumerWidget {
           aspectRatio: LayoutConstants.bookmarkCardAspectRatio,
           child: BookmarkPreviewCard(
             bookmark: bookmark,
+            showGoToChapter: false,
             onTap: () => ChapterBookmarkViewerRoute(
               seriesId: seriesId,
               chapterId: chapterId,

@@ -155,6 +155,7 @@ class _SliverCarouselTiles extends ConsumerWidget {
                     aspectRatio: LayoutConstants.bookmarkCardAspectRatio,
                     child: BookmarkPreviewCard(
                       bookmark: bookmarks[index],
+                      showGoToSeries: false,
                       onTap: () => SeriesBookmarkViewerRoute(
                         seriesId: seriesId,
                         index: index,

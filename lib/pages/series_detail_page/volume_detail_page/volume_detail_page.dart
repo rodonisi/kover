@@ -62,6 +62,7 @@ class VolumeDetailPage extends ConsumerWidget {
             aspectRatio: LayoutConstants.bookmarkCardAspectRatio,
             child: BookmarkPreviewCard(
               bookmark: bookmarks[index],
+              showGoToVolume: false,
               onTap: () => VolumeBookmarkViewerRoute(
                 seriesId: volume.seriesId,
                 volumeId: volume.id,
