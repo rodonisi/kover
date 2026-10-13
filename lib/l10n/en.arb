@@ -1024,9 +1024,5 @@
     "removeBookmark": "Remove bookmark",
     "@removeBookmark": {
         "description": "Tooltip for removing a bookmark"
-    },
-    "seriesDetails": "Series details",
-    "@seriesDetails": {
-        "description": "Context menu entry that opens the series detail page"
     }
 }

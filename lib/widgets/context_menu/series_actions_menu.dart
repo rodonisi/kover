@@ -79,7 +79,7 @@ class SeriesActionsContextMenu extends ConsumerWidget {
       extraEntries: [
         if (onViewDetails != null)
           MenuItem(
-            label: Text(l.seriesDetails),
+            label: Text(l.goToSeries),
             icon: const Icon(KoverIcons.series),
             onSelected: (_) => onViewDetails!(),
           ),
