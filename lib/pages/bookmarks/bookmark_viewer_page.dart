@@ -59,30 +59,29 @@ class BookmarkViewerPage extends ConsumerWidget {
       ),
     );
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Async(
-        asyncValue: all,
-        data: (items) {
-          if (readable.isEmpty) {
-            return _ViewerEmpty(onClose: () => context.pop());
-          }
-
-          final tapped = initialIndex < items.length
-              ? items[initialIndex]
-              : null;
-          final initial = tapped == null
-              ? 0
-              : readable.indexOf(tapped).clamp(0, readable.length - 1);
-
-          return _ViewerBody(
-            seriesId: seriesId,
-            bookmarks: readable,
-            initialIndex: initial,
-            reduceAnimations: reduceAnimations,
-          );
-        },
+    return Async(
+      asyncValue: all,
+      loading: () => const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
       ),
+      data: (items) {
+        if (readable.isEmpty) {
+          return const _ViewerEmpty();
+        }
+
+        final tapped = initialIndex < items.length ? items[initialIndex] : null;
+        final initial = tapped == null
+            ? 0
+            : readable.indexOf(tapped).clamp(0, readable.length - 1);
+
+        return _ViewerBody(
+          seriesId: seriesId,
+          bookmarks: readable,
+          initialIndex: initial,
+          reduceAnimations: reduceAnimations,
+        );
+      },
     );
   }
 }
@@ -102,12 +101,13 @@ class _ViewerBody extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final items = bookmarks;
     final controller = usePageController(initialPage: initialIndex);
     final current = useState(initialIndex);
     final zoomedIndexes = useState(<int>{});
     final pointerCount = useState(0);
-    final uiVisible = useState(true);
+    final uiVisible = useState(false);
 
     final overlayFadeDuration = reduceAnimations
         ? Duration.zero
@@ -160,142 +160,95 @@ class _ViewerBody extends HookConsumerWidget {
         ? const NeverScrollableScrollPhysics()
         : const BouncingScrollPhysics();
 
-    return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.escape): () => context.pop(),
-      },
-      child: ReaderShortcuts(
-        onNextPage: () => goTo(currentIndex() + 1),
-        onPreviousPage: () => goTo(currentIndex() - 1),
-        child: Stack(
-          children: [
-            Listener(
-              onPointerDown: (_) => pointerCount.value++,
-              onPointerUp: (_) =>
-                  pointerCount.value = (pointerCount.value - 1).clamp(0, 10),
-              onPointerCancel: (_) =>
-                  pointerCount.value = (pointerCount.value - 1).clamp(0, 10),
-              child: PageView.builder(
-                controller: controller,
-                allowImplicitScrolling: true,
-                pageSnapping: true,
-                itemCount: items.length,
-                physics: physics,
-                onPageChanged: (index) => current.value = index,
-                itemBuilder: (context, index) {
-                  final bookmark = items[index];
-                  return Async(
-                    asyncValue: ref.watch(bookmarkImageProvider(bookmark)),
-                    data: (image) => ZoomableHorizontalPageImage(
-                      key: ValueKey(bookmark.id),
-                      outerController: controller,
-                      onZoomChanged: (zoomed) {
-                        final next = {...zoomedIndexes.value};
-                        zoomed ? next.add(index) : next.remove(index);
-                        zoomedIndexes.value = next;
-                      },
-                      child: Image.memory(
-                        image.data,
-                        fit: BoxFit.contain,
-                        gaplessPlayback: true,
-                      ),
+    final position =
+        '${current.value.clamp(0, items.length - 1) + 1} / ${items.length}';
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: IgnorePointer(
+          ignoring: !uiVisible.value,
+          child:
+              AppBar(
+                    actionsPadding: const EdgeInsets.symmetric(
+                      horizontal: LayoutConstants.mediumPadding,
                     ),
-                  );
-                },
-              ),
-            ),
-            Positioned.fill(
-              child: OverlayGestures(
-                seriesId: seriesId,
-                disableGestures: zoomedIndexes.value.contains(current.value),
-                onLeftTap: () => goTo(currentIndex() - 1),
-                onRightTap: () => goTo(currentIndex() + 1),
-                onCenterTap: () => uiVisible.value = !uiVisible.value,
-              ),
-            ),
-            Align(
-              alignment: .topCenter,
-              child:
-                  _ViewerHeader(
-                        position:
-                            '${current.value.clamp(0, items.length - 1) + 1} / ${items.length}',
-                        onClose: () => context.pop(),
-                        onRemoveBookmark: removeCurrentBookmark,
-                      )
-                      .animate(target: uiVisible.value ? 1.0 : 0.0)
-                      .show(duration: 10.ms, maintain: false)
-                      .fadeIn(duration: overlayFadeDuration),
-            ),
-          ],
+                    actions: [
+                      IconButton(
+                        icon: const Icon(KoverIcons.bookmarkOn),
+                        color: Theme.of(context).colorScheme.primary,
+                        tooltip: l.removeBookmark,
+                        onPressed: removeCurrentBookmark,
+                      ),
+                      Center(child: Text(position)),
+                    ],
+                  )
+                  .animate(
+                    target: uiVisible.value ? 1.0 : 0.0,
+                  )
+                  .fade(
+                    duration: overlayFadeDuration,
+                    curve: Curves.easeInOut,
+                  ),
         ),
       ),
-    );
-  }
-}
-
-class _ViewerHeader extends StatelessWidget {
-  final String position;
-  final VoidCallback onClose;
-  final VoidCallback onRemoveBookmark;
-
-  const _ViewerHeader({
-    required this.position,
-    required this.onClose,
-    required this.onRemoveBookmark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-
-    return SafeArea(
-      child: Padding(
-        padding: LayoutConstants.smallEdgeInsets,
-        child: Row(
-          mainAxisAlignment: .spaceBetween,
-          children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(
-                  LayoutConstants.largeBorderRadius,
+      body: CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.escape): () => context.pop(),
+        },
+        child: ReaderShortcuts(
+          onNextPage: () => goTo(currentIndex() + 1),
+          onPreviousPage: () => goTo(currentIndex() - 1),
+          child: Stack(
+            children: [
+              Listener(
+                onPointerDown: (_) => pointerCount.value++,
+                onPointerUp: (_) =>
+                    pointerCount.value = (pointerCount.value - 1).clamp(0, 10),
+                onPointerCancel: (_) =>
+                    pointerCount.value = (pointerCount.value - 1).clamp(0, 10),
+                child: PageView.builder(
+                  controller: controller,
+                  allowImplicitScrolling: true,
+                  pageSnapping: true,
+                  itemCount: items.length,
+                  physics: physics,
+                  onPageChanged: (index) => current.value = index,
+                  itemBuilder: (context, index) {
+                    final bookmark = items[index];
+                    return Async(
+                      asyncValue: ref.watch(bookmarkImageProvider(bookmark)),
+                      data: (image) => ZoomableHorizontalPageImage(
+                        key: ValueKey(bookmark.id),
+                        outerController: controller,
+                        onZoomChanged: (zoomed) {
+                          final next = {...zoomedIndexes.value};
+                          zoomed ? next.add(index) : next.remove(index);
+                          zoomedIndexes.value = next;
+                        },
+                        child: Image.memory(
+                          image.data,
+                          fit: BoxFit.contain,
+                          gaplessPlayback: true,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
-              child: IconButton(
-                icon: const Icon(KoverIcons.close),
-                color: Colors.white,
-                onPressed: onClose,
-              ),
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(
-                  LayoutConstants.mediumBorderRadius,
+              Positioned.fill(
+                child: OverlayGestures(
+                  seriesId: seriesId,
+                  disableGestures: pointerCount.value >= 2,
+                  onLeftTap: () => goTo(currentIndex() - 1),
+                  onRightTap: () => goTo(currentIndex() + 1),
+                  onCenterTap: () => uiVisible.value = !uiVisible.value,
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: LayoutConstants.smallPadding,
-                  vertical: LayoutConstants.smallerPadding,
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(KoverIcons.bookmarkOn),
-                      color: Theme.of(context).colorScheme.primary,
-                      tooltip: l.removeBookmark,
-                      onPressed: onRemoveBookmark,
-                    ),
-                    Text(
-                      position,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -303,34 +256,20 @@ class _ViewerHeader extends StatelessWidget {
 }
 
 class _ViewerEmpty extends StatelessWidget {
-  final VoidCallback onClose;
-
-  const _ViewerEmpty({required this.onClose});
+  const _ViewerEmpty();
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
 
-    return SafeArea(
-      child: Column(
-        children: [
-          Align(
-            alignment: .topLeft,
-            child: IconButton(
-              icon: const Icon(KoverIcons.close),
-              color: Colors.white,
-              onPressed: onClose,
-            ),
-          ),
-          Expanded(
-            child: Center(
-              child: Text(
-                l.noBookmarks,
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-        ],
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(),
+      body: Center(
+        child: Text(
+          l.noBookmarks,
+          style: const TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
