@@ -880,5 +880,44 @@
     "@directionalityDescription": {
         "description": "Description for the layout directionality setting"
     },
-    "localeDefault": "Predefinito della lingua"
+    "localeDefault": "Predefinito della lingua",
+    "downloadedOnly": "Scaricati",
+    "@downloadedOnly": {
+        "description": "Label for the downloaded only filter option in lists"
+    },
+    "goToVolume": "Vai al volume",
+    "@goToVolume": {
+        "description": "Label for the go to volume button in context menus"
+    },
+    "syncingBookmarks": "Sincronizzazione segnalibri",
+    "@syncingBookmarks": {
+        "description": "Label for the syncing bookmarks phase"
+    },
+    "ensureSeriesDetailsAndProgress": "Assicura dettagli e progresso per la serie {seriesId}",
+    "@ensureSeriesDetailsAndProgress": {
+        "description": "Label for the sync phase ensuring details and progress are fetched for the series with given seriesId",
+        "placeholders": {
+            "seriesId": {
+                "description": "The ID of the series which details and progress are being fetched",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "bookmarks": "Segnalibri",
+    "@bookmarks": {
+        "description": "Title for the bookmarks page and navigation entry"
+    },
+    "noBookmarks": "Non ci sono ancora segnalibri",
+    "@noBookmarks": {
+        "description": "Empty state for the bookmarks page"
+    },
+    "addBookmark": "Aggiungi segnalibro",
+    "@addBookmark": {
+        "description": "Tooltip for adding a bookmark"
+    },
+    "removeBookmark": "Rimuovi segnalibro",
+    "@removeBookmark": {
+        "description": "Tooltip for removing a bookmark"
+    }
 }
