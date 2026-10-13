@@ -990,5 +990,29 @@
                 "example": "42"
             }
         }
+    },
+    "goToVolume": "Gehe zu Volumen",
+    "@goToVolume": {
+        "description": "Label for the go to volume button in context menus"
+    },
+    "syncingBookmarks": "Synchronisiere Lesezeichen",
+    "@syncingBookmarks": {
+        "description": "Label for the syncing bookmarks phase"
+    },
+    "bookmarks": "Lesezeichen",
+    "@bookmarks": {
+        "description": "Title for the bookmarks page and navigation entry"
+    },
+    "noBookmarks": "Noch keine Lesezeichen",
+    "@noBookmarks": {
+        "description": "Empty state for the bookmarks page"
+    },
+    "addBookmark": "Lesezeichen hinzufügen",
+    "@addBookmark": {
+        "description": "Tooltip for adding a bookmark"
+    },
+    "removeBookmark": "Lesezeichen löschen",
+    "@removeBookmark": {
+        "description": "Tooltip for removing a bookmark"
     }
 }
