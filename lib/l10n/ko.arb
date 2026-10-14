@@ -990,5 +990,29 @@
                 "example": "42"
             }
         }
+    },
+    "goToVolume": "해당 권으로 이동",
+    "@goToVolume": {
+        "description": "Label for the go to volume button in context menus"
+    },
+    "syncingBookmarks": "북마크 동기화 중",
+    "@syncingBookmarks": {
+        "description": "Label for the syncing bookmarks phase"
+    },
+    "bookmarks": "북마크",
+    "@bookmarks": {
+        "description": "Title for the bookmarks page and navigation entry"
+    },
+    "noBookmarks": "아직 북마크가 없습니다",
+    "@noBookmarks": {
+        "description": "Empty state for the bookmarks page"
+    },
+    "addBookmark": "북마크 추가",
+    "@addBookmark": {
+        "description": "Tooltip for adding a bookmark"
+    },
+    "removeBookmark": "북마크 제거",
+    "@removeBookmark": {
+        "description": "Tooltip for removing a bookmark"
     }
 }
