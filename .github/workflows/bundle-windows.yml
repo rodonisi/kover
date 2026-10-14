@@ -64,7 +64,6 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "release_name=$env:RELEASE_NAME"
 
       - name: Attach to release
-        if: ${{ inputs.upload_to_release }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
