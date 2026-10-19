@@ -51,6 +51,7 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
   const EpubReaderSettingsState._();
   const factory EpubReaderSettingsState({
     @Default(LayoutConstants.mediumPadding) double marginSize,
+    @Default(null) double? verticalMarginSize,
     @Default(14.0) double fontSize,
     @Default(0.0) double paragraphSpacing,
     @Default(1.5) double lineHeight,
@@ -72,6 +73,10 @@ extension on EpubReaderSettingsState {
   EpubReaderSettingsState clampLimits() {
     return copyWith(
       marginSize: marginSize.clamp(
+        EpubReaderSettingsLimits.marginSizeMin,
+        EpubReaderSettingsLimits.marginSizeMax,
+      ),
+      verticalMarginSize: verticalMarginSize?.clamp(
         EpubReaderSettingsLimits.marginSizeMin,
         EpubReaderSettingsLimits.marginSizeMax,
       ),
@@ -160,6 +165,23 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     );
     log.info(
       'set margin size',
+      attributes: {'value': newSize, 'reader': 'epub'},
+    );
+  }
+
+  Future<void> setVerticalMarginSize(double newSize) async {
+    final current = await future;
+
+    state = AsyncData(
+      current.copyWith(
+        verticalMarginSize: newSize.clamp(
+          EpubReaderSettingsLimits.marginSizeMin,
+          EpubReaderSettingsLimits.marginSizeMax,
+        ),
+      ),
+    );
+    log.info(
+      'set vertical margin size',
       attributes: {'value': newSize, 'reader': 'epub'},
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/epub_reader/render_epub_content.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
+import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/utils/hooks/use_sliver_observer_controller.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -32,6 +33,11 @@ class const EpubVerticalSubpages({
       ),
     );
     final data = subpageState.requireValue;
+    final verticalMargin = ref.watch(
+      epubReaderSettingsProvider(
+        seriesId: seriesId,
+      ).select((state) => state.value?.verticalMarginSize),
+    );
 
     // include buffer spinner page if currently measuring.
     final count = data.reflow.status == .measuring
@@ -81,7 +87,7 @@ class const EpubVerticalSubpages({
       },
     );
 
-    return LayoutBuilder(
+    final view = LayoutBuilder(
       builder: (context, constraints) {
         return SliverViewObserver(
           controller: observerController,
@@ -156,6 +162,15 @@ class const EpubVerticalSubpages({
           ),
         );
       },
+    );
+
+    if (verticalMargin == null) return view;
+
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: verticalMargin),
+        child: view,
+      ),
     );
   }
 }
