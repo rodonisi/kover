@@ -195,6 +195,16 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                       ),
                       if (SafePlatform.isMobile)
                         OrientationOption(seriesId: seriesId),
+                      if (settings.mode == .vertical)
+                        BooleanOption(
+                          title: l.expandToEdges,
+                          description: l.expandToEdgesDescription,
+                          icon: KoverIcons.safeArea,
+                          value: settings.ignoreSafeAreas,
+                          onChanged: (newValue) async => await ref
+                              .read(epubSettings.notifier)
+                              .setIgnoreSafeAreas(newValue),
+                        ),
                       BooleanOption(
                         icon: KoverIcons.highlight,
                         title: l.highlightResumeParagraph,

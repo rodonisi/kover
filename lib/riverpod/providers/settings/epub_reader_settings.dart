@@ -62,6 +62,7 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
     @Default(EpubReaderMode.horizontal) EpubReaderMode mode,
     @Default(false) bool removeParagraphIndent,
     @Default(EpubTextAlignment.left) EpubTextAlignment textAlignment,
+    @Default(true) bool ignoreSafeAreas,
   }) = _EpubReaderSettingsState;
 
   factory EpubReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -294,6 +295,16 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     log.info(
       'set remove indent paragraphs',
       attributes: {'value': value, 'reader': 'epub'},
+    );
+  }
+
+  Future<void> setIgnoreSafeAreas(bool ignore) async {
+    final current = await future;
+
+    state = AsyncData(current.copyWith(ignoreSafeAreas: ignore));
+    log.info(
+      'set ignore safe areas',
+      attributes: {'value': ignore, 'reader': 'epub'},
     );
   }
 
