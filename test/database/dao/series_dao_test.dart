@@ -4,6 +4,8 @@ import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kover/database/app_database.dart';
+import 'package:kover/database/dao/chapters_dao.dart';
+import 'package:kover/database/dao/series_dao.dart';
 import 'package:kover/models/enums/age_rating.dart';
 import 'package:kover/models/enums/format.dart';
 import 'package:kover/models/enums/library_type.dart';
@@ -136,6 +138,62 @@ void main() {
             lastModified: Value(DateTime.now()),
           ),
         );
+  }
+
+  ChapterWithRelationsCompanion chapterWithProgress({
+    required int id,
+    required int seriesId,
+    required int pagesRead,
+    Format format = Format.epub,
+    DateTime? remoteLastRead,
+  }) {
+    return ChapterWithRelationsCompanion(
+      chapter: ChaptersCompanion(
+        id: Value(id),
+        volumeId: const Value(0),
+        seriesId: Value(seriesId),
+        format: Value(format),
+        minNumber: const Value(0),
+        maxNumber: const Value(0),
+        sortOrder: const Value(0),
+        pages: const Value(10),
+        wordCount: const Value(0),
+        ageRating: const Value(AgeRating.unknown),
+        releaseDate: Value(DateTime.now()),
+        publicationStatus: const Value(PublicationStatus.unknown),
+        created: Value(DateTime.now()),
+        lastModified: Value(DateTime.now()),
+        remotePagesRead: Value(pagesRead),
+        remoteLastRead: Value.absentIfNull(remoteLastRead),
+      ),
+      writers: const [],
+      coverArtists: const [],
+      publishers: const [],
+      characters: const [],
+      pencillers: const [],
+      inkers: const [],
+      imprints: const [],
+      colorists: const [],
+      letterers: const [],
+      editors: const [],
+      translators: const [],
+      teams: const [],
+      locations: const [],
+      genres: const [],
+      tags: const [],
+    );
+  }
+
+  SeriesDetailCompanions detailWithChapters(
+    List<ChapterWithRelationsCompanion> chapters,
+  ) {
+    return SeriesDetailCompanions(
+      seriesId: 1,
+      storyline: const [],
+      specials: const [],
+      chapters: chapters,
+      volumes: const [],
+    );
   }
 
   group('SeriesDao', () {
@@ -289,6 +347,68 @@ void main() {
             .first;
 
         expect(result.map((s) => s.id).toSet(), equals({1}));
+      });
+    });
+
+    group('upsertDetailsBatch progress', () {
+      test('seeds progress for chapters with read pages', () async {
+        await insertLibrary(1);
+        await insertSeries(1);
+
+        final remoteLastRead = DateTime(2024, 1, 1);
+
+        await database.seriesDao.upsertDetailsBatch([
+          detailWithChapters([
+            chapterWithProgress(
+              id: 10,
+              seriesId: 1,
+              pagesRead: 2,
+              remoteLastRead: remoteLastRead,
+            ),
+            chapterWithProgress(id: 20, seriesId: 1, pagesRead: 0),
+            chapterWithProgress(
+              id: 30,
+              seriesId: 1,
+              pagesRead: 3,
+              format: Format.image,
+            ),
+          ]),
+        ]);
+
+        final progress = await database.select(database.readingProgress).get();
+
+        expect(progress, hasLength(2));
+
+        final epub = progress.singleWhere((p) => p.chapterId == 10);
+        expect(epub.seriesId, 1);
+        expect(epub.libraryId, 1);
+        expect(epub.pagesRead, 2);
+        expect(epub.lastModified, remoteLastRead);
+
+        final image = progress.singleWhere((p) => p.chapterId == 30);
+        expect(image.pagesRead, 3);
+      });
+
+      test('does not overwrite existing local progress', () async {
+        await insertLibrary(1);
+        await insertSeries(1);
+        await insertReadingProgress(
+          chapterId: 10,
+          seriesId: 1,
+          pagesRead: 1,
+        );
+
+        await database.seriesDao.upsertDetailsBatch([
+          detailWithChapters([
+            chapterWithProgress(id: 10, seriesId: 1, pagesRead: 2),
+          ]),
+        ]);
+
+        final progress = await database
+            .select(database.readingProgress)
+            .getSingle();
+
+        expect(progress.pagesRead, 1);
       });
     });
   });

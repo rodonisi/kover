@@ -168,6 +168,9 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   /// Get all chapter ids with outdated progress. Optionally restrict to series
   /// [seriesId] and/or chapters that have never been fetched locally
   /// ([onlyMissing]).
+  ///
+  /// When [onlyMissing] is false, EPUB progress entries without an xpath are
+  /// included as well so their full progress can be fetched.
   Future<List<int>> getOutdatedChapterIds({
     int? seriesId,
     bool onlyMissing = false,
@@ -177,10 +180,15 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     final isLocalOutdated = readingProgress.lastModified.isSmallerThan(
       chapters.remoteLastRead,
     );
+    final isPartialEpubCandidate =
+        chapters.format.equalsValue(.epub) &
+        readingProgress.bookScrollId.isNull();
 
     var condition =
         hasRemoteProgress &
-        (onlyMissing ? isMissingLocal : (isMissingLocal | isLocalOutdated));
+        (onlyMissing
+            ? isMissingLocal
+            : (isMissingLocal | isLocalOutdated | isPartialEpubCandidate));
 
     if (seriesId != null) {
       condition = condition & chapters.seriesId.equals(seriesId);
