@@ -50,8 +50,10 @@ enum EpubTextAlignment { left, right, justify, center }
 sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
   const EpubReaderSettingsState._();
   const factory EpubReaderSettingsState({
-    @Default(LayoutConstants.mediumPadding) double marginSize,
-    @Default(null) double? verticalMarginSize,
+    @JsonKey(name: 'marginSize')
+    @Default(LayoutConstants.mediumPadding)
+    double horizontalMarginSize,
+    @Default(LayoutConstants.mediumPadding) double verticalMarginSize,
     @Default(14.0) double fontSize,
     @Default(0.0) double paragraphSpacing,
     @Default(1.5) double lineHeight,
@@ -73,11 +75,11 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
 extension on EpubReaderSettingsState {
   EpubReaderSettingsState clampLimits() {
     return copyWith(
-      marginSize: marginSize.clamp(
+      horizontalMarginSize: horizontalMarginSize.clamp(
         EpubReaderSettingsLimits.marginSizeMin,
         EpubReaderSettingsLimits.marginSizeMax,
       ),
-      verticalMarginSize: verticalMarginSize?.clamp(
+      verticalMarginSize: verticalMarginSize.clamp(
         EpubReaderSettingsLimits.marginSizeMin,
         EpubReaderSettingsLimits.marginSizeMax,
       ),
@@ -153,12 +155,12 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     );
   }
 
-  Future<void> setMarginSize(double newSize) async {
+  Future<void> setHorizontalMarginSize(double newSize) async {
     final current = await future;
 
     state = AsyncData(
       current.copyWith(
-        marginSize: newSize.clamp(
+        horizontalMarginSize: newSize.clamp(
           EpubReaderSettingsLimits.marginSizeMin,
           EpubReaderSettingsLimits.marginSizeMax,
         ),

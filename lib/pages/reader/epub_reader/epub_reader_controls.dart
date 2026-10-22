@@ -96,21 +96,20 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                       ),
                       NumericOption(
                         icon: KoverIcons.margins,
-                        title: l.margins,
-                        value: settings.marginSize,
+                        title: l.horizontalMargins,
+                        value: settings.horizontalMarginSize,
                         min: EpubReaderSettingsLimits.marginSizeMin,
                         max: EpubReaderSettingsLimits.marginSizeMax,
                         step: EpubReaderSettingsLimits.marginSizeStep,
                         decimalPlaces: 0,
                         onChanged: (newValue) async => await ref
                             .read(epubSettings.notifier)
-                            .setMarginSize(newValue),
+                            .setHorizontalMarginSize(newValue),
                       ),
                       NumericOption(
                         icon: KoverIcons.verticalMargins,
                         title: l.verticalMargins,
-                        value:
-                            settings.verticalMarginSize ?? settings.marginSize,
+                        value: settings.verticalMarginSize,
                         min: EpubReaderSettingsLimits.marginSizeMin,
                         max: EpubReaderSettingsLimits.marginSizeMax,
                         step: EpubReaderSettingsLimits.marginSizeStep,
