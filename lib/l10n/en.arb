@@ -790,6 +790,10 @@
     "@invalidCredentials": {
         "description": "User display error displayed when credentials are invalid"
     },
+    "invalidCredentialsDescription": "The server rejected the API key. Check your API key in Settings.",
+    "@invalidCredentialsDescription": {
+        "description": "Instructions shown when the server rejected the API key"
+    },
     "invalidCertificate": "Invalid Certificate",
     "@invalidCertificate": {
         "description": "User display error shown when the server certificate cannot be validated"

@@ -14,6 +14,8 @@ part 'auth.g.dart';
 
 class NoCredentialsException implements Exception {}
 
+class InvalidCredentialsException implements Exception {}
+
 class CertificateValidationException implements Exception {
   CertificateValidationException(this.cause);
 
@@ -35,8 +37,10 @@ bool isCertificateValidationError(Object? error) {
 }
 
 Duration? _retry(int retryCount, Object error) {
-  // Never retry missing credentials
-  if (error is NoCredentialsException) return null;
+  // Never retry missing or invalid credentials
+  if (error is NoCredentialsException || error is InvalidCredentialsException) {
+    return null;
+  }
 
   // Never retry connectivity or TLS-certificate errors - fail fast.
   // A certificate validation failure cannot succeed without changing the
@@ -91,10 +95,11 @@ class CurrentUser extends _$CurrentUser {
       );
 
       // A refresh normally keeps the last known user visible if the network
-      // or server is temporarily unavailable. A rejected TLS certificate is
-      // actionable, though: surface it so the user can enable the explicit
-      // certificate-validation exception or correct the server certificate.
-      if (isCertificateValidationError(error)) {
+      // or server is temporarily unavailable. A rejected TLS certificate or
+      // invalid API key is actionable, though: surface it so the user can
+      // correct their settings.
+      if (isCertificateValidationError(error) ||
+          error is InvalidCredentialsException) {
         state = AsyncValue.error(error, stackTrace);
       }
     }
@@ -107,6 +112,10 @@ class CurrentUser extends _$CurrentUser {
         apiKey: apiKey,
         pluginName: 'kover',
       );
+      if (res.statusCode == HttpStatus.unauthorized ||
+          res.statusCode == HttpStatus.forbidden) {
+        throw InvalidCredentialsException();
+      }
       if (!res.isSuccessful || res.body == null) {
         throw switch (res.error) {
           final Exception error => error,

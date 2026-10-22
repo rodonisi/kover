@@ -57,6 +57,48 @@ class LoginGuard extends ConsumerWidget {
           ),
         ),
       ),
+      .invalidCredentials => Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: .min,
+            children: [
+              Icon(
+                KoverIcons.error,
+                size: LayoutConstants.largerIcon,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(height: LayoutConstants.smallPadding),
+              Text(
+                l.invalidCredentials,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: .bold,
+                ),
+                textAlign: .center,
+              ),
+              const SizedBox(height: LayoutConstants.smallerPadding),
+              Padding(
+                padding: const .symmetric(
+                  horizontal: LayoutConstants.mediumPadding,
+                ),
+                child: Text(
+                  l.invalidCredentialsDescription,
+                  textAlign: .center,
+                ),
+              ),
+              const SizedBox(height: LayoutConstants.smallPadding),
+              FilledButton.icon(
+                onPressed: () => const SettingsRoute().go(context),
+                icon: Icon(
+                  KoverIcons.settings,
+                  size: LayoutConstants.smallIcon,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+                label: Text(l.openSettings),
+              ),
+            ],
+          ),
+        ),
+      ),
       .certificateError => Scaffold(
         body: Center(
           child: Column(

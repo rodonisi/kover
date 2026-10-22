@@ -159,7 +159,7 @@ class _User extends ConsumerWidget {
           ),
         ],
       ),
-      LoginStatus.error => Row(
+      LoginStatus.invalidCredentials => Row(
         spacing: LayoutConstants.smallPadding,
         children: [
           Icon(
@@ -168,6 +168,21 @@ class _User extends ConsumerWidget {
           ),
           Text(
             l.invalidCredentials,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ),
+        ],
+      ),
+      LoginStatus.error => Row(
+        spacing: LayoutConstants.smallPadding,
+        children: [
+          Icon(
+            KoverIcons.alert,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          Text(
+            l.connectionError,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.error,
             ),

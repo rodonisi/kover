@@ -87,7 +87,14 @@ String? apiKey(Ref ref) {
   return settings?.apiKey;
 }
 
-enum LoginStatus { noCredentials, loading, loggedIn, certificateError, error }
+enum LoginStatus {
+  noCredentials,
+  loading,
+  loggedIn,
+  invalidCredentials,
+  certificateError,
+  error,
+}
 
 @riverpod
 LoginStatus loginStatus(Ref ref) {
@@ -107,6 +114,9 @@ LoginStatus loginStatus(Ref ref) {
   if (user.isLoading) return .loading;
 
   if (user.hasError) {
+    if (user.error is InvalidCredentialsException) {
+      return .invalidCredentials;
+    }
     if (user.error is CertificateValidationException) {
       return .certificateError;
     }
