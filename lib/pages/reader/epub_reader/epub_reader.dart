@@ -39,6 +39,11 @@ class EpubReader extends HookConsumerWidget {
     final model = ref.watch(
       epubReaderProvider(seriesId: seriesId),
     );
+    final ignoreSafeAreas = ref.watch(
+      epubReaderSettingsProvider(
+        seriesId: seriesId,
+      ).select((state) => state.value?.ignoreSafeAreas ?? true),
+    );
 
     return Async(
       asyncValue: model,
@@ -98,6 +103,9 @@ class EpubReader extends HookConsumerWidget {
                   });
                 });
 
+                final respectSafeAreas =
+                    data.mode == .vertical && !ignoreSafeAreas;
+
                 return Stack(
                   children: [
                     Positioned.fill(
@@ -106,40 +114,48 @@ class EpubReader extends HookConsumerWidget {
                         child: Directionality(
                           textDirection: data.commonSettings.readDirection
                               .toTextDirection(),
-                          child: PageView.builder(
-                            clipBehavior: .none,
-                            controller: controller,
-                            itemCount: navState.totalPages,
-                            allowImplicitScrolling: true,
-                            scrollCacheExtent: const .viewport(4),
-                            scrollDirection: switch (data.mode) {
-                              .horizontal => .horizontal,
-                              .vertical => .vertical,
-                              .spreads => .horizontal,
-                            },
-                            physics: const NeverScrollableScrollPhysics(),
-                            onPageChanged: (newPage) {
-                              ref.read(nav.notifier).jumpToPage(newPage);
-                            },
-                            itemBuilder: (context, index) {
-                              return _Page(
-                                seriesId: seriesId,
-                                chapterId: chapterId,
-                                readingListId: readingListId,
-                                page: index,
-                                reverse:
-                                    data.commonSettings.readDirection ==
-                                        .rightToLeft &&
-                                    data.mode != .vertical,
-                                mode: data.mode,
-                                outerController: controller,
-                                onSelectionChanged: (selected) {
-                                  if (selected != hasSelection.value) {
-                                    hasSelection.value = selected;
-                                  }
-                                },
-                              );
-                            },
+                          child: SafeArea(
+                            left: respectSafeAreas,
+                            top: respectSafeAreas,
+                            right: respectSafeAreas,
+                            bottom: respectSafeAreas,
+                            child: PageView.builder(
+                              clipBehavior: respectSafeAreas
+                                  ? .hardEdge
+                                  : .none,
+                              controller: controller,
+                              itemCount: navState.totalPages,
+                              allowImplicitScrolling: true,
+                              scrollCacheExtent: const .viewport(4),
+                              scrollDirection: switch (data.mode) {
+                                .horizontal => .horizontal,
+                                .vertical => .vertical,
+                                .spreads => .horizontal,
+                              },
+                              physics: const NeverScrollableScrollPhysics(),
+                              onPageChanged: (newPage) {
+                                ref.read(nav.notifier).jumpToPage(newPage);
+                              },
+                              itemBuilder: (context, index) {
+                                return _Page(
+                                  seriesId: seriesId,
+                                  chapterId: chapterId,
+                                  readingListId: readingListId,
+                                  page: index,
+                                  reverse:
+                                      data.commonSettings.readDirection ==
+                                          .rightToLeft &&
+                                      data.mode != .vertical,
+                                  mode: data.mode,
+                                  outerController: controller,
+                                  onSelectionChanged: (selected) {
+                                    if (selected != hasSelection.value) {
+                                      hasSelection.value = selected;
+                                    }
+                                  },
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
