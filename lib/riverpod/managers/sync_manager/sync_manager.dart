@@ -39,6 +39,9 @@ sealed class SyncPhase with _$SyncPhase {
   const factory refreshMetadata({required int seriesId}) = RefreshMetadata;
   const factory refreshCovers({required int seriesId}) = RefreshCovers;
   const factory refreshToc({required int chapterId}) = RefreshToc;
+  const factory refreshAnnotations({required int chapterId}) =
+      RefreshAnnotations;
+  const factory highlightSlots() = HighlightSlots;
   const factory ensureDetailsAndProgress({required int seriesId}) =
       EnsureDetailsAndProgress;
   const factory seriesDetails() = SeriesDetails;
@@ -51,7 +54,9 @@ sealed class SyncPhase with _$SyncPhase {
       RefreshServerFonts() ||
       RefreshMetadata() ||
       RefreshCovers() ||
-      RefreshToc() => {},
+      RefreshToc() ||
+      RefreshAnnotations() ||
+      HighlightSlots() => {},
       AllSeries() => {const .libraries()},
       SeriesDetails() => {const .allSeries()},
       Metadata() ||
@@ -146,6 +151,7 @@ class SyncManager extends _$SyncManager {
       const .seriesDetails(),
       const .refreshServerSettings(),
       const .refreshServerFonts(),
+      const .highlightSlots(),
       if (settings.downloadCovers) const .covers(),
     });
   }
@@ -193,6 +199,11 @@ class SyncManager extends _$SyncManager {
   /// Refresh chapter toc for chapter [chapterId]
   void refreshChapterToc({required int chapterId}) {
     _runPhase(.refreshToc(chapterId: chapterId));
+  }
+
+  /// Refresh annotations for chapter [chapterId]
+  void refreshAnnotations({required int chapterId}) {
+    _runPhase(.refreshAnnotations(chapterId: chapterId));
   }
 
   void _enqueuePhases(Set<SyncPhase> phases) {

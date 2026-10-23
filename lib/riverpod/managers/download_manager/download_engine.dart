@@ -1,8 +1,10 @@
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/riverpod/providers/client.dart';
+import 'package:kover/riverpod/repository/annotation_repository.dart';
 import 'package:kover/riverpod/repository/download_repository.dart';
 import 'package:kover/riverpod/repository/font_repository.dart';
+import 'package:kover/sync/annotation_sync_operations.dart';
 import 'package:kover/sync/book_sync_operations.dart';
 import 'package:kover/sync/chapter_sync_operations.dart';
 import 'package:kover/sync/series_sync_operations.dart';
@@ -40,9 +42,15 @@ class const DownloadEngine({required final DownloadRepository downloadRepo}) {
     final volumeClient = VolumeSyncOperations(client: client);
     final seriesClient = SeriesSyncOperations(client: client);
 
+    final annotationRepo = AnnotationRepository(
+      db,
+      AnnotationSyncOperations(client),
+    );
+
     final downloadRepo = DownloadRepository(
       db: db,
       fontsRepository: fontRepo,
+      annotationRepository: annotationRepo,
       bookClient: bookClient,
       chapterClient: chapterClient,
       volumeClient: volumeClient,

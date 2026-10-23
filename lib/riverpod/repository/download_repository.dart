@@ -6,6 +6,7 @@ import 'package:kover/database/converters/page_content_converter.dart';
 import 'package:kover/models/enums/format.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
+import 'package:kover/riverpod/repository/annotation_repository.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/riverpod/repository/font_repository.dart';
 import 'package:kover/sync/book_sync_operations.dart';
@@ -24,11 +25,13 @@ DownloadRepository downloadRepository(Ref ref) {
   final db = ref.watch(databaseProvider);
   final client = ref.watch(restClientProvider);
   final fontsRepository = ref.watch(fontRepositoryProvider);
+  final annotationRepository = ref.watch(annotationRepositoryProvider);
   final apiKey = ref.watch(apiKeyProvider);
 
   return DownloadRepository(
     db: db,
     fontsRepository: fontsRepository,
+    annotationRepository: annotationRepository,
     bookClient: BookSyncOperations(client: client, apiKey: apiKey!),
     chapterClient: ChapterSyncOperations(client: client),
     volumeClient: VolumeSyncOperations(client: client),
@@ -39,6 +42,7 @@ DownloadRepository downloadRepository(Ref ref) {
 class const DownloadRepository({
   required final AppDatabase _db,
   required final FontRepository _fontsRepository,
+  required final AnnotationRepository _annotationRepository,
   required final BookSyncOperations _bookClient,
   required final ChapterSyncOperations _chapterClient,
   required final VolumeSyncOperations _volumeClient,
@@ -130,12 +134,34 @@ class const DownloadRepository({
       upsertCallback: (batch) => _db.downloadDao.insertPagesBatch(batch),
     );
 
+    if (format == .epub) {
+      await _refreshAnnotations(chapterId: chapterId);
+    }
+
     final volume = await _volumeClient.getVolume(volumeId);
     await downloadMissingCovers(
       chapterId: chapterId,
       volumeId: volumeId,
       seriesId: volume?.seriesId,
     );
+  }
+
+  /// Stores the annotations of [chapterId], so the highlights injected into
+  /// the downloaded pages are colored offline. A failure does not fail the
+  /// download, as the annotations are refreshed again when the chapter opens.
+  Future<void> _refreshAnnotations({required int chapterId}) async {
+    try {
+      await _annotationRepository.refreshChapterAnnotations(
+        chapterId: chapterId,
+      );
+    } catch (e, stacktrace) {
+      log.error(
+        'failed to refresh annotations of downloaded chapter',
+        error: e,
+        stacktrace: stacktrace,
+        attributes: {'chapter_id': chapterId},
+      );
+    }
   }
 
   /// Downloads a single epub page, persisting its fonts to the font cache

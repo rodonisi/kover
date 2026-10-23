@@ -2,6 +2,7 @@ import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/riverpod/providers/client.dart';
+import 'package:kover/riverpod/repository/annotation_repository.dart';
 import 'package:kover/riverpod/repository/book_repository.dart';
 import 'package:kover/riverpod/repository/bookmark_repository.dart';
 import 'package:kover/riverpod/repository/chapters_repository.dart';
@@ -15,6 +16,7 @@ import 'package:kover/riverpod/repository/server_settings_repository.dart';
 import 'package:kover/riverpod/repository/smart_filters_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
 import 'package:kover/riverpod/repository/want_to_read_repository.dart';
+import 'package:kover/sync/annotation_sync_operations.dart';
 import 'package:kover/sync/book_sync_operations.dart';
 import 'package:kover/sync/bookmark_sync_operations.dart';
 import 'package:kover/sync/chapter_sync_operations.dart';
@@ -44,6 +46,7 @@ class SyncEngine({
   required final CollectionsRepository collectionsRepo,
   required final ReadingListsRepository readingListsRepo,
   required final SmartFiltersRepository smartFiltersRepo,
+  required final AnnotationRepository annotationRepo,
 }) {
   final _pool = Pool(8);
 
@@ -113,6 +116,10 @@ class SyncEngine({
       db: db,
       client: SmartFiltersSyncOperations(client: client),
     );
+    final annotationRepo = AnnotationRepository(
+      db,
+      AnnotationSyncOperations(client),
+    );
 
     return SyncEngine(
       seriesRepo: seriesRepo,
@@ -128,6 +135,7 @@ class SyncEngine({
       collectionsRepo: collectionsRepo,
       readingListsRepo: readingListsRepo,
       smartFiltersRepo: smartFiltersRepo,
+      annotationRepo: annotationRepo,
     );
   }
 
@@ -175,6 +183,10 @@ class SyncEngine({
           () async => await refreshCovers(seriesId: seriesId),
       refreshToc: (chapterId) =>
           () async => await refreshToc(chapterId: chapterId),
+      refreshAnnotations: (chapterId) =>
+          () async => await refreshAnnotations(chapterId: chapterId),
+      highlightSlots: () =>
+          () async => await syncHighlightSlots(),
       ensureDetailsAndProgress: (seriesId) =>
           () async => await ensureDetailsAndProgress(seriesId: seriesId),
       seriesDetails: () =>
@@ -285,6 +297,16 @@ class SyncEngine({
     await _pool.withResource(
       () => bookRepo.refreshChapterToc(chapterId: chapterId),
     );
+  }
+
+  Future<void> refreshAnnotations({required int chapterId}) async {
+    await _pool.withResource(
+      () => annotationRepo.refreshChapterAnnotations(chapterId: chapterId),
+    );
+  }
+
+  Future<void> syncHighlightSlots() async {
+    await _pool.withResource(annotationRepo.refreshHighlightSlots);
   }
 
   Future<void> refreshServerSettings() async {

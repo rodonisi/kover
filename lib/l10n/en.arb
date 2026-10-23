@@ -786,6 +786,21 @@
             }
         }
     },
+    "refreshingChapterAnnotations": "Refreshing annotations for chapter {chapterId}",
+    "@refreshingChapterAnnotations": {
+        "description": "Label for the sync phase refreshing the annotations (highlights) of the chapter with the given ID",
+        "placeholders": {
+            "chapterId": {
+                "description": "The ID of the chapter which annotations are being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "syncingHighlightSlots": "Syncing highlight colors",
+    "@syncingHighlightSlots": {
+        "description": "Label for the sync phase fetching the user's highlight colors"
+    },
     "invalidCredentials": "Invalid Credentials",
     "@invalidCredentials": {
         "description": "User display error displayed when credentials are invalid"
