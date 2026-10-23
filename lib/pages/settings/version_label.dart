@@ -22,6 +22,7 @@ class VersionLabel extends ConsumerWidget {
           onTap: () {
             showAboutDialog(
               context: context,
+              useRootNavigator: false,
               applicationName: info.appName,
               applicationVersion: l.version(info.version, info.buildNumber),
               applicationIcon: Container(

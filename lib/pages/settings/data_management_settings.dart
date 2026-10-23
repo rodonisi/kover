@@ -105,6 +105,7 @@ class DataManagementSettings extends ConsumerWidget {
                           onPressed: () async {
                             final confirmed = await showDialog<bool>(
                               context: context,
+                              useRootNavigator: false,
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                   title: Text(l.clearDatabaseDialogTitle),

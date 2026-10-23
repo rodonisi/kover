@@ -37,6 +37,7 @@ class KeybindOption extends ConsumerWidget {
         onPressed: () async {
           final result = await showDialog<ReaderKeyBinding>(
             context: context,
+            useRootNavigator: false,
             builder: (context) => _KeybindCaptureDialog(
               title: title,
               currentValue: value,
