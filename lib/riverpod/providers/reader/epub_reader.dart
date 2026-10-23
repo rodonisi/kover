@@ -396,6 +396,18 @@ class EpubNavigation extends _$EpubNavigation {
     );
   }
 
+  void updateSubpageCount(int totalSubpages) {
+    final current = state.value;
+    if (current == null) return;
+
+    state = AsyncData(
+      current.copyWith(
+        totalSubpages: totalSubpages,
+        ready: true,
+      ),
+    );
+  }
+
   void _handleProgress() {
     listenSelf((prev, next) {
       next.whenData((data) async {
@@ -605,20 +617,12 @@ class EpubNavigation extends _$EpubNavigation {
 
     if (!current.ready) return;
 
-    final reflow = await ref.read(
-      epubReflowProvider(
-        seriesId: seriesId,
-        chapterId: chapterId,
-        page: current.page,
-      ).future,
-    );
-
     if (subpage < 0) {
       await jumpToPage(current.page - 1);
       return;
     }
 
-    if (reflow.status == .done && subpage >= reflow.subpages.length) {
+    if (subpage >= current.totalSubpages) {
       await jumpToPage(current.page + 1);
       return;
     }
@@ -626,7 +630,6 @@ class EpubNavigation extends _$EpubNavigation {
     state = AsyncData(
       current.copyWith(
         subpage: subpage,
-        ready: reflow.status == .done || subpage < reflow.subpages.length,
         fromObserver: fromObserver,
       ),
     );
