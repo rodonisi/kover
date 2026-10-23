@@ -677,6 +677,14 @@
     "@margins": {
         "description": "Label for the margins setting"
     },
+    "horizontalMargins": "Horizontal Margins",
+    "@horizontalMargins": {
+        "description": "Label for the left and right margins setting in the EPUB reader"
+    },
+    "verticalMargins": "Vertical Margins",
+    "@verticalMargins": {
+        "description": "Label for the top and bottom margins setting in the EPUB reader"
+    },
     "verticalGap": "Vertical Gap",
     "@verticalGap": {
         "description": "Label for the vertical gap setting"

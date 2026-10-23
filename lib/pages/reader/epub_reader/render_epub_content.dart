@@ -44,8 +44,10 @@ class RenderEpubContent extends ConsumerWidget {
           bottom: false,
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: data.epubSettings.marginSize,
-              vertical: verticalPadding ? data.epubSettings.marginSize : 0,
+              horizontal: data.epubSettings.horizontalMarginSize,
+              vertical: verticalPadding
+                  ? data.epubSettings.verticalMarginSize
+                  : 0,
             ),
             child: Directionality(
               textDirection: WidgetsLocalizations.of(context).textDirection,
