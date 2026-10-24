@@ -64,7 +64,13 @@ class CollectionsDao extends DatabaseAccessor<AppDatabase>
     ]);
 
     if (query.isNotEmpty) {
-      q.where(containsAny(query, [collections.title, collections.summary]));
+      q.where(
+        matchesAllTokens(
+          query,
+          (token) =>
+              containsAny(token, [collections.title, collections.summary]),
+        ),
+      );
     }
 
     q

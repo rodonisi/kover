@@ -65,17 +65,16 @@ class SearchButton extends HookConsumerWidget {
         );
       },
       suggestionsBuilder: (context, controller) async {
+        final query = controller.text.trim();
+        if (query.isEmpty) return const [];
+
         final l = AppLocalizations.of(context);
         final theme = Theme.of(context);
-        final seriesResults = await ref.read(
-          searchSeriesProvider(controller.text).future,
-        );
-        final volumesResults = await ref.watch(
-          searchVolumesProvider(controller.text).future,
-        );
-        final chaptersResults = await ref.watch(
-          searchChaptersProvider(controller.text).future,
-        );
+        final (seriesResults, volumesResults, chaptersResults) = await (
+          ref.read(searchSeriesProvider(query).future),
+          ref.read(searchVolumesProvider(query).future),
+          ref.read(searchChaptersProvider(query).future),
+        ).wait;
 
         if (seriesResults.isEmpty &&
             volumesResults.isEmpty &&

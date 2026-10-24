@@ -39,9 +39,14 @@ class ReadingListsPageContent extends HookConsumerWidget {
       ),
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(syncManagerProvider.notifier).syncReadingLists();
-    });
+    useListenable(controller);
+
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(syncManagerProvider.notifier).syncReadingLists();
+      });
+      return null;
+    }, const []);
 
     return ReadingListsListPage(
       title: l.readingLists,

@@ -110,17 +110,7 @@ class SmartFiltersDao(super.attachedDatabase)
           );
 
     if (query.isNotEmpty) {
-      q.where(
-        containsAny(
-          query,
-          [
-            series.name,
-            series.sortName,
-            series.localizedName,
-            series.originalName,
-          ],
-        ),
-      );
+      q.where(db.seriesDao.matchesSeriesQuery(query));
     }
 
     if (downloadedOnly) {
@@ -165,7 +155,13 @@ class SmartFiltersDao(super.attachedDatabase)
     ])..where(smartFilterReadingList.smartFilterId.equals(smartFilterId));
 
     if (query.isNotEmpty) {
-      q.where(containsAny(query, [readingLists.title, readingLists.summary]));
+      q.where(
+        matchesAllTokens(
+          query,
+          (token) =>
+              containsAny(token, [readingLists.title, readingLists.summary]),
+        ),
+      );
     }
 
     q

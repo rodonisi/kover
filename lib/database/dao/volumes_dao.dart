@@ -62,17 +62,32 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
     String query, {
     int? seriesId,
   }) async {
-    final q = managers.volumes
-        .filter((f) => f.seriesId.libraryId.includeInSearch(true))
-        .filter((f) => f.name.contains(query));
+    if (query.trim().isEmpty) return [];
+
+    final matchesSearch = matchesTokensWithParent(
+      query,
+      volumes.name.contains,
+      db.seriesDao.matchesSeriesToken,
+    );
+
+    final q =
+        select(volumes).join([
+          innerJoin(series, series.id.equalsExp(volumes.seriesId)),
+          innerJoin(libraries, libraries.id.equalsExp(series.libraryId)),
+        ])..where(
+          libraries.includeInSearch.equals(true) & matchesSearch,
+        );
 
     if (seriesId != null) {
-      q.filter((f) => f.seriesId.id(seriesId));
+      q.where(volumes.seriesId.equals(seriesId));
     }
 
-    q.orderBy((o) => o.minNumber.asc() & o.name.asc());
+    q.orderBy([
+      OrderingTerm.asc(volumes.minNumber),
+      OrderingTerm.asc(volumes.name),
+    ]);
 
-    return await q.get();
+    return await q.map((row) => row.readTable(volumes)).get();
   }
 
   /// Watch pages read for volume [volumeId]
@@ -114,7 +129,7 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
     q.where(volumes.seriesId.equals(seriesId));
 
     if (query.isNotEmpty) {
-      q.where(containsAny(query, [volumes.name]));
+      q.where(matchesAllTokens(query, volumes.name.contains));
     }
 
     if (downloadedOnly) {

@@ -57,7 +57,13 @@ class ReadingListsDao extends DatabaseAccessor<AppDatabase>
     ]);
 
     if (query.isNotEmpty) {
-      q.where(containsAny(query, [readingLists.title, readingLists.summary]));
+      q.where(
+        matchesAllTokens(
+          query,
+          (token) =>
+              containsAny(token, [readingLists.title, readingLists.summary]),
+        ),
+      );
     }
 
     q

@@ -47,6 +47,12 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     selectOnly(downloadedPages)..addColumns([downloadedPages.chapterId]),
   );
 
+  Expression<bool> _matchesChapterToken(String token) =>
+      containsAny(token, [chapters.title, chapters.titleName, chapters.isbn]);
+
+  Expression<bool> _matchesChapterQuery(String query) =>
+      matchesAllTokens(query, _matchesChapterToken);
+
   /// Get a [SingleOrNullSelectable] for chapter [chapterId]
   Selectable<Chapter> chapter(int chapterId) {
     return managers.chapters.filter((f) => f.id.equals(chapterId));
@@ -57,31 +63,44 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     String query, {
     int? volumeId,
     int? seriesId,
-  }) {
-    final q = managers.chapters
-        .filter((f) => f.seriesId.libraryId.includeInSearch(true))
-        .filter(
-          (f) => f.titleName.contains(query),
+  }) async {
+    if (query.trim().isEmpty) return [];
+
+    final titles = [chapters.title, chapters.titleName];
+    final titleRank = titleMatchRank(query, titles);
+    final matchesSearch = matchesTokensWithParent(
+      query,
+      _matchesChapterToken,
+      db.seriesDao.matchesSeriesToken,
+    );
+
+    final q =
+        select(chapters).join([
+          innerJoin(series, series.id.equalsExp(chapters.seriesId)),
+          innerJoin(libraries, libraries.id.equalsExp(series.libraryId)),
+          leftOuterJoin(db.volumes, db.volumes.id.equalsExp(chapters.volumeId)),
+        ])..where(
+          libraries.includeInSearch.equals(true) & matchesSearch,
         );
 
     if (volumeId != null) {
-      q.filter((f) => f.volumeId.id(volumeId));
+      q.where(chapters.volumeId.equals(volumeId));
     }
 
     if (seriesId != null) {
-      q.filter((f) => f.seriesId.id(seriesId));
+      q.where(chapters.seriesId.equals(seriesId));
     }
 
-    q.orderBy(
-      (o) =>
-          o.volumeId.minNumber.asc() &
-          o.sortOrder.asc() &
-          o.seriesId.id.asc() &
-          o.titleName.asc() &
-          o.title.asc(),
-    );
+    q.orderBy([
+      OrderingTerm.asc(titleRank),
+      OrderingTerm.asc(db.volumes.minNumber),
+      OrderingTerm.asc(chapters.sortOrder),
+      OrderingTerm.asc(chapters.seriesId),
+      OrderingTerm.asc(chapters.titleName),
+      OrderingTerm.asc(chapters.title),
+    ]);
 
-    return q.get();
+    return await q.map((row) => row.readTable(chapters)).get();
   }
 
   /// Watch chapters for series [seriesId], sliced by [kind], optionally
@@ -129,7 +148,7 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     }
 
     if (query.isNotEmpty) {
-      q.where(containsAny(query, [chapters.title]));
+      q.where(_matchesChapterQuery(query));
     }
 
     if (downloadedOnly) {
