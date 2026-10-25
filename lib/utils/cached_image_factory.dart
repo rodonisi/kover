@@ -1,11 +1,35 @@
+import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:kover/utils/highlight_recognizer.dart';
+import 'package:kover/utils/html_constants.dart';
 
 class CachedImageFactory extends WidgetFactory {
   final Map<int, MemoryImage> _cache = {};
   final double? maxHeight;
 
   CachedImageFactory({this.maxHeight});
+
+  @override
+  void parse(BuildTree meta) {
+    final element = meta.element;
+    const prefix = HtmlConstants.highlightIdPrefix;
+    if (element.localName == HtmlConstants.highlightTag &&
+        element.id.startsWith(prefix)) {
+      final annotationId = int.tryParse(element.id.substring(prefix.length));
+      if (annotationId != null) {
+        meta.inherit(_highlightRecognizer, HighlightRecognizer(annotationId));
+      }
+    }
+
+    super.parse(meta);
+  }
+
+  /// Hands the highlight's recognizer down to the text spans inside it.
+  static InheritedProperties _highlightRecognizer(
+    InheritedProperties resolving,
+    GestureRecognizer value,
+  ) => resolving.copyWith<GestureRecognizer>(value: value);
 
   @override
   Widget? buildImageWidget(

@@ -1,6 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/mapping/enums/read_direction.dart';
+import 'package:kover/pages/reader/epub_reader/annotation_sheet.dart';
 import 'package:kover/pages/reader/epub_reader/epub_horizontal_subpages.dart';
 import 'package:kover/pages/reader/epub_reader/epub_measure_root.dart';
 import 'package:kover/pages/reader/epub_reader/epub_reader_provider.dart';
@@ -8,9 +10,12 @@ import 'package:kover/pages/reader/epub_reader/epub_theme_override.dart';
 import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
 import 'package:kover/pages/reader/epub_reader/epub_vertical_subpages.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
+import 'package:kover/riverpod/providers/annotation.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
+import 'package:kover/utils/highlight_recognizer.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
@@ -30,6 +35,18 @@ class EpubReader extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasSelection = useState(false);
+
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+
+        ref
+            .read(syncManagerProvider.notifier)
+            .refreshAnnotations(chapterId: chapterId);
+      });
+      return null;
+    }, [chapterId]);
+
     final nav = epubNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
@@ -60,6 +77,19 @@ class EpubReader extends HookConsumerWidget {
         },
         onJumpToPage: (page) {
           ref.read(nav.notifier).jumpToPage(page);
+        },
+        onTapContent: (position) {
+          final annotationId = highlightAt(context, position);
+          if (annotationId == null) return false;
+
+          final annotation = ref
+              .read(seriesAnnotationsProvider(seriesId: seriesId))
+              .value
+              ?.firstWhereOrNull((a) => a.serverId == annotationId);
+          if (annotation == null) return false;
+
+          showAnnotationSheet(context, ref, annotation: annotation);
+          return true;
         },
         endDrawer: EpubTocDrawer(
           seriesId: seriesId,
