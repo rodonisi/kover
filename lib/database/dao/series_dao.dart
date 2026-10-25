@@ -192,8 +192,8 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
             libraries.includeInSearch.equals(true) & matchesSeriesQuery(query),
           )
           ..orderBy([
-            OrderingTerm.asc(titleRank),
-            OrderingTerm.asc(series.sortName),
+            .asc(titleRank),
+            .asc(series.sortName),
           ]);
 
     return await q.map((row) => row.readTable(series)).get();

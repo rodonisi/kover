@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:kover/models/enums/format.dart';
 
+final _whitespaceRegExp = RegExp(r'\s+');
+
 /// Matches chapter [format] values whose pages are single images and therefore
 /// support bookmarks.
 Expression<bool> isBookmarkableChapterFormat(Expression<String> format) =>
@@ -23,7 +25,7 @@ Expression<bool> matchesAllTokens(
 ) {
   final trimmed = query.trim();
   if (trimmed.isEmpty) return const Constant(true);
-  return trimmed.split(RegExp(r'\s+')).map(matcher).reduce((a, b) => a & b);
+  return trimmed.split(_whitespaceRegExp).map(matcher).reduce((a, b) => a & b);
 }
 
 /// Match [query] where at least one token matches [itemMatcher] and all tokens
@@ -35,7 +37,7 @@ Expression<bool> matchesTokensWithParent(
 ) {
   final trimmed = query.trim();
   if (trimmed.isEmpty) return const Constant(false);
-  final tokens = trimmed.split(RegExp(r'\s+'));
+  final tokens = trimmed.split(_whitespaceRegExp);
   if (tokens.length == 1) return itemMatcher(tokens.single);
   final item = [for (final t in tokens) itemMatcher(t)];
   final both = [
@@ -51,7 +53,7 @@ Expression<int> titleMatchRank(
 ) {
   final trimmed = query.trim();
   if (trimmed.isEmpty) return const Constant(0);
-  final tokens = trimmed.split(RegExp(r'\s+'));
+  final tokens = trimmed.split(_whitespaceRegExp);
   final matched = [for (final t in tokens) containsAny(t, columns)];
   return CaseWhenExpression<int>(
     cases: [

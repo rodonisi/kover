@@ -83,8 +83,8 @@ class VolumesDao extends DatabaseAccessor<AppDatabase> with _$VolumesDaoMixin {
     }
 
     q.orderBy([
-      OrderingTerm.asc(volumes.minNumber),
-      OrderingTerm.asc(volumes.name),
+      .asc(volumes.minNumber),
+      .asc(volumes.name),
     ]);
 
     return await q.map((row) => row.readTable(volumes)).get();

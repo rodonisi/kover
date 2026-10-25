@@ -92,12 +92,12 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     }
 
     q.orderBy([
-      OrderingTerm.asc(titleRank),
-      OrderingTerm.asc(db.volumes.minNumber),
-      OrderingTerm.asc(chapters.sortOrder),
-      OrderingTerm.asc(chapters.seriesId),
-      OrderingTerm.asc(chapters.titleName),
-      OrderingTerm.asc(chapters.title),
+      .asc(titleRank),
+      .asc(db.volumes.minNumber),
+      .asc(chapters.sortOrder),
+      .asc(chapters.seriesId),
+      .asc(chapters.titleName),
+      .asc(chapters.title),
     ]);
 
     return await q.map((row) => row.readTable(chapters)).get();
