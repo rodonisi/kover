@@ -63,6 +63,10 @@ class RenderEpubContent extends ConsumerWidget {
                     s.addAll(mergedStyles['.$className'] ?? {});
                   }
 
+                  if (element.id.isNotEmpty) {
+                    s.addAll(mergedStyles['#${element.id}'] ?? {});
+                  }
+
                   final considerLast =
                       !verticalPadding || element.nextElementSibling != null;
 

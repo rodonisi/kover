@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:kover/riverpod/providers/annotation.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -23,9 +24,13 @@ Future<RenderEpubContentModel> renderEpubContent(
   final css = await ref.watch(
     customCssProvider(seriesId: seriesId).future,
   );
+  // Highlights only change colors: don't hold the render, nor the reflow
+  // measure built on it, while they load.
+  final highlightCss =
+      ref.watch(highlightCssProvider(seriesId: seriesId)).value ?? const {};
 
   return RenderEpubContentModel(
     epubSettings: epubSettings,
-    customCss: css,
+    customCss: {...css, ...highlightCss},
   );
 }

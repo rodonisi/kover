@@ -8,6 +8,7 @@ import 'package:kover/pages/reader/epub_reader/epub_theme_override.dart';
 import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
 import 'package:kover/pages/reader/epub_reader/epub_vertical_subpages.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
+import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
@@ -30,6 +31,18 @@ class EpubReader extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasSelection = useState(false);
+
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+
+        ref
+            .read(syncManagerProvider.notifier)
+            .refreshAnnotations(chapterId: chapterId);
+      });
+      return null;
+    }, [chapterId]);
+
     final nav = epubNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
