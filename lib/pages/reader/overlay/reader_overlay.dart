@@ -29,6 +29,7 @@ class ReaderOverlay extends HookConsumerWidget {
   final void Function()? onNextPage;
   final void Function()? onPreviousPage;
   final void Function(int page)? onJumpToPage;
+  final bool Function(Offset globalPosition)? onTapContent;
   final bool Function(int page)? isLastPage;
   final bool disableGestures;
   final int seriesId;
@@ -43,6 +44,7 @@ class ReaderOverlay extends HookConsumerWidget {
     this.onNextPage,
     this.onPreviousPage,
     this.onJumpToPage,
+    this.onTapContent,
     this.isLastPage,
     this.endDrawer,
     this.extraControls,
@@ -130,6 +132,9 @@ class ReaderOverlay extends HookConsumerWidget {
           );
 
           return Scaffold(
+            // A keyboard opened by a sheet over the reader, e.g. to write an
+            // annotation, must not shrink the pages: that would reflow them.
+            resizeToAvoidBottomInset: false,
             endDrawerEnableOpenDragGesture: false,
             endDrawer: endDrawer,
             body: ReaderShortcuts(
@@ -173,6 +178,7 @@ class ReaderOverlay extends HookConsumerWidget {
                       onCenterTap: () => uiVisible.value = !uiVisible.value,
                       onLeftTap: onPreviousPage,
                       onRightTap: onNextPage,
+                      onTapContent: onTapContent,
                     ),
                   ),
                   Align(

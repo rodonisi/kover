@@ -9,6 +9,10 @@ class OverlayGestures extends ConsumerWidget {
   final VoidCallback? onCenterTap;
   final VoidCallback? onLeftTap;
   final VoidCallback? onRightTap;
+
+  /// Called with the global position of a tap before the tapped zone's
+  /// action, which is skipped when it returns true.
+  final bool Function(Offset globalPosition)? onTapContent;
   final bool disableGestures;
 
   const OverlayGestures({
@@ -17,8 +21,18 @@ class OverlayGestures extends ConsumerWidget {
     this.onCenterTap,
     this.onLeftTap,
     this.onRightTap,
+    this.onTapContent,
     this.disableGestures = false,
   });
+
+  GestureTapUpCallback? _onTapUp(VoidCallback? onTap) {
+    if (onTap == null && onTapContent == null) return null;
+
+    return (details) {
+      if (onTapContent?.call(details.globalPosition) ?? false) return;
+      onTap?.call();
+    };
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,14 +51,14 @@ class OverlayGestures extends ConsumerWidget {
                   flex: 1,
                   child: GestureDetector(
                     behavior: .translucent,
-                    onTap: onLeftTap,
+                    onTapUp: _onTapUp(onLeftTap),
                   ),
                 ),
               Flexible(
                 flex: 2,
                 child: GestureDetector(
                   behavior: .translucent,
-                  onTap: onCenterTap,
+                  onTapUp: _onTapUp(onCenterTap),
                 ),
               ),
               if (data.navigationGestures)
@@ -52,7 +66,7 @@ class OverlayGestures extends ConsumerWidget {
                   flex: 1,
                   child: GestureDetector(
                     behavior: .translucent,
-                    onTap: onRightTap,
+                    onTapUp: _onTapUp(onRightTap),
                   ),
                 ),
             ],

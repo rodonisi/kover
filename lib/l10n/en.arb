@@ -786,6 +786,25 @@
             }
         }
     },
+    "refreshingChapterAnnotations": "Refreshing annotations for chapter {chapterId}",
+    "@refreshingChapterAnnotations": {
+        "description": "Label for the sync phase refreshing the annotations (highlights) of the chapter with the given ID",
+        "placeholders": {
+            "chapterId": {
+                "description": "The ID of the chapter which annotations are being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "syncingHighlightSlots": "Syncing highlight colors",
+    "@syncingHighlightSlots": {
+        "description": "Label for the sync phase fetching the user's highlight colors"
+    },
+    "syncingAnnotations": "Syncing annotations",
+    "@syncingAnnotations": {
+        "description": "Label for the syncing annotations phase"
+    },
     "invalidCredentials": "Invalid Credentials",
     "@invalidCredentials": {
         "description": "User display error displayed when credentials are invalid"
@@ -1028,5 +1047,72 @@
     "removeBookmark": "Remove bookmark",
     "@removeBookmark": {
         "description": "Tooltip for removing a bookmark"
+    },
+    "annotation": "Annotation",
+    "@annotation": {
+        "description": "Title of the sheet showing a highlight and its note, opened by tapping the highlight in the epub reader"
+    },
+    "noAnnotationNote": "No note",
+    "@noAnnotationNote": {
+        "description": "Shown in the annotation sheet when the highlight has no note"
+    },
+    "highlight": "Highlight",
+    "@highlight": {
+        "description": "Text selection menu action creating a highlight from the selected text in the epub reader"
+    },
+    "newHighlight": "New highlight",
+    "@newHighlight": {
+        "description": "Title of the editor of a new highlight"
+    },
+    "editAnnotation": "Edit annotation",
+    "@editAnnotation": {
+        "description": "Title of the editor of an existing highlight"
+    },
+    "highlightColor": "Color {number}",
+    "@highlightColor": {
+        "description": "Accessibility label of a highlight color choice in the annotation editor",
+        "placeholders": {
+            "number": {
+                "description": "The 1-based position of the color among the user's highlight colors",
+                "type": "int",
+                "example": "2"
+            }
+        }
+    },
+    "annotationNoteHint": "Add a note",
+    "@annotationNoteHint": {
+        "description": "Hint of the note field in the annotation editor"
+    },
+    "containsSpoilers": "Contains spoilers",
+    "@containsSpoilers": {
+        "description": "Switch in the annotation editor marking the note as a spoiler for other readers"
+    },
+    "edit": "Edit",
+    "@edit": {
+        "description": "Button editing an annotation"
+    },
+    "delete": "Delete",
+    "@delete": {
+        "description": "Button deleting an annotation"
+    },
+    "deleteAnnotationTitle": "Delete annotation?",
+    "@deleteAnnotationTitle": {
+        "description": "Title of the dialog confirming the deletion of an annotation"
+    },
+    "deleteAnnotationContent": "The highlight and its note are removed from all your devices.",
+    "@deleteAnnotationContent": {
+        "description": "Content of the dialog confirming the deletion of an annotation"
+    },
+    "cannotHighlightHere": "This text can't be highlighted",
+    "@cannotHighlightHere": {
+        "description": "Error shown when the selected text can't be located in the page for a highlight"
+    },
+    "highlightNotCreated": "Couldn't create the highlight. Check the connection to the server.",
+    "@highlightNotCreated": {
+        "description": "Error shown when the server didn't create a highlight"
+    },
+    "highlightNotPlaced": "Highlight saved, but Kavita couldn't place it in the page",
+    "@highlightNotPlaced": {
+        "description": "Warning shown when the server created a highlight but doesn't show it in the page it serves"
     }
 }

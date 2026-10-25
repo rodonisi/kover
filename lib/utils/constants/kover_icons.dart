@@ -117,6 +117,7 @@ sealed class KoverIcons {
   static const IconData refresh = LucideIcons.refreshCw;
   static const IconData copy = LucideIcons.copy;
   static const IconData trash = LucideIcons.trash;
+  static const IconData edit = LucideIcons.pencil;
   static const IconData remove = LucideIcons.x;
   static const IconData minus = LucideIcons.minus;
   static const IconData add = LucideIcons.plus;

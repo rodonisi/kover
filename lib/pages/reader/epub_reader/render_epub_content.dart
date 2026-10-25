@@ -1,5 +1,6 @@
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/pages/reader/epub_reader/epub_selection.dart';
 import 'package:kover/pages/reader/epub_reader/render_epub_content_provider.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
@@ -14,6 +15,10 @@ class RenderEpubContent extends ConsumerWidget {
   final CachedImageFactory? imageCache;
   final bool verticalPadding;
 
+  /// Tracks the selection over this content, shown as [subpage] of its page.
+  final EpubSelectionTracker? selectionTracker;
+  final int subpage;
+
   const RenderEpubContent({
     super.key,
     required this.seriesId,
@@ -21,6 +26,8 @@ class RenderEpubContent extends ConsumerWidget {
     required this.styles,
     this.imageCache,
     this.verticalPadding = true,
+    this.selectionTracker,
+    this.subpage = 0,
   });
 
   @override
@@ -49,84 +56,98 @@ class RenderEpubContent extends ConsumerWidget {
             ),
             child: Directionality(
               textDirection: WidgetsLocalizations.of(context).textDirection,
-              child: HtmlWidget(
-                html,
-                buildAsync: false,
-                enableCaching: true,
-                factoryBuilder: () => imageCache ?? CachedImageFactory(),
-                customStylesBuilder: (element) {
-                  final s = Map<String, String>.from(
-                    mergedStyles[element.localName] ?? {},
-                  );
+              child: _trackSelection(
+                HtmlWidget(
+                  html,
+                  buildAsync: false,
+                  enableCaching: true,
+                  factoryBuilder: () => imageCache ?? CachedImageFactory(),
+                  customStylesBuilder: (element) {
+                    final s = Map<String, String>.from(
+                      mergedStyles[element.localName] ?? {},
+                    );
 
-                  for (final className in element.classes) {
-                    s.addAll(mergedStyles['.$className'] ?? {});
-                  }
-
-                  final considerLast =
-                      !verticalPadding || element.nextElementSibling != null;
-
-                  final isSplit = element.attributes.containsKey(
-                    HtmlConstants.splitParagraphAttribute,
-                  );
-
-                  final fontOverride = data.epubSettings.fontFamily;
-                  if (fontOverride != null) {
-                    final fontFamily = 'font-family: "$fontOverride"';
-                    element.attributes['style'] =
-                        '${element.attributes['style']}; $fontFamily';
-                  }
-
-                  if (element.localName == 'p') {
-                    final styles = [?element.attributes['style']];
-
-                    final alignment = switch (data.epubSettings.textAlignment) {
-                      EpubTextAlignment.left => 'left',
-                      EpubTextAlignment.center => 'center',
-                      EpubTextAlignment.right => 'right',
-                      EpubTextAlignment.justify => 'justify',
-                    };
-                    styles.add('text-align: $alignment');
-
-                    if (considerLast && !isSplit) {
-                      styles.add(
-                        'margin-bottom: ${data.epubSettings.paragraphSpacing}em',
-                      );
+                    for (final className in element.classes) {
+                      s.addAll(mergedStyles['.$className'] ?? {});
                     }
 
-                    element.attributes['style'] = styles
-                        .whereType<String>()
-                        .join(
-                          '; ',
+                    if (element.id.isNotEmpty) {
+                      s.addAll(mergedStyles['#${element.id}'] ?? {});
+                    }
+
+                    final considerLast =
+                        !verticalPadding || element.nextElementSibling != null;
+
+                    final isSplit = element.attributes.containsKey(
+                      HtmlConstants.splitParagraphAttribute,
+                    );
+
+                    final fontOverride = data.epubSettings.fontFamily;
+                    if (fontOverride != null) {
+                      final fontFamily = 'font-family: "$fontOverride"';
+                      element.attributes['style'] =
+                          '${element.attributes['style']}; $fontFamily';
+                    }
+
+                    if (element.localName == 'p') {
+                      final styles = [?element.attributes['style']];
+
+                      final alignment =
+                          switch (data.epubSettings.textAlignment) {
+                            EpubTextAlignment.left => 'left',
+                            EpubTextAlignment.center => 'center',
+                            EpubTextAlignment.right => 'right',
+                            EpubTextAlignment.justify => 'justify',
+                          };
+                      styles.add('text-align: $alignment');
+
+                      if (considerLast && !isSplit) {
+                        styles.add(
+                          'margin-bottom: ${data.epubSettings.paragraphSpacing}em',
                         );
-                  }
+                      }
 
-                  if (data.epubSettings.removeParagraphIndent &&
-                      element.attributes.containsKey(
-                        HtmlConstants.textIndentSpanAttribute,
-                      )) {
-                    final textIndent = 'width: 0';
-                    element.attributes['style'] =
-                        '${element.attributes['style']}; $textIndent';
-                  }
+                      element.attributes['style'] = styles
+                          .whereType<String>()
+                          .join(
+                            '; ',
+                          );
+                    }
 
-                  return s;
-                },
-                textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: data.epubSettings.fontSize,
-                  height: data.epubSettings.lineHeight,
-                  wordSpacing: data.epubSettings.wordSpacing,
-                  letterSpacing: data.epubSettings.letterSpacing,
+                    if (data.epubSettings.removeParagraphIndent &&
+                        element.attributes.containsKey(
+                          HtmlConstants.textIndentSpanAttribute,
+                        )) {
+                      final textIndent = 'width: 0';
+                      element.attributes['style'] =
+                          '${element.attributes['style']}; $textIndent';
+                    }
+
+                    return s;
+                  },
+                  textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: data.epubSettings.fontSize,
+                    height: data.epubSettings.lineHeight,
+                    wordSpacing: data.epubSettings.wordSpacing,
+                    letterSpacing: data.epubSettings.letterSpacing,
+                  ),
+                  rebuildTriggers: [
+                    mergedStyles.toString(),
+                    data.epubSettings,
+                  ],
                 ),
-                rebuildTriggers: [
-                  mergedStyles.toString(),
-                  data.epubSettings,
-                ],
               ),
             ),
           ),
         );
       },
     );
+  }
+
+  Widget _trackSelection(Widget child) {
+    final tracker = selectionTracker;
+    if (tracker == null) return child;
+
+    return EpubSelectionScope(tracker: tracker, subpage: subpage, child: child);
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/pages/reader/epub_reader/render_epub_content.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
+import 'package:kover/pages/reader/epub_reader/epub_selection.dart';
 import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
@@ -13,6 +14,7 @@ class const EpubHorizontalSubpages({
   required final int? readingListId,
   required final int page,
   required final CachedImageFactory imageCache,
+  final EpubSelectionTracker? selectionTracker,
 }) extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -111,6 +113,8 @@ class const EpubHorizontalSubpages({
           html: data.reflow.subpages[index].outerHtml,
           styles: data.reflow.page.styles,
           imageCache: imageCache,
+          selectionTracker: selectionTracker,
+          subpage: index,
         ),
       );
     }

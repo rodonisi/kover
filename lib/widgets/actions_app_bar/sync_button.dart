@@ -160,6 +160,7 @@ String _phaseLabel(AppLocalizations l, SyncPhase phase) {
     covers: () => l.syncingCovers,
     wantToRead: () => l.syncingWantToRead,
     bookmarks: () => l.syncingBookmarks,
+    annotations: () => l.syncingAnnotations,
     collections: () => l.syncingCollections,
     readingLists: () => l.syncingReadingLists,
     smartFilters: () => l.syncingSmartFilters,
@@ -172,5 +173,8 @@ String _phaseLabel(AppLocalizations l, SyncPhase phase) {
     refreshServerSettings: () => l.refreshingServerSettings,
     refreshServerFonts: () => l.refreshingServerFonts,
     refreshToc: (chapterId) => l.refreshingChapterToc(chapterId),
+    refreshAnnotations: (chapterId) =>
+        l.refreshingChapterAnnotations(chapterId),
+    highlightSlots: () => l.syncingHighlightSlots,
   );
 }
