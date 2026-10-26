@@ -50,9 +50,7 @@ enum EpubTextAlignment { left, right, justify, center }
 sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
   const EpubReaderSettingsState._();
   const factory EpubReaderSettingsState({
-    @JsonKey(name: 'marginSize')
-    @Default(LayoutConstants.mediumPadding)
-    double horizontalMarginSize,
+    @Default(LayoutConstants.mediumPadding) double horizontalMarginSize,
     @Default(LayoutConstants.mediumPadding) double verticalMarginSize,
     @Default(14.0) double fontSize,
     @Default(0.0) double paragraphSpacing,
