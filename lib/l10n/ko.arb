@@ -1014,5 +1014,28 @@
     "removeBookmark": "북마크 제거",
     "@removeBookmark": {
         "description": "Tooltip for removing a bookmark"
+    },
+    "horizontalMargins": "좌우 여백",
+    "@horizontalMargins": {
+        "description": "Label for the left and right margins setting in the EPUB reader"
+    },
+    "verticalMargins": "상하 여백",
+    "@verticalMargins": {
+        "description": "Label for the top and bottom margins setting in the EPUB reader"
+    },
+    "refreshingChapterProgress": "{chapterId} 챕터 읽기 진행률 새로고침 중",
+    "@refreshingChapterProgress": {
+        "description": "Label for the syncing chapter progress phase with the chapter ID",
+        "placeholders": {
+            "chapterId": {
+                "description": "The ID of the chapter which reading progress is being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "invalidCredentialsDescription": "서버에서 API 키를 거부했습니다. 설정에서 API 키를 확인해 주세요.",
+    "@invalidCredentialsDescription": {
+        "description": "Instructions shown when the server rejected the API key"
     }
 }
