@@ -310,10 +310,7 @@ class EpubReflow extends _$EpubReflow {
     EpubReflowState? newState;
     if (current.scrollId != null) {
       try {
-        final resumePoint = fragment.querySelector(
-          '[${HtmlConstants.scrollIdAttribute}="${current.scrollId!.cssEscaped}"]',
-        );
-        if (resumePoint != null && resumePoint.hasChildNodes()) {
+        if (fragment.isResumePoint(current.scrollId!)) {
           log.info(
             'found resume point',
             attributes: {

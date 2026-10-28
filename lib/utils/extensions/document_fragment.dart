@@ -1,4 +1,5 @@
 import 'package:html/dom.dart';
+import 'package:kover/utils/extensions/string.dart';
 import 'package:kover/utils/html_constants.dart';
 
 extension DocumentFragmentExtensions on DocumentFragment {
@@ -10,6 +11,22 @@ extension DocumentFragmentExtensions on DocumentFragment {
         .firstOrNull;
 
     return p?.attributes['scroll-id'];
+  }
+
+  /// Whether reading resumes on this subpage for the progress saved with
+  /// [scrollId]. Progress stores the first paragraph of the visible subpage,
+  /// so a split paragraph ending this subpage was saved from the next one,
+  /// where it continues at the top.
+  bool isResumePoint(String scrollId) {
+    final element = querySelector(
+      '[${HtmlConstants.scrollIdAttribute}="${scrollId.cssEscaped}"]',
+    );
+    if (element == null || !element.hasChildNodes()) return false;
+
+    return !element.attributes.containsKey(
+          HtmlConstants.splitParagraphAttribute,
+        ) ||
+        paragraphScrollId() == scrollId;
   }
 }
 
