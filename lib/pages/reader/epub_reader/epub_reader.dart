@@ -127,7 +127,6 @@ class EpubReader extends HookConsumerWidget {
                       controller: controller,
                       itemCount: navState.totalPages,
                       allowImplicitScrolling: true,
-                      scrollCacheExtent: const .viewport(4),
                       scrollDirection: switch (data.mode) {
                         .horizontal => .horizontal,
                         .vertical => .vertical,
@@ -276,7 +275,9 @@ class _Page extends HookConsumerWidget {
       ),
       (previous, next) {
         next.whenData((next) {
-          if (next.page == page && controller.status == .ready) {
+          if (next.page == page &&
+              controller.status == .ready &&
+              controller.currentSubpage != next.subpage) {
             controller.jumpToSubpage(next.subpage);
           }
         });
