@@ -33,6 +33,11 @@ class PaginatedEpubPageController({
     if (paginator == null || index < 0 || index >= paginator.subpageCount) {
       return;
     }
+
+    // Re-syncing the current subpage must stay a no-op, otherwise the
+    // navigation provider and this controller keep notifying each other.
+    if (index == _currentSubpage) return;
+
     _currentSubpage = index;
     onSubpageChanged?.call(_currentSubpage);
     notifyListeners();
@@ -62,6 +67,8 @@ class PaginatedEpubPageController({
   }
 
   void viewportChanged() {
+    if (_status == .measuring) return;
+
     _status = .measuring;
     notifyListeners();
   }

@@ -80,6 +80,10 @@ class EpubNavigation extends _$EpubNavigation {
     final current = state.value;
     if (current == null) return;
 
+    // Avoid redundant state writes: listeners would sync the same subpage back
+    // into the page controller and start a notification loop.
+    if (current.ready && current.totalSubpages == totalSubpages) return;
+
     state = AsyncData(
       current.copyWith(
         totalSubpages: totalSubpages,
