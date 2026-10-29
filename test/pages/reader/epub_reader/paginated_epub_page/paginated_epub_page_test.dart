@@ -276,6 +276,97 @@ void main() {
       controller.nextSubpage();
       expect(controller.currentSubpage, 1);
     });
+
+    test('does not re-notify when jumping to the current subpage', () {
+      final changes = <int>[];
+      final controller = PaginatedEpubPageController(
+        onSubpageChanged: changes.add,
+      );
+      final paginator = _paginator('<div><p>AAAA BBBB CCCC</p></div>');
+      final block = _nodeIndexOf(paginator.root, 'p');
+
+      controller.attachRoot(paginator.root);
+      controller.processMeasurements(
+        EpubMeasurements(
+          contentSize: const Size(100, 1000),
+          units: [
+            _line(nodeIndex: block, bottom: 10, childPath: const [0]),
+            _line(
+              nodeIndex: block,
+              top: 10,
+              bottom: 20,
+              offset: 5,
+              childPath: const [0],
+            ),
+            _line(
+              nodeIndex: block,
+              top: 20,
+              bottom: 30,
+              offset: 10,
+              childPath: const [0],
+            ),
+          ],
+        ),
+        pageHeight: 25,
+      );
+
+      var notifications = 0;
+      controller.addListener(() => notifications++);
+
+      // The navigation provider re-syncs the current subpage on every state
+      // change; this must not notify back or the two loop forever.
+      controller.jumpToSubpage(0);
+
+      expect(notifications, 0);
+      expect(changes, isEmpty);
+
+      controller.nextSubpage();
+
+      expect(controller.currentSubpage, 1);
+      expect(notifications, 1);
+      expect(changes, [1]);
+
+      controller.jumpToSubpage(1);
+
+      expect(notifications, 1);
+      expect(changes, [1]);
+    });
+
+    test('viewportChanged only notifies when leaving the ready state', () {
+      final controller = PaginatedEpubPageController();
+      final paginator = _paginator('<div><p>Only page</p></div>');
+      final block = _nodeIndexOf(paginator.root, 'p');
+
+      controller.attachRoot(paginator.root);
+
+      var notifications = 0;
+      controller.addListener(() => notifications++);
+
+      controller.viewportChanged();
+
+      expect(notifications, 0);
+      expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
+
+      controller.processMeasurements(
+        EpubMeasurements(
+          contentSize: const Size(100, 10),
+          units: [_line(nodeIndex: block, bottom: 10)],
+        ),
+        pageHeight: 100,
+      );
+
+      expect(notifications, 1);
+      expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+
+      controller.viewportChanged();
+
+      expect(notifications, 2);
+      expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
+
+      controller.viewportChanged();
+
+      expect(notifications, 2);
+    });
   });
 }
 
