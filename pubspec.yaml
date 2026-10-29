@@ -32,7 +32,7 @@ dependencies:
   chopper: ^8.5.0
   http: ^1.6.0
   scrollview_observer: ^1.26.3
-  lucide_icons_flutter: ^3.1.9
+  lucide_icons_flutter: ^4.0.1
   flutter_context_menu: ^0.4.1
   drift: ^2.34.3
   drift_flutter: ^0.3.0
