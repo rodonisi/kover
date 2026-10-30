@@ -1,17 +1,17 @@
 import 'package:html/dom.dart' as dom;
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/probes/epub_measurements_collector.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break_unit.dart';
 import 'package:kover/utils/html_constants.dart';
 import 'package:kover/utils/logging.dart';
 
-class EpubPaginator {
-  final dom.DocumentFragment root;
+const _pageFitTolerance = 0.01;
+
+/// Splits an EPUB document into subpages based on the measured positions of
+/// lines and blocks.
+class EpubPaginator({required final dom.DocumentFragment root}) {
   final List<EpubBreak> _breaks = [];
   final Map<int, String> _subpages = {};
   bool _hasMeasurement = false;
-
-  new({required dom.DocumentFragment root})
-    : root = EpubPagePreprocessor(root: root).process();
 
   /// The document always has a first page, so there is one more subpage than
   /// there are breaks.
@@ -40,11 +40,11 @@ class EpubPaginator {
     var cursor = 0;
 
     while (cursor < units.length) {
-      final origin = units[cursor].top;
-      final limit = origin + pageHeight;
+      final origin = cursor == 0 ? 0.0 : units[cursor].pageStartTop;
+      final limit = origin + pageHeight - _pageFitTolerance;
 
       var last = cursor;
-      while (last + 1 < units.length && units[last + 1].bottom <= limit) {
+      while (last + 1 < units.length && units[last + 1].pageEndBottom < limit) {
         last++;
       }
 
@@ -59,14 +59,6 @@ class EpubPaginator {
   }
 
   String getSubpage(int index) {
-    log.debug(
-      'Requesting subpage',
-      attributes: {
-        'index': index,
-        'breaks': _breaks.length,
-        'subpages': subpageCount,
-      },
-    );
     if (index < 0 || index >= subpageCount) return '';
 
     if (_subpages.containsKey(index)) {
@@ -81,27 +73,10 @@ class EpubPaginator {
     final subpage = _splitSubpage(start, end).outerHtml;
     _subpages[index] = subpage;
 
-    log.debug(
-      'Subpage generated',
-      attributes: {
-        'index': index,
-        'start': start,
-        'end': end,
-        'length': subpage.length,
-      },
-    );
-
     return subpage;
   }
 
   dom.DocumentFragment _splitSubpage(EpubBreak? start, EpubBreak? end) {
-    log.debug(
-      'Generating subpage',
-      attributes: {
-        'start': start,
-        'end': end,
-      },
-    );
     final subpage = root.clone(true);
 
     // Both boundaries are resolved before trimming: removing nodes invalidates

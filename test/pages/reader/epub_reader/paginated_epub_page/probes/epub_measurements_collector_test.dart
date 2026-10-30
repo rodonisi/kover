@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break_unit.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/probes/epub_measurements_collector.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/utils/extensions/epub_page_preprocessor.dart'
     as render_utils;
 import 'package:kover/utils/html_constants.dart';
@@ -124,6 +126,113 @@ void main() {
       }
     });
 
+    testWidgets('includes ancestor padding in line page insets', (
+      tester,
+    ) async {
+      final html = _preprocess(
+        '<div style="padding: 32px 0">'
+        '<p style="margin: 0">Enough text to wrap across several lines in the '
+        'measurement viewport and exercise block splitting.</p>'
+        '</div>',
+      );
+
+      EpubMeasurements? measurements;
+      await _pump(tester, html, (value) => measurements = value);
+
+      final lines = measurements!.units.whereType<EpubLineUnit>();
+      expect(lines, isNotEmpty);
+      for (final line in lines) {
+        expect(line.topInset, greaterThanOrEqualTo(32));
+        expect(line.bottomInset, greaterThanOrEqualTo(32));
+      }
+    });
+
+    testWidgets('waits for asynchronous HTML builds before measuring', (
+      tester,
+    ) async {
+      final paragraphs = List.generate(
+        400,
+        (index) =>
+            '<p>Paragraph $index with enough text to require an asynchronous '
+            'HTML build before probes can be collected.</p>',
+      ).join();
+      final html = _preprocess('<div>$paragraphs</div>');
+
+      EpubMeasurements? measurements;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EpubMeasurementsCollector(
+              html: html,
+              viewport: const Size(500, 600),
+              onMeasured: (value) => measurements = value,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(measurements, isNull);
+
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 200)),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(measurements, isNotNull);
+      expect(measurements!.units, isNotEmpty);
+    });
+
+    testWidgets('completes immediately for empty HTML', (tester) async {
+      EpubMeasurements? measurements;
+      await _pump(
+        tester,
+        dom.DocumentFragment(),
+        (value) => measurements = value,
+      );
+
+      expect(measurements, isNotNull);
+      expect(measurements!.units, isEmpty);
+    });
+
+    testWidgets('waits for dimensionless images before measuring', (
+      tester,
+    ) async {
+      final html = _preprocess(
+        '<img src="data:image/png;base64,'
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8'
+        '/x8AAusB9Wl2nXQAAAAASUVORK5CYII=">',
+      );
+
+      EpubMeasurements? measurements;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EpubMeasurementsCollector(
+              html: html,
+              viewport: const Size(500, 600),
+              onMeasured: (value) => measurements = value,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(measurements, isNull);
+
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(measurements, isNotNull);
+      final leaves = measurements!.units.whereType<EpubLeafUnit>();
+      expect(leaves, hasLength(1));
+      expect(leaves.single.height, greaterThan(0));
+    });
+
     testWidgets('harvests leaf probes next to text blocks', (tester) async {
       final html = _preprocess(
         '<div>'
@@ -135,7 +244,12 @@ void main() {
       );
 
       EpubMeasurements? measurements;
-      await _pump(tester, html, (value) => measurements = value);
+      await _pump(
+        tester,
+        html,
+        (value) => measurements = value,
+        waitForImages: true,
+      );
 
       final leaves = measurements!.units.whereType<EpubLeafUnit>();
 
@@ -151,25 +265,35 @@ void main() {
 Future<void> _pump(
   WidgetTester tester,
   dom.DocumentFragment html,
-  void Function(EpubMeasurements) onMeasured,
-) async {
+  void Function(EpubMeasurements) onMeasured, {
+  bool waitForImages = false,
+}) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
         body: EpubMeasurementsCollector(
           html: html,
-          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+          viewport: const Size(500, 600),
           onMeasured: onMeasured,
         ),
       ),
     ),
   );
   await tester.pump();
+
+  if (waitForImages) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
+    );
+    await tester.pump();
+    await tester.pump();
+  }
 }
 
 dom.DocumentFragment _preprocess(String html) {
   return EpubPagePreprocessor(
     root: dom.DocumentFragment.html(html),
+    operations: [NodeIndexingOperation()],
   ).process();
 }
 
@@ -178,5 +302,8 @@ dom.DocumentFragment _preprocessForRender(String html) {
   final preprocessed = render_utils.EpubPagePreprocessor(
     root,
   ).preprocessForRender();
-  return EpubPagePreprocessor(root: preprocessed).process();
+  return EpubPagePreprocessor(
+    root: preprocessed,
+    operations: [NodeIndexingOperation()],
+  ).process();
 }
