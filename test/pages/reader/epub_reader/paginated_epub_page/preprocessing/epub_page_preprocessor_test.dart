@@ -13,7 +13,10 @@ void main() {
           '<div><p>a<span>b</span></p><p>c</p></div>',
         );
 
-        EpubPagePreprocessor(root: root).process();
+        EpubPagePreprocessor(
+          root: root,
+          operations: [NodeIndexingOperation()],
+        ).process();
 
         // <div index=0>
         //   <p index=1>
@@ -28,7 +31,10 @@ void main() {
       test('when fragment has multiple roots, then indexes them in order', () {
         final root = dom.DocumentFragment.html('text<p>a</p><p>b</p>');
 
-        EpubPagePreprocessor(root: root).process();
+        EpubPagePreprocessor(
+          root: root,
+          operations: [NodeIndexingOperation()],
+        ).process();
 
         expect(_nodeIndexes(root), ['0', '1']);
       });

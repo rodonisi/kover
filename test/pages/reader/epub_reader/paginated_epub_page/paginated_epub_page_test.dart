@@ -2,9 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart' show Size;
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_paginator.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break_unit.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller_status.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/probes/epub_measurements_collector.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
 import 'package:kover/utils/html_constants.dart';
 
 void main() {
@@ -19,6 +22,26 @@ void main() {
 
       expect(paginator.subpageCount, 1);
       expect(paginator.getSubpage(0), contains('Only page'));
+    });
+
+    test('starts the first page at the document origin', () {
+      final paginator = _paginator('<div><p>AAAA BBBB</p></div>');
+      final block = _nodeIndexOf(paginator.root, 'p');
+
+      paginator.paginate([
+        _line(nodeIndex: block, top: 32, bottom: 42, childPath: const [0]),
+        _line(
+          nodeIndex: block,
+          top: 42,
+          bottom: 52,
+          offset: 4,
+          childPath: const [0],
+        ),
+      ], 42);
+
+      expect(paginator.subpageCount, 2);
+      expect(paginator.getSubpage(0), isNot(contains('BBBB')));
+      expect(paginator.getSubpage(1), contains('BBBB'));
     });
 
     test('splits a paragraph at line offsets', () {
@@ -129,6 +152,30 @@ void main() {
 
       expect(pages[2], contains('FIVE SIX'));
       expect(pages[2], isNot(contains('THREE')));
+    });
+
+    test('accounts for preserved spacing at split boundaries', () {
+      final paginator = _paginator('<div><p>AAAA BBBB</p></div>');
+      final block = _nodeIndexOf(paginator.root, 'p');
+
+      paginator.paginate([
+        _line(
+          nodeIndex: block,
+          top: 32,
+          bottom: 42,
+          topInset: 32,
+          bottomInset: 32,
+        ),
+        _line(
+          nodeIndex: block,
+          top: 42,
+          bottom: 52,
+          topInset: 32,
+          bottomInset: 32,
+        ),
+      ], 74);
+
+      expect(paginator.subpageCount, 2);
     });
 
     test('splits at a block boundary and keeps wrappers', () {
@@ -370,8 +417,13 @@ void main() {
   });
 }
 
-EpubPaginator _paginator(String html) =>
-    EpubPaginator(root: dom.DocumentFragment.html(html));
+EpubPaginator _paginator(String html) {
+  final root = EpubPagePreprocessor(
+    root: dom.DocumentFragment.html(html),
+    operations: [NodeIndexingOperation()],
+  ).process();
+  return EpubPaginator(root: root);
+}
 
 int _nodeIndexOf(dom.DocumentFragment root, String selector) =>
     _nodeIndex(root.querySelector(selector)!);
@@ -387,6 +439,8 @@ EpubBreakUnit _line({
   List<int> childPath = const [],
   bool afterNode = false,
   bool isLeaf = false,
+  double topInset = 0,
+  double bottomInset = 0,
 }) {
   final start = EpubBreak(
     blockNodeIndex: nodeIndex,
@@ -401,11 +455,15 @@ EpubBreakUnit _line({
           nodeIndex: nodeIndex,
           top: top,
           bottom: bottom,
+          topInset: topInset,
+          bottomInset: bottomInset,
         )
       : EpubLineUnit(
           start: start,
           nodeIndex: nodeIndex,
           top: top,
           bottom: bottom,
+          topInset: topInset,
+          bottomInset: bottomInset,
         );
 }

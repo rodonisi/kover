@@ -1,31 +1,22 @@
-import 'dart:math' as math;
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/paginated_epub_widget_factory.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/probes/epub_block_probe.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/probes/epub_leaf_probe.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/probes/epub_text_probe.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_probe.dart';
 import 'package:kover/utils/html_constants.dart';
-
-sealed class EpubFailure {
-  const EpubFailure({required this.nodeIndex});
-
-  final int nodeIndex;
-}
-
-class EpubImageFailure extends EpubFailure {
-  const EpubImageFailure({required super.nodeIndex, required this.url});
-
-  final String url;
-}
 
 /// A [WidgetFactory] used for measuring the epub content.
 /// Wraps blocks, text and images in probes that report their size and position.
-class MeasuringPaginatedEpubWidgetFactory({super.viewport})
-    extends PaginatedEpubWidgetFactory {
-  final failures = <EpubImageFailure>[];
+class MeasuringPaginatedEpubWidgetFactory({
+  super.viewport,
+  final void Function()? onBuildComplete,
+  final void Function()? onImageSettled,
+}) extends PaginatedEpubWidgetFactory {
+  var _isBuildComplete = false;
+  int _pendingImages = 0;
+
+  bool get isBuildComplete => _isBuildComplete;
+  int get pendingImages => _pendingImages;
 
   final BuildOp epubBlockProbeOp = .v2(
     alwaysRenderBlock: false,
@@ -51,6 +42,43 @@ class MeasuringPaginatedEpubWidgetFactory({super.viewport})
   }
 
   @override
+  Widget buildBodyWidget(BuildContext context, Widget child) {
+    final built = super.buildBodyWidget(context, child);
+    _markBuildComplete();
+    return built;
+  }
+
+  @override
+  Widget? onErrorBuilder(
+    BuildContext context,
+    BuildTree tree, [
+    dynamic error,
+    dynamic data,
+  ]) {
+    final built = super.onErrorBuilder(context, tree, error, data);
+    _markBuildComplete();
+    return built;
+  }
+
+  void _markBuildComplete() {
+    if (_isBuildComplete) return;
+    _isBuildComplete = true;
+    onBuildComplete?.call();
+  }
+
+  @override
+  Widget? buildPadding(
+    BuildTree tree,
+    Widget child,
+    EdgeInsetsGeometry padding,
+  ) {
+    final built = super.buildPadding(tree, child, padding);
+    if (built == null) return null;
+
+    return EpubPaddingProbe(padding: padding, child: built);
+  }
+
+  @override
   Widget? buildText(
     BuildTree tree,
     InheritedProperties resolved,
@@ -72,55 +100,29 @@ class MeasuringPaginatedEpubWidgetFactory({super.viewport})
 
   @override
   Widget? buildImageWidget(BuildTree meta, ImageSource src) {
+    final child = super.buildImageWidget(meta, src);
     final nodeIndex = _nodeIndex(meta.element);
-    if (nodeIndex == null) return super.buildImageWidget(meta, src);
+    if (nodeIndex == null) return child;
 
-    final size = _imageSize(src);
-    if (size == null) {
-      failures.add(EpubImageFailure(nodeIndex: nodeIndex, url: src.url));
-      return EpubLeafProbe(
-        nodeIndex: nodeIndex,
-        element: meta.element,
-        child: const SizedBox.shrink(),
+    var tracked = child ?? const SizedBox.shrink();
+    if (child is Image) {
+      tracked = _EpubImageLoadTracker(
+        key: ValueKey(child.image),
+        provider: child.image,
+        onEnter: () => _pendingImages++,
+        onExit: () {
+          _pendingImages--;
+          if (_pendingImages == 0) onImageSettled?.call();
+        },
+        child: child,
       );
     }
-
-    final fitted = _fit(size);
-    final child = super.buildImageWidget(meta, src);
 
     return EpubLeafProbe(
       nodeIndex: nodeIndex,
       element: meta.element,
-      child: SizedBox(
-        width: fitted.width,
-        height: fitted.height,
-        child: child,
-      ),
+      child: tracked,
     );
-  }
-
-  Size? _imageSize(ImageSource src) {
-    if (src.width != null && src.height != null) {
-      return Size(src.width!, src.height!);
-    }
-
-    return null;
-  }
-
-  Size _fit(Size size) {
-    if (size.isEmpty) return size;
-
-    final widthLimit = viewport.width.isFinite ? viewport.width : size.width;
-    final heightLimit = viewport.height.isFinite
-        ? viewport.height
-        : size.height;
-
-    final scale = math.min(
-      1.0,
-      math.min(widthLimit / size.width, heightLimit / size.height),
-    );
-
-    return Size(size.width * scale, size.height * scale);
   }
 
   static int? _nodeIndex(dom.Element element) {
@@ -128,4 +130,82 @@ class MeasuringPaginatedEpubWidgetFactory({super.viewport})
         element.attributes[HtmlConstants.nodeIndexAttribute] ?? '';
     return int.tryParse(indexAttr);
   }
+}
+
+class _EpubImageLoadTracker extends StatefulWidget {
+  final ImageProvider provider;
+  final void Function() onEnter;
+  final void Function() onExit;
+  final Widget child;
+
+  const _EpubImageLoadTracker({
+    super.key,
+    required this.provider,
+    required this.onEnter,
+    required this.onExit,
+    required this.child,
+  });
+
+  @override
+  State<_EpubImageLoadTracker> createState() => _EpubImageLoadTrackerState();
+}
+
+class _EpubImageLoadTrackerState extends State<_EpubImageLoadTracker> {
+  ImageStream? _stream;
+  ImageStreamListener? _listener;
+  var _settled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.onEnter();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_settled || _stream != null) return;
+
+    final stream = widget.provider.resolve(
+      createLocalImageConfiguration(context),
+    );
+    final listener = ImageStreamListener(
+      (_, _) => _settle(),
+      onError: (_, _) => _settle(),
+    );
+
+    _stream = stream;
+    _listener = listener;
+    stream.addListener(listener);
+  }
+
+  void _settle() {
+    if (_settled) return;
+    _settled = true;
+    _removeListener();
+    widget.onExit();
+  }
+
+  void _removeListener() {
+    final stream = _stream;
+    final listener = _listener;
+    if (stream != null && listener != null) {
+      stream.removeListener(listener);
+    }
+    _stream = null;
+    _listener = null;
+  }
+
+  @override
+  void dispose() {
+    _removeListener();
+    if (!_settled) {
+      _settled = true;
+      widget.onExit();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
