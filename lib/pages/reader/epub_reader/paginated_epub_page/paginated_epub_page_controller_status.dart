@@ -1,10 +1,13 @@
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_paginator.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/probes/epub_measurements_collector.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
 import 'package:material_ui/material_ui.dart';
 
 enum PaginatedEpubPageControllerStatus { measuring, ready }
 
+/// Controls the state of a [PaginatedEpubPage].
 class PaginatedEpubPageController({
   final String? initialXpath,
   final void Function(int)? onSubpageChanged,
@@ -34,8 +37,6 @@ class PaginatedEpubPageController({
       return;
     }
 
-    // Re-syncing the current subpage must stay a no-op, otherwise the
-    // navigation provider and this controller keep notifying each other.
     if (index == _currentSubpage) return;
 
     _currentSubpage = index;
@@ -44,7 +45,11 @@ class PaginatedEpubPageController({
   }
 
   void attachRoot(dom.DocumentFragment html) {
-    _paginator = EpubPaginator(root: html);
+    final preprocessed = EpubPagePreprocessor(
+      root: html,
+      operations: [NodeIndexingOperation()],
+    ).process();
+    _paginator = EpubPaginator(root: preprocessed);
     _currentSubpage = 0;
     _status = .measuring;
     notifyListeners();

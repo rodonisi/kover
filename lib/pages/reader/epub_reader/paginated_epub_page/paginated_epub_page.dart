@@ -1,9 +1,10 @@
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'dart:async';
+
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/paginated_epub_widget_factory.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller_status.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/probes/epub_measurements_collector.dart';
-import 'package:kover/utils/logging.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/render_html.dart';
 import 'package:material_ui/material_ui.dart';
 
 class PaginatedEpubPage extends StatefulWidget {
@@ -18,6 +19,7 @@ class PaginatedEpubPage extends StatefulWidget {
 
 class _PaginatedEpubPageState extends State<PaginatedEpubPage> {
   Size _viewport = Size.zero;
+  Timer? _viewportDebounce;
 
   @override
   void initState() {
@@ -58,7 +60,12 @@ class _PaginatedEpubPageState extends State<PaginatedEpubPage> {
     return LayoutBuilder(
       builder: (context, constraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          updateViewport(Size(constraints.maxWidth, constraints.maxHeight));
+          if (_viewportDebounce != null) {
+            _viewportDebounce!.cancel();
+          }
+          _viewportDebounce = Timer(const Duration(milliseconds: 100), () {
+            updateViewport(Size(constraints.maxWidth, constraints.maxHeight));
+          });
         });
 
         if (widget.controller.status == .measuring) {
@@ -67,41 +74,11 @@ class _PaginatedEpubPageState extends State<PaginatedEpubPage> {
               Offstage(
                 child: EpubMeasurementsCollector(
                   html: widget.controller.root!,
-                  constraints: constraints,
+                  viewport: _viewport,
                   onMeasured: (measurements) {
-                    // Pages are laid out in the viewport, not in the full document.
-                    final viewportHeight = constraints.maxHeight;
-                    final pageHeight =
-                        viewportHeight.isFinite && viewportHeight > 0
-                        ? viewportHeight
-                        : measurements.contentSize.height;
-
-                    log.debug(
-                      'Measurements collected',
-                      attributes: {
-                        'contentSize': measurements.contentSize,
-                        'pageHeight': pageHeight,
-                        'units': measurements.units.length,
-                        'lines': measurements.units
-                            .whereType<EpubLineUnit>()
-                            .length,
-                        'leaves': measurements.units
-                            .whereType<EpubLeafUnit>()
-                            .length,
-                      },
-                    );
-
                     widget.controller.processMeasurements(
                       measurements,
-                      pageHeight: pageHeight,
-                    );
-
-                    log.debug(
-                      'Pagination completed',
-                      attributes: {
-                        'pageHeight': pageHeight,
-                        'subpages': widget.controller.subpageCount,
-                      },
+                      pageHeight: _viewport.height,
                     );
                   },
                 ),
@@ -121,9 +98,13 @@ class _PaginatedEpubPageState extends State<PaginatedEpubPage> {
         return PageView.builder(
           itemCount: subpageCount,
           itemBuilder: (context, index) {
-            return HtmlWidget(
-              widget.controller.getSubpage(index),
-              factoryBuilder: () => PaginatedEpubWidgetFactory(),
+            return OverflowBox(
+              maxHeight: double.infinity,
+              child: RenderHtml(
+                html: widget.controller.getSubpage(index),
+                factoryBuilder: () =>
+                    PaginatedEpubWidgetFactory(viewport: _viewport),
+              ),
             );
           },
         );

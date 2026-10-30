@@ -27,9 +27,8 @@ class EpubTextIndexMismatch implements Exception {
   String toString() => 'EpubTextIndexMismatch: $reason';
 }
 
-/// Aligns the flattened inline text of [block] (the text fwfh puts into a
-/// single `RichText`) with its DOM nodes, so line start offsets can be turned
-/// back into DOM break points.
+/// Aligns the flattened inline text of [block] with its DOM nodes, so line
+/// start offsets can be turned  back into DOM break points.
 ///
 /// The alignment is greedy: whitespace runs in the DOM may collapse or vanish,
 /// so a normalized space consumes a raw whitespace run and a non-space
@@ -37,26 +36,22 @@ class EpubTextIndexMismatch implements Exception {
 /// injected by fwfh (indent spans, anchors, inline-block elements, sup/sub,
 /// horizontal margins/padding) are represented by `U+FFFC` in the flattened
 /// text and are consumed as single tokens. Anything that does not line up
-/// throws [EpubTextIndexMismatch]; the caller then treats the block as
-/// unsplittable.
-class EpubTextIndex {
-  EpubTextIndex._(this._positions);
-
-  final List<EpubTextPosition> _positions;
-
+/// throws [EpubTextIndexMismatch].
+class const EpubTextIndex._(final List<EpubTextPosition> _positions) {
   /// Returns the DOM position of the visible character at [offset].
   EpubTextPosition? positionAt(int offset) {
     if (offset < 0 || offset >= _positions.length) return null;
     return _positions[offset];
   }
 
-  static EpubTextIndex build({
+  factory build({
     required dom.Element block,
     required Set<dom.Element> blockElements,
     required CssWhitespace whitespace,
     required String plainText,
   }) {
     final tokens = <_Token>[];
+
     _collect(
       block: block,
       node: block,
@@ -103,12 +98,12 @@ class EpubTextIndex {
           index++;
           continue;
         }
-        if (whitespace != CssWhitespace.pre) {
+        if (whitespace != .pre) {
           throw EpubTextIndexMismatch('expected <br> at $i');
         }
       }
 
-      if (whitespace == CssWhitespace.pre) {
+      if (whitespace == .pre) {
         final token = _peek(tokens, index);
         if (token is! _CharToken || token.char != char) {
           throw EpubTextIndexMismatch('pre text mismatch at $i');
@@ -165,12 +160,11 @@ class EpubTextIndex {
       throw const EpubTextIndexMismatch('trailing content after text');
     }
 
-    return EpubTextIndex._(positions);
+    return ._(positions);
   }
 }
 
-_Token? _peek(List<_Token> tokens, int index) =>
-    index < tokens.length ? tokens[index] : null;
+_Token? _peek(List<_Token> tokens, int index) => tokens.elementAtOrNull(index);
 
 void _collect({
   required dom.Element block,
@@ -181,10 +175,11 @@ void _collect({
 }) {
   if (node is dom.Text) {
     final data = node.data;
-    if (whitespace == CssWhitespace.pre) {
-      for (var i = 0; i < data.length; i++) {
-        tokens.add(_CharToken(node: node, offset: i, char: data[i]));
-      }
+    if (whitespace == .pre) {
+      tokens.addAll([
+        for (var i = 0; i < data.length; i++)
+          _CharToken(node: node, offset: i, char: data[i]),
+      ]);
       return;
     }
 
@@ -219,9 +214,7 @@ void _collect({
     return;
   }
 
-  if (localName == 'sup' ||
-      localName == 'sub' ||
-      _hasInlineBlockDisplay(node)) {
+  if (localName == 'sup' || _hasInlineBlockDisplay(node)) {
     if (node.attributes.containsKey('id')) tokens.add(_InlineToken(node));
     tokens.add(_InlineToken(node));
     return;
