@@ -4,6 +4,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_paginato
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/scroll_id_operation.dart';
 import 'package:material_ui/material_ui.dart';
 
 enum PaginatedEpubPageControllerStatus { measuring, ready }
@@ -51,7 +52,10 @@ class PaginatedEpubPageController({
   void attachRoot(dom.DocumentFragment html) {
     final root = EpubPagePreprocessor(
       html: html,
-      operations: [NodeIndexingOperation()],
+      operations: [
+        NodeIndexingOperation(),
+        ScrollIdOperation(),
+      ],
     ).process();
     _paginator = EpubPaginator(root: root);
     _cssEngine = CssEngine(root: root);
