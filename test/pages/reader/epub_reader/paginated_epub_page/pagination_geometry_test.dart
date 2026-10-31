@@ -1,6 +1,7 @@
 import 'package:flutter/rendering.dart' show RenderFlex;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_paginator.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/paginated_epub_widget_factory.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_anchor.dart';
@@ -167,6 +168,7 @@ Future<EpubPaginator> _paginate(
             child: EpubMeasurementsCollector(
               html: root,
               viewport: viewport,
+              cssEngine: CssEngine(root: root),
               onMeasured: (value) => measurements = value,
             ),
           ),
@@ -227,6 +229,9 @@ Future<double> _renderedPageHeight(
                     html: html,
                     factoryBuilder: () =>
                         PaginatedEpubWidgetFactory(viewport: viewport),
+                    cssEngine: CssEngine(
+                      root: dom.DocumentFragment.html(html),
+                    ),
                   ),
                 ),
               ),
@@ -244,7 +249,7 @@ Future<double> _renderedPageHeight(
 
 dom.DocumentFragment _preprocess(String html) {
   return EpubPagePreprocessor(
-    root: dom.DocumentFragment.html(html),
+    html: dom.DocumentFragment.html(html),
     operations: [NodeIndexingOperation()],
   ).process();
 }

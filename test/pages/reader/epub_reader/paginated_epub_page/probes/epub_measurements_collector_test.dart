@@ -1,11 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break_unit.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
-import 'package:kover/utils/extensions/epub_page_preprocessor.dart'
-    as render_utils;
 import 'package:kover/utils/html_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -26,10 +25,21 @@ void main() {
 
       final units = measurements!.units;
 
+      final paragraphs = html.querySelectorAll('p');
+      final paragraphIndexes = {
+        for (final paragraph in paragraphs)
+          int.parse(
+            paragraph.attributes[HtmlConstants.nodeIndexAttribute]!,
+          ),
+      };
+
       expect(units.whereType<EpubLineUnit>(), isNotEmpty);
       expect(units.whereType<EpubLineUnit>().length, greaterThan(2));
       expect(units.any((unit) => unit.nodeIndex == 0), isFalse);
-      expect(units.map((unit) => unit.nodeIndex).toSet(), containsAll([1, 2]));
+      expect(
+        units.map((unit) => unit.nodeIndex).toSet(),
+        containsAll(paragraphIndexes),
+      );
 
       for (final unit in units) {
         expect(unit.bottom, greaterThan(unit.top));
@@ -64,11 +74,12 @@ void main() {
     testWidgets('harvests lines from paragraphs with text indent', (
       tester,
     ) async {
-      final html = _preprocessForRender(
+      final html = _preprocess(
+        '<style>p { text-indent: 4% }</style>'
         '<div>'
-        '<p style="text-indent: 4%">First paragraph with enough words to '
+        '<p>First paragraph with enough words to '
         'wrap onto another line when rendered in a narrow viewport.</p>'
-        '<p style="text-indent: 4%">Second paragraph.</p>'
+        '<p>Second paragraph.</p>'
         '</div>',
       );
 
@@ -82,7 +93,7 @@ void main() {
     });
 
     testWidgets('harvests lines from calibre-style markup', (tester) async {
-      final html = _preprocessForRender(
+      final html = _preprocess(
         '<div>'
         '<h2 id="chapter">\n'
         '<a id="chapter-anchor"></a><span id="chapter-image"></span>\n'
@@ -165,6 +176,7 @@ void main() {
             body: EpubMeasurementsCollector(
               html: html,
               viewport: const Size(500, 600),
+              cssEngine: CssEngine(root: html),
               onMeasured: (value) => measurements = value,
             ),
           ),
@@ -212,6 +224,7 @@ void main() {
             body: EpubMeasurementsCollector(
               html: html,
               viewport: const Size(500, 600),
+              cssEngine: CssEngine(root: html),
               onMeasured: (value) => measurements = value,
             ),
           ),
@@ -252,8 +265,13 @@ void main() {
       );
 
       final leaves = measurements!.units.whereType<EpubLeafUnit>();
+      final imageIndex = int.parse(
+        html
+            .querySelector('img')!
+            .attributes[HtmlConstants.nodeIndexAttribute]!,
+      );
 
-      expect(leaves.any((unit) => unit.nodeIndex == 1), isTrue);
+      expect(leaves.any((unit) => unit.nodeIndex == imageIndex), isTrue);
       expect(
         measurements!.units.whereType<EpubLineUnit>().isNotEmpty,
         isTrue,
@@ -274,6 +292,7 @@ Future<void> _pump(
         body: EpubMeasurementsCollector(
           html: html,
           viewport: const Size(500, 600),
+          cssEngine: CssEngine(root: html),
           onMeasured: onMeasured,
         ),
       ),
@@ -292,18 +311,7 @@ Future<void> _pump(
 
 dom.DocumentFragment _preprocess(String html) {
   return EpubPagePreprocessor(
-    root: dom.DocumentFragment.html(html),
-    operations: [NodeIndexingOperation()],
-  ).process();
-}
-
-dom.DocumentFragment _preprocessForRender(String html) {
-  final root = dom.DocumentFragment.html(html);
-  final preprocessed = render_utils.EpubPagePreprocessor(
-    root,
-  ).preprocessForRender();
-  return EpubPagePreprocessor(
-    root: preprocessed,
+    html: dom.DocumentFragment.html(html),
     operations: [NodeIndexingOperation()],
   ).process();
 }

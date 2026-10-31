@@ -1,5 +1,8 @@
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:html/dom.dart' as dom;
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/measuring_paginated_epub_widget_factory.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/paginated_epub_widget_factory.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_probe.dart';
@@ -58,7 +61,76 @@ void main() {
     expect(measured, rendered);
     expect(tester.getSize(find.byType(EpubLeafProbe)), rendered);
   });
+
+  testWidgets('positive text-indent shifts the first line', (tester) async {
+    const viewport = Size(300, 600);
+    const html =
+        '<p style="margin: 0; font-size: 10px; text-indent: 2em">'
+        'Hello world</p>';
+
+    await _pumpHtml(tester, html, viewport);
+
+    final paragraph = tester.renderObject<RenderParagraph>(
+      find.byType(RichText),
+    );
+    expect(paragraph.text.toPlainText().codeUnitAt(0), 0xFFFC);
+
+    final firstGlyph = paragraph.getOffsetForCaret(
+      const TextPosition(offset: 1),
+      Rect.zero,
+    );
+    expect(firstGlyph.dx, greaterThanOrEqualTo(18));
+  });
+
+  testWidgets('non-positive or centered text-indent is ignored', (
+    tester,
+  ) async {
+    const viewport = Size(300, 600);
+    const html =
+        '<p style="margin: 0; font-size: 10px; text-indent: -2em">'
+        'Negative</p>'
+        '<p style="margin: 0; font-size: 10px; text-indent: 0">Zero</p>'
+        '<p style="margin: 0; font-size: 10px; text-indent: 2em; '
+        'text-align: center">Centered</p>'
+        '<p ${HtmlConstants.splitParagraphAttribute} '
+        'style="margin: 0; font-size: 10px; text-indent: 2em">Split</p>';
+
+    await _pumpHtml(tester, html, viewport);
+
+    final paragraphs = tester
+        .renderObjectList<RenderParagraph>(find.byType(RichText))
+        .where((p) => p.text.toPlainText().isNotEmpty)
+        .toList();
+
+    expect(paragraphs, hasLength(4));
+    for (final paragraph in paragraphs) {
+      expect(paragraph.text.toPlainText().codeUnitAt(0), isNot(0xFFFC));
+    }
+  });
 }
+
+Future<void> _pumpHtml(
+  WidgetTester tester,
+  String html,
+  Size viewport,
+) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: RenderHtml(
+          key: UniqueKey(),
+          html: html,
+          factoryBuilder: () => PaginatedEpubWidgetFactory(viewport: viewport),
+          cssEngine: _engine(html),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+CssEngine _engine(String html) =>
+    CssEngine(root: dom.DocumentFragment.html(html));
 
 Future<Size> _imageSize(
   WidgetTester tester,
@@ -72,6 +144,7 @@ Future<Size> _imageSize(
           key: UniqueKey(),
           html: html,
           factoryBuilder: factoryBuilder,
+          cssEngine: _engine(html),
         ),
       ),
     ),

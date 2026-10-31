@@ -51,7 +51,11 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
       final next = last + 1;
       if (next >= units.length) break;
 
-      starts.add(units[next].start);
+      starts.add(
+        units[next].start.copyWith(
+          startsMidBlock: units[last].nodeIndex == units[next].nodeIndex,
+        ),
+      );
       cursor = next;
     }
 
@@ -111,6 +115,13 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
 
     if (start != null) {
       _trimBefore(subpage, startNode!, start);
+    }
+
+    if (start?.startsMidBlock == true) {
+      _blockAt(
+        subpage,
+        start!.blockNodeIndex,
+      )?.attributes[HtmlConstants.splitParagraphAttribute] = '';
     }
 
     return subpage;
