@@ -1,6 +1,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/measuring_paginated_epub_widget_factory.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break_unit.dart';
@@ -19,11 +20,13 @@ class EpubMeasurementsCollector extends HookWidget {
   final dom.DocumentFragment html;
   final Size viewport;
   final void Function(EpubMeasurements) onMeasured;
+  final CssEngine cssEngine;
   const new({
     super.key,
     required this.html,
     required this.viewport,
     required this.onMeasured,
+    required this.cssEngine,
   });
 
   @override
@@ -87,6 +90,7 @@ class EpubMeasurementsCollector extends HookWidget {
             key: ValueKey(viewport),
             html: html.outerHtml,
             factoryBuilder: () => factory,
+            cssEngine: cssEngine,
           ),
         ),
       ),

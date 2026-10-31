@@ -6,7 +6,6 @@ import 'package:kover/models/pdf_model.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/riverpod/repository/book_repository.dart';
-import 'package:kover/utils/extensions/epub_page_preprocessor.dart';
 import 'package:kover/utils/extensions/color.dart';
 import 'package:kover/utils/extensions/epub_theme.dart';
 import 'package:kover/utils/html_constants.dart';
@@ -32,10 +31,8 @@ Future<PageContent> epubPage(
   final repo = ref.watch(bookRepositoryProvider);
   final content = await repo.getEpubPage(chapterId: chapterId, page: page);
 
-  final preprocessed = content.root.preprocessForRender();
-
   return content.copyWith(
-    root: preprocessed,
+    root: content.root,
     styles: content.styles,
   );
 }

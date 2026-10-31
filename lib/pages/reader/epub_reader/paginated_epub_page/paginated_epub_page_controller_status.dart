@@ -1,4 +1,5 @@
 import 'package:html/dom.dart' as dom;
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_paginator.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
@@ -14,6 +15,7 @@ class PaginatedEpubPageController({
   final void Function(int)? onSubpagesCountChanged,
 }) extends ChangeNotifier {
   EpubPaginator? _paginator;
+  CssEngine? _cssEngine;
   PaginatedEpubPageControllerStatus _status = .measuring;
   int _currentSubpage = 0;
 
@@ -22,6 +24,8 @@ class PaginatedEpubPageController({
 
   int get currentSubpage => _currentSubpage;
   int get subpageCount => _paginator?.subpageCount ?? 0;
+  CssEngine get cssEngine =>
+      _cssEngine ?? (throw Exception('CSS engine is not initialized'));
 
   void nextSubpage() {
     jumpToSubpage(_currentSubpage + 1);
@@ -45,11 +49,12 @@ class PaginatedEpubPageController({
   }
 
   void attachRoot(dom.DocumentFragment html) {
-    final preprocessed = EpubPagePreprocessor(
-      root: html,
+    final root = EpubPagePreprocessor(
+      html: html,
       operations: [NodeIndexingOperation()],
     ).process();
-    _paginator = EpubPaginator(root: preprocessed);
+    _paginator = EpubPaginator(root: root);
+    _cssEngine = CssEngine(root: root);
     _currentSubpage = 0;
     _status = .measuring;
     notifyListeners();

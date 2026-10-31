@@ -1,16 +1,24 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 
 class RenderHtml extends StatelessWidget {
   final String html;
   final WidgetFactory Function() factoryBuilder;
-  const new({super.key, required this.html, required this.factoryBuilder});
+  final CssEngine cssEngine;
+  const new({
+    super.key,
+    required this.html,
+    required this.factoryBuilder,
+    required this.cssEngine,
+  });
 
   @override
   Widget build(BuildContext context) {
     return HtmlWidget(
       html,
       factoryBuilder: factoryBuilder,
+      customStylesBuilder: (element) => cssEngine.stylesFor(element),
     );
   }
 }
