@@ -1,13 +1,132 @@
 import 'dart:math' as math;
 
+import 'package:csslib/parser.dart' as css;
+import 'package:csslib/visitor.dart' as css;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:kover/utils/html_constants.dart';
 
 /// A [WidgetFactory] that adjusts rendering for paginated EPUB content.
 class PaginatedEpubWidgetFactory({
   final Size viewport = const Size(double.infinity, double.infinity),
 }) extends WidgetFactory {
+  late final BuildOp _textIndentOp = BuildOp(
+    alwaysRenderBlock: false,
+    debugLabel: 'epub-text-indent',
+    onParsed: (tree) {
+      _applyTextIndent(tree);
+      return tree;
+    },
+  );
+
+  @override
+  void parse(BuildTree meta) {
+    meta.register(_textIndentOp);
+
+    super.parse(meta);
+  }
+
+  void _applyTextIndent(BuildTree tree) {
+    if (tree.isInline != false) return;
+    if (tree.children.any((child) => child.isInline == false)) return;
+    if (tree.element.attributes.containsKey(
+      HtmlConstants.splitParagraphAttribute,
+    )) {
+      return;
+    }
+    if (tree.element.attributes.containsKey(
+      HtmlConstants.textIndentAttribute,
+    )) {
+      return;
+    }
+
+    final indent = _effectiveTextIndent(tree);
+    if (indent == null || !indent.isPositive) return;
+    if (_isCenterAligned(tree)) return;
+
+    tree.element.attributes[HtmlConstants.textIndentAttribute] = '';
+    tree.prepend(
+      WidgetBit.inline(
+        tree,
+        WidgetPlaceholder(
+          builder: (context, _) {
+            final width = _resolveIndent(tree, indent, context);
+            return width != null && width > 0
+                ? SizedBox(width: width)
+                : widget0;
+          },
+          debugLabel: '${tree.element.localName}--textIndent',
+        ),
+        alignment: .bottom,
+      ),
+    );
+  }
+
+  /// Returns the first valid `text-indent` declaration on [tree] or its
+  /// ancestors. CSS inheritance applies to the block's first line.
+  CssLength? _effectiveTextIndent(BuildTree tree) {
+    for (BuildTree? current = tree; current != null;) {
+      final parsed = _parseLength(current.getStyle('text-indent')?.value);
+      if (parsed != null) return parsed;
+
+      current = current.hasParent ? current.parent : null;
+    }
+
+    return null;
+  }
+
+  bool _isCenterAligned(BuildTree tree) {
+    for (BuildTree? current = tree; current != null;) {
+      final value = current.getStyle('text-align')?.value;
+      final term = value is css.LiteralTerm ? value.valueAsString : null;
+      if (term != null) {
+        return switch (term) {
+          'center' => true,
+          _ => false,
+        };
+      }
+
+      current = current.hasParent ? current.parent : null;
+    }
+
+    return false;
+  }
+
+  double? _resolveIndent(
+    BuildTree tree,
+    CssLength indent,
+    BuildContext context,
+  ) => switch (indent.unit) {
+    .percentage =>
+      viewport.width.isFinite ? viewport.width * indent.number / 100 : null,
+    _ => indent.getValue(tree.inheritanceResolvers.resolve(context)),
+  };
+
+  static CssLength? _parseLength(css.Expression? expression) =>
+      switch (expression) {
+        css.EmTerm(:final value) => CssLength(
+          (value as num).toDouble(),
+          .em,
+        ),
+        css.LengthTerm(:final value, :final unit) => switch (unit) {
+          css.TokenKind.UNIT_LENGTH_PX => CssLength(
+            (value as num).toDouble(),
+          ),
+          css.TokenKind.UNIT_LENGTH_PT => CssLength(
+            (value as num).toDouble(),
+            .pt,
+          ),
+          _ => null,
+        },
+        css.PercentageTerm(:final value) => CssLength(
+          (value as num).toDouble(),
+          .percentage,
+        ),
+        css.NumberTerm(:final number) when number == 0 => CssLength.zero,
+        _ => null,
+      };
+
   @override
   StylesMap? customStylesBuilder(dom.Element element) {
     final styles = Map<String, String>.of(

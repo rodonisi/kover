@@ -84,6 +84,53 @@ void main() {
       expect(second, isNot(contains('AAAA')));
     });
 
+    test('marks a paragraph continued from the previous page', () {
+      final paginator = _paginator('<div><p>AAAA BBBB CCCC</p></div>');
+      final block = _nodeIndexOf(paginator.root, 'p');
+
+      paginator.paginate([
+        _line(
+          nodeIndex: block,
+          top: 0,
+          bottom: 10,
+          offset: 0,
+          childPath: const [0],
+        ),
+        _line(
+          nodeIndex: block,
+          top: 10,
+          bottom: 20,
+          offset: 5,
+          childPath: const [0],
+        ),
+        _line(
+          nodeIndex: block,
+          top: 20,
+          bottom: 30,
+          offset: 10,
+          childPath: const [0],
+        ),
+      ], 25);
+
+      final first = dom.DocumentFragment.html(paginator.getSubpage(0));
+      final second = dom.DocumentFragment.html(paginator.getSubpage(1));
+
+      expect(
+        first
+            .querySelector('p')!
+            .attributes
+            .containsKey(HtmlConstants.splitParagraphAttribute),
+        isFalse,
+      );
+      expect(
+        second
+            .querySelector('p')!
+            .attributes
+            .containsKey(HtmlConstants.splitParagraphAttribute),
+        isTrue,
+      );
+    });
+
     test('keeps page boundaries between consecutive subpages', () {
       final paginator = _paginator(
         '<div><p>ONE TWO THREE FOUR FIVE SIX</p></div>',
@@ -208,6 +255,17 @@ void main() {
       expect(last, contains('Second'));
       expect(last, isNot(contains('Intro')));
       expect(last, contains('kover-wrapper'));
+      expect(
+        dom.DocumentFragment.html(
+              last,
+            )
+            .querySelector('p')!
+            .attributes
+            .containsKey(
+              HtmlConstants.splitParagraphAttribute,
+            ),
+        isFalse,
+      );
     });
 
     test('handles a break after a line break', () {
@@ -419,7 +477,7 @@ void main() {
 
 EpubPaginator _paginator(String html) {
   final root = EpubPagePreprocessor(
-    root: dom.DocumentFragment.html(html),
+    html: dom.DocumentFragment.html(html),
     operations: [NodeIndexingOperation()],
   ).process();
   return EpubPaginator(root: root);

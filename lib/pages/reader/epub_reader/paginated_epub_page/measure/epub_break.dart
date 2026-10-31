@@ -13,7 +13,25 @@ class const EpubBreak({
 
   /// When true the break sits after the referenced node (used for `<br>`).
   final bool afterNode = false,
+
+  /// When true the page starting at this break continues a block that started
+  /// on a previous page.
+  final bool startsMidBlock = false,
 }) extends Equatable {
+  EpubBreak copyWith({bool? startsMidBlock}) => EpubBreak(
+    blockNodeIndex: blockNodeIndex,
+    childPath: childPath,
+    offset: offset,
+    afterNode: afterNode,
+    startsMidBlock: startsMidBlock ?? this.startsMidBlock,
+  );
+
   @override
-  List<Object?> get props => [blockNodeIndex, childPath, offset, afterNode];
+  List<Object?> get props => [
+    blockNodeIndex,
+    childPath,
+    offset,
+    afterNode,
+    startsMidBlock,
+  ];
 }
