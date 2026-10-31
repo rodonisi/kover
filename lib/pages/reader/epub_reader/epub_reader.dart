@@ -284,11 +284,20 @@ class _Page extends HookConsumerWidget {
       },
     );
 
+    final settings =
+        ref
+            .watch(
+              epubReaderSettingsProvider(seriesId: seriesId),
+            )
+            .value ??
+        const EpubReaderSettingsState();
+
     return Async(
       asyncValue: content,
       data: (data) => PaginatedEpubPage(
         controller: controller,
         html: data.root,
+        settings: settings,
       ),
     );
 

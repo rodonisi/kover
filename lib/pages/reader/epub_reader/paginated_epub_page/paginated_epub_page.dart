@@ -5,13 +5,20 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/pag
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller_status.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/render_html.dart';
+import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:material_ui/material_ui.dart';
 
 class PaginatedEpubPage extends StatefulWidget {
   final PaginatedEpubPageController controller;
   final dom.DocumentFragment html;
+  final EpubReaderSettingsState settings;
 
-  const new({super.key, required this.controller, required this.html});
+  const new({
+    super.key,
+    required this.controller,
+    required this.html,
+    required this.settings,
+  });
 
   @override
   State<PaginatedEpubPage> createState() => _PaginatedEpubPageState();
@@ -34,6 +41,10 @@ class _PaginatedEpubPageState extends State<PaginatedEpubPage> {
     if (oldWidget.html != widget.html) {
       widget.controller.attachRoot(widget.html);
     }
+
+    if (oldWidget.settings != widget.settings) {
+      widget.controller.remeasure();
+    }
   }
 
   void _onControllerChanged() {
@@ -51,6 +62,12 @@ class _PaginatedEpubPageState extends State<PaginatedEpubPage> {
 
   @override
   Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+      fontSize: widget.settings.fontSize,
+      height: widget.settings.lineHeight,
+      wordSpacing: widget.settings.wordSpacing,
+      letterSpacing: widget.settings.letterSpacing,
+    );
     if (widget.controller.root == null) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -76,6 +93,7 @@ class _PaginatedEpubPageState extends State<PaginatedEpubPage> {
                   html: widget.controller.root!,
                   viewport: _viewport,
                   cssEngine: widget.controller.cssEngine,
+                  textStyle: textStyle,
                   onMeasured: (measurements) {
                     widget.controller.processMeasurements(
                       measurements,
@@ -106,6 +124,7 @@ class _PaginatedEpubPageState extends State<PaginatedEpubPage> {
                 factoryBuilder: () =>
                     PaginatedEpubWidgetFactory(viewport: _viewport),
                 cssEngine: widget.controller.cssEngine,
+                textStyle: textStyle,
               ),
             );
           },

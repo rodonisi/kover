@@ -64,6 +64,13 @@ class PaginatedEpubPageController({
     notifyListeners();
   }
 
+  void remeasure() {
+    if (_status == .measuring) return;
+
+    _status = .measuring;
+    notifyListeners();
+  }
+
   void processMeasurements(
     EpubMeasurements measurements, {
     required double pageHeight,
