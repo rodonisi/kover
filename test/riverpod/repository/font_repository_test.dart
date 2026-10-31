@@ -69,7 +69,7 @@ void main() {
       );
 
       test(
-        'when the font is not cached, then fetches and returns its bytes',
+        'when the font is not cached, then fetches, caches and returns it',
         () {
           fakeAsync((async) {
             Uint8List? data;
@@ -77,14 +77,39 @@ void main() {
 
             when(client.getFontBytes(any)).thenAnswer((_) async => fontBytes);
 
-            repository.getFontData(face).then((v) => data = v);
-            database.select(database.fonts).get().then((v) => rows = v);
+            repository.getFontData(face).then((v) {
+              data = v;
+              database.select(database.fonts).get().then((v) => rows = v);
+            });
 
             async.flushMicrotasks();
 
             expect(data, fontBytes.bytes);
             verify(client.getFontBytes(face.url)).called(1);
-            expect(rows, isEmpty);
+            expect(rows.single.url, face.url);
+            expect(rows.single.data, fontBytes.bytes);
+            expect(rows.single.mimeType, fontBytes.mimeType);
+          });
+        },
+      );
+
+      test(
+        'when the font was fetched before, then does not fetch it again',
+        () {
+          fakeAsync((async) {
+            Uint8List? data;
+
+            when(client.getFontBytes(any)).thenAnswer((_) async => fontBytes);
+
+            repository.getFontData(face).then((_) {});
+            async.flushMicrotasks();
+            clearInteractions(client);
+
+            repository.getFontData(face).then((v) => data = v);
+            async.flushMicrotasks();
+
+            expect(data, fontBytes.bytes);
+            verifyNever(client.getFontBytes(any));
           });
         },
       );

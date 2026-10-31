@@ -25,7 +25,8 @@ class const FontRepository({
   required final BookSyncOperations _client,
 }) {
   /// Returns the bytes of [font], reading them from the cache first and
-  /// fetching them from the server when missing.
+  /// fetching and caching them when missing, so that reading online doesn't
+  /// fetch the fonts of a book again at every start.
   Future<Uint8List?> getFontData(FontFace font) async {
     final cached = await _db.fontDao.getByUrl(url: font.url);
     if (cached != null) return cached.data;
@@ -33,6 +34,7 @@ class const FontRepository({
     final fetched = await _client.getFontBytes(font.url);
     if (fetched == null || fetched.bytes.isEmpty) return null;
 
+    await _saveFont(font, fetched);
     return fetched.bytes;
   }
 
@@ -44,15 +46,22 @@ class const FontRepository({
       final fetched = await _client.getFontBytes(font.url);
       if (fetched == null || fetched.bytes.isEmpty) continue;
 
-      await _db.fontDao.upsertFont(
-        FontsCompanion.insert(
-          family: font.family,
-          weight: Value(font.weight),
-          url: font.url,
-          data: fetched.bytes,
-          mimeType: Value(fetched.mimeType),
-        ),
-      );
+      await _saveFont(font, fetched);
     }
+  }
+
+  Future<void> _saveFont(
+    FontFace font,
+    ({Uint8List bytes, String mimeType}) fetched,
+  ) {
+    return _db.fontDao.upsertFont(
+      FontsCompanion.insert(
+        family: font.family,
+        weight: Value(font.weight),
+        url: font.url,
+        data: fetched.bytes,
+        mimeType: Value(fetched.mimeType),
+      ),
+    );
   }
 }
