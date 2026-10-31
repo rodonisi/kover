@@ -75,6 +75,7 @@ class _PaginatedEpubPageState extends State<PaginatedEpubPage> {
                 child: EpubMeasurementsCollector(
                   html: widget.controller.root!,
                   viewport: _viewport,
+                  cssEngine: widget.controller.cssEngine,
                   onMeasured: (measurements) {
                     widget.controller.processMeasurements(
                       measurements,
@@ -104,6 +105,7 @@ class _PaginatedEpubPageState extends State<PaginatedEpubPage> {
                 html: widget.controller.getSubpage(index),
                 factoryBuilder: () =>
                     PaginatedEpubWidgetFactory(viewport: _viewport),
+                cssEngine: widget.controller.cssEngine,
               ),
             );
           },
