@@ -79,9 +79,7 @@ class const EpubTextIndex._(final List<EpubTextPosition> _positions) {
           // positive CSS text-indent. It has no DOM node of its own, so the
           // leading placeholder maps to the block start.
           if (i == 0 &&
-              block.attributes.containsKey(
-                HtmlConstants.textIndentAttribute,
-              )) {
+              block.attributes.containsKey(HtmlConstants.textIndentAttribute)) {
             positions.add(EpubTextPosition(node: block, offset: 0));
             continue;
           }
@@ -220,11 +218,6 @@ void _collect({
     return;
   }
 
-  if (node.attributes.containsKey(HtmlConstants.textIndentSpanAttribute)) {
-    tokens.add(_InlineToken(node));
-    return;
-  }
-
   if (localName == 'sup' || _hasInlineBlockDisplay(node)) {
     if (node.attributes.containsKey('id')) tokens.add(_InlineToken(node));
     tokens.add(_InlineToken(node));
@@ -302,10 +295,7 @@ bool _hasInlineBlockDisplay(dom.Element element) {
 
 bool _isInlineWidgetElement(dom.Element element) {
   final localName = element.localName;
-  return element.attributes.containsKey(
-        HtmlConstants.textIndentSpanAttribute,
-      ) ||
-      localName == 'sup' ||
+  return localName == 'sup' ||
       localName == 'sub' ||
       (localName != null && _inlineWidgetTags.contains(localName)) ||
       _hasInlineBlockDisplay(element);

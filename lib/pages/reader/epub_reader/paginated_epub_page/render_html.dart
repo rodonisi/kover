@@ -6,11 +6,13 @@ class RenderHtml extends StatelessWidget {
   final String html;
   final WidgetFactory Function() factoryBuilder;
   final CssEngine cssEngine;
+  final TextStyle? textStyle;
   const new({
     super.key,
     required this.html,
     required this.factoryBuilder,
     required this.cssEngine,
+    this.textStyle,
   });
 
   @override
@@ -19,6 +21,7 @@ class RenderHtml extends StatelessWidget {
       html,
       factoryBuilder: factoryBuilder,
       customStylesBuilder: (element) => cssEngine.stylesFor(element),
+      textStyle: textStyle,
     );
   }
 }

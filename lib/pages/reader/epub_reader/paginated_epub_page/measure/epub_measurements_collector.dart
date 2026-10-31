@@ -21,12 +21,15 @@ class EpubMeasurementsCollector extends HookWidget {
   final Size viewport;
   final void Function(EpubMeasurements) onMeasured;
   final CssEngine cssEngine;
+  final TextStyle? textStyle;
+
   const new({
     super.key,
     required this.html,
     required this.viewport,
     required this.onMeasured,
     required this.cssEngine,
+    this.textStyle,
   });
 
   @override
@@ -91,6 +94,7 @@ class EpubMeasurementsCollector extends HookWidget {
             html: html.outerHtml,
             factoryBuilder: () => factory,
             cssEngine: cssEngine,
+            textStyle: textStyle,
           ),
         ),
       ),
