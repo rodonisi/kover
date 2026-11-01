@@ -56,7 +56,7 @@ class _SmartFilterReadingListsContent extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useTextEditingController();
-    final orderBy = useState(UnorderedSortOption.name);
+    final orderBy = useState(OrderedSortOption.sortOrder);
     final sortDirection = useState(SortDirection.ascending);
 
     final readingLists = ref.watch(
@@ -73,7 +73,7 @@ class _SmartFilterReadingListsContent extends HookConsumerWidget {
     return ReadingListsListPage(
       title: title,
       controller: controller,
-      sortMenu: UnorderedSortMenu(
+      sortMenu: OrderedSortMenu(
         orderBy: orderBy.value,
         onOrderByChanged: (value) => orderBy.value = value,
         sortDirection: sortDirection.value,
@@ -95,7 +95,7 @@ class _SmartFilterSeriesContent extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final orderBy = useState(UnorderedSortOption.name);
+    final orderBy = useState(OrderedSortOption.sortOrder);
     final sortDirection = useState(SortDirection.ascending);
     final hideRead = useState(false);
     final downloadedOnly = useState(false);
@@ -117,7 +117,7 @@ class _SmartFilterSeriesContent extends HookConsumerWidget {
     return SeriesListPage(
       title: title,
       controller: controller,
-      sortMenu: UnorderedSortMenu(
+      sortMenu: OrderedSortMenu(
         orderBy: orderBy.value,
         onOrderByChanged: (value) => orderBy.value = value,
         sortDirection: sortDirection.value,

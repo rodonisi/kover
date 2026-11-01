@@ -38,7 +38,7 @@ class const SmartFiltersRepository({
   Stream<List<SeriesModel>> watchSeries(
     int smartFilterId, {
     String query = '',
-    UnorderedSortOption orderBy = .name,
+    OrderedSortOption orderBy = .sortOrder,
     SortDirection direction = .ascending,
     bool hideRead = false,
     bool downloadedOnly = false,
@@ -61,7 +61,7 @@ class const SmartFiltersRepository({
   Stream<List<ReadingListModel>> watchReadingLists(
     int smartFilterId, {
     String query = '',
-    UnorderedSortOption orderBy = .name,
+    OrderedSortOption orderBy = .sortOrder,
     SortDirection direction = .ascending,
   }) {
     return _db.smartFiltersDao
