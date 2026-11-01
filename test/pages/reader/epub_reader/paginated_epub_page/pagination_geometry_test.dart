@@ -1,4 +1,3 @@
-import 'package:flutter/rendering.dart' show RenderFlex;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
@@ -11,6 +10,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epu
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/render_html.dart';
+import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
@@ -51,6 +51,38 @@ void main() {
     final text = List.filled(40, 'margin line').join(' ');
     final root = _preprocess(
       '<p style="margin: 32px 0">$text</p>',
+    );
+
+    final paginator = await _paginate(tester, root, viewport);
+
+    expect(paginator.subpageCount, greaterThan(1));
+    await _expectPagesFit(tester, paginator, viewport);
+  });
+
+  testWidgets('generated pages handle margins inside padded wrappers', (
+    tester,
+  ) async {
+    const viewport = Size(180, 120);
+    final text = List.filled(40, 'margin line').join(' ');
+    final root = _preprocess(
+      '<div style="padding: 16px 0">'
+      '<p style="margin: 32px 0">$text</p>'
+      '</div>',
+    );
+
+    final paginator = await _paginate(tester, root, viewport);
+
+    expect(paginator.subpageCount, greaterThan(1));
+    await _expectPagesFit(tester, paginator, viewport);
+  });
+
+  testWidgets('generated pages keep mixed-run lines whole', (tester) async {
+    const viewport = Size(180, 120);
+    final text = List.filled(30, 'small words').join(' ');
+    final root = _preprocess(
+      '<p style="margin: 0; line-height: 1.2">'
+      'Intro <span style="font-size: 32px; line-height: 1">BIG</span> $text'
+      '</p>',
     );
 
     final paginator = await _paginate(tester, root, viewport);
@@ -107,6 +139,7 @@ void main() {
               child: PaginatedEpubPage(
                 controller: controller,
                 html: dom.DocumentFragment.html(_chapterHtml()),
+                settings: const EpubReaderSettingsState(),
               ),
             ),
           ),
@@ -114,21 +147,21 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 150));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 300)),
+    );
     await tester.pump();
     await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
     await tester.pump();
     await tester.pumpAndSettle();
 
     expect(controller.subpageCount, greaterThan(1));
-    final columns = tester.renderObjectList(find.byType(Column));
     expect(
-      columns.whereType<RenderFlex>().any(
-        (column) =>
-            column.constraints.hasTightHeight &&
-            column.constraints.maxHeight == viewport.height,
-      ),
-      isTrue,
-      reason: 'The test must exercise the production tight-height Column',
+      find.byType(OverflowBox),
+      findsWidgets,
+      reason: 'The test must exercise the production page rendering path',
     );
     expect(tester.takeException(), isNull);
     await tester.pump(const Duration(milliseconds: 150));

@@ -9,76 +9,79 @@ void main() {
   group('EpubPagePreprocessor', () {
     group('node indexing', () {
       test('when elements are nested, then indexes them in order', () {
-        final root = dom.DocumentFragment.html(
+        final html = dom.DocumentFragment.html(
           '<div><p>a<span>b</span></p><p>c</p></div>',
         );
 
-        EpubPagePreprocessor(
-          root: root,
+        final root = EpubPagePreprocessor(
+          html: html,
           operations: [NodeIndexingOperation()],
         ).process();
 
-        // <div index=0>
-        //   <p index=1>
-        //     a
-        //     <span index=2>b</span>
-        //   </p>
-        //   <p index=3>c</p>
+        // <div index=0> wrapper
+        //   <div index=1>
+        //     <p index=2>
+        //       a
+        //       <span index=3>b</span>
+        //     </p>
+        //     <p index=4>c</p>
+        //   </div>
         // </div>
-        expect(_nodeIndexes(root), ['0', '1', '2', '3']);
+        expect(_nodeIndexes(root), ['0', '1', '2', '3', '4']);
       });
 
       test('when fragment has multiple roots, then indexes them in order', () {
-        final root = dom.DocumentFragment.html('text<p>a</p><p>b</p>');
+        final html = dom.DocumentFragment.html('text<p>a</p><p>b</p>');
 
-        EpubPagePreprocessor(
-          root: root,
+        final root = EpubPagePreprocessor(
+          html: html,
           operations: [NodeIndexingOperation()],
-        ).process();
-
-        expect(_nodeIndexes(root), ['0', '1']);
-      });
-
-      test('when processed again, then resets and overwrites indexes', () {
-        final root = dom.DocumentFragment.html('<div><p>a</p></div>');
-        final preprocessor = EpubPagePreprocessor(
-          root: root,
-          operations: [NodeIndexingOperation()],
-        );
-
-        preprocessor.process();
-        preprocessor.process();
-
-        expect(_nodeIndexes(root), ['0', '1']);
-      });
-
-      test('when child is inserted on enter, then it is indexed too', () {
-        final root = dom.DocumentFragment.html('<div><p>a</p></div>');
-
-        EpubPagePreprocessor(
-          root: root,
-          operations: [_InsertChildOperation(), NodeIndexingOperation()],
         ).process();
 
         expect(_nodeIndexes(root), ['0', '1', '2']);
+      });
+
+      test('when processed again, then resets and overwrites indexes', () {
+        final html = dom.DocumentFragment.html('<div><p>a</p></div>');
+        final preprocessor = EpubPagePreprocessor(
+          html: html,
+          operations: [NodeIndexingOperation()],
+        );
+
+        final first = preprocessor.process();
+        final second = preprocessor.process();
+
+        expect(_nodeIndexes(first), ['0', '1', '2']);
+        expect(_nodeIndexes(second), ['0', '1', '2']);
+      });
+
+      test('when child is inserted on enter, then it is indexed too', () {
+        final html = dom.DocumentFragment.html('<div><p>a</p></div>');
+
+        final root = EpubPagePreprocessor(
+          html: html,
+          operations: [_InsertChildOperation(), NodeIndexingOperation()],
+        ).process();
+
+        expect(_nodeIndexes(root), ['0', '1', '2', '3', '4']);
         expect(
           root
               .querySelector('span')!
               .attributes[HtmlConstants.nodeIndexAttribute],
-          '2',
+          '3',
         );
       });
     });
 
     group('walking', () {
       test('when walking, then calls hooks in operation order', () {
-        final root = dom.DocumentFragment.html(
+        final html = dom.DocumentFragment.html(
           '<div><p>a</p><span>b</span></div>',
         );
         final events = <String>[];
 
         EpubPagePreprocessor(
-          root: root,
+          html: html,
           operations: [
             _RecordingOperation('first', events),
             _RecordingOperation('second', events),
@@ -88,6 +91,8 @@ void main() {
         expect(events, [
           'first:start',
           'second:start',
+          'first:enter:div',
+          'second:enter:div',
           'first:enter:div',
           'second:enter:div',
           'first:enter:p',
@@ -102,6 +107,8 @@ void main() {
           'second:text:b',
           'second:exit:span',
           'first:exit:span',
+          'second:exit:div',
+          'first:exit:div',
           'second:exit:div',
           'first:exit:div',
           'second:finish',

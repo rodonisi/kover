@@ -49,6 +49,32 @@ void main() {
       expect(tops, orderedEquals([...tops]..sort()));
     });
 
+    testWidgets('coalesces text boxes that belong to one visual line', (
+      tester,
+    ) async {
+      final plain = _preprocess('<div><p>ONE TWO THREE</p></div>');
+      final mixed = _preprocess(
+        '<div><p><span style="font-size: 24px">ONE</span> TWO '
+        '<span style="font-size: 10px">THREE</span></p></div>',
+      );
+
+      EpubMeasurements? plainMeasurements;
+      await _pump(tester, plain, (value) => plainMeasurements = value);
+      expect(
+        plainMeasurements!.units.whereType<EpubLineUnit>().length,
+        1,
+      );
+
+      await tester.pumpWidget(const SizedBox.shrink());
+
+      EpubMeasurements? mixedMeasurements;
+      await _pump(tester, mixed, (value) => mixedMeasurements = value);
+      expect(
+        mixedMeasurements!.units.whereType<EpubLineUnit>().length,
+        1,
+      );
+    });
+
     testWidgets('harvests lines from indented markup with inline spans', (
       tester,
     ) async {
