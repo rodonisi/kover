@@ -132,6 +132,25 @@ class PaginatedEpubWidgetFactory({
     final styles = Map<String, String>.of(
       super.customStylesBuilder(element) ?? const {},
     );
+
+    if (element.attributes.containsKey(
+      HtmlConstants.splitStartAttribute,
+    )) {
+      styles['margin-top'] = '0';
+      element.attributes['style'] = _appendStyle(
+        element.attributes['style'],
+        'margin-top: 0',
+      );
+    }
+
+    if (element.attributes.containsKey(HtmlConstants.splitEndAttribute)) {
+      styles['margin-bottom'] = '0';
+      element.attributes['style'] = _appendStyle(
+        element.attributes['style'],
+        'margin-bottom: 0',
+      );
+    }
+
     if (element.localName != 'img') return styles;
 
     final width = double.tryParse(element.attributes['width'] ?? '');
@@ -142,6 +161,15 @@ class PaginatedEpubWidgetFactory({
     return styles
       ..['width'] = '${fitted.width}px'
       ..['height'] = '${fitted.height}px';
+  }
+
+  /// Adds [declaration] to an inline style attribute without dropping the
+  /// element's own declarations.
+  String _appendStyle(String? existing, String declaration) {
+    final current = existing?.trim() ?? '';
+    if (current.isEmpty) return declaration;
+    final separator = current.endsWith(';') ? ' ' : '; ';
+    return '$current$separator$declaration';
   }
 
   Size _fit(Size size) {

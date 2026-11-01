@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:html/dom.dart' as dom;
@@ -331,10 +333,17 @@ EpubLeafUnit? _textLeafUnit({
 }
 
 class _LineBox {
-  const _LineBox({required this.top, required this.bottom});
+  const _LineBox({
+    required this.top,
+    required this.bottom,
+    required this.left,
+    required this.right,
+  });
 
   final double top;
   final double bottom;
+  final double left;
+  final double right;
 }
 
 List<_LineBox> _lineBoxes(RenderParagraph paragraph, String plainText) {
@@ -345,14 +354,55 @@ List<_LineBox> _lineBoxes(RenderParagraph paragraph, String plainText) {
   );
 
   if (boxes.isEmpty) {
-    return [_LineBox(top: 0, bottom: paragraph.size.height)];
+    return [
+      _LineBox(
+        top: 0,
+        bottom: paragraph.size.height,
+        left: 0,
+        right: paragraph.size.width,
+      ),
+    ];
   }
 
-  final sorted = boxes.toList()..sort((a, b) => a.top.compareTo(b.top));
+  final sorted = boxes.where((box) => box.bottom > box.top).toList()
+    ..sort((a, b) => a.top.compareTo(b.top));
 
-  final lines = [
-    for (final box in sorted) _LineBox(top: box.top, bottom: box.bottom),
-  ];
+  if (sorted.isEmpty) {
+    return [
+      _LineBox(
+        top: 0,
+        bottom: paragraph.size.height,
+        left: 0,
+        right: paragraph.size.width,
+      ),
+    ];
+  }
+
+  final lines = <_LineBox>[];
+  for (final box in sorted) {
+    final last = lines.lastOrNull;
+
+    // A visual line can produce several boxes (bidi runs, mixed font
+    // metrics, inline widgets). Treat them as one line so a page can never
+    // start or end between two boxes of the same line.
+    if (last != null && (box.top - last.top).abs() < 0.5) {
+      lines[lines.length - 1] = _LineBox(
+        top: math.min(last.top, box.top),
+        bottom: math.max(last.bottom, box.bottom),
+        left: math.min(last.left, box.left),
+        right: math.max(last.right, box.right),
+      );
+    } else {
+      lines.add(
+        _LineBox(
+          top: box.top,
+          bottom: box.bottom,
+          left: box.left,
+          right: box.right,
+        ),
+      );
+    }
+  }
 
   return lines;
 }
@@ -360,8 +410,8 @@ List<_LineBox> _lineBoxes(RenderParagraph paragraph, String plainText) {
 int _lineStartOffset(RenderParagraph paragraph, _LineBox line) {
   final width = paragraph.size.width;
   final x = paragraph.textDirection == .rtl
-      ? (width - 0.1).clamp(0.0, width)
-      : 0.1;
+      ? (line.right - 0.1).clamp(0.0, width)
+      : (line.left + 0.1).clamp(0.0, width);
 
   final position = paragraph.getPositionForOffset(
     Offset(x, (line.top + line.bottom) / 2),

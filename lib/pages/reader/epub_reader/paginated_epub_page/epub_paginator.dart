@@ -1,10 +1,9 @@
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break_unit.dart';
+import 'package:kover/utils/extensions/document_fragment.dart';
 import 'package:kover/utils/html_constants.dart';
 import 'package:kover/utils/logging.dart';
-
-const _pageFitTolerance = 0.01;
 
 /// Splits an EPUB document into subpages based on the measured positions of
 /// lines and blocks.
@@ -41,10 +40,11 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
 
     while (cursor < units.length) {
       final origin = cursor == 0 ? 0.0 : units[cursor].pageStartTop;
-      final limit = origin + pageHeight - _pageFitTolerance;
+      final limit = origin + pageHeight;
 
       var last = cursor;
-      while (last + 1 < units.length && units[last + 1].pageEndBottom < limit) {
+      while (last + 1 < units.length &&
+          units[last + 1].pageEndBottom <= limit) {
         last++;
       }
 
@@ -109,6 +109,24 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
       return dom.DocumentFragment();
     }
 
+    // Mark the page edges before trimming. The renderer drops the top margin
+    // of everything on the first path and the bottom margin of everything on
+    // the last path, so the rendered page matches the measured height (which
+    // only carries padding and line leading).
+    if (start != null) {
+      final startBlock = _blockAt(subpage, start.blockNodeIndex);
+      if (startBlock != null) {
+        _markPath(startBlock, HtmlConstants.splitStartAttribute);
+      }
+    }
+
+    if (end != null) {
+      final endBlock = _blockAt(subpage, end.blockNodeIndex);
+      if (endBlock != null) {
+        _markPath(endBlock, HtmlConstants.splitEndAttribute);
+      }
+    }
+
     if (end != null) {
       _trimAfter(subpage, endNode!, end);
     }
@@ -124,7 +142,23 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
       )?.attributes[HtmlConstants.splitParagraphAttribute] = '';
     }
 
+    // Trimming can leave empty paragraph shells whose margins would still
+    // contribute vertical space to the rendered page.
+    subpage
+        .querySelectorAll('p')
+        .where((element) => !element.hasVisibleNodes)
+        .toList()
+        .forEach((element) => element.remove());
+
     return subpage;
+  }
+
+  void _markPath(dom.Element element, String attribute) {
+    dom.Node? current = element;
+    while (current is dom.Element) {
+      current.attributes[attribute] = '';
+      current = current.parent;
+    }
   }
 
   /// Resolves a break to a node in [root].
