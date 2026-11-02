@@ -1,3 +1,4 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/book_chapter_model.dart';
 import 'package:kover/models/image_model.dart';
@@ -8,10 +9,17 @@ import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/riverpod/repository/book_repository.dart';
 import 'package:kover/utils/extensions/color.dart';
 import 'package:kover/utils/extensions/epub_theme.dart';
-import 'package:kover/utils/html_constants.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+part 'book.freezed.dart';
 part 'book.g.dart';
+
+@freezed
+class EpubThemeStylesModel({
+  required final Map<String, String> root,
+  required final Map<String, String> highlight,
+}) with _$EpubThemeStylesModel;
 
 @riverpod
 Stream<List<BookChapterModel>> bookChapters(
@@ -54,7 +62,7 @@ Future<PdfModel> pdf(Ref ref, {required int chapterId}) async {
 }
 
 @riverpod
-Future<Map<String, Map<String, String>>> customCss(
+Future<EpubThemeStylesModel> epubThemeStyles(
   Ref ref, {
   required int seriesId,
 }) async {
@@ -65,22 +73,20 @@ Future<Map<String, Map<String, String>>> customCss(
   );
   final appTheme = await ref.watch(themeProvider.selectAsync((s) => s.theme));
 
-  final theme = themeState?.data ?? appTheme;
+  return epubThemeStylesFromTheme(themeState?.data ?? appTheme);
+}
 
-  final highlightColor = theme.colorScheme.tertiaryContainer.withAlpha(0xe0);
-  final onHighlightColor = theme.colorScheme.onTertiaryContainer;
-
-  final backgroundColor = theme.colorScheme.surface;
-  final onBackgroundColor = theme.colorScheme.onSurface;
-
-  return {
-    '.${HtmlConstants.resumeParagraphClass}': {
-      'background-color': highlightColor.toCssRgba(),
-      'color': onHighlightColor.toCssRgba(),
+EpubThemeStylesModel epubThemeStylesFromTheme(ThemeData theme) {
+  return EpubThemeStylesModel(
+    root: {
+      'background-color': theme.colorScheme.surface.toCssRgba(),
+      'color': theme.colorScheme.onSurface.toCssRgba(),
     },
-    '.${HtmlConstants.koverWrapperClass}': {
-      'background-color': backgroundColor.toCssRgba(),
-      'color': onBackgroundColor.toCssRgba(),
+    highlight: {
+      'background-color': theme.colorScheme.tertiaryContainer
+          .withAlpha(0xe0)
+          .toCssRgba(),
+      'color': theme.colorScheme.onTertiaryContainer.toCssRgba(),
     },
-  };
+  );
 }

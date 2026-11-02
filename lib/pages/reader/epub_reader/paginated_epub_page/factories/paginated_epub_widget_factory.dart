@@ -10,6 +10,7 @@ import 'package:kover/utils/html_constants.dart';
 /// A [WidgetFactory] that adjusts rendering for paginated EPUB content.
 class PaginatedEpubWidgetFactory({
   final Size viewport = const Size(double.infinity, double.infinity),
+  final bool removeParagraphIndent = false,
 }) extends WidgetFactory {
   late final BuildOp _textIndentOp = BuildOp(
     alwaysRenderBlock: false,
@@ -28,6 +29,7 @@ class PaginatedEpubWidgetFactory({
   }
 
   void _applyTextIndent(BuildTree tree) {
+    if (removeParagraphIndent) return;
     if (tree.isInline != false) return;
     if (tree.children.any((child) => child.isInline == false)) return;
     if (tree.element.attributes.containsKey(

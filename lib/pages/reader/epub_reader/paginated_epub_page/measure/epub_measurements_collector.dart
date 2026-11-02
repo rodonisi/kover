@@ -10,7 +10,8 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_anchor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_text_index.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_probe.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/render_html.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_content.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
 import 'package:material_ui/material_ui.dart';
 
 class const EpubMeasurements({
@@ -18,20 +19,98 @@ class const EpubMeasurements({
   required final Size contentSize,
 });
 
-class EpubMeasurementsCollector extends HookWidget {
+class EpubMeasurementsCollector extends StatelessWidget {
   final dom.DocumentFragment html;
-  final Size viewport;
-  final void Function(EpubMeasurements) onMeasured;
+  final PaginatedEpubPageSettings settings;
   final CssEngine cssEngine;
-  final TextStyle? textStyle;
+  final bool enabled;
+  final void Function(Size viewport) onViewportChanged;
+  final void Function(EpubMeasurements measurements, Size viewport) onMeasured;
 
   const new({
     super.key,
     required this.html,
-    required this.viewport,
-    required this.onMeasured,
+    required this.settings,
     required this.cssEngine,
-    this.textStyle,
+    required this.enabled,
+    required this.onViewportChanged,
+    required this.onMeasured,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = settings.mode == .spreads ? 2 : 1;
+        final outerWidth = constraints.maxWidth / columns;
+        final horizontalPadding = settings.horizontalMarginSize * 2;
+        final verticalPadding = settings.mode == .vertical
+            ? 0.0
+            : settings.verticalMarginSize * 2;
+
+        final viewport = Size(
+          math.max(0, outerWidth - horizontalPadding),
+          math.max(0, constraints.maxHeight - verticalPadding),
+        );
+
+        return _EpubMeasureViewport(
+          viewport: viewport,
+          onViewportChanged: onViewportChanged,
+          child: enabled
+              ? _EpubMeasureContent(
+                  html: html,
+                  settings: settings,
+                  cssEngine: cssEngine,
+                  viewport: viewport,
+                  outerWidth: outerWidth,
+                  onMeasured: onMeasured,
+                )
+              : const SizedBox.shrink(),
+        );
+      },
+    );
+  }
+}
+
+class _EpubMeasureViewport extends HookWidget {
+  final Size viewport;
+  final void Function(Size viewport) onViewportChanged;
+  final Widget child;
+
+  const _EpubMeasureViewport({
+    required this.viewport,
+    required this.onViewportChanged,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    useEffect(() {
+      if (!viewport.isEmpty) {
+        onViewportChanged(viewport);
+      }
+      return null;
+    }, [viewport, onViewportChanged]);
+
+    return child;
+  }
+}
+
+class _EpubMeasureContent extends HookWidget {
+  final dom.DocumentFragment html;
+  final PaginatedEpubPageSettings settings;
+  final CssEngine cssEngine;
+  final Size viewport;
+  final double outerWidth;
+  final void Function(EpubMeasurements measurements, Size viewport) onMeasured;
+
+  const _EpubMeasureContent({
+    required this.html,
+    required this.settings,
+    required this.cssEngine,
+    required this.viewport,
+    required this.outerWidth,
+    required this.onMeasured,
   });
 
   @override
@@ -62,7 +141,7 @@ class EpubMeasurementsCollector extends HookWidget {
             return;
           }
 
-          onMeasured(measurements);
+          onMeasured(measurements, viewport);
         } finally {
           scheduled.value = false;
         }
@@ -72,12 +151,13 @@ class EpubMeasurementsCollector extends HookWidget {
     final factory = useMemoized(() {
       final created = MeasuringPaginatedEpubWidgetFactory(
         viewport: viewport,
+        removeParagraphIndent: settings.removeParagraphIndent,
         onBuildComplete: scheduleMeasurement,
         onImageSettled: scheduleMeasurement,
       );
       factoryRef.value = created;
       return created;
-    }, [html, viewport]);
+    }, [html, viewport, settings.removeParagraphIndent]);
 
     useEffect(() {
       scheduleMeasurement();
@@ -86,17 +166,18 @@ class EpubMeasurementsCollector extends HookWidget {
 
     if (viewport.isEmpty) return const SizedBox.shrink();
 
-    return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
-      child: ExcludeSemantics(
-        child: EpubMeasureAnchor(
-          key: measureKey,
-          child: RenderHtml(
-            key: ValueKey(viewport),
+    return SizedBox(
+      width: outerWidth,
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: ExcludeSemantics(
+          child: PaginatedEpubPageContent(
             html: html.outerHtml,
-            factoryBuilder: () => factory,
+            settings: settings,
+            viewport: viewport,
             cssEngine: cssEngine,
-            textStyle: textStyle,
+            anchorKey: measureKey,
+            factoryBuilder: () => factory,
           ),
         ),
       ),

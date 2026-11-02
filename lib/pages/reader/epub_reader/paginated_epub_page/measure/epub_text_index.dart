@@ -70,20 +70,24 @@ class const EpubTextIndex._(final List<EpubTextPosition> _positions) {
       final isSpace = char == ' ' || char == '\u00A0';
 
       if (isPlaceholder) {
+        // The widget factory prepends a synthetic inline widget for a positive
+        // CSS text-indent. It has no DOM node of its own, so the leading
+        // placeholder maps to the block start. Handle it before looking at the
+        // DOM tokens: the paragraph may start with an inline widget (for
+        // example an anchor), which must not be mistaken for the indent.
+        if (i == 0 &&
+            block.attributes.containsKey(
+              HtmlConstants.textIndentAttribute,
+            )) {
+          positions.add(EpubTextPosition(node: block, offset: 0));
+          continue;
+        }
+
         while (_peek(tokens, index) is _WhitespaceToken) {
           index++;
         }
         final token = _peek(tokens, index);
         if (token is! _InlineToken) {
-          // The widget factory prepends a synthetic inline widget for a
-          // positive CSS text-indent. It has no DOM node of its own, so the
-          // leading placeholder maps to the block start.
-          if (i == 0 &&
-              block.attributes.containsKey(HtmlConstants.textIndentAttribute)) {
-            positions.add(EpubTextPosition(node: block, offset: 0));
-            continue;
-          }
-
           throw EpubTextIndexMismatch('expected inline widget at $i');
         }
         positions.add(EpubTextPosition(node: token.element, offset: 0));

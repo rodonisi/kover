@@ -4,14 +4,119 @@ import 'package:html/dom.dart' as dom;
 import 'package:kover/utils/html_constants.dart';
 import 'package:kover/utils/logging.dart';
 
-class CssEngine({required final dom.DocumentFragment root}) {
-  final Map<String, Map<String, String>> _elementMap;
+/// Resolves the document stylesheet and an optional additional stylesheet to
+/// concrete declarations per element.
+///
+/// Additional styles are applied after the document styles as a user-origin
+/// layer: later declarations win regardless of selector specificity. This
+/// makes them suitable for reader settings and app-provided overrides.
+class CssEngine {
+  final dom.DocumentFragment _root;
+  final Map<String, Map<String, String>> _baseElementMap;
+  late Map<String, Map<String, String>> _elementMap;
+  Map<String, Map<String, String>> _additionalDeclarations = const {};
+  var _revision = 0;
 
-  this : _elementMap = _computeStyles(root);
+  CssEngine({
+    required dom.DocumentFragment root,
+    Map<String, Map<String, String>> additionalStyles = const {},
+  }) : _root = root,
+       _baseElementMap = _computeStyles(root) {
+    final result = _applyAdditionalStyles(_baseElementMap, additionalStyles);
+    _elementMap = result.styles;
+    _additionalDeclarations = result.declarations;
+  }
+
+  int get stylesRevision => _revision;
 
   Map<String, String>? stylesFor(dom.Element element) {
     final nodeIndex = element.attributes[HtmlConstants.nodeIndexAttribute];
-    return nodeIndex == null ? null : _elementMap[nodeIndex];
+    if (nodeIndex == null) return null;
+
+    final declarations = _additionalDeclarations[nodeIndex];
+    if (declarations != null) {
+      _appendInlineStyles(element, declarations);
+    }
+
+    return _elementMap[nodeIndex];
+  }
+
+  void updateAdditionalStyles(Map<String, Map<String, String>> styles) {
+    final result = _applyAdditionalStyles(_baseElementMap, styles);
+    _elementMap = result.styles;
+    _additionalDeclarations = result.declarations;
+    _revision++;
+  }
+
+  ({
+    Map<String, Map<String, String>> styles,
+    Map<String, Map<String, String>> declarations,
+  })
+  _applyAdditionalStyles(
+    Map<String, Map<String, String>> base,
+    Map<String, Map<String, String>> additionalStyles,
+  ) {
+    final result = <String, Map<String, String>>{
+      for (final entry in base.entries)
+        entry.key: Map<String, String>.of(entry.value),
+    };
+    final declarationsByNode = <String, Map<String, String>>{};
+
+    for (final entry in additionalStyles.entries) {
+      try {
+        final matches = _root.querySelectorAll(entry.key);
+        for (final element in matches) {
+          final nodeIndex =
+              element.attributes[HtmlConstants.nodeIndexAttribute];
+          if (nodeIndex == null) continue;
+
+          final properties = result.putIfAbsent(nodeIndex, () => {});
+          final declarations = declarationsByNode.putIfAbsent(
+            nodeIndex,
+            () => {},
+          );
+          for (final declaration in entry.value.entries) {
+            // Re-insert on every assignment so the map keeps the order of the
+            // last declaration for each property.
+            properties.remove(declaration.key);
+            properties[declaration.key] = declaration.value;
+            declarations.remove(declaration.key);
+            declarations[declaration.key] = declaration.value;
+          }
+        }
+      } catch (e) {
+        log.debug(
+          'skipping invalid additional selector',
+          attributes: {'error': e},
+        );
+      }
+    }
+
+    return (styles: result, declarations: declarationsByNode);
+  }
+
+  /// Appends the additional declarations to the element's inline style.
+  ///
+  /// `flutter_widget_from_html` applies inline styles after custom styles, so
+  /// appending here makes the additional stylesheet win without dropping the
+  /// book's other inline declarations.
+  static void _appendInlineStyles(
+    dom.Element element,
+    Map<String, String> declarations,
+  ) {
+    if (declarations.isEmpty) return;
+
+    final appended = declarations.entries
+        .map((entry) => '${entry.key}: ${entry.value}')
+        .join('; ');
+    if (appended.isEmpty) return;
+
+    final existing = element.attributes['style']?.trim() ?? '';
+    if (existing.contains(appended)) return;
+
+    element.attributes['style'] = existing.isEmpty
+        ? '$appended;'
+        : '$existing; $appended;';
   }
 
   static Map<String, Map<String, String>> _computeStyles(
@@ -23,18 +128,16 @@ class CssEngine({required final dom.DocumentFragment root}) {
     for (final rule in rules) {
       try {
         final matches = root.querySelectorAll(rule.selector);
-        for (final el in matches) {
-          final nodeIndex = el.attributes[HtmlConstants.nodeIndexAttribute];
+        for (final element in matches) {
+          final nodeIndex =
+              element.attributes[HtmlConstants.nodeIndexAttribute];
           if (nodeIndex == null) continue;
           map.putIfAbsent(nodeIndex, () => []).add(rule);
         }
       } catch (e) {
         log.debug(
           'skipping invalid selector',
-          attributes: {
-            'selector': rule.selector,
-            'error': e,
-          },
+          attributes: {'error': e, 'selector': rule.selector},
         );
       }
     }

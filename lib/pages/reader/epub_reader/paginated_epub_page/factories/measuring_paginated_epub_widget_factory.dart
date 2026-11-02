@@ -9,6 +9,7 @@ import 'package:kover/utils/html_constants.dart';
 /// Wraps blocks, text and images in probes that report their size and position.
 class MeasuringPaginatedEpubWidgetFactory({
   super.viewport,
+  super.removeParagraphIndent,
   final void Function()? onBuildComplete,
   final void Function()? onImageSettled,
 }) extends PaginatedEpubWidgetFactory {

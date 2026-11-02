@@ -2,16 +2,31 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_paginator.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/paginated_epub_widget_factory.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_anchor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_content.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller_status.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/render_html.dart';
-import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:material_ui/material_ui.dart';
+
+const _settings = PaginatedEpubPageSettings(
+  horizontalMarginSize: 0,
+  verticalMarginSize: 0,
+  fontSize: 14,
+  paragraphSpacing: 0,
+  lineHeight: 1.5,
+  wordSpacing: 0,
+  letterSpacing: 0,
+  fontFamily: null,
+  removeParagraphIndent: false,
+  highlightResumePoint: false,
+  canScroll: true,
+  reduceAnimations: false,
+  textAlignment: .left,
+  mode: .horizontal,
+);
 
 void main() {
   testWidgets('generated pages include preserved block padding', (
@@ -139,7 +154,7 @@ void main() {
               child: PaginatedEpubPage(
                 controller: controller,
                 html: dom.DocumentFragment.html(_chapterHtml()),
-                settings: const EpubReaderSettingsState(),
+                settings: _settings,
               ),
             ),
           ),
@@ -166,6 +181,27 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pump(const Duration(milliseconds: 150));
   });
+
+  testWidgets(
+    'generated pages split indented paragraphs with leading anchors',
+    (
+      tester,
+    ) async {
+      const viewport = Size(180, 120);
+      final text = List.filled(60, 'indent anchor line').join(' ');
+      final root = _preprocess(
+        '<style>.pindent { margin: 0; text-indent: 1.5em; }</style>'
+        '<p class="pindent">'
+        '<a id="previous"></a><a id="morson"></a>$text'
+        '</p>',
+      );
+
+      final paginator = await _paginate(tester, root, viewport);
+
+      expect(paginator.subpageCount, greaterThan(1));
+      await _expectPagesFit(tester, paginator, viewport);
+    },
+  );
 }
 
 String _chapterHtml() {
@@ -200,9 +236,11 @@ Future<EpubPaginator> _paginate(
             height: viewport.height,
             child: EpubMeasurementsCollector(
               html: root,
-              viewport: viewport,
+              settings: _settings,
               cssEngine: CssEngine(root: root),
-              onMeasured: (value) => measurements = value,
+              enabled: true,
+              onViewportChanged: (_) {},
+              onMeasured: (value, _) => measurements = value,
             ),
           ),
         ),
@@ -255,17 +293,14 @@ Future<double> _renderedPageHeight(
               alignment: Alignment.topCenter,
               child: SizedBox(
                 width: viewport.width,
-                child: EpubMeasureAnchor(
-                  key: anchorKey,
-                  child: RenderHtml(
-                    key: UniqueKey(),
-                    html: html,
-                    factoryBuilder: () =>
-                        PaginatedEpubWidgetFactory(viewport: viewport),
-                    cssEngine: CssEngine(
-                      root: dom.DocumentFragment.html(html),
-                    ),
+                child: PaginatedEpubPageContent(
+                  html: html,
+                  settings: _settings,
+                  viewport: viewport,
+                  cssEngine: CssEngine(
+                    root: dom.DocumentFragment.html(html),
                   ),
+                  anchorKey: anchorKey,
                 ),
               ),
             ),
