@@ -33,9 +33,6 @@ sealed class EpubNavigationState with _$EpubNavigationState {
 
 @riverpod
 class EpubNavigation extends _$EpubNavigation {
-  var _fromLastSubpage = false;
-  final _resumed = false;
-  final _wasAheadReflow = false;
   var _spreads = false;
   int get _step => _spreads ? 2 : 1;
 
@@ -153,12 +150,6 @@ class EpubNavigation extends _$EpubNavigation {
           (next) async {
             final current = await future;
 
-            if (prev != null &&
-                prev.hasValue &&
-                (next - prev.value!).abs() > 1) {
-              _fromLastSubpage = false;
-            }
-
             state = AsyncData(
               current.copyWith(
                 page: next,
@@ -187,10 +178,6 @@ class EpubNavigation extends _$EpubNavigation {
     final current = await future;
 
     if (!current.ready || page >= current.totalPages || page < 0) return;
-
-    if (current.page - page == 1) {
-      _fromLastSubpage = true;
-    }
 
     await ref
         .read(

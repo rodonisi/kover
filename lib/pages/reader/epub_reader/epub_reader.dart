@@ -10,7 +10,6 @@ import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
-import 'package:kover/utils/cached_image_factory.dart';
 import 'package:kover/utils/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
@@ -43,14 +42,6 @@ class EpubReader extends HookConsumerWidget {
       epubReaderSettingsProvider(
         seriesId: seriesId,
       ).select((state) => state.value?.ignoreSafeAreas ?? true),
-    );
-    final verticalMargin = ref.watch(
-      epubReaderSettingsProvider(
-        seriesId: seriesId,
-      ).select(
-        (state) =>
-            state.value?.verticalMarginSize ?? LayoutConstants.mediumPadding,
-      ),
     );
 
     return Async(
@@ -224,19 +215,6 @@ class _Page extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final container = ProviderScope.containerOf(context);
-    final mediaQueryData = MediaQuery.of(context);
-    final themeData = Theme.of(context);
-    final textDirection = Directionality.of(context);
-    final locale = Localizations.localeOf(context);
-    final imageCache = useMemoized(
-      () => CachedImageFactory(maxHeight: mediaQueryData.size.height),
-      [],
-    );
-    final lastViewport = useRef<(Size, double)?>(null);
-    final vertical = mode == .vertical;
-    final spreads = mode == .spreads;
-
     final content = ref.watch(
       epubPageProvider(chapterId: chapterId, page: page),
     );
@@ -300,101 +278,5 @@ class _Page extends HookConsumerWidget {
         settings: settings,
       ),
     );
-
-    // final subpageState = ref.watch(
-    //   epubReaderSubpageProvider(
-    //     seriesId: seriesId,
-    //     chapterId: chapterId,
-    //     readingListId: readingListId,
-    //     page: page,
-    //   ),
-    // );
-
-    // return Async(
-    //   asyncValue: subpageState,
-    //   skipLoadingOnReload: true,
-    //   data: (data) {
-    //     return LayoutBuilder(
-    //       builder: (context, constraints) {
-    //         final isVisiblePage = data.navigation.page == page;
-    //         final visibleReady = data.navigation.ready;
-    //         final isAdjacentPage = (data.navigation.page - page).abs() <= 1;
-    //         final shouldStart =
-    //             isVisiblePage || (visibleReady && isAdjacentPage);
-    //
-    //         final viewport = spreads
-    //             ? Size(
-    //                 constraints.maxWidth / 2,
-    //                 constraints.maxHeight,
-    //               )
-    //             : constraints.biggest;
-    //         final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-    //
-    //         if (shouldStart && data.reflow.status == .initial) {
-    //           lastViewport.value = (viewport, devicePixelRatio);
-    //           WidgetsBinding.instance.addPostFrameCallback((_) {
-    //             if (!context.mounted) return;
-    //             ref
-    //                 .read(provider.notifier)
-    //                 .startReflow(
-    //                   viewport: viewport,
-    //                   devicePixelRatio: devicePixelRatio,
-    //                   measureBuilder: (html, styles) => EpubMeasureRoot(
-    //                     container: container,
-    //                     mediaQueryData: mediaQueryData,
-    //                     themeData: themeData,
-    //                     textDirection: textDirection,
-    //                     locale: locale,
-    //                     seriesId: seriesId,
-    //                     html: html,
-    //                     styles: styles,
-    //                     imageCache: imageCache,
-    //                     verticalPadding: !vertical,
-    //                   ),
-    //                   refreshRate: View.of(context).display.refreshRate,
-    //                 );
-    //           });
-    //         } else if (data.reflow.status != .initial &&
-    //             lastViewport.value != (viewport, devicePixelRatio)) {
-    //           lastViewport.value = (viewport, devicePixelRatio);
-    //           WidgetsBinding.instance.addPostFrameCallback((_) {
-    //             if (!context.mounted) return;
-    //             ref.invalidate(provider, asReload: true);
-    //           });
-    //         }
-    //
-    //         return SelectionArea(
-    //           onSelectionChanged: (selection) {
-    //             onSelectionChanged?.call(
-    //               selection != null && selection.plainText.isNotEmpty,
-    //             );
-    //           },
-    //           child: NotificationListener<ScrollNotification>(
-    //             onNotification: data.navigationGesturesEnabled
-    //                 ? handleScrollNotification
-    //                 : null,
-    //             child: vertical
-    //                 ? EpubVerticalSubpages(
-    //                     key: ValueKey(page),
-    //                     seriesId: seriesId,
-    //                     chapterId: chapterId,
-    //                     readingListId: readingListId,
-    //                     page: page,
-    //                     imageCache: imageCache,
-    //                   )
-    //                 : EpubHorizontalSubpages(
-    //                     key: ValueKey(page),
-    //                     seriesId: seriesId,
-    //                     chapterId: chapterId,
-    //                     readingListId: readingListId,
-    //                     page: page,
-    //                     imageCache: imageCache,
-    //                   ),
-    //           ),
-    //         );
-    //       },
-    //     );
-    //   },
-    // );
   }
 }
