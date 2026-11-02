@@ -79,7 +79,6 @@ class ReaderOverlay extends HookConsumerWidget {
           final prevChapter = ref.watch(
             prevChapterProvider(
               seriesId: seriesId,
-              volumeId: data.reader.volumeId,
               chapterId: chapterId,
               readingListId: readingListId,
             ),
@@ -88,7 +87,6 @@ class ReaderOverlay extends HookConsumerWidget {
           final nextChapter = ref.watch(
             nextChapterProvider(
               seriesId: seriesId,
-              volumeId: data.reader.volumeId,
               chapterId: chapterId,
               readingListId: readingListId,
             ),
