@@ -50,17 +50,17 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   }) {
     return _chaptersWithProgressQuery(seriesId: seriesId, volumeId: volumeId)
       ..orderBy([
-        OrderingTerm.desc(
+        .desc(
           readingProgress.chapterId.isNotNull() &
               readingProgress.pagesRead.isBiggerThan(const Constant(0)) &
               readingProgress.pagesRead.isSmallerThan(chapters.pages),
         ),
-        OrderingTerm.desc(
+        .desc(
           readingProgress.chapterId.isNull() |
               readingProgress.pagesRead.equals(0),
         ),
-        OrderingTerm.asc(chapters.sortOrder),
-        OrderingTerm.asc(volumes.minNumber),
+        .asc(volumes.minNumber),
+        .asc(chapters.sortOrder),
       ])
       ..limit(1);
   }
