@@ -54,7 +54,7 @@ class SmartFiltersDao(super.attachedDatabase)
   OrderingTerm _orderingTerm(OrderedSortOption column, OrderingMode mode) {
     return switch (column) {
       .sortOrder => OrderingTerm(
-        expression: smartFilterSeries.rowId,
+        expression: smartFilterSeries.sortOrder,
         mode: mode,
       ),
       .name => OrderingTerm(
@@ -172,7 +172,7 @@ class SmartFiltersDao(super.attachedDatabase)
       ..orderBy([
         OrderingTerm(
           expression: switch (orderBy) {
-            .sortOrder => smartFilterReadingList.rowId,
+            .sortOrder => smartFilterReadingList.sortOrder,
             .name => readingLists.title,
             .progress => progress,
             .lastRead => readingProgress.lastModified.max(),
@@ -207,10 +207,22 @@ class SmartFiltersDao(super.attachedDatabase)
   Future<void> upsertSmartFilterSeriesBatch(
     Iterable<SmartFilterSeriesCompanion> b,
   ) async {
-    final ids = b.map((e) => e.smartFilterId.value).toSet();
+    final idsByFilter = <int, List<int>>{};
+    for (final link in b) {
+      idsByFilter
+          .putIfAbsent(link.smartFilterId.value, () => [])
+          .add(link.seriesId.value);
+    }
 
     await batch((batch) {
-      batch.deleteWhere(smartFilterSeries, (t) => t.smartFilterId.isIn(ids));
+      for (final entry in idsByFilter.entries) {
+        final seriesIds = entry.value;
+        batch.deleteWhere(
+          smartFilterSeries,
+          (t) =>
+              t.smartFilterId.equals(entry.key) & t.seriesId.isNotIn(seriesIds),
+        );
+      }
       batch.insertAllOnConflictUpdate(smartFilterSeries, b);
     });
   }
@@ -221,13 +233,26 @@ class SmartFiltersDao(super.attachedDatabase)
   Future<void> upsertSmartFilterReadingListBatch(
     Iterable<SmartFilterReadingListCompanion> b,
   ) async {
-    final ids = b.map((e) => e.smartFilterId.value).toSet();
+    final idsByFilter = <int, List<int>>{};
+    for (final link in b) {
+      idsByFilter
+          .putIfAbsent(
+            link.smartFilterId.value,
+            () => [],
+          )
+          .add(link.readingListId.value);
+    }
 
     await batch((batch) {
-      batch.deleteWhere(
-        smartFilterReadingList,
-        (t) => t.smartFilterId.isIn(ids),
-      );
+      for (final entry in idsByFilter.entries) {
+        final readingListIds = entry.value;
+        batch.deleteWhere(
+          smartFilterReadingList,
+          (t) =>
+              t.smartFilterId.equals(entry.key) &
+              t.readingListId.isNotIn(readingListIds),
+        );
+      }
       batch.insertAllOnConflictUpdate(smartFilterReadingList, b);
     });
   }
@@ -237,10 +262,25 @@ class SmartFiltersDao(super.attachedDatabase)
   Future<void> upsertSmartFilterPersonBatch(
     Iterable<SmartFilterPersonCompanion> b,
   ) async {
-    final ids = b.map((e) => e.smartFilterId.value).toSet();
+    final idsByFilter = <int, List<int>>{};
+    for (final link in b) {
+      idsByFilter
+          .putIfAbsent(
+            link.smartFilterId.value,
+            () => [],
+          )
+          .add(link.personId.value);
+    }
 
     await batch((batch) {
-      batch.deleteWhere(smartFilterPerson, (t) => t.smartFilterId.isIn(ids));
+      for (final entry in idsByFilter.entries) {
+        final personIds = entry.value;
+        batch.deleteWhere(
+          smartFilterPerson,
+          (t) =>
+              t.smartFilterId.equals(entry.key) & t.personId.isNotIn(personIds),
+        );
+      }
       batch.insertAllOnConflictUpdate(smartFilterPerson, b);
     });
   }

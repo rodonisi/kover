@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/models/enums/order_by_option.dart';
 import 'package:kover/models/enums/sort_direction.dart';
@@ -117,28 +118,31 @@ class const SmartFiltersRepository({
           switch (smartFilter.type.value) {
             case .series:
               await _db.smartFiltersDao.upsertSmartFilterSeriesBatch(
-                ids.map(
-                  (id) => SmartFilterSeriesCompanion.insert(
+                ids.indexed.map(
+                  (entry) => SmartFilterSeriesCompanion.insert(
                     smartFilterId: smartFilter.id.value,
-                    seriesId: id,
+                    seriesId: entry.$2,
+                    sortOrder: Value(entry.$1),
                   ),
                 ),
               );
             case .readingList:
               await _db.smartFiltersDao.upsertSmartFilterReadingListBatch(
-                ids.map(
-                  (id) => SmartFilterReadingListCompanion.insert(
+                ids.indexed.map(
+                  (entry) => SmartFilterReadingListCompanion.insert(
                     smartFilterId: smartFilter.id.value,
-                    readingListId: id,
+                    readingListId: entry.$2,
+                    sortOrder: Value(entry.$1),
                   ),
                 ),
               );
             case .person:
               await _db.smartFiltersDao.upsertSmartFilterPersonBatch(
-                ids.map(
-                  (id) => SmartFilterPersonCompanion.insert(
+                ids.indexed.map(
+                  (entry) => SmartFilterPersonCompanion.insert(
                     smartFilterId: smartFilter.id.value,
-                    personId: id,
+                    personId: entry.$2,
+                    sortOrder: Value(entry.$1),
                   ),
                 ),
               );
