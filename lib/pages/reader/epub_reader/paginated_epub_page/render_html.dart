@@ -22,6 +22,7 @@ class RenderHtml extends StatelessWidget {
       factoryBuilder: factoryBuilder,
       customStylesBuilder: (element) => cssEngine.stylesFor(element),
       textStyle: textStyle,
+      rebuildTriggers: [cssEngine.stylesRevision],
     );
   }
 }

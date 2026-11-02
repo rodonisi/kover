@@ -5,8 +5,26 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
 import 'package:kover/utils/html_constants.dart';
 import 'package:material_ui/material_ui.dart';
+
+const _settings = PaginatedEpubPageSettings(
+  horizontalMarginSize: 0,
+  verticalMarginSize: 0,
+  fontSize: 14,
+  paragraphSpacing: 0,
+  lineHeight: 1.5,
+  wordSpacing: 0,
+  letterSpacing: 0,
+  fontFamily: null,
+  removeParagraphIndent: false,
+  highlightResumePoint: false,
+  canScroll: true,
+  reduceAnimations: false,
+  textAlignment: .left,
+  mode: .horizontal,
+);
 
 void main() {
   group('EpubMeasurementsCollector', () {
@@ -201,9 +219,11 @@ void main() {
           home: Scaffold(
             body: EpubMeasurementsCollector(
               html: html,
-              viewport: const Size(500, 600),
+              settings: _settings,
               cssEngine: CssEngine(root: html),
-              onMeasured: (value) => measurements = value,
+              enabled: true,
+              onViewportChanged: (_) {},
+              onMeasured: (value, _) => measurements = value,
             ),
           ),
         ),
@@ -249,9 +269,11 @@ void main() {
           home: Scaffold(
             body: EpubMeasurementsCollector(
               html: html,
-              viewport: const Size(500, 600),
+              settings: _settings,
               cssEngine: CssEngine(root: html),
-              onMeasured: (value) => measurements = value,
+              enabled: true,
+              onViewportChanged: (_) {},
+              onMeasured: (value, _) => measurements = value,
             ),
           ),
         ),
@@ -317,9 +339,11 @@ Future<void> _pump(
       home: Scaffold(
         body: EpubMeasurementsCollector(
           html: html,
-          viewport: const Size(500, 600),
+          settings: _settings,
           cssEngine: CssEngine(root: html),
-          onMeasured: onMeasured,
+          enabled: true,
+          onViewportChanged: (_) {},
+          onMeasured: (value, _) => onMeasured(value),
         ),
       ),
     ),

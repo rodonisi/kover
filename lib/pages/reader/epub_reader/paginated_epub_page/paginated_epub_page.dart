@@ -1,135 +1,131 @@
-import 'dart:async';
-
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:html/dom.dart' as dom;
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/paginated_epub_widget_factory.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller_status.dart';
+import 'package:kover/utils/html_constants.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/render_html.dart';
-import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller_status.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_styles.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/views/horizontal_epub_page_view.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/views/spreads_epub_page_view.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/views/vertical_epub_page_view.dart';
 import 'package:material_ui/material_ui.dart';
 
-class PaginatedEpubPage extends StatefulWidget {
+class PaginatedEpubPage extends HookWidget {
   final PaginatedEpubPageController controller;
   final dom.DocumentFragment html;
-  final EpubReaderSettingsState settings;
+  final PaginatedEpubPageSettings settings;
+  final Map<String, Map<String, String>> additionalStyles;
+  final Map<String, String> rootStyles;
+  final Map<String, String> highlightStyles;
+  final String? resumeScrollId;
+  final void Function(bool selected)? onSelectionChanged;
 
   const new({
     super.key,
     required this.controller,
     required this.html,
     required this.settings,
+    this.additionalStyles = const {},
+    this.rootStyles = const {},
+    this.highlightStyles = const {},
+    this.resumeScrollId,
+    this.onSelectionChanged,
   });
 
   @override
-  State<PaginatedEpubPage> createState() => _PaginatedEpubPageState();
-}
-
-class _PaginatedEpubPageState extends State<PaginatedEpubPage> {
-  Size _viewport = Size.zero;
-  Timer? _viewportDebounce;
-
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.attachRoot(widget.html);
-    widget.controller.addListener(_onControllerChanged);
-  }
-
-  @override
-  void didUpdateWidget(covariant PaginatedEpubPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.html != widget.html) {
-      widget.controller.attachRoot(widget.html);
-    }
-
-    if (oldWidget.settings != widget.settings) {
-      widget.controller.remeasure();
-    }
-  }
-
-  void _onControllerChanged() {
-    setState(() {});
-  }
-
-  void updateViewport(Size size) {
-    if (_viewport != size) {
-      setState(() {
-        _viewport = size;
-        widget.controller.viewportChanged();
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
-      fontSize: widget.settings.fontSize,
-      height: widget.settings.lineHeight,
-      wordSpacing: widget.settings.wordSpacing,
-      letterSpacing: widget.settings.letterSpacing,
+    useListenable(controller);
+
+    final mergedStyles = useMemoized(
+      () => mergeStyles([
+        additionalStyles,
+        if (rootStyles.isNotEmpty)
+          {'.${HtmlConstants.koverWrapperClass}': rootStyles},
+        settingsStyles(settings),
+        if (highlightStyles.isNotEmpty)
+          {'.${HtmlConstants.resumeClass}': highlightStyles},
+      ]),
+      [additionalStyles, rootStyles, highlightStyles, settings],
     );
-    if (widget.controller.root == null) {
-      return const Center(
-        child: CircularProgressIndicator(),
+
+    useEffect(() {
+      controller.attachRoot(
+        html,
+        settings: settings,
+        initialXpath: resumeScrollId,
+        additionalStyles: mergedStyles,
       );
-    }
+      return null;
+    }, [controller, html, resumeScrollId]);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_viewportDebounce != null) {
-            _viewportDebounce!.cancel();
-          }
-          _viewportDebounce = Timer(const Duration(milliseconds: 100), () {
-            updateViewport(Size(constraints.maxWidth, constraints.maxHeight));
-          });
-        });
+    useEffect(() {
+      controller.updateStyles(mergedStyles);
+      return null;
+    }, [controller, mergedStyles]);
 
-        if (widget.controller.status == .measuring) {
-          return Stack(
-            children: [
-              Offstage(
-                child: EpubMeasurementsCollector(
-                  html: widget.controller.root!,
-                  viewport: _viewport,
-                  cssEngine: widget.controller.cssEngine,
-                  textStyle: textStyle,
-                  onMeasured: (measurements) {
-                    widget.controller.processMeasurements(
-                      measurements,
-                      pageHeight: _viewport.height,
-                    );
-                  },
-                ),
+    useEffect(() {
+      controller.updateSettings(settings);
+      return null;
+    }, [controller, settings]);
+
+    final previousSettings = usePrevious(settings);
+    useEffect(() {
+      if (previousSettings == null || previousSettings == settings) return null;
+      controller.remeasure();
+      return null;
+    }, [controller, settings, previousSettings]);
+
+    final root = controller.root;
+    final measuring = controller.status == .measuring;
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Offstage(
+            child: root == null
+                ? const SizedBox.shrink()
+                : EpubMeasurementsCollector(
+                    html: root,
+                    settings: settings,
+                    cssEngine: controller.cssEngine,
+                    enabled: measuring,
+                    onViewportChanged: controller.viewportChanged,
+                    onMeasured: (measurements, viewport) {
+                      controller.processMeasurements(
+                        measurements,
+                        viewport: viewport,
+                      );
+                    },
+                  ),
+          ),
+        ),
+        if (root == null || measuring)
+          const Center(child: CircularProgressIndicator())
+        else if (controller.subpageCount == 0)
+          const SizedBox.shrink()
+        else
+          SelectionArea(
+            onSelectionChanged: (selection) {
+              onSelectionChanged?.call(
+                selection != null && selection.plainText.isNotEmpty,
+              );
+            },
+            child: switch (settings.mode) {
+              .horizontal => HorizontalEpubPageView(
+                controller: controller,
+                settings: settings,
               ),
-              const Center(
-                child: CircularProgressIndicator(),
+              .vertical => VerticalEpubPageView(
+                controller: controller,
+                settings: settings,
               ),
-            ],
-          );
-        }
-
-        final subpageCount = widget.controller.subpageCount;
-        if (subpageCount == 0) {
-          return const SizedBox.shrink();
-        }
-
-        return PageView.builder(
-          itemCount: subpageCount,
-          itemBuilder: (context, index) {
-            return OverflowBox(
-              maxHeight: double.infinity,
-              child: RenderHtml(
-                html: widget.controller.getSubpage(index),
-                factoryBuilder: () =>
-                    PaginatedEpubWidgetFactory(viewport: _viewport),
-                cssEngine: widget.controller.cssEngine,
-                textStyle: textStyle,
+              .spreads => SpreadsEpubPageView(
+                controller: controller,
+                settings: settings,
               ),
-            );
-          },
-        );
-      },
+            },
+          ),
+      ],
     );
   }
 }

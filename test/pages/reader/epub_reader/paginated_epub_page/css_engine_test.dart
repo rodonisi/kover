@@ -93,16 +93,83 @@ void main() {
 
       expect(styles?['color'], '#00f');
     });
+
+    test(
+      'when additional styles match, then they win over document styles',
+      () {
+        final (engine, rendered) = _render(
+          '''
+        <style>
+          p { color: red; margin-top: 4px; }
+        </style>
+        <p>text</p>
+      ''',
+          additionalStyles: {
+            'p': {'color': 'blue'},
+          },
+        );
+
+        final styles = engine.stylesFor(rendered.querySelector('p')!);
+
+        expect(styles?['color'], 'blue');
+        expect(styles?['margin-top'], '4px');
+      },
+    );
+
+    test('when additional styles use a universal selector, then all elements match', () {
+      final (engine, rendered) = _render(
+        '''
+        <div><p>text</p><span>inline</span></div>
+      ''',
+        additionalStyles: {
+          '*': {'text-indent': '0'},
+        },
+      );
+
+      expect(
+        engine.stylesFor(rendered.querySelector('p')!)?['text-indent'],
+        '0',
+      );
+      expect(
+        engine.stylesFor(rendered.querySelector('span')!)?['text-indent'],
+        '0',
+      );
+    });
+
+    test(
+      'when additional styles are updated, then the overlay is replaced',
+      () {
+        final (engine, rendered) = _render(
+          '<p>text</p>',
+          additionalStyles: {
+            'p': {'color': 'red'},
+          },
+        );
+
+        final paragraph = rendered.querySelector('p')!;
+        expect(engine.stylesFor(paragraph)?['color'], 'red');
+
+        engine.updateAdditionalStyles({
+          'p': {'text-align': 'justify'},
+        });
+
+        expect(engine.stylesFor(paragraph)?['color'], isNull);
+        expect(engine.stylesFor(paragraph)?['text-align'], 'justify');
+      },
+    );
   });
 }
 
 /// Builds an engine, then re-parses its HTML like flutter_widget_from_html.
-(CssEngine, dom.DocumentFragment) _render(String html) {
+(CssEngine, dom.DocumentFragment) _render(
+  String html, {
+  Map<String, Map<String, String>> additionalStyles = const {},
+}) {
   final root = EpubPagePreprocessor(
     html: dom.DocumentFragment.html(html),
     operations: [NodeIndexingOperation()],
   ).process();
-  final engine = CssEngine(root: root);
+  final engine = CssEngine(root: root, additionalStyles: additionalStyles);
   final rendered = dom.DocumentFragment.html(root.outerHtml);
   return (engine, rendered);
 }

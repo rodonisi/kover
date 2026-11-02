@@ -1,23 +1,15 @@
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
-import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
-import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'epub_reader.freezed.dart';
 part 'epub_reader.g.dart';
-
-typedef EpubMeasureWidgetBuilder = Widget Function(
-  String html,
-  Map<String, Map<String, String>> styles,
-);
 
 @freezed
 sealed class EpubNavigationState with _$EpubNavigationState {
@@ -28,11 +20,14 @@ sealed class EpubNavigationState with _$EpubNavigationState {
     required int totalSubpages,
     @Default(false) bool ready,
     @Default(false) bool fromObserver,
+    @Default(null) String? scrollId,
   }) = _EpubNavigationState;
 }
 
 @riverpod
 class EpubNavigation extends _$EpubNavigation {
+  final Map<int, int> _pageSubpageCounts = {};
+  int? _pendingLastSubpagePage;
   var _spreads = false;
   int get _step => _spreads ? 2 : 1;
 
@@ -73,17 +68,33 @@ class EpubNavigation extends _$EpubNavigation {
     );
   }
 
-  void updateSubpageCount(int totalSubpages) {
+  void updateSubpageCount(int page, int totalSubpages) {
+    _pageSubpageCounts[page] = totalSubpages;
+
     final current = state.value;
-    if (current == null) return;
+    if (current == null || current.page != page) return;
+
+    final landOnLast = _pendingLastSubpagePage == page;
+    if (landOnLast) {
+      _pendingLastSubpagePage = null;
+    }
+
+    final subpage = landOnLast && totalSubpages > 0
+        ? totalSubpages - 1
+        : current.subpage;
 
     // Avoid redundant state writes: listeners would sync the same subpage back
     // into the page controller and start a notification loop.
-    if (current.ready && current.totalSubpages == totalSubpages) return;
+    if (current.ready &&
+        current.totalSubpages == totalSubpages &&
+        current.subpage == subpage) {
+      return;
+    }
 
     state = AsyncData(
       current.copyWith(
         totalSubpages: totalSubpages,
+        subpage: subpage,
         ready: true,
       ),
     );
@@ -94,7 +105,8 @@ class EpubNavigation extends _$EpubNavigation {
       next.whenData((data) async {
         final isSamePosition =
             prev?.value?.page == data.page &&
-            prev?.value?.subpage == data.subpage;
+            prev?.value?.subpage == data.subpage &&
+            prev?.value?.scrollId == data.scrollId;
 
         if (!data.ready || isSamePosition) return;
 
@@ -125,6 +137,7 @@ class EpubNavigation extends _$EpubNavigation {
           );
           await reader.saveProgress(
             page: data.page,
+            scrollId: data.scrollId,
             handleCompletion: false,
           );
         } catch (e, stacktrace) {
@@ -149,13 +162,24 @@ class EpubNavigation extends _$EpubNavigation {
         next.whenData(
           (next) async {
             final current = await future;
+            final cachedCount = _pageSubpageCounts[next];
+            final landOnLast = _pendingLastSubpagePage == next;
+            final subpage = landOnLast && cachedCount != null && cachedCount > 0
+                ? cachedCount - 1
+                : 0;
+
+            if (!landOnLast || cachedCount != null) {
+              _pendingLastSubpagePage = null;
+            }
 
             state = AsyncData(
               current.copyWith(
                 page: next,
-                subpage: 0,
-                ready: false,
+                subpage: subpage,
+                totalSubpages: cachedCount ?? 0,
+                ready: cachedCount != null,
                 fromObserver: false,
+                scrollId: null,
               ),
             );
           },
@@ -174,10 +198,18 @@ class EpubNavigation extends _$EpubNavigation {
         .handleCompletion(false);
   }
 
-  Future<void> jumpToPage(int page) async {
+  Future<void> jumpToPage(int page, {bool force = false}) async {
     final current = await future;
 
-    if (!current.ready || page >= current.totalPages || page < 0) return;
+    if ((!current.ready && !force) || page >= current.totalPages || page < 0) {
+      return;
+    }
+
+    if (current.page - page == 1) {
+      _pendingLastSubpagePage = page;
+    } else if (page != current.page) {
+      _pendingLastSubpagePage = null;
+    }
 
     await ref
         .read(
@@ -190,9 +222,15 @@ class EpubNavigation extends _$EpubNavigation {
         .jumpToPage(page);
   }
 
-  Future<void> jumpToSubpage(int subpage, {bool fromObserver = false}) async {
+  Future<void> jumpToSubpage(
+    int subpage, {
+    bool fromObserver = false,
+    String? scrollId,
+    int? page,
+  }) async {
     final current = await future;
 
+    if (page != null && current.page != page) return;
     if (!current.ready) return;
 
     if (subpage < 0) {
@@ -209,73 +247,30 @@ class EpubNavigation extends _$EpubNavigation {
       current.copyWith(
         subpage: subpage,
         fromObserver: fromObserver,
+        scrollId: scrollId,
       ),
     );
   }
 
   Future<void> nextPage() async {
     final current = await future;
+
+    if (!current.ready) {
+      await jumpToPage(current.page + 1, force: true);
+      return;
+    }
+
     await jumpToSubpage(current.subpage + _step);
   }
 
   Future<void> previousPage() async {
     final current = await future;
+
+    if (!current.ready) {
+      await jumpToPage(current.page - 1, force: true);
+      return;
+    }
+
     await jumpToSubpage(current.subpage - _step);
   }
-}
-
-@freezed
-sealed class EpubReaderSubpageState with _$EpubReaderSubpageState {
-  const factory EpubReaderSubpageState({
-    required EpubNavigationState navigation,
-    required EpubReaderMode mode,
-    required double paragraphSpacing,
-    required bool reverse,
-    required bool navigationGesturesEnabled,
-    required bool reduceAnimations,
-  }) = _EpubReaderSubpageState;
-}
-
-@riverpod
-Future<EpubReaderSubpageState> epubReaderSubpage(
-  Ref ref, {
-  required int seriesId,
-  required int chapterId,
-  required int? readingListId,
-  required int page,
-}) async {
-  final navigationFuture = ref.watch(
-    epubNavigationProvider(
-      seriesId: seriesId,
-      chapterId: chapterId,
-      readingListId: readingListId,
-    ).future,
-  );
-  final epubSettingsFuture = ref.watch(
-    epubReaderSettingsProvider(seriesId: seriesId).selectAsync(
-      (value) => (value.mode, value.paragraphSpacing),
-    ),
-  );
-  final commonSettingsFuture = ref.watch(
-    commonReaderSettingsProvider(seriesId: seriesId).selectAsync(
-      (value) => (value.navigationGersturesEnabled, value.readDirection),
-    ),
-  );
-  final reduceAnimationsFuture = ref.watch(
-    themeProvider.selectAsync((value) => value.reduceAnimations),
-  );
-
-  final navigation = await navigationFuture;
-  final (mode, paragraphSpacing) = await epubSettingsFuture;
-  final (navigationGestures, readDirection) = await commonSettingsFuture;
-  final reduceAnimations = await reduceAnimationsFuture;
-
-  return EpubReaderSubpageState(
-    navigation: navigation,
-    mode: mode,
-    paragraphSpacing: paragraphSpacing,
-    reverse: readDirection == .rightToLeft,
-    navigationGesturesEnabled: navigationGestures,
-    reduceAnimations: reduceAnimations,
-  );
 }

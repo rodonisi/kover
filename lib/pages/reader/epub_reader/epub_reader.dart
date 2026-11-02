@@ -6,8 +6,8 @@ import 'package:kover/pages/reader/epub_reader/epub_theme_override.dart';
 import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller_status.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page_provider.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
-import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/layout_constants.dart';
@@ -85,6 +85,8 @@ class EpubReader extends HookConsumerWidget {
 
                     if (nextPage == previousPage) return;
 
+                    hasSelection.value = false;
+
                     if (controller.hasClients &&
                         controller.page?.round() != nextPage) {
                       final isSequential =
@@ -103,7 +105,7 @@ class EpubReader extends HookConsumerWidget {
                 });
 
                 final respectSafeAreas =
-                    data.mode == .vertical && !ignoreSafeAreas;
+                    data.mode != .vertical || !ignoreSafeAreas;
 
                 return Directionality(
                   textDirection: data.commonSettings.readDirection
@@ -125,7 +127,7 @@ class EpubReader extends HookConsumerWidget {
                       },
                       physics: const NeverScrollableScrollPhysics(),
                       onPageChanged: (newPage) {
-                        ref.read(nav.notifier).jumpToPage(newPage);
+                        ref.read(nav.notifier).jumpToPage(newPage, force: true);
                       },
                       itemBuilder: (context, index) {
                         return _Page(
@@ -137,7 +139,6 @@ class EpubReader extends HookConsumerWidget {
                               data.commonSettings.readDirection ==
                                   .rightToLeft &&
                               data.mode != .vertical,
-                          mode: data.mode,
                           outerController: controller,
                           onSelectionChanged: (selected) {
                             if (selected != hasSelection.value) {
@@ -164,7 +165,6 @@ class _Page extends HookConsumerWidget {
   final int? readingListId;
   final int page;
   final bool reverse;
-  final EpubReaderMode mode;
   final PageController outerController;
   final void Function(bool)? onSelectionChanged;
 
@@ -173,7 +173,6 @@ class _Page extends HookConsumerWidget {
     required this.chapterId,
     required this.readingListId,
     required this.page,
-    required this.mode,
     this.reverse = false,
     this.onSelectionChanged,
     required this.outerController,
@@ -215,67 +214,80 @@ class _Page extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final content = ref.watch(
-      epubPageProvider(chapterId: chapterId, page: page),
+    final nav = epubNavigationProvider(
+      seriesId: seriesId,
+      chapterId: chapterId,
+      readingListId: readingListId,
     );
-    final controller = useMemoized(
-      () => PaginatedEpubPageController(
-        onSubpageChanged: (subpage) {
-          ref
-              .read(
-                epubNavigationProvider(
-                  seriesId: seriesId,
-                  chapterId: chapterId,
-                  readingListId: readingListId,
-                ).notifier,
-              )
-              .jumpToSubpage(subpage);
-        },
-        onSubpagesCountChanged: (count) {
-          ref
-              .read(
-                epubNavigationProvider(
-                  seriesId: seriesId,
-                  chapterId: chapterId,
-                  readingListId: readingListId,
-                ).notifier,
-              )
-              .updateSubpageCount(count);
-        },
-      ),
-    );
-
-    ref.listen(
-      epubNavigationProvider(
+    final model = ref.watch(
+      paginatedEpubPageProvider(
         seriesId: seriesId,
         chapterId: chapterId,
         readingListId: readingListId,
+        page: page,
       ),
+    );
+    final controller = useMemoized(
+      () => PaginatedEpubPageController(
+        onSubpageChanged: (subpage, scrollId) {
+          onSelectionChanged?.call(false);
+          ref
+              .read(nav.notifier)
+              .jumpToSubpage(subpage, scrollId: scrollId, page: page);
+        },
+        onSubpagesCountChanged: (count) {
+          ref.read(nav.notifier).updateSubpageCount(page, count);
+        },
+      ),
+    );
+    useEffect(() => controller.dispose, [controller]);
+
+    final navState = ref.read(nav).value;
+    if (navState != null &&
+        navState.page == page &&
+        controller.status == .measuring) {
+      controller.setPendingSubpage(navState.subpage);
+    }
+
+    ref.listen(
+      nav,
       (previous, next) {
         next.whenData((next) {
-          if (next.page == page &&
-              controller.status == .ready &&
-              controller.currentSubpage != next.subpage) {
-            controller.jumpToSubpage(next.subpage);
+          if (next.page != page) {
+            controller.setPendingSubpage(null);
+            return;
+          }
+
+          if (controller.status == .ready) {
+            ref
+                .read(nav.notifier)
+                .updateSubpageCount(page, controller.subpageCount);
+            if (controller.currentSubpage != next.subpage) {
+              controller.jumpToSubpage(next.subpage);
+            }
+          } else {
+            controller.setPendingSubpage(next.subpage);
           }
         });
       },
     );
 
-    final settings =
-        ref
-            .watch(
-              epubReaderSettingsProvider(seriesId: seriesId),
-            )
-            .value ??
-        const EpubReaderSettingsState();
-
     return Async(
-      asyncValue: content,
-      data: (data) => PaginatedEpubPage(
-        controller: controller,
-        html: data.root,
-        settings: settings,
+      asyncValue: model,
+      data: (data) => NotificationListener<ScrollNotification>(
+        onNotification: data.settings.canScroll
+            ? handleScrollNotification
+            : null,
+        child: PaginatedEpubPage(
+          controller: controller,
+          html: data.html,
+          settings: data.settings,
+          additionalStyles: data.additionalStyles,
+          rootStyles: data.rootStyles,
+          highlightStyles: data.highlightStyles,
+          resumeScrollId: data.resumeScrollId,
+          onSelectionChanged: onSelectionChanged,
+        ),
       ),
     );
   }

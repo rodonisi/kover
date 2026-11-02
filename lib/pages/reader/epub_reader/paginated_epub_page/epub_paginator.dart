@@ -1,8 +1,8 @@
 import 'package:html/dom.dart' as dom;
+import 'package:kover/utils/html_constants.dart';
+import 'package:kover/utils/extensions/document_fragment.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break_unit.dart';
-import 'package:kover/utils/extensions/document_fragment.dart';
-import 'package:kover/utils/html_constants.dart';
 import 'package:kover/utils/logging.dart';
 
 /// Splits an EPUB document into subpages based on the measured positions of
@@ -10,6 +10,8 @@ import 'package:kover/utils/logging.dart';
 class EpubPaginator({required final dom.DocumentFragment root}) {
   final List<EpubBreak> _breaks = [];
   final Map<int, String> _subpages = {};
+  final Map<int, int> _nodePages = {};
+  final Map<int, String?> _scrollIds = {};
   bool _hasMeasurement = false;
 
   /// The document always has a first page, so there is one more subpage than
@@ -22,10 +24,12 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
   ) {
     _breaks.clear();
     _subpages.clear();
+    _nodePages.clear();
+    _scrollIds.clear();
     _hasMeasurement = true;
 
     if (units.isEmpty || pageHeight <= 0) {
-      log.warning(
+      log.debug(
         'Skipping pagination',
         attributes: {
           'units': units.length,
@@ -37,6 +41,7 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
 
     final starts = <EpubBreak>[];
     var cursor = 0;
+    var pageIndex = 0;
 
     while (cursor < units.length) {
       final origin = cursor == 0 ? 0.0 : units[cursor].pageStartTop;
@@ -48,6 +53,10 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
         last++;
       }
 
+      for (var index = cursor; index <= last; index++) {
+        _nodePages.putIfAbsent(units[index].nodeIndex, () => pageIndex);
+      }
+
       final next = last + 1;
       if (next >= units.length) break;
 
@@ -57,9 +66,50 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
         ),
       );
       cursor = next;
+      pageIndex++;
     }
 
     _breaks.addAll(starts);
+  }
+
+  /// Returns the subpage that contains the start of [nodeIndex], if known.
+  int? subpageForNodeIndex(int nodeIndex) => _nodePages[nodeIndex];
+
+  /// Returns the first subpage whose markup contains [scrollId].
+  ///
+  /// This is used as a fallback when the resume element cannot be mapped to a
+  /// block node index.
+  int? subpageForScrollId(String scrollId) {
+    for (var index = 0; index < subpageCount; index++) {
+      final fragment = dom.DocumentFragment.html(getSubpage(index));
+      final elements = fragment.querySelectorAll(
+        '[${HtmlConstants.scrollIdAttribute}]',
+      );
+      for (final element in elements) {
+        if (element.attributes[HtmlConstants.scrollIdAttribute] == scrollId) {
+          return index;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /// Returns the scroll id of the first paragraph on [index], if any.
+  String? scrollIdForSubpage(int index) {
+    if (index < 0 || index >= subpageCount) return null;
+    if (_scrollIds.containsKey(index)) return _scrollIds[index];
+
+    final fragment = dom.DocumentFragment.html(getSubpage(index));
+    String? scrollId;
+    for (final paragraph in fragment.querySelectorAll('p')) {
+      if (!paragraph.hasText) continue;
+      scrollId = paragraph.attributes[HtmlConstants.scrollIdAttribute];
+      break;
+    }
+
+    _scrollIds[index] = scrollId;
+    return scrollId;
   }
 
   String getSubpage(int index) {
@@ -87,24 +137,18 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
     // sibling positions in the cloned tree.
     final endNode = end == null ? null : _nodeAt(subpage, end);
     if (end != null && endNode == null) {
-      log.warning(
+      log.debug(
         'End node not found for subpage',
-        attributes: {
-          'start': start,
-          'end': end,
-        },
+        attributes: {'start': start, 'end': end},
       );
       return dom.DocumentFragment();
     }
 
     final startNode = start == null ? null : _nodeAt(subpage, start);
     if (start != null && startNode == null) {
-      log.warning(
+      log.debug(
         'Start node not found for subpage',
-        attributes: {
-          'start': start,
-          'end': end,
-        },
+        attributes: {'start': start, 'end': end},
       );
       return dom.DocumentFragment();
     }

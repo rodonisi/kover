@@ -5,6 +5,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_paginato
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break_unit.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller_status.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
@@ -338,7 +339,7 @@ void main() {
       final paginator = _paginator('<div><p>AAAA BBBB CCCC</p></div>');
       final block = _nodeIndexOf(paginator.root, 'p');
 
-      controller.attachRoot(paginator.root);
+      controller.attachRoot(paginator.root, settings: _pageSettings());
       controller.processMeasurements(
         EpubMeasurements(
           // The whole document is much taller than the viewport.
@@ -367,7 +368,7 @@ void main() {
             ),
           ],
         ),
-        pageHeight: 25,
+        viewport: const Size(100, 25),
       );
 
       expect(controller.status, PaginatedEpubPageControllerStatus.ready);
@@ -385,12 +386,12 @@ void main() {
     test('does not re-notify when jumping to the current subpage', () {
       final changes = <int>[];
       final controller = PaginatedEpubPageController(
-        onSubpageChanged: changes.add,
+        onSubpageChanged: (subpage, _) => changes.add(subpage),
       );
       final paginator = _paginator('<div><p>AAAA BBBB CCCC</p></div>');
       final block = _nodeIndexOf(paginator.root, 'p');
 
-      controller.attachRoot(paginator.root);
+      controller.attachRoot(paginator.root, settings: _pageSettings());
       controller.processMeasurements(
         EpubMeasurements(
           contentSize: const Size(100, 1000),
@@ -412,8 +413,9 @@ void main() {
             ),
           ],
         ),
-        pageHeight: 25,
+        viewport: const Size(100, 25),
       );
+      changes.clear();
 
       var notifications = 0;
       controller.addListener(() => notifications++);
@@ -442,12 +444,12 @@ void main() {
       final paginator = _paginator('<div><p>Only page</p></div>');
       final block = _nodeIndexOf(paginator.root, 'p');
 
-      controller.attachRoot(paginator.root);
+      controller.attachRoot(paginator.root, settings: _pageSettings());
 
       var notifications = 0;
       controller.addListener(() => notifications++);
 
-      controller.viewportChanged();
+      controller.viewportChanged(const Size(100, 10));
 
       expect(notifications, 0);
       expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
@@ -457,22 +459,162 @@ void main() {
           contentSize: const Size(100, 10),
           units: [_line(nodeIndex: block, bottom: 10)],
         ),
-        pageHeight: 100,
+        viewport: const Size(100, 100),
       );
 
       expect(notifications, 1);
       expect(controller.status, PaginatedEpubPageControllerStatus.ready);
 
-      controller.viewportChanged();
+      controller.viewportChanged(const Size(100, 120));
 
       expect(notifications, 2);
       expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
 
-      controller.viewportChanged();
+      controller.viewportChanged(const Size(100, 120));
 
       expect(notifications, 2);
     });
+
+    test('applies a pending subpage after pagination', () {
+      final controller = PaginatedEpubPageController();
+      final paginator = _paginator(
+        '<div><p>First</p><p>Second</p></div>',
+      );
+      final blocks = [
+        for (final paragraph in paginator.root.querySelectorAll('p'))
+          _nodeIndex(paragraph),
+      ];
+
+      controller.attachRoot(paginator.root, settings: _pageSettings());
+      controller.setPendingSubpage(1);
+      controller.processMeasurements(
+        EpubMeasurements(
+          contentSize: const Size(100, 20),
+          units: [
+            _line(nodeIndex: blocks[0], bottom: 10),
+            _line(nodeIndex: blocks[1], top: 10, bottom: 20),
+          ],
+        ),
+        viewport: const Size(100, 10),
+      );
+
+      expect(controller.currentSubpage, 1);
+    });
+
+    test('resumes at the initial xpath and reports its scroll id', () {
+      final html = dom.DocumentFragment.html(
+        '<div><p>first</p><p>second</p><p>third</p></div>',
+      );
+      final probe = PaginatedEpubPageController()
+        ..attachRoot(html, settings: _pageSettings());
+      final paragraphs = probe.root!.querySelectorAll('p');
+      final secondScrollId =
+          paragraphs[1].attributes[HtmlConstants.scrollIdAttribute]!;
+
+      final changes = <(int, String?)>[];
+      final controller = PaginatedEpubPageController(
+        onSubpageChanged: (subpage, scrollId) {
+          changes.add((subpage, scrollId));
+        },
+      );
+
+      controller.attachRoot(
+        html,
+        settings: _pageSettings(highlightResumePoint: true),
+        initialXpath: secondScrollId,
+        additionalStyles: {
+          '.${HtmlConstants.resumeClass}': {'background-color': 'red'},
+        },
+      );
+
+      final blocks = [
+        for (final paragraph in controller.root!.querySelectorAll('p'))
+          _nodeIndex(paragraph),
+      ];
+
+      controller.processMeasurements(
+        EpubMeasurements(
+          contentSize: const Size(100, 30),
+          units: [
+            _line(nodeIndex: blocks[0], bottom: 10),
+            _line(nodeIndex: blocks[1], top: 10, bottom: 20),
+            _line(nodeIndex: blocks[2], top: 20, bottom: 30),
+          ],
+        ),
+        viewport: const Size(100, 10),
+      );
+
+      expect(controller.currentSubpage, 1);
+      expect(changes, [(1, secondScrollId)]);
+      expect(controller.scrollIdForSubpage(1), secondScrollId);
+      expect(
+        controller.root!.querySelector('.${HtmlConstants.resumeClass}'),
+        isNotNull,
+      );
+      expect(
+        controller.cssEngine.stylesFor(
+          controller.root!.querySelectorAll('p')[1],
+        )?['background-color'],
+        'red',
+      );
+    });
+
+    test('updateSettings toggles the resume highlight class', () {
+      final html = dom.DocumentFragment.html('<div><p>first</p></div>');
+      final probe = PaginatedEpubPageController()
+        ..attachRoot(html, settings: _pageSettings());
+      final scrollId = probe.root!
+          .querySelector('p')!
+          .attributes[HtmlConstants.scrollIdAttribute]!;
+
+      final controller = PaginatedEpubPageController()
+        ..attachRoot(
+          html,
+          settings: _pageSettings(),
+          initialXpath: scrollId,
+        );
+
+      expect(
+        controller.root!.querySelector('.${HtmlConstants.resumeClass}'),
+        isNull,
+      );
+
+      controller.updateSettings(
+        _pageSettings(highlightResumePoint: true),
+      );
+      expect(
+        controller.root!.querySelectorAll('p').first.classes,
+        contains(HtmlConstants.resumeClass),
+      );
+
+      controller.updateSettings(_pageSettings());
+      expect(
+        controller.root!.querySelectorAll('p').first.classes,
+        isNot(contains(HtmlConstants.resumeClass)),
+      );
+    });
   });
+}
+
+PaginatedEpubPageSettings _pageSettings({
+  bool highlightResumePoint = false,
+}) {
+  return PaginatedEpubPageSettings(
+    horizontalMarginSize: 0,
+    verticalMarginSize: 0,
+    fontSize: 14,
+    paragraphSpacing: 0,
+    lineHeight: 1.5,
+    wordSpacing: 0,
+    letterSpacing: 0,
+    fontFamily: null,
+    removeParagraphIndent: false,
+    highlightResumePoint: highlightResumePoint,
+    canScroll: true,
+    reduceAnimations: false,
+    textAlignment: .left,
+    mode: .horizontal,
+  );
 }
 
 EpubPaginator _paginator(String html) {
