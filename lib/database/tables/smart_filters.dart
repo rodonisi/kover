@@ -29,6 +29,7 @@ class SmartFilterSeries extends Table {
     #id,
     onDelete: KeyAction.cascade,
   )();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column<Object>>? get primaryKey => {smartFilterId, seriesId};
@@ -45,6 +46,7 @@ class SmartFilterReadingList extends Table {
     #id,
     onDelete: KeyAction.cascade,
   )();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column<Object>>? get primaryKey => {smartFilterId, readingListId};
@@ -61,6 +63,7 @@ class SmartFilterPerson extends Table {
     #id,
     onDelete: KeyAction.cascade,
   )();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column<Object>>? get primaryKey => {smartFilterId, personId};

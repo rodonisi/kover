@@ -51,8 +51,12 @@ class SmartFiltersDao(super.attachedDatabase)
   Expression<double> get _progressRatio =>
       progressRatio(readingProgress.pagesRead.sum(), series.pages);
 
-  OrderingTerm _orderingTerm(UnorderedSortOption column, OrderingMode mode) {
+  OrderingTerm _orderingTerm(OrderedSortOption column, OrderingMode mode) {
     return switch (column) {
+      .sortOrder => OrderingTerm(
+        expression: smartFilterSeries.sortOrder,
+        mode: mode,
+      ),
       .name => OrderingTerm(
         expression: series.sortName,
         mode: mode,
@@ -87,7 +91,7 @@ class SmartFiltersDao(super.attachedDatabase)
   Stream<List<SeriesData>> watchSeriesForSmartFilter(
     int smartFilterId, {
     String query = '',
-    UnorderedSortOption orderBy = .name,
+    OrderedSortOption orderBy = .sortOrder,
     SortDirection direction = .ascending,
     bool hideRead = false,
     bool downloadedOnly = false,
@@ -128,7 +132,7 @@ class SmartFiltersDao(super.attachedDatabase)
   Stream<List<ReadingList>> watchReadingListsForSmartFilter(
     int smartFilterId, {
     String query = '',
-    UnorderedSortOption orderBy = .name,
+    OrderedSortOption orderBy = .sortOrder,
     SortDirection direction = .ascending,
   }) {
     final pagesReadSum = readingProgress.pagesRead.sum();
@@ -168,6 +172,7 @@ class SmartFiltersDao(super.attachedDatabase)
       ..orderBy([
         OrderingTerm(
           expression: switch (orderBy) {
+            .sortOrder => smartFilterReadingList.sortOrder,
             .name => readingLists.title,
             .progress => progress,
             .lastRead => readingProgress.lastModified.max(),

@@ -20,7 +20,7 @@ Stream<List<SeriesModel>> smartFilterSeries(
   Ref ref, {
   required int smartFilterId,
   String query = '',
-  UnorderedSortOption orderBy = .name,
+  OrderedSortOption orderBy = .sortOrder,
   SortDirection direction = .ascending,
   bool hideRead = false,
   bool downloadedOnly = false,
@@ -43,7 +43,7 @@ Stream<List<ReadingListModel>> smartFilterReadingLists(
   Ref ref, {
   required int smartFilterId,
   String query = '',
-  UnorderedSortOption orderBy = .name,
+  OrderedSortOption orderBy = .sortOrder,
   SortDirection direction = .ascending,
 }) {
   final repo = ref.watch(smartFiltersRepositoryProvider);

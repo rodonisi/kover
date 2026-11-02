@@ -30,6 +30,7 @@ import 'generated/schema_v11.dart' as v11;
 import 'generated/schema_v12.dart' as v12;
 import 'generated/schema_v13.dart' as v13;
 import 'generated/schema_v14.dart' as v14;
+import 'generated/schema_v15.dart' as v15;
 
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -649,6 +650,70 @@ void main() {
 
       expect(chapters.first.totalReads, 0);
       expect(chapters.first.remoteLastRead, null);
+
+      await migratedDb.close();
+    });
+  });
+
+  group('from 14 to 15', () {
+    test('does not corrupt existing smart filter links', () async {
+      final schema = await verifier.schemaAt(14);
+      final oldDb = v14.DatabaseAtV14(schema.newConnection());
+      await oldDb
+          .into(oldDb.smartFilterSeries)
+          .insert(
+            v14.SmartFilterSeriesCompanion.insert(
+              smartFilterId: 1,
+              seriesId: 10,
+            ),
+          );
+      await oldDb
+          .into(oldDb.smartFilterReadingList)
+          .insert(
+            v14.SmartFilterReadingListCompanion.insert(
+              smartFilterId: 2,
+              readingListId: 20,
+            ),
+          );
+      await oldDb
+          .into(oldDb.smartFilterPerson)
+          .insert(
+            v14.SmartFilterPersonCompanion.insert(
+              smartFilterId: 3,
+              personId: 30,
+            ),
+          );
+      await oldDb.close();
+
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, 15);
+      await db.close();
+
+      final migratedDb = v15.DatabaseAtV15(schema.newConnection());
+      final seriesLinks = await migratedDb
+          .select(migratedDb.smartFilterSeries)
+          .get();
+      final readingListLinks = await migratedDb
+          .select(migratedDb.smartFilterReadingList)
+          .get();
+      final personLinks = await migratedDb
+          .select(migratedDb.smartFilterPerson)
+          .get();
+
+      expect(seriesLinks, hasLength(1));
+      expect(seriesLinks.first.smartFilterId, 1);
+      expect(seriesLinks.first.seriesId, 10);
+      expect(seriesLinks.first.sortOrder, 0);
+
+      expect(readingListLinks, hasLength(1));
+      expect(readingListLinks.first.smartFilterId, 2);
+      expect(readingListLinks.first.readingListId, 20);
+      expect(readingListLinks.first.sortOrder, 0);
+
+      expect(personLinks, hasLength(1));
+      expect(personLinks.first.smartFilterId, 3);
+      expect(personLinks.first.personId, 30);
+      expect(personLinks.first.sortOrder, 0);
 
       await migratedDb.close();
     });
