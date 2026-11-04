@@ -93,14 +93,12 @@ class ReaderRepository {
   /// Watch expected previous chapter
   Stream<ChapterModel?> watchPrevChapter({
     required int seriesId,
-    int? volumeId,
     required int chapterId,
     int? readingListId,
   }) {
     return _db.readerDao
         .watchPrevChapter(
           seriesId: seriesId,
-          volumeId: volumeId,
           chapterId: chapterId,
           readingListId: readingListId,
         )
@@ -110,14 +108,12 @@ class ReaderRepository {
   /// Watch expected next chapter
   Stream<ChapterModel?> watchNextChapter({
     required int seriesId,
-    int? volumeId,
     required int chapterId,
     int? readingListId,
   }) {
     return _db.readerDao
         .watchNextChapter(
           seriesId: seriesId,
-          volumeId: volumeId,
           chapterId: chapterId,
           readingListId: readingListId,
         )

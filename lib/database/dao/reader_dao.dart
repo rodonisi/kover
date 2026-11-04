@@ -288,7 +288,6 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   /// Watch previous chapter for chapter [chapterId]
   Stream<Chapter?> watchPrevChapter({
     required int seriesId,
-    int? volumeId,
     required int chapterId,
     int? readingListId,
   }) {
@@ -298,18 +297,33 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
           ..addColumns([chapters.sortOrder])
           ..where(chapters.id.equals(chapterId)),
       );
+      final volumeMinNumberOfCurrent = subqueryExpression<double>(
+        selectOnly(chapters).join([
+            innerJoin(volumes, volumes.id.equalsExp(chapters.volumeId)),
+          ])
+          ..addColumns([volumes.minNumber])
+          ..where(chapters.id.equals(chapterId)),
+      );
 
-      final query = select(chapters)
-        ..where((c) {
-          final base =
-              c.seriesId.equals(seriesId) &
-              c.sortOrder.isSmallerThan(sortOrderOfCurrent);
-          return volumeId != null ? base & c.volumeId.equals(volumeId) : base;
-        })
-        ..orderBy([(c) => OrderingTerm.desc(c.sortOrder)])
-        ..limit(1);
+      final query =
+          select(chapters).join([
+              innerJoin(volumes, volumes.id.equalsExp(chapters.volumeId)),
+            ])
+            ..where(
+              chapters.seriesId.equals(seriesId) &
+                  (volumes.minNumber.isSmallerThan(volumeMinNumberOfCurrent) |
+                      (volumes.minNumber.equalsExp(volumeMinNumberOfCurrent) &
+                          chapters.sortOrder.isSmallerThan(
+                            sortOrderOfCurrent,
+                          ))),
+            )
+            ..orderBy([
+              .desc(volumes.minNumber),
+              .desc(chapters.sortOrder),
+            ])
+            ..limit(1);
 
-      return query.watchSingleOrNull();
+      return query.map((row) => row.readTable(chapters)).watchSingleOrNull();
     }
 
     final orderOfCurrentInList = subqueryExpression<int>(
@@ -346,7 +360,6 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   /// Watch next chapter for chapter [chapterId]
   Stream<Chapter?> watchNextChapter({
     required int seriesId,
-    int? volumeId,
     required int chapterId,
     int? readingListId,
   }) {
@@ -356,18 +369,33 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
           ..addColumns([chapters.sortOrder])
           ..where(chapters.id.equals(chapterId)),
       );
+      final volumeMinNumberOfCurrent = subqueryExpression<double>(
+        selectOnly(chapters).join([
+            innerJoin(volumes, volumes.id.equalsExp(chapters.volumeId)),
+          ])
+          ..addColumns([volumes.minNumber])
+          ..where(chapters.id.equals(chapterId)),
+      );
 
-      final query = select(chapters)
-        ..where((c) {
-          final base =
-              c.seriesId.equals(seriesId) &
-              c.sortOrder.isBiggerThan(sortOrderOfCurrent);
-          return volumeId != null ? base & c.volumeId.equals(volumeId) : base;
-        })
-        ..orderBy([(c) => OrderingTerm.asc(c.sortOrder)])
-        ..limit(1);
+      final query =
+          select(chapters).join([
+              innerJoin(volumes, volumes.id.equalsExp(chapters.volumeId)),
+            ])
+            ..where(
+              chapters.seriesId.equals(seriesId) &
+                  (volumes.minNumber.isBiggerThan(volumeMinNumberOfCurrent) |
+                      (volumes.minNumber.equalsExp(volumeMinNumberOfCurrent) &
+                          chapters.sortOrder.isBiggerThan(
+                            sortOrderOfCurrent,
+                          ))),
+            )
+            ..orderBy([
+              .asc(volumes.minNumber),
+              .asc(chapters.sortOrder),
+            ])
+            ..limit(1);
 
-      return query.watchSingleOrNull();
+      return query.map((row) => row.readTable(chapters)).watchSingleOrNull();
     }
 
     final orderOfCurrentInList = subqueryExpression<int>(

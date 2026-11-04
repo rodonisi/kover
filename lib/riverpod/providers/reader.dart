@@ -138,7 +138,6 @@ Future<ProgressModel?> bookProgress(Ref ref, {required int chapterId}) async {
 Stream<ChapterModel?> prevChapter(
   Ref ref, {
   required int seriesId,
-  int? volumeId,
   required int chapterId,
   int? readingListId,
 }) {
@@ -146,7 +145,6 @@ Stream<ChapterModel?> prevChapter(
   return repo
       .watchPrevChapter(
         seriesId: seriesId,
-        volumeId: volumeId,
         chapterId: chapterId,
         readingListId: readingListId,
       )
@@ -157,7 +155,6 @@ Stream<ChapterModel?> prevChapter(
 Stream<ChapterModel?> nextChapter(
   Ref ref, {
   required int seriesId,
-  int? volumeId,
   required int chapterId,
   int? readingListId,
 }) {
@@ -165,7 +162,6 @@ Stream<ChapterModel?> nextChapter(
   return repo
       .watchNextChapter(
         seriesId: seriesId,
-        volumeId: volumeId,
         chapterId: chapterId,
         readingListId: readingListId,
       )
