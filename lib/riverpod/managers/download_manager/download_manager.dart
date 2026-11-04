@@ -149,6 +149,7 @@ class DownloadManager extends _$DownloadManager {
   }
 
   Future<void> deleteChapter(int chapterId) async {
+    await _clearIds([chapterId]);
     await ref
         .read(downloadRepositoryProvider)
         .deleteChapter(chapterId: chapterId);

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
@@ -15,6 +16,7 @@ import 'package:kover/sync/volume_sync_operations.dart';
 import 'package:kover/utils/cancellation_token.dart';
 import 'package:kover/utils/chunked_fetch.dart';
 import 'package:kover/utils/logging.dart';
+import 'package:kover/utils/safe_platform.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'download_repository.g.dart';
@@ -116,7 +118,7 @@ class const DownloadRepository({
             chapterId: chapterId,
             page: page,
           ),
-          .pdf => await _bookClient.getPdf(chapterId: chapterId),
+          .pdf => await _downloadPdf(chapterId, cancellationToken),
           _ => throw Exception('unsupported format'),
         };
 
@@ -151,6 +153,20 @@ class const DownloadRepository({
     );
     await _fontsRepository.saveFonts(content.fonts);
     return pageContentConverter.toSql(content);
+  }
+
+  // PDFs live on disk; empty blob marks the chapter as downloaded.
+  Future<Uint8List> _downloadPdf(int id, CancellationToken? token) async {
+    if (!SafePlatform.isWeb) {
+      final path = await AppDatabase.pdfPath(id);
+      await _bookClient.downloadPdf(
+        chapterId: id,
+        savePath: path,
+        cancellationToken: token,
+      );
+      return Uint8List(0);
+    }
+    return _bookClient.getPdf(chapterId: id, cancellationToken: token);
   }
 
   Future<void> downloadMissingCovers({
@@ -219,9 +235,18 @@ class const DownloadRepository({
     }
   }
 
+  Future<void> _deletePdfFiles(Iterable<int> chapterIds) async {
+    if (SafePlatform.isWeb || chapterIds.isEmpty) return;
+    for (final id in chapterIds) {
+      final file = File(await AppDatabase.pdfPath(id));
+      if (await file.exists()) await file.delete();
+    }
+  }
+
   /// Removes all locally stored pages for [chapterId].
   Future<void> deleteChapter({required int chapterId}) async {
     await _db.downloadDao.deleteChapter(chapterId: chapterId);
+    await _deletePdfFiles([chapterId]);
     log.info(
       'deleted local pages for chapter',
       attributes: {'chapter_id': chapterId},
@@ -240,7 +265,8 @@ class const DownloadRepository({
 
   /// Cancels and deletes all downloaded pages for the chapters in [chapterIds].
   Future<void> deleteVolume(int volumeId) async {
-    await _db.downloadDao.deleteVolume(volumeId: volumeId);
+    final ids = await _db.downloadDao.deleteVolume(volumeId: volumeId);
+    await _deletePdfFiles(ids);
   }
 
   /// Emits the download progress as a percentage for all chapters belonging to [seriesId].
@@ -252,6 +278,7 @@ class const DownloadRepository({
 
   /// Cancels and deletes all downloaded pages for every chapter in [seriesId].
   Future<void> deleteSeries({required int seriesId}) async {
-    await _db.downloadDao.deleteSeries(seriesId: seriesId);
+    final ids = await _db.downloadDao.deleteSeries(seriesId: seriesId);
+    await _deletePdfFiles(ids);
   }
 }

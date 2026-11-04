@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:kover/database/converters/string_list_converter.dart';
@@ -49,6 +51,8 @@ import 'package:kover/models/enums/person_role.dart';
 import 'package:kover/models/enums/publication_status.dart';
 import 'package:kover/models/enums/sidenav_stream_type.dart';
 import 'package:kover/utils/logging.dart';
+import 'package:kover/utils/safe_platform.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 part 'app_database.g.dart';
@@ -117,6 +121,14 @@ part 'app_database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   static const dbName = 'kover_db';
+  static const pdfsDirName = 'pdfs';
+
+  static Future<String> pdfPath(int chapterId, {bool temporary = false}) async {
+    final dir = await (temporary
+        ? getTemporaryDirectory()
+        : getApplicationSupportDirectory());
+    return p.join(dir.path, pdfsDirName, '$chapterId.pdf');
+  }
 
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
@@ -125,9 +137,9 @@ class AppDatabase extends _$AppDatabase {
 
   /// Clear all content data from the database. Does not clear app state data (e.g. credentials, settings).
   /// Useful e.g. when switching user.
-  Future<void> clearDb() {
+  Future<void> clearDb() async {
     log.info('clearing database');
-    return transaction(() async {
+    await transaction(() async {
       await delete(libraries).go();
       await delete(chapters).go();
       await delete(volumes).go();
@@ -161,16 +173,25 @@ class AppDatabase extends _$AppDatabase {
       await delete(sidenav).go();
       await delete(dashboard).go();
 
-      await clearDownloads();
       await clearCovers();
     });
+    await clearDownloads();
   }
 
-  Future<void> clearDownloads() {
+  Future<void> clearDownloads() async {
     log.info('clearing downloads from database');
-    return transaction(() async {
+    await transaction(() async {
       await delete(downloadedPages).go();
     });
+    if (!SafePlatform.isWeb) {
+      for (final base in [
+        await getApplicationSupportDirectory(),
+        await getTemporaryDirectory(),
+      ]) {
+        final dir = Directory(p.join(base.path, pdfsDirName));
+        if (await dir.exists()) await dir.delete(recursive: true);
+      }
+    }
   }
 
   Future<void> clearCovers() {

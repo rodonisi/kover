@@ -6,6 +6,7 @@ import 'package:kover/models/pdf_model.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/riverpod/repository/book_repository.dart';
+import 'package:kover/utils/cancellation_token.dart';
 import 'package:kover/utils/extensions/epub_page_preprocessor.dart';
 import 'package:kover/utils/extensions/color.dart';
 import 'package:kover/utils/extensions/epub_theme.dart';
@@ -52,8 +53,10 @@ Future<ImageModel> imagePage(
 
 @riverpod
 Future<PdfModel> pdf(Ref ref, {required int chapterId}) async {
+  final token = CancellationToken();
+  ref.onDispose(token.cancel);
   final repo = ref.watch(bookRepositoryProvider);
-  return repo.getPdf(chapterId: chapterId);
+  return repo.getPdf(chapterId: chapterId, cancellationToken: token);
 }
 
 @riverpod

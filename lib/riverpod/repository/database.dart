@@ -36,12 +36,16 @@ Future<int?> databaseSize(Ref ref) async {
   final dbFile = File(
     p.join(applicationSubbportDir.path, '${AppDatabase.dbName}.sqlite'),
   );
-  if (await dbFile.exists()) {
-    final bytes = await dbFile.length();
-    return bytes;
-  } else {
-    return 0;
+  var bytes = await dbFile.exists() ? await dbFile.length() : 0;
+  final dir = Directory(
+    p.join(applicationSubbportDir.path, AppDatabase.pdfsDirName),
+  );
+  if (await dir.exists()) {
+    await for (final f in dir.list(followLinks: false)) {
+      if (f is File) bytes += await f.length();
+    }
   }
+  return bytes;
 }
 
 @riverpod

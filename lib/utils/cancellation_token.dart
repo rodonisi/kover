@@ -1,19 +1,22 @@
+import 'dart:async';
+
 class CancellationException implements Exception {
   @override
   String toString() => 'Operation was cancelled.';
 }
 
 class CancellationToken {
-  bool _isCancelled = false;
-  bool get isCancelled => _isCancelled;
+  final _completer = Completer<void>();
+  bool get isCancelled => _completer.isCompleted;
+  Future<void> get onCancel => _completer.future;
 
   void throwIfCancelled() {
-    if (_isCancelled) {
+    if (isCancelled) {
       throw CancellationException();
     }
   }
 
   void cancel() {
-    _isCancelled = true;
+    if (!_completer.isCompleted) _completer.complete();
   }
 }

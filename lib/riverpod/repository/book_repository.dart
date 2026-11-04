@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/converters/page_content_converter.dart';
 import 'package:kover/models/book_chapter_model.dart';
@@ -8,8 +10,10 @@ import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/book_sync_operations.dart';
+import 'package:kover/utils/cancellation_token.dart';
 import 'package:kover/utils/chunked_fetch.dart';
 import 'package:kover/utils/logging.dart';
+import 'package:kover/utils/safe_platform.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'book_repository.g.dart';
@@ -96,6 +100,7 @@ class BookRepository {
 
   Future<PdfModel> getPdf({
     required int chapterId,
+    CancellationToken? cancellationToken,
   }) async {
     if (await _db.downloadDao
         .isChapterDownloaded(chapterId: chapterId)
@@ -106,15 +111,32 @@ class BookRepository {
           'chapter_id': chapterId,
         },
       );
+      if (!SafePlatform.isWeb) {
+        final path = await AppDatabase.pdfPath(chapterId);
+        if (await File(path).exists()) return PdfModel.file(path: path);
+      }
       final p = await _db.downloadDao
           .getPage(chapterId: chapterId, page: 0)
           .getSingle();
 
-      return PdfModel(data: p.data);
+      if (p.data.isNotEmpty) return PdfModel.data(data: p.data);
     }
 
-    return PdfModel(
-      data: await _client.getPdf(chapterId: chapterId),
+    if (!SafePlatform.isWeb) {
+      final path = await AppDatabase.pdfPath(chapterId, temporary: true);
+      await _client.downloadPdf(
+        chapterId: chapterId,
+        savePath: path,
+        cancellationToken: cancellationToken,
+      );
+      return PdfModel.file(path: path);
+    }
+
+    return PdfModel.data(
+      data: await _client.getPdf(
+        chapterId: chapterId,
+        cancellationToken: cancellationToken,
+      ),
     );
   }
 
