@@ -1,11 +1,15 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:chopper/chopper.dart';
 import 'package:drift/drift.dart' hide Expression;
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/models/page_content.dart';
+import 'package:kover/utils/cancellation_token.dart';
 import 'package:kover/utils/epub_font_parser.dart';
 import 'package:kover/utils/logging.dart';
 
@@ -50,17 +54,64 @@ class BookSyncOperations {
   }
 
   /// Get PDF for [chapterId]
-  Future<Uint8List> getPdf({required int chapterId}) async {
-    final res = await _client.apiReaderPdfGet(
+  Future<Uint8List> getPdf({
+    required int chapterId,
+    CancellationToken? cancellationToken,
+  }) async {
+    final stream = await _getPdfStream(
       chapterId: chapterId,
-      apiKey: _apiKey,
+      cancellationToken: cancellationToken,
     );
+    final builder = BytesBuilder(copy: false);
+    await for (final chunk in stream) {
+      builder.add(chunk);
+    }
+    return builder.takeBytes();
+  }
 
-    if (!res.isSuccessful) {
+  // Bypass generated endpoint to stream bytes without JSON conversion.
+  Future<Stream<List<int>>> _getPdfStream({
+    required int chapterId,
+    CancellationToken? cancellationToken,
+  }) async {
+    final res = await _client.client.send<Stream<List<int>>, Stream<List<int>>>(
+      Request(
+        HttpMethod.Get,
+        Uri.parse('/api/Reader/pdf'),
+        _client.client.baseUrl,
+        parameters: {'chapterId': chapterId, 'apiKey': _apiKey},
+        abortTrigger: cancellationToken?.onCancel,
+      ),
+      responseConverter: (res) => res.copyWith(),
+    );
+    if (!res.isSuccessful || res.body == null) {
       throw Exception('Failed to load PDF: ${res.error}');
     }
+    return res.body!;
+  }
 
-    return res.bodyBytes;
+  /// Downloads PDF for [chapterId] and streams it directly to [savePath].
+  Future<void> downloadPdf({
+    required int chapterId,
+    required String savePath,
+    CancellationToken? cancellationToken,
+  }) async {
+    final stream = await _getPdfStream(
+      chapterId: chapterId,
+      cancellationToken: cancellationToken,
+    );
+    final tmp = File('$savePath.tmp');
+    await tmp.parent.create(recursive: true);
+    final sink = tmp.openWrite();
+    try {
+      await sink.addStream(stream);
+      await sink.close();
+      cancellationToken?.throwIfCancelled();
+      await tmp.rename(savePath);
+    } catch (_) {
+      if (await tmp.exists()) await tmp.delete();
+      rethrow;
+    }
   }
 
   /// Get preprocessed epub page [page] for [chapterId] with all remote images

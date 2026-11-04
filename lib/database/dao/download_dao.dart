@@ -106,27 +106,31 @@ class DownloadDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
-  Future<void> deleteVolume({required int volumeId}) async {
-    await transaction(() async {
+  Future<List<int>> deleteVolume({required int volumeId}) async {
+    return transaction(() async {
       final chapterIdsQuery = selectOnly(chapters)
         ..addColumns([chapters.id])
         ..where(chapters.volumeId.equals(volumeId));
 
+      final ids = await chapterIdsQuery.map((r) => r.read(chapters.id)!).get();
       await (delete(
         downloadedPages,
       )..where((tbl) => tbl.chapterId.isInQuery(chapterIdsQuery))).go();
+      return ids;
     });
   }
 
-  Future<void> deleteSeries({required int seriesId}) async {
-    await transaction(() async {
+  Future<List<int>> deleteSeries({required int seriesId}) async {
+    return transaction(() async {
       final chapterIdsQuery = selectOnly(chapters)
         ..addColumns([chapters.id])
         ..where(chapters.seriesId.equals(seriesId));
 
+      final ids = await chapterIdsQuery.map((r) => r.read(chapters.id)!).get();
       await (delete(
         downloadedPages,
       )..where((tbl) => tbl.chapterId.isInQuery(chapterIdsQuery))).go();
+      return ids;
     });
   }
 

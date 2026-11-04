@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/models/pdf_model.dart';
 import 'package:kover/models/read_direction.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/pages/reader/pdf_reader/pdf_reader_provider.dart';
@@ -128,10 +129,15 @@ class PdfReader extends HookConsumerWidget {
                       data.settings.readerMode == .vertical
                   ? null
                   : const NeverScrollableScrollPhysics();
-              final content = PdfViewer.data(
-                pdf.data,
+              final content = PdfViewer(
+                switch (pdf) {
+                  PdfFileModel(:final path) => PdfDocumentRefFile(path),
+                  PdfDataModel(:final data) => PdfDocumentRefData(
+                    data,
+                    sourceName: chapterId.toString(),
+                  ),
+                },
                 controller: controller,
-                sourceName: chapterId.toString(),
                 initialPageNumber: data.reader.initialPage + 1,
                 params: PdfViewerParams(
                   scrollPhysics: scrollPhysics,

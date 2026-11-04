@@ -100,7 +100,13 @@ class RootDownloadWorker implements DownloadWorker {
             chapterId: chapterId,
             cancellationToken: token,
           )
-          .timeout(_downloadTimeout, onTimeout: token.cancel);
+          .timeout(
+            _downloadTimeout,
+            onTimeout: () {
+              token.cancel();
+              throw TimeoutException('Download timed out', _downloadTimeout);
+            },
+          );
     } finally {
       _tokens.remove(requestId);
     }
@@ -263,7 +269,13 @@ class IsolatedDownloadWorker implements DownloadWorker {
               chapterId: chapterId,
               cancellationToken: token,
             )
-            .timeout(_downloadTimeout, onTimeout: token.cancel);
+            .timeout(
+              _downloadTimeout,
+              onTimeout: () {
+                token.cancel();
+                throw TimeoutException('Download timed out', _downloadTimeout);
+              },
+            );
         args.sendPort.send((requestId, null));
       } catch (e, stacktrace) {
         args.sendPort.send((

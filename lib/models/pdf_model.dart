@@ -10,9 +10,13 @@ part 'pdf_model.g.dart';
 sealed class PdfModel with _$PdfModel {
   const PdfModel._();
 
-  const factory PdfModel({
+  const factory PdfModel.data({
     @Uint8ListConverter() required Uint8List data,
-  }) = _PdfModel;
+  }) = PdfDataModel;
+
+  const factory PdfModel.file({
+    required String path,
+  }) = PdfFileModel;
 
   factory PdfModel.fromJson(Map<String, Object?> json) =>
       _$PdfModelFromJson(json);
