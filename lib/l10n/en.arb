@@ -685,6 +685,14 @@
     "@verticalMargins": {
         "description": "Label for the top and bottom margins setting in the EPUB reader"
     },
+    "horizontalCrop": "Horizontal Crop (%)",
+    "@horizontalCrop": {
+        "description": "Label for the setting that trims the left and right page edges in the PDF reader"
+    },
+    "verticalCrop": "Vertical Crop (%)",
+    "@verticalCrop": {
+        "description": "Label for the setting that trims the top and bottom page edges in the PDF reader"
+    },
     "verticalGap": "Vertical Gap",
     "@verticalGap": {
         "description": "Label for the vertical gap setting"
