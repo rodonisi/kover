@@ -282,7 +282,6 @@ class _Page extends HookConsumerWidget {
           controller: controller,
           html: data.html,
           settings: data.settings,
-          additionalStyles: data.additionalStyles,
           rootStyles: data.rootStyles,
           highlightStyles: data.highlightStyles,
           resumeScrollId: data.resumeScrollId,

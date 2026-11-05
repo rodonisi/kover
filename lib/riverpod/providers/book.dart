@@ -41,7 +41,6 @@ Future<PageContent> epubPage(
 
   return content.copyWith(
     root: content.root,
-    styles: content.styles,
   );
 }
 

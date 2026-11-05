@@ -14,7 +14,6 @@ class PaginatedEpubPage extends HookWidget {
   final PaginatedEpubPageController controller;
   final dom.DocumentFragment html;
   final PaginatedEpubPageSettings settings;
-  final Map<String, Map<String, String>> additionalStyles;
   final Map<String, String> rootStyles;
   final Map<String, String> highlightStyles;
   final String? resumeScrollId;
@@ -25,7 +24,6 @@ class PaginatedEpubPage extends HookWidget {
     required this.controller,
     required this.html,
     required this.settings,
-    this.additionalStyles = const {},
     this.rootStyles = const {},
     this.highlightStyles = const {},
     this.resumeScrollId,
@@ -38,14 +36,13 @@ class PaginatedEpubPage extends HookWidget {
 
     final mergedStyles = useMemoized(
       () => mergeStyles([
-        additionalStyles,
         if (rootStyles.isNotEmpty)
           {'.${HtmlConstants.koverWrapperClass}': rootStyles},
         settingsStyles(settings),
         if (highlightStyles.isNotEmpty)
           {'.${HtmlConstants.resumeClass}': highlightStyles},
       ]),
-      [additionalStyles, rootStyles, highlightStyles, settings],
+      [rootStyles, highlightStyles, settings],
     );
 
     useEffect(() {
