@@ -84,32 +84,30 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                               .read(pdfSettings.notifier)
                               .setLockHorizontalPan(newValue),
                         ),
-                      if (settings.readerMode == .horizontal) ...[
-                        NumericOption(
-                          icon: KoverIcons.margins,
-                          title: l.horizontalCrop,
-                          value: settings.horizontalCrop,
-                          min: PdfReaderSettingsLimits.cropMin,
-                          max: PdfReaderSettingsLimits.cropMax,
-                          step: PdfReaderSettingsLimits.cropStep,
-                          decimalPlaces: 0,
-                          onChanged: (newValue) async => await ref
-                              .read(pdfSettings.notifier)
-                              .setHorizontalCrop(newValue),
-                        ),
-                        NumericOption(
-                          icon: KoverIcons.verticalMargins,
-                          title: l.verticalCrop,
-                          value: settings.verticalCrop,
-                          min: PdfReaderSettingsLimits.cropMin,
-                          max: PdfReaderSettingsLimits.cropMax,
-                          step: PdfReaderSettingsLimits.cropStep,
-                          decimalPlaces: 0,
-                          onChanged: (newValue) async => await ref
-                              .read(pdfSettings.notifier)
-                              .setVerticalCrop(newValue),
-                        ),
-                      ],
+                      NumericOption(
+                        icon: KoverIcons.margins,
+                        title: l.horizontalCrop,
+                        value: settings.horizontalCrop,
+                        min: PdfReaderSettingsLimits.cropMin,
+                        max: PdfReaderSettingsLimits.cropMax,
+                        step: PdfReaderSettingsLimits.cropStep,
+                        decimalPlaces: 0,
+                        onChanged: (newValue) async => await ref
+                            .read(pdfSettings.notifier)
+                            .setHorizontalCrop(newValue),
+                      ),
+                      NumericOption(
+                        icon: KoverIcons.verticalMargins,
+                        title: l.verticalCrop,
+                        value: settings.verticalCrop,
+                        min: PdfReaderSettingsLimits.cropMin,
+                        max: PdfReaderSettingsLimits.cropMax,
+                        step: PdfReaderSettingsLimits.cropStep,
+                        decimalPlaces: 0,
+                        onChanged: (newValue) async => await ref
+                            .read(pdfSettings.notifier)
+                            .setVerticalCrop(newValue),
+                      ),
                       if (SafePlatform.isMobile)
                         OrientationOption(seriesId: seriesId),
                       BooleanOption(

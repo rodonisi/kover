@@ -40,8 +40,7 @@ class PdfViewerControllerHookState
 PdfViewerController usePdfViewerController() => use(const PdfControllerHook());
 
 bool _isCropping(PdfReaderSettingsState settings) =>
-    settings.readerMode == .horizontal &&
-    (settings.horizontalCrop > 0 || settings.verticalCrop > 0);
+    settings.horizontalCrop > 0 || settings.verticalCrop > 0;
 
 /// Page area left after cropping, relative to the page's top-left corner.
 Rect _cropRect(Size size, PdfReaderSettingsState settings) {
@@ -161,28 +160,38 @@ class PdfReader extends HookConsumerWidget {
         if (stale()) return;
         viewSize.value = controller.viewSize;
         layoutTick.value++;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
           final settings = latestSettings.value;
           if (stale() || settings == null) return;
-          if (settings.readerMode != .horizontal) return;
-          if (!(force || _isCropping(settings))) return;
           final pageNumber = controller.pageNumber;
           if (pageNumber == null) return;
-          unawaited(_fitPage(controller, settings, pageNumber));
+          if (_isCropping(settings)) {
+            await _fitPage(controller, settings, pageNumber);
+          } else if (force) {
+            // Crop was just removed: restore the viewer's default zoom for the current layout.
+            final zoom = max(controller.coverScale, controller.minScale);
+            await controller.setZoom(controller.centerPosition, zoom);
+            await controller.goToPage(pageNumber: pageNumber, duration: .zero);
+          }
         });
       });
       WidgetsBinding.instance.scheduleFrame();
     }
 
-    // Re-fit the current page when crop settings change, including back to uncropped.
-    useEffect(() {
-      if (settings?.readerMode == .horizontal &&
-          (cropping || wasCropping.value)) {
-        scheduleRefit(force: true);
-      }
-      wasCropping.value = cropping;
-      return null;
-    }, [cropping, settings?.horizontalCrop, settings?.verticalCrop]);
+    // Re-fit the current page when crop settings or the layout change, including back to uncropped.
+    useEffect(
+      () {
+        if (cropping || wasCropping.value) scheduleRefit(force: true);
+        wasCropping.value = cropping;
+        return null;
+      },
+      [
+        cropping,
+        settings?.horizontalCrop,
+        settings?.verticalCrop,
+        settings?.readerMode,
+      ],
+    );
 
     ref.listen(navProvider, (previous, next) async {
       next.whenData((next) async {
