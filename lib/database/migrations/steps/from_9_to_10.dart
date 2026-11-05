@@ -68,7 +68,7 @@ Future<void> _migrateLegacyPageFonts(AppDatabase db) async {
         if (legacyFonts is List) continue;
 
         final root = parseFragment(blob['root'] as String? ?? '');
-        final faces = EpubFontParser.parseStyles(
+        final faces = EpubFontParser.parse(
           root.querySelectorAll('style'),
         );
 

@@ -15,7 +15,6 @@ part 'paginated_epub_page_provider.g.dart';
 @freezed
 class PaginatedEpubPageModel({
   required final dom.DocumentFragment html,
-  required final Map<String, Map<String, String>> additionalStyles,
   required final Map<String, String> rootStyles,
   required final Map<String, String> highlightStyles,
   required final PaginatedEpubPageSettings settings,
@@ -73,7 +72,6 @@ Future<PaginatedEpubPageModel> paginatedEpubPage(
 
   return PaginatedEpubPageModel(
     html: content.root,
-    additionalStyles: content.styles,
     rootStyles: themeStyles.root,
     highlightStyles: themeStyles.highlight,
     resumeScrollId: scrollId,

@@ -12,7 +12,6 @@ sealed class PageContent with _$PageContent {
 
   const factory PageContent({
     @DocumentFragmentConverter() required DocumentFragment root,
-    required Map<String, Map<String, String>> styles,
     required List<FontFace> fonts,
   }) = _PageContent;
 
