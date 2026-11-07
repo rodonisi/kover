@@ -29,7 +29,7 @@ class Breakpoints extends _$Breakpoints {
       >= LayoutBreakpoints.expanded => .large,
       >= LayoutBreakpoints.medium => .expanded,
       >= LayoutBreakpoints.compact => .medium,
-      _ => Breakpoint.compact,
+      _ => .compact,
     };
   }
 }
