@@ -5,7 +5,7 @@ import 'package:kover/pages/series_detail_page/chapter_detail_page/chapter_app_b
 import 'package:kover/pages/series_detail_page/sliver_metadata_display.dart';
 import 'package:kover/riverpod/providers/bookmark.dart';
 import 'package:kover/riverpod/providers/router.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/cards/bookmark_preview_card.dart';
 import 'package:kover/widgets/details/metadata_sections.dart';
 import 'package:kover/widgets/util/sliver_bottom_padding.dart';

@@ -1,4 +1,4 @@
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'breakpoints.g.dart';

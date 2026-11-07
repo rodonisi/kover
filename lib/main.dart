@@ -7,7 +7,7 @@ import 'package:kover/riverpod/providers/theme.dart';
 import 'package:kover/riverpod/repository/sentry_repository.dart';
 import 'package:kover/sync/background.dart';
 import 'package:kover/utils/extensions/kover_theme_mode.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/utils/sentry.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/breakpoints.dart';

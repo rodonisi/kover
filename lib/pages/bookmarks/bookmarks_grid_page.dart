@@ -5,7 +5,7 @@ import 'package:kover/riverpod/providers/chapter.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/riverpod/providers/volume.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/cards/bookmark_preview_card.dart';
 import 'package:kover/widgets/lists/adaptive_sliver_grid.dart';
 import 'package:kover/widgets/util/async_value.dart';

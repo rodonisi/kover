@@ -5,7 +5,7 @@ import 'package:csslib/visitor.dart' as css;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:html/dom.dart' as dom;
-import 'package:kover/utils/html_constants.dart';
+import 'package:kover/utils/constants/html_constants.dart';
 
 /// A [WidgetFactory] that adjusts rendering for paginated EPUB content.
 class PaginatedEpubWidgetFactory({

@@ -1,5 +1,5 @@
 import 'package:html/dom.dart' as dom;
-import 'package:kover/utils/html_constants.dart';
+import 'package:kover/utils/constants/html_constants.dart';
 import 'package:kover/utils/extensions/document_fragment.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break_unit.dart';

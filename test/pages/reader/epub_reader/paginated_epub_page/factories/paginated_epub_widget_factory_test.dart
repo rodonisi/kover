@@ -9,7 +9,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/render_html.dart';
-import 'package:kover/utils/html_constants.dart';
+import 'package:kover/utils/constants/html_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
 const _image =

@@ -11,7 +11,7 @@ import 'package:kover/mapping/enums/sort_direction.dart';
 import 'package:kover/models/enums/order_by_option.dart';
 import 'package:kover/models/enums/person_role.dart';
 import 'package:kover/models/enums/sort_direction.dart';
-import 'package:kover/utils/data_constants.dart';
+import 'package:kover/utils/constants/data_constants.dart';
 import 'package:rxdart/rxdart.dart';
 
 part 'chapters_dao.g.dart';

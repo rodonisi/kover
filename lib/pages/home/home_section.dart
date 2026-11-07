@@ -3,7 +3,7 @@ import 'package:kover/models/reading_list_model.dart';
 import 'package:kover/models/series_model.dart';
 import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/cards/reading_list_card.dart';
 import 'package:kover/widgets/cards/series_card.dart';
 import 'package:material_ui/material_ui.dart';

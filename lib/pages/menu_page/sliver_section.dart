@@ -1,4 +1,4 @@
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
 class SliverSection extends StatelessWidget {

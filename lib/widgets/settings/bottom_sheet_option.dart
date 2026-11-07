@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/settings/navigate_option.dart';
 
 class BottomSheetOption extends ConsumerWidget {

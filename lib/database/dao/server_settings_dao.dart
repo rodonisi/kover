@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/tables/server_settings.dart';
-import 'package:kover/utils/data_constants.dart';
+import 'package:kover/utils/constants/data_constants.dart';
 
 part 'server_settings_dao.g.dart';
 

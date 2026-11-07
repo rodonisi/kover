@@ -7,7 +7,7 @@ import 'package:kover/riverpod/providers/chapter.dart';
 import 'package:kover/riverpod/providers/download.dart';
 import 'package:kover/riverpod/providers/reader.dart';
 import 'package:kover/riverpod/providers/router.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/cards/cover_image.dart';
 import 'package:kover/widgets/context_menu/actions_menu.dart';
 import 'package:kover/widgets/details/detail_app_bar.dart';

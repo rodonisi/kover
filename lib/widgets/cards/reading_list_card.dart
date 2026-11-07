@@ -1,7 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/cards/cover_card.dart';
 import 'package:kover/widgets/cards/cover_image.dart';
 import 'package:kover/widgets/cards/reading_list_card_provider.dart';

@@ -5,7 +5,7 @@ import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 
 class LoginGuard extends ConsumerWidget {
   final Widget child;

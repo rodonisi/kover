@@ -1,7 +1,7 @@
 import 'package:csslib/parser.dart' as css;
 import 'package:csslib/visitor.dart';
 import 'package:html/dom.dart' as dom;
-import 'package:kover/utils/html_constants.dart';
+import 'package:kover/utils/constants/html_constants.dart';
 import 'package:kover/utils/logging.dart';
 
 /// Resolves the document stylesheet and an optional additional stylesheet to

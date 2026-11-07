@@ -9,7 +9,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epu
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
-import 'package:kover/utils/html_constants.dart';
+import 'package:kover/utils/constants/html_constants.dart';
 
 void main() {
   group('EpubPaginator', () {

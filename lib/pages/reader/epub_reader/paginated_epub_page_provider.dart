@@ -15,8 +15,6 @@ part 'paginated_epub_page_provider.g.dart';
 @freezed
 class PaginatedEpubPageModel({
   required final dom.DocumentFragment html,
-  required final Map<String, String> rootStyles,
-  required final Map<String, String> highlightStyles,
   required final PaginatedEpubPageSettings settings,
   required final String? resumeScrollId,
 }) with _$PaginatedEpubPageModel;
@@ -41,9 +39,6 @@ Future<PaginatedEpubPageModel> paginatedEpubPage(
       page: page,
     ).future,
   );
-  final themeStylesFuture = ref.watch(
-    epubThemeStylesProvider(seriesId: seriesId).future,
-  );
   final readerFuture = ref.watch(
     readerProvider(
       seriesId: seriesId,
@@ -58,7 +53,6 @@ Future<PaginatedEpubPageModel> paginatedEpubPage(
   final settings = await settingsFuture;
   final commonSettings = await commonSettingsFuture;
   final content = await contentFuture;
-  final themeStyles = await themeStylesFuture;
   final reader = await readerFuture;
   final reduceAnimations = await reduceAnimationsFuture;
 
@@ -72,8 +66,6 @@ Future<PaginatedEpubPageModel> paginatedEpubPage(
 
   return PaginatedEpubPageModel(
     html: content.root,
-    rootStyles: themeStyles.root,
-    highlightStyles: themeStyles.highlight,
     resumeScrollId: scrollId,
     settings: PaginatedEpubPageSettings(
       horizontalMarginSize: settings.horizontalMarginSize,

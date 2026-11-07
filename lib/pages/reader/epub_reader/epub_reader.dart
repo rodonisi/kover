@@ -10,7 +10,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page_provider.dart
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -282,8 +282,6 @@ class _Page extends HookConsumerWidget {
           controller: controller,
           html: data.html,
           settings: data.settings,
-          rootStyles: data.rootStyles,
-          highlightStyles: data.highlightStyles,
           resumeScrollId: data.resumeScrollId,
           onSelectionChanged: onSelectionChanged,
         ),

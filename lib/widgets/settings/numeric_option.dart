@@ -1,5 +1,5 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/settings/option_container.dart';
 
 class NumericOption extends StatelessWidget {

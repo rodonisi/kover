@@ -7,7 +7,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/resume_highlight_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/scroll_id_operation.dart';
-import 'package:kover/utils/html_constants.dart';
+import 'package:kover/utils/constants/html_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
 enum PaginatedEpubPageControllerStatus { measuring, ready }

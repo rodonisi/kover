@@ -11,7 +11,7 @@ import 'package:kover/riverpod/providers/reader/image_vertical_reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/image_reader_settings.dart';
 import 'package:kover/utils/hooks/use_sliver_observer_controller.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
 

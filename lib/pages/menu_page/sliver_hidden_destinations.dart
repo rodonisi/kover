@@ -3,7 +3,7 @@ import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/menu_page/app_list_tile.dart';
 import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/utils/extensions/navbar_destination.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
 

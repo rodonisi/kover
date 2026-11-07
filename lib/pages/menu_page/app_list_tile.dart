@@ -1,6 +1,6 @@
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 
 class AppListTile extends StatelessWidget {
   const AppListTile({

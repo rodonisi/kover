@@ -1,21 +1,20 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:html/dom.dart' as dom;
-import 'package:kover/utils/html_constants.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller_status.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_styles.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/views/horizontal_epub_page_view.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/views/spreads_epub_page_view.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/views/vertical_epub_page_view.dart';
+import 'package:kover/utils/extensions/color.dart';
+import 'package:kover/utils/extensions/epub_text_alignment.dart';
+import 'package:kover/utils/constants/html_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
 class PaginatedEpubPage extends HookWidget {
   final PaginatedEpubPageController controller;
   final dom.DocumentFragment html;
   final PaginatedEpubPageSettings settings;
-  final Map<String, String> rootStyles;
-  final Map<String, String> highlightStyles;
   final String? resumeScrollId;
   final void Function(bool selected)? onSelectionChanged;
 
@@ -24,25 +23,54 @@ class PaginatedEpubPage extends HookWidget {
     required this.controller,
     required this.html,
     required this.settings,
-    this.rootStyles = const {},
-    this.highlightStyles = const {},
     this.resumeScrollId,
     this.onSelectionChanged,
   });
 
+  Map<String, Map<String, String>> computeThemeStyles(ThemeData theme) {
+    return {
+      '.${HtmlConstants.koverWrapperClass}': {
+        'background-color': theme.colorScheme.surface.toCssRgba(),
+        'color': theme.colorScheme.onSurface.toCssRgba(),
+      },
+      '.${HtmlConstants.resumeClass}': {
+        'background-color': theme.colorScheme.tertiaryContainer
+            .withAlpha(0xe0)
+            .toCssRgba(),
+        'color': theme.colorScheme.onTertiaryContainer.toCssRgba(),
+      },
+    };
+  }
+
+  Map<String, Map<String, String>> computeSettingsStyles(
+    PaginatedEpubPageSettings settings,
+  ) {
+    final global = <String, String>{
+      if (settings.fontFamily case final family?)
+        'font-family': '"${family.replaceAll('"', "'")}"',
+      if (settings.removeParagraphIndent) 'text-indent': '0',
+    };
+
+    return {
+      'p': {
+        'margin-bottom': '${settings.paragraphSpacing}em',
+        'text-align': settings.textAlignment.cssValue,
+      },
+      if (global.isNotEmpty) '*': global,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     useListenable(controller);
+    final theme = Theme.of(context);
 
-    final mergedStyles = useMemoized(
-      () => mergeStyles([
-        if (rootStyles.isNotEmpty)
-          {'.${HtmlConstants.koverWrapperClass}': rootStyles},
-        settingsStyles(settings),
-        if (highlightStyles.isNotEmpty)
-          {'.${HtmlConstants.resumeClass}': highlightStyles},
-      ]),
-      [rootStyles, highlightStyles, settings],
+    final styles = useMemoized(
+      () => {
+        ...computeThemeStyles(theme),
+        ...computeSettingsStyles(settings),
+      },
+      [theme, settings],
     );
 
     useEffect(() {
@@ -50,15 +78,15 @@ class PaginatedEpubPage extends HookWidget {
         html,
         settings: settings,
         initialXpath: resumeScrollId,
-        additionalStyles: mergedStyles,
+        additionalStyles: styles,
       );
       return null;
     }, [controller, html, resumeScrollId]);
 
     useEffect(() {
-      controller.updateStyles(mergedStyles);
+      controller.updateStyles(styles);
       return null;
-    }, [controller, mergedStyles]);
+    }, [controller, styles]);
 
     useEffect(() {
       controller.updateSettings(settings);

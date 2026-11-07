@@ -1,8 +1,8 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_constants.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_content.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller_status.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
 class HorizontalEpubPageView extends HookWidget {
@@ -32,7 +32,7 @@ class HorizontalEpubPageView extends HookWidget {
       } else {
         pageController.animateToPage(
           current,
-          duration: PaginatedEpubPageConstants.pageSlideDuration,
+          duration: LayoutConstants.pageSlideDuration,
           curve: Curves.easeInOut,
         );
       }

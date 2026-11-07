@@ -2,7 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/riverpod/providers/settings/general_settings.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 
 class MonitoringOptOutPopup extends ConsumerWidget {
   const MonitoringOptOutPopup({super.key});

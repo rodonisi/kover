@@ -2,7 +2,7 @@ import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 
 class AdaptiveSliverGrid extends ConsumerWidget {
   final int itemCount;

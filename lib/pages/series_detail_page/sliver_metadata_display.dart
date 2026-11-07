@@ -1,7 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/riverpod/providers/metadata.dart';
 import 'package:kover/utils/extensions/iterable.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/details/metadata_sections.dart';
 import 'package:kover/widgets/util/breakpoint_builder.dart';
 import 'package:kover/widgets/util/sliver_adaptive_padding.dart';

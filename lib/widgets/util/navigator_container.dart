@@ -9,7 +9,7 @@ import 'package:kover/riverpod/providers/settings/general_settings.dart';
 import 'package:kover/riverpod/providers/settings/oneoffs.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/utils/extensions/navbar_destination.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:kover/widgets/util/monitoring_opt_out_popup.dart';

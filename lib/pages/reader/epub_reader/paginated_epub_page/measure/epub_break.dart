@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:kover/utils/html_constants.dart';
+import 'package:kover/utils/constants/html_constants.dart';
 
 /// One page boundary. Points at a position inside the source tree.
 ///

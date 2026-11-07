@@ -18,7 +18,7 @@ import 'package:kover/mapping/enums/sort_direction.dart';
 import 'package:kover/models/enums/sort_direction.dart';
 import 'package:kover/models/enums/order_by_option.dart';
 import 'package:kover/utils/chunked_operation.dart';
-import 'package:kover/utils/data_constants.dart';
+import 'package:kover/utils/constants/data_constants.dart';
 import 'package:rxdart/rxdart.dart';
 
 part 'series_dao.g.dart';
