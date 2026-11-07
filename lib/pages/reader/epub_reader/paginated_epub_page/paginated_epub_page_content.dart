@@ -1,15 +1,10 @@
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/paginated_epub_widget_factory.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_anchor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/render_html.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Shared content wrapper used by both rendering and measurement.
-///
-/// Keeping the padding and text style here guarantees that the measured layout
-/// matches the rendered layout.
 class PaginatedEpubPageContent extends StatelessWidget {
   final String html;
   final PaginatedEpubPageSettings settings;
@@ -46,16 +41,12 @@ class PaginatedEpubPageContent extends StatelessWidget {
       ),
       child: EpubMeasureAnchor(
         key: anchorKey,
-        child: RenderHtml(
-          html: html,
-          cssEngine: cssEngine,
+        child: HtmlWidget(
+          html,
+          factoryBuilder: factoryBuilder,
+          customStylesBuilder: (element) => cssEngine.stylesFor(element),
           textStyle: textStyle,
-          factoryBuilder:
-              factoryBuilder ??
-              () => PaginatedEpubWidgetFactory(
-                viewport: viewport,
-                removeParagraphIndent: settings.removeParagraphIndent,
-              ),
+          rebuildTriggers: [cssEngine.stylesRevision],
         ),
       ),
     );

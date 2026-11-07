@@ -127,8 +127,7 @@ class PaginatedEpubPageController({
   /// Sets the subpage to use as soon as pagination completes.
   ///
   /// Used while a page is still measuring and the caller already knows which
-  /// subpage should become visible (for example when navigating back to the
-  /// last subpage of the previous page).
+  /// subpage should become visible.
   void setPendingSubpage(int? subpage) {
     _pendingSubpage = subpage;
   }
