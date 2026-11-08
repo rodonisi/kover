@@ -16,11 +16,10 @@ enum Breakpoint {
   bool operator <=(Breakpoint other) => index <= other.index;
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class Breakpoints extends _$Breakpoints {
   @override
   Breakpoint build() {
-    ref.keepAlive();
     return .compact;
   }
 
