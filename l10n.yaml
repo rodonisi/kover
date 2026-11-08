@@ -2,3 +2,5 @@ arb-dir: lib/l10n
 output-dir: lib/generated/l10n
 template-arb-file: en.arb
 nullable-getter: false
+preferred-supported-locales:
+  - en
