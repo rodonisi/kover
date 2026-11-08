@@ -23,7 +23,6 @@ class EpubMeasurementsCollector extends StatelessWidget {
   final dom.DocumentFragment html;
   final PaginatedEpubPageSettings settings;
   final CssEngine cssEngine;
-  final bool enabled;
   final void Function(Size viewport) onViewportChanged;
   final void Function(EpubMeasurements measurements, Size viewport) onMeasured;
 
@@ -32,7 +31,6 @@ class EpubMeasurementsCollector extends StatelessWidget {
     required this.html,
     required this.settings,
     required this.cssEngine,
-    required this.enabled,
     required this.onViewportChanged,
     required this.onMeasured,
   });
@@ -56,16 +54,14 @@ class EpubMeasurementsCollector extends StatelessWidget {
         return _EpubMeasureViewport(
           viewport: viewport,
           onViewportChanged: onViewportChanged,
-          child: enabled
-              ? _EpubMeasureContent(
-                  html: html,
-                  settings: settings,
-                  cssEngine: cssEngine,
-                  viewport: viewport,
-                  outerWidth: outerWidth,
-                  onMeasured: onMeasured,
-                )
-              : const SizedBox.shrink(),
+          child: _EpubMeasureContent(
+            html: html,
+            settings: settings,
+            cssEngine: cssEngine,
+            viewport: viewport,
+            outerWidth: outerWidth,
+            onMeasured: onMeasured,
+          ),
         );
       },
     );
