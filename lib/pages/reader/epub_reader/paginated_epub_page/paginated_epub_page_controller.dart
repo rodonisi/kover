@@ -1,6 +1,6 @@
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_paginator.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/pagination/epub_paginator.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
@@ -8,6 +8,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/resume_highlight_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/scroll_id_operation.dart';
 import 'package:kover/utils/constants/html_constants.dart';
+import 'package:kover/utils/extensions/document_fragment.dart';
 import 'package:material_ui/material_ui.dart';
 
 enum PaginatedEpubPageControllerStatus { measuring, ready }
@@ -189,23 +190,6 @@ class PaginatedEpubPageController({
     final xpath = _initialXpath;
     if (paginator == null || xpath == null) return null;
 
-    final element = _findByScrollId(paginator.root, xpath);
-    if (element != null) {
-      dom.Element? current = element;
-      while (current != null) {
-        final index = int.tryParse(
-          current.attributes[HtmlConstants.nodeIndexAttribute] ?? '',
-        );
-        if (index != null) {
-          final subpage = paginator.subpageForNodeIndex(index);
-          if (subpage != null) return subpage;
-        }
-
-        final parent = current.parent;
-        current = parent is dom.Element ? parent : null;
-      }
-    }
-
     return paginator.subpageForScrollId(xpath);
   }
 
@@ -215,15 +199,6 @@ class PaginatedEpubPageController({
   ) {
     if (scrollId == null) return null;
 
-    final elements = root.querySelectorAll(
-      '[${HtmlConstants.scrollIdAttribute}]',
-    );
-    for (final element in elements) {
-      if (element.attributes[HtmlConstants.scrollIdAttribute] == scrollId) {
-        return element;
-      }
-    }
-
-    return null;
+    return root.findByAttribute(HtmlConstants.scrollIdAttribute, scrollId);
   }
 }

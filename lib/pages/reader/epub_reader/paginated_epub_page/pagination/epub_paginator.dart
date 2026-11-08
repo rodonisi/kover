@@ -1,32 +1,28 @@
 import 'package:html/dom.dart' as dom;
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/pagination/epub_subpage.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_unit.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_position.dart';
 import 'package:kover/utils/constants/html_constants.dart';
 import 'package:kover/utils/extensions/document_fragment.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break_unit.dart';
 import 'package:kover/utils/logging.dart';
 
 /// Splits an EPUB document into subpages based on the measured positions of
 /// lines and blocks.
 class EpubPaginator({required final dom.DocumentFragment root}) {
-  final List<EpubBreak> _breaks = [];
-  final Map<int, String> _subpages = {};
-  final Map<int, int> _nodePages = {};
+  final List<EpubSubpage> _subpages = [];
+  final Map<int, String> _subpageHtml = {};
   final Map<int, String?> _scrollIds = {};
-  bool _hasMeasurement = false;
 
-  /// The document always has a first page, so there is one more subpage than
-  /// there are breaks.
-  int get subpageCount => _hasMeasurement ? _breaks.length + 1 : 0;
+  int get subpageCount => _subpages.length;
 
+  /// Splits the measured [units] into subpages of height [pageHeight].
   void paginate(
-    List<EpubBreakUnit> units,
+    List<EpubMeasureUnit> units,
     double pageHeight,
   ) {
-    _breaks.clear();
     _subpages.clear();
-    _nodePages.clear();
+    _subpageHtml.clear();
     _scrollIds.clear();
-    _hasMeasurement = true;
 
     if (units.isEmpty || pageHeight <= 0) {
       log.debug(
@@ -39,56 +35,45 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
       return;
     }
 
-    final starts = <EpubBreak>[];
+    EpubPosition? start;
+    var startsMidBlock = false;
     var cursor = 0;
-    var pageIndex = 0;
 
     while (cursor < units.length) {
       final origin = cursor == 0 ? 0.0 : units[cursor].pageStartTop;
       final limit = origin + pageHeight;
 
       var last = cursor;
-      while (last + 1 < units.length &&
-          units[last + 1].pageEndBottom <= limit) {
+      while (last + 1 < units.length && units[last + 1].pageEndBottom < limit) {
         last++;
       }
 
-      for (var index = cursor; index <= last; index++) {
-        _nodePages.putIfAbsent(units[index].nodeIndex, () => pageIndex);
-      }
-
       final next = last + 1;
-      if (next >= units.length) break;
+      final end = next < units.length ? units[next].start : null;
 
-      starts.add(
-        units[next].start.copyWith(
-          startsMidBlock: units[last].nodeIndex == units[next].nodeIndex,
+      _subpages.add(
+        EpubSubpage(
+          start: start,
+          end: end,
+          startsMidBlock: startsMidBlock,
         ),
       );
-      cursor = next;
-      pageIndex++;
-    }
 
-    _breaks.addAll(starts);
+      if (next >= units.length) break;
+
+      start = end;
+      startsMidBlock = units[last].nodeIndex == units[next].nodeIndex;
+      cursor = next;
+    }
   }
 
-  /// Returns the subpage that contains the start of [nodeIndex], if known.
-  int? subpageForNodeIndex(int nodeIndex) => _nodePages[nodeIndex];
-
   /// Returns the first subpage whose markup contains [scrollId].
-  ///
-  /// This is used as a fallback when the resume element cannot be mapped to a
-  /// block node index.
   int? subpageForScrollId(String scrollId) {
     for (var index = 0; index < subpageCount; index++) {
       final fragment = dom.DocumentFragment.html(getSubpage(index));
-      final elements = fragment.querySelectorAll(
-        '[${HtmlConstants.scrollIdAttribute}]',
-      );
-      for (final element in elements) {
-        if (element.attributes[HtmlConstants.scrollIdAttribute] == scrollId) {
-          return index;
-        }
+      if (fragment.findByAttribute(HtmlConstants.scrollIdAttribute, scrollId) !=
+          null) {
+        return index;
       }
     }
 
@@ -113,30 +98,32 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
   }
 
   /// Clears serialized subpage HTML while keeping the pagination geometry.
+  ///
+  /// Call this after mutating attributes or classes on the document so the
+  /// next render reflects the new markup.
   void invalidateSubpageCache() {
-    _subpages.clear();
+    _subpageHtml.clear();
   }
 
+  /// Returns the serialized HTML of the subpage at [index], or an empty string
+  /// if [index] is out of bounds.
   String getSubpage(int index) {
     if (index < 0 || index >= subpageCount) return '';
 
-    if (_subpages.containsKey(index)) {
-      return _subpages[index]!;
+    if (_subpageHtml.containsKey(index)) {
+      return _subpageHtml[index]!;
     }
 
-    // The first page starts at the beginning of the document. Every other
-    // page starts at the break that ended the previous page.
-    final start = index == 0 ? null : _breaks[index - 1];
-    final end = index < _breaks.length ? _breaks[index] : null;
-
-    final subpage = _splitSubpage(start, end).outerHtml;
-    _subpages[index] = subpage;
+    final subpage = _splitSubpage(_subpages[index]).outerHtml;
+    _subpageHtml[index] = subpage;
 
     return subpage;
   }
 
-  dom.DocumentFragment _splitSubpage(EpubBreak? start, EpubBreak? end) {
+  dom.DocumentFragment _splitSubpage(EpubSubpage page) {
     final subpage = root.clone(true);
+    final start = page.start;
+    final end = page.end;
 
     // Both boundaries are resolved before trimming: removing nodes invalidates
     // sibling positions in the cloned tree.
@@ -184,7 +171,7 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
       _trimBefore(subpage, startNode!, start);
     }
 
-    if (start?.startsMidBlock == true) {
+    if (page.startsMidBlock) {
       _blockAt(
         subpage,
         start!.blockNodeIndex,
@@ -210,12 +197,8 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
     }
   }
 
-  /// Resolves a break to a node in [root].
-  ///
-  /// [EpubBreak.blockNodeIndex] is a preorder element index (see
-  /// [HtmlConstants.nodeIndexAttribute]) and [EpubBreak.childPath] addresses a
-  /// node below that element using `nodes` indices.
-  dom.Node? _nodeAt(dom.Node root, EpubBreak position) {
+  /// Resolves a position to a node in [root].
+  dom.Node? _nodeAt(dom.DocumentFragment root, EpubPosition position) {
     final block = _blockAt(root, position.blockNodeIndex);
     if (block == null) return null;
 
@@ -229,33 +212,14 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
     return current;
   }
 
-  dom.Element? _blockAt(dom.Node root, int nodeIndex) {
-    final attribute = HtmlConstants.nodeIndexAttribute;
-    dom.Element? match;
-
-    void visit(dom.Node node) {
-      if (match != null) return;
-
-      if (node is dom.Element) {
-        final value = node.attributes[attribute];
-        if (value != null && int.tryParse(value) == nodeIndex) {
-          match = node;
-          return;
-        }
-      }
-
-      for (final child in node.nodes) {
-        visit(child);
-      }
-    }
-
-    visit(root);
-
-    return match;
+  dom.Element? _blockAt(dom.DocumentFragment root, int nodeIndex) {
+    return root.querySelector(
+      '[${HtmlConstants.nodeIndexAttribute}="$nodeIndex"]',
+    );
   }
 
   /// Removes everything belonging to the pages before [position].
-  void _trimBefore(dom.Node root, dom.Node node, EpubBreak position) {
+  void _trimBefore(dom.Node root, dom.Node node, EpubPosition position) {
     var inclusive = position.afterNode;
 
     if (node is dom.Text && !position.afterNode) {
@@ -266,8 +230,8 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
         node.data = data.substring(position.offset);
         inclusive = false;
       } else {
-        // The break sits after the whole text node, so the node belongs to the
-        // previous page.
+        // The position sits after the whole text node, so the node belongs to
+        // the previous page.
         inclusive = true;
       }
     }
@@ -276,7 +240,7 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
   }
 
   /// Removes everything belonging to the pages after [position].
-  void _trimAfter(dom.Node root, dom.Node node, EpubBreak position) {
+  void _trimAfter(dom.Node root, dom.Node node, EpubPosition position) {
     var inclusive = !position.afterNode && position.offset <= 0;
 
     if (node is dom.Text && !position.afterNode) {

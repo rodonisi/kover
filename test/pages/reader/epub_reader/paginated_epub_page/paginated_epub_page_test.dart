@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart' show Size;
 import 'package:html/dom.dart' as dom;
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_paginator.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break_unit.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/pagination/epub_paginator.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_unit.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_position.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
@@ -553,7 +553,7 @@ void main() {
       );
       expect(
         controller.cssEngine.stylesFor(
-          controller.root!.querySelectorAll('p')[1],
+          element: controller.root!.querySelectorAll('p')[1],
         )?['background-color'],
         'red',
       );
@@ -603,7 +603,7 @@ void main() {
         );
         expect(
           controller.cssEngine.stylesFor(
-            rendered.querySelector('p')!,
+            element: rendered.querySelector('p')!,
           )?['background-color'],
           isNull,
         );
@@ -623,7 +623,7 @@ void main() {
         );
         expect(
           controller.cssEngine.stylesFor(
-            rendered.querySelector('p')!,
+            element: rendered.querySelector('p')!,
           )?['background-color'],
           'red',
         );
@@ -641,7 +641,7 @@ void main() {
         );
         expect(
           controller.cssEngine.stylesFor(
-            rendered.querySelector('p')!,
+            element: rendered.querySelector('p')!,
           )?['background-color'],
           isNull,
         );
@@ -685,7 +685,7 @@ int _nodeIndexOf(dom.DocumentFragment root, String selector) =>
 int _nodeIndex(dom.Element element) =>
     int.parse(element.attributes[HtmlConstants.nodeIndexAttribute]!);
 
-EpubBreakUnit _line({
+EpubMeasureUnit _line({
   required int nodeIndex,
   double top = 0,
   required double bottom,
@@ -696,7 +696,7 @@ EpubBreakUnit _line({
   double topInset = 0,
   double bottomInset = 0,
 }) {
-  final start = EpubBreak(
+  final start = EpubPosition(
     blockNodeIndex: nodeIndex,
     childPath: childPath,
     offset: offset,

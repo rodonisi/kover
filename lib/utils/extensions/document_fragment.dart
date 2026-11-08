@@ -1,6 +1,21 @@
 import 'package:html/dom.dart';
 
 extension DocumentFragmentExtensions on DocumentFragment {
+  /// Finds the first descendant whose [attribute] equals [value].
+  ///
+  /// Falls back to filtering when [value] cannot be embedded in a selector.
+  Element? findByAttribute(String attribute, String value) {
+    try {
+      return querySelector('[$attribute="$value"]');
+    } on FormatException {
+      for (final element in querySelectorAll('[$attribute]')) {
+        if (element.attributes[attribute] == value) return element;
+      }
+
+      return null;
+    }
+  }
+
   String? paragraphScrollId() {
     final p = querySelectorAll('p')
         .where(

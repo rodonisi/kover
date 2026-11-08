@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_paginator.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/pagination/epub_paginator.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_content.dart';
@@ -238,7 +238,6 @@ Future<EpubPaginator> _paginate(
               html: root,
               settings: _settings,
               cssEngine: CssEngine(root: root),
-              enabled: true,
               onViewportChanged: (_) {},
               onMeasured: (value, _) => measurements = value,
             ),

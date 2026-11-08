@@ -14,7 +14,7 @@ void main() {
         <p>text</p>
       ''');
 
-      final styles = engine.stylesFor(rendered.querySelector('p')!);
+      final styles = engine.stylesFor(element: rendered.querySelector('p')!);
 
       expect(styles, {'color': '#f00'});
     });
@@ -27,7 +27,7 @@ void main() {
         <p>text</p>
       ''');
 
-      expect(engine.stylesFor(rendered.querySelector('p')!), isNull);
+      expect(engine.stylesFor(element: rendered.querySelector('p')!), isNull);
     });
 
     test('when specificity differs, then more specific rule wins', () {
@@ -39,7 +39,7 @@ void main() {
         <p id="target">text</p>
       ''');
 
-      final styles = engine.stylesFor(rendered.querySelector('p')!);
+      final styles = engine.stylesFor(element: rendered.querySelector('p')!);
 
       expect(styles?['color'], '#008000');
     });
@@ -53,7 +53,7 @@ void main() {
         <p>text</p>
       ''');
 
-      final styles = engine.stylesFor(rendered.querySelector('p')!);
+      final styles = engine.stylesFor(element: rendered.querySelector('p')!);
 
       expect(styles?['color'], '#00f');
     });
@@ -70,7 +70,7 @@ void main() {
         <p>text</p>
       ''');
 
-        final styles = engine.stylesFor(rendered.querySelector('p')!);
+        final styles = engine.stylesFor(element: rendered.querySelector('p')!);
 
         expect(styles?.keys, ['margin-left', 'margin']);
         expect(styles?['margin-left'], '5px');
@@ -89,7 +89,7 @@ void main() {
         <p>text</p>
       ''');
 
-      final styles = engine.stylesFor(rendered.querySelector('p')!);
+      final styles = engine.stylesFor(element: rendered.querySelector('p')!);
 
       expect(styles?['color'], '#00f');
     });
@@ -109,7 +109,7 @@ void main() {
           },
         );
 
-        final styles = engine.stylesFor(rendered.querySelector('p')!);
+        final styles = engine.stylesFor(element: rendered.querySelector('p')!);
 
         expect(styles?['color'], 'blue');
         expect(styles?['margin-top'], '4px');
@@ -127,11 +127,13 @@ void main() {
       );
 
       expect(
-        engine.stylesFor(rendered.querySelector('p')!)?['text-indent'],
+        engine.stylesFor(element: rendered.querySelector('p')!)?['text-indent'],
         '0',
       );
       expect(
-        engine.stylesFor(rendered.querySelector('span')!)?['text-indent'],
+        engine.stylesFor(
+          element: rendered.querySelector('span')!,
+        )?['text-indent'],
         '0',
       );
     });
@@ -153,7 +155,7 @@ void main() {
 
         var rendered = dom.DocumentFragment.html(root.outerHtml);
         expect(
-          engine.stylesFor(rendered.querySelector('p')!)?['color'],
+          engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
           isNull,
         );
 
@@ -161,7 +163,7 @@ void main() {
 
         rendered = dom.DocumentFragment.html(root.outerHtml);
         expect(
-          engine.stylesFor(rendered.querySelector('p')!)?['color'],
+          engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
           'red',
         );
       },
@@ -178,14 +180,14 @@ void main() {
         );
 
         final paragraph = rendered.querySelector('p')!;
-        expect(engine.stylesFor(paragraph)?['color'], 'red');
+        expect(engine.stylesFor(element: paragraph)?['color'], 'red');
 
         engine.updateAdditionalStyles({
           'p': {'text-align': 'justify'},
         });
 
-        expect(engine.stylesFor(paragraph)?['color'], isNull);
-        expect(engine.stylesFor(paragraph)?['text-align'], 'justify');
+        expect(engine.stylesFor(element: paragraph)?['color'], isNull);
+        expect(engine.stylesFor(element: paragraph)?['text-align'], 'justify');
       },
     );
   });

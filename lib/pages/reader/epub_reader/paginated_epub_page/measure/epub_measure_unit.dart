@@ -1,9 +1,9 @@
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_position.dart';
 
-/// A single break unit produced by the measurement pass.
-sealed class const EpubBreakUnit({
-  /// Boundary that starts the page containing this unit.
-  required final EpubBreak start,
+/// A single measured unit produced by the measurement pass.
+sealed class const EpubMeasureUnit({
+  /// Position where this unit starts in the source tree.
+  required final EpubPosition start,
 
   /// Source element index this unit belongs to.
   required final int nodeIndex,
@@ -33,7 +33,7 @@ final class const EpubLineUnit({
   required super.bottom,
   super.topInset,
   super.bottomInset,
-}) extends EpubBreakUnit;
+}) extends EpubMeasureUnit;
 
 /// Content that cannot be split: image, table, rule, empty block...
 final class const EpubLeafUnit({
@@ -43,4 +43,4 @@ final class const EpubLeafUnit({
   required super.bottom,
   super.topInset,
   super.bottomInset,
-}) extends EpubBreakUnit;
+}) extends EpubMeasureUnit;

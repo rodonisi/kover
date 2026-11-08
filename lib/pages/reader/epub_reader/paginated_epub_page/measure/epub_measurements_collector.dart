@@ -5,8 +5,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/measuring_paginated_epub_widget_factory.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_break_unit.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_unit.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_position.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_anchor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_text_index.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_probe.dart';
@@ -15,7 +15,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epu
 import 'package:material_ui/material_ui.dart';
 
 class const EpubMeasurements({
-  required final List<EpubBreakUnit> units,
+  required final List<EpubMeasureUnit> units,
   required final Size contentSize,
 });
 
@@ -182,9 +182,9 @@ class _EpubMeasureContent extends HookWidget {
 }
 
 /// Walks every probe injected by [MeasuringPaginatedEpubWidgetFactory] and
-/// turns it into break units, ordered by the render tree.
+/// turns it into measurement units, ordered by the render tree.
 EpubMeasurements collectMeasurements(RenderEpubMeasureAnchor anchor) {
-  final units = <EpubBreakUnit>[];
+  final units = <EpubMeasureUnit>[];
   final blockElements = <dom.Element>{};
 
   // Text probes are grouped by their nearest block, so nested block elements
@@ -282,12 +282,12 @@ bool _hasProbeDescendant(RenderObject node) {
   return found;
 }
 
-List<EpubBreakUnit> _collectTextUnits({
+List<EpubMeasureUnit> _collectTextUnits({
   required List<RenderEpubTextProbe> probes,
   required RenderBox origin,
   required Set<dom.Element> blockElements,
 }) {
-  final units = <EpubBreakUnit>[];
+  final units = <EpubMeasureUnit>[];
 
   for (final probe in probes) {
     if (!probe.attached || !probe.hasSize) continue;
@@ -359,7 +359,7 @@ List<EpubBreakUnit> _collectTextUnits({
 
         units.add(
           EpubLineUnit(
-            start: EpubBreak(
+            start: EpubPosition(
               blockNodeIndex: probe.nodeIndex,
               childPath: _childPathOf(probe.element, position.node),
               offset: position.offset,
@@ -400,7 +400,7 @@ EpubLeafUnit? _textLeafUnit({
   final padding = _paddingInsets(box, origin);
 
   return EpubLeafUnit(
-    start: EpubBreak(blockNodeIndex: probe.nodeIndex),
+    start: EpubPosition(blockNodeIndex: probe.nodeIndex),
     nodeIndex: probe.nodeIndex,
     top: topLeft.dy,
     bottom: topLeft.dy + box.size.height,
@@ -543,7 +543,7 @@ EpubLeafUnit? leafUnit({
   final padding = _paddingInsets(box, origin);
 
   return EpubLeafUnit(
-    start: EpubBreak(blockNodeIndex: nodeIndex),
+    start: EpubPosition(blockNodeIndex: nodeIndex),
     nodeIndex: nodeIndex,
     top: topLeft.dy,
     bottom: topLeft.dy + box.size.height,
