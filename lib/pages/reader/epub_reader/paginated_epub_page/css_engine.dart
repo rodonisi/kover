@@ -2,87 +2,75 @@ import 'package:csslib/parser.dart' as css;
 import 'package:csslib/visitor.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:kover/utils/constants/html_constants.dart';
+import 'package:kover/utils/extensions/map.dart';
 import 'package:kover/utils/logging.dart';
 
 /// Resolves the document stylesheet and an optional additional stylesheet to
 /// concrete declarations per element.
 ///
 /// Additional styles are applied after the document styles as a user-origin
-/// layer: later declarations win regardless of selector specificity. This
-/// makes them suitable for reader settings and app-provided overrides.
-class CssEngine {
-  final dom.DocumentFragment _root;
+/// layer: later declarations win regardless of selector specificity.
+///
+/// Additional selectors are matched against the rendered element's fragment,
+/// so class changes are reflected on the next render without replacing the
+/// stylesheet.
+class CssEngine({
+  required dom.DocumentFragment root,
+  var Map<String, Map<String, String>> _additionalStyles = const {},
+}) {
   final Map<String, Map<String, String>> _baseElementMap;
-  late Map<String, Map<String, String>> _elementMap;
-  Map<String, Map<String, String>> _additionalDeclarations = const {};
+  Expando<Map<String, Map<String, String>>> _resolvedAdditionalStyles =
+      Expando<Map<String, Map<String, String>>>();
   var _revision = 0;
 
-  CssEngine({
-    required dom.DocumentFragment root,
-    Map<String, Map<String, String>> additionalStyles = const {},
-  }) : _root = root,
-       _baseElementMap = _computeStyles(root) {
-    final result = _applyAdditionalStyles(_baseElementMap, additionalStyles);
-    _elementMap = result.styles;
-    _additionalDeclarations = result.declarations;
-  }
+  this : _baseElementMap = _computeStyles(root);
 
   int get stylesRevision => _revision;
 
-  Map<String, String>? stylesFor(dom.Element element) {
+  /// Returns the computed styles for the given element, or null if the element
+  /// is not part of the document.
+  Map<String, String>? stylesFor({required dom.Element element}) {
     final nodeIndex = element.attributes[HtmlConstants.nodeIndexAttribute];
     if (nodeIndex == null) return null;
 
-    final declarations = _additionalDeclarations[nodeIndex];
-    if (declarations != null) {
-      _appendInlineStyles(element, declarations);
-    }
+    final base = _baseElementMap[nodeIndex];
+    final declarations = _declarationsFor(element)[nodeIndex];
+    if (declarations == null) return base;
 
-    return _elementMap[nodeIndex];
+    final styles = <String, String>{...?base};
+    styles.addAllOrdered(declarations);
+    _appendInlineStyles(element, declarations);
+
+    return styles;
   }
 
+  /// Updates the additional stylesheet and invalidates the cached declarations.
   void updateAdditionalStyles(Map<String, Map<String, String>> styles) {
-    final result = _applyAdditionalStyles(_baseElementMap, styles);
-    _elementMap = result.styles;
-    _additionalDeclarations = result.declarations;
+    _additionalStyles = styles;
+    _resolvedAdditionalStyles = Expando<Map<String, Map<String, String>>>();
     _revision++;
   }
 
-  ({
-    Map<String, Map<String, String>> styles,
-    Map<String, Map<String, String>> declarations,
-  })
-  _applyAdditionalStyles(
-    Map<String, Map<String, String>> base,
-    Map<String, Map<String, String>> additionalStyles,
-  ) {
-    final result = <String, Map<String, String>>{
-      for (final entry in base.entries)
-        entry.key: Map<String, String>.of(entry.value),
-    };
+  Map<String, Map<String, String>> _declarationsFor(dom.Element element) {
+    final root = _rootOf(element);
+    return _resolvedAdditionalStyles[root] ??= _resolveAdditionalStyles(root);
+  }
+
+  Map<String, Map<String, String>> _resolveAdditionalStyles(dom.Node root) {
     final declarationsByNode = <String, Map<String, String>>{};
 
-    for (final entry in additionalStyles.entries) {
+    for (final additional in _additionalStyles.entries) {
       try {
-        final matches = _root.querySelectorAll(entry.key);
-        for (final element in matches) {
+        for (final element in _querySelectorAll(root, additional.key)) {
           final nodeIndex =
               element.attributes[HtmlConstants.nodeIndexAttribute];
           if (nodeIndex == null) continue;
 
-          final properties = result.putIfAbsent(nodeIndex, () => {});
           final declarations = declarationsByNode.putIfAbsent(
             nodeIndex,
             () => {},
           );
-          for (final declaration in entry.value.entries) {
-            // Re-insert on every assignment so the map keeps the order of the
-            // last declaration for each property.
-            properties.remove(declaration.key);
-            properties[declaration.key] = declaration.value;
-            declarations.remove(declaration.key);
-            declarations[declaration.key] = declaration.value;
-          }
+          declarations.addAllOrdered(additional.value);
         }
       } catch (e) {
         log.debug(
@@ -92,7 +80,16 @@ class CssEngine {
       }
     }
 
-    return (styles: result, declarations: declarationsByNode);
+    return declarationsByNode;
+  }
+
+  static dom.Node _rootOf(dom.Element element) {
+    dom.Node current = element;
+    while (true) {
+      final parent = current.parent;
+      if (parent == null) return current;
+      current = parent;
+    }
   }
 
   /// Appends the additional declarations to the element's inline style.
@@ -174,6 +171,20 @@ class CssEngine {
       tag.remove();
     }
     return visitor.rules.toList();
+  }
+
+  static List<dom.Element> _querySelectorAll(
+    dom.Node root,
+    String selector,
+  ) {
+    return switch (root) {
+      final dom.DocumentFragment fragment => fragment.querySelectorAll(
+        selector,
+      ),
+      final dom.Document document => document.querySelectorAll(selector),
+      final dom.Element element => element.querySelectorAll(selector),
+      _ => const [],
+    };
   }
 }
 

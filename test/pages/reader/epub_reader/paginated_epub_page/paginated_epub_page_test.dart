@@ -559,40 +559,94 @@ void main() {
       );
     });
 
-    test('updateSettings toggles the resume highlight class', () {
-      final html = dom.DocumentFragment.html('<div><p>first</p></div>');
-      final probe = PaginatedEpubPageController()
-        ..attachRoot(html, settings: _pageSettings());
-      final scrollId = probe.root!
-          .querySelector('p')!
-          .attributes[HtmlConstants.scrollIdAttribute]!;
+    test(
+      'updateSettings toggles the resume highlight and refreshes subpages',
+      () {
+        final html = dom.DocumentFragment.html('<div><p>first</p></div>');
+        final probe = PaginatedEpubPageController()
+          ..attachRoot(html, settings: _pageSettings());
+        final scrollId = probe.root!
+            .querySelector('p')!
+            .attributes[HtmlConstants.scrollIdAttribute]!;
 
-      final controller = PaginatedEpubPageController()
-        ..attachRoot(
-          html,
-          settings: _pageSettings(),
-          initialXpath: scrollId,
+        final controller = PaginatedEpubPageController()
+          ..attachRoot(
+            html,
+            settings: _pageSettings(),
+            initialXpath: scrollId,
+            additionalStyles: {
+              '.${HtmlConstants.resumeClass}': {'background-color': 'red'},
+            },
+          );
+
+        final block = _nodeIndex(controller.root!.querySelector('p')!);
+        controller.processMeasurements(
+          EpubMeasurements(
+            contentSize: const Size(100, 10),
+            units: [_line(nodeIndex: block, bottom: 10)],
+          ),
+          viewport: const Size(100, 10),
         );
 
-      expect(
-        controller.root!.querySelector('.${HtmlConstants.resumeClass}'),
-        isNull,
-      );
+        dom.DocumentFragment render() => dom.DocumentFragment.html(
+          controller.getSubpage(0),
+        );
 
-      controller.updateSettings(
-        _pageSettings(highlightResumePoint: true),
-      );
-      expect(
-        controller.root!.querySelectorAll('p').first.classes,
-        contains(HtmlConstants.resumeClass),
-      );
+        var rendered = render();
+        expect(
+          controller.root!.querySelector('.${HtmlConstants.resumeClass}'),
+          isNull,
+        );
+        expect(
+          rendered.querySelector('.${HtmlConstants.resumeClass}'),
+          isNull,
+        );
+        expect(
+          controller.cssEngine.stylesFor(
+            rendered.querySelector('p')!,
+          )?['background-color'],
+          isNull,
+        );
 
-      controller.updateSettings(_pageSettings());
-      expect(
-        controller.root!.querySelectorAll('p').first.classes,
-        isNot(contains(HtmlConstants.resumeClass)),
-      );
-    });
+        controller.updateSettings(
+          _pageSettings(highlightResumePoint: true),
+        );
+
+        expect(
+          controller.root!.querySelector('.${HtmlConstants.resumeClass}'),
+          isNotNull,
+        );
+        rendered = render();
+        expect(
+          rendered.querySelector('.${HtmlConstants.resumeClass}'),
+          isNotNull,
+        );
+        expect(
+          controller.cssEngine.stylesFor(
+            rendered.querySelector('p')!,
+          )?['background-color'],
+          'red',
+        );
+
+        controller.updateSettings(_pageSettings());
+
+        expect(
+          controller.root!.querySelector('.${HtmlConstants.resumeClass}'),
+          isNull,
+        );
+        rendered = render();
+        expect(
+          rendered.querySelector('.${HtmlConstants.resumeClass}'),
+          isNull,
+        );
+        expect(
+          controller.cssEngine.stylesFor(
+            rendered.querySelector('p')!,
+          )?['background-color'],
+          isNull,
+        );
+      },
+    );
   });
 }
 

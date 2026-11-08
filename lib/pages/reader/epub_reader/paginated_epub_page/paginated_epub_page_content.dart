@@ -44,7 +44,8 @@ class PaginatedEpubPageContent extends StatelessWidget {
         child: HtmlWidget(
           html,
           factoryBuilder: factoryBuilder,
-          customStylesBuilder: (element) => cssEngine.stylesFor(element),
+          customStylesBuilder: (element) =>
+              cssEngine.stylesFor(element: element),
           textStyle: textStyle,
           rebuildTriggers: [cssEngine.stylesRevision],
         ),

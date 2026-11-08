@@ -27,7 +27,6 @@ class PaginatedEpubPageController({
   bool _resumePending = false;
   int? _pendingSubpage;
   PaginatedEpubPageSettings? _settings;
-  Map<String, Map<String, String>> _additionalStyles = const {};
 
   PaginatedEpubPageControllerStatus get status => _status;
   dom.DocumentFragment? get root => _paginator?.root;
@@ -85,7 +84,6 @@ class PaginatedEpubPageController({
       root: root,
       additionalStyles: additionalStyles,
     );
-    _additionalStyles = additionalStyles;
     _settings = settings;
     _initialXpath = initialXpath;
     _highlightedElement = settings.highlightResumePoint
@@ -99,7 +97,6 @@ class PaginatedEpubPageController({
   }
 
   void updateStyles(Map<String, Map<String, String>> additionalStyles) {
-    _additionalStyles = additionalStyles;
     _cssEngine?.updateAdditionalStyles(additionalStyles);
     notifyListeners();
   }
@@ -120,7 +117,7 @@ class PaginatedEpubPageController({
       _highlightedElement?.classes.remove(HtmlConstants.resumeClass);
     }
 
-    _cssEngine?.updateAdditionalStyles(_additionalStyles);
+    _paginator?.invalidateSubpageCache();
     notifyListeners();
   }
 

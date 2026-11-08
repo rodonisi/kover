@@ -137,6 +137,37 @@ void main() {
     });
 
     test(
+      'when a class is added to the source, then it applies on re-parse '
+      'without updating the styles',
+      () {
+        final root = EpubPagePreprocessor(
+          html: dom.DocumentFragment.html('<p>text</p>'),
+          operations: [NodeIndexingOperation()],
+        ).process();
+        final engine = CssEngine(
+          root: root,
+          additionalStyles: {
+            '.resume': {'color': 'red'},
+          },
+        );
+
+        var rendered = dom.DocumentFragment.html(root.outerHtml);
+        expect(
+          engine.stylesFor(rendered.querySelector('p')!)?['color'],
+          isNull,
+        );
+
+        root.querySelector('p')!.classes.add('resume');
+
+        rendered = dom.DocumentFragment.html(root.outerHtml);
+        expect(
+          engine.stylesFor(rendered.querySelector('p')!)?['color'],
+          'red',
+        );
+      },
+    );
+
+    test(
       'when additional styles are updated, then the overlay is replaced',
       () {
         final (engine, rendered) = _render(

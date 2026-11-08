@@ -112,6 +112,11 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
     return scrollId;
   }
 
+  /// Clears serialized subpage HTML while keeping the pagination geometry.
+  void invalidateSubpageCache() {
+    _subpages.clear();
+  }
+
   String getSubpage(int index) {
     if (index < 0 || index >= subpageCount) return '';
 
