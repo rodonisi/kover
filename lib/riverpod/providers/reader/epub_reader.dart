@@ -53,6 +53,7 @@ sealed class EpubReflowState with _$EpubReflowState {
 class EpubReflow extends _$EpubReflow {
   final _pipeline = HeadlessMeasurePipeline();
   Timer? _debounceReflow;
+  var _reflowScheduled = false;
   late EpubMeasureWidgetBuilder _measureBuilder;
   late Duration _maxChunkDuration;
   late ReflowEngine _cursor;
@@ -67,6 +68,7 @@ class EpubReflow extends _$EpubReflow {
       _debounceReflow?.cancel();
       _pipeline.dispose();
     });
+    _reflowScheduled = false;
 
     // force rerender on settings change
     ref.listen(epubReaderSettingsProvider(seriesId: seriesId), (prev, next) {
@@ -105,10 +107,13 @@ class EpubReflow extends _$EpubReflow {
       resumeScrollId = progress.bookScrollId;
     }
 
+    // A font chosen in the settings overrides the font of every element, so
+    // the fonts of the book are only needed without one.
     if (settings.fontFamily != null) {
       await fontManager.ensureServerFontLoaded(settings.fontFamily!);
+    } else {
+      await fontManager.ensureLoaded(pageContent.fonts);
     }
-    await fontManager.ensureLoaded(pageContent.fonts);
 
     final existingHighlight = pageContent.root.querySelector(
       '.${HtmlConstants.resumeParagraphClass}',
@@ -147,7 +152,11 @@ class EpubReflow extends _$EpubReflow {
     required double refreshRate,
   }) async {
     _debounceReflow?.cancel();
-    _debounceReflow = Timer(200.ms, () {
+    // The first run after a build starts right away; later calls, e.g. for
+    // viewport changes, are coalesced.
+    final delay = _reflowScheduled ? 200.ms : Duration.zero;
+    _reflowScheduled = true;
+    _debounceReflow = Timer(delay, () {
       _reflow(
         viewport: viewport,
         devicePixelRatio: devicePixelRatio,
