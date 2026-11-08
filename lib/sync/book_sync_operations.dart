@@ -78,6 +78,7 @@ class BookSyncOperations {
 
   /// Fetches the raw font file at [url].
   Future<({Uint8List bytes, String mimeType})?> getFontBytes(String url) {
+    log.debug('fetching font bytes', attributes: {'url': url});
     return _fetchData(url);
   }
 
