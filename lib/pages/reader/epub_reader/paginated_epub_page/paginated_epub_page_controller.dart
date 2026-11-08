@@ -118,6 +118,7 @@ class PaginatedEpubPageController({
       _highlightedElement?.classes.remove(HtmlConstants.resumeClass);
     }
 
+    _cssEngine?.invalidate();
     _paginator?.invalidateSubpageCache();
     notifyListeners();
   }

@@ -138,6 +138,8 @@ void main() {
       );
       final block = _nodeIndexOf(paginator.root, 'p');
 
+      // Fitting is deliberately strict (`pageEndBottom < limit`), so leave
+      // slack for two 10px lines to share a page.
       paginator.paginate([
         _line(
           nodeIndex: block,
@@ -181,7 +183,7 @@ void main() {
           offset: 24,
           childPath: const [0],
         ),
-      ], 20);
+      ], 21);
 
       expect(paginator.subpageCount, 3);
 
@@ -200,6 +202,33 @@ void main() {
 
       expect(pages[2], contains('FIVE SIX'));
       expect(pages[2], isNot(contains('THREE')));
+    });
+
+    test('excludes a unit ending exactly at the page limit', () {
+      final paginator = _paginator('<div><p>AAAA BBBB</p></div>');
+      final block = _nodeIndexOf(paginator.root, 'p');
+
+      paginator.paginate([
+        _line(
+          nodeIndex: block,
+          top: 0,
+          bottom: 10,
+          offset: 0,
+          childPath: const [0],
+        ),
+        _line(
+          nodeIndex: block,
+          top: 10,
+          bottom: 20,
+          offset: 5,
+          childPath: const [0],
+        ),
+      ], 20);
+
+      expect(paginator.subpageCount, 2);
+      expect(paginator.getSubpage(0), contains('AAAA'));
+      expect(paginator.getSubpage(0), isNot(contains('BBBB')));
+      expect(paginator.getSubpage(1), contains('BBBB'));
     });
 
     test('accounts for preserved spacing at split boundaries', () {

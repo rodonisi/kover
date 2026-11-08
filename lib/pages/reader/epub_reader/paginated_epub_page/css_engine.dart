@@ -11,19 +11,21 @@ import 'package:kover/utils/logging.dart';
 /// Additional styles are applied after the document styles as a user-origin
 /// layer: later declarations win regardless of selector specificity.
 ///
-/// Additional selectors are matched against the rendered element's fragment,
-/// so class changes are reflected on the next render without replacing the
-/// stylesheet.
+/// Additional selectors are matched against the source document root. Callers
+/// that mutate classes or attributes must call [invalidate] so the cached
+/// selector matches are rebuilt.
 class CssEngine({
   required dom.DocumentFragment root,
   var Map<String, Map<String, String>> _additionalStyles = const {},
 }) {
+  late final dom.DocumentFragment _root;
   final Map<String, Map<String, String>> _baseElementMap;
-  Expando<Map<String, Map<String, String>>> _resolvedAdditionalStyles =
-      Expando<Map<String, Map<String, String>>>();
+  Map<String, Map<String, String>>? _resolvedAdditionalStyles;
   var _revision = 0;
 
-  this : _baseElementMap = _computeStyles(root);
+  this : _baseElementMap = _computeStyles(root) {
+    _root = root;
+  }
 
   int get stylesRevision => _revision;
 
@@ -34,7 +36,8 @@ class CssEngine({
     if (nodeIndex == null) return null;
 
     final base = _baseElementMap[nodeIndex];
-    final declarations = _declarationsFor(element)[nodeIndex];
+    final declarations = (_resolvedAdditionalStyles ??=
+        _resolveAdditionalStyles())[nodeIndex];
     if (declarations == null) return base;
 
     final styles = <String, String>{...?base};
@@ -47,21 +50,21 @@ class CssEngine({
   /// Updates the additional stylesheet and invalidates the cached declarations.
   void updateAdditionalStyles(Map<String, Map<String, String>> styles) {
     _additionalStyles = styles;
-    _resolvedAdditionalStyles = Expando<Map<String, Map<String, String>>>();
+    invalidate();
     _revision++;
   }
 
-  Map<String, Map<String, String>> _declarationsFor(dom.Element element) {
-    final root = _rootOf(element);
-    return _resolvedAdditionalStyles[root] ??= _resolveAdditionalStyles(root);
+  /// Drops cached selector matches after the source DOM changes.
+  void invalidate() {
+    _resolvedAdditionalStyles = null;
   }
 
-  Map<String, Map<String, String>> _resolveAdditionalStyles(dom.Node root) {
+  Map<String, Map<String, String>> _resolveAdditionalStyles() {
     final declarationsByNode = <String, Map<String, String>>{};
 
     for (final additional in _additionalStyles.entries) {
       try {
-        for (final element in _querySelectorAll(root, additional.key)) {
+        for (final element in _root.querySelectorAll(additional.key)) {
           final nodeIndex =
               element.attributes[HtmlConstants.nodeIndexAttribute];
           if (nodeIndex == null) continue;
@@ -81,15 +84,6 @@ class CssEngine({
     }
 
     return declarationsByNode;
-  }
-
-  static dom.Node _rootOf(dom.Element element) {
-    dom.Node current = element;
-    while (true) {
-      final parent = current.parent;
-      if (parent == null) return current;
-      current = parent;
-    }
   }
 
   /// Appends the additional declarations to the element's inline style.
@@ -171,20 +165,6 @@ class CssEngine({
       tag.remove();
     }
     return visitor.rules.toList();
-  }
-
-  static List<dom.Element> _querySelectorAll(
-    dom.Node root,
-    String selector,
-  ) {
-    return switch (root) {
-      final dom.DocumentFragment fragment => fragment.querySelectorAll(
-        selector,
-      ),
-      final dom.Document document => document.querySelectorAll(selector),
-      final dom.Element element => element.querySelectorAll(selector),
-      _ => const [],
-    };
   }
 }
 

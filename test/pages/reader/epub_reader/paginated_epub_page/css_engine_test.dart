@@ -19,6 +19,31 @@ void main() {
       expect(styles, {'color': '#f00'});
     });
 
+    test('when selector matches the detached root, then styles are found', () {
+      final root = EpubPagePreprocessor(
+        html: dom.DocumentFragment.html(
+          '<div class="kover-content"><p>text</p></div>',
+        ),
+        operations: [NodeIndexingOperation()],
+      ).process();
+      final engine = CssEngine(
+        root: root,
+        additionalStyles: {
+          '.kover-content': {'background-color': 'red'},
+        },
+      );
+
+      // flutter_widget_from_html parses HTML into detached top-level nodes.
+      final wrapper = dom.DocumentFragment.html(root.outerHtml).children.first
+        ..remove();
+      expect(wrapper.parent, isNull);
+
+      expect(
+        engine.stylesFor(element: wrapper)?['background-color'],
+        'red',
+      );
+    });
+
     test('when selector has no match, then styles are null', () {
       final (engine, rendered) = _render('''
         <style>
@@ -138,12 +163,41 @@ void main() {
       );
     });
 
+    test('when a class is added and invalidated, then styles apply', () {
+      final root = EpubPagePreprocessor(
+        html: dom.DocumentFragment.html('<p>text</p>'),
+        operations: [NodeIndexingOperation()],
+      ).process();
+      final engine = CssEngine(
+        root: root,
+        additionalStyles: {
+          '.resume': {'color': 'red'},
+        },
+      );
+
+      var rendered = dom.DocumentFragment.html(root.outerHtml);
+      expect(
+        engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
+        isNull,
+      );
+
+      root.querySelector('p')!.classes.add('resume');
+      engine.invalidate();
+
+      rendered = dom.DocumentFragment.html(root.outerHtml);
+      expect(
+        engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
+        'red',
+      );
+    });
+
     test(
-      'when a class is added to the source, then it applies on re-parse '
-      'without updating the styles',
+      'when a class is removed and invalidated, then styles are dropped',
       () {
         final root = EpubPagePreprocessor(
-          html: dom.DocumentFragment.html('<p>text</p>'),
+          html: dom.DocumentFragment.html(
+            '<p class="resume">text</p>',
+          ),
           operations: [NodeIndexingOperation()],
         ).process();
         final engine = CssEngine(
@@ -156,15 +210,16 @@ void main() {
         var rendered = dom.DocumentFragment.html(root.outerHtml);
         expect(
           engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
-          isNull,
+          'red',
         );
 
-        root.querySelector('p')!.classes.add('resume');
+        root.querySelector('p')!.classes.remove('resume');
+        engine.invalidate();
 
         rendered = dom.DocumentFragment.html(root.outerHtml);
         expect(
           engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
-          'red',
+          isNull,
         );
       },
     );
