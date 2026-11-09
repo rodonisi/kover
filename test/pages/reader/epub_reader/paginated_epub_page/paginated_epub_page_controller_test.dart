@@ -1,4 +1,3 @@
-import 'package:fake_async/fake_async.dart';
 import 'package:flutter/widgets.dart' show Size;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart' as dom;
@@ -322,55 +321,59 @@ void main() {
       },
     );
 
-    test('coalesces scheduled remeasures for a changed layout', () {
-      fakeAsync((async) {
-        final controller = PaginatedEpubPageController();
-        final html = dom.DocumentFragment.html('<div><p>only</p></div>');
-        controller.attachRoot(html, settings: _pageSettings());
-        final block = _nodeIndex(controller.root!.querySelector('p')!);
+    test('remeasure re-enters measuring for a changed layout', () {
+      final controller = PaginatedEpubPageController();
+      final html = dom.DocumentFragment.html('<div><p>only</p></div>');
+      controller.attachRoot(html, settings: _pageSettings());
+      final block = _nodeIndex(controller.root!.querySelector('p')!);
 
-        controller.processMeasurements(
-          EpubMeasurements(
-            contentSize: const Size(100, 10),
-            units: [_line(nodeIndex: block, bottom: 10)],
-          ),
-          viewport: const Size(100, 10),
-        );
-        expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+      controller.processMeasurements(
+        EpubMeasurements(
+          contentSize: const Size(100, 10),
+          units: [_line(nodeIndex: block, bottom: 10)],
+        ),
+        viewport: const Size(100, 10),
+      );
+      expect(controller.status, PaginatedEpubPageControllerStatus.ready);
 
-        var notifications = 0;
-        controller.addListener(() => notifications++);
+      var notifications = 0;
+      controller.addListener(() => notifications++);
 
-        controller.updateSettings(_pageSettings(fontSize: 16));
-        controller.scheduleRemeasure();
-        async.elapse(const Duration(milliseconds: 90));
-        controller.scheduleRemeasure();
-        async.elapse(const Duration(milliseconds: 99));
+      final resized = _pageSettings(fontSize: 16);
+      controller.updateSettings(resized);
+      controller.remeasure();
 
-        expect(controller.status, PaginatedEpubPageControllerStatus.ready);
-        expect(notifications, 0);
+      expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
+      expect(notifications, 1);
 
-        async.elapse(const Duration(milliseconds: 1));
+      // A measurement for the previous layout must not leave the measuring
+      // state.
+      controller.processMeasurements(
+        EpubMeasurements(
+          contentSize: const Size(100, 10),
+          units: [_line(nodeIndex: block, bottom: 10)],
+        ),
+        viewport: const Size(100, 10),
+        layoutKey: _pageSettings().layoutKey,
+      );
 
-        expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
-        expect(notifications, 1);
+      expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
 
-        controller.processMeasurements(
-          EpubMeasurements(
-            contentSize: const Size(100, 10),
-            units: [_line(nodeIndex: block, bottom: 10)],
-          ),
-          viewport: const Size(100, 10),
-          layoutKey: _pageSettings(fontSize: 16).layoutKey,
-        );
-        expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+      controller.processMeasurements(
+        EpubMeasurements(
+          contentSize: const Size(100, 10),
+          units: [_line(nodeIndex: block, bottom: 10)],
+        ),
+        viewport: const Size(100, 10),
+        layoutKey: resized.layoutKey,
+      );
+      expect(controller.status, PaginatedEpubPageControllerStatus.ready);
 
-        notifications = 0;
-        controller.scheduleRemeasure();
-        async.elapse(const Duration(milliseconds: 200));
+      notifications = 0;
+      controller.remeasure();
 
-        expect(notifications, 0);
-      });
+      expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+      expect(notifications, 0);
     });
 
     test('does not report a subpage when nothing was paginated', () {
@@ -398,19 +401,29 @@ void main() {
       expect(changes, isEmpty);
     });
 
-    test('dispose cancels a scheduled remeasure', () {
-      fakeAsync((async) {
-        final controller = PaginatedEpubPageController();
-        controller.attachRoot(
-          dom.DocumentFragment.html('<div><p>only</p></div>'),
-          settings: _pageSettings(),
-        );
+    test('remeasure ignores settings changes outside the layout key', () {
+      final controller = PaginatedEpubPageController();
+      final html = dom.DocumentFragment.html('<div><p>only</p></div>');
+      controller.attachRoot(html, settings: _pageSettings());
+      final block = _nodeIndex(controller.root!.querySelector('p')!);
 
-        controller.updateSettings(_pageSettings(fontSize: 16));
-        controller.scheduleRemeasure();
-        controller.dispose();
-        async.elapse(const Duration(seconds: 1));
-      });
+      controller.processMeasurements(
+        EpubMeasurements(
+          contentSize: const Size(100, 10),
+          units: [_line(nodeIndex: block, bottom: 10)],
+        ),
+        viewport: const Size(100, 10),
+      );
+      expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+
+      controller.updateSettings(_pageSettings(highlightResumePoint: true));
+
+      var notifications = 0;
+      controller.addListener(() => notifications++);
+      controller.remeasure();
+
+      expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+      expect(notifications, 0);
     });
   });
 }

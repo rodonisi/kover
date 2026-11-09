@@ -23,7 +23,7 @@ class EpubMeasurementsCollector extends StatelessWidget {
   final dom.DocumentFragment html;
   final PaginatedEpubPageSettings settings;
   final CssEngine cssEngine;
-  final void Function(Size viewport) onViewportChanged;
+  final BoxConstraints constraints;
   final void Function(EpubMeasurements measurements, Size viewport) onMeasured;
 
   const new({
@@ -31,65 +31,33 @@ class EpubMeasurementsCollector extends StatelessWidget {
     required this.html,
     required this.settings,
     required this.cssEngine,
-    required this.onViewportChanged,
+    required this.constraints,
     required this.onMeasured,
   });
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = settings.mode == .spreads ? 2 : 1;
-        final outerWidth = constraints.maxWidth / columns;
-        final horizontalPadding = settings.horizontalMarginSize * 2;
-        final verticalPadding = settings.mode == .vertical
-            ? 0.0
-            : settings.verticalMarginSize * 2;
+    final columns = settings.mode == .spreads ? 2 : 1;
+    final outerWidth = constraints.maxWidth / columns;
+    final horizontalPadding = settings.horizontalMarginSize * 2;
+    final verticalPadding = settings.mode == .vertical
+        ? 0.0
+        : settings.verticalMarginSize * 2;
 
-        final viewport = Size(
-          math.max(0, outerWidth - horizontalPadding),
-          math.max(0, constraints.maxHeight - verticalPadding),
-        );
-
-        return _EpubMeasureViewport(
-          viewport: viewport,
-          onViewportChanged: onViewportChanged,
-          child: _EpubMeasureContent(
-            key: ValueKey((html, viewport, settings.layoutKey)),
-            html: html,
-            settings: settings,
-            cssEngine: cssEngine,
-            viewport: viewport,
-            outerWidth: outerWidth,
-            onMeasured: onMeasured,
-          ),
-        );
-      },
+    final viewport = Size(
+      math.max(0, outerWidth - horizontalPadding),
+      math.max(0, constraints.maxHeight - verticalPadding),
     );
-  }
-}
 
-class _EpubMeasureViewport extends HookWidget {
-  final Size viewport;
-  final void Function(Size viewport) onViewportChanged;
-  final Widget child;
-
-  const _EpubMeasureViewport({
-    required this.viewport,
-    required this.onViewportChanged,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    useEffect(() {
-      if (!viewport.isEmpty) {
-        onViewportChanged(viewport);
-      }
-      return null;
-    }, [viewport, onViewportChanged]);
-
-    return child;
+    return _EpubMeasureContent(
+      key: ValueKey((html, viewport, settings.layoutKey)),
+      html: html,
+      settings: settings,
+      cssEngine: cssEngine,
+      viewport: viewport,
+      outerWidth: outerWidth,
+      onMeasured: onMeasured,
+    );
   }
 }
 

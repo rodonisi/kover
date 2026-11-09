@@ -218,12 +218,14 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: EpubMeasurementsCollector(
-              html: html,
-              settings: _settings,
-              cssEngine: CssEngine(root: html),
-              onViewportChanged: (_) {},
-              onMeasured: (value, _) => measurements = value,
+            body: LayoutBuilder(
+              builder: (context, constraints) => EpubMeasurementsCollector(
+                html: html,
+                settings: _settings,
+                cssEngine: CssEngine(root: html),
+                constraints: constraints,
+                onMeasured: (value, _) => measurements = value,
+              ),
             ),
           ),
         ),
@@ -267,12 +269,14 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: EpubMeasurementsCollector(
-              html: html,
-              settings: _settings,
-              cssEngine: CssEngine(root: html),
-              onViewportChanged: (_) {},
-              onMeasured: (value, _) => measurements = value,
+            body: LayoutBuilder(
+              builder: (context, constraints) => EpubMeasurementsCollector(
+                html: html,
+                settings: _settings,
+                cssEngine: CssEngine(root: html),
+                constraints: constraints,
+                onMeasured: (value, _) => measurements = value,
+              ),
             ),
           ),
         ),
@@ -336,12 +340,14 @@ Future<void> _pump(
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
-        body: EpubMeasurementsCollector(
-          html: html,
-          settings: _settings,
-          cssEngine: CssEngine(root: html),
-          onViewportChanged: (_) {},
-          onMeasured: (value, _) => onMeasured(value),
+        body: LayoutBuilder(
+          builder: (context, constraints) => EpubMeasurementsCollector(
+            html: html,
+            settings: _settings,
+            cssEngine: CssEngine(root: html),
+            constraints: constraints,
+            onMeasured: (value, _) => onMeasured(value),
+          ),
         ),
       ),
     ),

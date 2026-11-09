@@ -137,9 +137,6 @@ void main() {
     expect(controller.status, PaginatedEpubPageControllerStatus.ready);
     expect(controller.subpageCount, greaterThan(0));
 
-    // Let the trailing debounce timer fire before the test completes.
-    await tester.pump(const Duration(milliseconds: 200));
-
     expect(controller.status, PaginatedEpubPageControllerStatus.ready);
     expect(tester.takeException(), isNull);
   });
@@ -336,7 +333,7 @@ Future<EpubPaginator> _paginate(
               html: root,
               settings: _settings,
               cssEngine: CssEngine(root: root),
-              onViewportChanged: (_) {},
+              constraints: BoxConstraints.tight(viewport),
               onMeasured: (value, _) => measurements = value,
             ),
           ),

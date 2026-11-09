@@ -79,6 +79,8 @@ class PaginatedEpubPage extends HookWidget {
       ],
     );
 
+    final viewport = useState<Size?>(null);
+
     useEffect(() {
       controller.attachRoot(
         html,
@@ -110,56 +112,68 @@ class PaginatedEpubPage extends HookWidget {
     final root = controller.root;
     final measuring = controller.status == .measuring;
 
-    if (root == null || measuring) {
-      return Stack(
-        children: [
-          Positioned.fill(
-            child: Offstage(
-              child: root == null
-                  ? const SizedBox.shrink()
-                  : EpubMeasurementsCollector(
-                      html: root,
-                      settings: settings,
-                      cssEngine: controller.cssEngine,
-                      onViewportChanged: controller.viewportChanged,
-                      onMeasured: (measurements, viewport) {
-                        controller.processMeasurements(
-                          measurements,
-                          viewport: viewport,
-                          layoutKey: settings.layoutKey,
-                        );
-                      },
-                    ),
+    return LayoutBuilder(
+      builder: (context, contraints) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final newViewport = Size(contraints.maxWidth, contraints.maxHeight);
+
+          if (viewport.value == newViewport) return;
+          viewport.value = newViewport;
+
+          controller.viewportChanged(newViewport);
+        });
+        if (root == null || measuring) {
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: Offstage(
+                  child: root == null
+                      ? const SizedBox.shrink()
+                      : EpubMeasurementsCollector(
+                          html: root,
+                          settings: settings,
+                          cssEngine: controller.cssEngine,
+                          constraints: contraints,
+                          onMeasured: (measurements, viewport) {
+                            controller.processMeasurements(
+                              measurements,
+                              viewport: viewport,
+                              layoutKey: settings.layoutKey,
+                            );
+                          },
+                        ),
+                ),
+              ),
+              const Center(child: CircularProgressIndicator()),
+            ],
+          );
+        }
+
+        if (controller.subpageCount == 0) {
+          return const SizedBox.shrink();
+        }
+
+        return SelectionArea(
+          onSelectionChanged: (selection) {
+            onSelectionChanged?.call(
+              selection != null && selection.plainText.isNotEmpty,
+            );
+          },
+          child: switch (settings.mode) {
+            .horizontal => HorizontalEpubPageView(
+              controller: controller,
+              settings: settings,
             ),
-          ),
-          const Center(child: CircularProgressIndicator()),
-        ],
-      );
-    }
-
-    if (controller.subpageCount == 0) {
-      return const SizedBox.shrink();
-    }
-
-    return SelectionArea(
-      onSelectionChanged: (selection) {
-        onSelectionChanged?.call(
-          selection != null && selection.plainText.isNotEmpty,
+            .vertical => VerticalEpubPageView(
+              controller: controller,
+              settings: settings,
+            ),
+            .spreads => SpreadsEpubPageView(
+              controller: controller,
+              settings: settings,
+            ),
+          },
         );
-      },
-      child: switch (settings.mode) {
-        .horizontal => HorizontalEpubPageView(
-          controller: controller,
-          settings: settings,
-        ),
-        .vertical => VerticalEpubPageView(
-          controller: controller,
-          settings: settings,
-        ),
-        .spreads => SpreadsEpubPageView(
-          controller: controller,
-          settings: settings,
-        ),
       },
     );
   }
