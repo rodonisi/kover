@@ -70,7 +70,13 @@ class PaginatedEpubPage extends HookWidget {
         ...computeThemeStyles(theme),
         ...computeSettingsStyles(settings),
       },
-      [theme, settings],
+      [
+        theme,
+        settings.fontFamily,
+        settings.removeParagraphIndent,
+        settings.paragraphSpacing,
+        settings.textAlignment,
+      ],
     );
 
     useEffect(() {
@@ -95,7 +101,8 @@ class PaginatedEpubPage extends HookWidget {
 
     final previousSettings = usePrevious(settings);
     useEffect(() {
-      if (previousSettings == null || previousSettings == settings) return null;
+      if (previousSettings == null) return null;
+      if (previousSettings.layoutKey == settings.layoutKey) return null;
       controller.remeasure();
       return null;
     }, [controller, settings, previousSettings]);
@@ -119,6 +126,7 @@ class PaginatedEpubPage extends HookWidget {
                         controller.processMeasurements(
                           measurements,
                           viewport: viewport,
+                          layoutKey: settings.layoutKey,
                         );
                       },
                     ),

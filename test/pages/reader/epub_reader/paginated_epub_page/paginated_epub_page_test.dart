@@ -90,6 +90,216 @@ void main() {
     expect(controller.subpageCount, greaterThan(1));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('layout changes while measuring eventually reach ready', (
+    tester,
+  ) async {
+    const viewport = Size(320, 480);
+    tester.view
+      ..physicalSize = viewport
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final controller = _BlockingController();
+    addTearDown(controller.dispose);
+    final harnessKey = GlobalKey<_PageHarnessState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: viewport.width,
+            height: viewport.height,
+            child: _PageHarness(
+              key: harnessKey,
+              controller: controller,
+              html: dom.DocumentFragment.html(_chapterHtml()),
+              initialSettings: _settings,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The first measurement completes but stays ignored, leaving the page in
+    // the measuring state.
+    await tester.pump();
+    expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
+
+    // Simulate a slider tick while a measurement is already in progress.
+    harnessKey.currentState!.apply(
+      _settingsWith(horizontalMarginSize: 8),
+    );
+    controller.blockMeasurements = false;
+    await tester.pump();
+    await tester.pump();
+
+    expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+    expect(controller.subpageCount, greaterThan(0));
+
+    // Let the trailing debounce timer fire before the test completes.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('non-layout settings do not trigger a remeasure', (
+    tester,
+  ) async {
+    const viewport = Size(320, 240);
+    tester.view
+      ..physicalSize = viewport
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final controller = PaginatedEpubPageController();
+    addTearDown(controller.dispose);
+    final harnessKey = GlobalKey<_PageHarnessState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: viewport.width,
+            height: viewport.height,
+            child: _PageHarness(
+              key: harnessKey,
+              controller: controller,
+              html: dom.DocumentFragment.html(_chapterHtml()),
+              initialSettings: _settings,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    for (
+      var frame = 0;
+      frame < 100 &&
+          controller.status == PaginatedEpubPageControllerStatus.measuring;
+      frame++
+    ) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+
+    harnessKey.currentState!.apply(
+      _settingsWith(highlightResumePoint: true),
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('empty viewport leaves the measuring state', (tester) async {
+    const viewport = Size(200, 200);
+    tester.view
+      ..physicalSize = viewport
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final controller = PaginatedEpubPageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: viewport.width,
+            height: viewport.height,
+            child: PaginatedEpubPage(
+              controller: controller,
+              html: dom.DocumentFragment.html(_chapterHtml()),
+              settings: _settingsWith(horizontalMarginSize: 128),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump();
+
+    expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+    expect(controller.subpageCount, 0);
+    expect(tester.takeException(), isNull);
+  });
+}
+
+class _PageHarness extends StatefulWidget {
+  final PaginatedEpubPageController controller;
+  final dom.DocumentFragment html;
+  final PaginatedEpubPageSettings initialSettings;
+
+  const _PageHarness({
+    super.key,
+    required this.controller,
+    required this.html,
+    required this.initialSettings,
+  });
+
+  @override
+  State<_PageHarness> createState() => _PageHarnessState();
+}
+
+class _BlockingController extends PaginatedEpubPageController {
+  bool blockMeasurements = true;
+
+  @override
+  void processMeasurements(
+    EpubMeasurements measurements, {
+    required Size viewport,
+    Object? layoutKey,
+  }) {
+    if (blockMeasurements) return;
+    super.processMeasurements(
+      measurements,
+      viewport: viewport,
+      layoutKey: layoutKey,
+    );
+  }
+}
+
+class _PageHarnessState extends State<_PageHarness> {
+  late PaginatedEpubPageSettings settings = widget.initialSettings;
+
+  void apply(PaginatedEpubPageSettings value) {
+    setState(() => settings = value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PaginatedEpubPage(
+      controller: widget.controller,
+      html: widget.html,
+      settings: settings,
+    );
+  }
+}
+
+PaginatedEpubPageSettings _settingsWith({
+  double horizontalMarginSize = 0,
+  bool highlightResumePoint = false,
+}) {
+  return PaginatedEpubPageSettings(
+    horizontalMarginSize: horizontalMarginSize,
+    verticalMarginSize: 0,
+    fontSize: 14,
+    paragraphSpacing: 0,
+    lineHeight: 1.5,
+    wordSpacing: 0,
+    letterSpacing: 0,
+    fontFamily: null,
+    removeParagraphIndent: false,
+    highlightResumePoint: highlightResumePoint,
+    canScroll: true,
+    reduceAnimations: false,
+    ignoreSafeArea: false,
+    textAlignment: .left,
+    mode: .horizontal,
+  );
 }
 
 String _chapterHtml() {

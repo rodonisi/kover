@@ -55,6 +55,7 @@ class EpubMeasurementsCollector extends StatelessWidget {
           viewport: viewport,
           onViewportChanged: onViewportChanged,
           child: _EpubMeasureContent(
+            key: ValueKey((html, viewport, settings.layoutKey)),
             html: html,
             settings: settings,
             cssEngine: cssEngine,
@@ -101,6 +102,7 @@ class _EpubMeasureContent extends HookWidget {
   final void Function(EpubMeasurements measurements, Size viewport) onMeasured;
 
   const _EpubMeasureContent({
+    super.key,
     required this.html,
     required this.settings,
     required this.cssEngine,
@@ -159,6 +161,23 @@ class _EpubMeasureContent extends HookWidget {
       scheduleMeasurement();
       return null;
     }, [measureKey, html, viewport, factory]);
+
+    // There is nothing to lay out when margins consume the whole viewport.
+    // Report an empty measurement so the controller leaves the measuring
+    // state instead of spinning forever.
+    final emptyReported = useRef(false);
+    useEffect(() {
+      if (!viewport.isEmpty || emptyReported.value) return null;
+      emptyReported.value = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        onMeasured(
+          const EpubMeasurements(units: [], contentSize: Size.zero),
+          viewport,
+        );
+      });
+      return null;
+    }, [viewport, onMeasured]);
 
     if (viewport.isEmpty) return const SizedBox.shrink();
 

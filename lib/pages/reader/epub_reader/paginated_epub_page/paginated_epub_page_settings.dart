@@ -19,6 +19,25 @@ class const PaginatedEpubPageSettings({
   required final EpubTextAlignment textAlignment,
   required final EpubReaderMode mode,
 }) extends Equatable {
+  /// The subset of settings that changes the pagination geometry.
+  ///
+  /// Settings outside this subset (resume highlighting, gesture handling,
+  /// animation preferences) can be applied without re-measuring the page.
+  Object get layoutKey => (
+    horizontalMarginSize,
+    verticalMarginSize,
+    fontSize,
+    paragraphSpacing,
+    lineHeight,
+    wordSpacing,
+    letterSpacing,
+    fontFamily,
+    removeParagraphIndent,
+    ignoreSafeArea,
+    textAlignment,
+    mode,
+  );
+
   @override
   List<Object?> get props => [
     horizontalMarginSize,

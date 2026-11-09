@@ -1,8 +1,8 @@
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/pagination/epub_paginator.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/pagination/epub_paginator.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/resume_highlight_operation.dart';
@@ -28,6 +28,7 @@ class PaginatedEpubPageController({
   bool _resumePending = false;
   int? _pendingSubpage;
   PaginatedEpubPageSettings? _settings;
+  Object? _measuredLayoutKey;
 
   PaginatedEpubPageControllerStatus get status => _status;
   dom.DocumentFragment? get root => _paginator?.root;
@@ -93,6 +94,7 @@ class PaginatedEpubPageController({
     _resumePending = initialXpath != null;
     _currentSubpage = 0;
     _contentViewport = null;
+    _measuredLayoutKey = null;
     _status = .measuring;
     notifyListeners();
   }
@@ -132,7 +134,7 @@ class PaginatedEpubPageController({
   }
 
   void remeasure() {
-    if (_status == .measuring) return;
+    if (_measuredLayoutKey == _settings?.layoutKey) return;
 
     _status = .measuring;
     notifyListeners();
@@ -141,12 +143,15 @@ class PaginatedEpubPageController({
   void processMeasurements(
     EpubMeasurements measurements, {
     required Size viewport,
+    Object? layoutKey,
   }) {
     final paginator = _paginator;
     if (paginator == null) return;
+    if (layoutKey != null && layoutKey != _settings?.layoutKey) return;
 
     paginator.paginate(measurements.units, viewport.height);
     _contentViewport = viewport;
+    _measuredLayoutKey = _settings?.layoutKey;
     _status = .ready;
 
     final count = paginator.subpageCount;
@@ -160,10 +165,14 @@ class PaginatedEpubPageController({
     _resumePending = false;
     _currentSubpage = count == 0 ? 0 : target.clamp(0, count - 1);
 
-    onSubpageChanged?.call(
-      _currentSubpage,
-      scrollIdForSubpage(_currentSubpage),
-    );
+    // With no subpages there is no position to report. Calling this with 0
+    // would make the navigation provider treat it as past the last subpage.
+    if (count > 0) {
+      onSubpageChanged?.call(
+        _currentSubpage,
+        scrollIdForSubpage(_currentSubpage),
+      );
+    }
     notifyListeners();
   }
 
