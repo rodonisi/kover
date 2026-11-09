@@ -1,8 +1,9 @@
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/settings/option_container.dart';
 
-class NumericOption extends StatelessWidget {
+class NumericOption extends HookWidget {
   final String title;
   final String? description;
   final double value;
@@ -27,20 +28,24 @@ class NumericOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = useState(value);
     return OptionContainer(
       title: title,
       description: description,
       icon: icon,
-      value: value.toStringAsFixed(decimalPlaces),
+      value: state.value.toStringAsFixed(decimalPlaces),
       child: Slider(
         padding: const EdgeInsets.symmetric(
           horizontal: LayoutConstants.smallPadding,
         ),
-        value: value,
+        value: state.value,
         min: min,
         max: max,
         divisions: ((max - min) / step).round(),
-        onChanged: (newValue) => onChanged?.call(newValue),
+        onChanged: (newValue) => state.value = newValue,
+        onChangeEnd: (newValue) {
+          onChanged?.call(newValue);
+        },
       ),
     );
   }
