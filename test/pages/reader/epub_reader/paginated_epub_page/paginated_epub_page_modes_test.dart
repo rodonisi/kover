@@ -86,6 +86,7 @@ PaginatedEpubPageSettings _settings(EpubReaderMode mode) {
     highlightResumePoint: false,
     canScroll: true,
     reduceAnimations: false,
+    ignoreSafeArea: false,
     textAlignment: .left,
     mode: mode,
   );

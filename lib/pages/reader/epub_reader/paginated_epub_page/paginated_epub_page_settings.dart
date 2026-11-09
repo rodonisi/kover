@@ -15,6 +15,7 @@ class const PaginatedEpubPageSettings({
   required final bool highlightResumePoint,
   required final bool canScroll,
   required final bool reduceAnimations,
+  required final bool ignoreSafeArea,
   required final EpubTextAlignment textAlignment,
   required final EpubReaderMode mode,
 }) extends Equatable {
@@ -32,6 +33,7 @@ class const PaginatedEpubPageSettings({
     highlightResumePoint,
     canScroll,
     reduceAnimations,
+    ignoreSafeArea,
     textAlignment,
     mode,
   ];

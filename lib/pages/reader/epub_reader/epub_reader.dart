@@ -114,7 +114,7 @@ class EpubReader extends HookConsumerWidget {
                     left: respectSafeAreas,
                     top: respectSafeAreas,
                     right: respectSafeAreas,
-                    bottom: respectSafeAreas,
+                    bottom: false,
                     child: PageView.builder(
                       clipBehavior: respectSafeAreas ? .hardEdge : .none,
                       controller: controller,

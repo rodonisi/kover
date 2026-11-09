@@ -89,6 +89,12 @@ class VerticalEpubPageView extends HookWidget {
               )
             : const NeverScrollableScrollPhysics(),
         slivers: [
+          if (settings.ignoreSafeArea)
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: MediaQuery.of(context).padding.top,
+              ),
+            ),
           SliverList.builder(
             itemCount: controller.subpageCount,
             itemBuilder: (context, index) {

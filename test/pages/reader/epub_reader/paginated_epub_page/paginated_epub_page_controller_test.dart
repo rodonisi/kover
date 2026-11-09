@@ -339,6 +339,7 @@ PaginatedEpubPageSettings _pageSettings({
     highlightResumePoint: highlightResumePoint,
     canScroll: true,
     reduceAnimations: false,
+    ignoreSafeArea: false,
     textAlignment: .left,
     mode: .horizontal,
   );

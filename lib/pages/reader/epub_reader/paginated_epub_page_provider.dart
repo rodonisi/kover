@@ -80,6 +80,7 @@ Future<PaginatedEpubPageModel> paginatedEpubPage(
       highlightResumePoint: settings.highlightResumePoint,
       canScroll: commonSettings.navigationGersturesEnabled,
       reduceAnimations: reduceAnimations,
+      ignoreSafeArea: settings.ignoreSafeAreas,
       textAlignment: settings.textAlignment,
       mode: settings.mode,
     ),
