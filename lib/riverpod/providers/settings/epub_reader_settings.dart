@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/experimental/persist.dart';
+import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/utils/logging.dart';
@@ -61,6 +62,7 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
     @Default(true) bool highlightResumePoint,
     @Default(null) EpubTheme? theme,
     @Default(EpubReaderMode.horizontal) EpubReaderMode mode,
+    @Default(false) bool hadSpread,
     @Default(false) bool removeParagraphIndent,
     @Default(EpubTextAlignment.left) EpubTextAlignment textAlignment,
     @Default(true) bool ignoreSafeAreas,
@@ -103,6 +105,16 @@ extension on EpubReaderSettingsState {
       ),
     );
   }
+
+  EpubReaderSettingsState resolveBreakpoint(Breakpoint breakpoint) {
+    if (breakpoint == .compact && mode == .spreads) {
+      return copyWith(mode: .horizontal, hadSpread: true);
+    }
+    if (breakpoint != .compact && hadSpread && mode != .spreads) {
+      return copyWith(mode: .spreads);
+    }
+    return this;
+  }
 }
 
 @riverpod
@@ -133,7 +145,19 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     ).future;
 
     final defaults = await ref.watch(defaultEpubReaderSettingsProvider.future);
-    return state.value?.clampLimits() ?? defaults;
+    ref.listen(breakpointsProvider, (prev, next) {
+      final current = state.value;
+      if (current == null) return;
+
+      final resolved = current.resolveBreakpoint(next);
+      if (resolved != current) {
+        state = AsyncData(resolved);
+      }
+    });
+
+    return (state.value?.clampLimits() ?? defaults).resolveBreakpoint(
+      ref.read(breakpointsProvider),
+    );
   }
 
   Future<void> setFontSize(double newSize) async {
@@ -293,7 +317,12 @@ class EpubReaderSettings extends _$EpubReaderSettings {
   Future<void> setMode(EpubReaderMode mode) async {
     final current = await future;
 
-    state = AsyncData(current.copyWith(mode: mode));
+    state = AsyncData(
+      current.copyWith(
+        mode: mode,
+        hadSpread: mode == .spreads,
+      ),
+    );
     log.info(
       'set mode',
       attributes: {'value': mode, 'reader': 'epub'},
@@ -332,7 +361,9 @@ class EpubReaderSettings extends _$EpubReaderSettings {
 
   Future<void> reset() async {
     final defaults = await ref.read(defaultEpubReaderSettingsProvider.future);
-    state = AsyncData(defaults);
+    state = AsyncData(
+      defaults.resolveBreakpoint(ref.read(breakpointsProvider)),
+    );
     log.info(
       'set reader settings to defaults',
       attributes: {'reader': 'epub'},
