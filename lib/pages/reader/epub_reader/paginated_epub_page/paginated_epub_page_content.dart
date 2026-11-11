@@ -1,5 +1,6 @@
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/paginated_epub_widget_factory.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_anchor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
@@ -13,6 +14,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
   final CssEngine cssEngine;
   final Key? anchorKey;
   final WidgetFactory Function()? factoryBuilder;
+  final void Function(EpubAnchorTarget)? onAnchorTap;
 
   const PaginatedEpubPageContent({
     super.key,
@@ -22,6 +24,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
     required this.cssEngine,
     this.anchorKey,
     this.factoryBuilder,
+    this.onAnchorTap,
   });
 
   @override
@@ -49,6 +52,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
               () => PaginatedEpubWidgetFactory(
                 viewport: viewport,
                 removeParagraphIndent: settings.removeParagraphIndent,
+                onAnchorTap: onAnchorTap,
               ),
           customStylesBuilder: (element) =>
               cssEngine.stylesFor(element: element),

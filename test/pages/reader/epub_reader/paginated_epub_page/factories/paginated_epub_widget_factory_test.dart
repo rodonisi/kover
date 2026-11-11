@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/paginated_epub_widget_factory.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
@@ -143,6 +144,45 @@ void main() {
       }
     });
   });
+
+  group('anchors', () {
+    testWidgets('reports same-page links to the callback', (tester) async {
+      final targets = <EpubAnchorTarget>[];
+
+      await _pumpHtml(
+        tester,
+        '<p><a href="#note">note</a></p>',
+        const Size(300, 600),
+        onAnchorTap: targets.add,
+      );
+
+      await tester.tapOnText(find.textRange.ofSubstring('note'));
+      await tester.pumpAndSettle();
+
+      expect(targets, hasLength(1));
+      expect(targets.single.page, isNull);
+      expect(targets.single.part, 'note');
+    });
+
+    testWidgets('reports backend page anchors to the callback', (tester) async {
+      final targets = <EpubAnchorTarget>[];
+
+      await _pumpHtml(
+        tester,
+        '<p><a href="javascript:void(0)" '
+        'kavita-page="8" kavita-part="page_8">chapter</a></p>',
+        const Size(300, 600),
+        onAnchorTap: targets.add,
+      );
+
+      await tester.tapOnText(find.textRange.ofSubstring('chapter'));
+      await tester.pumpAndSettle();
+
+      expect(targets, hasLength(1));
+      expect(targets.single.page, 8);
+      expect(targets.single.part, 'page_8');
+    });
+  });
 }
 
 Future<void> _pumpHtml(
@@ -151,6 +191,7 @@ Future<void> _pumpHtml(
   Size viewport, {
   Map<String, Map<String, String>> additionalStyles = const {},
   bool removeParagraphIndent = false,
+  void Function(EpubAnchorTarget)? onAnchorTap,
 }) async {
   final engine = CssEngine(
     root: dom.DocumentFragment.html(html),
@@ -165,6 +206,7 @@ Future<void> _pumpHtml(
           factoryBuilder: () => PaginatedEpubWidgetFactory(
             viewport: viewport,
             removeParagraphIndent: removeParagraphIndent,
+            onAnchorTap: onAnchorTap,
           ),
           customStylesBuilder: (element) => engine.stylesFor(element: element),
         ),

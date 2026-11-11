@@ -27,6 +27,7 @@ class PaginatedEpubPageController({
   dom.Element? _highlightedElement;
   bool _resumePending = false;
   int? _pendingSubpage;
+  String? _pendingAnchor;
   PaginatedEpubPageSettings? _settings;
   Object? _measuredLayoutKey;
 
@@ -133,6 +134,19 @@ class PaginatedEpubPageController({
     _pendingSubpage = subpage;
   }
 
+  /// Jumps to the subpage containing [anchor].
+  ///
+  /// If the page is still measuring, the anchor is kept and applied once
+  /// pagination completes.
+  void jumpToAnchor(String anchor) {
+    if (_status != .ready) {
+      _pendingAnchor = anchor;
+      return;
+    }
+
+    _jumpToAnchor(anchor);
+  }
+
   void remeasure() {
     if (_measuredLayoutKey == _settings?.layoutKey) return;
 
@@ -154,14 +168,17 @@ class PaginatedEpubPageController({
     _measuredLayoutKey = _settings?.layoutKey;
     _status = .ready;
 
+    final anchorSubpage = _takePendingAnchorSubpage();
     final count = paginator.subpageCount;
     onSubpagesCountChanged?.call(count);
 
     final pendingSubpage = _pendingSubpage;
     _pendingSubpage = null;
-    final target = _resumePending
-        ? _resumeSubpage() ?? 0
-        : pendingSubpage ?? _currentSubpage;
+    final target =
+        anchorSubpage ??
+        (_resumePending
+            ? _resumeSubpage() ?? 0
+            : pendingSubpage ?? _currentSubpage);
     _resumePending = false;
     _currentSubpage = count == 0 ? 0 : target.clamp(0, count - 1);
 
@@ -193,6 +210,43 @@ class PaginatedEpubPageController({
 
   String? scrollIdForSubpage(int index) {
     return _paginator?.scrollIdForSubpage(index);
+  }
+
+  /// Returns the subpage that contains the element with [anchor].
+  ///
+  /// The lookup first uses the element's injected scroll id, then falls back to
+  /// the element id in the serialized subpages.
+  int? subpageForAnchor(String anchor) {
+    final paginator = _paginator;
+    final root = paginator?.root;
+    if (paginator == null || root == null) return null;
+
+    final id = anchor.startsWith('#') ? anchor.substring(1) : anchor;
+    if (id.isEmpty) return null;
+
+    final element = root.findByAttribute('id', id);
+    final scrollId = element?.attributes[HtmlConstants.scrollIdAttribute];
+    if (scrollId != null) {
+      final subpage = paginator.subpageForScrollId(scrollId);
+      if (subpage != null) return subpage;
+    }
+
+    return paginator.subpageForElementId(id);
+  }
+
+  void _jumpToAnchor(String anchor) {
+    final subpage = subpageForAnchor(anchor);
+    if (subpage != null) {
+      jumpToSubpage(subpage);
+    }
+  }
+
+  int? _takePendingAnchorSubpage() {
+    final anchor = _pendingAnchor;
+    if (anchor == null) return null;
+
+    _pendingAnchor = null;
+    return subpageForAnchor(anchor);
   }
 
   int? _resumeSubpage() {

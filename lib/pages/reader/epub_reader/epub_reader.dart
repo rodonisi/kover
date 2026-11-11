@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/mapping/enums/read_direction.dart';
 import 'package:kover/pages/reader/epub_reader/epub_reader_provider.dart';
 import 'package:kover/pages/reader/epub_reader/epub_theme_override.dart';
 import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page_provider.dart';
@@ -11,8 +14,10 @@ import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EpubReader extends HookConsumerWidget {
   final int seriesId;
@@ -239,8 +244,39 @@ class _Page extends HookConsumerWidget {
           ref.read(nav.notifier).updateSubpageCount(page, count);
         },
       ),
+      [page],
     );
     useEffect(() => controller.dispose, [controller]);
+
+    final pendingAnchor = ref.watch(
+      nav.select(
+        (state) {
+          final value = state.value;
+          if (value == null || value.page != page) return null;
+
+          final pending = value.pendingAnchor;
+          return pending != null && pending.page == page
+              ? pending.anchor
+              : null;
+        },
+      ),
+    );
+
+    // The controller keeps the anchor until the page finishes measuring.
+    useEffect(() {
+      if (pendingAnchor == null) return null;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+
+        final anchor = ref.read(nav.notifier).takePendingAnchor(page);
+        if (anchor != null) {
+          controller.jumpToAnchor(anchor);
+        }
+      });
+
+      return null;
+    }, [controller, pendingAnchor]);
 
     final navState = ref.read(nav).value;
     if (navState != null &&
@@ -258,6 +294,10 @@ class _Page extends HookConsumerWidget {
             return;
           }
 
+          // Let the anchor effect position this page instead of syncing the
+          // pre-anchor subpage first.
+          if (next.pendingAnchor?.page == page) return;
+
           if (controller.status == .ready) {
             ref
                 .read(nav.notifier)
@@ -272,6 +312,31 @@ class _Page extends HookConsumerWidget {
       },
     );
 
+    void handleAnchor(EpubAnchorTarget target) {
+      if (target.externalUri case final uri?) {
+        unawaited(_openExternal(uri));
+        return;
+      }
+
+      final targetPage = target.page;
+      if (targetPage != null && targetPage != page) {
+        unawaited(
+          ref
+              .read(nav.notifier)
+              .jumpToPage(
+                targetPage,
+                force: true,
+                anchor: target.part,
+              ),
+        );
+        return;
+      }
+
+      if (target.part case final part?) {
+        controller.jumpToAnchor(part);
+      }
+    }
+
     return Async(
       asyncValue: model,
       data: (data) => NotificationListener<ScrollNotification>(
@@ -284,8 +349,29 @@ class _Page extends HookConsumerWidget {
           settings: data.settings,
           resumeScrollId: data.resumeScrollId,
           onSelectionChanged: onSelectionChanged,
+          onAnchorTap: handleAnchor,
         ),
       ),
+    );
+  }
+}
+
+Future<void> _openExternal(Uri uri) async {
+  try {
+    if (!await canLaunchUrl(uri)) {
+      log.debug(
+        'cannot launch external url',
+        attributes: {'url': uri.toString()},
+      );
+      return;
+    }
+
+    await launchUrl(uri, mode: .externalApplication);
+  } catch (e, stacktrace) {
+    log.error(
+      'failed to launch external url',
+      error: e,
+      stacktrace: stacktrace,
     );
   }
 }

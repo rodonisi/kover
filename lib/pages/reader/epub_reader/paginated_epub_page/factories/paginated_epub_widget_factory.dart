@@ -2,15 +2,19 @@ import 'dart:math' as math;
 
 import 'package:csslib/parser.dart' as css;
 import 'package:csslib/visitor.dart' as css;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
 import 'package:kover/utils/constants/html_constants.dart';
+import 'package:kover/widgets/util/link_hit_region.dart';
 
 /// A [WidgetFactory] that adjusts rendering for paginated EPUB content.
 class PaginatedEpubWidgetFactory({
   final Size viewport = const Size(double.infinity, double.infinity),
   final bool removeParagraphIndent = false,
+  final void Function(EpubAnchorTarget)? onAnchorTap,
 }) extends WidgetFactory {
   late final BuildOp _textIndentOp = BuildOp(
     alwaysRenderBlock: false,
@@ -26,6 +30,39 @@ class PaginatedEpubWidgetFactory({
     meta.register(_textIndentOp);
 
     super.parse(meta);
+  }
+
+  @override
+  GestureRecognizer? buildGestureRecognizer(
+    BuildTree tree, {
+    GestureTapCallback? onTap,
+  }) {
+    final callback = onAnchorTap;
+    if (callback != null) {
+      final target = EpubAnchorTarget.fromElement(tree.element);
+      if (target != null) {
+        return super.buildGestureRecognizer(
+          tree,
+          onTap: () => callback(target),
+        );
+      }
+    }
+
+    return super.buildGestureRecognizer(tree, onTap: onTap);
+  }
+
+  @override
+  Widget? buildGestureDetector(
+    BuildTree tree,
+    Widget child,
+    GestureRecognizer recognizer,
+  ) {
+    final built = super.buildGestureDetector(tree, child, recognizer);
+    if (built == null || onAnchorTap == null) return built;
+
+    if (EpubAnchorTarget.fromElement(tree.element) == null) return built;
+
+    return LinkHitRegion(child: built);
   }
 
   void _applyTextIndent(BuildTree tree) {

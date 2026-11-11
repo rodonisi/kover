@@ -80,6 +80,18 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
     return null;
   }
 
+  /// Returns the first subpage whose markup contains an element with [id].
+  int? subpageForElementId(String id) {
+    for (var index = 0; index < subpageCount; index++) {
+      final fragment = dom.DocumentFragment.html(getSubpage(index));
+      if (fragment.findByAttribute('id', id) != null) {
+        return index;
+      }
+    }
+
+    return null;
+  }
+
   /// Returns the scroll id of the first paragraph on [index], if any.
   String? scrollIdForSubpage(int index) {
     if (index < 0 || index >= subpageCount) return null;

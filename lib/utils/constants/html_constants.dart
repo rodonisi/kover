@@ -9,4 +9,7 @@ sealed class HtmlConstants {
   static const String splitStartAttribute = 'split-start';
   static const String splitEndAttribute = 'split-end';
   static const String nodeIndexAttribute = 'kover-node-index';
+  static const String kavitaPageAttribute = 'kavita-page';
+  static const String kavitaPartAttribute = 'kavita-part';
+  static const String kavitaNoteRefAttribute = 'kavita-note-ref';
 }

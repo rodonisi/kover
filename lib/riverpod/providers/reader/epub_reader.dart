@@ -21,6 +21,9 @@ sealed class EpubNavigationState with _$EpubNavigationState {
     @Default(false) bool ready,
     @Default(false) bool fromObserver,
     @Default(null) String? scrollId,
+
+    /// Cross-page anchor waiting for [page] to become the active page.
+    @Default(null) ({int page, String anchor})? pendingAnchor,
   }) = _EpubNavigationState;
 }
 
@@ -172,6 +175,10 @@ class EpubNavigation extends _$EpubNavigation {
               _pendingLastSubpagePage = null;
             }
 
+            final pendingAnchor = current.pendingAnchor?.page == next
+                ? current.pendingAnchor
+                : null;
+
             state = AsyncData(
               current.copyWith(
                 page: next,
@@ -180,6 +187,7 @@ class EpubNavigation extends _$EpubNavigation {
                 ready: cachedCount != null,
                 fromObserver: false,
                 scrollId: null,
+                pendingAnchor: pendingAnchor,
               ),
             );
           },
@@ -198,17 +206,34 @@ class EpubNavigation extends _$EpubNavigation {
         .handleCompletion(false);
   }
 
-  Future<void> jumpToPage(int page, {bool force = false}) async {
+  Future<void> jumpToPage(
+    int page, {
+    bool force = false,
+    String? anchor,
+  }) async {
     final current = await future;
 
     if ((!current.ready && !force) || page >= current.totalPages || page < 0) {
+      _clearPendingAnchor();
       return;
     }
 
-    if (current.page - page == 1) {
+    final pendingAnchor = anchor != null
+        ? (page: page, anchor: anchor)
+        : current.pendingAnchor?.page == page
+        ? current.pendingAnchor
+        : null;
+
+    if (anchor != null) {
+      _pendingLastSubpagePage = null;
+    } else if (current.page - page == 1) {
       _pendingLastSubpagePage = page;
     } else if (page != current.page) {
       _pendingLastSubpagePage = null;
+    }
+
+    if (pendingAnchor != current.pendingAnchor) {
+      state = AsyncData(current.copyWith(pendingAnchor: pendingAnchor));
     }
 
     await ref
@@ -220,6 +245,27 @@ class EpubNavigation extends _$EpubNavigation {
           ).notifier,
         )
         .jumpToPage(page);
+  }
+
+  /// Returns the pending anchor for [page], clearing it so it is applied once.
+  String? takePendingAnchor(int page) {
+    final current = state.value;
+    if (current == null ||
+        current.page != page ||
+        current.pendingAnchor?.page != page) {
+      return null;
+    }
+
+    final anchor = current.pendingAnchor!.anchor;
+    state = AsyncData(current.copyWith(pendingAnchor: null));
+    return anchor;
+  }
+
+  void _clearPendingAnchor() {
+    final current = state.value;
+    if (current == null || current.pendingAnchor == null) return;
+
+    state = AsyncData(current.copyWith(pendingAnchor: null));
   }
 
   Future<void> jumpToSubpage(
@@ -248,6 +294,9 @@ class EpubNavigation extends _$EpubNavigation {
         subpage: subpage,
         fromObserver: fromObserver,
         scrollId: scrollId,
+        pendingAnchor: current.pendingAnchor?.page == current.page
+            ? null
+            : current.pendingAnchor,
       ),
     );
   }

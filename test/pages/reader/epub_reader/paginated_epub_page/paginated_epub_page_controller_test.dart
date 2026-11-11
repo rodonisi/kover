@@ -425,6 +425,106 @@ void main() {
       expect(controller.status, PaginatedEpubPageControllerStatus.ready);
       expect(notifications, 0);
     });
+
+    test('maps an anchor id to the subpage that contains it', () {
+      final controller = PaginatedEpubPageController();
+      controller.attachRoot(
+        dom.DocumentFragment.html(
+          '<div><p id="first">First</p><p id="target">Second</p></div>',
+        ),
+        settings: _pageSettings(),
+      );
+      final blocks = [
+        for (final paragraph in controller.root!.querySelectorAll('p'))
+          _nodeIndex(paragraph),
+      ];
+
+      controller.processMeasurements(
+        EpubMeasurements(
+          contentSize: const Size(100, 20),
+          units: [
+            _line(nodeIndex: blocks[0], bottom: 10),
+            _line(nodeIndex: blocks[1], top: 10, bottom: 20),
+          ],
+        ),
+        viewport: const Size(100, 10),
+      );
+
+      expect(controller.subpageForAnchor('target'), 1);
+      expect(controller.subpageForAnchor('#target'), 1);
+      expect(controller.subpageForAnchor('missing'), isNull);
+    });
+
+    test('applies a pending anchor after pagination', () {
+      final changes = <(int, String?)>[];
+      final controller =
+          PaginatedEpubPageController(
+            onSubpageChanged: (subpage, scrollId) {
+              changes.add((subpage, scrollId));
+            },
+          )..attachRoot(
+            dom.DocumentFragment.html(
+              '<div><p id="first">First</p><p id="target">Second</p></div>',
+            ),
+            settings: _pageSettings(),
+          );
+      final blocks = [
+        for (final paragraph in controller.root!.querySelectorAll('p'))
+          _nodeIndex(paragraph),
+      ];
+
+      controller.setPendingSubpage(0);
+      controller.jumpToAnchor('target');
+      controller.processMeasurements(
+        EpubMeasurements(
+          contentSize: const Size(100, 20),
+          units: [
+            _line(nodeIndex: blocks[0], bottom: 10),
+            _line(nodeIndex: blocks[1], top: 10, bottom: 20),
+          ],
+        ),
+        viewport: const Size(100, 10),
+      );
+
+      expect(controller.currentSubpage, 1);
+      expect(changes, [(1, controller.scrollIdForSubpage(1))]);
+    });
+
+    test('jumps to an anchor immediately when ready', () {
+      final changes = <(int, String?)>[];
+      final controller =
+          PaginatedEpubPageController(
+            onSubpageChanged: (subpage, scrollId) {
+              changes.add((subpage, scrollId));
+            },
+          )..attachRoot(
+            dom.DocumentFragment.html(
+              '<div><p id="first">First</p><p id="target">Second</p></div>',
+            ),
+            settings: _pageSettings(),
+          );
+      final blocks = [
+        for (final paragraph in controller.root!.querySelectorAll('p'))
+          _nodeIndex(paragraph),
+      ];
+
+      controller.processMeasurements(
+        EpubMeasurements(
+          contentSize: const Size(100, 20),
+          units: [
+            _line(nodeIndex: blocks[0], bottom: 10),
+            _line(nodeIndex: blocks[1], top: 10, bottom: 20),
+          ],
+        ),
+        viewport: const Size(100, 10),
+      );
+      changes.clear();
+
+      controller.jumpToAnchor('#target');
+
+      expect(controller.currentSubpage, 1);
+      expect(changes, [(1, controller.scrollIdForSubpage(1))]);
+    });
   });
 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_content.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
@@ -9,11 +10,13 @@ import 'package:scrollview_observer/scrollview_observer.dart';
 class VerticalEpubPageView extends HookWidget {
   final PaginatedEpubPageController controller;
   final PaginatedEpubPageSettings settings;
+  final void Function(EpubAnchorTarget)? onAnchorTap;
 
   const VerticalEpubPageView({
     super.key,
     required this.controller,
     required this.settings,
+    this.onAnchorTap,
   });
 
   @override
@@ -103,6 +106,7 @@ class VerticalEpubPageView extends HookWidget {
                 settings: settings,
                 viewport: viewport,
                 cssEngine: controller.cssEngine,
+                onAnchorTap: onAnchorTap,
               );
             },
           ),

@@ -165,6 +165,80 @@ void main() {
       expect(container.read(_provider).value?.page, 0);
     },
   );
+
+  test('carries a pending anchor to the target page', () async {
+    final container = _createContainer();
+    final notifier = container.read(_provider.notifier);
+    await container.read(_provider.future);
+
+    notifier.updateSubpageCount(0, 3);
+    notifier.updateSubpageCount(1, 5);
+
+    await notifier.jumpToPage(1, anchor: 'target');
+    await container.pump();
+
+    expect(container.read(_provider).value?.page, 1);
+    expect(
+      container.read(_provider).value?.pendingAnchor,
+      (page: 1, anchor: 'target'),
+    );
+
+    // The outer PageView reports the page it settled on. That must not clear
+    // the anchor that is waiting for the same page.
+    await notifier.jumpToPage(1, force: true);
+    await container.pump();
+    expect(
+      container.read(_provider).value?.pendingAnchor,
+      (page: 1, anchor: 'target'),
+    );
+
+    expect(notifier.takePendingAnchor(0), isNull);
+    expect(
+      container.read(_provider).value?.pendingAnchor,
+      (page: 1, anchor: 'target'),
+    );
+
+    expect(notifier.takePendingAnchor(1), 'target');
+    expect(container.read(_provider).value?.pendingAnchor, isNull);
+  });
+
+  test('clears a pending anchor when navigating to another page', () async {
+    final container = _createContainer();
+    final notifier = container.read(_provider.notifier);
+    await container.read(_provider.future);
+
+    notifier.updateSubpageCount(0, 3);
+    notifier.updateSubpageCount(1, 5);
+
+    await notifier.jumpToPage(1, anchor: 'target');
+    await container.pump();
+    expect(
+      container.read(_provider).value?.pendingAnchor,
+      (page: 1, anchor: 'target'),
+    );
+
+    await notifier.jumpToPage(0);
+    await container.pump();
+
+    expect(container.read(_provider).value?.page, 0);
+    expect(container.read(_provider).value?.pendingAnchor, isNull);
+  });
+
+  test('publishes a pending anchor for the current page', () async {
+    final container = _createContainer();
+    final notifier = container.read(_provider.notifier);
+    await container.read(_provider.future);
+
+    await notifier.jumpToPage(0, force: true, anchor: 'target');
+    await container.pump();
+
+    expect(
+      container.read(_provider).value?.pendingAnchor,
+      (page: 0, anchor: 'target'),
+    );
+    expect(notifier.takePendingAnchor(0), 'target');
+    expect(container.read(_provider).value?.pendingAnchor, isNull);
+  });
 }
 
 final _provider = epubNavigationProvider(

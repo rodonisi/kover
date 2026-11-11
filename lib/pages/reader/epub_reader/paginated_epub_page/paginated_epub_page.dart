@@ -1,5 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
@@ -17,6 +18,7 @@ class PaginatedEpubPage extends HookWidget {
   final PaginatedEpubPageSettings settings;
   final String? resumeScrollId;
   final void Function(bool selected)? onSelectionChanged;
+  final void Function(EpubAnchorTarget)? onAnchorTap;
 
   const new({
     super.key,
@@ -25,6 +27,7 @@ class PaginatedEpubPage extends HookWidget {
     required this.settings,
     this.resumeScrollId,
     this.onSelectionChanged,
+    this.onAnchorTap,
   });
 
   Map<String, Map<String, String>> computeThemeStyles(ThemeData theme) {
@@ -163,14 +166,17 @@ class PaginatedEpubPage extends HookWidget {
             .horizontal => HorizontalEpubPageView(
               controller: controller,
               settings: settings,
+              onAnchorTap: onAnchorTap,
             ),
             .vertical => VerticalEpubPageView(
               controller: controller,
               settings: settings,
+              onAnchorTap: onAnchorTap,
             ),
             .spreads => SpreadsEpubPageView(
               controller: controller,
               settings: settings,
+              onAnchorTap: onAnchorTap,
             ),
           },
         );
