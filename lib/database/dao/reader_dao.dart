@@ -21,7 +21,41 @@ part 'reader_dao.g.dart';
   ],
 )
 class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
+  // Fallback sort keys for unvolumed chapters (Kavita uses 100000 for specials).
+  static const double _looseVolumeSortKey = 99999;
+  static const double _specialVolumeSortKey = 100000;
+
   ReaderDao(super.attachedDatabase);
+
+  /// Volume sort key placing numbered volumes before unvolumed loose
+  /// chapters, with specials last.
+  Expression<double> get _volumeSortKey => coalesce([
+    volumes.minNumber,
+    CaseWhenExpression<double>(
+      cases: [
+        CaseWhen(
+          chapters.isSpecial,
+          then: const Constant(_specialVolumeSortKey),
+        ),
+      ],
+      orElse: const Constant(_looseVolumeSortKey),
+    ),
+  ]);
+
+  Expression<double> _sortOrderOf(int chapterId) => subqueryExpression<double>(
+    selectOnly(chapters)
+      ..addColumns([chapters.sortOrder])
+      ..where(chapters.id.equals(chapterId)),
+  );
+
+  Expression<double> _volumeSortKeyOf(int chapterId) =>
+      subqueryExpression<double>(
+        selectOnly(chapters).join([
+            leftOuterJoin(volumes, volumes.id.equalsExp(chapters.volumeId)),
+          ])
+          ..addColumns([_volumeSortKey])
+          ..where(chapters.id.equals(chapterId)),
+      );
 
   JoinedSelectStatement<HasResultSet, dynamic> _chaptersWithProgressQuery({
     required int seriesId,
@@ -59,8 +93,9 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
           readingProgress.chapterId.isNull() |
               readingProgress.pagesRead.equals(0),
         ),
-        .asc(volumes.minNumber),
+        .asc(_volumeSortKey),
         .asc(chapters.sortOrder),
+        .asc(chapters.id),
       ])
       ..limit(1);
   }
@@ -292,34 +327,31 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     int? readingListId,
   }) {
     if (readingListId == null) {
-      final sortOrderOfCurrent = subqueryExpression<double>(
-        selectOnly(chapters)
-          ..addColumns([chapters.sortOrder])
-          ..where(chapters.id.equals(chapterId)),
-      );
-      final volumeMinNumberOfCurrent = subqueryExpression<double>(
-        selectOnly(chapters).join([
-            innerJoin(volumes, volumes.id.equalsExp(chapters.volumeId)),
-          ])
-          ..addColumns([volumes.minNumber])
-          ..where(chapters.id.equals(chapterId)),
-      );
+      final sortOrderOfCurrent = _sortOrderOf(chapterId);
+      final volumeSortKeyOfCurrent = _volumeSortKeyOf(chapterId);
+      final volumeSortKey = _volumeSortKey;
+      final sameVolume = volumeSortKey.equalsExp(volumeSortKeyOfCurrent);
+      final sameSortOrder =
+          sameVolume & chapters.sortOrder.equalsExp(sortOrderOfCurrent);
 
       final query =
           select(chapters).join([
-              innerJoin(volumes, volumes.id.equalsExp(chapters.volumeId)),
+              leftOuterJoin(volumes, volumes.id.equalsExp(chapters.volumeId)),
             ])
             ..where(
               chapters.seriesId.equals(seriesId) &
-                  (volumes.minNumber.isSmallerThan(volumeMinNumberOfCurrent) |
-                      (volumes.minNumber.equalsExp(volumeMinNumberOfCurrent) &
+                  (volumeSortKey.isSmallerThan(volumeSortKeyOfCurrent) |
+                      (sameVolume &
                           chapters.sortOrder.isSmallerThan(
                             sortOrderOfCurrent,
-                          ))),
+                          )) |
+                      (sameSortOrder &
+                          chapters.id.isSmallerThanValue(chapterId))),
             )
             ..orderBy([
-              .desc(volumes.minNumber),
+              .desc(volumeSortKey),
               .desc(chapters.sortOrder),
+              .desc(chapters.id),
             ])
             ..limit(1);
 
@@ -364,34 +396,31 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
     int? readingListId,
   }) {
     if (readingListId == null) {
-      final sortOrderOfCurrent = subqueryExpression<double>(
-        selectOnly(chapters)
-          ..addColumns([chapters.sortOrder])
-          ..where(chapters.id.equals(chapterId)),
-      );
-      final volumeMinNumberOfCurrent = subqueryExpression<double>(
-        selectOnly(chapters).join([
-            innerJoin(volumes, volumes.id.equalsExp(chapters.volumeId)),
-          ])
-          ..addColumns([volumes.minNumber])
-          ..where(chapters.id.equals(chapterId)),
-      );
+      final sortOrderOfCurrent = _sortOrderOf(chapterId);
+      final volumeSortKeyOfCurrent = _volumeSortKeyOf(chapterId);
+      final volumeSortKey = _volumeSortKey;
+      final sameVolume = volumeSortKey.equalsExp(volumeSortKeyOfCurrent);
+      final sameSortOrder =
+          sameVolume & chapters.sortOrder.equalsExp(sortOrderOfCurrent);
 
       final query =
           select(chapters).join([
-              innerJoin(volumes, volumes.id.equalsExp(chapters.volumeId)),
+              leftOuterJoin(volumes, volumes.id.equalsExp(chapters.volumeId)),
             ])
             ..where(
               chapters.seriesId.equals(seriesId) &
-                  (volumes.minNumber.isBiggerThan(volumeMinNumberOfCurrent) |
-                      (volumes.minNumber.equalsExp(volumeMinNumberOfCurrent) &
+                  (volumeSortKey.isBiggerThan(volumeSortKeyOfCurrent) |
+                      (sameVolume &
                           chapters.sortOrder.isBiggerThan(
                             sortOrderOfCurrent,
-                          ))),
+                          )) |
+                      (sameSortOrder &
+                          chapters.id.isBiggerThanValue(chapterId))),
             )
             ..orderBy([
-              .asc(volumes.minNumber),
+              .asc(volumeSortKey),
               .asc(chapters.sortOrder),
+              .asc(chapters.id),
             ])
             ..limit(1);
 
