@@ -18,6 +18,9 @@ class ChapterSnackbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     return SafeArea(
+      minimum: .only(
+        bottom: MediaQuery.systemGestureInsetsOf(context).bottom,
+      ),
       child: Card.filled(
         margin: LayoutConstants.mediumEdgeInsets,
         child: Padding(

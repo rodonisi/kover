@@ -26,39 +26,44 @@ class OverlayGestures extends ConsumerWidget {
 
     return IgnorePointer(
       ignoring: disableGestures,
-      child: Async(
-        asyncValue: model,
-        data: (data) {
-          return Row(
-            textDirection: data.readDirection.toTextDirection(),
-            children: [
-              if (data.navigationGestures)
+      child: Padding(
+        padding: .only(
+          bottom: MediaQuery.systemGestureInsetsOf(context).bottom,
+        ),
+        child: Async(
+          asyncValue: model,
+          data: (data) {
+            return Row(
+              textDirection: data.readDirection.toTextDirection(),
+              children: [
+                if (data.navigationGestures)
+                  Flexible(
+                    flex: 1,
+                    child: GestureDetector(
+                      behavior: .translucent,
+                      onTap: onLeftTap,
+                    ),
+                  ),
                 Flexible(
-                  flex: 1,
+                  flex: 2,
                   child: GestureDetector(
                     behavior: .translucent,
-                    onTap: onLeftTap,
+                    onTap: onCenterTap,
                   ),
                 ),
-              Flexible(
-                flex: 2,
-                child: GestureDetector(
-                  behavior: .translucent,
-                  onTap: onCenterTap,
-                ),
-              ),
-              if (data.navigationGestures)
-                Flexible(
-                  flex: 1,
-                  child: GestureDetector(
-                    behavior: .translucent,
-                    onTap: onRightTap,
+                if (data.navigationGestures)
+                  Flexible(
+                    flex: 1,
+                    child: GestureDetector(
+                      behavior: .translucent,
+                      onTap: onRightTap,
+                    ),
                   ),
-                ),
-            ],
-          );
-        },
-        loading: () => const SizedBox.shrink(),
+              ],
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+        ),
       ),
     );
   }

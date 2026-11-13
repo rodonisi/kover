@@ -50,6 +50,7 @@ class PageSlider extends ConsumerWidget {
               Text('${navState.currentPage + 1}'),
               Expanded(
                 child: Slider(
+                  allowedInteraction: .slideThumb,
                   value: sliderValue.value,
                   min: 0,
                   max: max.toDouble(),
