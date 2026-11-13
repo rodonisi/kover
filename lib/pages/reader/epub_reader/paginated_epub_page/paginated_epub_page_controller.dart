@@ -1,3 +1,4 @@
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
@@ -282,3 +283,66 @@ class PaginatedEpubPageController({
     return root.findByAttribute(HtmlConstants.scrollIdAttribute, scrollId);
   }
 }
+
+class PaginatedEpubPageControllerHook
+    extends Hook<PaginatedEpubPageController> {
+  final void Function(int subpage, String? scrollId)? onSubpageChanged;
+  final void Function(int subpage, String? scrollId)? onSubpageRestored;
+  final void Function(int)? onSubpagesCountChanged;
+
+  const PaginatedEpubPageControllerHook({
+    super.keys,
+    this.onSubpageChanged,
+    this.onSubpageRestored,
+    this.onSubpagesCountChanged,
+  });
+
+  @override
+  PaginatedEpubPageControllerHookState createState() =>
+      PaginatedEpubPageControllerHookState();
+}
+
+class PaginatedEpubPageControllerHookState
+    extends
+        HookState<
+          PaginatedEpubPageController,
+          PaginatedEpubPageControllerHook
+        > {
+  late final PaginatedEpubPageController controller;
+
+  @override
+  void initHook() {
+    super.initHook();
+    controller = PaginatedEpubPageController(
+      onSubpageChanged: (subpage, scrollId) =>
+          hook.onSubpageChanged?.call(subpage, scrollId),
+      onSubpageRestored: (subpage, scrollId) =>
+          hook.onSubpageRestored?.call(subpage, scrollId),
+      onSubpagesCountChanged: (count) =>
+          hook.onSubpagesCountChanged?.call(count),
+    );
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  PaginatedEpubPageController build(BuildContext context) => controller;
+}
+
+PaginatedEpubPageController usePaginatedEpubPageController({
+  List<Object?>? keys,
+  void Function(int subpage, String? scrollId)? onSubpageChanged,
+  void Function(int subpage, String? scrollId)? onSubpageRestored,
+  void Function(int)? onSubpagesCountChanged,
+}) => use(
+  PaginatedEpubPageControllerHook(
+    keys: keys,
+    onSubpageChanged: onSubpageChanged,
+    onSubpageRestored: onSubpageRestored,
+    onSubpagesCountChanged: onSubpagesCountChanged,
+  ),
+);

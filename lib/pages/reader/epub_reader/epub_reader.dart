@@ -232,32 +232,29 @@ class _Page extends HookConsumerWidget {
         page: page,
       ),
     );
-    final controller = useMemoized(
-      () => PaginatedEpubPageController(
-        onSubpageChanged: (subpage, scrollId) {
-          onSelectionChanged?.call(false);
-          ref
-              .read(nav.notifier)
-              .jumpToSubpage(subpage, scrollId: scrollId, page: page);
-        },
-        onSubpageRestored: (subpage, scrollId) {
-          onSelectionChanged?.call(false);
-          ref
-              .read(nav.notifier)
-              .jumpToSubpage(
-                subpage,
-                scrollId: scrollId,
-                page: page,
-                restored: true,
-              );
-        },
-        onSubpagesCountChanged: (count) {
-          ref.read(nav.notifier).updateSubpageCount(page, count);
-        },
-      ),
-      [page],
+    final controller = usePaginatedEpubPageController(
+      keys: [page],
+      onSubpageChanged: (subpage, scrollId) {
+        onSelectionChanged?.call(false);
+        ref
+            .read(nav.notifier)
+            .jumpToSubpage(subpage, scrollId: scrollId, page: page);
+      },
+      onSubpageRestored: (subpage, scrollId) {
+        onSelectionChanged?.call(false);
+        ref
+            .read(nav.notifier)
+            .jumpToSubpage(
+              subpage,
+              scrollId: scrollId,
+              page: page,
+              restored: true,
+            );
+      },
+      onSubpagesCountChanged: (count) {
+        ref.read(nav.notifier).updateSubpageCount(page, count);
+      },
     );
-    useEffect(() => controller.dispose, [controller]);
 
     final pendingAnchor = ref.watch(
       nav.select(
