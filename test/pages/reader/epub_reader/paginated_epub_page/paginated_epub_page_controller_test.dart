@@ -238,6 +238,58 @@ void main() {
       );
     });
 
+    test('reports a restored position separately from user navigation', () {
+      final html = dom.DocumentFragment.html(
+        '<div><p>first</p><p>second</p></div>',
+      );
+      final probe = PaginatedEpubPageController()
+        ..attachRoot(html, settings: _pageSettings());
+      final secondScrollId = probe.root!
+          .querySelectorAll('p')[1]
+          .attributes[HtmlConstants.scrollIdAttribute]!;
+
+      final restored = <(int, String?)>[];
+      final changes = <(int, String?)>[];
+      final controller = PaginatedEpubPageController(
+        onSubpageChanged: (subpage, scrollId) {
+          changes.add((subpage, scrollId));
+        },
+        onSubpageRestored: (subpage, scrollId) {
+          restored.add((subpage, scrollId));
+        },
+      );
+
+      controller.attachRoot(
+        html,
+        settings: _pageSettings(),
+        initialXpath: secondScrollId,
+      );
+
+      final blocks = [
+        for (final paragraph in controller.root!.querySelectorAll('p'))
+          _nodeIndex(paragraph),
+      ];
+
+      controller.processMeasurements(
+        EpubMeasurements(
+          contentSize: const Size(100, 20),
+          units: [
+            _line(nodeIndex: blocks[0], bottom: 10),
+            _line(nodeIndex: blocks[1], top: 10, bottom: 20),
+          ],
+        ),
+        viewport: const Size(100, 10),
+      );
+
+      expect(controller.currentSubpage, 1);
+      expect(restored, [(1, secondScrollId)]);
+      expect(changes, isEmpty);
+
+      controller.jumpToSubpage(0);
+
+      expect(changes, [(0, controller.scrollIdForSubpage(0))]);
+    });
+
     test(
       'updateSettings toggles the resume highlight and refreshes subpages',
       () {

@@ -41,6 +41,10 @@ const _readerState = ReaderState(
 );
 
 class _FakeReader extends Reader {
+  _FakeReader();
+
+  final saves = <({int page, String? scrollId})>[];
+
   @override
   Future<ReaderState> build({
     required int seriesId,
@@ -55,7 +59,9 @@ class _FakeReader extends Reader {
     required int page,
     String? scrollId,
     bool handleCompletion = true,
-  }) async {}
+  }) async {
+    saves.add((page: page, scrollId: scrollId));
+  }
 
   @override
   Future<void> markComplete() async {}
@@ -239,6 +245,54 @@ void main() {
     expect(notifier.takePendingAnchor(0), 'target');
     expect(container.read(_provider).value?.pendingAnchor, isNull);
   });
+
+  test('restoring the opened position does not save progress', () async {
+    final reader = _FakeReader();
+    final container = _createContainer(reader: reader);
+    final notifier = container.read(_provider.notifier);
+    await container.read(_provider.future);
+
+    notifier.updateSubpageCount(0, 3);
+    await container.pump();
+
+    await notifier.jumpToSubpage(
+      0,
+      scrollId: 'opening',
+      page: 0,
+      restored: true,
+    );
+    await container.pump();
+
+    expect(reader.saves, isEmpty);
+
+    await notifier.jumpToSubpage(1, scrollId: 'reading', page: 0);
+    await container.pump();
+
+    expect(reader.saves, [(page: 0, scrollId: 'reading')]);
+  });
+
+  test('restored positions still save after user navigation', () async {
+    final reader = _FakeReader();
+    final container = _createContainer(reader: reader);
+    final notifier = container.read(_provider.notifier);
+    await container.read(_provider.future);
+
+    await notifier.jumpToPage(1, force: true);
+    await container.pump();
+
+    notifier.updateSubpageCount(1, 2);
+    await container.pump();
+
+    await notifier.jumpToSubpage(
+      0,
+      scrollId: 'resume',
+      page: 1,
+      restored: true,
+    );
+    await container.pump();
+
+    expect(reader.saves.last, (page: 1, scrollId: 'resume'));
+  });
 }
 
 final _provider = epubNavigationProvider(
@@ -247,14 +301,15 @@ final _provider = epubNavigationProvider(
   readingListId: null,
 );
 
-ProviderContainer _createContainer() {
+ProviderContainer _createContainer({_FakeReader? reader}) {
+  final fakeReader = reader ?? _FakeReader();
   final container = ProviderContainer.test(
     overrides: [
       readerProvider(
         seriesId: 1,
         chapterId: 2,
         readingListId: null,
-      ).overrideWith(_FakeReader.new),
+      ).overrideWith(() => fakeReader),
       epubReaderSettingsProvider(seriesId: 1).overrideWithBuild(
         (_, _) => const EpubReaderSettingsState(),
       ),

@@ -16,6 +16,11 @@ enum PaginatedEpubPageControllerStatus { measuring, ready }
 /// Controls the state of a [PaginatedEpubPage].
 class PaginatedEpubPageController({
   final void Function(int subpage, String? scrollId)? onSubpageChanged,
+
+  /// Called when pagination restores a position instead of the user moving.
+  ///
+  /// Falls back to [onSubpageChanged] when not provided.
+  final void Function(int subpage, String? scrollId)? onSubpageRestored,
   final void Function(int)? onSubpagesCountChanged,
 }) extends ChangeNotifier {
   EpubPaginator? _paginator;
@@ -206,7 +211,7 @@ class PaginatedEpubPageController({
     // With no subpages there is no position to report. Calling this with 0
     // would make the navigation provider treat it as past the last subpage.
     if (count > 0) {
-      onSubpageChanged?.call(
+      (onSubpageRestored ?? onSubpageChanged)?.call(
         _currentSubpage,
         scrollIdForSubpage(_currentSubpage),
       );

@@ -32,6 +32,7 @@ class EpubNavigation extends _$EpubNavigation {
   final Map<int, int> _pageSubpageCounts = {};
   int? _pendingLastSubpagePage;
   var _spreads = false;
+  var _hasUserNavigated = false;
   int get _step => _spreads ? 2 : 1;
 
   @override
@@ -112,6 +113,10 @@ class EpubNavigation extends _$EpubNavigation {
             prev?.value?.scrollId == data.scrollId;
 
         if (!data.ready || isSamePosition) return;
+
+        // Opening a chapter restores its saved position. That restoration is
+        // not a reading action and must not rewrite progress.
+        if (data.fromObserver && !_hasUserNavigated) return;
 
         final isLastSubpage = _spreads
             ? data.subpage >= data.totalSubpages - 2
@@ -218,6 +223,10 @@ class EpubNavigation extends _$EpubNavigation {
       return;
     }
 
+    if (page != current.page) {
+      _hasUserNavigated = true;
+    }
+
     final pendingAnchor = anchor != null
         ? (page: page, anchor: anchor)
         : current.pendingAnchor?.page == page
@@ -271,6 +280,7 @@ class EpubNavigation extends _$EpubNavigation {
   Future<void> jumpToSubpage(
     int subpage, {
     bool fromObserver = false,
+    bool restored = false,
     String? scrollId,
     int? page,
   }) async {
@@ -278,6 +288,10 @@ class EpubNavigation extends _$EpubNavigation {
 
     if (page != null && current.page != page) return;
     if (!current.ready) return;
+
+    if (!restored) {
+      _hasUserNavigated = true;
+    }
 
     if (subpage < 0) {
       await jumpToPage(current.page - 1);
@@ -292,7 +306,7 @@ class EpubNavigation extends _$EpubNavigation {
     state = AsyncData(
       current.copyWith(
         subpage: subpage,
-        fromObserver: fromObserver,
+        fromObserver: fromObserver || restored,
         scrollId: scrollId,
         pendingAnchor: current.pendingAnchor?.page == current.page
             ? null

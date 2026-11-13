@@ -240,6 +240,17 @@ class _Page extends HookConsumerWidget {
               .read(nav.notifier)
               .jumpToSubpage(subpage, scrollId: scrollId, page: page);
         },
+        onSubpageRestored: (subpage, scrollId) {
+          onSelectionChanged?.call(false);
+          ref
+              .read(nav.notifier)
+              .jumpToSubpage(
+                subpage,
+                scrollId: scrollId,
+                page: page,
+                restored: true,
+              );
+        },
         onSubpagesCountChanged: (count) {
           ref.read(nav.notifier).updateSubpageCount(page, count);
         },

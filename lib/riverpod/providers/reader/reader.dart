@@ -120,6 +120,17 @@ class Reader extends _$Reader {
 
     if (!ref.mounted) return;
 
+    final targetPage = page.clamp(0, current.totalPages - 1);
+
+    // Restoring the position a chapter was opened at is not a reading action
+    // and must not create or rewrite a progress entry.
+    if (targetPage == current.initialPage && scrollId == current.bookScrollId) {
+      _saveProgressDebounce?.cancel();
+      _saveProgressKeepAlive?.close();
+      _saveProgressKeepAlive = null;
+      return;
+    }
+
     _saveProgressDebounce?.cancel();
     _saveProgressKeepAlive?.close();
 
@@ -130,7 +141,7 @@ class Reader extends _$Reader {
       try {
         if (!ref.mounted) return;
 
-        if (handleCompletion && page >= current.totalPages - 1) {
+        if (handleCompletion && targetPage >= current.totalPages - 1) {
           await markComplete();
           return;
         }
@@ -143,7 +154,7 @@ class Reader extends _$Reader {
                 seriesId: current.series.id,
                 volumeId: current.volumeId,
                 chapterId: current.chapter.id,
-                pageNum: page.clamp(0, current.totalPages - 1),
+                pageNum: targetPage,
                 bookScrollId: scrollId,
               ),
             );
@@ -151,7 +162,7 @@ class Reader extends _$Reader {
         log.debug(
           'saved progress',
           attributes: {
-            'page': page,
+            'page': targetPage,
             'scroll_id': scrollId ?? 'null',
             'chapter_id': current.chapter.id,
           },
