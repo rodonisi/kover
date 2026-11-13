@@ -4,17 +4,11 @@ import 'package:kover/utils/constants/html_constants.dart';
 
 /// A position inside the DOM that corresponds to a character of the flattened
 /// inline text.
-class EpubTextPosition {
-  const EpubTextPosition({
-    required this.node,
-    required this.offset,
-    this.afterNode = false,
-  });
-
-  final dom.Node node;
-  final int offset;
-  final bool afterNode;
-}
+class const EpubTextPosition({
+  required final dom.Node node,
+  required final int offset,
+  final bool afterNode = false,
+});
 
 /// Thrown when the flattened text of a block cannot be mapped back to its DOM
 /// nodes.
@@ -27,16 +21,6 @@ class EpubTextIndexMismatch implements Exception {
   String toString() => 'EpubTextIndexMismatch: $reason';
 }
 
-/// Aligns the flattened inline text of [block] with its DOM nodes, so line
-/// start offsets can be turned  back into DOM break points.
-///
-/// The alignment is greedy: whitespace runs in the DOM may collapse or vanish,
-/// so a normalized space consumes a raw whitespace run and a non-space
-/// character skips collapsed whitespace before matching. Inline widgets
-/// injected by fwfh (indent spans, anchors, inline-block elements, sup/sub,
-/// horizontal margins/padding) are represented by `U+FFFC` in the flattened
-/// text and are consumed as single tokens. Anything that does not line up
-/// throws [EpubTextIndexMismatch].
 class const EpubTextIndex._(final List<EpubTextPosition> _positions) {
   /// Returns the DOM position of the visible character at [offset].
   EpubTextPosition? positionAt(int offset) {
@@ -44,6 +28,16 @@ class const EpubTextIndex._(final List<EpubTextPosition> _positions) {
     return _positions[offset];
   }
 
+  /// Aligns the flattened inline text of [block] with its DOM nodes, so line
+  /// start offsets can be turned  back into DOM break points.
+  ///
+  /// The alignment is greedy: whitespace runs in the DOM may collapse or vanish,
+  /// so a normalized space consumes a raw whitespace run and a non-space
+  /// character skips collapsed whitespace before matching. Inline widgets
+  /// injected by fwfh (indent spans, anchors, inline-block elements, sup/sub,
+  /// horizontal margins/padding) are represented by `U+FFFC` in the flattened
+  /// text and are consumed as single tokens. Anything that does not line up
+  /// throws [EpubTextIndexMismatch].
   factory build({
     required dom.Element block,
     required Set<dom.Element> blockElements,

@@ -41,14 +41,17 @@ class PaginatedEpubPageController({
   CssEngine get cssEngine =>
       _cssEngine ?? (throw Exception('CSS engine is not initialized'));
 
+  /// Move to the next subpage if available.
   void nextSubpage() {
     jumpToSubpage(_currentSubpage + 1);
   }
 
+  /// Move to the previous subpage if available.
   void previousSubpage() {
     jumpToSubpage(_currentSubpage - 1);
   }
 
+  /// Jump to the subpage at [index].
   void jumpToSubpage(int index) {
     final paginator = _paginator;
     if (paginator == null || index < 0 || index >= paginator.subpageCount) {
@@ -65,6 +68,30 @@ class PaginatedEpubPageController({
     notifyListeners();
   }
 
+  /// Jumps to the subpage containing [anchor].
+  ///
+  /// If the page is still measuring, the anchor is kept and applied once
+  /// pagination completes.
+  void jumpToAnchor(String anchor) {
+    if (_status != .ready) {
+      _pendingAnchor = anchor;
+      return;
+    }
+
+    _jumpToAnchor(anchor);
+  }
+
+  /// Sets the subpage to use as soon as pagination completes.
+  ///
+  /// Used while a page is still measuring and the caller already knows which
+  /// subpage should become visible.
+  void setPendingSubpage(int? subpage) {
+    _pendingSubpage = subpage;
+  }
+
+  /// Attach a root HTML document fragment to the controller.
+  /// This causes the controller to reset its state and start measuring the
+  /// provided HTML content.
   void attachRoot(
     dom.DocumentFragment html, {
     required PaginatedEpubPageSettings settings,
@@ -100,11 +127,13 @@ class PaginatedEpubPageController({
     notifyListeners();
   }
 
+  /// Updates the additional CSS styles.
   void updateStyles(Map<String, Map<String, String>> additionalStyles) {
     _cssEngine?.updateAdditionalStyles(additionalStyles);
     notifyListeners();
   }
 
+  /// Updates the settings used to render the page.
   void updateSettings(PaginatedEpubPageSettings settings) {
     final wasHighlighting = _settings?.highlightResumePoint ?? false;
     _settings = settings;
@@ -126,27 +155,18 @@ class PaginatedEpubPageController({
     notifyListeners();
   }
 
-  /// Sets the subpage to use as soon as pagination completes.
-  ///
-  /// Used while a page is still measuring and the caller already knows which
-  /// subpage should become visible.
-  void setPendingSubpage(int? subpage) {
-    _pendingSubpage = subpage;
+  /// Update the viewport size used for pagination.
+  void updateViewport(Size viewport) {
+    if (_contentViewport == viewport) return;
+
+    _contentViewport = viewport;
+    if (_status == .measuring) return;
+
+    _status = .measuring;
+    notifyListeners();
   }
 
-  /// Jumps to the subpage containing [anchor].
-  ///
-  /// If the page is still measuring, the anchor is kept and applied once
-  /// pagination completes.
-  void jumpToAnchor(String anchor) {
-    if (_status != .ready) {
-      _pendingAnchor = anchor;
-      return;
-    }
-
-    _jumpToAnchor(anchor);
-  }
-
+  /// Forces the controller to remeasure the content.
   void remeasure() {
     if (_measuredLayoutKey == _settings?.layoutKey) return;
 
@@ -154,6 +174,7 @@ class PaginatedEpubPageController({
     notifyListeners();
   }
 
+  /// Processes the measurements collected from the content.
   void processMeasurements(
     EpubMeasurements measurements, {
     required Size viewport,
@@ -190,16 +211,6 @@ class PaginatedEpubPageController({
         scrollIdForSubpage(_currentSubpage),
       );
     }
-    notifyListeners();
-  }
-
-  void viewportChanged(Size viewport) {
-    if (_contentViewport == viewport) return;
-
-    _contentViewport = viewport;
-    if (_status == .measuring) return;
-
-    _status = .measuring;
     notifyListeners();
   }
 

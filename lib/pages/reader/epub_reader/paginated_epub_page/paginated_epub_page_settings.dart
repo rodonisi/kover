@@ -1,7 +1,10 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 
+part 'paginated_epub_page_settings.freezed.dart';
+
 /// Settings consumed by the paginated EPUB rendering pipeline.
+@freezed
 class const PaginatedEpubPageSettings({
   required final double horizontalMarginSize,
   required final double verticalMarginSize,
@@ -18,7 +21,7 @@ class const PaginatedEpubPageSettings({
   required final bool ignoreSafeArea,
   required final EpubTextAlignment textAlignment,
   required final EpubReaderMode mode,
-}) extends Equatable {
+}) with _$PaginatedEpubPageSettings {
   /// The subset of settings that changes the pagination geometry.
   ///
   /// Settings outside this subset (resume highlighting, gesture handling,
@@ -37,23 +40,4 @@ class const PaginatedEpubPageSettings({
     textAlignment,
     mode,
   );
-
-  @override
-  List<Object?> get props => [
-    horizontalMarginSize,
-    verticalMarginSize,
-    fontSize,
-    paragraphSpacing,
-    lineHeight,
-    wordSpacing,
-    letterSpacing,
-    fontFamily,
-    removeParagraphIndent,
-    highlightResumePoint,
-    canScroll,
-    reduceAnimations,
-    ignoreSafeArea,
-    textAlignment,
-    mode,
-  ];
 }

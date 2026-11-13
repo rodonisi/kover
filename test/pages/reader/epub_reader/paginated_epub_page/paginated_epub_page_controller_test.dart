@@ -127,7 +127,7 @@ void main() {
       var notifications = 0;
       controller.addListener(() => notifications++);
 
-      controller.viewportChanged(const Size(100, 10));
+      controller.updateViewport(const Size(100, 10));
 
       expect(notifications, 0);
       expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
@@ -144,12 +144,12 @@ void main() {
       expect(notifications, 1);
       expect(controller.status, PaginatedEpubPageControllerStatus.ready);
 
-      controller.viewportChanged(const Size(100, 120));
+      controller.updateViewport(const Size(100, 120));
 
       expect(notifications, 2);
       expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
 
-      controller.viewportChanged(const Size(100, 120));
+      controller.updateViewport(const Size(100, 120));
 
       expect(notifications, 2);
     });

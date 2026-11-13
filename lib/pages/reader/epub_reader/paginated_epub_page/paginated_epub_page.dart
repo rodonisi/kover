@@ -12,6 +12,7 @@ import 'package:kover/utils/extensions/epub_text_alignment.dart';
 import 'package:kover/utils/constants/html_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
+/// Paginate and layout a single EPUB page.
 class PaginatedEpubPage extends HookWidget {
   final PaginatedEpubPageController controller;
   final dom.DocumentFragment html;
@@ -123,7 +124,7 @@ class PaginatedEpubPage extends HookWidget {
           if (viewport.value == newViewport) return;
           viewport.value = newViewport;
 
-          controller.viewportChanged(newViewport);
+          controller.updateViewport(newViewport);
         });
         if (root == null || measuring) {
           return Stack(

@@ -3,6 +3,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing
 import 'package:kover/utils/extensions/element.dart';
 import 'package:kover/utils/constants/html_constants.dart';
 
+/// Writes each elements XPath to [HtmlConstants.scrollIdAttribute].
 final class ScrollIdOperation extends EpubPagePreprocessorOperation {
   @override
   void enter(dom.Element element) {

@@ -14,11 +14,13 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epu
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
 import 'package:material_ui/material_ui.dart';
 
+/// The result of measuring an EPUB page's content.
 class const EpubMeasurements({
   required final List<EpubMeasureUnit> units,
   required final Size contentSize,
 });
 
+/// A widget that measures and reports the layout of an EPUB page's content.
 class EpubMeasurementsCollector extends StatelessWidget {
   final dom.DocumentFragment html;
   final PaginatedEpubPageSettings settings;
@@ -98,7 +100,7 @@ class _EpubMeasureContent extends HookWidget {
           final anchor = measureKey.currentContext?.findRenderObject();
           if (anchor is! RenderEpubMeasureAnchor || !anchor.hasSize) return;
 
-          final measurements = collectMeasurements(anchor);
+          final measurements = _collectMeasurements(anchor);
 
           if (measurements.contentSize.height > 0 &&
               measurements.units.isEmpty) {
@@ -170,7 +172,7 @@ class _EpubMeasureContent extends HookWidget {
 
 /// Walks every probe injected by [MeasuringPaginatedEpubWidgetFactory] and
 /// turns it into measurement units, ordered by the render tree.
-EpubMeasurements collectMeasurements(RenderEpubMeasureAnchor anchor) {
+EpubMeasurements _collectMeasurements(RenderEpubMeasureAnchor anchor) {
   final units = <EpubMeasureUnit>[];
   final blockElements = <dom.Element>{};
 
@@ -190,7 +192,7 @@ EpubMeasurements collectMeasurements(RenderEpubMeasureAnchor anchor) {
     if (node is RenderEpubTextProbe) return;
 
     if (node is RenderEpubLeafProbe) {
-      final unit = leafUnit(
+      final unit = _leafUnit(
         nodeIndex: node.nodeIndex,
         box: node,
         origin: anchor,
@@ -213,7 +215,7 @@ EpubMeasurements collectMeasurements(RenderEpubMeasureAnchor anchor) {
       } else if (!_hasProbeDescendant(node)) {
         // A block without any probe below it cannot be split (image, rule,
         // empty block...).
-        final unit = leafUnit(
+        final unit = _leafUnit(
           nodeIndex: node.nodeIndex,
           box: node,
           origin: anchor,
@@ -519,7 +521,7 @@ List<int> _childPathOf(dom.Element block, dom.Node node) {
   return (top: top, bottom: bottom);
 }
 
-EpubLeafUnit? leafUnit({
+EpubLeafUnit? _leafUnit({
   required int nodeIndex,
   required RenderBox box,
   required RenderBox origin,

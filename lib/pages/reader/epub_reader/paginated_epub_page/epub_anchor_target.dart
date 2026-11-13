@@ -9,26 +9,20 @@ import 'package:kover/utils/constants/html_constants.dart';
 /// - footnote references get `kavita-note-ref`
 /// - links that stay on the current page keep a `#fragment` href
 /// - external links keep their original `http(s)` href
-class EpubAnchorTarget {
-  const EpubAnchorTarget({
-    this.page,
-    this.part,
-    this.externalUri,
-  });
-
+class const EpubAnchorTarget({
   /// Zero-based reading-order page within the current chapter.
-  final int? page;
+  final int? page,
 
   /// Fragment id on [page].
   ///
   /// The backend also uses this attribute for the original file path when it
   /// could not resolve a page mapping. In that case no element will match and
   /// the reader lands at the start of [page].
-  final String? part;
+  final String? part,
 
   /// External URL that should be opened outside the reader.
-  final Uri? externalUri;
-
+  final Uri? externalUri,
+}) {
   /// Builds a target from the attributes Kavita writes on an `<a>` element.
   static EpubAnchorTarget? fromElement(dom.Element element) {
     if (element.localName != 'a') return null;

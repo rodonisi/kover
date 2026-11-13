@@ -10,7 +10,7 @@ class EpubPagePreprocessor({
   required final dom.DocumentFragment html,
   required final List<EpubPagePreprocessorOperation> operations,
 }) {
-  /// Runs all operations and returns root.
+  /// Runs all operations and returns the updated root.
   dom.DocumentFragment process() {
     final root = dom.DocumentFragment();
     final wrapper = dom.Element.tag('div')
