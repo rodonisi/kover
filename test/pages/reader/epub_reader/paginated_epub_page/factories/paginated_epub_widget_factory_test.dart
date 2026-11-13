@@ -22,9 +22,10 @@ void main() {
 
       expect(styles?['width'], '32.0px');
       expect(styles?['height'], '80.0px');
+      expect(styles?['max-height'], '80.0px');
     });
 
-    test('leaves images without dimensions untouched', () {
+    test('caps images without dimensions at the viewport height', () {
       final element = dom.Element.tag('img')..attributes['src'] = 'image.png';
 
       final styles = PaginatedEpubWidgetFactory(
@@ -33,6 +34,15 @@ void main() {
 
       expect(styles?.containsKey('width'), isFalse);
       expect(styles?.containsKey('height'), isFalse);
+      expect(styles?['max-height'], '80.0px');
+    });
+
+    test('does not cap images for an unbounded viewport', () {
+      final element = dom.Element.tag('img')..attributes['src'] = 'image.png';
+
+      final styles = PaginatedEpubWidgetFactory().customStylesBuilder(element);
+
+      expect(styles?.containsKey('max-height'), isFalse);
     });
 
     test('removes outer margins on split page edges', () {

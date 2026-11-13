@@ -192,6 +192,10 @@ class PaginatedEpubWidgetFactory({
 
     if (element.localName != 'img') return styles;
 
+    if (viewport.height.isFinite) {
+      styles['max-height'] = '${viewport.height}px';
+    }
+
     final width = double.tryParse(element.attributes['width'] ?? '');
     final height = double.tryParse(element.attributes['height'] ?? '');
     if (width == null || height == null) return styles;
