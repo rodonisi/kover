@@ -203,26 +203,31 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
   /// [seriesId] and/or chapters that have never been fetched locally
   /// ([onlyMissing]).
   ///
-  /// When [onlyMissing] is false, EPUB progress entries without an xpath are
-  /// included as well so their full progress can be fetched.
+  /// When [onlyMissing] is false, partial EPUB progress entries without an
+  /// xpath and remote unread resets are included as well.
   Future<List<int>> getOutdatedChapterIds({
     int? seriesId,
     bool onlyMissing = false,
   }) async {
     final hasRemoteProgress = chapters.remotePagesRead.isBiggerThanValue(0);
+    final hasLocalProgress = readingProgress.pagesRead.isBiggerThanValue(0);
     final isMissingLocal = readingProgress.chapterId.isNull();
     final isLocalOutdated = readingProgress.lastModified.isSmallerThan(
       chapters.remoteLastRead,
     );
+    final hasOutdatedProgress =
+        (hasRemoteProgress | hasLocalProgress) & isLocalOutdated;
     final isPartialEpubCandidate =
         chapters.format.equalsValue(.epub) &
+        readingProgress.dirty.equals(false) &
+        hasLocalProgress &
+        readingProgress.pagesRead.isSmallerThan(chapters.pages) &
         readingProgress.bookScrollId.isNull();
 
-    var condition =
-        hasRemoteProgress &
-        (onlyMissing
-            ? isMissingLocal
-            : (isMissingLocal | isLocalOutdated | isPartialEpubCandidate));
+    var condition = onlyMissing
+        ? (hasRemoteProgress & isMissingLocal)
+        : ((hasRemoteProgress & (isMissingLocal | isPartialEpubCandidate)) |
+              hasOutdatedProgress);
 
     if (seriesId != null) {
       condition = condition & chapters.seriesId.equals(seriesId);
@@ -465,6 +470,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
           seriesId: Value(s.id),
           libraryId: Value(s.libraryId),
           pagesRead: Value(isRead ? c.pages : 0),
+          bookScrollId: const Value(null),
           lastModified: Value(DateTime.timestamp()),
           dirty: const Value(true),
         );
@@ -502,6 +508,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
           seriesId: Value(s.id),
           libraryId: Value(s.libraryId),
           pagesRead: Value(isRead ? c.pages : 0),
+          bookScrollId: const Value(null),
           lastModified: Value(DateTime.timestamp()),
           dirty: const Value(true),
         );
@@ -535,6 +542,7 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
           seriesId: Value(s.id),
           libraryId: Value(s.libraryId),
           pagesRead: Value(isRead ? c.pages : 0),
+          bookScrollId: const Value(null),
           lastModified: Value(DateTime.timestamp()),
           dirty: const Value(true),
         ),
