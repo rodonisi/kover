@@ -482,6 +482,10 @@
     "@syncingBookmarks": {
         "description": "Label for the syncing bookmarks phase"
     },
+    "syncingAnnotations": "Syncing annotations",
+    "@syncingAnnotations": {
+        "description": "Label for the syncing annotations phase"
+    },
     "syncingCollections": "Syncing collections",
     "@syncingCollections": {
         "description": "Label for the syncing collections phase"
@@ -800,6 +804,17 @@
         "placeholders": {
             "chapterId": {
                 "description": "The ID of the chapter which reading progress is being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "refreshingChapterAnnotations": "Refreshing annotations for chapter {chapterId}",
+    "@refreshingChapterAnnotations": {
+        "description": "Label for the syncing chapter annotations phase with the chapter ID",
+        "placeholders": {
+            "chapterId": {
+                "description": "The ID of the chapter which annotations are being refreshed",
                 "type": "int",
                 "example": "42"
             }

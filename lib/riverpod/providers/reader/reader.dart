@@ -65,8 +65,10 @@ Future<ProgressModel?> readerProgress(
     readerChapterProvider(seriesId: seriesId, chapterId: chapterId).future,
   );
 
-  // Another device may have moved the position since the last sync.
-  await syncManager.refreshChapterProgress(chapterId: chapter.id);
+  await Future.wait([
+    syncManager.refreshChapterProgress(chapterId: chapter.id),
+    syncManager.refreshChapterAnnotations(chapterId: chapter.id),
+  ]);
 
   return repo.getProgress(chapter.id);
 }

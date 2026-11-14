@@ -23,3 +23,26 @@ extension AgeRatingMappings on api.AgeRating {
     };
   }
 }
+
+extension LocalAgeRatingMappings on AgeRating {
+  api.AgeRating toApi() {
+    return switch (this) {
+      .unknown => .unknown,
+      .ratingPending => .ratingpending,
+      .earlyChildhood => .earlychildhood,
+      .everyone => .everyone,
+      .g => .g,
+      .everyOne10Plus => .everyone10plus,
+      .pg => .pg,
+      .kidsToAdults => .kidstoadults,
+      .teen => .teen,
+      .mature15Plus => .mature15plus,
+      .mature17Plus => .mature17plus,
+      .mature => .mature,
+      .r18Plus => .r18plus,
+      .adultsOnly => .adultsonly,
+      .x18Plus => .x18plus,
+      .notApplicable => .notapplicable,
+    };
+  }
+}
