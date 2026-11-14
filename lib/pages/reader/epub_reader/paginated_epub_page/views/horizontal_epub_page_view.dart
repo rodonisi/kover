@@ -30,7 +30,7 @@ class HorizontalEpubPageView extends HookWidget {
       if (!pageController.hasClients) return null;
       if (pageController.page?.round() == current) return null;
 
-      if (settings.reduceAnimations) {
+      if (settings.reduceAnimations || !controller.animateSubpageChange) {
         pageController.jumpToPage(current);
       } else {
         pageController.animateToPage(
@@ -46,7 +46,6 @@ class HorizontalEpubPageView extends HookWidget {
       controller: pageController,
       itemCount: controller.subpageCount,
       allowImplicitScrolling: true,
-      scrollCacheExtent: const .viewport(4),
       physics: settings.canScroll && !settings.reduceAnimations
           ? const AlwaysScrollableScrollPhysics(
               parent: ClampingScrollPhysics(),

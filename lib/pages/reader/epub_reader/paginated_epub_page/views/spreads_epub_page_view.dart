@@ -30,7 +30,7 @@ class SpreadsEpubPageView extends HookWidget {
       if (!pageController.hasClients) return null;
       if (pageController.page?.round() == current) return null;
 
-      if (settings.reduceAnimations) {
+      if (settings.reduceAnimations || !controller.animateSubpageChange) {
         pageController.jumpToPage(current);
       } else {
         pageController.animateToPage(
@@ -46,7 +46,6 @@ class SpreadsEpubPageView extends HookWidget {
       controller: pageController,
       itemCount: (controller.subpageCount + 1) ~/ 2,
       allowImplicitScrolling: true,
-      scrollCacheExtent: const .viewport(4),
       physics: settings.canScroll && !settings.reduceAnimations
           ? const AlwaysScrollableScrollPhysics(
               parent: ClampingScrollPhysics(),
@@ -54,11 +53,14 @@ class SpreadsEpubPageView extends HookWidget {
           : const NeverScrollableScrollPhysics(),
       onPageChanged: (index) => controller.jumpToSubpage(index * 2),
       itemBuilder: (context, index) {
-        return Row(
-          children: [
-            Expanded(child: _column(index * 2, viewport)),
-            Expanded(child: _column(index * 2 + 1, viewport)),
-          ],
+        return SizedBox(
+          height: viewport.height,
+          child: Row(
+            children: [
+              Expanded(child: _column(index * 2, viewport)),
+              Expanded(child: _column(index * 2 + 1, viewport)),
+            ],
+          ),
         );
       },
     );

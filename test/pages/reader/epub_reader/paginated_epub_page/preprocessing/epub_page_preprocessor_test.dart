@@ -7,42 +7,73 @@ import 'package:kover/utils/constants/html_constants.dart';
 
 void main() {
   group('EpubPagePreprocessor', () {
-    group('node indexing', () {
-      test('when elements are nested, then indexes them in order', () {
-        final html = dom.DocumentFragment.html(
-          '<div><p>a<span>b</span></p><p>c</p></div>',
+    test('when walking, then calls hooks in operation order', () {
+      final html = dom.DocumentFragment.html(
+        '<div><p>a</p><span>b</span></div>',
+      );
+      final events = <String>[];
+
+      EpubPagePreprocessor(
+        html: html,
+        operations: [
+          _RecordingOperation('first', events),
+          _RecordingOperation('second', events),
+        ],
+      ).process();
+
+      expect(events, [
+        'first:start',
+        'second:start',
+        'first:enter:div',
+        'second:enter:div',
+        'first:enter:div',
+        'second:enter:div',
+        'first:enter:p',
+        'second:enter:p',
+        'first:text:a',
+        'second:text:a',
+        'second:exit:p',
+        'first:exit:p',
+        'first:enter:span',
+        'second:enter:span',
+        'first:text:b',
+        'second:text:b',
+        'second:exit:span',
+        'first:exit:span',
+        'second:exit:div',
+        'first:exit:div',
+        'second:exit:div',
+        'first:exit:div',
+        'second:finish',
+        'first:finish',
+      ]);
+    });
+
+    test(
+      'when processed, then wraps cloned content in the content wrapper',
+      () {
+        final html = dom.DocumentFragment.html('<p>a</p>');
+
+        final root = EpubPagePreprocessor(html: html, operations: []).process();
+
+        final wrapper = root.children.single;
+        expect(wrapper.localName, 'div');
+        expect(
+          wrapper.classes,
+          containsAll([
+            HtmlConstants.kavitaWrapperClass,
+            HtmlConstants.koverWrapperClass,
+          ]),
         );
+        expect(wrapper.children.single.localName, 'p');
+        expect(wrapper.text, 'a');
+      },
+    );
 
-        final root = EpubPagePreprocessor(
-          html: html,
-          operations: [NodeIndexingOperation()],
-        ).process();
-
-        // <div index=0> wrapper
-        //   <div index=1>
-        //     <p index=2>
-        //       a
-        //       <span index=3>b</span>
-        //     </p>
-        //     <p index=4>c</p>
-        //   </div>
-        // </div>
-        expect(_nodeIndexes(root), ['0', '1', '2', '3', '4']);
-      });
-
-      test('when fragment has multiple roots, then indexes them in order', () {
-        final html = dom.DocumentFragment.html('text<p>a</p><p>b</p>');
-
-        final root = EpubPagePreprocessor(
-          html: html,
-          operations: [NodeIndexingOperation()],
-        ).process();
-
-        expect(_nodeIndexes(root), ['0', '1', '2']);
-      });
-
-      test('when processed again, then resets and overwrites indexes', () {
-        final html = dom.DocumentFragment.html('<div><p>a</p></div>');
+    test(
+      'when processed repeatedly, then clones without mutating the input',
+      () {
+        final html = dom.DocumentFragment.html('<p>a</p>');
         final preprocessor = EpubPagePreprocessor(
           html: html,
           operations: [NodeIndexingOperation()],
@@ -51,88 +82,56 @@ void main() {
         final first = preprocessor.process();
         final second = preprocessor.process();
 
-        expect(_nodeIndexes(first), ['0', '1', '2']);
-        expect(_nodeIndexes(second), ['0', '1', '2']);
-      });
-
-      test('when child is inserted on enter, then it is indexed too', () {
-        final html = dom.DocumentFragment.html('<div><p>a</p></div>');
-
-        final root = EpubPagePreprocessor(
-          html: html,
-          operations: [_InsertChildOperation(), NodeIndexingOperation()],
-        ).process();
-
-        expect(_nodeIndexes(root), ['0', '1', '2', '3', '4']);
         expect(
-          root
-              .querySelector('span')!
+          html
+              .querySelector('p')!
+              .attributes
+              .containsKey(HtmlConstants.nodeIndexAttribute),
+          isFalse,
+        );
+        expect(
+          first
+              .querySelector('p')!
               .attributes[HtmlConstants.nodeIndexAttribute],
-          '3',
+          '1',
         );
-      });
-    });
-
-    group('walking', () {
-      test('when walking, then calls hooks in operation order', () {
-        final html = dom.DocumentFragment.html(
-          '<div><p>a</p><span>b</span></div>',
+        expect(
+          second
+              .querySelector('p')!
+              .attributes[HtmlConstants.nodeIndexAttribute],
+          '1',
         );
-        final events = <String>[];
+        expect(identical(first, second), isFalse);
+      },
+    );
 
-        EpubPagePreprocessor(
-          html: html,
-          operations: [
-            _RecordingOperation('first', events),
-            _RecordingOperation('second', events),
-          ],
-        ).process();
+    test('when fragment has multiple roots, then preserves their order', () {
+      final html = dom.DocumentFragment.html(
+        'before<p>a</p>between<span>b</span>after',
+      );
 
-        expect(events, [
-          'first:start',
-          'second:start',
-          'first:enter:div',
-          'second:enter:div',
-          'first:enter:div',
-          'second:enter:div',
-          'first:enter:p',
-          'second:enter:p',
-          'first:text:a',
-          'second:text:a',
-          'second:exit:p',
-          'first:exit:p',
-          'first:enter:span',
-          'second:enter:span',
-          'first:text:b',
-          'second:text:b',
-          'second:exit:span',
-          'first:exit:span',
-          'second:exit:div',
-          'first:exit:div',
-          'second:exit:div',
-          'first:exit:div',
-          'second:finish',
-          'first:finish',
-        ]);
-      });
+      final root = EpubPagePreprocessor(html: html, operations: []).process();
+
+      expect(
+        root.children.single.nodes.map(_describeNode),
+        [
+          'text:before',
+          'element:p',
+          'text:between',
+          'element:span',
+          'text:after',
+        ],
+      );
     });
   });
 }
 
-List<String?> _nodeIndexes(dom.DocumentFragment root) {
-  return [
-    for (final element in root.querySelectorAll('*'))
-      element.attributes[HtmlConstants.nodeIndexAttribute],
-  ];
-}
-
-final class _InsertChildOperation extends EpubPagePreprocessorOperation {
-  @override
-  void enter(dom.Element element) {
-    if (element.localName == 'div') {
-      element.append(dom.Element.tag('span')..text = 'inserted');
-    }
-  }
+String _describeNode(dom.Node node) {
+  return switch (node) {
+    dom.Text(:final data) => 'text:$data',
+    dom.Element(:final localName) => 'element:$localName',
+    _ => 'other',
+  };
 }
 
 final class _RecordingOperation extends EpubPagePreprocessorOperation {

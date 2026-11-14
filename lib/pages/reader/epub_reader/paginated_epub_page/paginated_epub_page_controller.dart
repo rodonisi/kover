@@ -32,6 +32,7 @@ class PaginatedEpubPageController({
   String? _initialXpath;
   dom.Element? _highlightedElement;
   bool _resumePending = false;
+  bool _animateSubpageChange = true;
   int? _pendingSubpage;
   String? _pendingAnchor;
   PaginatedEpubPageSettings? _settings;
@@ -44,6 +45,10 @@ class PaginatedEpubPageController({
 
   int get currentSubpage => _currentSubpage;
   int get subpageCount => _paginator?.subpageCount ?? 0;
+
+  /// Whether the last subpage change should be animated by the view.
+  bool get animateSubpageChange => _animateSubpageChange;
+
   CssEngine get cssEngine =>
       _cssEngine ?? (throw Exception('CSS engine is not initialized'));
 
@@ -58,14 +63,23 @@ class PaginatedEpubPageController({
   }
 
   /// Jump to the subpage at [index].
-  void jumpToSubpage(int index) {
-    final paginator = _paginator;
-    if (paginator == null || index < 0 || index >= paginator.subpageCount) {
+  ///
+  /// If the page is still measuring, the subpage is kept and applied once
+  /// pagination completes.
+  void jumpToSubpage(int index, {bool animate = true}) {
+    if (_status != .ready) {
+      _pendingSubpage = index;
       return;
     }
 
     if (index == _currentSubpage) return;
 
+    final paginator = _paginator;
+    if (paginator == null || index < 0 || index >= paginator.subpageCount) {
+      return;
+    }
+
+    _animateSubpageChange = animate;
     _currentSubpage = index;
     onSubpageChanged?.call(
       _currentSubpage,
@@ -78,21 +92,16 @@ class PaginatedEpubPageController({
   ///
   /// If the page is still measuring, the anchor is kept and applied once
   /// pagination completes.
-  void jumpToAnchor(String anchor) {
+  void jumpToAnchor(String anchor, {bool animate = true}) {
     if (_status != .ready) {
       _pendingAnchor = anchor;
       return;
     }
 
-    _jumpToAnchor(anchor);
-  }
-
-  /// Sets the subpage to use as soon as pagination completes.
-  ///
-  /// Used while a page is still measuring and the caller already knows which
-  /// subpage should become visible.
-  void setPendingSubpage(int? subpage) {
-    _pendingSubpage = subpage;
+    final subpage = subpageForAnchor(anchor);
+    if (subpage != null) {
+      jumpToSubpage(subpage, animate: animate);
+    }
   }
 
   /// Attach a root HTML document fragment to the controller.
@@ -151,9 +160,9 @@ class PaginatedEpubPageController({
       _highlightedElement ??= root == null
           ? null
           : _findByScrollId(root, _initialXpath);
-      _highlightedElement?.classes.add(HtmlConstants.resumeClass);
+      _highlightedElement?.classes.add(HtmlConstants.resumeParagraphClass);
     } else {
-      _highlightedElement?.classes.remove(HtmlConstants.resumeClass);
+      _highlightedElement?.classes.remove(HtmlConstants.resumeParagraphClass);
     }
 
     _cssEngine?.invalidate();
@@ -193,12 +202,12 @@ class PaginatedEpubPageController({
     paginator.paginate(measurements.units, viewport.height);
     _contentViewport = viewport;
     _measuredLayoutKey = _settings?.layoutKey;
-    _status = .ready;
 
-    final anchorSubpage = _takePendingAnchorSubpage();
     final count = paginator.subpageCount;
+
     onSubpagesCountChanged?.call(count);
 
+    final anchorSubpage = _takePendingAnchorSubpage();
     final pendingSubpage = _pendingSubpage;
     _pendingSubpage = null;
     final target =
@@ -207,6 +216,7 @@ class PaginatedEpubPageController({
             ? _resumeSubpage() ?? 0
             : pendingSubpage ?? _currentSubpage);
     _resumePending = false;
+    _status = .ready;
     _currentSubpage = count == 0 ? 0 : target.clamp(0, count - 1);
 
     // With no subpages there is no position to report. Calling this with 0
@@ -249,13 +259,6 @@ class PaginatedEpubPageController({
     }
 
     return paginator.subpageForElementId(id);
-  }
-
-  void _jumpToAnchor(String anchor) {
-    final subpage = subpageForAnchor(anchor);
-    if (subpage != null) {
-      jumpToSubpage(subpage);
-    }
   }
 
   int? _takePendingAnchorSubpage() {

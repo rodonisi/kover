@@ -37,13 +37,12 @@ class PaginatedEpubWidgetFactory({
     BuildTree tree, {
     GestureTapCallback? onTap,
   }) {
-    final callback = onAnchorTap;
-    if (callback != null) {
+    if (onAnchorTap != null) {
       final target = EpubAnchorTarget.fromElement(tree.element);
       if (target != null) {
         return super.buildGestureRecognizer(
           tree,
-          onTap: () => callback(target),
+          onTap: () => onAnchorTap!(target),
         );
       }
     }
@@ -65,24 +64,90 @@ class PaginatedEpubWidgetFactory({
     return LinkHitRegion(child: built);
   }
 
-  void _applyTextIndent(BuildTree tree) {
-    if (removeParagraphIndent) return;
-    if (tree.isInline != false) return;
-    if (tree.children.any((child) => child.isInline == false)) return;
-    if (tree.element.attributes.containsKey(
-      HtmlConstants.splitParagraphAttribute,
+  @override
+  Widget? buildImageWidget(BuildTree meta, ImageSource src) {
+    final image = super.buildImageWidget(meta, src);
+    if (image is! Image || !viewport.height.isFinite) return image;
+
+    return Image(
+      key: image.key,
+      image: image.image,
+      frameBuilder: image.frameBuilder,
+      loadingBuilder: image.loadingBuilder,
+      errorBuilder: image.errorBuilder,
+      semanticLabel: image.semanticLabel,
+      excludeFromSemantics: image.excludeFromSemantics,
+      width: image.width,
+      height: image.height,
+      color: image.color,
+      opacity: image.opacity,
+      colorBlendMode: image.colorBlendMode,
+      fit: .contain,
+      alignment: image.alignment,
+      repeat: image.repeat,
+      centerSlice: image.centerSlice,
+      matchTextDirection: image.matchTextDirection,
+      gaplessPlayback: image.gaplessPlayback,
+      isAntiAlias: image.isAntiAlias,
+      filterQuality: image.filterQuality,
+    );
+  }
+
+  @override
+  StylesMap? customStylesBuilder(dom.Element element) {
+    final styles = Map<String, String>.of(
+      super.customStylesBuilder(element) ?? const {},
+    );
+
+    if (element.attributes.containsKey(
+      HtmlConstants.trimStartAttribute,
     )) {
-      return;
+      styles['margin-top'] = '0';
+      element.attributes['style'] = _appendStyle(
+        element.attributes['style'],
+        'margin-top: 0',
+      );
     }
-    if (tree.element.attributes.containsKey(
-      HtmlConstants.textIndentAttribute,
-    )) {
+
+    if (element.attributes.containsKey(HtmlConstants.trimEndAttribute)) {
+      styles['margin-bottom'] = '0';
+      element.attributes['style'] = _appendStyle(
+        element.attributes['style'],
+        'margin-bottom: 0',
+      );
+    }
+
+    if (element.localName != 'img') return styles;
+
+    if (viewport.height.isFinite) {
+      styles['max-height'] = '${viewport.height}px';
+    }
+
+    final width = double.tryParse(element.attributes['width'] ?? '');
+    final height = double.tryParse(element.attributes['height'] ?? '');
+    if (width == null || height == null) return styles;
+
+    final fitted = _fit(Size(width, height));
+    return styles
+      ..['width'] = '${fitted.width}px'
+      ..['height'] = '${fitted.height}px';
+  }
+
+  void _applyTextIndent(BuildTree tree) {
+    if (removeParagraphIndent ||
+        tree.isInline != false ||
+        tree.children.any((child) => child.isInline == false) ||
+        tree.element.attributes.containsKey(
+          HtmlConstants.startsMidBlockAttribute,
+        ) ||
+        tree.element.attributes.containsKey(
+          HtmlConstants.textIndentAttribute,
+        )) {
       return;
     }
 
     final indent = _effectiveTextIndent(tree);
     if (indent == null || !indent.isPositive) return;
-    if (_isCenterAligned(tree)) return;
 
     tree.element.attributes[HtmlConstants.textIndentAttribute] = '';
     tree.prepend(
@@ -115,32 +180,13 @@ class PaginatedEpubWidgetFactory({
     return null;
   }
 
-  bool _isCenterAligned(BuildTree tree) {
-    for (BuildTree? current = tree; current != null;) {
-      final value = current.getStyle('text-align')?.value;
-      final term = value is css.LiteralTerm ? value.valueAsString : null;
-      if (term != null) {
-        return switch (term) {
-          'center' => true,
-          _ => false,
-        };
-      }
-
-      current = current.hasParent ? current.parent : null;
-    }
-
-    return false;
-  }
-
   double? _resolveIndent(
     BuildTree tree,
     CssLength indent,
     BuildContext context,
-  ) => switch (indent.unit) {
-    .percentage =>
-      viewport.width.isFinite ? viewport.width * indent.number / 100 : null,
-    _ => indent.getValue(tree.inheritanceResolvers.resolve(context)),
-  };
+  ) {
+    return indent.getValue(tree.inheritanceResolvers.resolve(context));
+  }
 
   static CssLength? _parseLength(css.Expression? expression) =>
       switch (expression) {
@@ -165,46 +211,6 @@ class PaginatedEpubWidgetFactory({
         css.NumberTerm(:final number) when number == 0 => CssLength.zero,
         _ => null,
       };
-
-  @override
-  StylesMap? customStylesBuilder(dom.Element element) {
-    final styles = Map<String, String>.of(
-      super.customStylesBuilder(element) ?? const {},
-    );
-
-    if (element.attributes.containsKey(
-      HtmlConstants.splitStartAttribute,
-    )) {
-      styles['margin-top'] = '0';
-      element.attributes['style'] = _appendStyle(
-        element.attributes['style'],
-        'margin-top: 0',
-      );
-    }
-
-    if (element.attributes.containsKey(HtmlConstants.splitEndAttribute)) {
-      styles['margin-bottom'] = '0';
-      element.attributes['style'] = _appendStyle(
-        element.attributes['style'],
-        'margin-bottom: 0',
-      );
-    }
-
-    if (element.localName != 'img') return styles;
-
-    if (viewport.height.isFinite) {
-      styles['max-height'] = '${viewport.height}px';
-    }
-
-    final width = double.tryParse(element.attributes['width'] ?? '');
-    final height = double.tryParse(element.attributes['height'] ?? '');
-    if (width == null || height == null) return styles;
-
-    final fitted = _fit(Size(width, height));
-    return styles
-      ..['width'] = '${fitted.width}px'
-      ..['height'] = '${fitted.height}px';
-  }
 
   /// Adds [declaration] to an inline style attribute without dropping the
   /// element's own declarations.

@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/measuring_paginated_epub_widget_factory.dart';
@@ -42,9 +41,7 @@ class EpubMeasurementsCollector extends StatelessWidget {
     final columns = settings.mode == .spreads ? 2 : 1;
     final outerWidth = constraints.maxWidth / columns;
     final horizontalPadding = settings.horizontalMarginSize * 2;
-    final verticalPadding = settings.mode == .vertical
-        ? 0.0
-        : settings.verticalMarginSize * 2;
+    final verticalPadding = settings.verticalMarginSize * 2;
 
     final viewport = Size(
       math.max(0, outerWidth - horizontalPadding),
@@ -63,7 +60,7 @@ class EpubMeasurementsCollector extends StatelessWidget {
   }
 }
 
-class _EpubMeasureContent extends HookWidget {
+class _EpubMeasureContent extends StatefulWidget {
   final dom.DocumentFragment html;
   final PaginatedEpubPageSettings settings;
   final CssEngine cssEngine;
@@ -71,7 +68,7 @@ class _EpubMeasureContent extends HookWidget {
   final double outerWidth;
   final void Function(EpubMeasurements measurements, Size viewport) onMeasured;
 
-  const _EpubMeasureContent({
+  const new({
     super.key,
     required this.html,
     required this.settings,
@@ -82,87 +79,98 @@ class _EpubMeasureContent extends HookWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final measureKey = useMemoized(() => GlobalKey());
-    final scheduled = useRef(false);
-    final factoryRef = useRef<MeasuringPaginatedEpubWidgetFactory?>(null);
+  State<_EpubMeasureContent> createState() => _EpubMeasureContentState();
+}
 
-    void scheduleMeasurement() {
-      if (scheduled.value) return;
-      scheduled.value = true;
+class _EpubMeasureContentState extends State<_EpubMeasureContent> {
+  final _measureKey = GlobalKey();
+  late final String _htmlText;
+  late final MeasuringPaginatedEpubWidgetFactory _factory;
+  var _scheduled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _htmlText = widget.html.outerHtml;
+
+    if (widget.viewport.isEmpty) {
+      // There is nothing to lay out when margins consume the whole viewport.
+      // Report an empty measurement so the controller leaves the measuring
+      // state instead of spinning forever.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        try {
-          if (!context.mounted) return;
-          final factory = factoryRef.value;
-          if (factory == null || factory.pendingImages > 0) return;
-          if (html.outerHtml.isNotEmpty && !factory.isBuildComplete) return;
-
-          final anchor = measureKey.currentContext?.findRenderObject();
-          if (anchor is! RenderEpubMeasureAnchor || !anchor.hasSize) return;
-
-          final measurements = _collectMeasurements(anchor);
-
-          if (measurements.contentSize.height > 0 &&
-              measurements.units.isEmpty) {
-            scheduled.value = false;
-            scheduleMeasurement();
-            return;
-          }
-
-          onMeasured(measurements, viewport);
-        } finally {
-          scheduled.value = false;
-        }
-      });
-    }
-
-    final factory = useMemoized(() {
-      final created = MeasuringPaginatedEpubWidgetFactory(
-        viewport: viewport,
-        removeParagraphIndent: settings.removeParagraphIndent,
-        onBuildComplete: scheduleMeasurement,
-        onImageSettled: scheduleMeasurement,
-      );
-      factoryRef.value = created;
-      return created;
-    }, [html, viewport, settings.removeParagraphIndent]);
-
-    useEffect(() {
-      scheduleMeasurement();
-      return null;
-    }, [measureKey, html, viewport, factory]);
-
-    // There is nothing to lay out when margins consume the whole viewport.
-    // Report an empty measurement so the controller leaves the measuring
-    // state instead of spinning forever.
-    final emptyReported = useRef(false);
-    useEffect(() {
-      if (!viewport.isEmpty || emptyReported.value) return null;
-      emptyReported.value = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!context.mounted) return;
-        onMeasured(
+        if (!mounted) return;
+        widget.onMeasured(
           const EpubMeasurements(units: [], contentSize: Size.zero),
-          viewport,
+          widget.viewport,
         );
       });
-      return null;
-    }, [viewport, onMeasured]);
+      return;
+    }
 
-    if (viewport.isEmpty) return const SizedBox.shrink();
+    _factory = MeasuringPaginatedEpubWidgetFactory(
+      viewport: widget.viewport,
+      removeParagraphIndent: widget.settings.removeParagraphIndent,
+      onChanged: _scheduleMeasurement,
+    );
+    _scheduleMeasurement();
+  }
+
+  @override
+  void didUpdateWidget(_EpubMeasureContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The parent keys this widget on the markup, viewport and layout settings,
+    // so the factory and serialized markup can be created once in initState.
+    assert(identical(oldWidget.html, widget.html));
+    assert(oldWidget.viewport == widget.viewport);
+    assert(
+      oldWidget.settings.removeParagraphIndent ==
+          widget.settings.removeParagraphIndent,
+    );
+  }
+
+  void _scheduleMeasurement() {
+    if (_scheduled) return;
+    _scheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        if (!mounted) return;
+        if (_factory.pendingImages > 0) return;
+        if (_htmlText.isNotEmpty && !_factory.isBuildComplete) return;
+
+        final anchor = _measureKey.currentContext?.findRenderObject();
+        if (anchor is! RenderEpubMeasureAnchor || !anchor.hasSize) return;
+
+        final measurements = _collectMeasurements(anchor);
+
+        if (measurements.contentSize.height > 0 && measurements.units.isEmpty) {
+          _scheduled = false;
+          _scheduleMeasurement();
+          return;
+        }
+
+        widget.onMeasured(measurements, widget.viewport);
+      } finally {
+        _scheduled = false;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.viewport.isEmpty) return const SizedBox.shrink();
 
     return SizedBox(
-      width: outerWidth,
+      width: widget.outerWidth,
       child: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
         child: ExcludeSemantics(
           child: PaginatedEpubPageContent(
-            html: html.outerHtml,
-            settings: settings,
-            viewport: viewport,
-            cssEngine: cssEngine,
-            anchorKey: measureKey,
-            factoryBuilder: () => factory,
+            html: _htmlText,
+            settings: widget.settings,
+            viewport: widget.viewport,
+            cssEngine: widget.cssEngine,
+            anchorKey: _measureKey,
+            factoryBuilder: () => _factory,
           ),
         ),
       ),
@@ -398,20 +406,6 @@ EpubLeafUnit? _textLeafUnit({
   );
 }
 
-class _LineBox {
-  const _LineBox({
-    required this.top,
-    required this.bottom,
-    required this.left,
-    required this.right,
-  });
-
-  final double top;
-  final double bottom;
-  final double left;
-  final double right;
-}
-
 List<_LineBox> _lineBoxes(RenderParagraph paragraph, String plainText) {
   final boxes = paragraph.getBoxesForSelection(
     TextSelection(baseOffset: 0, extentOffset: plainText.length),
@@ -539,4 +533,18 @@ EpubLeafUnit? _leafUnit({
     topInset: padding.top,
     bottomInset: padding.bottom,
   );
+}
+
+class _LineBox {
+  const _LineBox({
+    required this.top,
+    required this.bottom,
+    required this.left,
+    required this.right,
+  });
+
+  final double top;
+  final double bottom;
+  final double left;
+  final double right;
 }

@@ -1,14 +1,16 @@
 sealed class HtmlConstants {
-  static const String scrollIdAttribute = 'scroll-id';
-  static const String resumeParagraphClass = 'resume-paragraph';
-  static const String resumeClass = 'epub-resume';
-  static const String kavitaWrapperClass = 'book-content';
+  // Kover-specific constants
   static const String koverWrapperClass = 'kover-content';
-  static const String textIndentAttribute = 'text-indent-applied';
-  static const String splitParagraphAttribute = 'split-paragraph';
-  static const String splitStartAttribute = 'split-start';
-  static const String splitEndAttribute = 'split-end';
+  static const String resumeParagraphClass = 'kover-resume-paragraph';
   static const String nodeIndexAttribute = 'kover-node-index';
+  static const String scrollIdAttribute = 'kover-scroll-id';
+  static const String textIndentAttribute = 'kover-text-indent';
+  static const String startsMidBlockAttribute = 'kover-starts-mid-block';
+  static const String trimStartAttribute = 'kover-trim-start';
+  static const String trimEndAttribute = 'kover-trim-end';
+
+  // Kavita-specific constants
+  static const String kavitaWrapperClass = 'book-content';
   static const String kavitaPageAttribute = 'kavita-page';
   static const String kavitaPartAttribute = 'kavita-part';
   static const String kavitaNoteRefAttribute = 'kavita-note-ref';

@@ -4,8 +4,6 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing
 import 'package:kover/utils/constants/html_constants.dart';
 
 /// Applies an ordered set of operations during a single walk over [root].
-///
-/// When [operations] is omitted, the preprocessor only performs node indexing.
 class EpubPagePreprocessor({
   required final dom.DocumentFragment html,
   required final List<EpubPagePreprocessorOperation> operations,

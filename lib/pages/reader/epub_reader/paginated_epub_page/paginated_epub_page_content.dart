@@ -29,8 +29,9 @@ class PaginatedEpubPageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
-      color: Theme.of(context).colorScheme.onSurface,
+    final theme = Theme.of(context);
+    final textStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: theme.colorScheme.onSurface,
       fontSize: settings.fontSize,
       height: settings.lineHeight,
       wordSpacing: settings.wordSpacing,
@@ -39,7 +40,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
     );
 
     return Padding(
-      padding: EdgeInsets.symmetric(
+      padding: .symmetric(
         horizontal: settings.horizontalMarginSize,
         vertical: settings.mode == .vertical ? 0 : settings.verticalMarginSize,
       ),

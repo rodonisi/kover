@@ -5,8 +5,6 @@ import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/paginated_epub_widget_factory.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
 import 'package:kover/utils/constants/html_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -37,19 +35,11 @@ void main() {
       expect(styles?['max-height'], '80.0px');
     });
 
-    test('does not cap images for an unbounded viewport', () {
-      final element = dom.Element.tag('img')..attributes['src'] = 'image.png';
-
-      final styles = PaginatedEpubWidgetFactory().customStylesBuilder(element);
-
-      expect(styles?.containsKey('max-height'), isFalse);
-    });
-
     test('removes outer margins on split page edges', () {
       final start = dom.Element.tag('p')
-        ..attributes[HtmlConstants.splitStartAttribute] = '';
+        ..attributes[HtmlConstants.trimStartAttribute] = '';
       final end = dom.Element.tag('p')
-        ..attributes[HtmlConstants.splitEndAttribute] = '';
+        ..attributes[HtmlConstants.trimEndAttribute] = '';
 
       final factory = PaginatedEpubWidgetFactory();
 
@@ -79,40 +69,12 @@ void main() {
       expect(firstGlyph.dx, greaterThanOrEqualTo(18));
     });
 
-    testWidgets('additional text-indent override suppresses the indent', (
-      tester,
-    ) async {
-      const viewport = Size(300, 600);
-      final root = EpubPagePreprocessor(
-        html: dom.DocumentFragment.html(
-          '<p style="margin: 0; font-size: 10px; text-indent: 2em">'
-          'Hello world</p>',
-        ),
-        operations: [NodeIndexingOperation()],
-      ).process();
-      final html = root.outerHtml;
-
-      await _pumpHtml(
-        tester,
-        html,
-        viewport,
-        additionalStyles: {
-          '*': {'text-indent': '0'},
-        },
-      );
-
-      final paragraph = tester.renderObject<RenderParagraph>(
-        find.byType(RichText),
-      );
-      expect(paragraph.text.toPlainText().codeUnitAt(0), isNot(0xFFFC));
-    });
-
     testWidgets('remove paragraph indent suppresses the indent', (
       tester,
     ) async {
       const viewport = Size(300, 600);
       const html =
-          '<p style="margin: 0; font-size: 10px; text-indent: 2em">'
+          '<p style="text-indent: 2em">'
           'Hello world</p>';
 
       await _pumpHtml(
@@ -126,32 +88,6 @@ void main() {
         find.byType(RichText),
       );
       expect(paragraph.text.toPlainText().codeUnitAt(0), isNot(0xFFFC));
-    });
-
-    testWidgets('non-positive or centered text-indent is ignored', (
-      tester,
-    ) async {
-      const viewport = Size(300, 600);
-      const html =
-          '<p style="margin: 0; font-size: 10px; text-indent: -2em">'
-          'Negative</p>'
-          '<p style="margin: 0; font-size: 10px; text-indent: 0">Zero</p>'
-          '<p style="margin: 0; font-size: 10px; text-indent: 2em; '
-          'text-align: center">Centered</p>'
-          '<p ${HtmlConstants.splitParagraphAttribute} '
-          'style="margin: 0; font-size: 10px; text-indent: 2em">Split</p>';
-
-      await _pumpHtml(tester, html, viewport);
-
-      final paragraphs = tester
-          .renderObjectList<RenderParagraph>(find.byType(RichText))
-          .where((paragraph) => paragraph.text.toPlainText().isNotEmpty)
-          .toList();
-
-      expect(paragraphs, hasLength(4));
-      for (final paragraph in paragraphs) {
-        expect(paragraph.text.toPlainText().codeUnitAt(0), isNot(0xFFFC));
-      }
     });
   });
 

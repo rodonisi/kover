@@ -140,13 +140,8 @@ class const EpubTextIndex._(final List<EpubTextPosition> _positions) {
         throw EpubTextIndexMismatch('expected whitespace at $i');
       }
 
-      while (true) {
-        final token = _peek(tokens, index);
-        if (token is _WhitespaceToken) {
-          index++;
-          continue;
-        }
-        break;
+      while (_peek(tokens, index) is _WhitespaceToken) {
+        index++;
       }
 
       final token = _peek(tokens, index);

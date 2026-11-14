@@ -44,7 +44,7 @@ class VerticalEpubPageView extends HookWidget {
           return null;
         }
 
-        if (settings.reduceAnimations) {
+        if (settings.reduceAnimations || !controller.animateSubpageChange) {
           observerController.jumpTo(index: current);
         } else {
           observerController.animateTo(
@@ -63,54 +63,57 @@ class VerticalEpubPageView extends HookWidget {
       ],
     );
 
-    return SliverViewObserver(
-      controller: observerController,
-      onObserve: (model) {
-        if (model is! ListViewObserveModel) return;
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: settings.verticalMarginSize),
+      child: SliverViewObserver(
+        controller: observerController,
+        onObserve: (model) {
+          if (model is! ListViewObserveModel) return;
 
-        final firstVisible = model.firstChild?.index;
-        if (firstVisible == null) return;
+          final firstVisible = model.firstChild?.index;
+          if (firstVisible == null) return;
 
-        final last = controller.subpageCount - 1;
-        final target =
-            last >= 0 && model.displayingChildIndexList.contains(last)
-            ? last
-            : firstVisible;
+          final last = controller.subpageCount - 1;
+          final target =
+              last >= 0 && model.displayingChildIndexList.contains(last)
+              ? last
+              : firstVisible;
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!context.mounted) return;
-          if (target == controller.currentSubpage) return;
-          observed.value = target;
-          controller.jumpToSubpage(target.clamp(0, last));
-        });
-      },
-      child: CustomScrollView(
-        controller: scrollController,
-        physics: settings.canScroll
-            ? const AlwaysScrollableScrollPhysics(
-                parent: ClampingScrollPhysics(),
-              )
-            : const NeverScrollableScrollPhysics(),
-        slivers: [
-          if (settings.ignoreSafeArea)
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: MediaQuery.of(context).padding.top,
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) return;
+            if (target == controller.currentSubpage) return;
+            observed.value = target;
+            controller.jumpToSubpage(target.clamp(0, last));
+          });
+        },
+        child: CustomScrollView(
+          controller: scrollController,
+          physics: settings.canScroll
+              ? const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
+                )
+              : const NeverScrollableScrollPhysics(),
+          slivers: [
+            if (settings.ignoreSafeArea)
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: MediaQuery.of(context).padding.top,
+                ),
               ),
+            SliverList.builder(
+              itemCount: controller.subpageCount,
+              itemBuilder: (context, index) {
+                return PaginatedEpubPageContent(
+                  html: controller.getSubpage(index),
+                  settings: settings,
+                  viewport: viewport,
+                  cssEngine: controller.cssEngine,
+                  onAnchorTap: onAnchorTap,
+                );
+              },
             ),
-          SliverList.builder(
-            itemCount: controller.subpageCount,
-            itemBuilder: (context, index) {
-              return PaginatedEpubPageContent(
-                html: controller.getSubpage(index),
-                settings: settings,
-                viewport: viewport,
-                cssEngine: controller.cssEngine,
-                onAnchorTap: onAnchorTap,
-              );
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

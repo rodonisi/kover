@@ -164,14 +164,14 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
     if (start != null) {
       final startBlock = _blockAt(subpage, start.blockNodeIndex);
       if (startBlock != null) {
-        _markPath(startBlock, HtmlConstants.splitStartAttribute);
+        _markPath(startBlock, HtmlConstants.trimStartAttribute);
       }
     }
 
     if (end != null) {
       final endBlock = _blockAt(subpage, end.blockNodeIndex);
       if (endBlock != null) {
-        _markPath(endBlock, HtmlConstants.splitEndAttribute);
+        _markPath(endBlock, HtmlConstants.trimEndAttribute);
       }
     }
 
@@ -187,7 +187,7 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
       _blockAt(
         subpage,
         start!.blockNodeIndex,
-      )?.attributes[HtmlConstants.splitParagraphAttribute] = '';
+      )?.attributes[HtmlConstants.startsMidBlockAttribute] = '';
     }
 
     // Trimming can leave empty paragraph shells whose margins would still

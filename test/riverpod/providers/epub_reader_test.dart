@@ -6,6 +6,10 @@ import 'package:kover/models/series_model.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+import 'epub_reader_test.mocks.dart';
 
 const _series = SeriesModel(
   id: 1,
@@ -40,10 +44,309 @@ const _readerState = ReaderState(
   bookScrollId: null,
 );
 
-class _FakeReader extends Reader {
-  _FakeReader();
+final _provider = epubNavigationProvider(
+  seriesId: 1,
+  chapterId: 2,
+  readingListId: null,
+);
 
-  final saves = <({int page, String? scrollId})>[];
+@GenerateNiceMocks([MockSpec<Reader>()])
+void main() {
+  late MockReader reader;
+  late ProviderContainer container;
+  late EpubNavigation notifier;
+
+  setUp(() async {
+    reader = MockReader();
+    container = _createContainer(_ReaderAdapter(reader));
+    notifier = container.read(_provider.notifier);
+    await container.read(_provider.future);
+  });
+
+  group('EpubNavigation', () {
+    group('subpage counts', () {
+      test('starts unready', () {
+        expect(_state(container).ready, isFalse);
+      });
+
+      test('current-page count publishes readiness and total', () {
+        notifier.updateSubpageCount(0, 3);
+
+        expect(_state(container).ready, isTrue);
+        expect(_state(container).totalSubpages, 3);
+      });
+
+      test('other-page count does not change current state', () {
+        notifier.updateSubpageCount(0, 3);
+
+        notifier.updateSubpageCount(1, 7);
+
+        expect(_state(container).totalSubpages, 3);
+      });
+
+      test('page jump adopts the cached count', () async {
+        notifier.updateSubpageCount(0, 3);
+        notifier.updateSubpageCount(1, 7);
+
+        await notifier.jumpToPage(1, force: true);
+        await container.pump();
+
+        expect(_state(container).page, 1);
+        expect(_state(container).ready, isTrue);
+        expect(_state(container).totalSubpages, 7);
+      });
+
+      test('current-page report replaces the cached count', () async {
+        notifier.updateSubpageCount(0, 3);
+        notifier.updateSubpageCount(1, 7);
+        await notifier.jumpToPage(1, force: true);
+        await container.pump();
+
+        notifier.updateSubpageCount(1, 4);
+
+        expect(_state(container).totalSubpages, 4);
+      });
+
+      test('same-page subpage navigation is accepted', () async {
+        notifier.updateSubpageCount(0, 3);
+
+        await notifier.jumpToSubpage(2, page: 0);
+        await container.pump();
+
+        expect(_state(container).subpage, 2);
+      });
+
+      test('stale-page subpage navigation is ignored', () async {
+        notifier.updateSubpageCount(1, 4);
+        await notifier.jumpToPage(1, force: true);
+        await container.pump();
+        await notifier.jumpToSubpage(2, page: 1);
+        await container.pump();
+
+        await notifier.jumpToSubpage(1, page: 0);
+        await container.pump();
+
+        expect(_state(container).subpage, 2);
+      });
+    });
+
+    group('page navigation', () {
+      test('back navigation lands on the last previous subpage', () async {
+        notifier.updateSubpageCount(1, 5);
+        await notifier.jumpToPage(1, force: true);
+        await container.pump();
+
+        // The previous page is positioned while it is out of view.
+        notifier.updateSubpageCount(0, 3);
+        expect(_state(container).subpagePositions[0], 2);
+
+        await notifier.jumpToPage(0);
+        await container.pump();
+
+        expect(_state(container).page, 0);
+        expect(_state(container).subpage, 2);
+        expect(_state(container).ready, isTrue);
+      });
+
+      test('back navigation waits for an unknown subpage count', () async {
+        await notifier.jumpToPage(1, force: true);
+        await container.pump();
+        await notifier.jumpToPage(0, force: true);
+        await container.pump();
+        expect(_state(container).ready, isFalse);
+
+        notifier.updateSubpageCount(0, 4);
+        await container.pump();
+
+        expect(_state(container).subpage, 3);
+        expect(_state(container).ready, isTrue);
+      });
+
+      test('forward navigation starts at the first subpage', () async {
+        notifier.updateSubpageCount(1, 5);
+        await notifier.jumpToPage(1, force: true);
+        await container.pump();
+        await notifier.jumpToSubpage(2, page: 1);
+        await container.pump();
+
+        notifier.updateSubpageCount(0, 3);
+        await notifier.jumpToPage(0);
+        await container.pump();
+        expect(_state(container).subpage, 2);
+
+        await notifier.jumpToPage(1);
+        await container.pump();
+
+        expect(_state(container).page, 1);
+        expect(_state(container).subpage, 0);
+      });
+
+      test('count reports replace the position map', () async {
+        notifier.updateSubpageCount(1, 5);
+        await notifier.jumpToPage(1, force: true);
+        await container.pump();
+
+        final positions = _state(container).subpagePositions;
+        notifier.updateSubpageCount(0, 3);
+
+        expect(
+          identical(_state(container).subpagePositions, positions),
+          isFalse,
+        );
+        expect(positions[0], isNull);
+        expect(_state(container).subpagePositions[0], 2);
+      });
+
+      test('nextPage force-jumps while measuring', () async {
+        await notifier.nextPage();
+        await container.pump();
+
+        expect(_state(container).page, 1);
+      });
+
+      test('previousPage force-jumps while measuring', () async {
+        await notifier.nextPage();
+        await container.pump();
+
+        await notifier.previousPage();
+        await container.pump();
+
+        expect(_state(container).page, 0);
+      });
+    });
+
+    group('pending anchors', () {
+      Future<void> carryTarget() async {
+        notifier.updateSubpageCount(0, 3);
+        notifier.updateSubpageCount(1, 5);
+        await notifier.jumpToPage(1, anchor: 'target');
+        await container.pump();
+      }
+
+      test('cross-page jump publishes the target anchor', () async {
+        await carryTarget();
+
+        expect(_state(container).pendingAnchor, (page: 1, anchor: 'target'));
+      });
+
+      test('settling on the target page preserves its anchor', () async {
+        await carryTarget();
+
+        await notifier.jumpToPage(1, force: true);
+        await container.pump();
+
+        expect(_state(container).pendingAnchor, (page: 1, anchor: 'target'));
+      });
+
+      test('taking an anchor for a different page preserves it', () async {
+        await carryTarget();
+
+        expect(notifier.takePendingAnchor(0), isNull);
+        expect(_state(container).pendingAnchor, (page: 1, anchor: 'target'));
+      });
+
+      test('taking the target anchor consumes it', () async {
+        await carryTarget();
+
+        expect(notifier.takePendingAnchor(1), 'target');
+        expect(_state(container).pendingAnchor, isNull);
+      });
+
+      test('navigating elsewhere clears the anchor', () async {
+        await carryTarget();
+
+        await notifier.jumpToPage(0);
+        await container.pump();
+
+        expect(_state(container).pendingAnchor, isNull);
+      });
+
+      test('current-page jump publishes its anchor', () async {
+        notifier.updateSubpageCount(0, 3);
+
+        await notifier.jumpToPage(0, force: true, anchor: 'target');
+        await container.pump();
+
+        expect(_state(container).pendingAnchor, (page: 0, anchor: 'target'));
+      });
+
+      test('current-page anchor can be consumed once', () async {
+        notifier.updateSubpageCount(0, 3);
+        await notifier.jumpToPage(0, force: true, anchor: 'target');
+        await container.pump();
+
+        expect(notifier.takePendingAnchor(0), 'target');
+        expect(notifier.takePendingAnchor(0), isNull);
+        expect(_state(container).pendingAnchor, isNull);
+      });
+    });
+
+    group('progress', () {
+      test('opening restoration does not save', () async {
+        notifier.updateSubpageCount(0, 3);
+
+        await notifier.jumpToSubpage(
+          0,
+          scrollId: 'opening',
+          page: 0,
+          restored: true,
+        );
+        await container.pump();
+
+        verifyNever(
+          reader.saveProgress(
+            page: anyNamed('page'),
+            scrollId: anyNamed('scrollId'),
+            handleCompletion: anyNamed('handleCompletion'),
+          ),
+        );
+      });
+
+      test('subpage navigation saves its scroll id', () async {
+        notifier.updateSubpageCount(0, 3);
+
+        await notifier.jumpToSubpage(1, scrollId: 'reading', page: 0);
+        await container.pump();
+
+        verify(
+          reader.saveProgress(
+            page: 0,
+            scrollId: 'reading',
+            handleCompletion: false,
+          ),
+        ).called(1);
+      });
+
+      test('restored positions save after user navigation', () async {
+        await notifier.jumpToPage(1, force: true);
+        await container.pump();
+        notifier.updateSubpageCount(1, 2);
+        await container.pump();
+
+        await notifier.jumpToSubpage(
+          0,
+          scrollId: 'resume',
+          page: 1,
+          restored: true,
+        );
+        await container.pump();
+
+        verify(
+          reader.saveProgress(
+            page: 1,
+            scrollId: 'resume',
+            handleCompletion: false,
+          ),
+        ).called(1);
+      });
+    });
+  });
+}
+
+class _ReaderAdapter extends Reader {
+  _ReaderAdapter(this.reader);
+
+  final Reader reader;
 
   @override
   Future<ReaderState> build({
@@ -59,257 +362,26 @@ class _FakeReader extends Reader {
     required int page,
     String? scrollId,
     bool handleCompletion = true,
-  }) async {
-    saves.add((page: page, scrollId: scrollId));
+  }) {
+    return reader.saveProgress(
+      page: page,
+      scrollId: scrollId,
+      handleCompletion: handleCompletion,
+    );
   }
 
   @override
-  Future<void> markComplete() async {}
+  Future<void> markComplete() => reader.markComplete();
 }
 
-void main() {
-  test('page changes force-sync nav state and reuse cached subpage counts', () async {
-    final container = _createContainer();
-    final provider = _provider;
-    final notifier = container.read(provider.notifier);
-    await container.read(provider.future);
-
-    expect(container.read(provider).value?.ready, isFalse);
-
-    notifier.updateSubpageCount(0, 3);
-    expect(container.read(provider).value?.ready, isTrue);
-    expect(container.read(provider).value?.totalSubpages, 3);
-
-    // Cache a count for a page that is not current without leaking it into the
-    // current page's state.
-    notifier.updateSubpageCount(1, 7);
-    expect(container.read(provider).value?.totalSubpages, 3);
-
-    // The cached count makes the new page ready immediately after the page
-    // transition, even before its controller reports again.
-    await notifier.jumpToPage(1, force: true);
-    await container.pump();
-    expect(container.read(provider).value?.page, 1);
-    expect(container.read(provider).value?.ready, isTrue);
-    expect(container.read(provider).value?.totalSubpages, 7);
-
-    notifier.updateSubpageCount(1, 4);
-    expect(container.read(provider).value?.ready, isTrue);
-    expect(container.read(provider).value?.totalSubpages, 4);
-
-    await notifier.jumpToSubpage(2, page: 1);
-    await container.pump();
-    expect(container.read(provider).value?.subpage, 2);
-
-    await notifier.jumpToSubpage(1, page: 0);
-    await container.pump();
-    expect(container.read(provider).value?.subpage, 2);
-  });
-
-  test(
-    'navigating back lands on the last subpage of the previous page',
-    () async {
-      final container = _createContainer();
-      final notifier = container.read(_provider.notifier);
-      await container.read(_provider.future);
-
-      notifier.updateSubpageCount(0, 3);
-      notifier.updateSubpageCount(1, 5);
-
-      await notifier.jumpToPage(1, force: true);
-      await container.pump();
-      expect(container.read(_provider).value?.page, 1);
-
-      await notifier.jumpToPage(0);
-      await container.pump();
-
-      expect(container.read(_provider).value?.page, 0);
-      expect(container.read(_provider).value?.subpage, 2);
-      expect(container.read(_provider).value?.ready, isTrue);
-    },
-  );
-
-  test(
-    'navigating back before the count is known waits for the last subpage',
-    () async {
-      final container = _createContainer();
-      final notifier = container.read(_provider.notifier);
-      await container.read(_provider.future);
-
-      await notifier.jumpToPage(1, force: true);
-      await container.pump();
-      expect(container.read(_provider).value?.ready, isFalse);
-
-      await notifier.jumpToPage(0, force: true);
-      await container.pump();
-      expect(container.read(_provider).value?.page, 0);
-      expect(container.read(_provider).value?.ready, isFalse);
-
-      notifier.updateSubpageCount(0, 4);
-      await container.pump();
-
-      expect(container.read(_provider).value?.ready, isTrue);
-      expect(container.read(_provider).value?.subpage, 3);
-    },
-  );
-
-  test(
-    'nextPage and previousPage fall back to page jumps while measuring',
-    () async {
-      final container = _createContainer();
-      final notifier = container.read(_provider.notifier);
-      await container.read(_provider.future);
-
-      expect(container.read(_provider).value?.ready, isFalse);
-
-      await notifier.nextPage();
-      await container.pump();
-      expect(container.read(_provider).value?.page, 1);
-
-      await notifier.previousPage();
-      await container.pump();
-      expect(container.read(_provider).value?.page, 0);
-    },
-  );
-
-  test('carries a pending anchor to the target page', () async {
-    final container = _createContainer();
-    final notifier = container.read(_provider.notifier);
-    await container.read(_provider.future);
-
-    notifier.updateSubpageCount(0, 3);
-    notifier.updateSubpageCount(1, 5);
-
-    await notifier.jumpToPage(1, anchor: 'target');
-    await container.pump();
-
-    expect(container.read(_provider).value?.page, 1);
-    expect(
-      container.read(_provider).value?.pendingAnchor,
-      (page: 1, anchor: 'target'),
-    );
-
-    // The outer PageView reports the page it settled on. That must not clear
-    // the anchor that is waiting for the same page.
-    await notifier.jumpToPage(1, force: true);
-    await container.pump();
-    expect(
-      container.read(_provider).value?.pendingAnchor,
-      (page: 1, anchor: 'target'),
-    );
-
-    expect(notifier.takePendingAnchor(0), isNull);
-    expect(
-      container.read(_provider).value?.pendingAnchor,
-      (page: 1, anchor: 'target'),
-    );
-
-    expect(notifier.takePendingAnchor(1), 'target');
-    expect(container.read(_provider).value?.pendingAnchor, isNull);
-  });
-
-  test('clears a pending anchor when navigating to another page', () async {
-    final container = _createContainer();
-    final notifier = container.read(_provider.notifier);
-    await container.read(_provider.future);
-
-    notifier.updateSubpageCount(0, 3);
-    notifier.updateSubpageCount(1, 5);
-
-    await notifier.jumpToPage(1, anchor: 'target');
-    await container.pump();
-    expect(
-      container.read(_provider).value?.pendingAnchor,
-      (page: 1, anchor: 'target'),
-    );
-
-    await notifier.jumpToPage(0);
-    await container.pump();
-
-    expect(container.read(_provider).value?.page, 0);
-    expect(container.read(_provider).value?.pendingAnchor, isNull);
-  });
-
-  test('publishes a pending anchor for the current page', () async {
-    final container = _createContainer();
-    final notifier = container.read(_provider.notifier);
-    await container.read(_provider.future);
-
-    await notifier.jumpToPage(0, force: true, anchor: 'target');
-    await container.pump();
-
-    expect(
-      container.read(_provider).value?.pendingAnchor,
-      (page: 0, anchor: 'target'),
-    );
-    expect(notifier.takePendingAnchor(0), 'target');
-    expect(container.read(_provider).value?.pendingAnchor, isNull);
-  });
-
-  test('restoring the opened position does not save progress', () async {
-    final reader = _FakeReader();
-    final container = _createContainer(reader: reader);
-    final notifier = container.read(_provider.notifier);
-    await container.read(_provider.future);
-
-    notifier.updateSubpageCount(0, 3);
-    await container.pump();
-
-    await notifier.jumpToSubpage(
-      0,
-      scrollId: 'opening',
-      page: 0,
-      restored: true,
-    );
-    await container.pump();
-
-    expect(reader.saves, isEmpty);
-
-    await notifier.jumpToSubpage(1, scrollId: 'reading', page: 0);
-    await container.pump();
-
-    expect(reader.saves, [(page: 0, scrollId: 'reading')]);
-  });
-
-  test('restored positions still save after user navigation', () async {
-    final reader = _FakeReader();
-    final container = _createContainer(reader: reader);
-    final notifier = container.read(_provider.notifier);
-    await container.read(_provider.future);
-
-    await notifier.jumpToPage(1, force: true);
-    await container.pump();
-
-    notifier.updateSubpageCount(1, 2);
-    await container.pump();
-
-    await notifier.jumpToSubpage(
-      0,
-      scrollId: 'resume',
-      page: 1,
-      restored: true,
-    );
-    await container.pump();
-
-    expect(reader.saves.last, (page: 1, scrollId: 'resume'));
-  });
-}
-
-final _provider = epubNavigationProvider(
-  seriesId: 1,
-  chapterId: 2,
-  readingListId: null,
-);
-
-ProviderContainer _createContainer({_FakeReader? reader}) {
-  final fakeReader = reader ?? _FakeReader();
+ProviderContainer _createContainer(Reader reader) {
   final container = ProviderContainer.test(
     overrides: [
       readerProvider(
         seriesId: 1,
         chapterId: 2,
         readingListId: null,
-      ).overrideWith(() => fakeReader),
+      ).overrideWith(() => reader),
       epubReaderSettingsProvider(seriesId: 1).overrideWithBuild(
         (_, _) => const EpubReaderSettingsState(),
       ),
@@ -321,4 +393,8 @@ ProviderContainer _createContainer({_FakeReader? reader}) {
   addTearDown(sub.close);
 
   return container;
+}
+
+EpubNavigationState _state(ProviderContainer container) {
+  return container.read(_provider).requireValue;
 }

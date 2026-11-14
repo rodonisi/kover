@@ -6,227 +6,226 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing
 
 void main() {
   group('CssEngine', () {
-    test('when element is re-parsed, then styles are found by node index', () {
-      final (engine, rendered) = _render('''
-        <style>
-          p { color: red; }
-        </style>
-        <p>text</p>
-      ''');
-
-      final styles = engine.stylesFor(element: rendered.querySelector('p')!);
-
-      expect(styles, {'color': '#f00'});
-    });
-
-    test('when selector matches the detached root, then styles are found', () {
-      final root = EpubPagePreprocessor(
-        html: dom.DocumentFragment.html(
-          '<div class="kover-content"><p>text</p></div>',
-        ),
-        operations: [NodeIndexingOperation()],
-      ).process();
-      final engine = CssEngine(
-        root: root,
-        additionalStyles: {
-          '.kover-content': {'background-color': 'red'},
-        },
-      );
-
-      // flutter_widget_from_html parses HTML into detached top-level nodes.
-      final wrapper = dom.DocumentFragment.html(root.outerHtml).children.first
-        ..remove();
-      expect(wrapper.parent, isNull);
-
-      expect(
-        engine.stylesFor(element: wrapper)?['background-color'],
-        'red',
-      );
-    });
-
-    test('when selector has no match, then styles are null', () {
-      final (engine, rendered) = _render('''
-        <style>
-          span { color: red; }
-        </style>
-        <p>text</p>
-      ''');
-
-      expect(engine.stylesFor(element: rendered.querySelector('p')!), isNull);
-    });
-
-    test('when specificity differs, then more specific rule wins', () {
-      final (engine, rendered) = _render('''
-        <style>
-          p { color: red; }
-          #target { color: green; }
-        </style>
-        <p id="target">text</p>
-      ''');
-
-      final styles = engine.stylesFor(element: rendered.querySelector('p')!);
-
-      expect(styles?['color'], '#008000');
-    });
-
-    test('when specificity ties, then later rule wins', () {
-      final (engine, rendered) = _render('''
-        <style>
-          p { color: red; }
-          p { color: blue; }
-        </style>
-        <p>text</p>
-      ''');
-
-      final styles = engine.stylesFor(element: rendered.querySelector('p')!);
-
-      expect(styles?['color'], '#00f');
-    });
-
-    test(
-      'when later shorthand resets earlier longhand, then order is kept',
-      () {
+    group('document styles', () {
+      test('applies styles after the HTML is re-parsed', () {
         final (engine, rendered) = _render('''
-        <style>
-          p { margin: 0; }
-          p { margin-left: 5px; }
-          p { margin: 0; }
-        </style>
-        <p>text</p>
-      ''');
+          <style>
+            p { color: red; }
+          </style>
+          <p>text</p>
+        ''');
 
-        final styles = engine.stylesFor(element: rendered.querySelector('p')!);
+        expect(
+          engine.stylesFor(element: rendered.querySelector('p')!),
+          {'color': '#f00'},
+        );
+      });
 
-        expect(styles?.keys, ['margin-left', 'margin']);
-        expect(styles?['margin-left'], '5px');
-        expect(styles?['margin'], '0');
-      },
-    );
+      test('returns null when no selector matches', () {
+        final (engine, rendered) = _render('''
+          <style>
+            span { color: red; }
+          </style>
+          <p>text</p>
+        ''');
 
-    test('when rules split across style tags, then source order is kept', () {
-      final (engine, rendered) = _render('''
-        <style>
-          p { color: red; }
-        </style>
-        <style>
-          p { color: blue; }
-        </style>
-        <p>text</p>
-      ''');
+        expect(engine.stylesFor(element: rendered.querySelector('p')!), isNull);
+      });
 
-      final styles = engine.stylesFor(element: rendered.querySelector('p')!);
+      test('more specific selector wins', () {
+        final (engine, rendered) = _render('''
+          <style>
+            p { color: red; }
+            #target { color: green; }
+          </style>
+          <p id="target">text</p>
+        ''');
 
-      expect(styles?['color'], '#00f');
+        expect(
+          engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
+          '#008000',
+        );
+      });
+
+      test('later rule wins on equal specificity', () {
+        final (engine, rendered) = _render('''
+          <style>
+            p { color: red; }
+            p { color: blue; }
+          </style>
+          <p>text</p>
+        ''');
+
+        expect(
+          engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
+          '#00f',
+        );
+      });
+
+      test('keeps source order across style tags', () {
+        final (engine, rendered) = _render('''
+          <style>
+            p { color: red; }
+          </style>
+          <style>
+            p { color: blue; }
+          </style>
+          <p>text</p>
+        ''');
+
+        expect(
+          engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
+          '#00f',
+        );
+      });
+
+      test('keeps final declaration order and values', () {
+        final (engine, rendered) = _render('''
+          <style>
+            p { margin: 0; }
+            p { margin-left: 5px; }
+            p { margin: 0; }
+          </style>
+          <p>text</p>
+        ''');
+
+        final styles = engine.stylesFor(
+          element: rendered.querySelector('p')!,
+        )!;
+        expect(styles.entries.map((entry) => '${entry.key}: ${entry.value}'), [
+          'margin-left: 5px',
+          'margin: 0',
+        ]);
+      });
+
+      test('returns null for an element without a node index', () {
+        final engine = CssEngine(root: _source('<p>text</p>'));
+
+        expect(engine.stylesFor(element: dom.Element.tag('p')), isNull);
+      });
     });
 
-    test(
-      'when additional styles match, then they win over document styles',
-      () {
+    group('additional styles', () {
+      test('matches a detached root', () {
+        final root = _source(
+          '<div class="kover-content"><p>text</p></div>',
+        );
+        final engine = CssEngine(
+          root: root,
+          additionalStyles: {
+            '.kover-content': {'background-color': 'red'},
+          },
+        );
+
+        // flutter_widget_from_html parses HTML into detached top-level nodes.
+        final wrapper = _reparse(root).children.first..remove();
+
+        expect(
+          engine.stylesFor(element: wrapper)?['background-color'],
+          'red',
+        );
+      });
+
+      test('overrides a conflicting document declaration', () {
         final (engine, rendered) = _render(
           '''
-        <style>
-          p { color: red; margin-top: 4px; }
-        </style>
-        <p>text</p>
-      ''',
+          <style>
+            p { color: red; margin-top: 4px; }
+          </style>
+          <p>text</p>
+        ''',
           additionalStyles: {
             'p': {'color': 'blue'},
           },
         );
 
-        final styles = engine.stylesFor(element: rendered.querySelector('p')!);
+        expect(
+          engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
+          'blue',
+        );
+      });
 
-        expect(styles?['color'], 'blue');
-        expect(styles?['margin-top'], '4px');
-      },
-    );
+      test('keeps non-conflicting document declarations', () {
+        final (engine, rendered) = _render(
+          '''
+          <style>
+            p { color: red; margin-top: 4px; }
+          </style>
+          <p>text</p>
+        ''',
+          additionalStyles: {
+            'p': {'color': 'blue'},
+          },
+        );
 
-    test('when additional styles use a universal selector, then all elements match', () {
-      final (engine, rendered) = _render(
-        '''
-        <div><p>text</p><span>inline</span></div>
-      ''',
-        additionalStyles: {
-          '*': {'text-indent': '0'},
-        },
-      );
+        expect(
+          engine.stylesFor(
+            element: rendered.querySelector('p')!,
+          )?['margin-top'],
+          '4px',
+        );
+      });
 
-      expect(
-        engine.stylesFor(element: rendered.querySelector('p')!)?['text-indent'],
-        '0',
-      );
-      expect(
-        engine.stylesFor(
-          element: rendered.querySelector('span')!,
-        )?['text-indent'],
-        '0',
-      );
-    });
+      test('universal selector matches every element', () {
+        final (engine, rendered) = _render(
+          '<div><p>text</p><span>inline</span></div>',
+          additionalStyles: {
+            '*': {'text-indent': '0'},
+          },
+        );
 
-    test('when a class is added and invalidated, then styles apply', () {
-      final root = EpubPagePreprocessor(
-        html: dom.DocumentFragment.html('<p>text</p>'),
-        operations: [NodeIndexingOperation()],
-      ).process();
-      final engine = CssEngine(
-        root: root,
-        additionalStyles: {
-          '.resume': {'color': 'red'},
-        },
-      );
+        expect(
+          [
+            engine.stylesFor(
+              element: rendered.querySelector('p')!,
+            )?['text-indent'],
+            engine.stylesFor(
+              element: rendered.querySelector('span')!,
+            )?['text-indent'],
+          ],
+          ['0', '0'],
+        );
+      });
 
-      var rendered = dom.DocumentFragment.html(root.outerHtml);
-      expect(
-        engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
-        isNull,
-      );
-
-      root.querySelector('p')!.classes.add('resume');
-      engine.invalidate();
-
-      rendered = dom.DocumentFragment.html(root.outerHtml);
-      expect(
-        engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
-        'red',
-      );
-    });
-
-    test(
-      'when a class is removed and invalidated, then styles are dropped',
-      () {
-        final root = EpubPagePreprocessor(
-          html: dom.DocumentFragment.html(
-            '<p class="resume">text</p>',
-          ),
-          operations: [NodeIndexingOperation()],
-        ).process();
+      test('applies an added class after invalidation', () {
+        final root = _source('<p>text</p>');
         final engine = CssEngine(
           root: root,
           additionalStyles: {
             '.resume': {'color': 'red'},
           },
         );
+        String? color() => engine.stylesFor(
+          element: _reparse(root).querySelector('p')!,
+        )?['color'];
 
-        var rendered = dom.DocumentFragment.html(root.outerHtml);
-        expect(
-          engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
-          'red',
+        expect(color(), isNull);
+        root.querySelector('p')!.classes.add('resume');
+        engine.invalidate();
+
+        expect(color(), 'red');
+      });
+
+      test('drops a removed class after invalidation', () {
+        final root = _source('<p class="resume">text</p>');
+        final engine = CssEngine(
+          root: root,
+          additionalStyles: {
+            '.resume': {'color': 'red'},
+          },
         );
+        String? color() => engine.stylesFor(
+          element: _reparse(root).querySelector('p')!,
+        )?['color'];
 
+        expect(color(), 'red');
         root.querySelector('p')!.classes.remove('resume');
         engine.invalidate();
 
-        rendered = dom.DocumentFragment.html(root.outerHtml);
-        expect(
-          engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
-          isNull,
-        );
-      },
-    );
+        expect(color(), isNull);
+      });
 
-    test(
-      'when additional styles are updated, then the overlay is replaced',
-      () {
+      test('drops previous declarations when the overlay is updated', () {
         final (engine, rendered) = _render(
           '<p>text</p>',
           additionalStyles: {
@@ -234,30 +233,81 @@ void main() {
           },
         );
 
-        final paragraph = rendered.querySelector('p')!;
-        expect(engine.stylesFor(element: paragraph)?['color'], 'red');
+        engine.updateAdditionalStyles({
+          'p': {'text-align': 'justify'},
+        });
+
+        expect(
+          engine.stylesFor(element: rendered.querySelector('p')!)?['color'],
+          isNull,
+        );
+      });
+
+      test('applies new declarations when the overlay is updated', () {
+        final (engine, rendered) = _render(
+          '<p>text</p>',
+          additionalStyles: {
+            'p': {'color': 'red'},
+          },
+        );
 
         engine.updateAdditionalStyles({
           'p': {'text-align': 'justify'},
         });
 
-        expect(engine.stylesFor(element: paragraph)?['color'], isNull);
-        expect(engine.stylesFor(element: paragraph)?['text-align'], 'justify');
-      },
-    );
+        expect(
+          engine.stylesFor(
+            element: rendered.querySelector('p')!,
+          )?['text-align'],
+          'justify',
+        );
+      });
+
+      test('increments stylesRevision when the overlay is updated', () {
+        final (engine, _) = _render('<p>text</p>');
+
+        engine.updateAdditionalStyles({
+          'p': {'text-align': 'justify'},
+        });
+
+        expect(engine.stylesRevision, 1);
+      });
+
+      test('invalid selectors do not prevent valid selectors', () {
+        final (engine, rendered) = _render(
+          '<p>text</p>',
+          additionalStyles: {
+            'p[': {'color': 'red'},
+            'p': {'margin': '0'},
+          },
+        );
+
+        expect(
+          engine.stylesFor(element: rendered.querySelector('p')!)?['margin'],
+          '0',
+        );
+      });
+    });
   });
 }
 
-/// Builds an engine, then re-parses its HTML like flutter_widget_from_html.
+dom.DocumentFragment _source(String html) {
+  return EpubPagePreprocessor(
+    html: dom.DocumentFragment.html(html),
+    operations: [NodeIndexingOperation()],
+  ).process();
+}
+
+/// Re-parses the source HTML like flutter_widget_from_html.
+dom.DocumentFragment _reparse(dom.DocumentFragment root) {
+  return dom.DocumentFragment.html(root.outerHtml);
+}
+
 (CssEngine, dom.DocumentFragment) _render(
   String html, {
   Map<String, Map<String, String>> additionalStyles = const {},
 }) {
-  final root = EpubPagePreprocessor(
-    html: dom.DocumentFragment.html(html),
-    operations: [NodeIndexingOperation()],
-  ).process();
+  final root = _source(html);
   final engine = CssEngine(root: root, additionalStyles: additionalStyles);
-  final rendered = dom.DocumentFragment.html(root.outerHtml);
-  return (engine, rendered);
+  return (engine, _reparse(root));
 }

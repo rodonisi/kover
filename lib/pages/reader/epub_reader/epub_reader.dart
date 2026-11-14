@@ -110,7 +110,7 @@ class EpubReader extends HookConsumerWidget {
                 });
 
                 final respectSafeAreas =
-                    data.mode != .vertical || !ignoreSafeAreas;
+                    data.mode == .vertical && !ignoreSafeAreas;
 
                 return Directionality(
                   textDirection: data.commonSettings.readDirection
@@ -224,6 +224,7 @@ class _Page extends HookConsumerWidget {
       chapterId: chapterId,
       readingListId: readingListId,
     );
+
     final model = ref.watch(
       paginatedEpubPageProvider(
         seriesId: seriesId,
@@ -232,6 +233,7 @@ class _Page extends HookConsumerWidget {
         page: page,
       ),
     );
+
     final controller = usePaginatedEpubPageController(
       keys: [page],
       onSubpageChanged: (subpage, scrollId) {
@@ -279,7 +281,7 @@ class _Page extends HookConsumerWidget {
 
         final anchor = ref.read(nav.notifier).takePendingAnchor(page);
         if (anchor != null) {
-          controller.jumpToAnchor(anchor);
+          controller.jumpToAnchor(anchor, animate: false);
         }
       });
 
@@ -287,56 +289,47 @@ class _Page extends HookConsumerWidget {
     }, [controller, pendingAnchor]);
 
     final navState = ref.read(nav).value;
-    if (navState != null &&
-        navState.page == page &&
-        controller.status == .measuring) {
-      controller.setPendingSubpage(navState.subpage);
+    final navSubpage = navState?.subpagePositions[page];
+    if (navSubpage != null) {
+      controller.jumpToSubpage(navSubpage);
     }
 
     ref.listen(
       nav,
       (previous, next) {
         next.whenData((next) {
-          if (next.page != page) {
-            controller.setPendingSubpage(null);
-            return;
-          }
-
-          // Let the anchor effect position this page instead of syncing the
-          // pre-anchor subpage first.
           if (next.pendingAnchor?.page == page) return;
 
-          if (controller.status == .ready) {
-            ref
-                .read(nav.notifier)
-                .updateSubpageCount(page, controller.subpageCount);
-            if (controller.currentSubpage != next.subpage) {
-              controller.jumpToSubpage(next.subpage);
-            }
-          } else {
-            controller.setPendingSubpage(next.subpage);
-          }
+          // The active page follows the navigation position directly. Other
+          // mounted pages follow their own remembered position.
+          final subpage = page == next.page
+              ? next.subpage
+              : next.subpagePositions[page];
+          if (subpage == null) return;
+
+          controller.jumpToSubpage(
+            subpage,
+            animate: previous?.value?.page == next.page && next.page == page,
+          );
         });
       },
     );
 
     void handleAnchor(EpubAnchorTarget target) {
       if (target.externalUri case final uri?) {
-        unawaited(_openExternal(uri));
+        _openExternal(uri);
         return;
       }
 
       final targetPage = target.page;
       if (targetPage != null && targetPage != page) {
-        unawaited(
-          ref
-              .read(nav.notifier)
-              .jumpToPage(
-                targetPage,
-                force: true,
-                anchor: target.part,
-              ),
-        );
+        ref
+            .read(nav.notifier)
+            .jumpToPage(
+              targetPage,
+              force: true,
+              anchor: target.part,
+            );
         return;
       }
 

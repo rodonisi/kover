@@ -35,7 +35,7 @@ final class const EpubLineUnit({
   super.bottomInset,
 }) extends EpubMeasureUnit;
 
-/// Content that cannot be split: image, table, rule, empty block...
+/// Content that cannot be split: image, table, rule, empty block, etc.
 final class const EpubLeafUnit({
   required super.start,
   required super.nodeIndex,

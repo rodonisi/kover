@@ -8,576 +8,658 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epu
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
 import 'package:kover/utils/constants/html_constants.dart';
 
+const _singlePage = '<div><p>First</p></div>';
+const _twoPages = '<div><p id="first">First</p><p id="target">Second</p></div>';
+const _longPage = '<div><p>AAAA BBBB CCCC</p></div>';
+
+final _resumeStyles = {
+  '.${HtmlConstants.resumeParagraphClass}': {'background-color': 'red'},
+};
+
 void main() {
   group('PaginatedEpubPageController', () {
-    test('paginates against the viewport height, not the content height', () {
-      final controller = PaginatedEpubPageController();
-      controller.attachRoot(
-        dom.DocumentFragment.html('<div><p>AAAA BBBB CCCC</p></div>'),
-        settings: _pageSettings(),
-      );
-      final block = _nodeIndex(controller.root!.querySelector('p')!);
+    group('pagination', () {
+      test('becomes ready after measurements', () {
+        final controller = _ready(_controller(_singlePage));
 
-      controller.processMeasurements(
-        EpubMeasurements(
-          // The whole document is much taller than the viewport.
-          contentSize: const Size(100, 1000),
-          units: [
-            _line(
-              nodeIndex: block,
-              top: 0,
-              bottom: 10,
-              offset: 0,
-              childPath: const [0],
-            ),
-            _line(
-              nodeIndex: block,
-              top: 10,
-              bottom: 20,
-              offset: 5,
-              childPath: const [0],
-            ),
-            _line(
-              nodeIndex: block,
-              top: 20,
-              bottom: 30,
-              offset: 10,
-              childPath: const [0],
-            ),
-          ],
-        ),
-        viewport: const Size(100, 25),
-      );
+        expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+      });
 
-      expect(controller.status, PaginatedEpubPageControllerStatus.ready);
-      expect(controller.subpageCount, 2);
-      expect(controller.getSubpage(0), isNotEmpty);
-      expect(controller.currentSubpage, 0);
+      test('uses viewport height rather than content height', () {
+        final controller = _ready(
+          _controller(_longPage),
+          linesPerParagraph: 3,
+          viewportHeight: 25,
+          contentHeight: 1000,
+        );
 
-      controller.nextSubpage();
-      expect(controller.currentSubpage, 1);
+        expect(controller.subpageCount, 2);
+      });
 
-      controller.nextSubpage();
-      expect(controller.currentSubpage, 1);
-    });
+      test('starts at the first subpage', () {
+        final controller = _ready(_controller(_twoPages));
 
-    test('does not re-notify when jumping to the current subpage', () {
-      final changes = <int>[];
-      final controller = PaginatedEpubPageController(
-        onSubpageChanged: (subpage, _) => changes.add(subpage),
-      );
-      controller.attachRoot(
-        dom.DocumentFragment.html('<div><p>AAAA BBBB CCCC</p></div>'),
-        settings: _pageSettings(),
-      );
-      final block = _nodeIndex(controller.root!.querySelector('p')!);
+        expect(controller.currentSubpage, 0);
+      });
 
-      controller.processMeasurements(
-        EpubMeasurements(
-          contentSize: const Size(100, 1000),
-          units: [
-            _line(nodeIndex: block, bottom: 10, childPath: const [0]),
-            _line(
-              nodeIndex: block,
-              top: 10,
-              bottom: 20,
-              offset: 5,
-              childPath: const [0],
-            ),
-            _line(
-              nodeIndex: block,
-              top: 20,
-              bottom: 30,
-              offset: 10,
-              childPath: const [0],
-            ),
-          ],
-        ),
-        viewport: const Size(100, 25),
-      );
-      changes.clear();
+      test('returns the requested subpage markup', () {
+        final controller = _ready(_controller(_twoPages));
 
-      var notifications = 0;
-      controller.addListener(() => notifications++);
+        expect(controller.getSubpage(0), contains('First'));
+      });
 
-      controller.jumpToSubpage(0);
+      test('reports the subpage count', () {
+        final counts = <int>[];
 
-      expect(notifications, 0);
-      expect(changes, isEmpty);
+        _ready(_controller(_twoPages, onSubpagesCountChanged: counts.add));
 
-      controller.nextSubpage();
+        expect(counts, [2]);
+      });
 
-      expect(controller.currentSubpage, 1);
-      expect(notifications, 1);
-      expect(changes, [1]);
+      test('becomes ready for empty content', () {
+        final controller = _ready(_controller('<div></div>'));
 
-      controller.jumpToSubpage(1);
+        expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+      });
 
-      expect(notifications, 1);
-      expect(changes, [1]);
-    });
+      test('empty content has no subpages', () {
+        final controller = _ready(_controller('<div></div>'));
 
-    test('viewportChanged only notifies when leaving the ready state', () {
-      final controller = PaginatedEpubPageController();
-      controller.attachRoot(
-        dom.DocumentFragment.html('<div><p>Only page</p></div>'),
-        settings: _pageSettings(),
-      );
+        expect(controller.subpageCount, 0);
+      });
 
-      var notifications = 0;
-      controller.addListener(() => notifications++);
+      test('empty content does not report a position', () {
+        final changes = <(int, String?)>[];
 
-      controller.updateViewport(const Size(100, 10));
-
-      expect(notifications, 0);
-      expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
-
-      final block = _nodeIndex(controller.root!.querySelector('p')!);
-      controller.processMeasurements(
-        EpubMeasurements(
-          contentSize: const Size(100, 10),
-          units: [_line(nodeIndex: block, bottom: 10)],
-        ),
-        viewport: const Size(100, 100),
-      );
-
-      expect(notifications, 1);
-      expect(controller.status, PaginatedEpubPageControllerStatus.ready);
-
-      controller.updateViewport(const Size(100, 120));
-
-      expect(notifications, 2);
-      expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
-
-      controller.updateViewport(const Size(100, 120));
-
-      expect(notifications, 2);
-    });
-
-    test('applies a pending subpage after pagination', () {
-      final controller = PaginatedEpubPageController();
-      controller.attachRoot(
-        dom.DocumentFragment.html('<div><p>First</p><p>Second</p></div>'),
-        settings: _pageSettings(),
-      );
-      final blocks = [
-        for (final paragraph in controller.root!.querySelectorAll('p'))
-          _nodeIndex(paragraph),
-      ];
-
-      controller.setPendingSubpage(1);
-      controller.processMeasurements(
-        EpubMeasurements(
-          contentSize: const Size(100, 20),
-          units: [
-            _line(nodeIndex: blocks[0], bottom: 10),
-            _line(nodeIndex: blocks[1], top: 10, bottom: 20),
-          ],
-        ),
-        viewport: const Size(100, 10),
-      );
-
-      expect(controller.currentSubpage, 1);
-    });
-
-    test('resumes at the initial scroll id and reports it', () {
-      final html = dom.DocumentFragment.html(
-        '<div><p>first</p><p>second</p><p>third</p></div>',
-      );
-      final probe = PaginatedEpubPageController()
-        ..attachRoot(html, settings: _pageSettings());
-      final secondScrollId = probe.root!
-          .querySelectorAll('p')[1]
-          .attributes[HtmlConstants.scrollIdAttribute]!;
-
-      final changes = <(int, String?)>[];
-      final controller = PaginatedEpubPageController(
-        onSubpageChanged: (subpage, scrollId) {
-          changes.add((subpage, scrollId));
-        },
-      );
-
-      controller.attachRoot(
-        html,
-        settings: _pageSettings(highlightResumePoint: true),
-        initialXpath: secondScrollId,
-        additionalStyles: {
-          '.${HtmlConstants.resumeClass}': {'background-color': 'red'},
-        },
-      );
-
-      final blocks = [
-        for (final paragraph in controller.root!.querySelectorAll('p'))
-          _nodeIndex(paragraph),
-      ];
-
-      controller.processMeasurements(
-        EpubMeasurements(
-          contentSize: const Size(100, 30),
-          units: [
-            _line(nodeIndex: blocks[0], bottom: 10),
-            _line(nodeIndex: blocks[1], top: 10, bottom: 20),
-            _line(nodeIndex: blocks[2], top: 20, bottom: 30),
-          ],
-        ),
-        viewport: const Size(100, 10),
-      );
-
-      expect(controller.currentSubpage, 1);
-      expect(changes, [(1, secondScrollId)]);
-      expect(controller.scrollIdForSubpage(1), secondScrollId);
-      expect(
-        controller.root!.querySelector('.${HtmlConstants.resumeClass}'),
-        isNotNull,
-      );
-      expect(
-        controller.cssEngine.stylesFor(
-          element: controller.root!.querySelectorAll('p')[1],
-        )?['background-color'],
-        'red',
-      );
-    });
-
-    test('reports a restored position separately from user navigation', () {
-      final html = dom.DocumentFragment.html(
-        '<div><p>first</p><p>second</p></div>',
-      );
-      final probe = PaginatedEpubPageController()
-        ..attachRoot(html, settings: _pageSettings());
-      final secondScrollId = probe.root!
-          .querySelectorAll('p')[1]
-          .attributes[HtmlConstants.scrollIdAttribute]!;
-
-      final restored = <(int, String?)>[];
-      final changes = <(int, String?)>[];
-      final controller = PaginatedEpubPageController(
-        onSubpageChanged: (subpage, scrollId) {
-          changes.add((subpage, scrollId));
-        },
-        onSubpageRestored: (subpage, scrollId) {
-          restored.add((subpage, scrollId));
-        },
-      );
-
-      controller.attachRoot(
-        html,
-        settings: _pageSettings(),
-        initialXpath: secondScrollId,
-      );
-
-      final blocks = [
-        for (final paragraph in controller.root!.querySelectorAll('p'))
-          _nodeIndex(paragraph),
-      ];
-
-      controller.processMeasurements(
-        EpubMeasurements(
-          contentSize: const Size(100, 20),
-          units: [
-            _line(nodeIndex: blocks[0], bottom: 10),
-            _line(nodeIndex: blocks[1], top: 10, bottom: 20),
-          ],
-        ),
-        viewport: const Size(100, 10),
-      );
-
-      expect(controller.currentSubpage, 1);
-      expect(restored, [(1, secondScrollId)]);
-      expect(changes, isEmpty);
-
-      controller.jumpToSubpage(0);
-
-      expect(changes, [(0, controller.scrollIdForSubpage(0))]);
-    });
-
-    test(
-      'updateSettings toggles the resume highlight and refreshes subpages',
-      () {
-        final html = dom.DocumentFragment.html('<div><p>first</p></div>');
-        final probe = PaginatedEpubPageController()
-          ..attachRoot(html, settings: _pageSettings());
-        final scrollId = probe.root!
-            .querySelector('p')!
-            .attributes[HtmlConstants.scrollIdAttribute]!;
-
-        final controller = PaginatedEpubPageController()
-          ..attachRoot(
-            html,
-            settings: _pageSettings(),
-            initialXpath: scrollId,
-            additionalStyles: {
-              '.${HtmlConstants.resumeClass}': {'background-color': 'red'},
-            },
-          );
-
-        final block = _nodeIndex(controller.root!.querySelector('p')!);
-        controller.processMeasurements(
-          EpubMeasurements(
-            contentSize: const Size(100, 10),
-            units: [_line(nodeIndex: block, bottom: 10)],
+        _ready(
+          _controller(
+            '<div></div>',
+            onSubpageChanged: _record(changes),
           ),
-          viewport: const Size(100, 10),
         );
 
-        dom.DocumentFragment render() => dom.DocumentFragment.html(
-          controller.getSubpage(0),
+        expect(changes, isEmpty);
+      });
+    });
+
+    group('navigation', () {
+      test('next advances to the following subpage', () {
+        final controller = _ready(_controller(_twoPages));
+
+        controller.nextSubpage();
+
+        expect(controller.currentSubpage, 1);
+      });
+
+      test('next stops at the last subpage', () {
+        final controller = _ready(_controller(_twoPages))..jumpToSubpage(1);
+
+        controller.nextSubpage();
+
+        expect(controller.currentSubpage, 1);
+      });
+
+      test('previous moves to the preceding subpage', () {
+        final controller = _ready(_controller(_twoPages))..jumpToSubpage(1);
+
+        controller.previousSubpage();
+
+        expect(controller.currentSubpage, 0);
+      });
+
+      test('previous stops at the first subpage', () {
+        final controller = _ready(_controller(_twoPages));
+
+        controller.previousSubpage();
+
+        expect(controller.currentSubpage, 0);
+      });
+
+      test('reports the new position', () {
+        final changes = <(int, String?)>[];
+        final controller = _ready(
+          _controller(
+            _twoPages,
+            onSubpageChanged: _record(changes),
+          ),
+        );
+        changes.clear();
+
+        controller.nextSubpage();
+
+        expect(changes, [(1, controller.scrollIdForSubpage(1))]);
+      });
+
+      test('jumping to the current subpage is a no-op', () {
+        final changes = <(int, String?)>[];
+        final controller = _ready(
+          _controller(
+            _twoPages,
+            onSubpageChanged: _record(changes),
+          ),
+        );
+        changes.clear();
+        var notifications = 0;
+        controller.addListener(() => notifications++);
+
+        controller.jumpToSubpage(0);
+
+        expect(notifications, 0);
+        expect(changes, isEmpty);
+      });
+
+      test('applies a pending subpage after pagination', () {
+        final controller = _controller(_twoPages)..jumpToSubpage(1);
+
+        _paginate(controller);
+
+        expect(controller.currentSubpage, 1);
+      });
+
+      test('keeps the pending subpage until pagination completes', () {
+        final controller = _controller(_twoPages)..jumpToSubpage(1);
+
+        expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
+
+        _paginate(controller);
+
+        expect(controller.currentSubpage, 1);
+      });
+
+      test('reports the subpage count before becoming ready', () {
+        late PaginatedEpubPageController controller;
+        final statuses = <PaginatedEpubPageControllerStatus>[];
+
+        controller = _controller(
+          _twoPages,
+          onSubpagesCountChanged: (_) => statuses.add(controller.status),
         );
 
-        var rendered = render();
-        expect(
-          controller.root!.querySelector('.${HtmlConstants.resumeClass}'),
-          isNull,
-        );
-        expect(
-          rendered.querySelector('.${HtmlConstants.resumeClass}'),
-          isNull,
+        _paginate(controller);
+
+        expect(statuses, [PaginatedEpubPageControllerStatus.measuring]);
+      });
+
+      test('applies a subpage set while reporting the count', () {
+        late PaginatedEpubPageController controller;
+
+        controller = _controller(
+          _twoPages,
+          onSubpagesCountChanged: (_) {
+            if (controller.status ==
+                PaginatedEpubPageControllerStatus.measuring) {
+              controller.jumpToSubpage(1);
+            }
+          },
         );
 
-        controller.updateSettings(
-          _pageSettings(highlightResumePoint: true),
-        );
+        _paginate(controller);
+
+        expect(controller.currentSubpage, 1);
+        expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+      });
+
+      test('a jump is animated by default', () {
+        final controller = _ready(_controller(_twoPages));
+
+        controller.jumpToSubpage(1);
+
+        expect(controller.animateSubpageChange, isTrue);
+      });
+
+      test('an instant jump is flagged for the view', () {
+        final controller = _ready(_controller(_twoPages));
+
+        controller.jumpToSubpage(1, animate: false);
+
+        expect(controller.animateSubpageChange, isFalse);
+      });
+
+      test('an instant anchor jump is flagged for the view', () {
+        final controller = _ready(_controller(_twoPages));
+
+        controller.jumpToAnchor('#target', animate: false);
+
+        expect(controller.currentSubpage, 1);
+        expect(controller.animateSubpageChange, isFalse);
+      });
+    });
+
+    group('viewport', () {
+      test('a changed viewport enters measuring', () {
+        final controller = _ready(_controller(_singlePage));
+
+        controller.updateViewport(const Size(100, 20));
 
         expect(
-          controller.root!.querySelector('.${HtmlConstants.resumeClass}'),
-          isNotNull,
+          controller.status,
+          PaginatedEpubPageControllerStatus.measuring,
         );
-        rendered = render();
-        expect(
-          rendered.querySelector('.${HtmlConstants.resumeClass}'),
-          isNotNull,
+      });
+
+      test('a changed viewport notifies listeners', () {
+        final controller = _ready(_controller(_singlePage));
+        var notifications = 0;
+        controller.addListener(() => notifications++);
+
+        controller.updateViewport(const Size(100, 20));
+
+        expect(notifications, 1);
+      });
+
+      test('an unchanged viewport does not notify listeners', () {
+        final controller = _ready(_controller(_singlePage));
+        var notifications = 0;
+        controller.addListener(() => notifications++);
+
+        controller.updateViewport(const Size(100, 10));
+
+        expect(notifications, 0);
+      });
+
+      test('viewport updates do not notify while measuring', () {
+        final controller = _controller(_singlePage);
+        var notifications = 0;
+        controller.addListener(() => notifications++);
+
+        controller.updateViewport(const Size(100, 10));
+
+        expect(notifications, 0);
+      });
+    });
+
+    group('position restoration', () {
+      test('restores the subpage containing the initial scroll id', () {
+        final scrollId = _scrollId(_twoPages, 1);
+        final controller = _ready(
+          _controller(_twoPages, initialXpath: scrollId),
         );
-        expect(
-          controller.cssEngine.stylesFor(
-            element: rendered.querySelector('p')!,
-          )?['background-color'],
-          'red',
+
+        expect(controller.currentSubpage, 1);
+      });
+
+      test('reports the scroll id for a subpage', () {
+        final scrollId = _scrollId(_twoPages, 1);
+        final controller = _ready(
+          _controller(_twoPages, initialXpath: scrollId),
         );
+
+        expect(controller.scrollIdForSubpage(1), scrollId);
+      });
+
+      test('uses onSubpageRestored instead of onSubpageChanged', () {
+        final scrollId = _scrollId(_twoPages, 1);
+        final restored = <(int, String?)>[];
+        final changes = <(int, String?)>[];
+
+        _ready(
+          _controller(
+            _twoPages,
+            initialXpath: scrollId,
+            onSubpageRestored: _record(restored),
+            onSubpageChanged: _record(changes),
+          ),
+        );
+
+        expect(restored, [(1, scrollId)]);
+        expect(changes, isEmpty);
+      });
+
+      test('falls back to onSubpageChanged for restoration', () {
+        final scrollId = _scrollId(_twoPages, 1);
+        final changes = <(int, String?)>[];
+
+        _ready(
+          _controller(
+            _twoPages,
+            initialXpath: scrollId,
+            onSubpageChanged: _record(changes),
+          ),
+        );
+
+        expect(changes, [(1, scrollId)]);
+      });
+
+      test('reports user navigation separately after restoration', () {
+        final scrollId = _scrollId(_twoPages, 1);
+        final changes = <(int, String?)>[];
+        final controller = _ready(
+          _controller(
+            _twoPages,
+            initialXpath: scrollId,
+            onSubpageRestored: (_, _) {},
+            onSubpageChanged: _record(changes),
+          ),
+        );
+
+        controller.jumpToSubpage(0);
+
+        expect(changes, [(0, controller.scrollIdForSubpage(0))]);
+      });
+    });
+
+    group('resume highlighting', () {
+      test('enabling highlighting updates the subpage markup', () {
+        final controller = _controllerForHighlighting();
+
+        controller.updateSettings(_pageSettings(highlightResumePoint: true));
+
+        expect(_resumeElement(controller, 0), isNotNull);
+      });
+
+      test('enabling highlighting applies additional styles', () {
+        final controller = _controllerForHighlighting();
+
+        controller.updateSettings(_pageSettings(highlightResumePoint: true));
+
+        expect(_resumeColor(controller), 'red');
+      });
+
+      test('disabling highlighting removes it from the subpage markup', () {
+        final controller = _controllerForHighlighting(highlight: true);
 
         controller.updateSettings(_pageSettings());
 
+        expect(_resumeElement(controller, 0), isNull);
+      });
+
+      test('disabling highlighting drops additional styles', () {
+        final controller = _controllerForHighlighting(highlight: true);
+
+        controller.updateSettings(_pageSettings());
+
+        expect(_resumeColor(controller), isNull);
+      });
+    });
+
+    group('remeasurement', () {
+      test('changed layout settings enter measuring', () {
+        final controller = _ready(_controller(_singlePage));
+
+        controller.updateSettings(_pageSettings(fontSize: 16));
+        controller.remeasure();
+
         expect(
-          controller.root!.querySelector('.${HtmlConstants.resumeClass}'),
-          isNull,
+          controller.status,
+          PaginatedEpubPageControllerStatus.measuring,
         );
-        rendered = render();
+      });
+
+      test('changed layout settings notify on remeasurement', () {
+        final controller = _ready(_controller(_singlePage));
+        var notifications = 0;
+        controller.addListener(() => notifications++);
+
+        controller.updateSettings(_pageSettings(fontSize: 16));
+        controller.remeasure();
+
+        expect(notifications, 1);
+      });
+
+      test('ignores measurements for a stale layout', () {
+        final original = _pageSettings();
+        final resized = _pageSettings(fontSize: 16);
+        final controller = _ready(_controller(_singlePage, settings: original));
+        controller.updateSettings(resized);
+        controller.remeasure();
+
+        _paginate(controller, layoutKey: original.layoutKey);
+
         expect(
-          rendered.querySelector('.${HtmlConstants.resumeClass}'),
-          isNull,
+          controller.status,
+          PaginatedEpubPageControllerStatus.measuring,
         );
+      });
+
+      test('accepts measurements for the current layout', () {
+        final resized = _pageSettings(fontSize: 16);
+        final controller = _ready(_controller(_singlePage));
+        controller.updateSettings(resized);
+        controller.remeasure();
+
+        _paginate(controller, layoutKey: resized.layoutKey);
+
+        expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+      });
+
+      test('does not remeasure an unchanged layout', () {
+        final controller = _ready(_controller(_singlePage));
+        var notifications = 0;
+        controller.addListener(() => notifications++);
+
+        controller.remeasure();
+
+        expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+        expect(notifications, 0);
+      });
+
+      test('does not remeasure for non-layout settings', () {
+        final controller = _ready(_controller(_singlePage));
+        controller.updateSettings(_pageSettings(highlightResumePoint: true));
+        var notifications = 0;
+        controller.addListener(() => notifications++);
+
+        controller.remeasure();
+
+        expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+        expect(notifications, 0);
+      });
+    });
+
+    group('anchors', () {
+      test('finds the subpage for an anchor id', () {
+        final controller = _ready(_controller(_twoPages));
+
+        expect(controller.subpageForAnchor('target'), 1);
+      });
+
+      test('accepts a hash-prefixed anchor id', () {
+        final controller = _ready(_controller(_twoPages));
+
+        expect(controller.subpageForAnchor('#target'), 1);
+      });
+
+      test('returns null for a missing anchor', () {
+        final controller = _ready(_controller(_twoPages));
+
+        expect(controller.subpageForAnchor('missing'), isNull);
+      });
+
+      test('a pending anchor takes precedence over a pending subpage', () {
+        final controller = _controller(_twoPages)
+          ..jumpToSubpage(0)
+          ..jumpToAnchor('target');
+
+        _paginate(controller);
+
+        expect(controller.currentSubpage, 1);
+      });
+
+      test('a pending anchor reports its position after pagination', () {
+        final changes = <(int, String?)>[];
+        final controller = _controller(
+          _twoPages,
+          onSubpageChanged: _record(changes),
+        )..jumpToAnchor('target');
+
+        _paginate(controller);
+
+        expect(changes, [(1, controller.scrollIdForSubpage(1))]);
+      });
+
+      test('jumps to an anchor immediately when ready', () {
+        final controller = _ready(_controller(_twoPages));
+
+        controller.jumpToAnchor('#target');
+
+        expect(controller.currentSubpage, 1);
+      });
+
+      test('an immediate anchor jump reports its position', () {
+        final changes = <(int, String?)>[];
+        final controller = _ready(
+          _controller(
+            _twoPages,
+            onSubpageChanged: _record(changes),
+          ),
+        );
+        changes.clear();
+
+        controller.jumpToAnchor('#target');
+
+        expect(changes, [(1, controller.scrollIdForSubpage(1))]);
+      });
+    });
+
+    group('updateStyles', () {
+      test('applies new declarations', () {
+        final controller = _ready(_controller(_singlePage));
+
+        controller.updateStyles({
+          'p': {'color': 'red'},
+        });
+
         expect(
           controller.cssEngine.stylesFor(
-            element: rendered.querySelector('p')!,
-          )?['background-color'],
-          isNull,
+            element: controller.root!.querySelector('p')!,
+          )?['color'],
+          'red',
         );
-      },
-    );
+      });
 
-    test('remeasure re-enters measuring for a changed layout', () {
-      final controller = PaginatedEpubPageController();
-      final html = dom.DocumentFragment.html('<div><p>only</p></div>');
-      controller.attachRoot(html, settings: _pageSettings());
-      final block = _nodeIndex(controller.root!.querySelector('p')!);
+      test('notifies listeners', () {
+        final controller = _ready(_controller(_singlePage));
+        var notifications = 0;
+        controller.addListener(() => notifications++);
 
-      controller.processMeasurements(
-        EpubMeasurements(
-          contentSize: const Size(100, 10),
-          units: [_line(nodeIndex: block, bottom: 10)],
-        ),
-        viewport: const Size(100, 10),
-      );
-      expect(controller.status, PaginatedEpubPageControllerStatus.ready);
+        controller.updateStyles({
+          'p': {'color': 'red'},
+        });
 
-      var notifications = 0;
-      controller.addListener(() => notifications++);
-
-      final resized = _pageSettings(fontSize: 16);
-      controller.updateSettings(resized);
-      controller.remeasure();
-
-      expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
-      expect(notifications, 1);
-
-      // A measurement for the previous layout must not leave the measuring
-      // state.
-      controller.processMeasurements(
-        EpubMeasurements(
-          contentSize: const Size(100, 10),
-          units: [_line(nodeIndex: block, bottom: 10)],
-        ),
-        viewport: const Size(100, 10),
-        layoutKey: _pageSettings().layoutKey,
-      );
-
-      expect(controller.status, PaginatedEpubPageControllerStatus.measuring);
-
-      controller.processMeasurements(
-        EpubMeasurements(
-          contentSize: const Size(100, 10),
-          units: [_line(nodeIndex: block, bottom: 10)],
-        ),
-        viewport: const Size(100, 10),
-        layoutKey: resized.layoutKey,
-      );
-      expect(controller.status, PaginatedEpubPageControllerStatus.ready);
-
-      notifications = 0;
-      controller.remeasure();
-
-      expect(controller.status, PaginatedEpubPageControllerStatus.ready);
-      expect(notifications, 0);
-    });
-
-    test('does not report a subpage when nothing was paginated', () {
-      final changes = <(int, String?)>[];
-      final controller =
-          PaginatedEpubPageController(
-            onSubpageChanged: (subpage, scrollId) {
-              changes.add((subpage, scrollId));
-            },
-          )..attachRoot(
-            dom.DocumentFragment.html('<div><p>only</p></div>'),
-            settings: _pageSettings(),
-          );
-
-      controller.processMeasurements(
-        const EpubMeasurements(
-          contentSize: Size.zero,
-          units: [],
-        ),
-        viewport: Size.zero,
-      );
-
-      expect(controller.status, PaginatedEpubPageControllerStatus.ready);
-      expect(controller.subpageCount, 0);
-      expect(changes, isEmpty);
-    });
-
-    test('remeasure ignores settings changes outside the layout key', () {
-      final controller = PaginatedEpubPageController();
-      final html = dom.DocumentFragment.html('<div><p>only</p></div>');
-      controller.attachRoot(html, settings: _pageSettings());
-      final block = _nodeIndex(controller.root!.querySelector('p')!);
-
-      controller.processMeasurements(
-        EpubMeasurements(
-          contentSize: const Size(100, 10),
-          units: [_line(nodeIndex: block, bottom: 10)],
-        ),
-        viewport: const Size(100, 10),
-      );
-      expect(controller.status, PaginatedEpubPageControllerStatus.ready);
-
-      controller.updateSettings(_pageSettings(highlightResumePoint: true));
-
-      var notifications = 0;
-      controller.addListener(() => notifications++);
-      controller.remeasure();
-
-      expect(controller.status, PaginatedEpubPageControllerStatus.ready);
-      expect(notifications, 0);
-    });
-
-    test('maps an anchor id to the subpage that contains it', () {
-      final controller = PaginatedEpubPageController();
-      controller.attachRoot(
-        dom.DocumentFragment.html(
-          '<div><p id="first">First</p><p id="target">Second</p></div>',
-        ),
-        settings: _pageSettings(),
-      );
-      final blocks = [
-        for (final paragraph in controller.root!.querySelectorAll('p'))
-          _nodeIndex(paragraph),
-      ];
-
-      controller.processMeasurements(
-        EpubMeasurements(
-          contentSize: const Size(100, 20),
-          units: [
-            _line(nodeIndex: blocks[0], bottom: 10),
-            _line(nodeIndex: blocks[1], top: 10, bottom: 20),
-          ],
-        ),
-        viewport: const Size(100, 10),
-      );
-
-      expect(controller.subpageForAnchor('target'), 1);
-      expect(controller.subpageForAnchor('#target'), 1);
-      expect(controller.subpageForAnchor('missing'), isNull);
-    });
-
-    test('applies a pending anchor after pagination', () {
-      final changes = <(int, String?)>[];
-      final controller =
-          PaginatedEpubPageController(
-            onSubpageChanged: (subpage, scrollId) {
-              changes.add((subpage, scrollId));
-            },
-          )..attachRoot(
-            dom.DocumentFragment.html(
-              '<div><p id="first">First</p><p id="target">Second</p></div>',
-            ),
-            settings: _pageSettings(),
-          );
-      final blocks = [
-        for (final paragraph in controller.root!.querySelectorAll('p'))
-          _nodeIndex(paragraph),
-      ];
-
-      controller.setPendingSubpage(0);
-      controller.jumpToAnchor('target');
-      controller.processMeasurements(
-        EpubMeasurements(
-          contentSize: const Size(100, 20),
-          units: [
-            _line(nodeIndex: blocks[0], bottom: 10),
-            _line(nodeIndex: blocks[1], top: 10, bottom: 20),
-          ],
-        ),
-        viewport: const Size(100, 10),
-      );
-
-      expect(controller.currentSubpage, 1);
-      expect(changes, [(1, controller.scrollIdForSubpage(1))]);
-    });
-
-    test('jumps to an anchor immediately when ready', () {
-      final changes = <(int, String?)>[];
-      final controller =
-          PaginatedEpubPageController(
-            onSubpageChanged: (subpage, scrollId) {
-              changes.add((subpage, scrollId));
-            },
-          )..attachRoot(
-            dom.DocumentFragment.html(
-              '<div><p id="first">First</p><p id="target">Second</p></div>',
-            ),
-            settings: _pageSettings(),
-          );
-      final blocks = [
-        for (final paragraph in controller.root!.querySelectorAll('p'))
-          _nodeIndex(paragraph),
-      ];
-
-      controller.processMeasurements(
-        EpubMeasurements(
-          contentSize: const Size(100, 20),
-          units: [
-            _line(nodeIndex: blocks[0], bottom: 10),
-            _line(nodeIndex: blocks[1], top: 10, bottom: 20),
-          ],
-        ),
-        viewport: const Size(100, 10),
-      );
-      changes.clear();
-
-      controller.jumpToAnchor('#target');
-
-      expect(controller.currentSubpage, 1);
-      expect(changes, [(1, controller.scrollIdForSubpage(1))]);
+        expect(notifications, 1);
+      });
     });
   });
+}
+
+void Function(int, String?) _record(List<(int, String?)> changes) {
+  return (subpage, scrollId) => changes.add((subpage, scrollId));
+}
+
+PaginatedEpubPageController _controller(
+  String html, {
+  PaginatedEpubPageSettings? settings,
+  String? initialXpath,
+  Map<String, Map<String, String>> additionalStyles = const {},
+  void Function(int subpage, String? scrollId)? onSubpageChanged,
+  void Function(int subpage, String? scrollId)? onSubpageRestored,
+  void Function(int count)? onSubpagesCountChanged,
+}) {
+  return PaginatedEpubPageController(
+    onSubpageChanged: onSubpageChanged,
+    onSubpageRestored: onSubpageRestored,
+    onSubpagesCountChanged: onSubpagesCountChanged,
+  )..attachRoot(
+    dom.DocumentFragment.html(html),
+    settings: settings ?? _pageSettings(),
+    initialXpath: initialXpath,
+    additionalStyles: additionalStyles,
+  );
+}
+
+PaginatedEpubPageController _ready(
+  PaginatedEpubPageController controller, {
+  int linesPerParagraph = 1,
+  double viewportHeight = 10,
+  double? contentHeight,
+}) {
+  _paginate(
+    controller,
+    linesPerParagraph: linesPerParagraph,
+    viewportHeight: viewportHeight,
+    contentHeight: contentHeight,
+  );
+  return controller;
+}
+
+void _paginate(
+  PaginatedEpubPageController controller, {
+  int linesPerParagraph = 1,
+  double viewportHeight = 10,
+  double? contentHeight,
+  Object? layoutKey,
+}) {
+  final units = <EpubMeasureUnit>[];
+  var lineIndex = 0;
+
+  for (final block in controller.root!.querySelectorAll('p')) {
+    for (var line = 0; line < linesPerParagraph; line++) {
+      units.add(
+        _line(
+          nodeIndex: _nodeIndex(block),
+          top: lineIndex * 10,
+          bottom: (lineIndex + 1) * 10,
+          offset: line * 5,
+          childPath: const [0],
+        ),
+      );
+      lineIndex++;
+    }
+  }
+
+  controller.processMeasurements(
+    EpubMeasurements(
+      contentSize: Size(100, contentHeight ?? lineIndex * 10),
+      units: units,
+    ),
+    viewport: Size(100, viewportHeight),
+    layoutKey: layoutKey,
+  );
+}
+
+String _scrollId(String html, int paragraphIndex) {
+  final controller = _controller(html);
+  return controller.root!
+      .querySelectorAll('p')[paragraphIndex]
+      .attributes[HtmlConstants.scrollIdAttribute]!;
+}
+
+PaginatedEpubPageController _controllerForHighlighting({
+  bool highlight = false,
+}) {
+  final scrollId = _scrollId(_singlePage, 0);
+  return _ready(
+    _controller(
+      _singlePage,
+      settings: _pageSettings(highlightResumePoint: highlight),
+      initialXpath: scrollId,
+      additionalStyles: _resumeStyles,
+    ),
+  );
+}
+
+dom.DocumentFragment _subpage(
+  PaginatedEpubPageController controller,
+  int index,
+) {
+  return dom.DocumentFragment.html(controller.getSubpage(index));
+}
+
+dom.Element? _resumeElement(
+  PaginatedEpubPageController controller,
+  int index,
+) {
+  return _subpage(
+    controller,
+    index,
+  ).querySelector('.${HtmlConstants.resumeParagraphClass}');
+}
+
+String? _resumeColor(PaginatedEpubPageController controller) {
+  final rendered = _subpage(controller, 0);
+  return controller.cssEngine.stylesFor(
+    element: rendered.querySelector('p')!,
+  )?['background-color'];
 }
 
 PaginatedEpubPageSettings _pageSettings({

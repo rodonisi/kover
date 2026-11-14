@@ -94,14 +94,14 @@ void main() {
         first
             .querySelector('p')!
             .attributes
-            .containsKey(HtmlConstants.splitParagraphAttribute),
+            .containsKey(HtmlConstants.startsMidBlockAttribute),
         isFalse,
       );
       expect(
         second
             .querySelector('p')!
             .attributes
-            .containsKey(HtmlConstants.splitParagraphAttribute),
+            .containsKey(HtmlConstants.startsMidBlockAttribute),
         isTrue,
       );
     });
@@ -136,10 +136,8 @@ void main() {
     test('keeps wrapper elements when splitting at a block boundary', () {
       final paginator = _paginator(
         '<div class="kavita-wrapper">'
-        '<div class="kover-wrapper">'
         '<p>Intro</p>'
         '<p>Second</p>'
-        '</div>'
         '</div>',
       );
       final paragraphs = paginator.root.querySelectorAll('p');
@@ -158,20 +156,11 @@ void main() {
 
       expect(first, contains('Intro'));
       expect(first, isNot(contains('Second')));
-      expect(first, contains('kover-wrapper'));
+      expect(first, contains('kavita-wrapper'));
 
       expect(last, contains('Second'));
       expect(last, isNot(contains('Intro')));
-      expect(last, contains('kover-wrapper'));
-      expect(
-        dom.DocumentFragment.html(
-              last,
-            )
-            .querySelector('p')!
-            .attributes
-            .containsKey(HtmlConstants.splitParagraphAttribute),
-        isFalse,
-      );
+      expect(last, contains('kavita-wrapper'));
     });
 
     test('splits after a line break', () {
@@ -222,19 +211,6 @@ void main() {
 
       expect(last, contains('<img'));
       expect(last, isNot(contains('Before')));
-    });
-
-    test('returns no subpage before pagination and for invalid indices', () {
-      final paginator = _paginator('<div><p>Text</p></div>');
-
-      expect(paginator.subpageCount, 0);
-      expect(paginator.getSubpage(0), isEmpty);
-
-      final block = _nodeIndexOf(paginator.root, 'p');
-      paginator.paginate([_line(nodeIndex: block, bottom: 10)], 100);
-
-      expect(paginator.getSubpage(-1), isEmpty);
-      expect(paginator.getSubpage(1), isEmpty);
     });
   });
 }

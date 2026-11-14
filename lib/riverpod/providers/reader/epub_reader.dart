@@ -12,24 +12,22 @@ part 'epub_reader.freezed.dart';
 part 'epub_reader.g.dart';
 
 @freezed
-sealed class EpubNavigationState with _$EpubNavigationState {
-  const factory EpubNavigationState({
-    required int page,
-    required int totalPages,
-    required int subpage,
-    required int totalSubpages,
-    @Default(false) bool ready,
-    @Default(false) bool fromObserver,
-    @Default(null) String? scrollId,
-
-    /// Cross-page anchor waiting for [page] to become the active page.
-    @Default(null) ({int page, String anchor})? pendingAnchor,
-  }) = _EpubNavigationState;
+class EpubNavigationState({
+  required final int page,
+  required final int totalPages,
+  final Map<int, int> subpagePositions = const {},
+  final Map<int, int> subpageCounts = const {},
+  final bool ready = false,
+  final bool fromObserver = false,
+  final String? scrollId,
+  final ({int page, String anchor})? pendingAnchor,
+}) with _$EpubNavigationState {
+  int get subpage => subpagePositions[page] ?? 0;
+  int get totalSubpages => subpageCounts[page] ?? 0;
 }
 
 @riverpod
 class EpubNavigation extends _$EpubNavigation {
-  final Map<int, int> _pageSubpageCounts = {};
   int? _pendingLastSubpagePage;
   var _spreads = false;
   var _hasUserNavigated = false;
@@ -67,39 +65,38 @@ class EpubNavigation extends _$EpubNavigation {
     return EpubNavigationState(
       page: reader.initialPage,
       totalPages: reader.totalPages,
-      subpage: 0,
-      totalSubpages: 0,
     );
   }
 
   void updateSubpageCount(int page, int totalSubpages) {
-    _pageSubpageCounts[page] = totalSubpages;
-
     final current = state.value;
-    if (current == null || current.page != page) return;
+    if (current == null) return;
 
-    final landOnLast = _pendingLastSubpagePage == page;
-    if (landOnLast) {
+    final subpageCounts = {...current.subpageCounts, page: totalSubpages};
+    final subpagePositions = {...current.subpagePositions};
+
+    if (_pendingLastSubpagePage == page) {
       _pendingLastSubpagePage = null;
+      if (totalSubpages > 0) {
+        subpagePositions[page] = totalSubpages - 1;
+      }
+    } else if (page < current.page && totalSubpages > 0) {
+      subpagePositions[page] = totalSubpages - 1;
     }
 
-    final subpage = landOnLast && totalSubpages > 0
-        ? totalSubpages - 1
-        : current.subpage;
-
-    // Avoid redundant state writes: listeners would sync the same subpage back
-    // into the page controller and start a notification loop.
+    // Avoid redundant state writes: listeners would sync the same positions
+    // back into the page controllers and start a notification loop.
     if (current.ready &&
-        current.totalSubpages == totalSubpages &&
-        current.subpage == subpage) {
+        current.subpageCounts == subpageCounts &&
+        current.subpagePositions == subpagePositions) {
       return;
     }
 
     state = AsyncData(
       current.copyWith(
-        totalSubpages: totalSubpages,
-        subpage: subpage,
-        ready: true,
+        subpageCounts: subpageCounts,
+        subpagePositions: subpagePositions,
+        ready: subpageCounts.containsKey(current.page),
       ),
     );
   }
@@ -107,9 +104,11 @@ class EpubNavigation extends _$EpubNavigation {
   void _handleProgress() {
     listenSelf((prev, next) {
       next.whenData((data) async {
+        final page = data.page;
         final isSamePosition =
-            prev?.value?.page == data.page &&
-            prev?.value?.subpage == data.subpage &&
+            prev?.value?.page == page &&
+            prev?.value?.subpagePositions[page] ==
+                data.subpagePositions[page] &&
             prev?.value?.scrollId == data.scrollId;
 
         if (!data.ready || isSamePosition) return;
@@ -170,14 +169,14 @@ class EpubNavigation extends _$EpubNavigation {
         next.whenData(
           (next) async {
             final current = await future;
-            final cachedCount = _pageSubpageCounts[next];
-            final landOnLast = _pendingLastSubpagePage == next;
-            final subpage = landOnLast && cachedCount != null && cachedCount > 0
-                ? cachedCount - 1
-                : 0;
+            final cachedCount = current.subpageCounts[next];
+            final isSequentialBack = current.page - next == 1;
 
-            if (!landOnLast || cachedCount != null) {
-              _pendingLastSubpagePage = null;
+            final subpagePositions = {...current.subpagePositions};
+            if (current.page != next && !isSequentialBack) {
+              // Forward and non-sequential jumps always start at the top of
+              // the target page.
+              subpagePositions[next] = 0;
             }
 
             final pendingAnchor = current.pendingAnchor?.page == next
@@ -187,8 +186,7 @@ class EpubNavigation extends _$EpubNavigation {
             state = AsyncData(
               current.copyWith(
                 page: next,
-                subpage: subpage,
-                totalSubpages: cachedCount ?? 0,
+                subpagePositions: subpagePositions,
                 ready: cachedCount != null,
                 fromObserver: false,
                 scrollId: null,
@@ -235,7 +233,10 @@ class EpubNavigation extends _$EpubNavigation {
 
     if (anchor != null) {
       _pendingLastSubpagePage = null;
-    } else if (current.page - page == 1) {
+    } else if (current.page - page == 1 &&
+        !current.subpageCounts.containsKey(page)) {
+      // The count is not known yet, so it cannot have been pre-positioned to
+      // the last subpage. Remember the target and resolve it on measurement.
       _pendingLastSubpagePage = page;
     } else if (page != current.page) {
       _pendingLastSubpagePage = null;
@@ -303,9 +304,14 @@ class EpubNavigation extends _$EpubNavigation {
       return;
     }
 
+    final subpagePositions = {
+      ...current.subpagePositions,
+      current.page: subpage,
+    };
+
     state = AsyncData(
       current.copyWith(
-        subpage: subpage,
+        subpagePositions: subpagePositions,
         fromObserver: fromObserver || restored,
         scrollId: scrollId,
         pendingAnchor: current.pendingAnchor?.page == current.page

@@ -37,7 +37,7 @@ class PaginatedEpubPage extends HookWidget {
         'background-color': theme.colorScheme.surface.toCssRgba(),
         'color': theme.colorScheme.onSurface.toCssRgba(),
       },
-      '.${HtmlConstants.resumeClass}': {
+      '.${HtmlConstants.resumeParagraphClass}': {
         'background-color': theme.colorScheme.tertiaryContainer
             .withAlpha(0xe0)
             .toCssRgba(),
@@ -52,7 +52,6 @@ class PaginatedEpubPage extends HookWidget {
     final global = <String, String>{
       if (settings.fontFamily case final family?)
         'font-family': '"${family.replaceAll('"', "'")}"',
-      if (settings.removeParagraphIndent) 'text-indent': '0',
     };
 
     return {
@@ -129,24 +128,22 @@ class PaginatedEpubPage extends HookWidget {
         if (root == null || measuring) {
           return Stack(
             children: [
-              Positioned.fill(
-                child: Offstage(
-                  child: root == null
-                      ? const SizedBox.shrink()
-                      : EpubMeasurementsCollector(
-                          html: root,
-                          settings: settings,
-                          cssEngine: controller.cssEngine,
-                          constraints: contraints,
-                          onMeasured: (measurements, viewport) {
-                            controller.processMeasurements(
-                              measurements,
-                              viewport: viewport,
-                              layoutKey: settings.layoutKey,
-                            );
-                          },
-                        ),
-                ),
+              Offstage(
+                child: root == null
+                    ? const SizedBox.shrink()
+                    : EpubMeasurementsCollector(
+                        html: root,
+                        settings: settings,
+                        cssEngine: controller.cssEngine,
+                        constraints: contraints,
+                        onMeasured: (measurements, viewport) {
+                          controller.processMeasurements(
+                            measurements,
+                            viewport: viewport,
+                            layoutKey: settings.layoutKey,
+                          );
+                        },
+                      ),
               ),
               const Center(child: CircularProgressIndicator()),
             ],

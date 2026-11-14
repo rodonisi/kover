@@ -10,8 +10,7 @@ import 'package:kover/utils/constants/html_constants.dart';
 class MeasuringPaginatedEpubWidgetFactory({
   super.viewport,
   super.removeParagraphIndent,
-  final void Function()? onBuildComplete,
-  final void Function()? onImageSettled,
+  final void Function()? onChanged,
 }) extends PaginatedEpubWidgetFactory {
   var _isBuildComplete = false;
   int _pendingImages = 0;
@@ -64,7 +63,7 @@ class MeasuringPaginatedEpubWidgetFactory({
   void _markBuildComplete() {
     if (_isBuildComplete) return;
     _isBuildComplete = true;
-    onBuildComplete?.call();
+    onChanged?.call();
   }
 
   @override
@@ -86,10 +85,9 @@ class MeasuringPaginatedEpubWidgetFactory({
     InlineSpan text,
   ) {
     final child = super.buildText(tree, resolved, text);
-    if (child == null) return child;
-
     final nodeIndex = _nodeIndex(tree.element);
-    if (nodeIndex == null) return child;
+
+    if (child == null || nodeIndex == null) return child;
 
     return EpubTextProbe(
       nodeIndex: nodeIndex,
@@ -113,7 +111,7 @@ class MeasuringPaginatedEpubWidgetFactory({
         onEnter: () => _pendingImages++,
         onExit: () {
           _pendingImages--;
-          if (_pendingImages == 0) onImageSettled?.call();
+          if (_pendingImages == 0) onChanged?.call();
         },
         child: child,
       );
@@ -208,5 +206,7 @@ class _EpubImageLoadTrackerState extends State<_EpubImageLoadTracker> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
 }

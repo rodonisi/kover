@@ -6,120 +6,128 @@ import 'package:kover/utils/constants/html_constants.dart';
 
 void main() {
   group('EpubTextIndex', () {
-    test('maps the synthetic text-indent before a leading anchor', () {
-      final block = _block(
-        '<p ${HtmlConstants.textIndentAttribute}>'
-        '<a id="morson">Morson, Walter Augustus Ormsby</a>'
-        '</p>',
-      );
-      final anchor = block.querySelector('a')!;
-      final text = anchor.firstChild!;
-      const plainText = '\uFFFC\uFFFCMorson, Walter Augustus Ormsby';
+    group('plain text', () {
+      test('maps a character to its DOM position', () {
+        final block = _block('<p>Alpha</p>');
+        final index = _build(block, 'Alpha');
 
-      final index = EpubTextIndex.build(
-        block: block,
-        blockElements: {block},
-        whitespace: CssWhitespace.normal,
-        plainText: plainText,
-      );
+        expect(_at(index, 4), (block.firstChild, 4, false));
+      });
 
-      expect(index.positionAt(0)?.node, same(block));
-      expect(index.positionAt(0)?.offset, 0);
-      expect(index.positionAt(1)?.node, same(anchor));
-      expect(index.positionAt(2)?.node, same(text));
-      expect(index.positionAt(2)?.offset, 0);
-      expect(index.positionAt(plainText.length - 1)?.node, same(text));
+      test('returns null outside the text', () {
+        final block = _block('<p>Alpha</p>');
+        final index = _build(block, 'Alpha');
+
+        expect(
+          [index.positionAt(-1), index.positionAt(5)],
+          everyElement(isNull),
+        );
+      });
+
+      test('throws when the text does not match the block', () {
+        final block = _block('<p>Alpha</p>');
+
+        expect(
+          () => _build(block, 'Bravo'),
+          throwsA(isA<EpubTextIndexMismatch>()),
+        );
+      });
     });
 
-    test('maps the synthetic text-indent before leaked leading anchors', () {
-      final block = _block(
-        '<p ${HtmlConstants.textIndentAttribute}>'
-        '<a id="elliott"></a>'
-        '<a id="morson">Morson</a>'
-        '</p>',
-      );
-      final previous = block.querySelector('#elliott')!;
-      final current = block.querySelector('#morson')!;
-      final text = current.firstChild!;
-      const plainText = '\uFFFC\uFFFC\uFFFCMorson';
+    group('whitespace', () {
+      test('maps a collapsed whitespace run to the start of the run', () {
+        final block = _block('<p>a   b</p>');
+        final index = _build(block, 'a b');
 
-      final index = EpubTextIndex.build(
-        block: block,
-        blockElements: {block},
-        whitespace: CssWhitespace.normal,
-        plainText: plainText,
-      );
+        expect(_at(index, 1), (block.firstChild, 1, false));
+      });
 
-      expect(index.positionAt(0)?.node, same(block));
-      expect(index.positionAt(1)?.node, same(previous));
-      expect(index.positionAt(2)?.node, same(current));
-      expect(index.positionAt(3)?.node, same(text));
-      expect(index.positionAt(3)?.offset, 0);
+      test('maps characters after a whitespace run to their raw offset', () {
+        final block = _block('<p>a   b</p>');
+        final index = _build(block, 'a b');
+
+        expect(_at(index, 2), (block.firstChild, 4, false));
+      });
+
+      test('preserves newlines in pre mode', () {
+        final block = _block('<p>a\nb</p>');
+        final index = _build(block, 'a\nb', whitespace: .pre);
+
+        expect(_at(index, 1), (block.firstChild, 1, false));
+      });
     });
 
-    test('maps the synthetic text-indent before plain text', () {
-      final block = _block(
-        '<p ${HtmlConstants.textIndentAttribute}>Alpha</p>',
-      );
-      final text = block.firstChild!;
-      const plainText = '\uFFFCAlpha';
+    group('inline widgets', () {
+      test('maps a placeholder to its element', () {
+        final block = _block('<p><a id="morson">Morson</a></p>');
+        final anchor = block.querySelector('a')!;
+        final index = _build(block, '\uFFFCMorson');
 
-      final index = EpubTextIndex.build(
-        block: block,
-        blockElements: {block},
-        whitespace: CssWhitespace.normal,
-        plainText: plainText,
-      );
+        expect(_at(index, 0), (anchor, 0, false));
+      });
 
-      expect(index.positionAt(0)?.node, same(block));
-      expect(index.positionAt(1)?.node, same(text));
-      expect(index.positionAt(1)?.offset, 0);
+      test("maps text after a placeholder to that element's text", () {
+        final block = _block('<p><a id="morson">Morson</a></p>');
+        final anchor = block.querySelector('a')!;
+        final index = _build(block, '\uFFFCMorson');
+
+        expect(_at(index, 1), (anchor.firstChild, 0, false));
+      });
+
+      test('maps an indent placeholder to the block start', () {
+        final block = _block(
+          '<p ${HtmlConstants.textIndentAttribute}>Alpha</p>',
+        );
+        final index = _build(block, '\uFFFCAlpha');
+
+        expect(_at(index, 0), (block, 0, false));
+      });
+
+      test('maps text after an indent placeholder to the block text', () {
+        final block = _block(
+          '<p ${HtmlConstants.textIndentAttribute}>Alpha</p>',
+        );
+        final index = _build(block, '\uFFFCAlpha');
+
+        expect(_at(index, 1), (block.firstChild, 0, false));
+      });
     });
 
-    test('maps a leading anchor when there is no text-indent', () {
-      final block = _block('<p><a id="morson">Morson</a></p>');
-      final anchor = block.querySelector('a')!;
-      final text = anchor.firstChild!;
-      const plainText = '\uFFFCMorson';
+    group('line breaks', () {
+      test('maps a newline after its br', () {
+        final block = _block('<p>a<br>b</p>');
+        final br = block.querySelector('br')!;
+        final index = _build(block, 'a\nb');
 
-      final index = EpubTextIndex.build(
-        block: block,
-        blockElements: {block},
-        whitespace: CssWhitespace.normal,
-        plainText: plainText,
-      );
+        expect(_at(index, 1), (br, 0, true));
+      });
 
-      expect(index.positionAt(0)?.node, same(anchor));
-      expect(index.positionAt(1)?.node, same(text));
-      expect(index.positionAt(1)?.offset, 0);
-    });
+      test('maps text after a br to the following text node', () {
+        final block = _block('<p>a<br>b</p>');
+        final index = _build(block, 'a\nb');
 
-    test('maps nested inline text after a leading anchor', () {
-      final block = _block(
-        '<p ${HtmlConstants.textIndentAttribute}>'
-        '<a id="morson"></a>'
-        '<span class="bold"><span style="font-size: larger">'
-        'Morson, Walter Augustus Ormsby'
-        '</span></span>, Barrister'
-        '</p>',
-      );
-      final anchor = block.querySelector('#morson')!;
-      final name = block.querySelector('span span')!.firstChild!;
-      const plainText = '\uFFFC\uFFFCMorson, Walter Augustus Ormsby, Barrister';
-
-      final index = EpubTextIndex.build(
-        block: block,
-        blockElements: {block},
-        whitespace: CssWhitespace.normal,
-        plainText: plainText,
-      );
-
-      expect(index.positionAt(0)?.node, same(block));
-      expect(index.positionAt(1)?.node, same(anchor));
-      expect(index.positionAt(2)?.node, same(name));
-      expect(index.positionAt(2)?.offset, 0);
+        expect(_at(index, 2), (block.nodes.last, 0, false));
+      });
     });
   });
+}
+
+(Object, int, bool) _at(EpubTextIndex index, int offset) {
+  final position = index.positionAt(offset)!;
+  return (position.node, position.offset, position.afterNode);
+}
+
+EpubTextIndex _build(
+  dom.Element block,
+  String plainText, {
+  CssWhitespace whitespace = .normal,
+}) {
+  return EpubTextIndex.build(
+    block: block,
+    blockElements: {block},
+    whitespace: whitespace,
+    plainText: plainText,
+  );
 }
 
 dom.Element _block(String html) {
