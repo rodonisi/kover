@@ -1,0 +1,550 @@
+import 'dart:math' as math;
+
+import 'package:flutter/rendering.dart';
+import 'package:html/dom.dart' as dom;
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/measuring_paginated_epub_widget_factory.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_unit.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_position.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_anchor.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_text_index.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_probe.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_content.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
+import 'package:material_ui/material_ui.dart';
+
+/// The result of measuring an EPUB page's content.
+class const EpubMeasurements({
+  required final List<EpubMeasureUnit> units,
+  required final Size contentSize,
+});
+
+/// A widget that measures and reports the layout of an EPUB page's content.
+class EpubMeasurementsCollector extends StatelessWidget {
+  final dom.DocumentFragment html;
+  final PaginatedEpubPageSettings settings;
+  final CssEngine cssEngine;
+  final BoxConstraints constraints;
+  final void Function(EpubMeasurements measurements, Size viewport) onMeasured;
+
+  const new({
+    super.key,
+    required this.html,
+    required this.settings,
+    required this.cssEngine,
+    required this.constraints,
+    required this.onMeasured,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final columns = settings.mode == .spreads ? 2 : 1;
+    final outerWidth = constraints.maxWidth / columns;
+    final horizontalPadding = settings.horizontalMarginSize * 2;
+    final verticalPadding = settings.verticalMarginSize * 2;
+
+    final viewport = Size(
+      math.max(0, outerWidth - horizontalPadding),
+      math.max(0, constraints.maxHeight - verticalPadding),
+    );
+
+    return _EpubMeasureContent(
+      key: ValueKey((html, viewport, settings.layoutKey)),
+      html: html,
+      settings: settings,
+      cssEngine: cssEngine,
+      viewport: viewport,
+      outerWidth: outerWidth,
+      onMeasured: onMeasured,
+    );
+  }
+}
+
+class _EpubMeasureContent extends StatefulWidget {
+  final dom.DocumentFragment html;
+  final PaginatedEpubPageSettings settings;
+  final CssEngine cssEngine;
+  final Size viewport;
+  final double outerWidth;
+  final void Function(EpubMeasurements measurements, Size viewport) onMeasured;
+
+  const new({
+    super.key,
+    required this.html,
+    required this.settings,
+    required this.cssEngine,
+    required this.viewport,
+    required this.outerWidth,
+    required this.onMeasured,
+  });
+
+  @override
+  State<_EpubMeasureContent> createState() => _EpubMeasureContentState();
+}
+
+class _EpubMeasureContentState extends State<_EpubMeasureContent> {
+  final _measureKey = GlobalKey();
+  late final String _htmlText;
+  late final MeasuringPaginatedEpubWidgetFactory _factory;
+  var _scheduled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _htmlText = widget.html.outerHtml;
+
+    if (widget.viewport.isEmpty) {
+      // There is nothing to lay out when margins consume the whole viewport.
+      // Report an empty measurement so the controller leaves the measuring
+      // state instead of spinning forever.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        widget.onMeasured(
+          const EpubMeasurements(units: [], contentSize: Size.zero),
+          widget.viewport,
+        );
+      });
+      return;
+    }
+
+    _factory = MeasuringPaginatedEpubWidgetFactory(
+      viewport: widget.viewport,
+      removeParagraphIndent: widget.settings.removeParagraphIndent,
+      onChanged: _scheduleMeasurement,
+    );
+    _scheduleMeasurement();
+  }
+
+  @override
+  void didUpdateWidget(_EpubMeasureContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The parent keys this widget on the markup, viewport and layout settings,
+    // so the factory and serialized markup can be created once in initState.
+    assert(identical(oldWidget.html, widget.html));
+    assert(oldWidget.viewport == widget.viewport);
+    assert(
+      oldWidget.settings.removeParagraphIndent ==
+          widget.settings.removeParagraphIndent,
+    );
+  }
+
+  void _scheduleMeasurement() {
+    if (_scheduled) return;
+    _scheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        if (!mounted) return;
+        if (_factory.pendingImages > 0) return;
+        if (_htmlText.isNotEmpty && !_factory.isBuildComplete) return;
+
+        final anchor = _measureKey.currentContext?.findRenderObject();
+        if (anchor is! RenderEpubMeasureAnchor || !anchor.hasSize) return;
+
+        final measurements = _collectMeasurements(anchor);
+
+        if (measurements.contentSize.height > 0 && measurements.units.isEmpty) {
+          _scheduled = false;
+          _scheduleMeasurement();
+          return;
+        }
+
+        widget.onMeasured(measurements, widget.viewport);
+      } finally {
+        _scheduled = false;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.viewport.isEmpty) return const SizedBox.shrink();
+
+    return SizedBox(
+      width: widget.outerWidth,
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: ExcludeSemantics(
+          child: PaginatedEpubPageContent(
+            html: _htmlText,
+            settings: widget.settings,
+            viewport: widget.viewport,
+            cssEngine: widget.cssEngine,
+            anchorKey: _measureKey,
+            factoryBuilder: () => _factory,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Walks every probe injected by [MeasuringPaginatedEpubWidgetFactory] and
+/// turns it into measurement units, ordered by the render tree.
+EpubMeasurements _collectMeasurements(RenderEpubMeasureAnchor anchor) {
+  final units = <EpubMeasureUnit>[];
+  final blockElements = <dom.Element>{};
+
+  // Text probes are grouped by their nearest block, so nested block elements
+  // must be known before line boxes are mapped back to DOM positions.
+  void collectBlocks(RenderObject node) {
+    if (node is RenderEpubBlockProbe) {
+      blockElements.add(node.element);
+    }
+    node.visitChildren(collectBlocks);
+  }
+
+  collectBlocks(anchor);
+
+  void walk(RenderObject node) {
+    // Text probes are emitted by their owning block below.
+    if (node is RenderEpubTextProbe) return;
+
+    if (node is RenderEpubLeafProbe) {
+      final unit = _leafUnit(
+        nodeIndex: node.nodeIndex,
+        box: node,
+        origin: anchor,
+      );
+      if (unit != null) units.add(unit);
+      return;
+    }
+
+    if (node is RenderEpubBlockProbe) {
+      final textProbes = _collectOwnTextProbes(node);
+
+      if (textProbes.isNotEmpty) {
+        units.addAll(
+          _collectTextUnits(
+            probes: textProbes,
+            origin: anchor,
+            blockElements: blockElements,
+          ),
+        );
+      } else if (!_hasProbeDescendant(node)) {
+        // A block without any probe below it cannot be split (image, rule,
+        // empty block...).
+        final unit = _leafUnit(
+          nodeIndex: node.nodeIndex,
+          box: node,
+          origin: anchor,
+        );
+        if (unit != null) units.add(unit);
+        return;
+      }
+
+      // Wrapper blocks have no text probes of their own; keep walking so the
+      // paragraph blocks inside them are harvested too.
+      node.visitChildren(walk);
+      return;
+    }
+
+    node.visitChildren(walk);
+  }
+
+  walk(anchor);
+
+  return EpubMeasurements(units: units, contentSize: anchor.size);
+}
+
+List<RenderEpubTextProbe> _collectOwnTextProbes(RenderObject block) {
+  final probes = <RenderEpubTextProbe>[];
+
+  void walk(RenderObject node) {
+    if (node is RenderEpubBlockProbe || node is RenderEpubLeafProbe) return;
+    if (node is RenderEpubTextProbe) {
+      probes.add(node);
+      return;
+    }
+    node.visitChildren(walk);
+  }
+
+  block.visitChildren(walk);
+
+  return probes;
+}
+
+bool _hasProbeDescendant(RenderObject node) {
+  var found = false;
+
+  void walk(RenderObject current) {
+    if (found) return;
+    if (current is RenderEpubProbe) {
+      found = true;
+      return;
+    }
+    current.visitChildren(walk);
+  }
+
+  node.visitChildren(walk);
+  return found;
+}
+
+List<EpubMeasureUnit> _collectTextUnits({
+  required List<RenderEpubTextProbe> probes,
+  required RenderBox origin,
+  required Set<dom.Element> blockElements,
+}) {
+  final units = <EpubMeasureUnit>[];
+
+  for (final probe in probes) {
+    if (!probe.attached || !probe.hasSize) continue;
+
+    final paragraphs = <RenderParagraph>[];
+    void findParagraphs(RenderObject node) {
+      if (node is RenderParagraph) {
+        paragraphs.add(node);
+        return;
+      }
+      node.visitChildren(findParagraphs);
+    }
+
+    probe.visitChildren(findParagraphs);
+
+    for (final paragraph in paragraphs) {
+      if (!paragraph.attached || !paragraph.hasSize) continue;
+
+      final plainText = paragraph.text.toPlainText();
+      if (plainText.isEmpty) continue;
+
+      EpubTextIndex index;
+      try {
+        index = EpubTextIndex.build(
+          block: probe.element,
+          blockElements: blockElements,
+          whitespace: probe.whitespace,
+          plainText: plainText,
+        );
+      } on EpubTextIndexMismatch catch (_) {
+        // List markers and partial inline content do not map to the block's
+        // DOM text; keep them as one unsplittable unit instead of dropping
+        // the measurement.
+        final fallback = _textLeafUnit(
+          probe: probe,
+          box: paragraph,
+          origin: origin,
+        );
+        if (fallback != null) units.add(fallback);
+        continue;
+      }
+
+      final paragraphOrigin = paragraph.localToGlobal(
+        Offset.zero,
+        ancestor: origin,
+      );
+
+      final lines = _lineBoxes(paragraph, plainText);
+      final padding = _paddingInsets(paragraph, origin);
+      final firstLineTop = lines.first.top;
+      final trailingBottom = paragraph.size.height > lines.last.bottom
+          ? paragraph.size.height - lines.last.bottom
+          : 0.0;
+      var emitted = 0;
+
+      for (var i = 0; i < lines.length; i++) {
+        final line = lines[i];
+        final startOffset = _lineStartOffset(paragraph, line);
+        final position = index.positionAt(startOffset);
+        if (position == null) continue;
+
+        final isLast = i == lines.length - 1;
+        final bottom = isLast
+            ? paragraphOrigin.dy +
+                  (line.bottom > paragraph.size.height
+                      ? line.bottom
+                      : paragraph.size.height)
+            : paragraphOrigin.dy + line.bottom;
+
+        units.add(
+          EpubLineUnit(
+            start: EpubPosition(
+              blockNodeIndex: probe.nodeIndex,
+              childPath: _childPathOf(probe.element, position.node),
+              offset: position.offset,
+              afterNode: position.afterNode,
+            ),
+            nodeIndex: probe.nodeIndex,
+            top: paragraphOrigin.dy + line.top,
+            bottom: bottom,
+            topInset: padding.top + firstLineTop,
+            bottomInset: padding.bottom + (isLast ? 0.0 : trailingBottom),
+          ),
+        );
+        emitted++;
+      }
+
+      if (emitted == 0) {
+        final fallback = _textLeafUnit(
+          probe: probe,
+          box: paragraph,
+          origin: origin,
+        );
+        if (fallback != null) units.add(fallback);
+      }
+    }
+  }
+
+  return units;
+}
+
+EpubLeafUnit? _textLeafUnit({
+  required RenderEpubTextProbe probe,
+  required RenderBox box,
+  required RenderBox origin,
+}) {
+  if (!box.attached || !box.hasSize) return null;
+
+  final topLeft = box.localToGlobal(Offset.zero, ancestor: origin);
+  final padding = _paddingInsets(box, origin);
+
+  return EpubLeafUnit(
+    start: EpubPosition(blockNodeIndex: probe.nodeIndex),
+    nodeIndex: probe.nodeIndex,
+    top: topLeft.dy,
+    bottom: topLeft.dy + box.size.height,
+    topInset: padding.top,
+    bottomInset: padding.bottom,
+  );
+}
+
+List<_LineBox> _lineBoxes(RenderParagraph paragraph, String plainText) {
+  final boxes = paragraph.getBoxesForSelection(
+    TextSelection(baseOffset: 0, extentOffset: plainText.length),
+    boxHeightStyle: .includeLineSpacingMiddle,
+    boxWidthStyle: .max,
+  );
+
+  if (boxes.isEmpty) {
+    return [
+      _LineBox(
+        top: 0,
+        bottom: paragraph.size.height,
+        left: 0,
+        right: paragraph.size.width,
+      ),
+    ];
+  }
+
+  final sorted = boxes.where((box) => box.bottom > box.top).toList()
+    ..sort((a, b) => a.top.compareTo(b.top));
+
+  if (sorted.isEmpty) {
+    return [
+      _LineBox(
+        top: 0,
+        bottom: paragraph.size.height,
+        left: 0,
+        right: paragraph.size.width,
+      ),
+    ];
+  }
+
+  final lines = <_LineBox>[];
+  for (final box in sorted) {
+    final last = lines.lastOrNull;
+
+    // A visual line can produce several boxes (bidi runs, mixed font
+    // metrics, inline widgets). Treat them as one line so a page can never
+    // start or end between two boxes of the same line.
+    if (last != null && (box.top - last.top).abs() < 0.5) {
+      lines[lines.length - 1] = _LineBox(
+        top: math.min(last.top, box.top),
+        bottom: math.max(last.bottom, box.bottom),
+        left: math.min(last.left, box.left),
+        right: math.max(last.right, box.right),
+      );
+    } else {
+      lines.add(
+        _LineBox(
+          top: box.top,
+          bottom: box.bottom,
+          left: box.left,
+          right: box.right,
+        ),
+      );
+    }
+  }
+
+  return lines;
+}
+
+int _lineStartOffset(RenderParagraph paragraph, _LineBox line) {
+  final width = paragraph.size.width;
+  final x = paragraph.textDirection == .rtl
+      ? (line.right - 0.1).clamp(0.0, width)
+      : (line.left + 0.1).clamp(0.0, width);
+
+  final position = paragraph.getPositionForOffset(
+    Offset(x, (line.top + line.bottom) / 2),
+  );
+
+  return position.offset;
+}
+
+List<int> _childPathOf(dom.Element block, dom.Node node) {
+  final path = <int>[];
+  dom.Node? current = node;
+
+  while (current != null && !identical(current, block)) {
+    final parent = current.parent;
+    if (parent == null) return const [];
+    final index = parent.nodes.indexOf(current);
+    if (index < 0) return const [];
+    path.insert(0, index);
+    current = parent;
+  }
+
+  return path;
+}
+
+({double top, double bottom}) _paddingInsets(
+  RenderObject node,
+  RenderObject origin,
+) {
+  var top = 0.0;
+  var bottom = 0.0;
+  RenderObject? current = node.parent;
+
+  while (current != null && !identical(current, origin)) {
+    if (current is RenderEpubPaddingProbe) {
+      top += current.padding.top;
+      bottom += current.padding.bottom;
+    }
+    current = current.parent;
+  }
+
+  return (top: top, bottom: bottom);
+}
+
+EpubLeafUnit? _leafUnit({
+  required int nodeIndex,
+  required RenderBox box,
+  required RenderBox origin,
+}) {
+  if (!box.attached || !box.hasSize) return null;
+
+  final topLeft = box.localToGlobal(Offset.zero, ancestor: origin);
+  final padding = _paddingInsets(box, origin);
+
+  return EpubLeafUnit(
+    start: EpubPosition(blockNodeIndex: nodeIndex),
+    nodeIndex: nodeIndex,
+    top: topLeft.dy,
+    bottom: topLeft.dy + box.size.height,
+    topInset: padding.top,
+    bottomInset: padding.bottom,
+  );
+}
+
+class _LineBox {
+  const _LineBox({
+    required this.top,
+    required this.bottom,
+    required this.left,
+    required this.right,
+  });
+
+  final double top;
+  final double bottom;
+  final double left;
+  final double right;
+}

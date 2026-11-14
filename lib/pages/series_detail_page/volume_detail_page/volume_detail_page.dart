@@ -7,7 +7,7 @@ import 'package:kover/pages/series_detail_page/volume_detail_page/volume_app_bar
 import 'package:kover/riverpod/providers/bookmark.dart';
 import 'package:kover/riverpod/providers/router.dart';
 import 'package:kover/riverpod/providers/volume.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/cards/bookmark_preview_card.dart';
 import 'package:kover/widgets/cards/chapter_card.dart';
 import 'package:kover/widgets/details/metadata_sections.dart';

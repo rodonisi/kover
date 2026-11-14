@@ -1,7 +1,21 @@
 import 'package:html/dom.dart';
-import 'package:kover/utils/html_constants.dart';
 
 extension DocumentFragmentExtensions on DocumentFragment {
+  /// Finds the first descendant whose [attribute] equals [value].
+  ///
+  /// Falls back to filtering when [value] cannot be embedded in a selector.
+  Element? findByAttribute(String attribute, String value) {
+    try {
+      return querySelector('[$attribute="$value"]');
+    } on FormatException {
+      for (final element in querySelectorAll('[$attribute]')) {
+        if (element.attributes[attribute] == value) return element;
+      }
+
+      return null;
+    }
+  }
+
   String? paragraphScrollId() {
     final p = querySelectorAll('p')
         .where(
@@ -15,8 +29,7 @@ extension DocumentFragmentExtensions on DocumentFragment {
 
 extension NodeExtensions on Node {
   bool get hasVisibleNodes {
-    return !isIndentSpan &&
-        (isTextOrImage || nodes.any((node) => node.hasVisibleNodes));
+    return isTextOrImage || nodes.any((node) => node.hasVisibleNodes);
   }
 
   bool get hasText {
@@ -30,13 +43,6 @@ extension NodeExtensions on Node {
             _imageTags.contains(
               (this as Element).localName,
             ));
-  }
-
-  bool get isIndentSpan {
-    return this is Element &&
-        (this as Element).attributes.containsKey(
-          HtmlConstants.textIndentSpanAttribute,
-        );
   }
 
   static const _imageTags = {'img', 'svg'};

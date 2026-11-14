@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
-import 'package:kover/utils/data_constants.dart';
+import 'package:kover/utils/constants/data_constants.dart';
 
 extension ServerSettingDtoMappings on ServerSettingDto {
   ServerSettingsCompanion toServerSettingsCompanion() {

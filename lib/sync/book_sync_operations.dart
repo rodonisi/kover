@@ -70,17 +70,15 @@ class BookSyncOperations {
     required int page,
   }) async {
     final frag = await _getPreprocessedPage(chapterId: chapterId, page: page);
-    final styles = <String, Map<String, String>>{};
 
-    styles['a'] = {'text-decoration': 'none'};
+    final fonts = EpubFontParser.parse(frag.querySelectorAll('style'));
 
-    final fonts = EpubFontParser.parseStyles(frag.querySelectorAll('style'));
-
-    return PageContent(root: frag, styles: styles, fonts: fonts);
+    return PageContent(root: frag, fonts: fonts);
   }
 
   /// Fetches the raw font file at [url].
   Future<({Uint8List bytes, String mimeType})?> getFontBytes(String url) {
+    log.debug('fetching font bytes', attributes: {'url': url});
     return _fetchData(url);
   }
 

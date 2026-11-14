@@ -141,7 +141,7 @@ void main() {
             </style>
           ''');
 
-          final faces = EpubFontParser.parseStyles(
+          final faces = EpubFontParser.parse(
             fragment.querySelectorAll('style'),
           );
 
@@ -157,7 +157,7 @@ void main() {
         () {
           final fragment = parseFragment('<p>hello</p>');
 
-          final faces = EpubFontParser.parseStyles(
+          final faces = EpubFontParser.parse(
             fragment.querySelectorAll('style'),
           );
 

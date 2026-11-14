@@ -9,7 +9,7 @@ import 'package:kover/pages/reader/pdf_reader/pdf_reader_controls.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/theme.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 
 class ReaderControls extends HookConsumerWidget {
   final int seriesId;

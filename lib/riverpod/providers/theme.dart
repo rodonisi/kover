@@ -2,7 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:kover/utils/instant_transition_builder.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:kover/utils/theme.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';

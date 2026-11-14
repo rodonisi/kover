@@ -9,7 +9,7 @@ import 'package:kover/riverpod/providers/settings/credentials.dart';
 import 'package:kover/utils/app_colors.dart';
 import 'package:kover/utils/constants/kavita_version.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/bottom_sheet_option.dart';
 import 'package:kover/widgets/util/async_value.dart';

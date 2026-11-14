@@ -9,7 +9,7 @@ class EpubFontParser {
 
   /// Parses every `<style>` tag in [styles] and returns the declared font
   /// faces in source order.
-  static List<FontFace> parseStyles(Iterable<Element> styles) {
+  static List<FontFace> parse(Iterable<Element> styles) {
     return [for (final element in styles) ...parseCss(element.innerHtml)];
   }
 

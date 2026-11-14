@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 
 /// A sliver widget that lets the child sliver grow to a [maxWidth], adding
 /// padding when the viewport is larger than that.

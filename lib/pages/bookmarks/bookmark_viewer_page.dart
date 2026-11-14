@@ -12,7 +12,7 @@ import 'package:kover/riverpod/providers/bookmark.dart';
 import 'package:kover/riverpod/providers/theme.dart' hide Theme;
 import 'package:kover/riverpod/repository/bookmark_repository.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
 

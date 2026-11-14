@@ -5,7 +5,7 @@ import 'package:kover/models/enums/format.dart';
 import 'package:kover/models/enums/publication_status.dart';
 import 'package:kover/models/series_model.dart';
 import 'package:kover/riverpod/providers/metadata.dart';
-import 'package:kover/utils/data_constants.dart';
+import 'package:kover/utils/constants/data_constants.dart';
 
 part 'chapter_model.freezed.dart';
 

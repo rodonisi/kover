@@ -1,19 +1,23 @@
+import 'dart:async';
+
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/mapping/enums/read_direction.dart';
-import 'package:kover/pages/reader/epub_reader/epub_horizontal_subpages.dart';
-import 'package:kover/pages/reader/epub_reader/epub_measure_root.dart';
 import 'package:kover/pages/reader/epub_reader/epub_reader_provider.dart';
 import 'package:kover/pages/reader/epub_reader/epub_theme_override.dart';
 import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
-import 'package:kover/pages/reader/epub_reader/epub_vertical_subpages.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page_provider.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
-import 'package:kover/utils/cached_image_factory.dart';
-import 'package:kover/utils/layout_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EpubReader extends HookConsumerWidget {
   final int seriesId;
@@ -43,14 +47,6 @@ class EpubReader extends HookConsumerWidget {
       epubReaderSettingsProvider(
         seriesId: seriesId,
       ).select((state) => state.value?.ignoreSafeAreas ?? true),
-    );
-    final verticalMargin = ref.watch(
-      epubReaderSettingsProvider(
-        seriesId: seriesId,
-      ).select(
-        (state) =>
-            state.value?.verticalMarginSize ?? LayoutConstants.mediumPadding,
-      ),
     );
 
     return Async(
@@ -94,6 +90,8 @@ class EpubReader extends HookConsumerWidget {
 
                     if (nextPage == previousPage) return;
 
+                    hasSelection.value = false;
+
                     if (controller.hasClients &&
                         controller.page?.round() != nextPage) {
                       final isSequential =
@@ -114,72 +112,48 @@ class EpubReader extends HookConsumerWidget {
                 final respectSafeAreas =
                     data.mode == .vertical && !ignoreSafeAreas;
 
-                return Stack(
-                  children: [
-                    Positioned.fill(
-                      child: Offstage(
-                        offstage: !navState.ready,
-                        child: Directionality(
-                          textDirection: data.commonSettings.readDirection
-                              .toTextDirection(),
-                          child: SafeArea(
-                            left: respectSafeAreas,
-                            top: respectSafeAreas,
-                            right: respectSafeAreas,
-                            bottom: respectSafeAreas,
-                            child: Padding(
-                              padding: .symmetric(
-                                vertical: data.mode == .vertical
-                                    ? verticalMargin
-                                    : 0,
-                              ),
-                              child: PageView.builder(
-                                clipBehavior: data.mode == .vertical
-                                    ? .hardEdge
-                                    : .none,
-                                controller: controller,
-                                itemCount: navState.totalPages,
-                                allowImplicitScrolling: true,
-                                scrollCacheExtent: const .viewport(4),
-                                scrollDirection: switch (data.mode) {
-                                  .horizontal => .horizontal,
-                                  .vertical => .vertical,
-                                  .spreads => .horizontal,
-                                },
-                                physics: const NeverScrollableScrollPhysics(),
-                                onPageChanged: (newPage) {
-                                  ref.read(nav.notifier).jumpToPage(newPage);
-                                },
-                                itemBuilder: (context, index) {
-                                  return _Page(
-                                    seriesId: seriesId,
-                                    chapterId: chapterId,
-                                    readingListId: readingListId,
-                                    page: index,
-                                    reverse:
-                                        data.commonSettings.readDirection ==
-                                            .rightToLeft &&
-                                        data.mode != .vertical,
-                                    mode: data.mode,
-                                    outerController: controller,
-                                    onSelectionChanged: (selected) {
-                                      if (selected != hasSelection.value) {
-                                        hasSelection.value = selected;
-                                      }
-                                    },
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                return Directionality(
+                  textDirection: data.commonSettings.readDirection
+                      .toTextDirection(),
+                  child: SafeArea(
+                    left: respectSafeAreas,
+                    top: respectSafeAreas,
+                    right: respectSafeAreas,
+                    bottom: false,
+                    child: PageView.builder(
+                      clipBehavior: respectSafeAreas ? .hardEdge : .none,
+                      controller: controller,
+                      itemCount: navState.totalPages,
+                      allowImplicitScrolling: true,
+                      scrollDirection: switch (data.mode) {
+                        .horizontal => .horizontal,
+                        .vertical => .vertical,
+                        .spreads => .horizontal,
+                      },
+                      physics: const NeverScrollableScrollPhysics(),
+                      onPageChanged: (newPage) {
+                        ref.read(nav.notifier).jumpToPage(newPage, force: true);
+                      },
+                      itemBuilder: (context, index) {
+                        return _Page(
+                          seriesId: seriesId,
+                          chapterId: chapterId,
+                          readingListId: readingListId,
+                          page: index,
+                          reverse:
+                              data.commonSettings.readDirection ==
+                                  .rightToLeft &&
+                              data.mode != .vertical,
+                          outerController: controller,
+                          onSelectionChanged: (selected) {
+                            if (selected != hasSelection.value) {
+                              hasSelection.value = selected;
+                            }
+                          },
+                        );
+                      },
                     ),
-                    if (!navState.ready)
-                      const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                  ],
+                  ),
                 );
               },
             ),
@@ -196,7 +170,6 @@ class _Page extends HookConsumerWidget {
   final int? readingListId;
   final int page;
   final bool reverse;
-  final EpubReaderMode mode;
   final PageController outerController;
   final void Function(bool)? onSelectionChanged;
 
@@ -205,7 +178,6 @@ class _Page extends HookConsumerWidget {
     required this.chapterId,
     required this.readingListId,
     required this.page,
-    required this.mode,
     this.reverse = false,
     this.onSelectionChanged,
     required this.outerController,
@@ -247,27 +219,14 @@ class _Page extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final container = ProviderScope.containerOf(context);
-    final mediaQueryData = MediaQuery.of(context);
-    final themeData = Theme.of(context);
-    final textDirection = Directionality.of(context);
-    final locale = Localizations.localeOf(context);
-    final imageCache = useMemoized(
-      () => CachedImageFactory(maxHeight: mediaQueryData.size.height),
-      [],
-    );
-    final lastViewport = useRef<(Size, double)?>(null);
-    final vertical = mode == .vertical;
-    final spreads = mode == .spreads;
-
-    final provider = epubReflowProvider(
+    final nav = epubNavigationProvider(
       seriesId: seriesId,
       chapterId: chapterId,
-      page: page,
+      readingListId: readingListId,
     );
 
-    final subpageState = ref.watch(
-      epubReaderSubpageProvider(
+    final model = ref.watch(
+      paginatedEpubPageProvider(
         seriesId: seriesId,
         chapterId: chapterId,
         readingListId: readingListId,
@@ -275,91 +234,145 @@ class _Page extends HookConsumerWidget {
       ),
     );
 
-    return Async(
-      asyncValue: subpageState,
-      skipLoadingOnReload: true,
-      data: (data) {
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final isVisiblePage = data.navigation.page == page;
-            final visibleReady = data.navigation.ready;
-            final isAdjacentPage = (data.navigation.page - page).abs() <= 1;
-            final shouldStart =
-                isVisiblePage || (visibleReady && isAdjacentPage);
-
-            final viewport = spreads
-                ? Size(
-                    constraints.maxWidth / 2,
-                    constraints.maxHeight,
-                  )
-                : constraints.biggest;
-            final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-
-            if (shouldStart && data.reflow.status == .initial) {
-              lastViewport.value = (viewport, devicePixelRatio);
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (!context.mounted) return;
-                ref
-                    .read(provider.notifier)
-                    .startReflow(
-                      viewport: viewport,
-                      devicePixelRatio: devicePixelRatio,
-                      measureBuilder: (html, styles) => EpubMeasureRoot(
-                        container: container,
-                        mediaQueryData: mediaQueryData,
-                        themeData: themeData,
-                        textDirection: textDirection,
-                        locale: locale,
-                        seriesId: seriesId,
-                        html: html,
-                        styles: styles,
-                        imageCache: imageCache,
-                        verticalPadding: !vertical,
-                      ),
-                      refreshRate: View.of(context).display.refreshRate,
-                    );
-              });
-            } else if (data.reflow.status != .initial &&
-                lastViewport.value != (viewport, devicePixelRatio)) {
-              lastViewport.value = (viewport, devicePixelRatio);
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (!context.mounted) return;
-                ref.invalidate(provider, asReload: true);
-              });
-            }
-
-            return SelectionArea(
-              onSelectionChanged: (selection) {
-                onSelectionChanged?.call(
-                  selection != null && selection.plainText.isNotEmpty,
-                );
-              },
-              child: NotificationListener<ScrollNotification>(
-                onNotification: data.navigationGesturesEnabled
-                    ? handleScrollNotification
-                    : null,
-                child: vertical
-                    ? EpubVerticalSubpages(
-                        key: ValueKey(page),
-                        seriesId: seriesId,
-                        chapterId: chapterId,
-                        readingListId: readingListId,
-                        page: page,
-                        imageCache: imageCache,
-                      )
-                    : EpubHorizontalSubpages(
-                        key: ValueKey(page),
-                        seriesId: seriesId,
-                        chapterId: chapterId,
-                        readingListId: readingListId,
-                        page: page,
-                        imageCache: imageCache,
-                      ),
-              ),
-            );
-          },
-        );
+    final controller = usePaginatedEpubPageController(
+      keys: [page],
+      onSubpageChanged: (subpage, scrollId) {
+        onSelectionChanged?.call(false);
+        ref
+            .read(nav.notifier)
+            .jumpToSubpage(subpage, scrollId: scrollId, page: page);
       },
+      onSubpageRestored: (subpage, scrollId) {
+        onSelectionChanged?.call(false);
+        ref
+            .read(nav.notifier)
+            .jumpToSubpage(
+              subpage,
+              scrollId: scrollId,
+              page: page,
+              restored: true,
+            );
+      },
+      onSubpagesCountChanged: (count) {
+        ref.read(nav.notifier).updateSubpageCount(page, count);
+      },
+    );
+
+    final pendingAnchor = ref.watch(
+      nav.select(
+        (state) {
+          final value = state.value;
+          if (value == null || value.page != page) return null;
+
+          final pending = value.pendingAnchor;
+          return pending != null && pending.page == page
+              ? pending.anchor
+              : null;
+        },
+      ),
+    );
+
+    // The controller keeps the anchor until the page finishes measuring.
+    useEffect(() {
+      if (pendingAnchor == null) return null;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+
+        final anchor = ref.read(nav.notifier).takePendingAnchor(page);
+        if (anchor != null) {
+          controller.jumpToAnchor(anchor, animate: false);
+        }
+      });
+
+      return null;
+    }, [controller, pendingAnchor]);
+
+    final navState = ref.read(nav).value;
+    final navSubpage = navState?.subpagePositions[page];
+    if (navSubpage != null) {
+      controller.jumpToSubpage(navSubpage);
+    }
+
+    ref.listen(
+      nav,
+      (previous, next) {
+        next.whenData((next) {
+          if (next.pendingAnchor?.page == page) return;
+
+          // The active page follows the navigation position directly. Other
+          // mounted pages follow their own remembered position.
+          final subpage = page == next.page
+              ? next.subpage
+              : next.subpagePositions[page];
+          if (subpage == null) return;
+
+          controller.jumpToSubpage(
+            subpage,
+            animate: previous?.value?.page == next.page && next.page == page,
+          );
+        });
+      },
+    );
+
+    void handleAnchor(EpubAnchorTarget target) {
+      if (target.externalUri case final uri?) {
+        _openExternal(uri);
+        return;
+      }
+
+      final targetPage = target.page;
+      if (targetPage != null && targetPage != page) {
+        ref
+            .read(nav.notifier)
+            .jumpToPage(
+              targetPage,
+              force: true,
+              anchor: target.part,
+            );
+        return;
+      }
+
+      if (target.part case final part?) {
+        controller.jumpToAnchor(part);
+      }
+    }
+
+    return Async(
+      asyncValue: model,
+      data: (data) => NotificationListener<ScrollNotification>(
+        onNotification: data.settings.canScroll
+            ? handleScrollNotification
+            : null,
+        child: PaginatedEpubPage(
+          controller: controller,
+          html: data.html,
+          settings: data.settings,
+          resumeScrollId: data.resumeScrollId,
+          onSelectionChanged: onSelectionChanged,
+          onAnchorTap: handleAnchor,
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _openExternal(Uri uri) async {
+  try {
+    if (!await canLaunchUrl(uri)) {
+      log.debug(
+        'cannot launch external url',
+        attributes: {'url': uri.toString()},
+      );
+      return;
+    }
+
+    await launchUrl(uri, mode: .externalApplication);
+  } catch (e, stacktrace) {
+    log.error(
+      'failed to launch external url',
+      error: e,
+      stacktrace: stacktrace,
     );
   }
 }
