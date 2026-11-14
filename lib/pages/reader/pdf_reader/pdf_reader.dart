@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -8,6 +9,7 @@ import 'package:kover/pages/reader/pdf_reader/pdf_reader_provider.dart';
 import 'package:kover/pages/reader/pdf_reader/pdf_toc_drawer.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
+import 'package:kover/riverpod/providers/settings/pdf_reader_settings.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/widgets/util/async_value.dart';
@@ -36,6 +38,58 @@ class PdfViewerControllerHookState
 }
 
 PdfViewerController usePdfViewerController() => use(const PdfControllerHook());
+
+bool _isCropping(PdfReaderSettingsState settings) =>
+    settings.horizontalCrop > 0 || settings.verticalCrop > 0;
+
+/// Page area left after cropping, relative to the page's top-left corner.
+Rect _cropRect(Size size, PdfReaderSettingsState settings) {
+  final dx = size.width * settings.horizontalCrop / 100;
+  final dy = size.height * settings.verticalCrop / 100;
+  return Rect.fromLTRB(dx, dy, size.width - dx, size.height - dy);
+}
+
+/// Smallest document padding that lets every cropped page be centred when fitted to [viewSize].
+EdgeInsets _cropBoundary(
+  PdfPageLayout layout,
+  PdfReaderSettingsState settings,
+  Size viewSize,
+) {
+  final doc = layout.documentSize;
+  var (left, top, right, bottom) = (0.0, 0.0, 0.0, 0.0);
+  for (final page in layout.pageLayouts) {
+    final crop = _cropRect(page.size, settings).shift(page.topLeft);
+    final zoom = min(
+      viewSize.width / crop.width,
+      viewSize.height / crop.height,
+    );
+    final half = viewSize / zoom / 2;
+    left = max(left, half.width - crop.center.dx);
+    right = max(right, crop.center.dx + half.width - doc.width);
+    top = max(top, half.height - crop.center.dy);
+    bottom = max(bottom, crop.center.dy + half.height - doc.height);
+  }
+  return EdgeInsets.fromLTRB(left, top, right, bottom);
+}
+
+/// Zooms so the page area left after cropping fills the view.
+Future<void> _fitPage(
+  PdfViewerController controller,
+  PdfReaderSettingsState settings,
+  int pageNumber, {
+  Duration duration = Duration.zero,
+}) {
+  final pages = controller.document.pages;
+  final index = pageNumber.clamp(1, pages.length) - 1;
+  final size = controller.layout.pageLayouts[index].size;
+  final rect = _cropRect(size, settings);
+  return controller.goToRectInsidePage(
+    pageNumber: index + 1,
+    rect: rect.toPdfRect(page: pages[index], scaledPageSize: size),
+    anchor: .all,
+    duration: duration,
+  );
+}
 
 class PdfReader extends HookConsumerWidget {
   final int seriesId;
@@ -72,19 +126,98 @@ class PdfReader extends HookConsumerWidget {
     );
 
     final pdf = ref.watch(pdfProvider(chapterId: chapterId));
+    final settings = model.value?.settings;
+    final cropping = settings != null && _isCropping(settings);
+    final wasCropping = useRef(false);
+    final latestSettings = useRef(settings)..value = settings;
+    final viewSize = useState<Size?>(null);
+    // Forces a rebuild so crop boundaries use the viewer's current layout.
+    final layoutTick = useState(0);
+    final resizeTimer = useRef<Timer?>(null);
+    // Bumped by navigation so pending refits don't override a page turn.
+    final fitGeneration = useRef(0);
+    useEffect(
+      () =>
+          () => resizeTimer.value?.cancel(),
+      const [],
+    );
+
+    final cropBoundary =
+        cropping && viewSize.value != null && controller.isReady
+        ? _cropBoundary(controller.layout, settings, viewSize.value!)
+        : null;
+
+    // Rebuilds with the viewer's current layout and size, then refits the current page
+    // once the resulting boundaries are applied.
+    void scheduleRefit({bool force = false}) {
+      final generation = fitGeneration.value;
+      bool stale() =>
+          !context.mounted ||
+          generation != fitGeneration.value ||
+          !controller.isReady;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (stale()) return;
+        viewSize.value = controller.viewSize;
+        layoutTick.value++;
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          final settings = latestSettings.value;
+          if (stale() || settings == null) return;
+          final pageNumber = controller.pageNumber;
+          if (pageNumber == null) return;
+          if (_isCropping(settings)) {
+            await _fitPage(controller, settings, pageNumber);
+          } else if (force) {
+            // Crop was just removed: restore the viewer's default zoom for the current layout.
+            final zoom = max(controller.coverScale, controller.minScale);
+            await controller.setZoom(controller.centerPosition, zoom);
+            await controller.goToPage(pageNumber: pageNumber, duration: .zero);
+          }
+        });
+      });
+      WidgetsBinding.instance.scheduleFrame();
+    }
+
+    // Re-fit the current page when crop settings or the layout change, including back to uncropped.
+    useEffect(
+      () {
+        if (cropping || wasCropping.value) scheduleRefit(force: true);
+        wasCropping.value = cropping;
+        return null;
+      },
+      [
+        cropping,
+        settings?.horizontalCrop,
+        settings?.verticalCrop,
+        settings?.readerMode,
+      ],
+    );
 
     ref.listen(navProvider, (previous, next) async {
       next.whenData((next) async {
         if (!controller.isReady || next.fromObserver) return;
 
         if (previous?.value?.currentPage != next.currentPage) {
+          resizeTimer.value?.cancel();
+          fitGeneration.value++;
           lastUpdateFromProvider.value = true;
-          await controller.goToPage(
-            pageNumber: next.currentPage + 1,
-            duration: model.value?.reduceAnimations ?? false
-                ? .zero
-                : LayoutConstants.pageSlideDuration,
-          );
+          final duration = model.value?.reduceAnimations ?? false
+              ? Duration.zero
+              : LayoutConstants.pageSlideDuration;
+          final settings = model.value?.settings;
+          if (settings != null && _isCropping(settings)) {
+            await _fitPage(
+              controller,
+              settings,
+              next.currentPage + 1,
+              duration: duration,
+            );
+          } else {
+            await controller.goToPage(
+              pageNumber: next.currentPage + 1,
+              duration: duration,
+            );
+          }
         }
       });
     });
@@ -117,7 +250,17 @@ class PdfReader extends HookConsumerWidget {
               : null,
           extraControls: _PdfExtraControls(
             controller: controller,
-            defaultZoom: defaultZoom,
+            onResetZoom: () {
+              final pageNumber = controller.pageNumber;
+              if (_isCropping(data.settings) && pageNumber != null) {
+                unawaited(_fitPage(controller, data.settings, pageNumber));
+              } else {
+                controller.setZoom(
+                  controller.centerPosition,
+                  defaultZoom.value,
+                );
+              }
+            },
           ),
           child: Async(
             asyncValue: pdf,
@@ -135,6 +278,8 @@ class PdfReader extends HookConsumerWidget {
                 initialPageNumber: data.reader.initialPage + 1,
                 params: PdfViewerParams(
                   scrollPhysics: scrollPhysics,
+                  // Lets a cropped page centre at document edges.
+                  boundaryMargin: cropBoundary,
                   panAxis:
                       data.settings.lockHorizontalPan &&
                           data.settings.readerMode == .vertical
@@ -150,6 +295,16 @@ class PdfReader extends HookConsumerWidget {
                   onViewerReady: (document, controller) async {
                     toc.value = await document.loadOutline();
                     defaultZoom.value = controller.currentZoom;
+                    if (_isCropping(data.settings)) scheduleRefit();
+                  },
+                  onViewSizeChanged: (viewSize, oldViewSize, controller) {
+                    if (oldViewSize == null || !cropping) return;
+                    // Must not change the matrix synchronously; this may run during build.
+                    resizeTimer.value?.cancel();
+                    resizeTimer.value = Timer(
+                      const Duration(milliseconds: 200),
+                      scheduleRefit,
+                    );
                   },
                   onPageChanged: (page) {
                     if (page == null) return;
@@ -239,11 +394,11 @@ class PdfReader extends HookConsumerWidget {
 class _PdfExtraControls extends StatelessWidget {
   const _PdfExtraControls({
     required this.controller,
-    required this.defaultZoom,
+    required this.onResetZoom,
   });
 
   final PdfViewerController controller;
-  final ValueNotifier<double> defaultZoom;
+  final VoidCallback onResetZoom;
 
   @override
   Widget build(BuildContext context) {
@@ -264,12 +419,7 @@ class _PdfExtraControls extends StatelessWidget {
           icon: const Icon(KoverIcons.zoomOut),
         ),
         IconButton(
-          onPressed: () {
-            controller.setZoom(
-              controller.centerPosition,
-              defaultZoom.value,
-            );
-          },
+          onPressed: onResetZoom,
           icon: const Icon(KoverIcons.zoomReset),
         ),
       ],

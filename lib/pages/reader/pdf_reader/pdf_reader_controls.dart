@@ -8,6 +8,7 @@ import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/choice_option.dart';
+import 'package:kover/widgets/settings/numeric_option.dart';
 import 'package:kover/widgets/settings/reader/navigation_gestures_option.dart';
 import 'package:kover/widgets/settings/reader/orientation_option.dart';
 import 'package:kover/widgets/settings/reader/progress_bar_option.dart';
@@ -83,6 +84,30 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                               .read(pdfSettings.notifier)
                               .setLockHorizontalPan(newValue),
                         ),
+                      NumericOption(
+                        icon: KoverIcons.margins,
+                        title: l.horizontalCrop,
+                        value: settings.horizontalCrop,
+                        min: PdfReaderSettingsLimits.cropMin,
+                        max: PdfReaderSettingsLimits.cropMax,
+                        step: PdfReaderSettingsLimits.cropStep,
+                        decimalPlaces: 0,
+                        onChanged: (newValue) async => await ref
+                            .read(pdfSettings.notifier)
+                            .setHorizontalCrop(newValue),
+                      ),
+                      NumericOption(
+                        icon: KoverIcons.verticalMargins,
+                        title: l.verticalCrop,
+                        value: settings.verticalCrop,
+                        min: PdfReaderSettingsLimits.cropMin,
+                        max: PdfReaderSettingsLimits.cropMax,
+                        step: PdfReaderSettingsLimits.cropStep,
+                        decimalPlaces: 0,
+                        onChanged: (newValue) async => await ref
+                            .read(pdfSettings.notifier)
+                            .setVerticalCrop(newValue),
+                      ),
                       if (SafePlatform.isMobile)
                         OrientationOption(seriesId: seriesId),
                       BooleanOption(
