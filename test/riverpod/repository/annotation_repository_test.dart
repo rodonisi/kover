@@ -1,7 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kover/api/openapi.swagger.dart';
-import 'package:kover/database/app_database.dart';
+import 'package:kover/database/app_database.dart' hide HighlightSlot;
 import 'package:kover/database/dao/annotation_dao.dart';
+import 'package:kover/database/dao/highlight_slot_dao.dart';
 import 'package:kover/riverpod/repository/annotation_repository.dart';
 import 'package:kover/sync/annotation_sync_operations.dart';
 import 'package:mockito/annotations.dart';
@@ -10,6 +11,7 @@ import 'package:mockito/mockito.dart';
 @GenerateNiceMocks([
   MockSpec<AppDatabase>(),
   MockSpec<AnnotationDao>(),
+  MockSpec<HighlightSlotDao>(),
   MockSpec<AnnotationSyncOperations>(),
 ])
 import 'annotation_repository_test.mocks.dart';
@@ -17,14 +19,17 @@ import 'annotation_repository_test.mocks.dart';
 void main() {
   late MockAppDatabase mockDb;
   late MockAnnotationDao mockDao;
+  late MockHighlightSlotDao mockSlotDao;
   late MockAnnotationSyncOperations mockClient;
   late AnnotationRepository repo;
 
   setUp(() {
     mockDb = MockAppDatabase();
     mockDao = MockAnnotationDao();
+    mockSlotDao = MockHighlightSlotDao();
     mockClient = MockAnnotationSyncOperations();
     when(mockDb.annotationDao).thenReturn(mockDao);
+    when(mockDb.highlightSlotDao).thenReturn(mockSlotDao);
     repo = AnnotationRepository(mockDb, mockClient);
   });
 
@@ -207,4 +212,40 @@ void main() {
       verify(mockDao.deleteByIds([7])).called(1);
     },
   );
+
+  test(
+    'replaceHighlightSlots maps colors and skips missing slot numbers',
+    () async {
+      when(mockSlotDao.replaceSlots(any)).thenAnswer((_) async {});
+
+      await repo.replaceHighlightSlots([
+        const HighlightSlot(id: 1),
+        const HighlightSlot(
+          id: 2,
+          slotNumber: 0,
+          color: RgbaColor(r: 10, g: 20, b: 30, a: 0.75),
+        ),
+      ]);
+
+      final captured =
+          verify(mockSlotDao.replaceSlots(captureAny)).captured.single
+              as Iterable<HighlightSlotsCompanion>;
+      final slots = captured.toList();
+
+      expect(slots, hasLength(1));
+      expect(slots.single.slotNumber.value, 0);
+      expect(slots.single.red.value, 10);
+      expect(slots.single.green.value, 20);
+      expect(slots.single.blue.value, 30);
+      expect(slots.single.alpha.value, 0.75);
+    },
+  );
+
+  test('watchHighlightSlots delegates to the slot dao', () async {
+    when(mockSlotDao.watchSlots()).thenAnswer((_) => const Stream.empty());
+
+    await repo.watchHighlightSlots().drain<void>();
+
+    verify(mockSlotDao.watchSlots()).called(1);
+  });
 }

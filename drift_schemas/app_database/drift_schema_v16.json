@@ -2894,6 +2894,85 @@
     },
     {
       "id": 23,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "highlight_slots",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "slot_number",
+            "getter_name": "slotNumber",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "red",
+            "getter_name": "red",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "green",
+            "getter_name": "green",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "blue",
+            "getter_name": "blue",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "alpha",
+            "getter_name": "alpha",
+            "moor_type": "double",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "unique_keys": [
+          [
+            "slot_number"
+          ]
+        ]
+      }
+    },
+    {
+      "id": 24,
       "references": [
         13
       ],
@@ -2979,7 +3058,7 @@
       }
     },
     {
-      "id": 24,
+      "id": 25,
       "references": [],
       "type": "table",
       "data": {
@@ -3036,7 +3115,7 @@
       }
     },
     {
-      "id": 25,
+      "id": 26,
       "references": [],
       "type": "table",
       "data": {
@@ -3143,9 +3222,9 @@
       }
     },
     {
-      "id": 26,
+      "id": 27,
       "references": [
-        25,
+        26,
         2
       ],
       "type": "table",
@@ -3216,9 +3295,9 @@
       }
     },
     {
-      "id": 27,
+      "id": 28,
       "references": [
-        25
+        26
       ],
       "type": "table",
       "data": {
@@ -3271,7 +3350,7 @@
       }
     },
     {
-      "id": 28,
+      "id": 29,
       "references": [],
       "type": "table",
       "data": {
@@ -3388,9 +3467,9 @@
       }
     },
     {
-      "id": 29,
+      "id": 30,
       "references": [
-        28,
+        29,
         13
       ],
       "type": "table",
@@ -3471,9 +3550,9 @@
       }
     },
     {
-      "id": 30,
+      "id": 31,
       "references": [
-        28
+        29
       ],
       "type": "table",
       "data": {
@@ -3526,7 +3605,7 @@
       }
     },
     {
-      "id": 31,
+      "id": 32,
       "references": [],
       "type": "table",
       "data": {
@@ -3611,7 +3690,7 @@
       }
     },
     {
-      "id": 32,
+      "id": 33,
       "references": [],
       "type": "table",
       "data": {
@@ -3692,9 +3771,9 @@
       }
     },
     {
-      "id": 33,
+      "id": 34,
       "references": [
-        32
+        33
       ],
       "type": "table",
       "data": {
@@ -3795,7 +3874,7 @@
       }
     },
     {
-      "id": 34,
+      "id": 35,
       "references": [
         2
       ],
@@ -3864,7 +3943,7 @@
       }
     },
     {
-      "id": 35,
+      "id": 36,
       "references": [],
       "type": "table",
       "data": {
@@ -3979,9 +4058,9 @@
       }
     },
     {
-      "id": 36,
+      "id": 37,
       "references": [
-        32,
+        33,
         2
       ],
       "type": "table",
@@ -4062,10 +4141,10 @@
       }
     },
     {
-      "id": 37,
+      "id": 38,
       "references": [
-        32,
-        28
+        33,
+        29
       ],
       "type": "table",
       "data": {
@@ -4145,9 +4224,9 @@
       }
     },
     {
-      "id": 38,
+      "id": 39,
       "references": [
-        32,
+        33,
         5
       ],
       "type": "table",
@@ -4228,7 +4307,7 @@
       }
     },
     {
-      "id": 39,
+      "id": 40,
       "references": [],
       "type": "table",
       "data": {
@@ -4534,6 +4613,15 @@
         {
           "dialect": "sqlite",
           "sql": "CREATE TABLE IF NOT EXISTS \"annotations\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"server_id\" INTEGER NULL, \"series_id\" INTEGER NOT NULL REFERENCES series (id) ON DELETE CASCADE, \"volume_id\" INTEGER NOT NULL REFERENCES volumes (id), \"chapter_id\" INTEGER NOT NULL REFERENCES chapters (id) ON DELETE CASCADE, \"library_id\" INTEGER NOT NULL REFERENCES libraries (id) ON DELETE CASCADE, \"owner_user_id\" INTEGER NOT NULL, \"owner_username\" TEXT NULL, \"x_path\" TEXT NULL, \"ending_x_path\" TEXT NULL, \"selected_text\" TEXT NULL, \"comment\" TEXT NULL, \"comment_html\" TEXT NULL, \"comment_plain_text\" TEXT NULL, \"chapter_title\" TEXT NULL, \"context\" TEXT NULL, \"highlight_count\" INTEGER NULL, \"contains_spoiler\" INTEGER NULL CHECK (\"contains_spoiler\" IN (0, 1)), \"page_number\" INTEGER NULL, \"selected_slot_index\" INTEGER NULL, \"likes\" TEXT NOT NULL DEFAULT '[]', \"series_name\" TEXT NULL, \"library_name\" TEXT NULL, \"age_rating\" INTEGER NULL, \"created\" INTEGER NULL, \"last_modified\" INTEGER NULL, \"dirty\" INTEGER NOT NULL DEFAULT 0 CHECK (\"dirty\" IN (0, 1)), \"removed\" INTEGER NOT NULL DEFAULT 0 CHECK (\"removed\" IN (0, 1)), UNIQUE (\"server_id\"));"
+        }
+      ]
+    },
+    {
+      "name": "highlight_slots",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"highlight_slots\" (\"id\" INTEGER NOT NULL, \"slot_number\" INTEGER NOT NULL, \"red\" INTEGER NULL, \"green\" INTEGER NULL, \"blue\" INTEGER NULL, \"alpha\" REAL NULL, UNIQUE (\"slot_number\"));"
         }
       ]
     },

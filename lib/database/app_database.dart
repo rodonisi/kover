@@ -9,6 +9,7 @@ import 'package:kover/database/dao/chapters_dao.dart';
 import 'package:kover/database/dao/collections_dao.dart';
 import 'package:kover/database/dao/download_dao.dart';
 import 'package:kover/database/dao/font_dao.dart';
+import 'package:kover/database/dao/highlight_slot_dao.dart';
 import 'package:kover/database/dao/libraries_dao.dart';
 import 'package:kover/database/dao/reader_dao.dart';
 import 'package:kover/database/dao/reading_lists_dao.dart';
@@ -29,6 +30,7 @@ import 'package:kover/database/tables/collections.dart';
 import 'package:kover/database/tables/dashboard.dart';
 import 'package:kover/database/tables/download.dart';
 import 'package:kover/database/tables/fonts.dart';
+import 'package:kover/database/tables/highlight_slots.dart';
 import 'package:kover/database/tables/libraries.dart';
 import 'package:kover/database/tables/on_deck_removal.dart';
 import 'package:kover/database/tables/progress.dart';
@@ -81,6 +83,7 @@ part 'app_database.g.dart';
     WantToRead,
     Bookmarks,
     Annotations,
+    HighlightSlots,
     DownloadedPages,
     ServerSettings,
     Collections,
@@ -110,6 +113,7 @@ part 'app_database.g.dart';
     BookDao,
     BookmarkDao,
     AnnotationDao,
+    HighlightSlotDao,
     DownloadDao,
     RiverpodDao,
     ServerSettingsDao,
@@ -166,6 +170,7 @@ class AppDatabase extends _$AppDatabase {
       await delete(serverSettings).go();
       await delete(sidenav).go();
       await delete(dashboard).go();
+      await delete(highlightSlots).go();
 
       await clearDownloads();
       await clearCovers();

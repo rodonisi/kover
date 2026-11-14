@@ -9521,6 +9521,364 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
   }
 }
 
+class HighlightSlots extends Table
+    with TableInfo<HighlightSlots, HighlightSlotsData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  HighlightSlots(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<int> slotNumber = GeneratedColumn<int>(
+    'slot_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<int> red = GeneratedColumn<int>(
+    'red',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
+  );
+  late final GeneratedColumn<int> green = GeneratedColumn<int>(
+    'green',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
+  );
+  late final GeneratedColumn<int> blue = GeneratedColumn<int>(
+    'blue',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
+  );
+  late final GeneratedColumn<double> alpha = GeneratedColumn<double>(
+    'alpha',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    slotNumber,
+    red,
+    green,
+    blue,
+    alpha,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'highlight_slots';
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {slotNumber},
+  ];
+  @override
+  HighlightSlotsData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HighlightSlotsData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      slotNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}slot_number'],
+      )!,
+      red: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}red'],
+      ),
+      green: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}green'],
+      ),
+      blue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}blue'],
+      ),
+      alpha: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}alpha'],
+      ),
+    );
+  }
+
+  @override
+  HighlightSlots createAlias(String alias) {
+    return HighlightSlots(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const ['UNIQUE(slot_number)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class HighlightSlotsData extends DataClass
+    implements Insertable<HighlightSlotsData> {
+  final int id;
+  final int slotNumber;
+  final int? red;
+  final int? green;
+  final int? blue;
+  final double? alpha;
+  const HighlightSlotsData({
+    required this.id,
+    required this.slotNumber,
+    this.red,
+    this.green,
+    this.blue,
+    this.alpha,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['slot_number'] = Variable<int>(slotNumber);
+    if (!nullToAbsent || red != null) {
+      map['red'] = Variable<int>(red);
+    }
+    if (!nullToAbsent || green != null) {
+      map['green'] = Variable<int>(green);
+    }
+    if (!nullToAbsent || blue != null) {
+      map['blue'] = Variable<int>(blue);
+    }
+    if (!nullToAbsent || alpha != null) {
+      map['alpha'] = Variable<double>(alpha);
+    }
+    return map;
+  }
+
+  HighlightSlotsCompanion toCompanion(bool nullToAbsent) {
+    return HighlightSlotsCompanion(
+      id: Value(id),
+      slotNumber: Value(slotNumber),
+      red: red == null && nullToAbsent ? const Value.absent() : Value(red),
+      green: green == null && nullToAbsent
+          ? const Value.absent()
+          : Value(green),
+      blue: blue == null && nullToAbsent ? const Value.absent() : Value(blue),
+      alpha: alpha == null && nullToAbsent
+          ? const Value.absent()
+          : Value(alpha),
+    );
+  }
+
+  factory HighlightSlotsData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HighlightSlotsData(
+      id: serializer.fromJson<int>(json['id']),
+      slotNumber: serializer.fromJson<int>(json['slotNumber']),
+      red: serializer.fromJson<int?>(json['red']),
+      green: serializer.fromJson<int?>(json['green']),
+      blue: serializer.fromJson<int?>(json['blue']),
+      alpha: serializer.fromJson<double?>(json['alpha']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'slotNumber': serializer.toJson<int>(slotNumber),
+      'red': serializer.toJson<int?>(red),
+      'green': serializer.toJson<int?>(green),
+      'blue': serializer.toJson<int?>(blue),
+      'alpha': serializer.toJson<double?>(alpha),
+    };
+  }
+
+  HighlightSlotsData copyWith({
+    int? id,
+    int? slotNumber,
+    Value<int?> red = const Value.absent(),
+    Value<int?> green = const Value.absent(),
+    Value<int?> blue = const Value.absent(),
+    Value<double?> alpha = const Value.absent(),
+  }) => HighlightSlotsData(
+    id: id ?? this.id,
+    slotNumber: slotNumber ?? this.slotNumber,
+    red: red.present ? red.value : this.red,
+    green: green.present ? green.value : this.green,
+    blue: blue.present ? blue.value : this.blue,
+    alpha: alpha.present ? alpha.value : this.alpha,
+  );
+  HighlightSlotsData copyWithCompanion(HighlightSlotsCompanion data) {
+    return HighlightSlotsData(
+      id: data.id.present ? data.id.value : this.id,
+      slotNumber: data.slotNumber.present
+          ? data.slotNumber.value
+          : this.slotNumber,
+      red: data.red.present ? data.red.value : this.red,
+      green: data.green.present ? data.green.value : this.green,
+      blue: data.blue.present ? data.blue.value : this.blue,
+      alpha: data.alpha.present ? data.alpha.value : this.alpha,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HighlightSlotsData(')
+          ..write('id: $id, ')
+          ..write('slotNumber: $slotNumber, ')
+          ..write('red: $red, ')
+          ..write('green: $green, ')
+          ..write('blue: $blue, ')
+          ..write('alpha: $alpha')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, slotNumber, red, green, blue, alpha);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HighlightSlotsData &&
+          other.id == this.id &&
+          other.slotNumber == this.slotNumber &&
+          other.red == this.red &&
+          other.green == this.green &&
+          other.blue == this.blue &&
+          other.alpha == this.alpha);
+}
+
+class HighlightSlotsCompanion extends UpdateCompanion<HighlightSlotsData> {
+  final Value<int> id;
+  final Value<int> slotNumber;
+  final Value<int?> red;
+  final Value<int?> green;
+  final Value<int?> blue;
+  final Value<double?> alpha;
+  final Value<int> rowid;
+  const HighlightSlotsCompanion({
+    this.id = const Value.absent(),
+    this.slotNumber = const Value.absent(),
+    this.red = const Value.absent(),
+    this.green = const Value.absent(),
+    this.blue = const Value.absent(),
+    this.alpha = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HighlightSlotsCompanion.insert({
+    required int id,
+    required int slotNumber,
+    this.red = const Value.absent(),
+    this.green = const Value.absent(),
+    this.blue = const Value.absent(),
+    this.alpha = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       slotNumber = Value(slotNumber);
+  static Insertable<HighlightSlotsData> custom({
+    Expression<int>? id,
+    Expression<int>? slotNumber,
+    Expression<int>? red,
+    Expression<int>? green,
+    Expression<int>? blue,
+    Expression<double>? alpha,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (slotNumber != null) 'slot_number': slotNumber,
+      if (red != null) 'red': red,
+      if (green != null) 'green': green,
+      if (blue != null) 'blue': blue,
+      if (alpha != null) 'alpha': alpha,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HighlightSlotsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? slotNumber,
+    Value<int?>? red,
+    Value<int?>? green,
+    Value<int?>? blue,
+    Value<double?>? alpha,
+    Value<int>? rowid,
+  }) {
+    return HighlightSlotsCompanion(
+      id: id ?? this.id,
+      slotNumber: slotNumber ?? this.slotNumber,
+      red: red ?? this.red,
+      green: green ?? this.green,
+      blue: blue ?? this.blue,
+      alpha: alpha ?? this.alpha,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (slotNumber.present) {
+      map['slot_number'] = Variable<int>(slotNumber.value);
+    }
+    if (red.present) {
+      map['red'] = Variable<int>(red.value);
+    }
+    if (green.present) {
+      map['green'] = Variable<int>(green.value);
+    }
+    if (blue.present) {
+      map['blue'] = Variable<int>(blue.value);
+    }
+    if (alpha.present) {
+      map['alpha'] = Variable<double>(alpha.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HighlightSlotsCompanion(')
+          ..write('id: $id, ')
+          ..write('slotNumber: $slotNumber, ')
+          ..write('red: $red, ')
+          ..write('green: $green, ')
+          ..write('blue: $blue, ')
+          ..write('alpha: $alpha, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class DownloadedPages extends Table
     with TableInfo<DownloadedPages, DownloadedPagesData> {
   @override
@@ -14804,6 +15162,7 @@ class DatabaseAtV16 extends GeneratedDatabase {
   late final WantToRead wantToRead = WantToRead(this);
   late final Bookmarks bookmarks = Bookmarks(this);
   late final Annotations annotations = Annotations(this);
+  late final HighlightSlots highlightSlots = HighlightSlots(this);
   late final DownloadedPages downloadedPages = DownloadedPages(this);
   late final ServerSettings serverSettings = ServerSettings(this);
   late final Collections collections = Collections(this);
@@ -14852,6 +15211,7 @@ class DatabaseAtV16 extends GeneratedDatabase {
     wantToRead,
     bookmarks,
     annotations,
+    highlightSlots,
     downloadedPages,
     serverSettings,
     collections,

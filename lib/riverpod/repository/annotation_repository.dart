@@ -1,7 +1,8 @@
 import 'package:drift/drift.dart';
-import 'package:kover/api/openapi.swagger.dart';
+import 'package:kover/api/openapi.swagger.dart' as api;
 import 'package:kover/database/app_database.dart';
 import 'package:kover/mapping/dto/annotation_dto_mappings.dart';
+import 'package:kover/mapping/dto/highlight_slot_dto_mappings.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/annotation_sync_operations.dart';
@@ -229,7 +230,7 @@ class AnnotationRepository(
   /// Deletes local rows that are clean and whose server id is absent from
   /// [remote]. Dirty rows are never deleted: they hold unsynced local intent.
   Future<void> _deleteMissingRemote(
-    Iterable<AnnotationDto> remote, {
+    Iterable<api.AnnotationDto> remote, {
     int? chapterId,
   }) async {
     final remoteIds = remote.map((dto) => dto.id).whereType<int>().toSet();
@@ -251,7 +252,7 @@ class AnnotationRepository(
     }
   }
 
-  Future<void> _mergeRemote(Iterable<AnnotationDto> remote) async {
+  Future<void> _mergeRemote(Iterable<api.AnnotationDto> remote) async {
     final existingChapterIds = (await _db.annotationDao.getExistingChapterIds())
         .toSet();
 
@@ -282,5 +283,18 @@ class AnnotationRepository(
         dto.toAnnotationCompanion(localId: local?.id),
       );
     }
+  }
+
+  /// Watch all locally stored highlight slots, ordered by slot number.
+  Stream<List<HighlightSlot>> watchHighlightSlots() {
+    return _db.highlightSlotDao.watchSlots();
+  }
+
+  /// Replace all locally stored highlight slots with [slots].
+  Future<void> replaceHighlightSlots(Iterable<api.HighlightSlot> slots) {
+    final companions = slots
+        .map((slot) => slot.toHighlightSlotCompanion())
+        .whereType<HighlightSlotsCompanion>();
+    return _db.highlightSlotDao.replaceSlots(companions);
   }
 }

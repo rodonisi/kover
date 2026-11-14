@@ -9053,6 +9053,7 @@ final class Schema16 extends i0.VersionedSchema {
     wantToRead,
     bookmarks,
     annotations,
+    highlightSlots,
     downloadedPages,
     serverSettings,
     collections,
@@ -9468,6 +9469,24 @@ final class Schema16 extends i0.VersionedSchema {
         _column_133,
         _column_64,
         _column_114,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape49 highlightSlots = Shape49(
+    source: i0.VersionedTable(
+      entityName: 'highlight_slots',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['UNIQUE(slot_number)'],
+      columns: [
+        _column_4,
+        _column_134,
+        _column_135,
+        _column_136,
+        _column_137,
+        _column_138,
       ],
       attachedDatabase: database,
     ),
@@ -9926,6 +9945,63 @@ i1.GeneratedColumn<int> _column_133(String aliasedName) =>
       aliasedName,
       true,
       type: i1.DriftSqlType.int,
+      $customConstraints: 'NULL',
+    );
+
+class Shape49 extends i0.VersionedTable {
+  Shape49({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get slotNumber =>
+      columnsByName['slot_number']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get red =>
+      columnsByName['red']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get green =>
+      columnsByName['green']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get blue =>
+      columnsByName['blue']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get alpha =>
+      columnsByName['alpha']! as i1.GeneratedColumn<double>;
+}
+
+i1.GeneratedColumn<int> _column_134(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'slot_number',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL',
+    );
+i1.GeneratedColumn<int> _column_135(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'red',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<int> _column_136(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'green',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<int> _column_137(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'blue',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<double> _column_138(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'alpha',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.double,
       $customConstraints: 'NULL',
     );
 i0.MigrationStepWithVersion migrationSteps({

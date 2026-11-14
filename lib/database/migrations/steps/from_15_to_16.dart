@@ -9,5 +9,6 @@ Future<void> migrateFrom15To16(
 ) async {
   await db.transaction(() async {
     await m.createTable(schema.annotations);
+    await m.createTable(schema.highlightSlots);
   });
 }

@@ -13,20 +13,50 @@ import 'package:kover/models/user_model.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
+import 'package:kover/riverpod/repository/annotation_repository.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-@GenerateNiceMocks([MockSpec<Openapi>()])
+@GenerateNiceMocks([
+  MockSpec<Openapi>(),
+  MockSpec<AnnotationRepository>(),
+])
 import 'auth_test.mocks.dart';
 
 void main() {
+  late MockAnnotationRepository mockAnnotationRepository;
+
   setUpAll(() {
     final dummyUser = const UserDto();
     provideDummy<Response<UserDto>>(
       Response(http.Response('', 200), dummyUser),
     );
   });
+
+  setUp(() {
+    mockAnnotationRepository = MockAnnotationRepository();
+    when(mockAnnotationRepository.replaceHighlightSlots(any))
+        .thenAnswer((_) async {});
+  });
+
+  UserPreferencesDto preferences({List<HighlightSlot> slots = const []}) {
+    return UserPreferencesDto(
+      theme: const SiteThemeDto(),
+      blurUnreadSummaries: false,
+      promptForDownloadSize: false,
+      noTransitions: false,
+      collapseSeriesRelationships: false,
+      locale: 'en',
+      colorScapeEnabled: false,
+      dataSaver: false,
+      promptForRereadsAfter: 0,
+      customKeyBinds: const UserPreferencesDto$CustomKeyBinds(),
+      bookReaderHighlightSlots: slots,
+      socialPreferences: const AppUserSocialPreferences(),
+      opdsPreferences: const AppUserOpdsPreferences(),
+    );
+  }
 
   group('CurrentUser', () {
     test(
@@ -89,19 +119,25 @@ void main() {
               ),
             ),
             restClientProvider.overrideWith((_) => mockOpenapi),
+            annotationRepositoryProvider.overrideWithValue(
+              mockAnnotationRepository,
+            ),
           ],
         );
 
-        final userDto = const UserDto(
+        const slot = HighlightSlot(
+          id: 1,
+          slotNumber: 0,
+          color: RgbaColor(r: 255, g: 0, b: 0, a: 1),
+        );
+        final userDto = UserDto(
           id: 0,
           username: 'test_user',
+          preferences: preferences(slots: const [slot]),
         );
 
         when(
-          mockOpenapi.apiPluginAuthenticatePost(
-            apiKey: anyNamed('apiKey'),
-            pluginName: anyNamed('pluginName'),
-          ),
+          mockOpenapi.apiAccountGet(),
         ).thenAnswer(
           (_) async => Response(http.Response('', 200), userDto),
         );
@@ -112,6 +148,57 @@ void main() {
           completion(equals(UserModel.fromUserDto(userDto))),
         );
         async.flushMicrotasks();
+
+        final stored = verify(
+          mockAnnotationRepository.replaceHighlightSlots(captureAny),
+        ).captured.single;
+        expect(stored, [slot]);
+      });
+    });
+
+    test('when slot storage fails, should still fetch user successfully', () {
+      fakeAsync((async) {
+        final mockOpenapi = MockOpenapi();
+        final container = ProviderContainer.test(
+          overrides: [
+            storageProvider.overrideWith(
+              (ref) => Storage<String, String>.inMemory(),
+            ),
+            credentialsProvider.overrideWithBuild(
+              (_, _) => const CredentialsState(
+                url: 'https://example.com',
+                apiKey: 'valid_api_key',
+              ),
+            ),
+            restClientProvider.overrideWith((_) => mockOpenapi),
+            annotationRepositoryProvider.overrideWithValue(
+              mockAnnotationRepository,
+            ),
+          ],
+        );
+
+        final userDto = UserDto(
+          id: 0,
+          username: 'test_user',
+          preferences: preferences(),
+        );
+
+        when(
+          mockOpenapi.apiAccountGet(),
+        ).thenAnswer(
+          (_) async => Response(http.Response('', 200), userDto),
+        );
+        when(mockAnnotationRepository.replaceHighlightSlots(any))
+            .thenThrow(Exception('db'));
+
+        final user = container.read(currentUserProvider.future);
+        expect(
+          user,
+          completion(equals(UserModel.fromUserDto(userDto))),
+        );
+        async.flushMicrotasks();
+
+        verify(mockAnnotationRepository.replaceHighlightSlots(any)).called(1);
       });
     });
 
@@ -143,13 +230,13 @@ void main() {
                 ),
               ),
               restClientProvider.overrideWith((_) => mockOpenapi),
+              annotationRepositoryProvider.overrideWithValue(
+                mockAnnotationRepository,
+              ),
             ],
           );
           when(
-            mockOpenapi.apiPluginAuthenticatePost(
-              apiKey: anyNamed('apiKey'),
-              pluginName: anyNamed('pluginName'),
-            ),
+            mockOpenapi.apiAccountGet(),
           ).thenAnswer(
             (_) async => Response(http.Response('', 500), null),
           );
@@ -178,14 +265,14 @@ void main() {
                 ),
               ),
               restClientProvider.overrideWith((_) => mockOpenapi),
+              annotationRepositoryProvider.overrideWithValue(
+                mockAnnotationRepository,
+              ),
             ],
           );
 
           when(
-            mockOpenapi.apiPluginAuthenticatePost(
-              apiKey: anyNamed('apiKey'),
-              pluginName: anyNamed('pluginName'),
-            ),
+            mockOpenapi.apiAccountGet(),
           ).thenAnswer(
             (_) async =>
                 throw const HandshakeException('Certificate is invalid'),
@@ -199,10 +286,7 @@ void main() {
             LoginStatus.certificateError,
           );
           verify(
-            mockOpenapi.apiPluginAuthenticatePost(
-              apiKey: anyNamed('apiKey'),
-              pluginName: anyNamed('pluginName'),
-            ),
+            mockOpenapi.apiAccountGet(),
           ).called(1);
         });
       },
@@ -225,16 +309,16 @@ void main() {
               ),
               credentialsProvider.overrideWithBuild((_, _) => credentials),
               restClientProvider.overrideWith((_) => mockOpenapi),
+              annotationRepositoryProvider.overrideWithValue(
+                mockAnnotationRepository,
+              ),
             ],
           );
           final userDto = const UserDto(id: 0, username: 'test_user');
           var attempts = 0;
 
           when(
-            mockOpenapi.apiPluginAuthenticatePost(
-              apiKey: anyNamed('apiKey'),
-              pluginName: anyNamed('pluginName'),
-            ),
+            mockOpenapi.apiAccountGet(),
           ).thenAnswer((_) async {
             if (attempts++ == 0) {
               return Response(http.Response('', 200), userDto);
@@ -291,6 +375,9 @@ void main() {
                 ),
               ),
               restClientProvider.overrideWith((_) => mockOpenapi),
+              annotationRepositoryProvider.overrideWithValue(
+                mockAnnotationRepository,
+              ),
             ],
           );
 
@@ -300,10 +387,7 @@ void main() {
           );
 
           when(
-            mockOpenapi.apiPluginAuthenticatePost(
-              apiKey: anyNamed('apiKey'),
-              pluginName: anyNamed('pluginName'),
-            ),
+            mockOpenapi.apiAccountGet(),
           ).thenAnswer(
             (_) async => Response(http.Response('', 200), userDto),
           );
@@ -348,14 +432,14 @@ void main() {
                 (_, _) => credentials,
               ),
               restClientProvider.overrideWith((_) => mockOpenapi),
+              annotationRepositoryProvider.overrideWithValue(
+                mockAnnotationRepository,
+              ),
             ],
           );
 
           when(
-            mockOpenapi.apiPluginAuthenticatePost(
-              apiKey: anyNamed('apiKey'),
-              pluginName: anyNamed('pluginName'),
-            ),
+            mockOpenapi.apiAccountGet(),
           ).thenAnswer(
             (_) async => Response(http.Response('', 401), null),
           );
@@ -408,14 +492,14 @@ void main() {
                 ),
               ),
               restClientProvider.overrideWith((_) => mockOpenapi),
+              annotationRepositoryProvider.overrideWithValue(
+                mockAnnotationRepository,
+              ),
             ],
           );
 
           when(
-            mockOpenapi.apiPluginAuthenticatePost(
-              apiKey: anyNamed('apiKey'),
-              pluginName: anyNamed('pluginName'),
-            ),
+            mockOpenapi.apiAccountGet(),
           ).thenAnswer(
             (_) async => Response(http.Response('', 500), null),
           );

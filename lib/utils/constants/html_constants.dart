@@ -14,4 +14,5 @@ sealed class HtmlConstants {
   static const String kavitaPageAttribute = 'kavita-page';
   static const String kavitaPartAttribute = 'kavita-part';
   static const String kavitaNoteRefAttribute = 'kavita-note-ref';
+  static const String kavitaHighlightElementTag = 'app-epub-highlight';
 }
