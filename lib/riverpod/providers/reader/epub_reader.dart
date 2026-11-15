@@ -12,17 +12,20 @@ part 'epub_reader.freezed.dart';
 part 'epub_reader.g.dart';
 
 @freezed
+class EpubSubpagePosition({required final int subpage, final String? scrollId})
+    with _$EpubSubpagePosition;
+
+@freezed
 class EpubNavigationState({
   required final int page,
   required final int totalPages,
-  final Map<int, int> subpagePositions = const {},
+  final Map<int, EpubSubpagePosition> subpagePositions = const {},
   final Map<int, int> subpageCounts = const {},
   final bool ready = false,
-  final bool fromObserver = false,
-  final String? scrollId,
   final ({int page, String anchor})? pendingAnchor,
 }) with _$EpubNavigationState {
-  int get subpage => subpagePositions[page] ?? 0;
+  int get subpage => subpagePositions[page]?.subpage ?? 0;
+  String? get scrollId => subpagePositions[page]?.scrollId;
   int get totalSubpages => subpageCounts[page] ?? 0;
 }
 
@@ -30,7 +33,7 @@ class EpubNavigationState({
 class EpubNavigation extends _$EpubNavigation {
   int? _pendingLastSubpagePage;
   var _spreads = false;
-  var _hasUserNavigated = false;
+  var _positionRestored = false;
   int get _step => _spreads ? 2 : 1;
 
   @override
@@ -69,23 +72,16 @@ class EpubNavigation extends _$EpubNavigation {
   }
 
   void updateSubpageCount(int page, int totalSubpages) {
-    final current = state.value;
-    if (current == null) return;
+    final current = state.requireValue;
 
     final subpageCounts = {...current.subpageCounts, page: totalSubpages};
     final subpagePositions = {...current.subpagePositions};
 
-    if (_pendingLastSubpagePage == page) {
-      _pendingLastSubpagePage = null;
-      if (totalSubpages > 0) {
-        subpagePositions[page] = totalSubpages - 1;
-      }
-    } else if (page < current.page && totalSubpages > 0) {
-      subpagePositions[page] = totalSubpages - 1;
+    if ((page < current.page || page == _pendingLastSubpagePage) &&
+        totalSubpages > 0) {
+      subpagePositions[page] = EpubSubpagePosition(subpage: totalSubpages - 1);
     }
 
-    // Avoid redundant state writes: listeners would sync the same positions
-    // back into the page controllers and start a notification loop.
     if (current.ready &&
         current.subpageCounts == subpageCounts &&
         current.subpagePositions == subpagePositions) {
@@ -101,21 +97,40 @@ class EpubNavigation extends _$EpubNavigation {
     );
   }
 
+  void restorePosition({
+    required int page,
+    required int subpage,
+    String? scrollId,
+  }) {
+    updateSubpagePosition(page: page, subpage: subpage, scrollId: scrollId);
+    if (page == state.value?.page) _positionRestored = true;
+  }
+
+  void updateSubpagePosition({
+    required int page,
+    required int subpage,
+    String? scrollId,
+  }) {
+    final current = state.requireValue;
+
+    final subpagePositions = {
+      ...current.subpagePositions,
+      page: EpubSubpagePosition(subpage: subpage, scrollId: scrollId),
+    };
+
+    state = AsyncData(
+      current.copyWith(
+        subpagePositions: subpagePositions,
+      ),
+    );
+  }
+
   void _handleProgress() {
     listenSelf((prev, next) {
       next.whenData((data) async {
-        final page = data.page;
-        final isSamePosition =
-            prev?.value?.page == page &&
-            prev?.value?.subpagePositions[page] ==
-                data.subpagePositions[page] &&
-            prev?.value?.scrollId == data.scrollId;
-
-        if (!data.ready || isSamePosition) return;
-
         // Opening a chapter restores its saved position. That restoration is
         // not a reading action and must not rewrite progress.
-        if (data.fromObserver && !_hasUserNavigated) return;
+        if (!_positionRestored || data.scrollId == null) return;
 
         final isLastSubpage = _spreads
             ? data.subpage >= data.totalSubpages - 2
@@ -135,18 +150,19 @@ class EpubNavigation extends _$EpubNavigation {
         }
 
         try {
-          final reader = ref.read(
-            readerProvider(
-              seriesId: seriesId,
-              chapterId: chapterId,
-              readingListId: readingListId,
-            ).notifier,
-          );
-          await reader.saveProgress(
-            page: data.page,
-            scrollId: data.scrollId,
-            handleCompletion: false,
-          );
+          await ref
+              .read(
+                readerProvider(
+                  seriesId: seriesId,
+                  chapterId: chapterId,
+                  readingListId: readingListId,
+                ).notifier,
+              )
+              .saveProgress(
+                page: data.page,
+                scrollId: data.scrollId,
+                handleCompletion: false,
+              );
         } catch (e, stacktrace) {
           log.error(
             'handleProgress save failed',
@@ -176,7 +192,7 @@ class EpubNavigation extends _$EpubNavigation {
             if (current.page != next && !isSequentialBack) {
               // Forward and non-sequential jumps always start at the top of
               // the target page.
-              subpagePositions[next] = 0;
+              subpagePositions[next] = EpubSubpagePosition(subpage: 0);
             }
 
             final pendingAnchor = current.pendingAnchor?.page == next
@@ -188,8 +204,6 @@ class EpubNavigation extends _$EpubNavigation {
                 page: next,
                 subpagePositions: subpagePositions,
                 ready: cachedCount != null,
-                fromObserver: false,
-                scrollId: null,
                 pendingAnchor: pendingAnchor,
               ),
             );
@@ -222,7 +236,7 @@ class EpubNavigation extends _$EpubNavigation {
     }
 
     if (page != current.page) {
-      _hasUserNavigated = true;
+      _positionRestored = true;
     }
 
     final pendingAnchor = anchor != null
@@ -278,21 +292,10 @@ class EpubNavigation extends _$EpubNavigation {
     state = AsyncData(current.copyWith(pendingAnchor: null));
   }
 
-  Future<void> jumpToSubpage(
-    int subpage, {
-    bool fromObserver = false,
-    bool restored = false,
-    String? scrollId,
-    int? page,
-  }) async {
-    final current = await future;
-
-    if (page != null && current.page != page) return;
+  Future<void> _jumpToSubpage(int subpage) async {
+    final current = state.value ?? await future;
     if (!current.ready) return;
-
-    if (!restored) {
-      _hasUserNavigated = true;
-    }
+    _positionRestored = true;
 
     if (subpage < 0) {
       await jumpToPage(current.page - 1);
@@ -306,40 +309,40 @@ class EpubNavigation extends _$EpubNavigation {
 
     final subpagePositions = {
       ...current.subpagePositions,
-      current.page: subpage,
+      current.page: EpubSubpagePosition(subpage: subpage),
     };
 
-    state = AsyncData(
-      current.copyWith(
-        subpagePositions: subpagePositions,
-        fromObserver: fromObserver || restored,
-        scrollId: scrollId,
-        pendingAnchor: current.pendingAnchor?.page == current.page
-            ? null
-            : current.pendingAnchor,
-      ),
+    final next = current.copyWith(
+      subpagePositions: subpagePositions,
+      pendingAnchor: current.pendingAnchor?.page == current.page
+          ? null
+          : current.pendingAnchor,
     );
+
+    if (next == current) return;
+
+    state = AsyncData(next);
   }
 
   Future<void> nextPage() async {
-    final current = await future;
+    final current = state.value ?? await future;
 
     if (!current.ready) {
       await jumpToPage(current.page + 1, force: true);
       return;
     }
 
-    await jumpToSubpage(current.subpage + _step);
+    await _jumpToSubpage(current.subpage + _step);
   }
 
   Future<void> previousPage() async {
-    final current = await future;
+    final current = state.value ?? await future;
 
     if (!current.ready) {
       await jumpToPage(current.page - 1, force: true);
       return;
     }
 
-    await jumpToSubpage(current.subpage - _step);
+    await _jumpToSubpage(current.subpage - _step);
   }
 }

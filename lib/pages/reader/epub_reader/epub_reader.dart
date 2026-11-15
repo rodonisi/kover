@@ -240,17 +240,20 @@ class _Page extends HookConsumerWidget {
         onSelectionChanged?.call(false);
         ref
             .read(nav.notifier)
-            .jumpToSubpage(subpage, scrollId: scrollId, page: page);
+            .updateSubpagePosition(
+              page: page,
+              subpage: subpage,
+              scrollId: scrollId,
+            );
       },
       onSubpageRestored: (subpage, scrollId) {
         onSelectionChanged?.call(false);
         ref
             .read(nav.notifier)
-            .jumpToSubpage(
-              subpage,
-              scrollId: scrollId,
+            .restorePosition(
               page: page,
-              restored: true,
+              subpage: subpage,
+              scrollId: scrollId,
             );
       },
       onSubpagesCountChanged: (count) {
@@ -288,27 +291,17 @@ class _Page extends HookConsumerWidget {
       return null;
     }, [controller, pendingAnchor]);
 
-    final navState = ref.read(nav).value;
-    final navSubpage = navState?.subpagePositions[page];
-    if (navSubpage != null) {
-      controller.jumpToSubpage(navSubpage);
-    }
-
     ref.listen(
       nav,
       (previous, next) {
         next.whenData((next) {
           if (next.pendingAnchor?.page == page) return;
 
-          // The active page follows the navigation position directly. Other
-          // mounted pages follow their own remembered position.
-          final subpage = page == next.page
-              ? next.subpage
-              : next.subpagePositions[page];
-          if (subpage == null) return;
+          final position = next.subpagePositions[page];
+          if (position == null) return;
 
           controller.jumpToSubpage(
-            subpage,
+            position.subpage,
             animate: previous?.value?.page == next.page && next.page == page,
           );
         });

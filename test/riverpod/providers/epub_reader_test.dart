@@ -107,23 +107,22 @@ void main() {
         expect(_state(container).totalSubpages, 4);
       });
 
-      test('same-page subpage navigation is accepted', () async {
+      test('same-page subpage navigation is accepted', () {
         notifier.updateSubpageCount(0, 3);
 
-        await notifier.jumpToSubpage(2, page: 0);
-        await container.pump();
+        notifier.updateSubpagePosition(page: 0, subpage: 2);
 
         expect(_state(container).subpage, 2);
       });
 
-      test('stale-page subpage navigation is ignored', () async {
+      test('stale-page update does not move the current subpage', () async {
         notifier.updateSubpageCount(1, 4);
         await notifier.jumpToPage(1, force: true);
         await container.pump();
-        await notifier.jumpToSubpage(2, page: 1);
+        notifier.updateSubpagePosition(page: 1, subpage: 2);
         await container.pump();
 
-        await notifier.jumpToSubpage(1, page: 0);
+        notifier.updateSubpagePosition(page: 0, subpage: 1);
         await container.pump();
 
         expect(_state(container).subpage, 2);
@@ -138,7 +137,7 @@ void main() {
 
         // The previous page is positioned while it is out of view.
         notifier.updateSubpageCount(0, 3);
-        expect(_state(container).subpagePositions[0], 2);
+        expect(_state(container).subpagePositions[0]?.subpage, 2);
 
         await notifier.jumpToPage(0);
         await container.pump();
@@ -166,7 +165,7 @@ void main() {
         notifier.updateSubpageCount(1, 5);
         await notifier.jumpToPage(1, force: true);
         await container.pump();
-        await notifier.jumpToSubpage(2, page: 1);
+        notifier.updateSubpagePosition(page: 1, subpage: 2);
         await container.pump();
 
         notifier.updateSubpageCount(0, 3);
@@ -194,7 +193,7 @@ void main() {
           isFalse,
         );
         expect(positions[0], isNull);
-        expect(_state(container).subpagePositions[0], 2);
+        expect(_state(container).subpagePositions[0]?.subpage, 2);
       });
 
       test('nextPage force-jumps while measuring', () async {
@@ -285,12 +284,7 @@ void main() {
       test('opening restoration does not save', () async {
         notifier.updateSubpageCount(0, 3);
 
-        await notifier.jumpToSubpage(
-          0,
-          scrollId: 'opening',
-          page: 0,
-          restored: true,
-        );
+        notifier.restorePosition(page: 0, subpage: 0, scrollId: 'opening');
         await container.pump();
 
         verifyNever(
@@ -304,8 +298,13 @@ void main() {
 
       test('subpage navigation saves its scroll id', () async {
         notifier.updateSubpageCount(0, 3);
+        notifier.restorePosition(page: 0, subpage: 0);
 
-        await notifier.jumpToSubpage(1, scrollId: 'reading', page: 0);
+        notifier.updateSubpagePosition(
+          page: 0,
+          subpage: 1,
+          scrollId: 'reading',
+        );
         await container.pump();
 
         verify(
@@ -323,12 +322,7 @@ void main() {
         notifier.updateSubpageCount(1, 2);
         await container.pump();
 
-        await notifier.jumpToSubpage(
-          0,
-          scrollId: 'resume',
-          page: 1,
-          restored: true,
-        );
+        notifier.restorePosition(page: 1, subpage: 0, scrollId: 'resume');
         await container.pump();
 
         verify(
