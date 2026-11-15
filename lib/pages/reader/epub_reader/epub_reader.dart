@@ -110,7 +110,7 @@ class EpubReader extends HookConsumerWidget {
                 });
 
                 final respectSafeAreas =
-                    data.mode == .vertical && !ignoreSafeAreas;
+                    data.mode != .vertical || !ignoreSafeAreas;
 
                 return Directionality(
                   textDirection: data.commonSettings.readDirection
