@@ -116,20 +116,11 @@ class Reader extends _$Reader {
     String? scrollId,
     bool handleCompletion = true,
   }) async {
-    final current = await future;
+    final current = state.value ?? await future;
 
     if (!ref.mounted) return;
 
     final targetPage = page.clamp(0, current.totalPages - 1);
-
-    // Restoring the position a chapter was opened at is not a reading action
-    // and must not create or rewrite a progress entry.
-    if (targetPage == current.initialPage && scrollId == current.bookScrollId) {
-      _saveProgressDebounce?.cancel();
-      _saveProgressKeepAlive?.close();
-      _saveProgressKeepAlive = null;
-      return;
-    }
 
     _saveProgressDebounce?.cancel();
     _saveProgressKeepAlive?.close();

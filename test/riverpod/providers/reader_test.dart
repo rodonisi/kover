@@ -39,7 +39,7 @@ class _FakeReaderRepository extends Mock implements ReaderRepository {
 }
 
 void main() {
-  test('does not persist the position a chapter was opened at', () async {
+  test('persists progress for the page it is called with', () async {
     final repository = _FakeReaderRepository();
 
     final container = ProviderContainer.test(
@@ -74,11 +74,11 @@ void main() {
     await notifier.saveProgress(page: 0);
     await Future<void>.delayed(const Duration(milliseconds: 150));
 
-    expect(repository.saves, isEmpty);
+    expect(repository.saves.single.pageNum, 0);
 
     await notifier.saveProgress(page: 1);
     await Future<void>.delayed(const Duration(milliseconds: 150));
 
-    expect(repository.saves.single.pageNum, 1);
+    expect(repository.saves.last.pageNum, 1);
   });
 }

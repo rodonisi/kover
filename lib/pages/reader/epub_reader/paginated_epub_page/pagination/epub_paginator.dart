@@ -48,7 +48,6 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
       var last = cursor;
       while (last + 1 < units.length && units[last + 1].pageEndBottom < limit) {
         last++;
-        _nodeIndexSubpage[units[last].nodeIndex] = _subpages.length;
       }
 
       final next = last + 1;
@@ -61,6 +60,14 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
           startsMidBlock: startsMidBlock,
         ),
       );
+
+      final subpageIndex = _subpages.length - 1;
+      for (var i = cursor; i <= last; i++) {
+        _nodeIndexSubpage.putIfAbsent(
+          units[i].nodeIndex,
+          () => subpageIndex,
+        );
+      }
 
       if (next >= units.length) break;
 

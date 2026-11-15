@@ -280,7 +280,7 @@ void main() {
 
       if (sub.read().value?.subpage != 0) {
         log.debug('jumping to subpage 0');
-        await container
+        container
             .read(
               epubNavigationProvider(
                 seriesId: targetSeries,
@@ -288,7 +288,7 @@ void main() {
                 readingListId: null,
               ).notifier,
             )
-            .jumpToSubpage(0);
+            .updateSubpagePosition(page: targetPage, subpage: 0);
         await tester.pumpAndSettle();
       }
 
