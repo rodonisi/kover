@@ -95,7 +95,6 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
         ),
         .asc(_volumeSortKey),
         .asc(chapters.sortOrder),
-        .asc(chapters.id),
       ])
       ..limit(1);
   }
@@ -331,8 +330,6 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
       final volumeSortKeyOfCurrent = _volumeSortKeyOf(chapterId);
       final volumeSortKey = _volumeSortKey;
       final sameVolume = volumeSortKey.equalsExp(volumeSortKeyOfCurrent);
-      final sameSortOrder =
-          sameVolume & chapters.sortOrder.equalsExp(sortOrderOfCurrent);
 
       final query =
           select(chapters).join([
@@ -344,14 +341,11 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
                       (sameVolume &
                           chapters.sortOrder.isSmallerThan(
                             sortOrderOfCurrent,
-                          )) |
-                      (sameSortOrder &
-                          chapters.id.isSmallerThanValue(chapterId))),
+                          ))),
             )
             ..orderBy([
               .desc(volumeSortKey),
               .desc(chapters.sortOrder),
-              .desc(chapters.id),
             ])
             ..limit(1);
 
@@ -400,8 +394,6 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
       final volumeSortKeyOfCurrent = _volumeSortKeyOf(chapterId);
       final volumeSortKey = _volumeSortKey;
       final sameVolume = volumeSortKey.equalsExp(volumeSortKeyOfCurrent);
-      final sameSortOrder =
-          sameVolume & chapters.sortOrder.equalsExp(sortOrderOfCurrent);
 
       final query =
           select(chapters).join([
@@ -413,14 +405,11 @@ class ReaderDao extends DatabaseAccessor<AppDatabase> with _$ReaderDaoMixin {
                       (sameVolume &
                           chapters.sortOrder.isBiggerThan(
                             sortOrderOfCurrent,
-                          )) |
-                      (sameSortOrder &
-                          chapters.id.isBiggerThanValue(chapterId))),
+                          ))),
             )
             ..orderBy([
               .asc(volumeSortKey),
               .asc(chapters.sortOrder),
-              .asc(chapters.id),
             ])
             ..limit(1);
 
