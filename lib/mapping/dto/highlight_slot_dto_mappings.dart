@@ -9,8 +9,10 @@ extension HighlightSlotDtoMappings on HighlightSlot {
     final number = slotNumber;
     if (number == null) return null;
 
+    final color = this.color;
+
     return HighlightSlotsCompanion.insert(
-      slotNumber: number,
+      slotNumber: Value(number),
       red: Value(color?.r),
       green: Value(color?.g),
       blue: Value(color?.b),

@@ -8306,7 +8306,7 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL REFERENCES volumes(id)',
+    $customConstraints: 'NOT NULL REFERENCES volumes(id)ON DELETE CASCADE',
   );
   late final GeneratedColumn<int> chapterId = GeneratedColumn<int>(
     'chapter_id',
@@ -8323,6 +8323,14 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL REFERENCES libraries(id)ON DELETE CASCADE',
+  );
+  late final GeneratedColumn<int> pageNumber = GeneratedColumn<int>(
+    'page_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<int> ownerUserId = GeneratedColumn<int>(
     'owner_user_id',
@@ -8388,14 +8396,6 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
     requiredDuringInsert: false,
     $customConstraints: 'NULL',
   );
-  late final GeneratedColumn<String> chapterTitle = GeneratedColumn<String>(
-    'chapter_title',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
-  );
   late final GeneratedColumn<String> context = GeneratedColumn<String>(
     'context',
     aliasedName,
@@ -8420,21 +8420,13 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
     requiredDuringInsert: false,
     $customConstraints: 'NULL CHECK (contains_spoiler IN (0, 1))',
   );
-  late final GeneratedColumn<int> pageNumber = GeneratedColumn<int>(
-    'page_number',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
-  );
   late final GeneratedColumn<int> selectedSlotIndex = GeneratedColumn<int>(
     'selected_slot_index',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<String> likes = GeneratedColumn<String>(
     'likes',
@@ -8444,22 +8436,6 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
     requiredDuringInsert: false,
     $customConstraints: 'NOT NULL DEFAULT \'[]\'',
     defaultValue: const CustomExpression('\'[]\''),
-  );
-  late final GeneratedColumn<String> seriesName = GeneratedColumn<String>(
-    'series_name',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
-  );
-  late final GeneratedColumn<String> libraryName = GeneratedColumn<String>(
-    'library_name',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
   );
   late final GeneratedColumn<int> ageRating = GeneratedColumn<int>(
     'age_rating',
@@ -8511,6 +8487,7 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
     volumeId,
     chapterId,
     libraryId,
+    pageNumber,
     ownerUserId,
     ownerUsername,
     xPath,
@@ -8519,15 +8496,11 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
     comment,
     commentHtml,
     commentPlainText,
-    chapterTitle,
     context,
     highlightCount,
     containsSpoiler,
-    pageNumber,
     selectedSlotIndex,
     likes,
-    seriesName,
-    libraryName,
     ageRating,
     created,
     lastModified,
@@ -8573,6 +8546,10 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
         DriftSqlType.int,
         data['${effectivePrefix}library_id'],
       )!,
+      pageNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}page_number'],
+      )!,
       ownerUserId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}owner_user_id'],
@@ -8605,10 +8582,6 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
         DriftSqlType.string,
         data['${effectivePrefix}comment_plain_text'],
       ),
-      chapterTitle: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}chapter_title'],
-      ),
       context: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}context'],
@@ -8621,26 +8594,14 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
         DriftSqlType.int,
         data['${effectivePrefix}contains_spoiler'],
       ),
-      pageNumber: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}page_number'],
-      ),
       selectedSlotIndex: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}selected_slot_index'],
-      ),
+      )!,
       likes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}likes'],
       )!,
-      seriesName: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}series_name'],
-      ),
-      libraryName: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}library_name'],
-      ),
       ageRating: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}age_rating'],
@@ -8682,6 +8643,7 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
   final int volumeId;
   final int chapterId;
   final int libraryId;
+  final int pageNumber;
   final int ownerUserId;
   final String? ownerUsername;
   final String? xPath;
@@ -8690,15 +8652,11 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
   final String? comment;
   final String? commentHtml;
   final String? commentPlainText;
-  final String? chapterTitle;
   final String? context;
   final int? highlightCount;
   final int? containsSpoiler;
-  final int? pageNumber;
-  final int? selectedSlotIndex;
+  final int selectedSlotIndex;
   final String likes;
-  final String? seriesName;
-  final String? libraryName;
   final int? ageRating;
   final int? created;
   final int? lastModified;
@@ -8711,6 +8669,7 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     required this.volumeId,
     required this.chapterId,
     required this.libraryId,
+    required this.pageNumber,
     required this.ownerUserId,
     this.ownerUsername,
     this.xPath,
@@ -8719,15 +8678,11 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     this.comment,
     this.commentHtml,
     this.commentPlainText,
-    this.chapterTitle,
     this.context,
     this.highlightCount,
     this.containsSpoiler,
-    this.pageNumber,
-    this.selectedSlotIndex,
+    required this.selectedSlotIndex,
     required this.likes,
-    this.seriesName,
-    this.libraryName,
     this.ageRating,
     this.created,
     this.lastModified,
@@ -8745,6 +8700,7 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     map['volume_id'] = Variable<int>(volumeId);
     map['chapter_id'] = Variable<int>(chapterId);
     map['library_id'] = Variable<int>(libraryId);
+    map['page_number'] = Variable<int>(pageNumber);
     map['owner_user_id'] = Variable<int>(ownerUserId);
     if (!nullToAbsent || ownerUsername != null) {
       map['owner_username'] = Variable<String>(ownerUsername);
@@ -8767,9 +8723,6 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     if (!nullToAbsent || commentPlainText != null) {
       map['comment_plain_text'] = Variable<String>(commentPlainText);
     }
-    if (!nullToAbsent || chapterTitle != null) {
-      map['chapter_title'] = Variable<String>(chapterTitle);
-    }
     if (!nullToAbsent || context != null) {
       map['context'] = Variable<String>(context);
     }
@@ -8779,19 +8732,8 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     if (!nullToAbsent || containsSpoiler != null) {
       map['contains_spoiler'] = Variable<int>(containsSpoiler);
     }
-    if (!nullToAbsent || pageNumber != null) {
-      map['page_number'] = Variable<int>(pageNumber);
-    }
-    if (!nullToAbsent || selectedSlotIndex != null) {
-      map['selected_slot_index'] = Variable<int>(selectedSlotIndex);
-    }
+    map['selected_slot_index'] = Variable<int>(selectedSlotIndex);
     map['likes'] = Variable<String>(likes);
-    if (!nullToAbsent || seriesName != null) {
-      map['series_name'] = Variable<String>(seriesName);
-    }
-    if (!nullToAbsent || libraryName != null) {
-      map['library_name'] = Variable<String>(libraryName);
-    }
     if (!nullToAbsent || ageRating != null) {
       map['age_rating'] = Variable<int>(ageRating);
     }
@@ -8816,6 +8758,7 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       volumeId: Value(volumeId),
       chapterId: Value(chapterId),
       libraryId: Value(libraryId),
+      pageNumber: Value(pageNumber),
       ownerUserId: Value(ownerUserId),
       ownerUsername: ownerUsername == null && nullToAbsent
           ? const Value.absent()
@@ -8838,9 +8781,6 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       commentPlainText: commentPlainText == null && nullToAbsent
           ? const Value.absent()
           : Value(commentPlainText),
-      chapterTitle: chapterTitle == null && nullToAbsent
-          ? const Value.absent()
-          : Value(chapterTitle),
       context: context == null && nullToAbsent
           ? const Value.absent()
           : Value(context),
@@ -8850,19 +8790,8 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       containsSpoiler: containsSpoiler == null && nullToAbsent
           ? const Value.absent()
           : Value(containsSpoiler),
-      pageNumber: pageNumber == null && nullToAbsent
-          ? const Value.absent()
-          : Value(pageNumber),
-      selectedSlotIndex: selectedSlotIndex == null && nullToAbsent
-          ? const Value.absent()
-          : Value(selectedSlotIndex),
+      selectedSlotIndex: Value(selectedSlotIndex),
       likes: Value(likes),
-      seriesName: seriesName == null && nullToAbsent
-          ? const Value.absent()
-          : Value(seriesName),
-      libraryName: libraryName == null && nullToAbsent
-          ? const Value.absent()
-          : Value(libraryName),
       ageRating: ageRating == null && nullToAbsent
           ? const Value.absent()
           : Value(ageRating),
@@ -8889,6 +8818,7 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       volumeId: serializer.fromJson<int>(json['volumeId']),
       chapterId: serializer.fromJson<int>(json['chapterId']),
       libraryId: serializer.fromJson<int>(json['libraryId']),
+      pageNumber: serializer.fromJson<int>(json['pageNumber']),
       ownerUserId: serializer.fromJson<int>(json['ownerUserId']),
       ownerUsername: serializer.fromJson<String?>(json['ownerUsername']),
       xPath: serializer.fromJson<String?>(json['xPath']),
@@ -8897,15 +8827,11 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       comment: serializer.fromJson<String?>(json['comment']),
       commentHtml: serializer.fromJson<String?>(json['commentHtml']),
       commentPlainText: serializer.fromJson<String?>(json['commentPlainText']),
-      chapterTitle: serializer.fromJson<String?>(json['chapterTitle']),
       context: serializer.fromJson<String?>(json['context']),
       highlightCount: serializer.fromJson<int?>(json['highlightCount']),
       containsSpoiler: serializer.fromJson<int?>(json['containsSpoiler']),
-      pageNumber: serializer.fromJson<int?>(json['pageNumber']),
-      selectedSlotIndex: serializer.fromJson<int?>(json['selectedSlotIndex']),
+      selectedSlotIndex: serializer.fromJson<int>(json['selectedSlotIndex']),
       likes: serializer.fromJson<String>(json['likes']),
-      seriesName: serializer.fromJson<String?>(json['seriesName']),
-      libraryName: serializer.fromJson<String?>(json['libraryName']),
       ageRating: serializer.fromJson<int?>(json['ageRating']),
       created: serializer.fromJson<int?>(json['created']),
       lastModified: serializer.fromJson<int?>(json['lastModified']),
@@ -8923,6 +8849,7 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       'volumeId': serializer.toJson<int>(volumeId),
       'chapterId': serializer.toJson<int>(chapterId),
       'libraryId': serializer.toJson<int>(libraryId),
+      'pageNumber': serializer.toJson<int>(pageNumber),
       'ownerUserId': serializer.toJson<int>(ownerUserId),
       'ownerUsername': serializer.toJson<String?>(ownerUsername),
       'xPath': serializer.toJson<String?>(xPath),
@@ -8931,15 +8858,11 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       'comment': serializer.toJson<String?>(comment),
       'commentHtml': serializer.toJson<String?>(commentHtml),
       'commentPlainText': serializer.toJson<String?>(commentPlainText),
-      'chapterTitle': serializer.toJson<String?>(chapterTitle),
       'context': serializer.toJson<String?>(context),
       'highlightCount': serializer.toJson<int?>(highlightCount),
       'containsSpoiler': serializer.toJson<int?>(containsSpoiler),
-      'pageNumber': serializer.toJson<int?>(pageNumber),
-      'selectedSlotIndex': serializer.toJson<int?>(selectedSlotIndex),
+      'selectedSlotIndex': serializer.toJson<int>(selectedSlotIndex),
       'likes': serializer.toJson<String>(likes),
-      'seriesName': serializer.toJson<String?>(seriesName),
-      'libraryName': serializer.toJson<String?>(libraryName),
       'ageRating': serializer.toJson<int?>(ageRating),
       'created': serializer.toJson<int?>(created),
       'lastModified': serializer.toJson<int?>(lastModified),
@@ -8955,6 +8878,7 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     int? volumeId,
     int? chapterId,
     int? libraryId,
+    int? pageNumber,
     int? ownerUserId,
     Value<String?> ownerUsername = const Value.absent(),
     Value<String?> xPath = const Value.absent(),
@@ -8963,15 +8887,11 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     Value<String?> comment = const Value.absent(),
     Value<String?> commentHtml = const Value.absent(),
     Value<String?> commentPlainText = const Value.absent(),
-    Value<String?> chapterTitle = const Value.absent(),
     Value<String?> context = const Value.absent(),
     Value<int?> highlightCount = const Value.absent(),
     Value<int?> containsSpoiler = const Value.absent(),
-    Value<int?> pageNumber = const Value.absent(),
-    Value<int?> selectedSlotIndex = const Value.absent(),
+    int? selectedSlotIndex,
     String? likes,
-    Value<String?> seriesName = const Value.absent(),
-    Value<String?> libraryName = const Value.absent(),
     Value<int?> ageRating = const Value.absent(),
     Value<int?> created = const Value.absent(),
     Value<int?> lastModified = const Value.absent(),
@@ -8984,6 +8904,7 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     volumeId: volumeId ?? this.volumeId,
     chapterId: chapterId ?? this.chapterId,
     libraryId: libraryId ?? this.libraryId,
+    pageNumber: pageNumber ?? this.pageNumber,
     ownerUserId: ownerUserId ?? this.ownerUserId,
     ownerUsername: ownerUsername.present
         ? ownerUsername.value
@@ -8996,7 +8917,6 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     commentPlainText: commentPlainText.present
         ? commentPlainText.value
         : this.commentPlainText,
-    chapterTitle: chapterTitle.present ? chapterTitle.value : this.chapterTitle,
     context: context.present ? context.value : this.context,
     highlightCount: highlightCount.present
         ? highlightCount.value
@@ -9004,13 +8924,8 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     containsSpoiler: containsSpoiler.present
         ? containsSpoiler.value
         : this.containsSpoiler,
-    pageNumber: pageNumber.present ? pageNumber.value : this.pageNumber,
-    selectedSlotIndex: selectedSlotIndex.present
-        ? selectedSlotIndex.value
-        : this.selectedSlotIndex,
+    selectedSlotIndex: selectedSlotIndex ?? this.selectedSlotIndex,
     likes: likes ?? this.likes,
-    seriesName: seriesName.present ? seriesName.value : this.seriesName,
-    libraryName: libraryName.present ? libraryName.value : this.libraryName,
     ageRating: ageRating.present ? ageRating.value : this.ageRating,
     created: created.present ? created.value : this.created,
     lastModified: lastModified.present ? lastModified.value : this.lastModified,
@@ -9025,6 +8940,9 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       volumeId: data.volumeId.present ? data.volumeId.value : this.volumeId,
       chapterId: data.chapterId.present ? data.chapterId.value : this.chapterId,
       libraryId: data.libraryId.present ? data.libraryId.value : this.libraryId,
+      pageNumber: data.pageNumber.present
+          ? data.pageNumber.value
+          : this.pageNumber,
       ownerUserId: data.ownerUserId.present
           ? data.ownerUserId.value
           : this.ownerUserId,
@@ -9045,9 +8963,6 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       commentPlainText: data.commentPlainText.present
           ? data.commentPlainText.value
           : this.commentPlainText,
-      chapterTitle: data.chapterTitle.present
-          ? data.chapterTitle.value
-          : this.chapterTitle,
       context: data.context.present ? data.context.value : this.context,
       highlightCount: data.highlightCount.present
           ? data.highlightCount.value
@@ -9055,19 +8970,10 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       containsSpoiler: data.containsSpoiler.present
           ? data.containsSpoiler.value
           : this.containsSpoiler,
-      pageNumber: data.pageNumber.present
-          ? data.pageNumber.value
-          : this.pageNumber,
       selectedSlotIndex: data.selectedSlotIndex.present
           ? data.selectedSlotIndex.value
           : this.selectedSlotIndex,
       likes: data.likes.present ? data.likes.value : this.likes,
-      seriesName: data.seriesName.present
-          ? data.seriesName.value
-          : this.seriesName,
-      libraryName: data.libraryName.present
-          ? data.libraryName.value
-          : this.libraryName,
       ageRating: data.ageRating.present ? data.ageRating.value : this.ageRating,
       created: data.created.present ? data.created.value : this.created,
       lastModified: data.lastModified.present
@@ -9087,6 +8993,7 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
           ..write('volumeId: $volumeId, ')
           ..write('chapterId: $chapterId, ')
           ..write('libraryId: $libraryId, ')
+          ..write('pageNumber: $pageNumber, ')
           ..write('ownerUserId: $ownerUserId, ')
           ..write('ownerUsername: $ownerUsername, ')
           ..write('xPath: $xPath, ')
@@ -9095,15 +9002,11 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
           ..write('comment: $comment, ')
           ..write('commentHtml: $commentHtml, ')
           ..write('commentPlainText: $commentPlainText, ')
-          ..write('chapterTitle: $chapterTitle, ')
           ..write('context: $context, ')
           ..write('highlightCount: $highlightCount, ')
           ..write('containsSpoiler: $containsSpoiler, ')
-          ..write('pageNumber: $pageNumber, ')
           ..write('selectedSlotIndex: $selectedSlotIndex, ')
           ..write('likes: $likes, ')
-          ..write('seriesName: $seriesName, ')
-          ..write('libraryName: $libraryName, ')
           ..write('ageRating: $ageRating, ')
           ..write('created: $created, ')
           ..write('lastModified: $lastModified, ')
@@ -9121,6 +9024,7 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     volumeId,
     chapterId,
     libraryId,
+    pageNumber,
     ownerUserId,
     ownerUsername,
     xPath,
@@ -9129,15 +9033,11 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     comment,
     commentHtml,
     commentPlainText,
-    chapterTitle,
     context,
     highlightCount,
     containsSpoiler,
-    pageNumber,
     selectedSlotIndex,
     likes,
-    seriesName,
-    libraryName,
     ageRating,
     created,
     lastModified,
@@ -9154,6 +9054,7 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
           other.volumeId == this.volumeId &&
           other.chapterId == this.chapterId &&
           other.libraryId == this.libraryId &&
+          other.pageNumber == this.pageNumber &&
           other.ownerUserId == this.ownerUserId &&
           other.ownerUsername == this.ownerUsername &&
           other.xPath == this.xPath &&
@@ -9162,15 +9063,11 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
           other.comment == this.comment &&
           other.commentHtml == this.commentHtml &&
           other.commentPlainText == this.commentPlainText &&
-          other.chapterTitle == this.chapterTitle &&
           other.context == this.context &&
           other.highlightCount == this.highlightCount &&
           other.containsSpoiler == this.containsSpoiler &&
-          other.pageNumber == this.pageNumber &&
           other.selectedSlotIndex == this.selectedSlotIndex &&
           other.likes == this.likes &&
-          other.seriesName == this.seriesName &&
-          other.libraryName == this.libraryName &&
           other.ageRating == this.ageRating &&
           other.created == this.created &&
           other.lastModified == this.lastModified &&
@@ -9185,6 +9082,7 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
   final Value<int> volumeId;
   final Value<int> chapterId;
   final Value<int> libraryId;
+  final Value<int> pageNumber;
   final Value<int> ownerUserId;
   final Value<String?> ownerUsername;
   final Value<String?> xPath;
@@ -9193,15 +9091,11 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
   final Value<String?> comment;
   final Value<String?> commentHtml;
   final Value<String?> commentPlainText;
-  final Value<String?> chapterTitle;
   final Value<String?> context;
   final Value<int?> highlightCount;
   final Value<int?> containsSpoiler;
-  final Value<int?> pageNumber;
-  final Value<int?> selectedSlotIndex;
+  final Value<int> selectedSlotIndex;
   final Value<String> likes;
-  final Value<String?> seriesName;
-  final Value<String?> libraryName;
   final Value<int?> ageRating;
   final Value<int?> created;
   final Value<int?> lastModified;
@@ -9214,6 +9108,7 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     this.volumeId = const Value.absent(),
     this.chapterId = const Value.absent(),
     this.libraryId = const Value.absent(),
+    this.pageNumber = const Value.absent(),
     this.ownerUserId = const Value.absent(),
     this.ownerUsername = const Value.absent(),
     this.xPath = const Value.absent(),
@@ -9222,15 +9117,11 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     this.comment = const Value.absent(),
     this.commentHtml = const Value.absent(),
     this.commentPlainText = const Value.absent(),
-    this.chapterTitle = const Value.absent(),
     this.context = const Value.absent(),
     this.highlightCount = const Value.absent(),
     this.containsSpoiler = const Value.absent(),
-    this.pageNumber = const Value.absent(),
     this.selectedSlotIndex = const Value.absent(),
     this.likes = const Value.absent(),
-    this.seriesName = const Value.absent(),
-    this.libraryName = const Value.absent(),
     this.ageRating = const Value.absent(),
     this.created = const Value.absent(),
     this.lastModified = const Value.absent(),
@@ -9244,6 +9135,7 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     required int volumeId,
     required int chapterId,
     required int libraryId,
+    required int pageNumber,
     required int ownerUserId,
     this.ownerUsername = const Value.absent(),
     this.xPath = const Value.absent(),
@@ -9252,15 +9144,11 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     this.comment = const Value.absent(),
     this.commentHtml = const Value.absent(),
     this.commentPlainText = const Value.absent(),
-    this.chapterTitle = const Value.absent(),
     this.context = const Value.absent(),
     this.highlightCount = const Value.absent(),
     this.containsSpoiler = const Value.absent(),
-    this.pageNumber = const Value.absent(),
-    this.selectedSlotIndex = const Value.absent(),
+    required int selectedSlotIndex,
     this.likes = const Value.absent(),
-    this.seriesName = const Value.absent(),
-    this.libraryName = const Value.absent(),
     this.ageRating = const Value.absent(),
     this.created = const Value.absent(),
     this.lastModified = const Value.absent(),
@@ -9270,7 +9158,9 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
        volumeId = Value(volumeId),
        chapterId = Value(chapterId),
        libraryId = Value(libraryId),
-       ownerUserId = Value(ownerUserId);
+       pageNumber = Value(pageNumber),
+       ownerUserId = Value(ownerUserId),
+       selectedSlotIndex = Value(selectedSlotIndex);
   static Insertable<AnnotationsData> custom({
     Expression<int>? id,
     Expression<int>? serverId,
@@ -9278,6 +9168,7 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     Expression<int>? volumeId,
     Expression<int>? chapterId,
     Expression<int>? libraryId,
+    Expression<int>? pageNumber,
     Expression<int>? ownerUserId,
     Expression<String>? ownerUsername,
     Expression<String>? xPath,
@@ -9286,15 +9177,11 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     Expression<String>? comment,
     Expression<String>? commentHtml,
     Expression<String>? commentPlainText,
-    Expression<String>? chapterTitle,
     Expression<String>? context,
     Expression<int>? highlightCount,
     Expression<int>? containsSpoiler,
-    Expression<int>? pageNumber,
     Expression<int>? selectedSlotIndex,
     Expression<String>? likes,
-    Expression<String>? seriesName,
-    Expression<String>? libraryName,
     Expression<int>? ageRating,
     Expression<int>? created,
     Expression<int>? lastModified,
@@ -9308,6 +9195,7 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
       if (volumeId != null) 'volume_id': volumeId,
       if (chapterId != null) 'chapter_id': chapterId,
       if (libraryId != null) 'library_id': libraryId,
+      if (pageNumber != null) 'page_number': pageNumber,
       if (ownerUserId != null) 'owner_user_id': ownerUserId,
       if (ownerUsername != null) 'owner_username': ownerUsername,
       if (xPath != null) 'x_path': xPath,
@@ -9316,15 +9204,11 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
       if (comment != null) 'comment': comment,
       if (commentHtml != null) 'comment_html': commentHtml,
       if (commentPlainText != null) 'comment_plain_text': commentPlainText,
-      if (chapterTitle != null) 'chapter_title': chapterTitle,
       if (context != null) 'context': context,
       if (highlightCount != null) 'highlight_count': highlightCount,
       if (containsSpoiler != null) 'contains_spoiler': containsSpoiler,
-      if (pageNumber != null) 'page_number': pageNumber,
       if (selectedSlotIndex != null) 'selected_slot_index': selectedSlotIndex,
       if (likes != null) 'likes': likes,
-      if (seriesName != null) 'series_name': seriesName,
-      if (libraryName != null) 'library_name': libraryName,
       if (ageRating != null) 'age_rating': ageRating,
       if (created != null) 'created': created,
       if (lastModified != null) 'last_modified': lastModified,
@@ -9340,6 +9224,7 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     Value<int>? volumeId,
     Value<int>? chapterId,
     Value<int>? libraryId,
+    Value<int>? pageNumber,
     Value<int>? ownerUserId,
     Value<String?>? ownerUsername,
     Value<String?>? xPath,
@@ -9348,15 +9233,11 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     Value<String?>? comment,
     Value<String?>? commentHtml,
     Value<String?>? commentPlainText,
-    Value<String?>? chapterTitle,
     Value<String?>? context,
     Value<int?>? highlightCount,
     Value<int?>? containsSpoiler,
-    Value<int?>? pageNumber,
-    Value<int?>? selectedSlotIndex,
+    Value<int>? selectedSlotIndex,
     Value<String>? likes,
-    Value<String?>? seriesName,
-    Value<String?>? libraryName,
     Value<int?>? ageRating,
     Value<int?>? created,
     Value<int?>? lastModified,
@@ -9370,6 +9251,7 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
       volumeId: volumeId ?? this.volumeId,
       chapterId: chapterId ?? this.chapterId,
       libraryId: libraryId ?? this.libraryId,
+      pageNumber: pageNumber ?? this.pageNumber,
       ownerUserId: ownerUserId ?? this.ownerUserId,
       ownerUsername: ownerUsername ?? this.ownerUsername,
       xPath: xPath ?? this.xPath,
@@ -9378,15 +9260,11 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
       comment: comment ?? this.comment,
       commentHtml: commentHtml ?? this.commentHtml,
       commentPlainText: commentPlainText ?? this.commentPlainText,
-      chapterTitle: chapterTitle ?? this.chapterTitle,
       context: context ?? this.context,
       highlightCount: highlightCount ?? this.highlightCount,
       containsSpoiler: containsSpoiler ?? this.containsSpoiler,
-      pageNumber: pageNumber ?? this.pageNumber,
       selectedSlotIndex: selectedSlotIndex ?? this.selectedSlotIndex,
       likes: likes ?? this.likes,
-      seriesName: seriesName ?? this.seriesName,
-      libraryName: libraryName ?? this.libraryName,
       ageRating: ageRating ?? this.ageRating,
       created: created ?? this.created,
       lastModified: lastModified ?? this.lastModified,
@@ -9416,6 +9294,9 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     if (libraryId.present) {
       map['library_id'] = Variable<int>(libraryId.value);
     }
+    if (pageNumber.present) {
+      map['page_number'] = Variable<int>(pageNumber.value);
+    }
     if (ownerUserId.present) {
       map['owner_user_id'] = Variable<int>(ownerUserId.value);
     }
@@ -9440,9 +9321,6 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     if (commentPlainText.present) {
       map['comment_plain_text'] = Variable<String>(commentPlainText.value);
     }
-    if (chapterTitle.present) {
-      map['chapter_title'] = Variable<String>(chapterTitle.value);
-    }
     if (context.present) {
       map['context'] = Variable<String>(context.value);
     }
@@ -9452,20 +9330,11 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     if (containsSpoiler.present) {
       map['contains_spoiler'] = Variable<int>(containsSpoiler.value);
     }
-    if (pageNumber.present) {
-      map['page_number'] = Variable<int>(pageNumber.value);
-    }
     if (selectedSlotIndex.present) {
       map['selected_slot_index'] = Variable<int>(selectedSlotIndex.value);
     }
     if (likes.present) {
       map['likes'] = Variable<String>(likes.value);
-    }
-    if (seriesName.present) {
-      map['series_name'] = Variable<String>(seriesName.value);
-    }
-    if (libraryName.present) {
-      map['library_name'] = Variable<String>(libraryName.value);
     }
     if (ageRating.present) {
       map['age_rating'] = Variable<int>(ageRating.value);
@@ -9494,6 +9363,7 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
           ..write('volumeId: $volumeId, ')
           ..write('chapterId: $chapterId, ')
           ..write('libraryId: $libraryId, ')
+          ..write('pageNumber: $pageNumber, ')
           ..write('ownerUserId: $ownerUserId, ')
           ..write('ownerUsername: $ownerUsername, ')
           ..write('xPath: $xPath, ')
@@ -9502,15 +9372,11 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
           ..write('comment: $comment, ')
           ..write('commentHtml: $commentHtml, ')
           ..write('commentPlainText: $commentPlainText, ')
-          ..write('chapterTitle: $chapterTitle, ')
           ..write('context: $context, ')
           ..write('highlightCount: $highlightCount, ')
           ..write('containsSpoiler: $containsSpoiler, ')
-          ..write('pageNumber: $pageNumber, ')
           ..write('selectedSlotIndex: $selectedSlotIndex, ')
           ..write('likes: $likes, ')
-          ..write('seriesName: $seriesName, ')
-          ..write('libraryName: $libraryName, ')
           ..write('ageRating: $ageRating, ')
           ..write('created: $created, ')
           ..write('lastModified: $lastModified, ')
@@ -9527,20 +9393,12 @@ class HighlightSlots extends Table
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   HighlightSlots(this.attachedDatabase, [this._alias]);
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
   late final GeneratedColumn<int> slotNumber = GeneratedColumn<int>(
     'slot_number',
     aliasedName,
     false,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<int> red = GeneratedColumn<int>(
@@ -9576,33 +9434,18 @@ class HighlightSlots extends Table
     $customConstraints: 'NULL',
   );
   @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    slotNumber,
-    red,
-    green,
-    blue,
-    alpha,
-  ];
+  List<GeneratedColumn> get $columns => [slotNumber, red, green, blue, alpha];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'highlight_slots';
   @override
-  Set<GeneratedColumn> get $primaryKey => const {};
-  @override
-  List<Set<GeneratedColumn>> get uniqueKeys => [
-    {slotNumber},
-  ];
+  Set<GeneratedColumn> get $primaryKey => {slotNumber};
   @override
   HighlightSlotsData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return HighlightSlotsData(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
       slotNumber: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}slot_number'],
@@ -9632,21 +9475,19 @@ class HighlightSlots extends Table
   }
 
   @override
-  List<String> get customConstraints => const ['UNIQUE(slot_number)'];
+  List<String> get customConstraints => const ['PRIMARY KEY(slot_number)'];
   @override
   bool get dontWriteConstraints => true;
 }
 
 class HighlightSlotsData extends DataClass
     implements Insertable<HighlightSlotsData> {
-  final int id;
   final int slotNumber;
   final int? red;
   final int? green;
   final int? blue;
   final double? alpha;
   const HighlightSlotsData({
-    required this.id,
     required this.slotNumber,
     this.red,
     this.green,
@@ -9656,7 +9497,6 @@ class HighlightSlotsData extends DataClass
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
     map['slot_number'] = Variable<int>(slotNumber);
     if (!nullToAbsent || red != null) {
       map['red'] = Variable<int>(red);
@@ -9675,7 +9515,6 @@ class HighlightSlotsData extends DataClass
 
   HighlightSlotsCompanion toCompanion(bool nullToAbsent) {
     return HighlightSlotsCompanion(
-      id: Value(id),
       slotNumber: Value(slotNumber),
       red: red == null && nullToAbsent ? const Value.absent() : Value(red),
       green: green == null && nullToAbsent
@@ -9694,7 +9533,6 @@ class HighlightSlotsData extends DataClass
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return HighlightSlotsData(
-      id: serializer.fromJson<int>(json['id']),
       slotNumber: serializer.fromJson<int>(json['slotNumber']),
       red: serializer.fromJson<int?>(json['red']),
       green: serializer.fromJson<int?>(json['green']),
@@ -9706,7 +9544,6 @@ class HighlightSlotsData extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
       'slotNumber': serializer.toJson<int>(slotNumber),
       'red': serializer.toJson<int?>(red),
       'green': serializer.toJson<int?>(green),
@@ -9716,14 +9553,12 @@ class HighlightSlotsData extends DataClass
   }
 
   HighlightSlotsData copyWith({
-    int? id,
     int? slotNumber,
     Value<int?> red = const Value.absent(),
     Value<int?> green = const Value.absent(),
     Value<int?> blue = const Value.absent(),
     Value<double?> alpha = const Value.absent(),
   }) => HighlightSlotsData(
-    id: id ?? this.id,
     slotNumber: slotNumber ?? this.slotNumber,
     red: red.present ? red.value : this.red,
     green: green.present ? green.value : this.green,
@@ -9732,7 +9567,6 @@ class HighlightSlotsData extends DataClass
   );
   HighlightSlotsData copyWithCompanion(HighlightSlotsCompanion data) {
     return HighlightSlotsData(
-      id: data.id.present ? data.id.value : this.id,
       slotNumber: data.slotNumber.present
           ? data.slotNumber.value
           : this.slotNumber,
@@ -9746,7 +9580,6 @@ class HighlightSlotsData extends DataClass
   @override
   String toString() {
     return (StringBuffer('HighlightSlotsData(')
-          ..write('id: $id, ')
           ..write('slotNumber: $slotNumber, ')
           ..write('red: $red, ')
           ..write('green: $green, ')
@@ -9757,12 +9590,11 @@ class HighlightSlotsData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, slotNumber, red, green, blue, alpha);
+  int get hashCode => Object.hash(slotNumber, red, green, blue, alpha);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is HighlightSlotsData &&
-          other.id == this.id &&
           other.slotNumber == this.slotNumber &&
           other.red == this.red &&
           other.green == this.green &&
@@ -9771,78 +9603,60 @@ class HighlightSlotsData extends DataClass
 }
 
 class HighlightSlotsCompanion extends UpdateCompanion<HighlightSlotsData> {
-  final Value<int> id;
   final Value<int> slotNumber;
   final Value<int?> red;
   final Value<int?> green;
   final Value<int?> blue;
   final Value<double?> alpha;
-  final Value<int> rowid;
   const HighlightSlotsCompanion({
-    this.id = const Value.absent(),
     this.slotNumber = const Value.absent(),
     this.red = const Value.absent(),
     this.green = const Value.absent(),
     this.blue = const Value.absent(),
     this.alpha = const Value.absent(),
-    this.rowid = const Value.absent(),
   });
   HighlightSlotsCompanion.insert({
-    required int id,
-    required int slotNumber,
+    this.slotNumber = const Value.absent(),
     this.red = const Value.absent(),
     this.green = const Value.absent(),
     this.blue = const Value.absent(),
     this.alpha = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       slotNumber = Value(slotNumber);
+  });
   static Insertable<HighlightSlotsData> custom({
-    Expression<int>? id,
     Expression<int>? slotNumber,
     Expression<int>? red,
     Expression<int>? green,
     Expression<int>? blue,
     Expression<double>? alpha,
-    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
       if (slotNumber != null) 'slot_number': slotNumber,
       if (red != null) 'red': red,
       if (green != null) 'green': green,
       if (blue != null) 'blue': blue,
       if (alpha != null) 'alpha': alpha,
-      if (rowid != null) 'rowid': rowid,
     });
   }
 
   HighlightSlotsCompanion copyWith({
-    Value<int>? id,
     Value<int>? slotNumber,
     Value<int?>? red,
     Value<int?>? green,
     Value<int?>? blue,
     Value<double?>? alpha,
-    Value<int>? rowid,
   }) {
     return HighlightSlotsCompanion(
-      id: id ?? this.id,
       slotNumber: slotNumber ?? this.slotNumber,
       red: red ?? this.red,
       green: green ?? this.green,
       blue: blue ?? this.blue,
       alpha: alpha ?? this.alpha,
-      rowid: rowid ?? this.rowid,
     );
   }
 
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
     if (slotNumber.present) {
       map['slot_number'] = Variable<int>(slotNumber.value);
     }
@@ -9858,22 +9672,17 @@ class HighlightSlotsCompanion extends UpdateCompanion<HighlightSlotsData> {
     if (alpha.present) {
       map['alpha'] = Variable<double>(alpha.value);
     }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
     return map;
   }
 
   @override
   String toString() {
     return (StringBuffer('HighlightSlotsCompanion(')
-          ..write('id: $id, ')
           ..write('slotNumber: $slotNumber, ')
           ..write('red: $red, ')
           ..write('green: $green, ')
           ..write('blue: $blue, ')
-          ..write('alpha: $alpha, ')
-          ..write('rowid: $rowid')
+          ..write('alpha: $alpha')
           ..write(')'))
         .toString();
   }
@@ -15340,6 +15149,13 @@ class DatabaseAtV16 extends GeneratedDatabase {
     WritePropagation(
       on: TableUpdateQuery.onTableName(
         'series',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('annotations', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'volumes',
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('annotations', kind: UpdateKind.delete)],

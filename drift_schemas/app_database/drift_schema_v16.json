@@ -2569,9 +2569,9 @@
             "moor_type": "int",
             "nullable": false,
             "customConstraints": null,
-            "defaultConstraints": "REFERENCES volumes (id)",
+            "defaultConstraints": "REFERENCES volumes (id) ON DELETE CASCADE",
             "dialectAwareDefaultConstraints": {
-              "sqlite": "REFERENCES volumes (id)"
+              "sqlite": "REFERENCES volumes (id) ON DELETE CASCADE"
             },
             "default_dart": null,
             "default_client_dart": null,
@@ -2584,7 +2584,7 @@
                   },
                   "initially_deferred": false,
                   "on_update": null,
-                  "on_delete": null
+                  "on_delete": "cascade"
                 }
               }
             ]
@@ -2640,6 +2640,16 @@
                 }
               }
             ]
+          },
+          {
+            "name": "page_number",
+            "getter_name": "pageNumber",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
           },
           {
             "name": "owner_user_id",
@@ -2722,16 +2732,6 @@
             "dsl_features": []
           },
           {
-            "name": "chapter_title",
-            "getter_name": "chapterTitle",
-            "moor_type": "string",
-            "nullable": true,
-            "customConstraints": null,
-            "default_dart": null,
-            "default_client_dart": null,
-            "dsl_features": []
-          },
-          {
             "name": "context",
             "getter_name": "context",
             "moor_type": "string",
@@ -2766,20 +2766,10 @@
             "dsl_features": []
           },
           {
-            "name": "page_number",
-            "getter_name": "pageNumber",
-            "moor_type": "int",
-            "nullable": true,
-            "customConstraints": null,
-            "default_dart": null,
-            "default_client_dart": null,
-            "dsl_features": []
-          },
-          {
             "name": "selected_slot_index",
             "getter_name": "selectedSlotIndex",
             "moor_type": "int",
-            "nullable": true,
+            "nullable": false,
             "customConstraints": null,
             "default_dart": null,
             "default_client_dart": null,
@@ -2798,26 +2788,6 @@
               "dart_expr": "const IntListConverter()",
               "dart_type_name": "List<int>"
             }
-          },
-          {
-            "name": "series_name",
-            "getter_name": "seriesName",
-            "moor_type": "string",
-            "nullable": true,
-            "customConstraints": null,
-            "default_dart": null,
-            "default_client_dart": null,
-            "dsl_features": []
-          },
-          {
-            "name": "library_name",
-            "getter_name": "libraryName",
-            "moor_type": "string",
-            "nullable": true,
-            "customConstraints": null,
-            "default_dart": null,
-            "default_client_dart": null,
-            "dsl_features": []
           },
           {
             "name": "age_rating",
@@ -2901,16 +2871,6 @@
         "was_declared_in_moor": false,
         "columns": [
           {
-            "name": "id",
-            "getter_name": "id",
-            "moor_type": "int",
-            "nullable": false,
-            "customConstraints": null,
-            "default_dart": null,
-            "default_client_dart": null,
-            "dsl_features": []
-          },
-          {
             "name": "slot_number",
             "getter_name": "slotNumber",
             "moor_type": "int",
@@ -2964,10 +2924,8 @@
         "is_virtual": false,
         "without_rowid": false,
         "constraints": [],
-        "unique_keys": [
-          [
-            "slot_number"
-          ]
+        "explicit_pk": [
+          "slot_number"
         ]
       }
     },
@@ -4612,7 +4570,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"annotations\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"server_id\" INTEGER NULL, \"series_id\" INTEGER NOT NULL REFERENCES series (id) ON DELETE CASCADE, \"volume_id\" INTEGER NOT NULL REFERENCES volumes (id), \"chapter_id\" INTEGER NOT NULL REFERENCES chapters (id) ON DELETE CASCADE, \"library_id\" INTEGER NOT NULL REFERENCES libraries (id) ON DELETE CASCADE, \"owner_user_id\" INTEGER NOT NULL, \"owner_username\" TEXT NULL, \"x_path\" TEXT NULL, \"ending_x_path\" TEXT NULL, \"selected_text\" TEXT NULL, \"comment\" TEXT NULL, \"comment_html\" TEXT NULL, \"comment_plain_text\" TEXT NULL, \"chapter_title\" TEXT NULL, \"context\" TEXT NULL, \"highlight_count\" INTEGER NULL, \"contains_spoiler\" INTEGER NULL CHECK (\"contains_spoiler\" IN (0, 1)), \"page_number\" INTEGER NULL, \"selected_slot_index\" INTEGER NULL, \"likes\" TEXT NOT NULL DEFAULT '[]', \"series_name\" TEXT NULL, \"library_name\" TEXT NULL, \"age_rating\" INTEGER NULL, \"created\" INTEGER NULL, \"last_modified\" INTEGER NULL, \"dirty\" INTEGER NOT NULL DEFAULT 0 CHECK (\"dirty\" IN (0, 1)), \"removed\" INTEGER NOT NULL DEFAULT 0 CHECK (\"removed\" IN (0, 1)), UNIQUE (\"server_id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"annotations\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"server_id\" INTEGER NULL, \"series_id\" INTEGER NOT NULL REFERENCES series (id) ON DELETE CASCADE, \"volume_id\" INTEGER NOT NULL REFERENCES volumes (id) ON DELETE CASCADE, \"chapter_id\" INTEGER NOT NULL REFERENCES chapters (id) ON DELETE CASCADE, \"library_id\" INTEGER NOT NULL REFERENCES libraries (id) ON DELETE CASCADE, \"page_number\" INTEGER NOT NULL, \"owner_user_id\" INTEGER NOT NULL, \"owner_username\" TEXT NULL, \"x_path\" TEXT NULL, \"ending_x_path\" TEXT NULL, \"selected_text\" TEXT NULL, \"comment\" TEXT NULL, \"comment_html\" TEXT NULL, \"comment_plain_text\" TEXT NULL, \"context\" TEXT NULL, \"highlight_count\" INTEGER NULL, \"contains_spoiler\" INTEGER NULL CHECK (\"contains_spoiler\" IN (0, 1)), \"selected_slot_index\" INTEGER NOT NULL, \"likes\" TEXT NOT NULL DEFAULT '[]', \"age_rating\" INTEGER NULL, \"created\" INTEGER NULL, \"last_modified\" INTEGER NULL, \"dirty\" INTEGER NOT NULL DEFAULT 0 CHECK (\"dirty\" IN (0, 1)), \"removed\" INTEGER NOT NULL DEFAULT 0 CHECK (\"removed\" IN (0, 1)), UNIQUE (\"server_id\"));"
         }
       ]
     },
@@ -4621,7 +4579,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"highlight_slots\" (\"id\" INTEGER NOT NULL, \"slot_number\" INTEGER NOT NULL, \"red\" INTEGER NULL, \"green\" INTEGER NULL, \"blue\" INTEGER NULL, \"alpha\" REAL NULL, UNIQUE (\"slot_number\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"highlight_slots\" (\"slot_number\" INTEGER NOT NULL, \"red\" INTEGER NULL, \"green\" INTEGER NULL, \"blue\" INTEGER NULL, \"alpha\" REAL NULL, PRIMARY KEY (\"slot_number\"));"
         }
       ]
     },

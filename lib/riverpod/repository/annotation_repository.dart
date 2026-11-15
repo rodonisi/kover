@@ -3,6 +3,8 @@ import 'package:kover/api/openapi.swagger.dart' as api;
 import 'package:kover/database/app_database.dart';
 import 'package:kover/mapping/dto/annotation_dto_mappings.dart';
 import 'package:kover/mapping/dto/highlight_slot_dto_mappings.dart';
+import 'package:kover/models/annotation_model.dart';
+import 'package:kover/models/highlight_slot_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/repository/database.dart';
 import 'package:kover/sync/annotation_sync_operations.dart';
@@ -40,17 +42,17 @@ class AnnotationRepository(
     String? context,
     int highlightCount = 1,
     bool containsSpoiler = false,
-    int? pageNumber,
+    required int pageNumber,
     int selectedSlotIndex = 0,
   }) async {
     final now = DateTime.now();
     final stored = await _db.annotationDao.upsert(
-      AnnotationsCompanion(
-        seriesId: Value(seriesId),
-        volumeId: Value(volumeId),
-        chapterId: Value(chapterId),
-        libraryId: Value(libraryId),
-        ownerUserId: Value(ownerUserId),
+      .insert(
+        seriesId: seriesId,
+        volumeId: volumeId,
+        chapterId: chapterId,
+        libraryId: libraryId,
+        ownerUserId: ownerUserId,
         xPath: Value(xPath),
         endingXPath: Value(endingXPath),
         selectedText: Value(selectedText),
@@ -60,8 +62,8 @@ class AnnotationRepository(
         context: Value(context),
         highlightCount: Value(highlightCount),
         containsSpoiler: Value(containsSpoiler),
-        pageNumber: Value(pageNumber),
-        selectedSlotIndex: Value(selectedSlotIndex),
+        pageNumber: pageNumber,
+        selectedSlotIndex: selectedSlotIndex,
         likes: const Value([]),
         created: Value(now),
         lastModified: Value(now),
@@ -285,9 +287,24 @@ class AnnotationRepository(
     }
   }
 
+  /// Watch all locally stored, non-removed annotations for [chapterId].
+  Stream<List<AnnotationModel>> watchAnnotations({required int chapterId}) {
+    return _db.annotationDao
+        .watchAnnotationsForChapter(chapterId)
+        .map(
+          (annotations) => annotations
+              .map(AnnotationModel.fromDatabaseModel)
+              .toList(growable: false),
+        );
+  }
+
   /// Watch all locally stored highlight slots, ordered by slot number.
-  Stream<List<HighlightSlot>> watchHighlightSlots() {
-    return _db.highlightSlotDao.watchSlots();
+  Stream<List<HighlightSlotModel>> watchHighlightSlots() {
+    return _db.highlightSlotDao.watchSlots().map(
+      (slots) => slots
+          .map(HighlightSlotModel.fromDatabaseModel)
+          .toList(growable: false),
+    );
   }
 
   /// Replace all locally stored highlight slots with [slots].

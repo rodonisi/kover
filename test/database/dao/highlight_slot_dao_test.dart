@@ -25,7 +25,7 @@ void main() {
     double? alpha,
   }) {
     return HighlightSlotsCompanion.insert(
-      slotNumber: slotNumber,
+      slotNumber: Value(slotNumber),
       red: Value(red),
       green: Value(green),
       blue: Value(blue),

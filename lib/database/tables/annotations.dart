@@ -11,11 +11,13 @@ class Annotations extends Table {
   IntColumn get serverId => integer().nullable()();
   IntColumn get seriesId =>
       integer().references(Series, #id, onDelete: .cascade)();
-  IntColumn get volumeId => integer().references(Volumes, #id)();
+  IntColumn get volumeId =>
+      integer().references(Volumes, #id, onDelete: .cascade)();
   IntColumn get chapterId =>
       integer().references(Chapters, #id, onDelete: .cascade)();
   IntColumn get libraryId =>
       integer().references(Libraries, #id, onDelete: .cascade)();
+  IntColumn get pageNumber => integer()();
   IntColumn get ownerUserId => integer()();
   TextColumn get ownerUsername => text().nullable()();
   TextColumn get xPath => text().nullable()();
@@ -24,16 +26,12 @@ class Annotations extends Table {
   TextColumn get comment => text().nullable()();
   TextColumn get commentHtml => text().nullable()();
   TextColumn get commentPlainText => text().nullable()();
-  TextColumn get chapterTitle => text().nullable()();
   TextColumn get context => text().nullable()();
   IntColumn get highlightCount => integer().nullable()();
   BoolColumn get containsSpoiler => boolean().nullable()();
-  IntColumn get pageNumber => integer().nullable()();
-  IntColumn get selectedSlotIndex => integer().nullable()();
+  IntColumn get selectedSlotIndex => integer()();
   TextColumn get likes =>
       text().map(const IntListConverter()).withDefault(const Constant('[]'))();
-  TextColumn get seriesName => text().nullable()();
-  TextColumn get libraryName => text().nullable()();
   IntColumn get ageRating => intEnum<AgeRating>().nullable()();
   DateTimeColumn get created => dateTime().nullable()();
   DateTimeColumn get lastModified => dateTime().nullable()();

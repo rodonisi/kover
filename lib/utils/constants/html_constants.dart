@@ -15,4 +15,13 @@ sealed class HtmlConstants {
   static const String kavitaPartAttribute = 'kavita-part';
   static const String kavitaNoteRefAttribute = 'kavita-note-ref';
   static const String kavitaHighlightElementTag = 'app-epub-highlight';
+  static const String kavitaAnnotationIdAttribute = 'data-annotation-id';
+
+  // Annotation highlight constants
+  static const String koverAnnotationIdAttribute = 'data-kover-annotation-id';
+  static const String annotationHighlightIdPrefix = 'epub-highlight-';
+
+  /// The canonical DOM id for the highlight belonging to [localId].
+  static String annotationHighlightId(int localId) =>
+      '$annotationHighlightIdPrefix$localId';
 }

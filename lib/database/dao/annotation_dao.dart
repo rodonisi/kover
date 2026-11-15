@@ -46,6 +46,19 @@ class AnnotationDao extends DatabaseAccessor<AppDatabase>
         .get();
   }
 
+  /// Watch every locally stored, non-removed annotation row for [chapterId].
+  Stream<List<Annotation>> watchAnnotationsForChapter(int chapterId) {
+    return (select(annotations)
+          ..where(
+            (a) => a.chapterId.equals(chapterId) & a.removed.equals(false),
+          )
+          ..orderBy([
+            (a) => OrderingTerm.asc(a.pageNumber),
+            (a) => OrderingTerm.asc(a.id),
+          ]))
+        .watch();
+  }
+
   /// Get the IDs of all chapters that are known locally.
   Future<List<int>> getExistingChapterIds() async {
     final q = selectOnly(chapters, distinct: true)..addColumns([chapters.id]);
