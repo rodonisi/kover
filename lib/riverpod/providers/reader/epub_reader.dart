@@ -285,7 +285,7 @@ class EpubNavigation extends _$EpubNavigation {
     String? scrollId,
     int? page,
   }) async {
-    final current = await future;
+    final current = state.value ?? await future;
 
     if (page != null && current.page != page) return;
     if (!current.ready) return;
@@ -309,20 +309,22 @@ class EpubNavigation extends _$EpubNavigation {
       current.page: subpage,
     };
 
-    state = AsyncData(
-      current.copyWith(
-        subpagePositions: subpagePositions,
-        fromObserver: fromObserver || restored,
-        scrollId: scrollId,
-        pendingAnchor: current.pendingAnchor?.page == current.page
-            ? null
-            : current.pendingAnchor,
-      ),
+    final next = current.copyWith(
+      subpagePositions: subpagePositions,
+      fromObserver: fromObserver || restored,
+      scrollId: scrollId,
+      pendingAnchor: current.pendingAnchor?.page == current.page
+          ? null
+          : current.pendingAnchor,
     );
+
+    if (next == current) return;
+
+    state = AsyncData(next);
   }
 
   Future<void> nextPage() async {
-    final current = await future;
+    final current = state.value ?? await future;
 
     if (!current.ready) {
       await jumpToPage(current.page + 1, force: true);
@@ -333,7 +335,7 @@ class EpubNavigation extends _$EpubNavigation {
   }
 
   Future<void> previousPage() async {
-    final current = await future;
+    final current = state.value ?? await future;
 
     if (!current.ready) {
       await jumpToPage(current.page - 1, force: true);
