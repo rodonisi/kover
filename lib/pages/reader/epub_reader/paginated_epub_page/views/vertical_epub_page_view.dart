@@ -63,8 +63,11 @@ class VerticalEpubPageView extends HookWidget {
       ],
     );
 
+    final EdgeInsets padding = settings.ignoreSafeArea
+        ? .zero
+        : .symmetric(vertical: settings.verticalMarginSize);
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: settings.verticalMarginSize),
+      padding: padding,
       child: SliverViewObserver(
         controller: observerController,
         onObserve: (model) {
