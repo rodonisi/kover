@@ -11,7 +11,8 @@ import 'package:kover/utils/logging.dart';
 class EpubPaginator({required final dom.DocumentFragment root}) {
   final List<EpubSubpage> _subpages = [];
   final Map<int, String> _subpageHtml = {};
-  final Map<int, String?> _scrollIds = {};
+  final Map<int, String?> _subpageScrollId = {};
+  final Map<int, int> _nodeIndexSubpage = {};
 
   int get subpageCount => _subpages.length;
 
@@ -22,7 +23,8 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
   ) {
     _subpages.clear();
     _subpageHtml.clear();
-    _scrollIds.clear();
+    _subpageScrollId.clear();
+    _nodeIndexSubpage.clear();
 
     if (units.isEmpty || pageHeight <= 0) {
       log.debug(
@@ -46,6 +48,7 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
       var last = cursor;
       while (last + 1 < units.length && units[last + 1].pageEndBottom < limit) {
         last++;
+        _nodeIndexSubpage[units[last].nodeIndex] = _subpages.length;
       }
 
       final next = last + 1;
@@ -69,33 +72,31 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
 
   /// Returns the first subpage whose markup contains [scrollId].
   int? subpageForScrollId(String scrollId) {
-    for (var index = 0; index < subpageCount; index++) {
-      final fragment = dom.DocumentFragment.html(getSubpage(index));
-      if (fragment.findByAttribute(HtmlConstants.scrollIdAttribute, scrollId) !=
-          null) {
-        return index;
-      }
-    }
+    final element = root.findByAttribute(
+      HtmlConstants.scrollIdAttribute,
+      scrollId,
+    );
 
-    return null;
+    if (element == null) return null;
+
+    final nodeIndex = _nodeIndex(element);
+    return _nodeIndexSubpage[nodeIndex];
   }
 
   /// Returns the first subpage whose markup contains an element with [id].
   int? subpageForElementId(String id) {
-    for (var index = 0; index < subpageCount; index++) {
-      final fragment = dom.DocumentFragment.html(getSubpage(index));
-      if (fragment.findByAttribute('id', id) != null) {
-        return index;
-      }
-    }
+    final element = root.findByAttribute('id', id);
 
-    return null;
+    if (element == null) return null;
+
+    final nodeIndex = _nodeIndex(element);
+    return _nodeIndexSubpage[nodeIndex];
   }
 
   /// Returns the scroll id of the first paragraph on [index], if any.
   String? scrollIdForSubpage(int index) {
     if (index < 0 || index >= subpageCount) return null;
-    if (_scrollIds.containsKey(index)) return _scrollIds[index];
+    if (_subpageScrollId.containsKey(index)) return _subpageScrollId[index];
 
     final fragment = dom.DocumentFragment.html(getSubpage(index));
     String? scrollId;
@@ -105,7 +106,7 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
       break;
     }
 
-    _scrollIds[index] = scrollId;
+    _subpageScrollId[index] = scrollId;
     return scrollId;
   }
 
@@ -130,6 +131,11 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
     _subpageHtml[index] = subpage;
 
     return subpage;
+  }
+
+  int _nodeIndex(dom.Element element) {
+    final index = element.attributes[HtmlConstants.nodeIndexAttribute] ?? '';
+    return int.parse(index);
   }
 
   dom.DocumentFragment _splitSubpage(EpubSubpage page) {
