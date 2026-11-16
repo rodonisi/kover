@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -37,6 +38,31 @@ class PdfViewerControllerHookState
 
 PdfViewerController usePdfViewerController() => use(const PdfControllerHook());
 
+/// Zooms to [percent] of the viewer's fit zoom on [pageNumber], centred horizontally and
+/// showing the top of the page when it is taller than the view.
+Future<void> _goToPageZoomed(
+  PdfViewerController controller,
+  int pageNumber,
+  double percent, {
+  Duration duration = Duration.zero,
+}) {
+  final fit = controller.coverScale.clamp(
+    controller.minScale,
+    controller.maxScale,
+  );
+  final zoom = min(fit * percent / 100, controller.maxScale);
+  final index = pageNumber.clamp(1, controller.pageCount) - 1;
+  final page = controller.layout.pageLayouts[index];
+  final y = min(
+    page.center.dy,
+    page.top + controller.viewSize.height / zoom / 2,
+  );
+  return controller.goTo(
+    controller.calcMatrixFor(Offset(page.center.dx, y), zoom: zoom),
+    duration: duration,
+  );
+}
+
 class PdfReader extends HookConsumerWidget {
   final int seriesId;
   final int chapterId;
@@ -72,6 +98,27 @@ class PdfReader extends HookConsumerWidget {
     );
 
     final pdf = ref.watch(pdfProvider(chapterId: chapterId));
+    final zoomPercent = model.value?.settings.defaultZoom;
+
+    // Apply a changed default zoom to the current page.
+    useEffect(() {
+      if (zoomPercent == null || !controller.isReady) return null;
+      // Effects run during build; the viewer must not change its matrix until after the frame.
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final page = ref.read(navProvider).value?.currentPage;
+        if (!context.mounted || !controller.isReady || page == null) return;
+        if (zoomPercent > 100) {
+          await _goToPageZoomed(controller, page + 1, zoomPercent);
+        } else {
+          await controller.setZoom(
+            controller.centerPosition,
+            defaultZoom.value,
+          );
+          await controller.goToPage(pageNumber: page + 1, duration: .zero);
+        }
+      });
+      return null;
+    }, [zoomPercent]);
 
     ref.listen(navProvider, (previous, next) async {
       next.whenData((next) async {
@@ -79,12 +126,23 @@ class PdfReader extends HookConsumerWidget {
 
         if (previous?.value?.currentPage != next.currentPage) {
           lastUpdateFromProvider.value = true;
-          await controller.goToPage(
-            pageNumber: next.currentPage + 1,
-            duration: model.value?.reduceAnimations ?? false
-                ? .zero
-                : LayoutConstants.pageSlideDuration,
-          );
+          final duration = model.value?.reduceAnimations ?? false
+              ? Duration.zero
+              : LayoutConstants.pageSlideDuration;
+          final percent = model.value?.settings.defaultZoom ?? 100;
+          if (percent > 100) {
+            await _goToPageZoomed(
+              controller,
+              next.currentPage + 1,
+              percent,
+              duration: duration,
+            );
+          } else {
+            await controller.goToPage(
+              pageNumber: next.currentPage + 1,
+              duration: duration,
+            );
+          }
         }
       });
     });
@@ -117,7 +175,23 @@ class PdfReader extends HookConsumerWidget {
               : null,
           extraControls: _PdfExtraControls(
             controller: controller,
-            defaultZoom: defaultZoom,
+            onResetZoom: () {
+              final page = ref.read(navProvider).value?.currentPage;
+              if (data.settings.defaultZoom > 100 && page != null) {
+                unawaited(
+                  _goToPageZoomed(
+                    controller,
+                    page + 1,
+                    data.settings.defaultZoom,
+                  ),
+                );
+              } else {
+                controller.setZoom(
+                  controller.centerPosition,
+                  defaultZoom.value,
+                );
+              }
+            },
           ),
           child: Async(
             asyncValue: pdf,
@@ -148,8 +222,17 @@ class PdfReader extends HookConsumerWidget {
                     },
                   ),
                   onViewerReady: (document, controller) async {
-                    toc.value = await document.loadOutline();
                     defaultZoom.value = controller.currentZoom;
+                    if (data.settings.defaultZoom > 100) {
+                      unawaited(
+                        _goToPageZoomed(
+                          controller,
+                          data.reader.initialPage + 1,
+                          data.settings.defaultZoom,
+                        ),
+                      );
+                    }
+                    toc.value = await document.loadOutline();
                   },
                   onPageChanged: (page) {
                     if (page == null) return;
@@ -239,11 +322,11 @@ class PdfReader extends HookConsumerWidget {
 class _PdfExtraControls extends StatelessWidget {
   const _PdfExtraControls({
     required this.controller,
-    required this.defaultZoom,
+    required this.onResetZoom,
   });
 
   final PdfViewerController controller;
-  final ValueNotifier<double> defaultZoom;
+  final VoidCallback onResetZoom;
 
   @override
   Widget build(BuildContext context) {
@@ -264,12 +347,7 @@ class _PdfExtraControls extends StatelessWidget {
           icon: const Icon(KoverIcons.zoomOut),
         ),
         IconButton(
-          onPressed: () {
-            controller.setZoom(
-              controller.centerPosition,
-              defaultZoom.value,
-            );
-          },
+          onPressed: onResetZoom,
           icon: const Icon(KoverIcons.zoomReset),
         ),
       ],
