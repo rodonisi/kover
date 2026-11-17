@@ -53,6 +53,18 @@ sealed class ImageReaderSettingsState with _$ImageReaderSettingsState {
       _$ImageReaderSettingsStateFromJson(json);
 }
 
+extension on ImageReaderSettingsState {
+  ImageReaderSettingsState resolveBreakpoint(Breakpoint breakpoint) {
+    if (breakpoint == .compact && readerMode == .spread) {
+      return copyWith(readerMode: .horizontal, hadSpread: true);
+    }
+    if (breakpoint != .compact && hadSpread && readerMode != .spread) {
+      return copyWith(readerMode: .spread);
+    }
+    return this;
+  }
+}
+
 @riverpod
 @JsonPersist()
 class DefaultImageReaderSettings extends _$DefaultImageReaderSettings {
@@ -84,18 +96,15 @@ class ImageReaderSettings extends _$ImageReaderSettings {
       final current = state.value;
       if (current == null) return;
 
-      if (next == .compact && current.readerMode == .spread) {
-        state = AsyncData(
-          current.copyWith(readerMode: .horizontal),
-        );
-      } else if (next != .compact && current.hadSpread) {
-        state = AsyncData(
-          current.copyWith(readerMode: .spread),
-        );
+      final resolved = current.resolveBreakpoint(next);
+      if (resolved != current) {
+        state = AsyncData(resolved);
       }
     });
 
-    return state.value ?? defaults;
+    return (state.value ?? defaults).resolveBreakpoint(
+      ref.read(breakpointsProvider),
+    );
   }
 
   Future<void> setScaleType(ImageScaleType type) async {
@@ -225,7 +234,9 @@ class ImageReaderSettings extends _$ImageReaderSettings {
 
   Future<void> reset() async {
     final defaults = await ref.read(defaultImageReaderSettingsProvider.future);
-    state = AsyncData(defaults);
+    state = AsyncData(
+      defaults.resolveBreakpoint(ref.read(breakpointsProvider)),
+    );
     log.info(
       'reset reader settings to defaults',
       attributes: {'reader': 'image'},
