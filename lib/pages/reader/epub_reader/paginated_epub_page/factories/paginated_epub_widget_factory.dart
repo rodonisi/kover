@@ -99,6 +99,17 @@ class PaginatedEpubWidgetFactory({
       super.customStylesBuilder(element) ?? const {},
     );
 
+    if (element.classes.contains(HtmlConstants.koverWrapperClass)) {
+      return styles..removeWhere(
+        (key, _) =>
+            key.startsWith('margin') ||
+            key.startsWith('padding') ||
+            key == 'width' ||
+            key == 'min-width' ||
+            key == 'max-width',
+      );
+    }
+
     if (element.attributes.containsKey(
       HtmlConstants.trimStartAttribute,
     )) {
