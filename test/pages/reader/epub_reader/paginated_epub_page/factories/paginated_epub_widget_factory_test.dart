@@ -5,6 +5,8 @@ import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/paginated_epub_widget_factory.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
 import 'package:kover/utils/constants/html_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -46,6 +48,31 @@ void main() {
       expect(factory.customStylesBuilder(start)?['margin-top'], '0');
       expect(factory.customStylesBuilder(end)?['margin-bottom'], '0');
     });
+
+    testWidgets(
+      'ignores wrapper spacing and width while keeping inherited styles',
+      (tester) async {
+        const html =
+            '<style>.book-content { width: 50%; max-width: 200px; '
+            'margin: 2em auto; margin-left: 4em; padding: 2em 1em 2em 70px; '
+            'color: #123456; text-align: center; }</style>'
+            '<p>Hello world</p>';
+
+        await _pumpHtml(tester, html, const Size(800, 600));
+
+        final paragraph = tester.renderObject<RenderParagraph>(
+          find.byType(RichText),
+        );
+        expect(paragraph.size.width, 800);
+        expect(tester.getTopLeft(find.byType(RichText)), Offset.zero);
+        expect(
+          tester.getSize(find.byType(HtmlWidget)).height,
+          paragraph.size.height,
+        );
+        expect(paragraph.textAlign, TextAlign.center);
+        expect(paragraph.text.style?.color, const Color(0xFF123456));
+      },
+    );
   });
 
   group('text indent', () {
@@ -139,16 +166,17 @@ Future<void> _pumpHtml(
   bool removeParagraphIndent = false,
   void Function(EpubAnchorTarget)? onAnchorTap,
 }) async {
-  final engine = CssEngine(
-    root: dom.DocumentFragment.html(html),
-    additionalStyles: additionalStyles,
-  );
+  final root = EpubPagePreprocessor(
+    html: dom.DocumentFragment.html(html),
+    operations: [NodeIndexingOperation()],
+  ).process();
+  final engine = CssEngine(root: root, additionalStyles: additionalStyles);
 
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
         body: HtmlWidget(
-          html,
+          root.outerHtml,
           factoryBuilder: () => PaginatedEpubWidgetFactory(
             viewport: viewport,
             removeParagraphIndent: removeParagraphIndent,
