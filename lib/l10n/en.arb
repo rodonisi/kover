@@ -1016,7 +1016,7 @@
     "@defaultLabel": {
       "description": "Label for a default option in a setting"
     },
-    "defaultZoom": "Default Zoom (%)",
+    "defaultZoom": "Default Zoom",
     "@defaultZoom": {
       "description": "Label for the PDF reader setting that sets the zoom applied on each page turn, relative to fitting the page"
     },

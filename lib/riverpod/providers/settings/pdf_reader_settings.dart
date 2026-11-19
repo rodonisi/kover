@@ -14,10 +14,10 @@ enum PdfReaderMode {
 }
 
 sealed class PdfReaderSettingsLimits {
-  /// Percentage of the viewer's fit zoom.
-  static const double defaultZoomMin = 100.0;
-  static const double defaultZoomMax = 200.0;
-  static const double defaultZoomStep = 5.0;
+  /// Multiplier of the viewer's fit zoom.
+  static const double defaultZoomMin = 1.0;
+  static const double defaultZoomMax = 2.0;
+  static const double defaultZoomStep = 0.05;
 }
 
 @freezed
@@ -27,7 +27,7 @@ sealed class PdfReaderSettingsState with _$PdfReaderSettingsState {
     @Default(PdfReaderMode.vertical) PdfReaderMode readerMode,
     @Default(true) bool ignoreSafeAreas,
     @Default(false) bool lockHorizontalPan,
-    @Default(100.0) double defaultZoom,
+    @Default(1.0) double defaultZoom,
   }) = _PdfReaderSettingsState;
 
   factory PdfReaderSettingsState.fromJson(Map<String, Object?> json) =>

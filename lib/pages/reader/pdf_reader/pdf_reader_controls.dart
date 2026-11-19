@@ -91,7 +91,7 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                         min: PdfReaderSettingsLimits.defaultZoomMin,
                         max: PdfReaderSettingsLimits.defaultZoomMax,
                         step: PdfReaderSettingsLimits.defaultZoomStep,
-                        decimalPlaces: 0,
+                        labelBuilder: (value) => '${(value * 100).round()}%',
                         onChanged: (newValue) async => await ref
                             .read(pdfSettings.notifier)
                             .setDefaultZoom(newValue),
