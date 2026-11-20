@@ -8,6 +8,7 @@ import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/utils/safe_platform.dart';
 import 'package:kover/widgets/settings/boolean_option.dart';
 import 'package:kover/widgets/settings/choice_option.dart';
+import 'package:kover/widgets/settings/numeric_option.dart';
 import 'package:kover/widgets/settings/reader/navigation_gestures_option.dart';
 import 'package:kover/widgets/settings/reader/orientation_option.dart';
 import 'package:kover/widgets/settings/reader/progress_bar_option.dart';
@@ -83,6 +84,18 @@ class PdfReaderSettingsBottomSheet extends ConsumerWidget {
                               .read(pdfSettings.notifier)
                               .setLockHorizontalPan(newValue),
                         ),
+                      NumericOption(
+                        icon: KoverIcons.zoomIn,
+                        title: l.defaultZoom,
+                        value: settings.defaultZoom,
+                        min: PdfReaderSettingsLimits.defaultZoomMin,
+                        max: PdfReaderSettingsLimits.defaultZoomMax,
+                        step: PdfReaderSettingsLimits.defaultZoomStep,
+                        labelBuilder: (value) => '${(value * 100).round()}%',
+                        onChanged: (newValue) async => await ref
+                            .read(pdfSettings.notifier)
+                            .setDefaultZoom(newValue),
+                      ),
                       if (SafePlatform.isMobile)
                         OrientationOption(seriesId: seriesId),
                       BooleanOption(

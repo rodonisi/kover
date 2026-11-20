@@ -12,6 +12,7 @@ class NumericOption extends HookWidget {
   final double max;
   final int decimalPlaces;
   final IconData? icon;
+  final String Function(double value)? labelBuilder;
   final void Function(double)? onChanged;
   const NumericOption({
     super.key,
@@ -23,6 +24,7 @@ class NumericOption extends HookWidget {
     this.description,
     this.decimalPlaces = 1,
     this.icon,
+    this.labelBuilder,
     this.onChanged,
   });
 
@@ -33,7 +35,9 @@ class NumericOption extends HookWidget {
       title: title,
       description: description,
       icon: icon,
-      value: state.value.toStringAsFixed(decimalPlaces),
+      value:
+          labelBuilder?.call(state.value) ??
+          state.value.toStringAsFixed(decimalPlaces),
       child: Slider(
         padding: const EdgeInsets.symmetric(
           horizontal: LayoutConstants.smallPadding,
