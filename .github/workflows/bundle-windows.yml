@@ -14,13 +14,17 @@ on:
     secrets:
       SENTRY_AUTH_TOKEN:
         required: true
+      SIGNPATH_API_TOKEN:
+        required: true
+      SIGNPATH_ORGANIZATION_ID:
+        required: true
 
 jobs:
   build-and-upload-windows:
     name: Build and upload Windows
     runs-on: windows-latest
-    permissions:
-      contents: write
+    # permissions:
+    #   contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -53,20 +57,41 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: dart run sentry_dart_plugin
 
-      - name: Zip release build
-        id: zip
-        shell: pwsh
-        env:
-          RELEASE_NAME: Kover-${{ inputs.version }}-windows-x64.zip
-        run: |
-          Compress-Archive -Path build/windows/x64/runner/Release/* `
-            -DestinationPath $env:RELEASE_NAME
-          Add-Content -Path $env:GITHUB_OUTPUT -Value "release_name=$env:RELEASE_NAME"
+      # - name: Zip release build
+      #   id: zip
+      #   shell: pwsh
+      #   env:
+      #     RELEASE_NAME: Kover-${{ inputs.version }}-windows-x64.zip
+      #   run: |
+      #     Compress-Archive -Path build/windows/x64/runner/Release/* `
+      #       -DestinationPath $env:RELEASE_NAME
+      #     Add-Content -Path $env:GITHUB_OUTPUT -Value "release_name=$env:RELEASE_NAME"
 
-      - name: Attach to release
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_NAME: ${{ steps.zip.outputs.release_name }}
-        run: |
-          gh release upload ${{ inputs.version }} $env:RELEASE_NAME
+      - name: upload unsigned artifact
+        id: upload-unsigned-artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Kover-${{ inputs.version }}-windows-x64
+          path: build/windows/x64/runner/Release
+
+      - name: submit signing request
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: "${{ secrets.SIGNPATH_API_TOKEN }}"
+          organization-id: "${{ secrets.SIGNPATH_ORGANIZATION_ID }}"
+          project-slug: "${{ vars.SIGNPATH_PROJECT_SLUG }}"
+          signing-policy-slug: "${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}"
+          github-artifact-id: "${{ steps.upload-unsigned-artifact.outputs.artifact-id }}"
+          wait-for-completion: true
+          output-artifact-directory: "out/"
+          parameters: |
+            version: ${{ toJSON(inputs.version) }}
+            build_number: ${{ toJSON(inputs.build_number) }}
+
+      # - name: Attach to release
+      #   shell: pwsh
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
+      #     RELEASE_NAME: ${{ steps.zip.outputs.release_name }}
+      #   run: |
+      #     gh release upload ${{ inputs.version }} $env:RELEASE_NAME
