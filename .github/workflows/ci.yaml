@@ -5,6 +5,17 @@ on:
     types: [opened, reopened, synchronize]
 
 jobs:
+  test-windows-sign:
+    name: Test Windows Signing
+    uses: ./.github/workflows/bundle-windows.yml
+    with:
+      version: 0.19.0
+      build_number: 42
+    secrets:
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+      SIGNPATH_ORGANIZATION_ID: ${{ secrets.SIGNPATH_ORGANIZATION_ID }}
+
   build-and-test:
     strategy:
       matrix:
