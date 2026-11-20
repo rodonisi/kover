@@ -8,6 +8,8 @@ jobs:
   test-windows-sign:
     name: Test Windows Signing
     uses: ./.github/workflows/bundle-windows.yml
+    permissions:
+      contents: write
     with:
       version: 0.19.0
       build_number: 42
