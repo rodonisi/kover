@@ -70,12 +70,20 @@ dev_dependencies:
   yaml: ^3.1.3
   mockito: ^5.6.4
   fake_async: ^1.3.3
+  msix: ^3.18.0
 
 flutter:
   generate: true
   uses-material-design: true
   assets:
     - assets/icon/icon.png
+
+msix_config:
+  display_name: Kover
+  publisher_display_name: rodonisi
+  identity_name: com.rodonisi.kover
+  logo_path: assets/icon/icon.png
+  capabilities: internetClient,privateNetworkClientServer
 
 sentry:
   upload_debug_symbols: true
