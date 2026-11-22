@@ -61,22 +61,19 @@ jobs:
           flutter gen-l10n
 
       - name: Validate DB Schema 🗄️
-        if: matrix.platform == 'web'
+        if: matrix.platform != 'windows'
         run: |
           dart run drift_dev make-migrations
           git diff --exit-code -- lib test drift_schemas
 
       - name: Check Format 🎨
-        if: matrix.platform == 'web'
         run: dart format --output=none --set-exit-if-changed .
 
       - name: Analyze 🔍
-        if: matrix.platform == 'web'
         run: flutter analyze
 
       - name: Build 🏗️
         run: flutter build ${{ matrix.platform }}
 
       - name: Test 🧪
-        if: matrix.platform == 'web'
         run: flutter test
