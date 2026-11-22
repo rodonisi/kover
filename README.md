@@ -127,16 +127,8 @@ Thanks to the amazing people helping shape this project by providing feedback, r
   <img src="screenshots/light_mode.png" alt="Screenshot" width="220" />
 </p>
 
-## Thanks
+## Acknowledgements
 
-<p align="center">
-  <a href="https://sentry.io" style="text-decoration: none;">
-    <img src="./docs/assets/sentry.svg" height="50" width="169" alt="Sentry" />
-  </a>
-  <a href="https://weblate.org" style="text-decoration: none;">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Weblate_logo.svg/1280px-Weblate_logo.svg.png" height="50" alt="Weblate" />
-  </a>
-</p>
-
-- [Sentry](https://sentry.io/) for providing an open source license for their error monitoring software.
-- [Weblate](https://weblate.org/) for providing free hosting to support translations.
+- <a href="https://sentry.io/"><img src="./docs/assets/sentry.svg" height="40" align="absmiddle" alt="Sentry" /></a> **[Sentry](https://sentry.io/)** — Providing an open source license for their error monitoring software.
+- <a href="https://weblate.org/"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Weblate_logo.svg/1280px-Weblate_logo.svg.png" height="40" align="absmiddle" alt="Weblate" /></a> **[Weblate](https://weblate.org/)** — Providing free hosting to support translations.
+- <a href="https://signpath.io/"><img src="https://signpath.org/assets/favicon-50x50.png" height="30" align="absmiddle" alt="SignPath" /></a> **[SignPath Foundation](https://signpath.org/)** — Providing an OSS code signing certificate and signing infrastructure.
