@@ -1,6 +1,5 @@
 import 'package:kover/pages/reader/image_reader/vertical_continuous_reader_provider.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/models/image_model.dart';
