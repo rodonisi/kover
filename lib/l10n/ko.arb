@@ -1037,5 +1037,9 @@
     "invalidCredentialsDescription": "서버에서 API 키를 거부했습니다. 설정에서 API 키를 확인해 주세요.",
     "@invalidCredentialsDescription": {
         "description": "Instructions shown when the server rejected the API key"
+    },
+    "defaultZoom": "기본 줌",
+    "@defaultZoom": {
+        "description": "Label for the PDF reader setting that sets the zoom applied on each page turn, relative to fitting the page"
     }
 }
