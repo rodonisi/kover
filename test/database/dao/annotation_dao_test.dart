@@ -81,6 +81,8 @@ void main() {
       ownerUserId: ownerUserId,
       xPath: Value(xPath),
       selectedText: const Value('text'),
+      pageNumber: 1,
+      selectedSlotIndex: 0,
       likes: const Value([]),
       dirty: Value(dirty),
       removed: Value(removed),

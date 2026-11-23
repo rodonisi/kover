@@ -2,10 +2,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/pagination/epub_paginator.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/ensure_annotations_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/remove_unknown_annotations_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/resume_highlight_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/scroll_id_operation.dart';
 import 'package:kover/utils/constants/html_constants.dart';
@@ -37,6 +40,9 @@ class PaginatedEpubPageController({
   String? _pendingAnchor;
   PaginatedEpubPageSettings? _settings;
   Object? _measuredLayoutKey;
+  dom.DocumentFragment? _sourceHtml;
+  Map<String, Map<String, String>> _additionalStyles = const {};
+  List<PaginatedEpubAnnotation> _annotations = const [];
 
   PaginatedEpubPageControllerStatus get status => _status;
   dom.DocumentFragment? get root => _paginator?.root;
@@ -112,38 +118,82 @@ class PaginatedEpubPageController({
     required PaginatedEpubPageSettings settings,
     String? initialXpath,
     Map<String, Map<String, String>> additionalStyles = const {},
+    List<PaginatedEpubAnnotation> annotations = const [],
   }) {
+    _sourceHtml = html;
+    _additionalStyles = additionalStyles;
+    _annotations = annotations;
+    _settings = settings;
+    _initialXpath = initialXpath;
+    _currentSubpage = 0;
+    _contentViewport = null;
+    _measuredLayoutKey = null;
+    _resumePending = initialXpath != null;
+    _rebuildRoot();
+  }
+
+  /// Rebuilds the page when the annotation set changes.
+  ///
+  /// The page keeps its current subpage and is measured again. Editing a
+  /// comment or a slot color does not move a highlight, but the rebuilt root
+  /// is the simplest way to keep the markup in sync.
+  void updateAnnotations(List<PaginatedEpubAnnotation> annotations) {
+    if (_sameAnnotations(_annotations, annotations)) return;
+
+    _annotations = annotations;
+    if (_paginator == null) return;
+
+    _measuredLayoutKey = null;
+    _rebuildRoot();
+  }
+
+  void _rebuildRoot() {
+    final source = _sourceHtml;
+    final settings = _settings;
+    if (source == null || settings == null) return;
+
     final root = EpubPagePreprocessor(
-      html: html,
+      html: source,
       operations: [
         NodeIndexingOperation(),
         ScrollIdOperation(),
         ResumeHighlightOperation(
-          scrollId: settings.highlightResumePoint ? initialXpath : null,
+          scrollId: settings.highlightResumePoint ? _initialXpath : null,
         ),
+        RemoveUnknownAnnotationsOperation(annotations: _annotations),
+        EnsureAnnotationsOperation(annotations: _annotations),
       ],
     ).process();
 
     _paginator = EpubPaginator(root: root);
     _cssEngine = CssEngine(
       root: root,
-      additionalStyles: additionalStyles,
+      additionalStyles: _additionalStyles,
     );
-    _settings = settings;
-    _initialXpath = initialXpath;
     _highlightedElement = settings.highlightResumePoint
-        ? _findByScrollId(root, initialXpath)
+        ? _findByScrollId(root, _initialXpath)
         : null;
-    _resumePending = initialXpath != null;
-    _currentSubpage = 0;
-    _contentViewport = null;
-    _measuredLayoutKey = null;
     _status = .measuring;
     notifyListeners();
   }
 
+  static bool _sameAnnotations(
+    List<PaginatedEpubAnnotation> a,
+    List<PaginatedEpubAnnotation> b,
+  ) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+
+    for (var index = 0; index < a.length; index++) {
+      if (a[index] != b[index]) return false;
+    }
+
+    return true;
+  }
+
   /// Updates the additional CSS styles.
   void updateStyles(Map<String, Map<String, String>> additionalStyles) {
+    _additionalStyles = additionalStyles;
     _cssEngine?.updateAdditionalStyles(additionalStyles);
     notifyListeners();
   }

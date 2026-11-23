@@ -2,6 +2,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/views/horizontal_epub_page_view.dart';
@@ -17,6 +18,7 @@ class PaginatedEpubPage extends HookWidget {
   final PaginatedEpubPageController controller;
   final dom.DocumentFragment html;
   final PaginatedEpubPageSettings settings;
+  final List<PaginatedEpubAnnotation> annotations;
   final String? resumeScrollId;
   final void Function(bool selected)? onSelectionChanged;
   final void Function(EpubAnchorTarget)? onAnchorTap;
@@ -26,6 +28,7 @@ class PaginatedEpubPage extends HookWidget {
     required this.controller,
     required this.html,
     required this.settings,
+    this.annotations = const [],
     this.resumeScrollId,
     this.onSelectionChanged,
     this.onAnchorTap,
@@ -90,9 +93,15 @@ class PaginatedEpubPage extends HookWidget {
         settings: settings,
         initialXpath: resumeScrollId,
         additionalStyles: styles,
+        annotations: annotations,
       );
       return null;
     }, [controller, html, resumeScrollId]);
+
+    useEffect(() {
+      controller.updateAnnotations(annotations);
+      return null;
+    }, [controller, annotations]);
 
     useEffect(() {
       controller.updateStyles(styles);

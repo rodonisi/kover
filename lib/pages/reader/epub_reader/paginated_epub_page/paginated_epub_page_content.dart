@@ -3,6 +3,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.da
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/paginated_epub_widget_factory.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_anchor.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -10,6 +11,7 @@ import 'package:material_ui/material_ui.dart';
 class PaginatedEpubPageContent extends StatelessWidget {
   final String html;
   final PaginatedEpubPageSettings settings;
+  final List<PaginatedEpubAnnotation> annotations;
   final Size viewport;
   final CssEngine cssEngine;
   final Key? anchorKey;
@@ -25,6 +27,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
     this.anchorKey,
     this.factoryBuilder,
     this.onAnchorTap,
+    this.annotations = const [],
   });
 
   @override

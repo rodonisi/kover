@@ -1,7 +1,10 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation_mapper.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
 import 'package:kover/riverpod/managers/font_manager.dart';
+import 'package:kover/riverpod/providers/annotations.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
@@ -17,6 +20,7 @@ class PaginatedEpubPageModel({
   required final dom.DocumentFragment html,
   required final PaginatedEpubPageSettings settings,
   required final String? resumeScrollId,
+  final List<PaginatedEpubAnnotation> annotations = const [],
 }) with _$PaginatedEpubPageModel;
 
 @riverpod
@@ -49,12 +53,18 @@ Future<PaginatedEpubPageModel> paginatedEpubPage(
   final reduceAnimationsFuture = ref.watch(
     themeProvider.selectAsync((value) => value.reduceAnimations),
   );
+  final annotationsFuture = ref.watch(
+    chapterAnnotationsProvider(chapterId: chapterId).future,
+  );
+  final slotsFuture = ref.watch(highlightSlotsProvider.future);
 
   final settings = await settingsFuture;
   final commonSettings = await commonSettingsFuture;
   final content = await contentFuture;
   final reader = await readerFuture;
   final reduceAnimations = await reduceAnimationsFuture;
+  final annotations = await annotationsFuture;
+  final slots = await slotsFuture;
 
   final fontManager = ref.read(fontManagerProvider.notifier);
   if (settings.fontFamily case final family?) {
@@ -67,6 +77,10 @@ Future<PaginatedEpubPageModel> paginatedEpubPage(
   return PaginatedEpubPageModel(
     html: content.root,
     resumeScrollId: scrollId,
+    annotations: [
+      for (final annotation in annotations)
+        ?toPaginatedEpubAnnotation(annotation, slots),
+    ],
     settings: PaginatedEpubPageSettings(
       horizontalMarginSize: settings.horizontalMarginSize,
       verticalMarginSize: settings.verticalMarginSize,

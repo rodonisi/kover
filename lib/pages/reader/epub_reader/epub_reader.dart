@@ -341,6 +341,7 @@ class _Page extends HookConsumerWidget {
           controller: controller,
           html: data.html,
           settings: data.settings,
+          annotations: data.annotations,
           resumeScrollId: data.resumeScrollId,
           onSelectionChanged: onSelectionChanged,
           onAnchorTap: handleAnchor,

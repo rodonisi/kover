@@ -50,6 +50,8 @@ void main() {
       ownerUserId: 1,
       xPath: '/p[1]',
       selectedText: 'text',
+      pageNumber: 1,
+      selectedSlotIndex: 0,
       likes: const [],
       created: DateTime(2026),
       dirty: dirty,
@@ -62,6 +64,8 @@ void main() {
       id: id,
       xPath: '/p[1]',
       selectedText: 'text',
+      pageNumber: 1,
+      selectedSlotIndex: 0,
       chapterId: chapterId,
       volumeId: 1,
       seriesId: 1,
@@ -83,6 +87,7 @@ void main() {
       ownerUserId: 1,
       xPath: '/p[1]',
       selectedText: 'text',
+      pageNumber: 1,
     );
 
     verify(mockClient.create(any)).called(1);
@@ -107,6 +112,7 @@ void main() {
       libraryId: 1,
       ownerUserId: 1,
       selectedText: 'text',
+      pageNumber: 1,
     );
 
     verify(mockDao.upsert(any)).called(1);
