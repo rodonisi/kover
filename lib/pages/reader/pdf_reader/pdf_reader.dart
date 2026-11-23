@@ -3,8 +3,8 @@ import 'dart:math';
 
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kover/models/read_direction.dart';
 import 'package:kover/pages/reader/overlay/reader_overlay.dart';
+import 'package:kover/pages/reader/pdf_reader/horizontal_page_layout.dart';
 import 'package:kover/pages/reader/pdf_reader/pdf_reader_provider.dart';
 import 'package:kover/pages/reader/pdf_reader/pdf_toc_drawer.dart';
 import 'package:kover/riverpod/providers/book.dart';
@@ -186,6 +186,14 @@ class PdfReader extends HookConsumerWidget {
                       data.settings.readerMode == .vertical
                   ? null
                   : const NeverScrollableScrollPhysics();
+
+              final layoutStrategy = switch (data.settings.readerMode) {
+                .vertical => const SequentialPagesLayout(),
+                .horizontal => HorizontalPageLayout(
+                  readDirection: data.commonSettings.readDirection,
+                ),
+              };
+
               final content = PdfViewer.data(
                 pdf.data,
                 controller: controller,
@@ -222,35 +230,15 @@ class PdfReader extends HookConsumerWidget {
                   onPageChanged: (page) {
                     if (page == null) return;
 
-                    // Workaround for PdfViewer reporting 1-based page number
-                    // in layout order, but only some times. It seems jumpToPage
-                    // always goes by document order. The update from the provider
-                    // alwo fires an event with the same page, while the next ones
-                    // go back by layout order.
-                    final int navIndex;
-                    if (data.commonSettings.readDirection == .rightToLeft &&
-                        data.settings.readerMode == .horizontal) {
-                      navIndex = lastUpdateFromProvider.value
-                          ? page - 1
-                          : (data.reader.totalPages - page - 1);
-                    } else {
-                      navIndex = page - 1;
-                    }
-
                     ref
                         .read(navProvider.notifier)
-                        .jumpToPage(navIndex, fromObserver: true);
-
-                    lastUpdateFromProvider.value = false;
+                        .jumpToPage(page - 1, fromObserver: true);
                   },
-                  layoutPages: switch (data.settings.readerMode) {
-                    .vertical => null,
-                    .horizontal => (pages, params) => horizontalLayout(
-                      pages,
-                      params,
-                      data.commonSettings.readDirection,
-                    ),
-                  },
+                  layoutStrategy: layoutStrategy,
+                  calculateCurrentPageNumber:
+                      layoutStrategy is HorizontalPageLayout
+                      ? layoutStrategy.calculateCurrentPageNumber
+                      : null,
                 ),
               );
 
@@ -263,43 +251,6 @@ class PdfReader extends HookConsumerWidget {
           ),
         );
       },
-    );
-  }
-
-  PdfPageLayout horizontalLayout(
-    List<PdfPage> pages,
-    PdfViewerParams params,
-    ReadDirection readDirection,
-  ) {
-    final height =
-        pages.fold(0.0, (prev, page) => max(prev, page.height)) +
-        params.margin * 2;
-    final width = pages.fold(
-      params.margin,
-      (prev, page) => prev + page.width + params.margin,
-    );
-    final pageLayouts = <Rect>[];
-    double x = params.margin;
-    for (var page in pages) {
-      final dirX = switch (readDirection) {
-        .leftToRight => x,
-        .rightToLeft => width - x - page.width,
-      };
-
-      pageLayouts.add(
-        Rect.fromLTWH(
-          dirX,
-          (height - page.height) / 2, // center vertically
-          page.width,
-          page.height,
-        ),
-      );
-
-      x += page.width + params.margin;
-    }
-    return PdfPageLayout(
-      pageLayouts: pageLayouts,
-      documentSize: Size(width, height),
     );
   }
 }

@@ -5,7 +5,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.13.0
+  sdk: ^3.14.0
 
 dependencies:
   flutter:
@@ -44,7 +44,7 @@ dependencies:
   csslib: ^1.0.2
   flutter_markdown_plus: ^1.0.7
   path: ^1.9.1
-  pdfrx: ^2.3.2
+  pdfrx: ^3.1.0
   flutter_secure_storage: ^11.0.0
   package_info_plus: ^10.1.0
   url_launcher: ^6.3.2
