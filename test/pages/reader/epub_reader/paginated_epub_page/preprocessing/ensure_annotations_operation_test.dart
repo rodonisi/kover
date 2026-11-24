@@ -3,6 +3,7 @@ import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/ensure_annotations_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/remove_unknown_annotations_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/scroll_id_operation.dart';
 import 'package:kover/utils/constants/html_constants.dart';
 import 'package:material_ui/material_ui.dart';
@@ -18,7 +19,7 @@ void main() {
           _annotation(
             id: 1,
             serverId: 7,
-            xpath: '//div/div[1]/p[1]',
+            xpath: '//body/p[1]',
             selectedText: 'world',
           ),
         ],
@@ -46,7 +47,7 @@ void main() {
         annotations: [
           _annotation(
             id: 1,
-            xpath: '//div/div[1]/p[1]',
+            xpath: '//body/p[1]',
             selectedText: 'world',
           ),
         ],
@@ -74,7 +75,7 @@ void main() {
           _annotation(
             id: 1,
             serverId: 7,
-            xpath: '//div/div[1]/p[1]',
+            xpath: '//body/p[1]',
             selectedText: 'world',
           ),
         ],
@@ -90,13 +91,47 @@ void main() {
       );
     });
 
+    test(
+      'when server highlight uses canonical id, then pipeline adopts it',
+      () {
+        final annotation = _annotation(
+          id: 1,
+          serverId: 7,
+          xpath: '//body/p[1]',
+          selectedText: 'world',
+        );
+        final root = EpubPagePreprocessor(
+          html: dom.DocumentFragment.html(
+            '<div><p>Hello <app-epub-highlight id="epub-highlight-7">'
+            'world</app-epub-highlight></p></div>',
+          ),
+          operations: [
+            ScrollIdOperation(),
+            RemoveUnknownAnnotationsOperation(annotations: [annotation]),
+            EnsureAnnotationsOperation(annotations: [annotation]),
+          ],
+        ).process();
+
+        final highlights = root.querySelectorAll(
+          HtmlConstants.kavitaHighlightElementTag,
+        );
+        expect(highlights, hasLength(1));
+        expect(highlights.single.text, 'world');
+        expect(
+          highlights.single.attributes[HtmlConstants
+              .koverAnnotationIdAttribute],
+          '1',
+        );
+      },
+    );
+
     test('when text is split by an inline element, then preserves it', () {
       final root = _process(
         '<div><p>a <em>b</em> c</p></div>',
         annotations: [
           _annotation(
             id: 1,
-            xpath: '//div/div[1]/p[1]',
+            xpath: '//body/p[1]',
             selectedText: 'a b',
           ),
         ],
@@ -126,7 +161,7 @@ void main() {
         annotations: [
           _annotation(
             id: 1,
-            xpath: '//div/div[1]/p[1]',
+            xpath: '//body/p[1]',
             selectedText: 'and Wolf',
           ),
         ],
@@ -144,8 +179,8 @@ void main() {
         annotations: [
           _annotation(
             id: 1,
-            xpath: '//div/div[1]/p[1]',
-            endXpath: '//div/div[1]/p[2]',
+            xpath: '//body/p[1]',
+            endXpath: '//body/p[2]',
             selectedText: 'lo Wor',
           ),
         ],
@@ -170,12 +205,12 @@ void main() {
         annotations: [
           _annotation(
             id: 1,
-            xpath: '//div/div[1]/p[1]',
+            xpath: '//body/p[1]',
             selectedText: 'cdef',
           ),
           _annotation(
             id: 2,
-            xpath: '//div/div[1]/p[1]',
+            xpath: '//body/p[1]',
             selectedText: 'efgh',
           ),
         ],
@@ -193,7 +228,7 @@ void main() {
         annotations: [
           _annotation(
             id: 1,
-            xpath: '//div/div[1]/p[1]',
+            xpath: '//body/p[1]',
             selectedText: 'cde',
           ),
         ],
@@ -216,7 +251,7 @@ void main() {
         annotations: [
           _annotation(
             id: 1,
-            xpath: '//div/div[1]/p[1]',
+            xpath: '//body/p[1]',
             selectedText: 'missing',
           ),
         ],
@@ -234,7 +269,7 @@ void main() {
         annotations: [
           _annotation(
             id: 1,
-            xpath: '//div/div[1]/p[9]',
+            xpath: '//body/p[9]',
             selectedText: 'abc',
           ),
         ],

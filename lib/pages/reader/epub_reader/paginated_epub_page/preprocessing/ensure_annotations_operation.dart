@@ -154,10 +154,7 @@ final class EnsureAnnotationsOperation extends EpubPagePreprocessorOperation {
   }
 
   void _adopt(dom.Element element) {
-    final serverId = int.tryParse(
-      element.attributes[HtmlConstants.kavitaAnnotationIdAttribute]?.trim() ??
-          '',
-    );
+    final serverId = HtmlConstants.annotationServerId(element.attributes);
     if (serverId == null) return;
 
     final annotation = _byServerId[serverId];

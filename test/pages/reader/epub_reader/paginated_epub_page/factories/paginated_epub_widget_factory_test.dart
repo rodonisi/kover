@@ -5,10 +5,22 @@ import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/paginated_epub_widget_factory.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
 import 'package:kover/utils/constants/html_constants.dart';
+import 'package:kover/widgets/util/link_hit_region.dart';
 import 'package:material_ui/material_ui.dart';
+
+const _annotationColor = Color(0xFFFF0000);
+final _annotation = PaginatedEpubAnnotation(
+  id: 1,
+  serverId: 7,
+  xpath: '//div/p[1]',
+  endXpath: '//div/p[1]',
+  selectedText: 'world',
+  color: _annotationColor,
+);
 
 void main() {
   group('PaginatedEpubWidgetFactory', () {
@@ -118,6 +130,92 @@ void main() {
     });
   });
 
+  group('annotations', () {
+    testWidgets('renders the configured highlight color', (tester) async {
+      await _pumpHtml(
+        tester,
+        '<p>Hello <app-epub-highlight data-kover-annotation-id="1" '
+        'style="background-color: blue">world</app-epub-highlight></p>',
+        const Size(300, 600),
+        annotations: [_annotation],
+      );
+
+      final richText = tester.widget<RichText>(find.byType(RichText));
+      final highlighted = (richText.text as TextSpan).children!
+          .whereType<TextSpan>()
+          .firstWhere((span) => span.text?.contains('world') == true);
+      expect(highlighted.style?.background?.color, _annotationColor);
+    });
+
+    testWidgets('leaves unknown annotation ids untouched', (tester) async {
+      await _pumpHtml(
+        tester,
+        '<p>Hello <app-epub-highlight data-kover-annotation-id="99">'
+        'world</app-epub-highlight></p>',
+        const Size(300, 600),
+        annotations: [_annotation],
+      );
+
+      final richText = tester.widget<RichText>(find.byType(RichText));
+      expect(
+        _textSpans(richText.text).map((span) => span.style?.background?.color),
+        everyElement(isNull),
+      );
+    });
+
+    testWidgets('reports a tap with the matching annotation', (tester) async {
+      final tapped = <PaginatedEpubAnnotation>[];
+      await _pumpHtml(
+        tester,
+        '<p>Hello <app-epub-highlight data-kover-annotation-id="1">'
+        'world</app-epub-highlight></p>',
+        const Size(300, 600),
+        annotations: [_annotation],
+        onAnnotationTap: tapped.add,
+      );
+
+      await tester.tapOnText(find.textRange.ofSubstring('world'));
+      await tester.pumpAndSettle();
+
+      expect(tapped, [_annotation]);
+    });
+
+    testWidgets('keeps nested links tappable', (tester) async {
+      final tappedAnnotations = <PaginatedEpubAnnotation>[];
+      final tappedAnchors = <EpubAnchorTarget>[];
+      await _pumpHtml(
+        tester,
+        '<p>Hello <app-epub-highlight data-kover-annotation-id="1">'
+        '<a href="#note">world</a></app-epub-highlight></p>',
+        const Size(300, 600),
+        annotations: [_annotation],
+        onAnnotationTap: tappedAnnotations.add,
+        onAnchorTap: tappedAnchors.add,
+      );
+
+      await tester.tapOnText(find.textRange.ofSubstring('world'));
+      await tester.pumpAndSettle();
+
+      expect(tappedAnnotations, isEmpty);
+      expect(tappedAnchors.single.part, 'note');
+    });
+
+    testWidgets('marks block highlights as overlay-safe hit regions', (
+      tester,
+    ) async {
+      await _pumpHtml(
+        tester,
+        '<app-epub-highlight data-kover-annotation-id="1" '
+        'style="display: block"><p>world</p></app-epub-highlight>',
+        const Size(300, 600),
+        annotations: [_annotation],
+        onAnnotationTap: (_) {},
+      );
+
+      expect(find.byType(LinkHitRegion), findsOneWidget);
+    });
+  });
+
   group('anchors', () {
     testWidgets('reports same-page links to the callback', (tester) async {
       final targets = <EpubAnchorTarget>[];
@@ -165,6 +263,8 @@ Future<void> _pumpHtml(
   Map<String, Map<String, String>> additionalStyles = const {},
   bool removeParagraphIndent = false,
   void Function(EpubAnchorTarget)? onAnchorTap,
+  Iterable<PaginatedEpubAnnotation> annotations = const [],
+  void Function(PaginatedEpubAnnotation)? onAnnotationTap,
 }) async {
   final root = EpubPagePreprocessor(
     html: dom.DocumentFragment.html(html),
@@ -181,6 +281,8 @@ Future<void> _pumpHtml(
             viewport: viewport,
             removeParagraphIndent: removeParagraphIndent,
             onAnchorTap: onAnchorTap,
+            annotations: annotations,
+            onAnnotationTap: onAnnotationTap,
           ),
           customStylesBuilder: (element) => engine.stylesFor(element: element),
         ),
@@ -188,4 +290,12 @@ Future<void> _pumpHtml(
     ),
   );
   await tester.pumpAndSettle();
+}
+
+Iterable<TextSpan> _textSpans(InlineSpan span) sync* {
+  if (span is! TextSpan) return;
+  yield span;
+  for (final child in span.children ?? const <InlineSpan>[]) {
+    yield* _textSpans(child);
+  }
 }

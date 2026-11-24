@@ -9,6 +9,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_anchor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_text_index.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_probe.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_content.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
 import 'package:material_ui/material_ui.dart';
@@ -23,6 +24,7 @@ class const EpubMeasurements({
 class EpubMeasurementsCollector extends StatelessWidget {
   final dom.DocumentFragment html;
   final PaginatedEpubPageSettings settings;
+  final List<PaginatedEpubAnnotation> annotations;
   final CssEngine cssEngine;
   final BoxConstraints constraints;
   final void Function(EpubMeasurements measurements, Size viewport) onMeasured;
@@ -34,6 +36,7 @@ class EpubMeasurementsCollector extends StatelessWidget {
     required this.cssEngine,
     required this.constraints,
     required this.onMeasured,
+    this.annotations = const [],
   });
 
   @override
@@ -52,6 +55,7 @@ class EpubMeasurementsCollector extends StatelessWidget {
       key: ValueKey((html, viewport, settings.layoutKey)),
       html: html,
       settings: settings,
+      annotations: annotations,
       cssEngine: cssEngine,
       viewport: viewport,
       outerWidth: outerWidth,
@@ -63,6 +67,7 @@ class EpubMeasurementsCollector extends StatelessWidget {
 class _EpubMeasureContent extends StatefulWidget {
   final dom.DocumentFragment html;
   final PaginatedEpubPageSettings settings;
+  final List<PaginatedEpubAnnotation> annotations;
   final CssEngine cssEngine;
   final Size viewport;
   final double outerWidth;
@@ -76,6 +81,7 @@ class _EpubMeasureContent extends StatefulWidget {
     required this.viewport,
     required this.outerWidth,
     required this.onMeasured,
+    this.annotations = const [],
   });
 
   @override
@@ -110,6 +116,7 @@ class _EpubMeasureContentState extends State<_EpubMeasureContent> {
     _factory = MeasuringPaginatedEpubWidgetFactory(
       viewport: widget.viewport,
       removeParagraphIndent: widget.settings.removeParagraphIndent,
+      annotations: widget.annotations,
       onChanged: _scheduleMeasurement,
     );
     _scheduleMeasurement();
@@ -167,6 +174,7 @@ class _EpubMeasureContentState extends State<_EpubMeasureContent> {
           child: PaginatedEpubPageContent(
             html: _htmlText,
             settings: widget.settings,
+            annotations: widget.annotations,
             viewport: widget.viewport,
             cssEngine: widget.cssEngine,
             anchorKey: _measureKey,

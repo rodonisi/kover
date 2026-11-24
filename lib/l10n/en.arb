@@ -820,6 +820,62 @@
             }
         }
     },
+    "annotationDetails": "Annotation details",
+    "@annotationDetails": {
+        "description": "Title for the annotation details bottom sheet"
+    },
+    "annotationNotFound": "Annotation not found.",
+    "@annotationNotFound": {
+        "description": "Message shown when an opened annotation no longer exists"
+    },
+    "selectedText": "Selected text",
+    "@selectedText": {
+        "description": "Label for the text highlighted by an annotation"
+    },
+    "comment": "Comment",
+    "@comment": {
+        "description": "Label for an annotation comment"
+    },
+    "highlightColor": "Highlight color",
+    "@highlightColor": {
+        "description": "Label for selecting an annotation highlight color"
+    },
+    "spoiler": "Spoiler",
+    "@spoiler": {
+        "description": "Badge shown on annotations marked as spoilers"
+    },
+    "page": "Page",
+    "@page": {
+        "description": "Label for the page number attached to an annotation"
+    },
+    "created": "Created",
+    "@created": {
+        "description": "Label for the annotation creation date"
+    },
+    "edit": "Edit",
+    "@edit": {
+        "description": "Label for the button that edits an annotation"
+    },
+    "delete": "Delete",
+    "@delete": {
+        "description": "Label for the button that deletes an annotation"
+    },
+    "deleteAnnotationDialogTitle": "Delete annotation?",
+    "@deleteAnnotationDialogTitle": {
+        "description": "Title for the annotation deletion confirmation dialog"
+    },
+    "deleteAnnotationDialogContent": "The annotation will be deleted locally and from the server when possible. This cannot be undone.",
+    "@deleteAnnotationDialogContent": {
+        "description": "Warning shown before deleting an annotation"
+    },
+    "annotationSaveFailed": "Could not save annotation.",
+    "@annotationSaveFailed": {
+        "description": "Error shown when an annotation edit cannot be saved"
+    },
+    "annotationDeleteFailed": "Could not delete annotation.",
+    "@annotationDeleteFailed": {
+        "description": "Error shown when an annotation cannot be deleted"
+    },
     "invalidCredentials": "Invalid Credentials",
     "@invalidCredentials": {
         "description": "User display error displayed when credentials are invalid"

@@ -6,6 +6,7 @@ import 'package:kover/mapping/enums/read_direction.dart';
 import 'package:kover/pages/reader/epub_reader/epub_reader_provider.dart';
 import 'package:kover/pages/reader/epub_reader/epub_theme_override.dart';
 import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/annotations/epub_annotation_sheet.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller.dart';
@@ -345,6 +346,11 @@ class _Page extends HookConsumerWidget {
           resumeScrollId: data.resumeScrollId,
           onSelectionChanged: onSelectionChanged,
           onAnchorTap: handleAnchor,
+          annotationSheetBuilder: (context, annotationId) =>
+              EpubAnnotationSheet(
+                chapterId: chapterId,
+                annotationId: annotationId,
+              ),
         ),
       ),
     );

@@ -1,5 +1,4 @@
 import 'package:html/dom.dart';
-import 'package:kover/utils/extensions/string.dart';
 
 extension ScrollIdExtension on Element {
   /// Computes the XPath of this element relative to the root of the document.
@@ -19,7 +18,7 @@ extension ScrollIdExtension on Element {
 
     // Handle shortcuts (unless pureXPath is requested)
     if (!pureXPath && element.id.isNotEmpty) {
-      return 'id("${element.id}")'.cssEscaped;
+      return 'id("${element.id}")';
     }
 
     if (element.localName == 'body') {

@@ -21,3 +21,34 @@ Stream<List<AnnotationModel>> chapterAnnotations(
 Stream<List<HighlightSlotModel>> highlightSlots(Ref ref) {
   return ref.watch(annotationRepositoryProvider).watchHighlightSlots();
 }
+
+/// Coordinates annotation edits and removal through the repository.
+@riverpod
+class AnnotationActions extends _$AnnotationActions {
+  @override
+  void build() {}
+
+  /// Saves a plain-text comment and highlight slot for the annotation.
+  Future<void> save({
+    required int id,
+    required String? comment,
+    required bool containsSpoiler,
+    required int selectedSlotIndex,
+  }) {
+    return ref
+        .read(annotationRepositoryProvider)
+        .updateAnnotation(
+          id: id,
+          comment: comment,
+          commentHtml: null,
+          commentPlainText: comment,
+          containsSpoiler: containsSpoiler,
+          selectedSlotIndex: selectedSlotIndex,
+        );
+  }
+
+  /// Removes the annotation locally and attempts to remove its server copy.
+  Future<void> remove(int id) {
+    return ref.read(annotationRepositoryProvider).removeAnnotation(id);
+  }
+}

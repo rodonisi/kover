@@ -17,6 +17,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
   final Key? anchorKey;
   final WidgetFactory Function()? factoryBuilder;
   final void Function(EpubAnchorTarget)? onAnchorTap;
+  final void Function(PaginatedEpubAnnotation)? onAnnotationTap;
 
   const PaginatedEpubPageContent({
     super.key,
@@ -27,6 +28,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
     this.anchorKey,
     this.factoryBuilder,
     this.onAnchorTap,
+    this.onAnnotationTap,
     this.annotations = const [],
   });
 
@@ -50,6 +52,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
       child: EpubMeasureAnchor(
         key: anchorKey,
         child: HtmlWidget(
+          key: ValueKey(Object.hashAll(annotations)),
           html,
           factoryBuilder:
               factoryBuilder ??
@@ -57,6 +60,8 @@ class PaginatedEpubPageContent extends StatelessWidget {
                 viewport: viewport,
                 removeParagraphIndent: settings.removeParagraphIndent,
                 onAnchorTap: onAnchorTap,
+                annotations: annotations,
+                onAnnotationTap: onAnnotationTap,
               ),
           customStylesBuilder: (element) =>
               cssEngine.stylesFor(element: element),

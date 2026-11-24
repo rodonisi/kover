@@ -24,4 +24,20 @@ sealed class HtmlConstants {
   /// The canonical DOM id for the highlight belonging to [localId].
   static String annotationHighlightId(int localId) =>
       '$annotationHighlightIdPrefix$localId';
+
+  /// Reads the server annotation id from Kavita's highlight attributes.
+  ///
+  /// Supports both the current `id` format and the older data attribute.
+  static int? annotationServerId(Map<Object, String> attributes) {
+    final dataId = attributes[kavitaAnnotationIdAttribute]?.trim();
+    if (dataId case final dataId?) {
+      final parsed = int.tryParse(dataId);
+      if (parsed != null) return parsed;
+    }
+
+    final id = attributes['id']?.trim();
+    if (id == null || !id.startsWith(annotationHighlightIdPrefix)) return null;
+
+    return int.tryParse(id.substring(annotationHighlightIdPrefix.length));
+  }
 }

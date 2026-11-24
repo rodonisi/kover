@@ -28,10 +28,7 @@ final class RemoveUnknownAnnotationsOperation
   void enter(dom.Element element) {
     if (element.localName != HtmlConstants.kavitaHighlightElementTag) return;
 
-    final serverId = int.tryParse(
-      element.attributes[HtmlConstants.kavitaAnnotationIdAttribute]?.trim() ??
-          '',
-    );
+    final serverId = HtmlConstants.annotationServerId(element.attributes);
 
     if (serverId != null && _serverIds.contains(serverId)) return;
 

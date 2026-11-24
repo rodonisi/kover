@@ -11,7 +11,14 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/views/vertica
 import 'package:kover/utils/extensions/color.dart';
 import 'package:kover/utils/extensions/epub_text_alignment.dart';
 import 'package:kover/utils/constants/html_constants.dart';
+import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
+
+/// Builds the annotation sheet opened from a paginated EPUB highlight.
+typedef EpubAnnotationSheetBuilder = Widget Function(
+  BuildContext context,
+  int annotationId,
+);
 
 /// Paginate and layout a single EPUB page.
 class PaginatedEpubPage extends HookWidget {
@@ -22,6 +29,7 @@ class PaginatedEpubPage extends HookWidget {
   final String? resumeScrollId;
   final void Function(bool selected)? onSelectionChanged;
   final void Function(EpubAnchorTarget)? onAnchorTap;
+  final EpubAnnotationSheetBuilder? annotationSheetBuilder;
 
   const new({
     super.key,
@@ -32,6 +40,7 @@ class PaginatedEpubPage extends HookWidget {
     this.resumeScrollId,
     this.onSelectionChanged,
     this.onAnchorTap,
+    this.annotationSheetBuilder,
   });
 
   Map<String, Map<String, String>> computeThemeStyles(ThemeData theme) {
@@ -124,6 +133,30 @@ class PaginatedEpubPage extends HookWidget {
     final root = controller.root;
     final measuring = controller.status == .measuring;
 
+    void handleAnnotationTap(PaginatedEpubAnnotation annotation) {
+      final builder = annotationSheetBuilder;
+      if (builder == null) return;
+
+      final animation = settings.reduceAnimations
+          ? const AnimationStyle(duration: .zero, reverseDuration: .zero)
+          : null;
+      showModalBottomSheet(
+        context: context,
+        showDragHandle: true,
+        isScrollControlled: true,
+        useSafeArea: true,
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+          maxWidth: LayoutBreakpoints.medium,
+        ),
+        sheetAnimationStyle: animation,
+        builder: (sheetContext) => builder(sheetContext, annotation.id),
+      );
+    }
+
+    final void Function(PaginatedEpubAnnotation)? annotationTapHandler =
+        annotationSheetBuilder == null ? null : handleAnnotationTap;
+
     return LayoutBuilder(
       builder: (context, contraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -143,6 +176,7 @@ class PaginatedEpubPage extends HookWidget {
                     : EpubMeasurementsCollector(
                         html: root,
                         settings: settings,
+                        annotations: annotations,
                         cssEngine: controller.cssEngine,
                         constraints: contraints,
                         onMeasured: (measurements, viewport) {
@@ -174,16 +208,19 @@ class PaginatedEpubPage extends HookWidget {
               controller: controller,
               settings: settings,
               onAnchorTap: onAnchorTap,
+              onAnnotationTap: annotationTapHandler,
             ),
             .vertical => VerticalEpubPageView(
               controller: controller,
               settings: settings,
               onAnchorTap: onAnchorTap,
+              onAnnotationTap: annotationTapHandler,
             ),
             .spreads => SpreadsEpubPageView(
               controller: controller,
               settings: settings,
               onAnchorTap: onAnchorTap,
+              onAnnotationTap: annotationTapHandler,
             ),
           },
         );

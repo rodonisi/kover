@@ -49,6 +49,10 @@ class PaginatedEpubPageController({
   Size? get contentViewport => _contentViewport;
   String? get initialXpath => _initialXpath;
 
+  /// The annotations currently applied to the page markup.
+  List<PaginatedEpubAnnotation> get annotations =>
+      List.unmodifiable(_annotations);
+
   int get currentSubpage => _currentSubpage;
   int get subpageCount => _paginator?.subpageCount ?? 0;
 

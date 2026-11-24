@@ -23,6 +23,34 @@ void main() {
       expect(highlight!.text, 'b');
     });
 
+    test('when canonical highlight id is known, then keeps the highlight', () {
+      final root = _process(
+        '<div><p>a<app-epub-highlight id="epub-highlight-7">b'
+        '</app-epub-highlight>c</p></div>',
+        annotations: [_annotation(serverId: 7)],
+      );
+
+      final highlight = root.querySelector(
+        HtmlConstants.kavitaHighlightElementTag,
+      );
+      expect(highlight, isNotNull);
+      expect(highlight!.text, 'b');
+    });
+
+    test('when canonical highlight id is unknown, then unwraps it', () {
+      final root = _process(
+        '<div><p>a<app-epub-highlight id="epub-highlight-8">b'
+        '</app-epub-highlight>c</p></div>',
+        annotations: [_annotation(serverId: 7)],
+      );
+
+      expect(
+        root.querySelector(HtmlConstants.kavitaHighlightElementTag),
+        isNull,
+      );
+      expect(root.querySelector('p')!.text, 'abc');
+    });
+
     test('when server id is unknown, then unwraps the highlight', () {
       final root = _process(
         '<div><p>a<app-epub-highlight data-annotation-id="7">b</app-epub-highlight>c</p></div>',
@@ -78,8 +106,8 @@ PaginatedEpubAnnotation _annotation({int? serverId}) {
   return PaginatedEpubAnnotation(
     id: serverId ?? 1,
     serverId: serverId,
-    xpath: '//div/p[1]',
-    endXpath: '//div/p[1]',
+    xpath: '//body/p[1]',
+    endXpath: '//body/p[1]',
     selectedText: 'b',
     color: _color,
   );

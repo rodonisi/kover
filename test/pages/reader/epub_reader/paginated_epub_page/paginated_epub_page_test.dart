@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
@@ -17,6 +19,16 @@ import 'package:mockito/mockito.dart';
 import 'paginated_epub_page_test.mocks.dart';
 
 const _html = '<p>Text</p>';
+const _highlightHtml =
+    '<p>Hello <app-epub-highlight data-kover-annotation-id="1">'
+    'world</app-epub-highlight></p>';
+final _annotation = PaginatedEpubAnnotation(
+  id: 1,
+  xpath: '//div/p[1]',
+  endXpath: '//div/p[1]',
+  selectedText: 'world',
+  color: const Color(0xFFFF0000),
+);
 const _settings = PaginatedEpubPageSettings(
   horizontalMarginSize: 0,
   verticalMarginSize: 0,
@@ -117,6 +129,25 @@ void main() {
         ).called(1);
       });
 
+      testWidgets('forwards annotations to the measurement collector', (
+        tester,
+      ) async {
+        when(controller.root).thenReturn(_preprocess(_highlightHtml));
+        when(controller.status).thenReturn(.measuring);
+
+        await _pumpPage(
+          tester,
+          controller,
+          html: dom.DocumentFragment.html(_highlightHtml),
+          annotations: [_annotation],
+        );
+
+        final collector = tester.widget<EpubMeasurementsCollector>(
+          find.byType(EpubMeasurementsCollector, skipOffstage: false),
+        );
+        expect(collector.annotations, [_annotation]);
+      });
+
       testWidgets('remeasures when layout settings change', (tester) async {
         final html = dom.DocumentFragment.html(_html);
         await _pumpPage(tester, controller, html: html);
@@ -176,6 +207,57 @@ void main() {
           expect(find.byType(viewType), findsOneWidget);
         });
       }
+
+      for (final mode in EpubReaderMode.values) {
+        testWidgets('opens the injected sheet in ${mode.name} mode', (
+          tester,
+        ) async {
+          when(controller.getSubpage(any)).thenReturn(_highlightHtml);
+          when(controller.annotations).thenReturn([_annotation]);
+          final opened = <int>[];
+
+          await _pumpPage(
+            tester,
+            controller,
+            settings: _settings.copyWith(mode: mode),
+            annotations: [_annotation],
+            annotationSheetBuilder: (context, annotationId) {
+              opened.add(annotationId);
+              return const Text('annotation sheet');
+            },
+          );
+
+          await tester.tapOnText(find.textRange.ofSubstring('world'));
+          await tester.pumpAndSettle();
+
+          expect(opened, [1]);
+          expect(find.text('annotation sheet'), findsOneWidget);
+        });
+      }
+
+      testWidgets('refreshes highlight colors when annotations change', (
+        tester,
+      ) async {
+        when(controller.getSubpage(any)).thenReturn(_highlightHtml);
+        when(controller.annotations).thenReturn([_annotation]);
+        await _pumpPage(tester, controller, annotations: [_annotation]);
+
+        Color? highlightColor() {
+          final richText = tester.widget<RichText>(find.byType(RichText));
+          final highlighted = (richText.text as TextSpan).children!
+              .whereType<TextSpan>()
+              .firstWhere((span) => span.text?.contains('world') == true);
+          return highlighted.style?.background?.color;
+        }
+
+        expect(highlightColor(), _annotation.color);
+
+        final updated = _annotation.copyWith(color: const Color(0xFF0000FF));
+        when(controller.annotations).thenReturn([updated]);
+        await _pumpPage(tester, controller, annotations: [updated]);
+
+        expect(highlightColor(), updated.color);
+      });
     });
   });
 }
@@ -186,6 +268,8 @@ Future<void> _pumpPage(
   dom.DocumentFragment? html,
   String? resumeScrollId,
   PaginatedEpubPageSettings settings = _settings,
+  Iterable<PaginatedEpubAnnotation> annotations = const [],
+  EpubAnnotationSheetBuilder? annotationSheetBuilder,
 }) async {
   const viewport = Size(320, 240);
   final fragment = html ?? dom.DocumentFragment.html(_html);
@@ -202,7 +286,9 @@ Future<void> _pumpPage(
               controller: controller,
               html: fragment,
               settings: settings,
+              annotations: annotations.toList(growable: false),
               resumeScrollId: resumeScrollId,
+              annotationSheetBuilder: annotationSheetBuilder,
             ),
           ),
         ),
