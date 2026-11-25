@@ -83,21 +83,24 @@ class AnnotationActions extends _$AnnotationActions {
     required String? comment,
     required bool containsSpoiler,
     required int selectedSlotIndex,
-  }) {
-    return ref
-        .read(annotationRepositoryProvider)
-        .updateAnnotation(
-          id: id,
-          comment: AnnotationComment.toDelta(comment),
-          commentHtml: AnnotationComment.toHtml(comment),
-          commentPlainText: comment,
-          containsSpoiler: containsSpoiler,
-          selectedSlotIndex: selectedSlotIndex,
-        );
+  }) async {
+    final annotations = ref.read(annotationRepositoryProvider);
+    final user = await ref.read(currentUserProvider.future);
+    await annotations.updateAnnotation(
+      id: id,
+      ownerUserId: user.id,
+      comment: AnnotationComment.toDelta(comment),
+      commentHtml: AnnotationComment.toHtml(comment),
+      commentPlainText: comment,
+      containsSpoiler: containsSpoiler,
+      selectedSlotIndex: selectedSlotIndex,
+    );
   }
 
   /// Removes the annotation locally and attempts to remove its server copy.
-  Future<void> remove(int id) {
-    return ref.read(annotationRepositoryProvider).removeAnnotation(id);
+  Future<void> remove(int id) async {
+    final annotations = ref.read(annotationRepositoryProvider);
+    final user = await ref.read(currentUserProvider.future);
+    await annotations.removeAnnotation(id, ownerUserId: user.id);
   }
 }

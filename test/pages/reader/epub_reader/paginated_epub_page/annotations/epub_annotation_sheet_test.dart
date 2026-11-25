@@ -7,8 +7,10 @@ import 'package:kover/models/annotation_draft.dart';
 import 'package:kover/models/annotation_model.dart';
 import 'package:kover/models/book_chapter_model.dart';
 import 'package:kover/models/highlight_slot_model.dart';
+import 'package:kover/models/user_model.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/annotations/epub_annotation_sheet.dart';
 import 'package:kover/riverpod/providers/annotations.dart';
+import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/repository/annotation_repository.dart';
 import 'package:material_ui/material_ui.dart';
@@ -18,12 +20,15 @@ import 'package:mockito/mockito.dart';
 import 'epub_annotation_sheet_test.mocks.dart';
 
 const _chapterId = 1;
+const _ownerUserId = 1;
+const _currentUser = UserModel(id: _ownerUserId, username: 'dev');
 const _yellow = Color(0xFFFFFF00);
 const _blue = Color(0xFF0000FF);
 final _annotation = AnnotationModel(
   id: 10,
   chapterId: _chapterId,
   pageNumber: 4,
+  ownerUserId: _ownerUserId,
   ownerUsername: 'dev',
   selectedText: 'quoted text',
   commentPlainText: 'original note',
@@ -81,7 +86,7 @@ void main() {
       expect(find.text('dev'), findsOneWidget);
       expect(find.text('Spoiler'), findsOneWidget);
       expect(find.text('quoted text'), findsOneWidget);
-      expect(find.text('— Page 5, Chapter "Arrakis"'), findsOneWidget);
+      expect(find.text('Page 5, Chapter "Arrakis"'), findsOneWidget);
       expect(find.text('original note'), findsOneWidget);
       expect(find.text('Edit'), findsOneWidget);
       expect(find.text('Delete'), findsOneWidget);
@@ -100,6 +105,40 @@ void main() {
       await _pumpSheet(tester, toc: const []);
 
       expect(find.text('— Page 5'), findsOneWidget);
+    });
+
+    testWidgets('hides edit and delete for annotations owned by another user', (
+      tester,
+    ) async {
+      await _pumpSheet(
+        tester,
+        annotations: [
+          _annotation.copyWith(ownerUserId: 99, ownerUsername: 'other'),
+        ],
+      );
+
+      expect(find.text('other'), findsOneWidget);
+      expect(find.text('quoted text'), findsOneWidget);
+      expect(find.text('original note'), findsOneWidget);
+      expect(find.text('Edit'), findsNothing);
+      expect(find.text('Delete'), findsNothing);
+    });
+
+    testWidgets('hides edit and delete when owner or current user is unknown', (
+      tester,
+    ) async {
+      await _pumpSheet(
+        tester,
+        annotations: [_annotation.copyWith(ownerUserId: null)],
+      );
+
+      expect(find.text('Edit'), findsNothing);
+      expect(find.text('Delete'), findsNothing);
+
+      await _pumpSheet(tester, currentUser: null);
+
+      expect(find.text('Edit'), findsNothing);
+      expect(find.text('Delete'), findsNothing);
     });
 
     testWidgets('shows single lastModified timestamp and falls back to created', (
@@ -227,6 +266,9 @@ void main() {
         ProviderScope(
           overrides: [
             annotationRepositoryProvider.overrideWithValue(repository),
+            currentUserProvider.overrideWith(
+              () => _FakeCurrentUser(_currentUser),
+            ),
             bookChaptersProvider(chapterId: _chapterId).overrideWith(
               (_) => Stream.value(_toc),
             ),
@@ -281,6 +323,7 @@ void main() {
       verify(
         repository.updateAnnotation(
           id: 10,
+          ownerUserId: _ownerUserId,
           comment: r'{"ops":[{"insert":"updated note\n"}]}',
           commentHtml: '<p>updated note</p>',
           commentPlainText: 'updated note',
@@ -311,6 +354,7 @@ void main() {
       verify(
         repository.updateAnnotation(
           id: 10,
+          ownerUserId: _ownerUserId,
           comment: null,
           commentHtml: null,
           commentPlainText: null,
@@ -341,7 +385,7 @@ void main() {
       await _tap(tester, find.text('Cancel'));
       await tester.pumpAndSettle();
 
-      verifyNever(repository.removeAnnotation(10));
+      verifyNever(repository.removeAnnotation(10, ownerUserId: _ownerUserId));
       expect(find.byType(AlertDialog), findsNothing);
     });
 
@@ -359,7 +403,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      verify(repository.removeAnnotation(10)).called(1);
+      verify(repository.removeAnnotation(10, ownerUserId: _ownerUserId)).called(1);
     });
 
     testWidgets('shows an error when saving fails', (tester) async {
@@ -367,6 +411,7 @@ void main() {
       when(
         repository.updateAnnotation(
           id: 10,
+          ownerUserId: _ownerUserId,
           comment: r'{"ops":[{"insert":"bad note\n"}]}',
           commentHtml: '<p>bad note</p>',
           commentPlainText: 'bad note',
@@ -393,7 +438,7 @@ void main() {
 
     testWidgets('shows an error when deletion fails', (tester) async {
       final repository = await _pumpSheet(tester);
-      when(repository.removeAnnotation(10))
+      when(repository.removeAnnotation(10, ownerUserId: _ownerUserId))
           .thenThrow(StateError('delete failed'));
 
       await _tap(tester, find.text('Delete'));
@@ -454,7 +499,8 @@ void main() {
         when(
           repository.watchHighlightSlots(),
         ).thenAnswer((_) => Stream.value(_slots));
-        when(repository.removeAnnotation(10)).thenAnswer((_) {
+        when(repository.removeAnnotation(10, ownerUserId: _ownerUserId))
+            .thenAnswer((_) {
           annotations.add(const []);
           return pendingRemove.future;
         });
@@ -463,6 +509,9 @@ void main() {
           ProviderScope(
             overrides: [
               annotationRepositoryProvider.overrideWithValue(repository),
+              currentUserProvider.overrideWith(
+                () => _FakeCurrentUser(_currentUser),
+              ),
               bookChaptersProvider(chapterId: _chapterId).overrideWith(
                 (_) => Stream.value(_toc),
               ),
@@ -543,7 +592,7 @@ void main() {
       expect(find.text('Selected text'), findsNothing);
       expect(find.byType(Divider), findsNothing);
       expect(find.text('selected words'), findsOneWidget);
-      expect(find.text('— Page 5, Chapter "Arrakis"'), findsOneWidget);
+      expect(find.text('Page 5, Chapter "Arrakis"'), findsOneWidget);
       expect(
         find.byKey(const ValueKey('annotation-comment-field')),
         findsOneWidget,
@@ -778,6 +827,7 @@ Future<_DraftActionRecorder> _pumpDraftSheet(
 
   await tester.pumpWidget(
     ProviderScope(
+      key: UniqueKey(),
       overrides: [
         annotationRepositoryProvider.overrideWithValue(repository),
         bookChaptersProvider(chapterId: _chapterId).overrideWith(
@@ -832,11 +882,27 @@ Future<void> _enterText(
   await tester.pump();
 }
 
+class _FakeCurrentUser extends CurrentUser {
+  _FakeCurrentUser(this._user);
+
+  final UserModel? _user;
+
+  @override
+  Future<UserModel> build() {
+    final user = _user;
+    if (user == null) {
+      return Future<UserModel>.error(NoCredentialsException());
+    }
+    return Future.value(user);
+  }
+}
+
 Future<MockAnnotationRepository> _pumpSheet(
   WidgetTester tester, {
   List<AnnotationModel>? annotations,
   List<HighlightSlotModel>? slots,
   List<BookChapterModel>? toc,
+  UserModel? currentUser = _currentUser,
   Stream<List<AnnotationModel>>? annotationsStream,
   Stream<List<HighlightSlotModel>>? slotsStream,
 }) async {
@@ -852,8 +918,10 @@ Future<MockAnnotationRepository> _pumpSheet(
 
   await tester.pumpWidget(
     ProviderScope(
+      key: UniqueKey(),
       overrides: [
         annotationRepositoryProvider.overrideWithValue(repository),
+        currentUserProvider.overrideWith(() => _FakeCurrentUser(currentUser)),
         bookChaptersProvider(chapterId: _chapterId).overrideWith(
           (_) => Stream.value(toc ?? _toc),
         ),

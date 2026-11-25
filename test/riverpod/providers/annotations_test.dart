@@ -157,6 +157,7 @@ void main() {
       verify(
         annotations.updateAnnotation(
           id: 10,
+          ownerUserId: 5,
           comment: r'{"ops":[{"insert":"first\nsecond\n"}]}',
           commentHtml: '<p>first</p><p>second</p>',
           commentPlainText: 'first\nsecond',
@@ -164,6 +165,12 @@ void main() {
           selectedSlotIndex: 1,
         ),
       ).called(1);
+    });
+
+    test('remove forwards the current user id', () async {
+      await container.read(annotationActionsProvider.notifier).remove(10);
+
+      verify(annotations.removeAnnotation(10, ownerUserId: 5)).called(1);
     });
   });
 }

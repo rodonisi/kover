@@ -129,7 +129,7 @@ void main() {
       (_) async => storedAnnotation(dirty: true),
     );
 
-    await repo.removeAnnotation(1);
+    await repo.removeAnnotation(1, ownerUserId: 1);
 
     verify(mockDao.deleteByIds([1])).called(1);
     verifyNever(mockClient.remove(any));
@@ -144,11 +144,42 @@ void main() {
     });
     when(mockClient.remove(any)).thenAnswer((_) async {});
 
-    await repo.removeAnnotation(1);
+    await repo.removeAnnotation(1, ownerUserId: 1);
 
     verify(mockDao.markRemoved(1)).called(1);
     verify(mockClient.remove(9)).called(1);
     verify(mockDao.deleteByIds([1])).called(1);
+  });
+
+  test('updateAnnotation ignores rows owned by another user', () async {
+    when(mockDao.getAnnotation(1)).thenAnswer(
+      (_) async => storedAnnotation(serverId: 9),
+    );
+
+    await repo.updateAnnotation(
+      id: 1,
+      ownerUserId: 2,
+      comment: 'hijack',
+      commentHtml: '<p>hijack</p>',
+      commentPlainText: 'hijack',
+      containsSpoiler: false,
+      selectedSlotIndex: 0,
+    );
+
+    verifyNever(mockDao.upsert(any));
+    verifyNever(mockClient.update(any));
+  });
+
+  test('removeAnnotation ignores rows owned by another user', () async {
+    when(mockDao.getAnnotation(1)).thenAnswer(
+      (_) async => storedAnnotation(serverId: 9),
+    );
+
+    await repo.removeAnnotation(1, ownerUserId: 2);
+
+    verifyNever(mockDao.markRemoved(any));
+    verifyNever(mockDao.deleteByIds(any));
+    verifyNever(mockClient.remove(any));
   });
 
   test('mergeAnnotations creates, updates and deletes dirty rows', () async {

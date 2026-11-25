@@ -8,6 +8,7 @@ import 'package:kover/models/annotation_model.dart';
 import 'package:kover/models/book_chapter_model.dart';
 import 'package:kover/models/highlight_slot_model.dart';
 import 'package:kover/riverpod/providers/annotations.dart';
+import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/utils/annotation_comment.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
@@ -50,6 +51,9 @@ class EpubAnnotationSheet extends HookConsumerWidget {
     );
     final slots = ref.watch(highlightSlotsProvider);
     final toc = ref.watch(bookChaptersProvider(chapterId: chapterId));
+    final currentUserId = ref.watch(
+      currentUserProvider.select((user) => user.value?.id),
+    );
     final isDeleting = useState(false);
     final lastAnnotation = useRef<AnnotationModel?>(null);
 
@@ -87,6 +91,8 @@ class EpubAnnotationSheet extends HookConsumerWidget {
             annotation: visible,
             slots: slots,
             chapterTitle: chapterTitle,
+            canModify:
+                currentUserId != null && visible.ownerUserId == currentUserId,
             isDeleting: isDeleting,
           ),
         );
@@ -224,12 +230,14 @@ class _AnnotationContent extends HookConsumerWidget {
     required this.annotation,
     required this.slots,
     required this.chapterTitle,
+    required this.canModify,
     required this.isDeleting,
   });
 
   final AnnotationModel annotation;
   final List<HighlightSlotModel> slots;
   final String? chapterTitle;
+  final bool canModify;
   final ValueNotifier<bool> isDeleting;
 
   @override
@@ -244,10 +252,11 @@ class _AnnotationContent extends HookConsumerWidget {
     final commentController = useTextEditingController(
       text: _commentText(annotation),
     );
+    final editing = isEditing.value && canModify;
     final isBusy = isSaving.value || deleting;
     final comment = _commentText(annotation).trim();
-    final canSave = _hasColor(slots, selectedSlot.value);
-    final activeSlot = isEditing.value
+    final canSave = canModify && _hasColor(slots, selectedSlot.value);
+    final activeSlot = editing
         ? selectedSlot.value
         : annotation.selectedSlotIndex;
     final accentColor = _colorForSlot(slots, activeSlot);
@@ -259,6 +268,7 @@ class _AnnotationContent extends HookConsumerWidget {
     );
 
     void startEditing() {
+      if (!canModify) return;
       commentController.text = _commentText(annotation);
       selectedSlot.value = annotation.selectedSlotIndex;
       containsSpoiler.value = annotation.containsSpoiler;
@@ -298,7 +308,7 @@ class _AnnotationContent extends HookConsumerWidget {
     }
 
     Future<void> remove() async {
-      if (isBusy) return;
+      if (!canModify || isBusy) return;
 
       final l10n = AppLocalizations.of(context);
       final confirmed = await showDialog<bool>(
@@ -347,7 +357,7 @@ class _AnnotationContent extends HookConsumerWidget {
     }
 
     final hasHeader =
-        !isEditing.value &&
+        !editing &&
         ((annotation.ownerUsername?.trim().isNotEmpty ?? false) ||
             timestamp != null ||
             annotation.containsSpoiler);
@@ -360,7 +370,7 @@ class _AnnotationContent extends HookConsumerWidget {
               containsSpoiler: annotation.containsSpoiler,
             )
           : null,
-      body: isEditing.value
+      body: editing
           ? _EditableBody(
               selectedText: annotation.selectedText ?? '',
               accentColor: accentColor,
@@ -382,18 +392,20 @@ class _AnnotationContent extends HookConsumerWidget {
               attribution: attribution,
               comment: comment,
             ),
-      footer: isEditing.value
+      footer: editing
           ? _SaveActions(
               isSaving: isSaving.value,
               onCancel: isBusy ? null : () => isEditing.value = false,
               onSave: canSave && !isBusy ? save : null,
             )
-          : _ViewActions(
+          : canModify
+          ? _ViewActions(
               isBusy: isBusy,
               isDeleting: deleting,
               onDelete: remove,
               onEdit: startEditing,
-            ),
+            )
+          : null,
     );
   }
 }
@@ -403,12 +415,12 @@ class _SheetLayout extends StatelessWidget {
   const new({
     this.header,
     required this.body,
-    required this.footer,
+    this.footer,
   });
 
   final Widget? header;
   final Widget body;
-  final Widget footer;
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -428,7 +440,7 @@ class _SheetLayout extends StatelessWidget {
           children: [
             ?header,
             Flexible(child: body),
-            footer,
+            ?footer,
           ],
         ),
       ),

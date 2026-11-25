@@ -91,11 +91,13 @@ class AnnotationRepository(
     await _tryPush(stored);
   }
 
-  /// Updates the modifiable fields of the annotation with [id]. The annotation
-  /// is marked as dirty and a request is sent to the server. If the request
-  /// fails, the annotation remains dirty and will be retried on the next sync.
+  /// Updates the modifiable fields of the annotation with [id] if owned by
+  /// [ownerUserId]. The annotation is marked as dirty and a request is sent to
+  /// the server. If the request fails, the annotation remains dirty and will be
+  /// retried on the next sync.
   Future<void> updateAnnotation({
     required int id,
+    required int ownerUserId,
     required String? comment,
     required String? commentHtml,
     required String? commentPlainText,
@@ -103,7 +105,11 @@ class AnnotationRepository(
     required int selectedSlotIndex,
   }) async {
     final existing = await _db.annotationDao.getAnnotation(id);
-    if (existing == null || existing.removed) return;
+    if (existing == null ||
+        existing.removed ||
+        existing.ownerUserId != ownerUserId) {
+      return;
+    }
 
     final updated = await _db.annotationDao.upsert(
       AnnotationsCompanion(
@@ -126,14 +132,18 @@ class AnnotationRepository(
     await _tryPush(updated);
   }
 
-  /// Removes the annotation with [id]. If the annotation has never been
-  /// successfully pushed to the server, it is hard-deleted. If it has been
-  /// pushed, it is marked as removed and a request is sent to the server to
-  /// remove it. If the server request fails, the annotation remains marked as
-  /// removed and will be retried on the next sync.
-  Future<void> removeAnnotation(int id) async {
+  /// Removes the annotation with [id] if owned by [ownerUserId]. If the
+  /// annotation has never been successfully pushed to the server, it is
+  /// hard-deleted. If it has been pushed, it is marked as removed and a request
+  /// is sent to the server to remove it. If the server request fails, the
+  /// annotation remains marked as removed and will be retried on the next sync.
+  Future<void> removeAnnotation(int id, {required int ownerUserId}) async {
     final stored = await _db.annotationDao.getAnnotation(id);
-    if (stored == null || stored.removed) return;
+    if (stored == null ||
+        stored.removed ||
+        stored.ownerUserId != ownerUserId) {
+      return;
+    }
 
     log.debug(
       'removing annotation',
