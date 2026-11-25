@@ -118,6 +118,7 @@ graph LR
 
 - Use [dot shorthands](https://dart.dev/language/dot-shorthands) whenever applicable.
 - Prefer [switch expressions](https://dart.dev/language/branches#switch-expressions) over statements.
+- Prefer [concise `new` constructor syntax](https://dart.dev/language/constructors#concise-constructor-syntax) (`const new(...)` / `new(...)`) for widgets, and declaring [primary constructors](https://dart.dev/language/primary-constructors) (`class const Foo({required final ...})` / `class Foo({required final ...})`) for all other classes.
 - Prefer constants over magic strings and number. If a constant is not defined yet, consider whether it should be added to the codebase.
   - For example for UI padding values, icon sizes, etc.
 - Avoid stateful widgets as much as possible. When local state is necessary, use [hooks](https://pub.dev/packages/flutter_hooks).
