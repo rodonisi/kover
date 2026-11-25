@@ -543,16 +543,9 @@ EpubLeafUnit? _leafUnit({
   );
 }
 
-class _LineBox {
-  const _LineBox({
-    required this.top,
-    required this.bottom,
-    required this.left,
-    required this.right,
-  });
-
-  final double top;
-  final double bottom;
-  final double left;
-  final double right;
-}
+class const _LineBox({
+  required final double top,
+  required final double bottom,
+  required final double left,
+  required final double right,
+});

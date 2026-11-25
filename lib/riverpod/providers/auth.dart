@@ -18,11 +18,7 @@ class NoCredentialsException implements Exception {}
 
 class InvalidCredentialsException implements Exception {}
 
-class CertificateValidationException implements Exception {
-  CertificateValidationException(this.cause);
-
-  final Object cause;
-
+class CertificateValidationException(final Object cause) implements Exception {
   @override
   String toString() => 'Certificate validation failed: $cause';
 }

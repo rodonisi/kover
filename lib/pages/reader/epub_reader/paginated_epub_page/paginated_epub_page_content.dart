@@ -22,7 +22,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
   final EpubSelectionRegistry? selectionRegistry;
   final int subpageIndex;
 
-  const PaginatedEpubPageContent({
+  const new({
     super.key,
     required this.html,
     required this.settings,

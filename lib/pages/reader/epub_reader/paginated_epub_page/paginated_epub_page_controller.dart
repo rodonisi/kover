@@ -377,19 +377,12 @@ class PaginatedEpubPageController({
   }
 }
 
-class PaginatedEpubPageControllerHook
-    extends Hook<PaginatedEpubPageController> {
-  final void Function(int subpage, String? scrollId)? onSubpageChanged;
-  final void Function(int subpage, String? scrollId)? onSubpageRestored;
-  final void Function(int)? onSubpagesCountChanged;
-
-  const PaginatedEpubPageControllerHook({
-    super.keys,
-    this.onSubpageChanged,
-    this.onSubpageRestored,
-    this.onSubpagesCountChanged,
-  });
-
+class const PaginatedEpubPageControllerHook({
+  super.keys,
+  final void Function(int subpage, String? scrollId)? onSubpageChanged,
+  final void Function(int subpage, String? scrollId)? onSubpageRestored,
+  final void Function(int)? onSubpagesCountChanged,
+}) extends Hook<PaginatedEpubPageController> {
   @override
   PaginatedEpubPageControllerHookState createState() =>
       PaginatedEpubPageControllerHookState();

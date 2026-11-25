@@ -99,4 +99,15 @@ void main() {
       expect(result.map((c) => c.id).toSet(), equals({20}));
     });
   });
+
+  group('ChaptersDao getExistingChapterIds', () {
+    test('returns all locally stored chapter ids', () async {
+      await insertChapter(10, seriesId: 1);
+      await insertChapter(20, seriesId: 1);
+
+      final result = await database.chaptersDao.getExistingChapterIds();
+
+      expect(result, equals({10, 20}));
+    });
+  });
 }

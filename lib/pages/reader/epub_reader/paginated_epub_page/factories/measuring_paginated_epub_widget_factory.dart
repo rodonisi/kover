@@ -138,7 +138,7 @@ class _EpubImageLoadTracker extends StatefulWidget {
   final void Function() onExit;
   final Widget child;
 
-  const _EpubImageLoadTracker({
+  const new({
     super.key,
     required this.provider,
     required this.onEnter,

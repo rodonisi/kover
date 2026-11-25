@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 /// stays out of the gesture arena when a pointer lands on the region, letting
 /// its recognizer handle the tap.
 class LinkHitRegion extends SingleChildRenderObjectWidget {
-  const LinkHitRegion({super.key, required super.child});
+  const new({super.key, required super.child});
 
   @override
   RenderLinkHitRegion createRenderObject(BuildContext context) =>

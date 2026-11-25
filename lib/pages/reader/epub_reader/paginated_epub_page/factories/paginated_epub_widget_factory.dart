@@ -14,29 +14,20 @@ import 'package:kover/utils/extensions/color.dart';
 import 'package:kover/widgets/util/link_hit_region.dart';
 
 /// A [WidgetFactory] that adjusts rendering for paginated EPUB content.
-class PaginatedEpubWidgetFactory extends WidgetFactory {
-  /// Creates a factory with optional annotation highlighting and tap handling.
-  PaginatedEpubWidgetFactory({
-    this.viewport = const Size(double.infinity, double.infinity),
-    this.removeParagraphIndent = false,
-    this.onAnchorTap,
-    Iterable<PaginatedEpubAnnotation> annotations = const [],
-    this.onAnnotationTap,
-    this.selectionRegistry,
-    this.subpageIndex = 0,
-  }) : _annotations = {
-         for (final annotation in annotations) annotation.id: annotation,
-       };
-
-  final Size viewport;
-  final bool removeParagraphIndent;
-  final void Function(EpubAnchorTarget)? onAnchorTap;
-  final void Function(PaginatedEpubAnnotation)? onAnnotationTap;
+class PaginatedEpubWidgetFactory({
+  final Size viewport = const Size(double.infinity, double.infinity),
+  final bool removeParagraphIndent = false,
+  final void Function(EpubAnchorTarget)? onAnchorTap,
+  Iterable<PaginatedEpubAnnotation> annotations = const [],
+  final void Function(PaginatedEpubAnnotation)? onAnnotationTap,
 
   /// Receives every rendered text block, so selections can be annotated.
-  final EpubSelectionRegistry? selectionRegistry;
-  final int subpageIndex;
-  final Map<int, PaginatedEpubAnnotation> _annotations;
+  final EpubSelectionRegistry? selectionRegistry,
+  final int subpageIndex = 0,
+}) extends WidgetFactory {
+  final Map<int, PaginatedEpubAnnotation> _annotations = {
+    for (final annotation in annotations) annotation.id: annotation,
+  };
 
   // Runs after background styling so the saved slot color wins.
   static const _annotationPriority = 9007199254740991;

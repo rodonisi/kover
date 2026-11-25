@@ -25,7 +25,7 @@ class EpubReader extends HookConsumerWidget {
   final int chapterId;
   final int? readingListId;
 
-  const EpubReader({
+  const new({
     super.key,
     required this.seriesId,
     required this.chapterId,

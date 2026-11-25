@@ -34,18 +34,18 @@ const int _compactCommentMaxLines = 4;
 
 /// Shows annotation details and controls for editing or removing it.
 class EpubAnnotationSheet extends HookConsumerWidget {
-  /// Creates a sheet for the annotation with [annotationId] in [chapterId].
+  final int chapterId;
+  final int annotationId;
+
   const new({
     super.key,
     required this.chapterId,
     required this.annotationId,
   });
 
-  final int chapterId;
-  final int annotationId;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final annotations = ref.watch(
       chapterAnnotationsProvider(chapterId: chapterId),
     );
@@ -74,7 +74,7 @@ class EpubAnnotationSheet extends HookConsumerWidget {
         if (visible == null) {
           return Padding(
             padding: LayoutConstants.largeEdgeInsets,
-            child: Text(AppLocalizations.of(context).annotationNotFound),
+            child: Text(l.annotationNotFound),
           );
         }
 

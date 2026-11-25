@@ -1,11 +1,8 @@
-import 'dart:async';
-
-import 'package:drift/drift.dart' hide isNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart' hide HighlightSlot;
 import 'package:kover/database/dao/annotation_dao.dart';
-import 'package:kover/database/dao/highlight_slot_dao.dart';
+import 'package:kover/database/dao/chapters_dao.dart';
 import 'package:kover/riverpod/repository/annotation_repository.dart';
 import 'package:kover/sync/annotation_sync_operations.dart';
 import 'package:mockito/annotations.dart';
@@ -14,7 +11,7 @@ import 'package:mockito/mockito.dart';
 @GenerateNiceMocks([
   MockSpec<AppDatabase>(),
   MockSpec<AnnotationDao>(),
-  MockSpec<HighlightSlotDao>(),
+  MockSpec<ChaptersDao>(),
   MockSpec<AnnotationSyncOperations>(),
 ])
 import 'annotation_repository_test.mocks.dart';
@@ -22,17 +19,17 @@ import 'annotation_repository_test.mocks.dart';
 void main() {
   late MockAppDatabase mockDb;
   late MockAnnotationDao mockDao;
-  late MockHighlightSlotDao mockSlotDao;
+  late MockChaptersDao mockChapterDao;
   late MockAnnotationSyncOperations mockClient;
   late AnnotationRepository repo;
 
   setUp(() {
     mockDb = MockAppDatabase();
     mockDao = MockAnnotationDao();
-    mockSlotDao = MockHighlightSlotDao();
+    mockChapterDao = MockChaptersDao();
     mockClient = MockAnnotationSyncOperations();
     when(mockDb.annotationDao).thenReturn(mockDao);
-    when(mockDb.highlightSlotDao).thenReturn(mockSlotDao);
+    when(mockDb.chaptersDao).thenReturn(mockChapterDao);
     repo = AnnotationRepository(mockDb, mockClient);
   });
 
@@ -82,7 +79,6 @@ void main() {
   test('addAnnotation pushes a create and stores the server row', () async {
     final stored = storedAnnotation(dirty: true);
     when(mockDao.upsert(any)).thenAnswer((_) async => stored);
-    when(mockDao.getAnnotation(1)).thenAnswer((_) async => stored);
     when(mockClient.create(any)).thenAnswer((_) async => remoteAnnotation());
 
     await repo.addAnnotation(
@@ -124,29 +120,37 @@ void main() {
     verify(mockDao.upsert(any)).called(1);
   });
 
-  test('removeAnnotation hard-deletes a never-synced row', () async {
-    when(mockDao.getAnnotation(1)).thenAnswer(
-      (_) async => storedAnnotation(dirty: true),
+  test('removeAnnotation tombstones and clears a never-synced row', () async {
+    when(
+      mockDao.markRemoved(1, ownerUserId: 1),
+    ).thenAnswer(
+      (_) async => storedAnnotation(dirty: true, removed: true),
     );
 
     await repo.removeAnnotation(1, ownerUserId: 1);
 
+    verify(mockDao.markRemoved(1, ownerUserId: 1)).called(1);
+    verifyNever(mockDao.getAnnotation(any));
     verify(mockDao.deleteByIds([1])).called(1);
     verifyNever(mockClient.remove(any));
   });
 
   test('removeAnnotation tombstones a synced row and pushes', () async {
-    var calls = 0;
-    when(mockDao.getAnnotation(1)).thenAnswer((_) async {
-      return calls++ == 0
-          ? storedAnnotation(serverId: 9)
-          : storedAnnotation(serverId: 9, dirty: true, removed: true);
-    });
+    when(
+      mockDao.markRemoved(1, ownerUserId: 1),
+    ).thenAnswer(
+      (_) async => storedAnnotation(
+        serverId: 9,
+        dirty: true,
+        removed: true,
+      ),
+    );
     when(mockClient.remove(any)).thenAnswer((_) async {});
 
     await repo.removeAnnotation(1, ownerUserId: 1);
 
-    verify(mockDao.markRemoved(1)).called(1);
+    verify(mockDao.markRemoved(1, ownerUserId: 1)).called(1);
+    verifyNever(mockDao.getAnnotation(any));
     verify(mockClient.remove(9)).called(1);
     verify(mockDao.deleteByIds([1])).called(1);
   });
@@ -171,15 +175,80 @@ void main() {
   });
 
   test('removeAnnotation ignores rows owned by another user', () async {
-    when(mockDao.getAnnotation(1)).thenAnswer(
-      (_) async => storedAnnotation(serverId: 9),
-    );
+    when(
+      mockDao.markRemoved(1, ownerUserId: 2),
+    ).thenAnswer((_) async => null);
 
     await repo.removeAnnotation(1, ownerUserId: 2);
 
-    verifyNever(mockDao.markRemoved(any));
+    verify(mockDao.markRemoved(1, ownerUserId: 2)).called(1);
+    verifyNever(mockDao.getAnnotation(any));
     verifyNever(mockDao.deleteByIds(any));
     verifyNever(mockClient.remove(any));
+  });
+
+  test('updateAnnotation pushes an update and marks the row clean', () async {
+    final existing = storedAnnotation(serverId: 9);
+    final updated = storedAnnotation(serverId: 9, dirty: true);
+    when(mockDao.getAnnotation(1)).thenAnswer((_) async => existing);
+    when(mockDao.upsert(any)).thenAnswer((_) async => updated);
+    when(mockClient.update(any)).thenAnswer(
+      (_) async => remoteAnnotation(id: 9),
+    );
+
+    await repo.updateAnnotation(
+      id: 1,
+      ownerUserId: 1,
+      comment: 'updated',
+      commentHtml: '<p>updated</p>',
+      commentPlainText: 'updated',
+      containsSpoiler: false,
+      selectedSlotIndex: 0,
+    );
+
+    verify(mockClient.update(any)).called(1);
+    final captured = verify(mockDao.upsert(captureAny)).captured;
+    expect(captured, hasLength(2));
+    final merged = captured.last as AnnotationsCompanion;
+    expect(merged.dirty.value, isFalse);
+  });
+
+  test('updateAnnotation leaves the row dirty when push fails', () async {
+    final existing = storedAnnotation(serverId: 9);
+    final updated = storedAnnotation(serverId: 9, dirty: true);
+    when(mockDao.getAnnotation(1)).thenAnswer((_) async => existing);
+    when(mockDao.upsert(any)).thenAnswer((_) async => updated);
+    when(mockClient.update(any)).thenThrow(Exception('offline'));
+
+    await repo.updateAnnotation(
+      id: 1,
+      ownerUserId: 1,
+      comment: 'updated',
+      commentHtml: '<p>updated</p>',
+      commentPlainText: 'updated',
+      containsSpoiler: false,
+      selectedSlotIndex: 0,
+    );
+
+    verify(mockDao.upsert(any)).called(1);
+  });
+
+  test('removeAnnotation keeps the tombstone when push fails', () async {
+    when(
+      mockDao.markRemoved(1, ownerUserId: 1),
+    ).thenAnswer(
+      (_) async => storedAnnotation(
+        serverId: 9,
+        dirty: true,
+        removed: true,
+      ),
+    );
+    when(mockClient.remove(9)).thenThrow(Exception('offline'));
+
+    await repo.removeAnnotation(1, ownerUserId: 1);
+
+    verify(mockDao.markRemoved(1, ownerUserId: 1)).called(1);
+    verifyNever(mockDao.deleteByIds(any));
   });
 
   test('mergeAnnotations creates, updates and deletes dirty rows', () async {
@@ -194,9 +263,6 @@ void main() {
     when(mockDao.getDirtyAnnotations()).thenAnswer(
       (_) async => [create, update, remove],
     );
-    when(mockDao.getAnnotation(1)).thenAnswer((_) async => create);
-    when(mockDao.getAnnotation(2)).thenAnswer((_) async => update);
-    when(mockDao.getAnnotation(3)).thenAnswer((_) async => remove);
     when(mockDao.upsert(any)).thenAnswer((_) async => create);
     when(mockClient.create(any)).thenAnswer(
       (_) async => remoteAnnotation(id: 10),
@@ -214,195 +280,73 @@ void main() {
     verify(mockDao.deleteByIds([3])).called(1);
   });
 
-  test(
-    'cleans up remote copy when an unsynced annotation is deleted mid-create',
-    () async {
-      final stored = storedAnnotation(dirty: true);
-      final createCompleter = Completer<AnnotationDto>();
-      Annotation? current = stored;
-
-      when(mockDao.upsert(any)).thenAnswer((_) async => stored);
-      when(mockDao.getAnnotation(1)).thenAnswer((_) async => current);
-      when(mockClient.create(any)).thenAnswer((_) => createCompleter.future);
-      when(mockClient.remove(9)).thenAnswer((_) async {});
-
-      final addFuture = repo.addAnnotation(
-        seriesId: 1,
-        volumeId: 1,
-        chapterId: 1,
-        libraryId: 1,
-        ownerUserId: 1,
-        selectedText: 'text',
-        pageNumber: 1,
-      );
-      await Future<void>.delayed(Duration.zero);
-
-      // Simulate local hard-delete while create is still in flight.
-      current = null;
-      createCompleter.complete(remoteAnnotation(id: 9));
-      await addFuture;
-
-      verify(mockClient.remove(9)).called(1);
-      verify(mockDao.upsert(any)).called(1);
-    },
-  );
-
-  test(
-    'keeps newer local edit dirty when an earlier create returns',
-    () async {
-      final firstTime = DateTime(2026, 1, 1, 12);
-      final secondTime = DateTime(2026, 1, 1, 12, 1);
-      final stored = storedAnnotation(dirty: true, lastModified: firstTime);
-      final createCompleter = Completer<AnnotationDto>();
-      var current = stored;
-
-      when(mockDao.upsert(any)).thenAnswer((_) async => current);
-      when(mockDao.getAnnotation(1)).thenAnswer((_) async => current);
-      when(mockClient.create(any)).thenAnswer((_) => createCompleter.future);
-
-      final addFuture = repo.addAnnotation(
-        seriesId: 1,
-        volumeId: 1,
-        chapterId: 1,
-        libraryId: 1,
-        ownerUserId: 1,
-        selectedText: 'text',
-        pageNumber: 1,
-      );
-      await Future<void>.delayed(Duration.zero);
-
-      current = stored.copyWith(lastModified: Value(secondTime));
-      createCompleter.complete(remoteAnnotation(id: 9));
-      await addFuture;
-
-      final captured = verify(mockDao.upsert(captureAny)).captured;
-      expect(captured, hasLength(2));
-      final patch = captured.last as AnnotationsCompanion;
-      expect(patch.serverId.value, 9);
-      expect(patch.dirty.value, isTrue);
-      expect(patch.comment.present, isFalse);
-    },
-  );
-
-  test(
-    'removes remote copy when annotation is tombstoned mid-push',
-    () async {
-      final stored = storedAnnotation(id: 1, serverId: 9, dirty: true);
-      final updateCompleter = Completer<AnnotationDto>();
-      var current = stored;
-
-      when(mockDao.getDirtyAnnotations()).thenAnswer((_) async => [stored]);
-      when(mockDao.getAnnotation(1)).thenAnswer((_) async => current);
-      when(mockClient.update(any)).thenAnswer((_) => updateCompleter.future);
-      when(mockClient.remove(9)).thenAnswer((_) async {});
-
-      final mergeFuture = repo.mergeAnnotations();
-      await Future<void>.delayed(Duration.zero);
-
-      current = stored.copyWith(removed: true);
-      updateCompleter.complete(remoteAnnotation(id: 9));
-      await mergeFuture;
-
-      verify(mockClient.remove(9)).called(1);
-      verify(mockDao.deleteByIds([1])).called(1);
-      verifyNever(mockDao.upsert(any));
-    },
-  );
-
-  test(
-    'serializes concurrent pushes for the same annotation without double create',
-    () async {
-      final stored = storedAnnotation(id: 1, dirty: true);
-      final createCompleter = Completer<AnnotationDto>();
-      var current = stored;
-
-      when(mockDao.upsert(any)).thenAnswer((invocation) async {
-        final companion =
-            invocation.positionalArguments.single as AnnotationsCompanion;
-        if (companion.serverId.present && companion.dirty.present) {
-          current = current.copyWith(
-            serverId: Value(companion.serverId.value),
-            dirty: companion.dirty.value,
-          );
-        }
-        return current;
-      });
-      when(mockDao.getAnnotation(1)).thenAnswer((_) async => current);
-      when(mockDao.getDirtyAnnotations()).thenAnswer((_) async => [stored]);
-      when(mockClient.create(any)).thenAnswer((_) => createCompleter.future);
-
-      final addFuture = repo.addAnnotation(
-        seriesId: 1,
-        volumeId: 1,
-        chapterId: 1,
-        libraryId: 1,
-        ownerUserId: 1,
-        selectedText: 'text',
-        pageNumber: 1,
-      );
-      await Future<void>.delayed(Duration.zero);
-
-      final mergeFuture = repo.mergeAnnotations();
-      createCompleter.complete(remoteAnnotation(id: 9));
-      await Future.wait([addFuture, mergeFuture]);
-
-      verify(mockClient.create(any)).called(1);
-      verifyNever(mockClient.update(any));
-    },
-  );
-
   test('refreshAllAnnotations skips remote rows dirty locally', () async {
-    final dirty = storedAnnotation(serverId: 9, dirty: true);
     when(mockClient.getAllAnnotations()).thenAnswer(
       (_) async => [remoteAnnotation()],
     );
-    when(mockDao.getExistingChapterIds()).thenAnswer((_) async => [1]);
-    when(mockDao.getAnnotationByServerId(9)).thenAnswer((_) async => dirty);
-    when(mockDao.getAnnotations()).thenAnswer((_) async => [dirty]);
+    when(mockChapterDao.getExistingChapterIds()).thenAnswer((_) async => {1});
+    when(mockDao.mergeRemoteBatch(any)).thenAnswer((_) async {});
 
     await repo.refreshAllAnnotations();
 
+    verify(mockDao.mergeRemoteBatch(any)).called(1);
     verifyNever(mockDao.upsert(any));
+    verify(
+      mockDao.deleteStaleAnnotations(argThat(contains(9))),
+    ).called(1);
     verifyNever(mockDao.deleteByIds(any));
   });
 
-  test('refreshAllAnnotations deletes clean rows absent remotely', () async {
-    final clean = storedAnnotation(id: 7, serverId: 7);
-    final dirty = storedAnnotation(id: 8, serverId: 8, dirty: true);
+  test('refreshAllAnnotations delegates stale deletion to the dao', () async {
     when(mockClient.getAllAnnotations()).thenAnswer(
       (_) async => [remoteAnnotation(id: 1)],
     );
-    when(mockDao.getExistingChapterIds()).thenAnswer((_) async => [1]);
-    when(mockDao.getAnnotationByServerId(1)).thenAnswer((_) async => null);
-    when(mockDao.getAnnotations()).thenAnswer((_) async => [clean, dirty]);
+    when(mockChapterDao.getExistingChapterIds()).thenAnswer((_) async => {1});
+    when(mockDao.mergeRemoteBatch(any)).thenAnswer((_) async {});
 
     await repo.refreshAllAnnotations();
 
-    verify(mockDao.upsert(any)).called(1);
-    verify(mockDao.deleteByIds([7])).called(1);
-    verifyNever(mockDao.deleteByIds(argThat(contains(8))));
+    verify(mockDao.mergeRemoteBatch(any)).called(1);
+    verifyNever(mockDao.upsert(any));
+    verify(
+      mockDao.deleteStaleAnnotations(argThat(contains(1))),
+    ).called(1);
+    verifyNever(mockDao.deleteByIds(any));
+  });
+
+  test('refreshAllAnnotations skips unknown chapters', () async {
+    when(mockClient.getAllAnnotations()).thenAnswer(
+      (_) async => [remoteAnnotation(id: 9, chapterId: 2)],
+    );
+    when(mockChapterDao.getExistingChapterIds()).thenAnswer((_) async => {1});
+
+    await repo.refreshAllAnnotations();
+
+    verify(mockDao.mergeRemoteBatch(argThat(isEmpty))).called(1);
+    verifyNever(mockDao.upsert(any));
   });
 
   test(
     'refreshChapterAnnotations scopes reconciliation to the chapter',
     () async {
-      final stale = storedAnnotation(id: 7, serverId: 7, chapterId: 2);
       when(mockClient.getChapterAnnotations(2)).thenAnswer((_) async => []);
-      when(mockDao.getAnnotationsForChapter(2)).thenAnswer(
-        (_) async => [stale],
-      );
+      when(mockChapterDao.getExistingChapterIds()).thenAnswer((_) async => {2});
 
       await repo.refreshChapterAnnotations(chapterId: 2);
 
       verify(mockClient.getChapterAnnotations(2)).called(1);
-      verify(mockDao.deleteByIds([7])).called(1);
+      verify(mockDao.mergeRemoteBatch(argThat(isEmpty))).called(1);
+      verify(
+        mockDao.deleteStaleAnnotations(argThat(isEmpty), chapterId: 2),
+      ).called(1);
+      verifyNever(mockDao.deleteByIds(any));
     },
   );
 
   test(
     'replaceHighlightSlots maps colors and skips missing slot numbers',
     () async {
-      when(mockSlotDao.replaceSlots(any)).thenAnswer((_) async {});
+      when(mockDao.replaceHighlightSlots(any)).thenAnswer((_) async {});
 
       await repo.replaceHighlightSlots([
         const HighlightSlot(id: 1),
@@ -414,7 +358,7 @@ void main() {
       ]);
 
       final captured =
-          verify(mockSlotDao.replaceSlots(captureAny)).captured.single
+          verify(mockDao.replaceHighlightSlots(captureAny)).captured.single
               as Iterable<HighlightSlotsCompanion>;
       final slots = captured.toList();
 
@@ -427,11 +371,11 @@ void main() {
     },
   );
 
-  test('watchHighlightSlots delegates to the slot dao', () async {
-    when(mockSlotDao.watchSlots()).thenAnswer((_) => const Stream.empty());
+  test('watchHighlightSlots delegates to the annotation dao', () async {
+    when(mockDao.watchHighlightSlots()).thenAnswer((_) => const Stream.empty());
 
     await repo.watchHighlightSlots().drain<void>();
 
-    verify(mockSlotDao.watchSlots()).called(1);
+    verify(mockDao.watchHighlightSlots()).called(1);
   });
 }

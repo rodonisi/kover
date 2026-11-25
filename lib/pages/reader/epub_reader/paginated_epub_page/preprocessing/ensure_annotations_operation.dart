@@ -12,12 +12,12 @@ import 'package:kover/utils/logging.dart';
 /// match an annotation xpath. Text is buffered between the start and end
 /// element of every annotation, then matched against the annotation's selected
 /// text once the walk is complete.
-final class EnsureAnnotationsOperation extends EpubPagePreprocessorOperation {
-  EnsureAnnotationsOperation({
-    required Iterable<PaginatedEpubAnnotation> annotations,
-  }) : _annotations = annotations.toList(growable: false);
-
-  final List<PaginatedEpubAnnotation> _annotations;
+final class EnsureAnnotationsOperation({
+  required Iterable<PaginatedEpubAnnotation> annotations,
+}) extends EpubPagePreprocessorOperation {
+  final List<PaginatedEpubAnnotation> _annotations = annotations.toList(
+    growable: false,
+  );
 
   final _byServerId = <int, PaginatedEpubAnnotation>{};
   final _byStartXPath = <String, List<PaginatedEpubAnnotation>>{};
@@ -378,39 +378,31 @@ final class _TextBuffer {
   }
 }
 
-final class _TextRun {
-  const _TextRun({required this.node, required this.start});
-
-  final dom.Text node;
-  final int start;
-
+final class const _TextRun({
+  required final dom.Text node,
+  required final int start,
+}) {
   int get end => start + node.data.length;
 }
 
-final class _Span {
-  _Span({required this.annotation, required this.start, required this.end});
+final class const _Span({
+  required final PaginatedEpubAnnotation annotation,
+  required final int start,
+  required final int end,
+});
 
-  final PaginatedEpubAnnotation annotation;
-  final int start;
-  final int end;
-}
-
-final class _Match {
-  const _Match({required this.start, required this.end});
-
+final class const _Match({
   /// Offsets in the raw, unnormalized buffered text.
-  final int start;
-  final int end;
-}
+  required final int start,
+  required final int end,
+});
 
-final class _Normalized {
-  const _Normalized({required this.text, required this.starts});
-
-  final String text;
+final class const _Normalized({
+  required final String text,
 
   /// Raw offset of every normalized character, plus the end boundary.
-  final List<int> starts;
-}
+  required final List<int> starts,
+});
 
 /// Collapses whitespace runs to one space and trims the result, while keeping
 /// a map from normalized characters back to the raw text.

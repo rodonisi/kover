@@ -9,7 +9,6 @@ import 'package:kover/database/dao/chapters_dao.dart';
 import 'package:kover/database/dao/collections_dao.dart';
 import 'package:kover/database/dao/download_dao.dart';
 import 'package:kover/database/dao/font_dao.dart';
-import 'package:kover/database/dao/highlight_slot_dao.dart';
 import 'package:kover/database/dao/libraries_dao.dart';
 import 'package:kover/database/dao/reader_dao.dart';
 import 'package:kover/database/dao/reading_lists_dao.dart';
@@ -113,7 +112,6 @@ part 'app_database.g.dart';
     BookDao,
     BookmarkDao,
     AnnotationDao,
-    HighlightSlotDao,
     DownloadDao,
     RiverpodDao,
     ServerSettingsDao,

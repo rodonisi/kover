@@ -214,8 +214,7 @@ class BookmarkRepository(
   }
 
   Future<void> _mergeRemote(Iterable<BookmarkDto> remote) async {
-    final existingChapterIds = (await _db.bookmarkDao.getExistingChapterIds())
-        .toSet();
+    final existingChapterIds = await _db.chaptersDao.getExistingChapterIds();
     for (final dto in remote) {
       if (!existingChapterIds.contains(dto.chapterId)) {
         log.warning(

@@ -3,7 +3,6 @@ import 'package:kover/database/app_database.dart';
 
 part 'annotation_model.freezed.dart';
 
-/// UI-facing representation of a stored annotation.
 @freezed
 class AnnotationModel({
   required final int id,

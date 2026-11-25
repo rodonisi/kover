@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/dao/bookmark_dao.dart';
+import 'package:kover/database/dao/chapters_dao.dart';
 import 'package:kover/riverpod/repository/bookmark_repository.dart';
 import 'package:kover/sync/bookmark_sync_operations.dart';
 import 'package:mockito/annotations.dart';
@@ -10,6 +11,7 @@ import 'package:mockito/mockito.dart';
 @GenerateNiceMocks([
   MockSpec<AppDatabase>(),
   MockSpec<BookmarkDao>(),
+  MockSpec<ChaptersDao>(),
   MockSpec<BookmarkSyncOperations>(),
 ])
 import 'bookmark_repository_test.mocks.dart';
@@ -17,14 +19,17 @@ import 'bookmark_repository_test.mocks.dart';
 void main() {
   late MockAppDatabase mockDb;
   late MockBookmarkDao mockDao;
+  late MockChaptersDao mockChapterDao;
   late MockBookmarkSyncOperations mockClient;
   late BookmarkRepository repo;
 
   setUp(() {
     mockDb = MockAppDatabase();
     mockDao = MockBookmarkDao();
+    mockChapterDao = MockChaptersDao();
     mockClient = MockBookmarkSyncOperations();
     when(mockDb.bookmarkDao).thenReturn(mockDao);
+    when(mockDb.chaptersDao).thenReturn(mockChapterDao);
     repo = BookmarkRepository(mockDb, mockClient);
   });
 
@@ -152,7 +157,7 @@ void main() {
           ),
         ],
       );
-      when(mockDao.getExistingChapterIds()).thenAnswer((_) async => [1]);
+      when(mockChapterDao.getExistingChapterIds()).thenAnswer((_) async => {1});
       when(mockDao.getBookmarks()).thenAnswer((_) async => []);
 
       await repo.refreshAllBookmarks();
@@ -176,7 +181,7 @@ void main() {
         ),
       ],
     );
-    when(mockDao.getExistingChapterIds()).thenAnswer((_) async => [1]);
+    when(mockChapterDao.getExistingChapterIds()).thenAnswer((_) async => {1});
     when(
       mockDao.getBookmark(chapterId: 1, page: 2, imageOffset: 0),
     ).thenAnswer((_) async => tombstone);
@@ -202,7 +207,7 @@ void main() {
           ),
         ],
       );
-      when(mockDao.getExistingChapterIds()).thenAnswer((_) async => [1]);
+      when(mockChapterDao.getExistingChapterIds()).thenAnswer((_) async => {1});
       when(mockDao.getBookmarks()).thenAnswer((_) async => [stale]);
 
       await repo.refreshAllBookmarks();
@@ -217,7 +222,7 @@ void main() {
       final clean = storedBookmark(id: 7, serverId: 7, page: 5);
       final dirty = storedBookmark(id: 8, page: 9, dirty: true);
       when(mockClient.getAllBookmarks()).thenAnswer((_) async => []);
-      when(mockDao.getExistingChapterIds()).thenAnswer((_) async => [1]);
+      when(mockChapterDao.getExistingChapterIds()).thenAnswer((_) async => {1});
       when(mockDao.getBookmarks()).thenAnswer((_) async => [clean, dirty]);
 
       await repo.refreshAllBookmarks();
@@ -244,7 +249,7 @@ void main() {
           ),
         ],
       );
-      when(mockDao.getExistingChapterIds()).thenAnswer((_) async => [1]);
+      when(mockChapterDao.getExistingChapterIds()).thenAnswer((_) async => {1});
       when(mockDao.getBookmarks()).thenAnswer((_) async => [epub, image]);
 
       await repo.refreshAllBookmarks();

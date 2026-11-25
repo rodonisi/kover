@@ -24,8 +24,6 @@ class AnnotationRepository(
   final AppDatabase _db,
   final AnnotationSyncOperations _client,
 ) {
-  final _inFlightPushes = <int, Future<void>>{};
-
   /// Adds an annotation. The annotation is marked as dirty and a request is
   /// sent to the server to create it. If the server request fails, the
   /// annotation remains dirty and will be retried on the next sync.
@@ -84,7 +82,6 @@ class AnnotationRepository(
         'chapter_id': chapterId,
         'library_id': libraryId,
         'xpath': xPath,
-        'stored': stored,
       },
     );
 
@@ -132,41 +129,26 @@ class AnnotationRepository(
     await _tryPush(updated);
   }
 
-  /// Removes the annotation with [id] if owned by [ownerUserId]. If the
-  /// annotation has never been successfully pushed to the server, it is
-  /// hard-deleted. If it has been pushed, it is marked as removed and a request
-  /// is sent to the server to remove it. If the server request fails, the
-  /// annotation remains marked as removed and will be retried on the next sync.
+  /// Removes the annotation with [id] if owned by [ownerUserId]. The annotation
+  /// is marked as removed and a request is sent to the server to remove it. If
+  /// the server request fails, the annotation remains marked as removed and
+  /// will be retried on the next sync.
   Future<void> removeAnnotation(int id, {required int ownerUserId}) async {
-    final stored = await _db.annotationDao.getAnnotation(id);
-    if (stored == null ||
-        stored.removed ||
-        stored.ownerUserId != ownerUserId) {
-      return;
-    }
+    final removed = await _db.annotationDao.markRemoved(
+      id,
+      ownerUserId: ownerUserId,
+    );
+    if (removed == null) return;
 
     log.debug(
       'removing annotation',
-      attributes: {'id': id, 'server_id': stored.serverId},
+      attributes: {'id': id, 'server_id': removed.serverId},
     );
 
-    final serverId = stored.serverId;
-    if (serverId == null) {
-      // Never successfully pushed, or an orphaned clean row: no remote copy
-      // exists, so it is safe to hard-delete.
-      await _db.annotationDao.deleteByIds([stored.id]);
-      return;
-    }
-
-    await _db.annotationDao.markRemoved(stored.id);
-    await _tryPush(stored.copyWith(dirty: true, removed: true));
+    await _tryPush(removed);
   }
 
-  /// Merges all dirty annotations with the server. Dirty annotations are those
-  /// that have been added, updated, or removed locally but not yet successfully
-  /// pushed to the server. If a dirty annotation is successfully pushed, its
-  /// dirty flag is cleared. Removed annotations are hard-deleted locally once
-  /// the server confirms the deletion.
+  /// Merges all dirty annotations with the server.
   Future<void> mergeAnnotations() async {
     final dirty = await _db.annotationDao.getDirtyAnnotations();
     if (dirty.isEmpty) return;
@@ -215,162 +197,46 @@ class AnnotationRepository(
     }
   }
 
-  /// Push a local annotation to the server and merge the server representation
-  /// back into the local row, serializing concurrent pushes for the same row.
-  Future<void> _push(Annotation annotation) {
-    return _serializePush(annotation.id, () async {
-      final latest = await _db.annotationDao.getAnnotation(annotation.id);
-      if (latest == null || !latest.dirty) return;
-
-      if (latest.removed) {
-        if (latest.serverId case final serverId?) {
-          await _client.remove(serverId);
-        }
-        await _db.annotationDao.deleteByIds([latest.id]);
-        return;
+  /// Push a local annotation once. Failures leave the row dirty for retry.
+  Future<void> _push(Annotation annotation) async {
+    if (annotation.removed) {
+      if (annotation.serverId case final serverId?) {
+        await _client.remove(serverId);
       }
+      await _db.annotationDao.deleteByIds([annotation.id]);
+      return;
+    }
 
-      final dto = latest.toAnnotationDto();
-      final remote = latest.serverId == null
-          ? await _client.create(dto)
-          : await _client.update(dto);
-
-      final current = await _db.annotationDao.getAnnotation(latest.id);
-      if (current == null) {
-        // The unsynced row was deleted locally while the create was in flight.
-        if (latest.serverId == null && remote.id != null) {
-          try {
-            await _client.remove(remote.id!);
-          } catch (e) {
-            log.info(
-              'could not clean up deleted annotation on server',
-              attributes: {'server_id': remote.id, 'error': e},
-            );
-          }
-        }
-        return;
-      }
-
-      if (current.removed) {
-        final serverId = current.serverId ?? remote.id;
-        if (serverId == null) {
-          await _db.annotationDao.deleteByIds([current.id]);
-          return;
-        }
-        if (current.serverId == null) {
-          await _db.annotationDao.upsert(
-            AnnotationsCompanion(
-              id: Value(current.id),
-              serverId: Value(serverId),
-              dirty: const Value(true),
-              removed: const Value(true),
-            ),
-          );
-        }
-        try {
-          await _client.remove(serverId);
-          await _db.annotationDao.deleteByIds([current.id]);
-        } catch (e) {
-          log.info('could not remove annotation', attributes: {'error': e});
-        }
-        return;
-      }
-
-      if (current.lastModified != latest.lastModified) {
-        // Keep the newer local edit dirty and only record the assigned server id.
-        if (current.serverId == null && remote.id != null) {
-          await _db.annotationDao.upsert(
-            AnnotationsCompanion(
-              id: Value(current.id),
-              serverId: Value(remote.id),
-              dirty: const Value(true),
-            ),
-          );
-        }
-        return;
-      }
-
-      await _db.annotationDao.upsert(
-        remote.toAnnotationCompanion(localId: latest.id),
-      );
-    });
-  }
-
-  Future<void> _serializePush(int id, Future<void> Function() action) {
-    final previous = _inFlightPushes[id];
-    final current = () async {
-      if (previous != null) {
-        try {
-          await previous;
-        } catch (_) {}
-      }
-      await action();
-    }();
-
-    _inFlightPushes[id] = current;
-    return current.whenComplete(() {
-      if (identical(_inFlightPushes[id], current)) {
-        _inFlightPushes.remove(id);
-      }
-    });
+    final remote = annotation.serverId == null
+        ? await _client.create(annotation.toAnnotationDto())
+        : await _client.update(annotation.toAnnotationDto());
+    await _db.annotationDao.upsert(
+      remote.toAnnotationCompanion(localId: annotation.id),
+    );
   }
 
   /// Deletes local rows that are clean and whose server id is absent from
-  /// [remote]. Dirty rows are never deleted: they hold unsynced local intent.
+  /// [remote]. Dirty rows are never deleted.
   Future<void> _deleteMissingRemote(
     Iterable<api.AnnotationDto> remote, {
     int? chapterId,
   }) async {
     final remoteIds = remote.map((dto) => dto.id).whereType<int>().toSet();
 
-    final local = chapterId == null
-        ? await _db.annotationDao.getAnnotations()
-        : await _db.annotationDao.getAnnotationsForChapter(chapterId);
-
-    final stale = local
-        .where(
-          (a) =>
-              !a.dirty && a.serverId != null && !remoteIds.contains(a.serverId),
-        )
-        .map((a) => a.id)
-        .toList();
-
-    if (stale.isNotEmpty) {
-      await _db.annotationDao.deleteByIds(stale);
-    }
+    await _db.annotationDao.deleteStaleAnnotations(
+      remoteIds,
+      chapterId: chapterId,
+    );
   }
 
   Future<void> _mergeRemote(Iterable<api.AnnotationDto> remote) async {
-    final existingChapterIds = (await _db.annotationDao.getExistingChapterIds())
-        .toSet();
+    final existingChapterIds = await _db.chaptersDao.getExistingChapterIds();
+    final entries = remote
+        .where((dto) => existingChapterIds.contains(dto.chapterId))
+        .map((dto) => dto.toAnnotationCompanion())
+        .toList();
 
-    for (final dto in remote) {
-      final serverId = dto.id;
-      if (serverId == null) {
-        log.warning('skipping annotation without server id');
-        continue;
-      }
-      if (!existingChapterIds.contains(dto.chapterId)) {
-        log.warning(
-          'skipping annotation for unknown chapter',
-          attributes: {'chapter_id': dto.chapterId, 'annotation_id': serverId},
-        );
-        continue;
-      }
-
-      final local = await _db.annotationDao.getAnnotationByServerId(serverId);
-      if (local != null && local.dirty) {
-        log.warning(
-          'skipping remote annotation for dirty local row',
-          attributes: {'annotation_id': serverId},
-        );
-        continue;
-      }
-
-      await _db.annotationDao.upsert(
-        dto.toAnnotationCompanion(localId: local?.id),
-      );
-    }
+    await _db.annotationDao.mergeRemoteBatch(entries);
   }
 
   /// Watch all locally stored, non-removed annotations for [chapterId].
@@ -386,7 +252,7 @@ class AnnotationRepository(
 
   /// Watch all locally stored highlight slots, ordered by slot number.
   Stream<List<HighlightSlotModel>> watchHighlightSlots() {
-    return _db.highlightSlotDao.watchSlots().map(
+    return _db.annotationDao.watchHighlightSlots().map(
       (slots) => slots
           .map(HighlightSlotModel.fromDatabaseModel)
           .toList(growable: false),
@@ -398,6 +264,6 @@ class AnnotationRepository(
     final companions = slots
         .map((slot) => slot.toHighlightSlotCompanion())
         .whereType<HighlightSlotsCompanion>();
-    return _db.highlightSlotDao.replaceSlots(companions);
+    return _db.annotationDao.replaceHighlightSlots(companions);
   }
 }

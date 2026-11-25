@@ -94,18 +94,21 @@ void main() {
       final accent = tester.widget<DecoratedBox>(
         find.byKey(const ValueKey('annotation-highlight-accent')),
       );
-      final border = (accent.decoration as BoxDecoration).border
-          as BorderDirectional;
+      final border =
+          (accent.decoration as BoxDecoration).border as BorderDirectional;
       expect(border.start.color, _yellow);
     });
 
-    testWidgets('shows page-only attribution when TOC has no matching chapter', (
-      tester,
-    ) async {
-      await _pumpSheet(tester, toc: const []);
+    testWidgets(
+      'shows page-only attribution when TOC has no matching chapter',
+      (
+        tester,
+      ) async {
+        await _pumpSheet(tester, toc: const []);
 
-      expect(find.text('— Page 5'), findsOneWidget);
-    });
+        expect(find.text('— Page 5'), findsOneWidget);
+      },
+    );
 
     testWidgets('hides edit and delete for annotations owned by another user', (
       tester,
@@ -141,34 +144,37 @@ void main() {
       expect(find.text('Delete'), findsNothing);
     });
 
-    testWidgets('shows single lastModified timestamp and falls back to created', (
-      tester,
-    ) async {
-      await _pumpSheet(
+    testWidgets(
+      'shows single lastModified timestamp and falls back to created',
+      (
         tester,
-        annotations: [
-          _annotation.copyWith(
-            created: DateTime(2025, 4, 10, 9, 0),
-            lastModified: DateTime(2026, 11, 25, 14, 30),
-          ),
-        ],
-      );
+      ) async {
+        await _pumpSheet(
+          tester,
+          annotations: [
+            _annotation.copyWith(
+              created: DateTime(2025, 4, 10, 9, 0),
+              lastModified: DateTime(2026, 11, 25, 14, 30),
+            ),
+          ],
+        );
 
-      expect(find.textContaining('2026'), findsOneWidget);
-      expect(find.textContaining('2025'), findsNothing);
+        expect(find.textContaining('2026'), findsOneWidget);
+        expect(find.textContaining('2025'), findsNothing);
 
-      await _pumpSheet(
-        tester,
-        annotations: [
-          _annotation.copyWith(
-            created: DateTime(2025, 4, 10, 9, 0),
-            lastModified: null,
-          ),
-        ],
-      );
+        await _pumpSheet(
+          tester,
+          annotations: [
+            _annotation.copyWith(
+              created: DateTime(2025, 4, 10, 9, 0),
+              lastModified: null,
+            ),
+          ],
+        );
 
-      expect(find.textContaining('2025'), findsOneWidget);
-    });
+        expect(find.textContaining('2025'), findsOneWidget);
+      },
+    );
 
     testWidgets('shows a comment written in the Kavita web app', (
       tester,
@@ -242,59 +248,62 @@ void main() {
       expect(commentScrollable.position.maxScrollExtent, greaterThan(0));
     });
 
-    testWidgets('does not overflow on cramped viewports in view and edit mode', (
-      tester,
-    ) async {
-      final longQuote = List.generate(20, (i) => 'Quote line $i').join('\n');
-      final longComment = List.generate(20, (i) => 'Comment line $i').join(
-        '\n',
-      );
-      final repository = MockAnnotationRepository();
-      when(repository.watchAnnotations(chapterId: _chapterId)).thenAnswer(
-        (_) => Stream.value([
-          _annotation.copyWith(
-            selectedText: longQuote,
-            commentPlainText: longComment,
-          ),
-        ]),
-      );
-      when(
-        repository.watchHighlightSlots(),
-      ).thenAnswer((_) => Stream.value(_slots));
+    testWidgets(
+      'does not overflow on cramped viewports in view and edit mode',
+      (
+        tester,
+      ) async {
+        final longQuote = List.generate(20, (i) => 'Quote line $i').join('\n');
+        final longComment = List.generate(20, (i) => 'Comment line $i').join(
+          '\n',
+        );
+        final repository = MockAnnotationRepository();
+        when(repository.watchAnnotations(chapterId: _chapterId)).thenAnswer(
+          (_) => Stream.value([
+            _annotation.copyWith(
+              selectedText: longQuote,
+              commentPlainText: longComment,
+            ),
+          ]),
+        );
+        when(
+          repository.watchHighlightSlots(),
+        ).thenAnswer((_) => Stream.value(_slots));
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            annotationRepositoryProvider.overrideWithValue(repository),
-            currentUserProvider.overrideWith(
-              () => _FakeCurrentUser(_currentUser),
-            ),
-            bookChaptersProvider(chapterId: _chapterId).overrideWith(
-              (_) => Stream.value(_toc),
-            ),
-          ],
-          child: MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(
-              body: SizedBox(
-                height: 220,
-                child: EpubAnnotationSheet(
-                  chapterId: _chapterId,
-                  annotationId: _annotation.id,
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              annotationRepositoryProvider.overrideWithValue(repository),
+              currentUserProvider.overrideWith(
+                () => _FakeCurrentUser(_currentUser),
+              ),
+              bookChaptersProvider(chapterId: _chapterId).overrideWith(
+                (_) => Stream.value(_toc),
+              ),
+            ],
+            child: MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(
+                body: SizedBox(
+                  height: 220,
+                  child: EpubAnnotationSheet(
+                    chapterId: _chapterId,
+                    annotationId: _annotation.id,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
 
-      await _tap(tester, find.text('Edit'));
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-    });
+        await _tap(tester, find.text('Edit'));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      },
+    );
 
     testWidgets('saves trimmed comment, slot, and spoiler toggle', (
       tester,
@@ -308,13 +317,16 @@ void main() {
         '  updated note  ',
       );
       await _tap(tester, find.byTooltip('Highlight color 2'));
-      await _tap(tester, find.byKey(const ValueKey('annotation-spoiler-toggle')));
+      await _tap(
+        tester,
+        find.byKey(const ValueKey('annotation-spoiler-toggle')),
+      );
 
       final accent = tester.widget<DecoratedBox>(
         find.byKey(const ValueKey('annotation-highlight-accent')),
       );
-      final border = (accent.decoration as BoxDecoration).border
-          as BorderDirectional;
+      final border =
+          (accent.decoration as BoxDecoration).border as BorderDirectional;
       expect(border.start.color, _blue);
 
       await _tap(tester, find.text('Save'));
@@ -403,7 +415,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      verify(repository.removeAnnotation(10, ownerUserId: _ownerUserId)).called(1);
+      verify(repository.removeAnnotation(10, ownerUserId: _ownerUserId))
+          .called(1);
     });
 
     testWidgets('shows an error when saving fails', (tester) async {
@@ -501,9 +514,9 @@ void main() {
         ).thenAnswer((_) => Stream.value(_slots));
         when(repository.removeAnnotation(10, ownerUserId: _ownerUserId))
             .thenAnswer((_) {
-          annotations.add(const []);
-          return pendingRemove.future;
-        });
+              annotations.add(const []);
+              return pendingRemove.future;
+            });
 
         await tester.pumpWidget(
           ProviderScope(
@@ -623,7 +636,10 @@ void main() {
         '  a note  ',
       );
       await _tap(tester, find.byTooltip('Highlight color 2'));
-      await _tap(tester, find.byKey(const ValueKey('annotation-spoiler-toggle')));
+      await _tap(
+        tester,
+        find.byKey(const ValueKey('annotation-spoiler-toggle')),
+      );
       await _tap(tester, find.text('Save'));
       await tester.pumpAndSettle();
 
@@ -775,19 +791,13 @@ typedef _Created = ({
   int selectedSlotIndex,
 });
 
-class _DraftActionRecorder {
-  _DraftActionRecorder({this.pending});
-
+class _DraftActionRecorder({final Completer<void>? pending}) {
   final created = <_Created>[];
   Object? error;
-  final Completer<void>? pending;
 }
 
-class _RecordingAnnotationActions extends AnnotationActions {
-  _RecordingAnnotationActions(this._recorder);
-
-  final _DraftActionRecorder _recorder;
-
+class _RecordingAnnotationActions(final _DraftActionRecorder _recorder)
+    extends AnnotationActions {
   @override
   Future<void> create({
     required int chapterId,
@@ -882,11 +892,7 @@ Future<void> _enterText(
   await tester.pump();
 }
 
-class _FakeCurrentUser extends CurrentUser {
-  _FakeCurrentUser(this._user);
-
-  final UserModel? _user;
-
+class _FakeCurrentUser(final UserModel? _user) extends CurrentUser {
   @override
   Future<UserModel> build() {
     final user = _user;

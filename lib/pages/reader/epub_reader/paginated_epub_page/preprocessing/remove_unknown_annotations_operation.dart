@@ -9,12 +9,9 @@ import 'package:kover/utils/constants/html_constants.dart';
 /// Only highlights carrying a known server id are kept. Kover's own id
 /// attribute is written later by `EnsureAnnotationsOperation`, so it is not
 /// consulted here.
-final class RemoveUnknownAnnotationsOperation
-    extends EpubPagePreprocessorOperation {
-  RemoveUnknownAnnotationsOperation({required this.annotations});
-
-  final Iterable<PaginatedEpubAnnotation> annotations;
-
+final class RemoveUnknownAnnotationsOperation({
+  required final Iterable<PaginatedEpubAnnotation> annotations,
+}) extends EpubPagePreprocessorOperation {
   final _serverIds = <int>{};
 
   @override

@@ -1,15 +1,14 @@
 import 'package:drift/drift.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/database/tables/annotations.dart';
-import 'package:kover/database/tables/chapters.dart';
+import 'package:kover/database/tables/highlight_slots.dart';
 
 part 'annotation_dao.g.dart';
 
-@DriftAccessor(tables: [Annotations, Chapters])
-class AnnotationDao extends DatabaseAccessor<AppDatabase>
+@DriftAccessor(tables: [Annotations, HighlightSlots])
+class AnnotationDao(super.attachedDatabase)
+    extends DatabaseAccessor<AppDatabase>
     with _$AnnotationDaoMixin {
-  AnnotationDao(super.attachedDatabase);
-
   /// Get every locally stored annotation row that has been modified since the
   /// last sync.
   Future<List<Annotation>> getDirtyAnnotations() {
@@ -31,7 +30,6 @@ class AnnotationDao extends DatabaseAccessor<AppDatabase>
   }
 
   /// Every locally stored, non-removed annotation row, dirty and clean alike.
-  /// Used to reconcile against the remote set during a full refresh.
   Future<List<Annotation>> getAnnotations() {
     return (select(
       annotations,
@@ -59,22 +57,113 @@ class AnnotationDao extends DatabaseAccessor<AppDatabase>
         .watch();
   }
 
-  /// Get the IDs of all chapters that are known locally.
-  Future<List<int>> getExistingChapterIds() async {
-    final q = selectOnly(chapters, distinct: true)..addColumns([chapters.id]);
-    return q.map((row) => row.read(chapters.id)!).get();
+  /// Watch all locally stored highlight slots, ordered by slot number.
+  Stream<List<HighlightSlot>> watchHighlightSlots() {
+    return (select(
+      highlightSlots,
+    )..orderBy([(s) => OrderingTerm.asc(s.slotNumber)])).watch();
   }
 
-  /// Mark the annotation with [id] as removed.
-  Future<void> markRemoved(int id) {
-    return (update(annotations)..where((a) => a.id.equals(id))).write(
-      const AnnotationsCompanion(dirty: Value(true), removed: Value(true)),
-    );
+  /// Replace all locally stored highlight slots with [slots].
+  Future<void> replaceHighlightSlots(Iterable<HighlightSlotsCompanion> slots) {
+    return transaction(() async {
+      await delete(highlightSlots).go();
+      final entries = slots.toList();
+      if (entries.isEmpty) return;
+      await batch((batch) => batch.insertAll(highlightSlots, entries));
+    });
+  }
+
+  /// Mark the annotation with [id] as removed if owned by [ownerUserId].
+  ///
+  /// Returns the updated tombstone, or null if no matching row exists.
+  Future<Annotation?> markRemoved(int id, {required int ownerUserId}) async {
+    final rows =
+        await (update(annotations)..where(
+              (a) =>
+                  a.id.equals(id) &
+                  a.ownerUserId.equals(ownerUserId) &
+                  a.removed.equals(false),
+            ))
+            .writeReturning(
+              const AnnotationsCompanion(
+                dirty: Value(true),
+                removed: Value(true),
+              ),
+            );
+    return rows.singleOrNull;
   }
 
   /// Delete the annotations with the given [ids] from the local database.
   Future<void> deleteByIds(Iterable<int> ids) async {
     await (delete(annotations)..where((a) => a.id.isIn(ids))).go();
+  }
+
+  /// Delete clean annotations whose server ids are absent from [remoteIds].
+  ///
+  /// Dirty and removed rows are preserved. When [chapterId] is provided, only
+  /// annotations in that chapter are considered.
+  Future<void> deleteStaleAnnotations(
+    Iterable<int> remoteIds, {
+    int? chapterId,
+  }) async {
+    await (delete(annotations)..where(
+          (a) =>
+              a.dirty.equals(false) &
+              a.removed.equals(false) &
+              a.serverId.isNotNull() &
+              a.serverId.isIn(remoteIds).not() &
+              (chapterId == null
+                  ? const Constant(true)
+                  : a.chapterId.equals(chapterId)),
+        ))
+        .go();
+  }
+
+  /// Merge remote annotation [entries] in one batch.
+  ///
+  /// Entries matching dirty local rows are skipped.
+  Future<void> mergeRemoteBatch(
+    Iterable<AnnotationsCompanion> entries,
+  ) async {
+    final incoming = entries.toList();
+    if (incoming.isEmpty) return;
+
+    final serverIds = incoming
+        .map((entry) => entry.serverId.present ? entry.serverId.value : null)
+        .whereType<int>()
+        .toSet();
+
+    await transaction(() async {
+      final local = await (select(
+        annotations,
+      )..where((a) => a.serverId.isIn(serverIds))).get();
+      final dirtyServerIds = local
+          .where((annotation) => annotation.dirty)
+          .map((annotation) => annotation.serverId)
+          .whereType<int>()
+          .toSet();
+      final toUpsert = incoming.where((entry) {
+        final serverId = entry.serverId.present ? entry.serverId.value : null;
+        return serverId == null || !dirtyServerIds.contains(serverId);
+      }).toList();
+
+      if (toUpsert.isNotEmpty) {
+        await batch((batch) {
+          for (final entry in toUpsert) {
+            batch.insert(
+              annotations,
+              entry,
+              onConflict: DoUpdate(
+                (_) => entry,
+                target: [annotations.serverId],
+                where: (_) => annotations.dirty.equals(false),
+              ),
+            );
+          }
+        });
+      }
+    });
   }
 
   /// Add or update an annotation entry, matching by local id or server id.

@@ -136,10 +136,4 @@ class BookmarkDao extends DatabaseAccessor<AppDatabase>
           .insertReturning(entry.copyWith(id: const Value.absent()));
     });
   }
-
-  /// Get the IDs of all chapters that have at least one bookmark. This is used to
-  Future<List<int>> getExistingChapterIds() async {
-    final q = selectOnly(chapters, distinct: true)..addColumns([chapters.id]);
-    return q.map((row) => row.read(chapters.id)!).get();
-  }
 }

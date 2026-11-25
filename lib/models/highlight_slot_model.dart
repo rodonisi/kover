@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 
 part 'highlight_slot_model.freezed.dart';
 
-/// UI-facing representation of a user-configured highlight slot.
 @freezed
 class HighlightSlotModel({
   required final int slotNumber,

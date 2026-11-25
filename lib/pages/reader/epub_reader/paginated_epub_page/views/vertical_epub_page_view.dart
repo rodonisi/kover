@@ -16,7 +16,7 @@ class VerticalEpubPageView extends HookWidget {
   final void Function(PaginatedEpubAnnotation)? onAnnotationTap;
   final EpubSelectionRegistry? selectionRegistry;
 
-  const VerticalEpubPageView({
+  const new({
     super.key,
     required this.controller,
     required this.settings,

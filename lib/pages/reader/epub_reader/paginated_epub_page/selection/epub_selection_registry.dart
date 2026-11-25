@@ -54,7 +54,7 @@ final class EpubSelectionRegistry {
 /// container reverses the horizontal order in RTL mode so cross-subpage
 /// selections follow reading order.
 class EpubSubpagesSelectionContainer extends HookWidget {
-  const EpubSubpagesSelectionContainer({super.key, required this.child});
+  const new({super.key, required this.child});
 
   final Widget child;
 
@@ -71,12 +71,8 @@ class EpubSubpagesSelectionContainer extends HookWidget {
   }
 }
 
-final class _SubpagesSelectionDelegate
+final class _SubpagesSelectionDelegate(final TextDirection textDirection)
     extends StaticSelectionContainerDelegate {
-  _SubpagesSelectionDelegate(this.textDirection);
-
-  final TextDirection textDirection;
-
   @override
   Comparator<Selectable> get compareOrder =>
       textDirection == .rtl ? _compareRtlScreenOrder : super.compareOrder;
@@ -104,7 +100,7 @@ final class _SubpagesSelectionDelegate
 /// Their paragraphs would end up in between the selected ones. A subpage with
 /// its own container is ordered as a whole instead.
 class EpubSubpageSelectionContainer extends HookWidget {
-  const EpubSubpageSelectionContainer({super.key, required this.child});
+  const new({super.key, required this.child});
 
   final Widget child;
 
@@ -164,7 +160,7 @@ final class _SubpageSelectionDelegate extends StaticSelectionContainerDelegate {
 /// Blocks nested in another block, such as superscripts, are not registered:
 /// their text already belongs to the outer block.
 class EpubSelectableBlock extends HookWidget {
-  const EpubSelectableBlock({
+  const new({
     super.key,
     required this.registry,
     required this.element,
@@ -202,15 +198,17 @@ class EpubSelectableBlock extends HookWidget {
   }
 }
 
-final class _Block implements Comparable<_Block> {
-  _Block._({
-    required this.element,
-    required this.delegate,
-    required this.xPath,
-    required this.nodeIndex,
-    required this.subpageIndex,
-  });
+final class _Block._({
+  required final dom.Element element,
+  required final StaticSelectionContainerDelegate delegate,
+  required final String xPath,
 
+  /// The position of [element] in the document.
+  required final int nodeIndex,
+
+  /// The subpage on which this block is rendered.
+  required final int subpageIndex,
+}) implements Comparable<_Block> {
   /// Returns `null` when [element] was not prepared by the page preprocessor.
   static _Block? tryCreate(
     dom.Element element,
@@ -231,16 +229,6 @@ final class _Block implements Comparable<_Block> {
       subpageIndex: subpageIndex,
     );
   }
-
-  final dom.Element element;
-  final StaticSelectionContainerDelegate delegate;
-  final String xPath;
-
-  /// The position of [element] in the document.
-  final int nodeIndex;
-
-  /// The subpage on which this block is rendered.
-  final int subpageIndex;
 
   /// Whether this block renders the rest of a paragraph that started on the
   /// previous subpage.

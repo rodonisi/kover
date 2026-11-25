@@ -836,7 +836,7 @@
     "@spoiler": {
         "description": "Badge and toggle label for annotations marked as spoilers"
     },
-    "annotationPageLocation": "— Page {page}",
+    "annotationPageLocation": "Page {page}",
     "@annotationPageLocation": {
         "description": "Attribution showing the page number of an annotation when no chapter title is available",
         "placeholders": {
