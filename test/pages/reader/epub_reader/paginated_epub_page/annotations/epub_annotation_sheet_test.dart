@@ -5,9 +5,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/annotation_draft.dart';
 import 'package:kover/models/annotation_model.dart';
+import 'package:kover/models/book_chapter_model.dart';
 import 'package:kover/models/highlight_slot_model.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/annotations/epub_annotation_sheet.dart';
 import 'package:kover/riverpod/providers/annotations.dart';
+import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/repository/annotation_repository.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mockito/annotations.dart';
@@ -22,6 +24,7 @@ final _annotation = AnnotationModel(
   id: 10,
   chapterId: _chapterId,
   pageNumber: 4,
+  ownerUsername: 'dev',
   selectedText: 'quoted text',
   commentPlainText: 'original note',
   containsSpoiler: true,
@@ -40,23 +43,92 @@ final _slots = [
   HighlightSlotModel(slotNumber: 1, color: _blue),
   HighlightSlotModel(slotNumber: 2),
 ];
+const _toc = [
+  BookChapterModel(
+    title: 'Prologue',
+    page: 0,
+    children: [],
+  ),
+  BookChapterModel(
+    title: 'Book One',
+    page: 2,
+    children: [
+      BookChapterModel(title: 'Arrakis', page: 4, children: []),
+    ],
+  ),
+  BookChapterModel(
+    title: 'Book Two',
+    page: 10,
+    children: [],
+  ),
+];
 
 @GenerateNiceMocks([MockSpec<AnnotationRepository>()])
 void main() {
   group('EpubAnnotationSheet', () {
-    testWidgets('shows annotation details', (tester) async {
+    testWidgets('shows redesigned details without redundant labels', (
+      tester,
+    ) async {
       await _pumpSheet(tester);
 
-      expect(find.text('Annotation details'), findsOneWidget);
-      expect(find.text('quoted text'), findsOneWidget);
-      expect(find.text('original note'), findsOneWidget);
+      expect(find.text('Annotation details'), findsNothing);
+      expect(find.text('Selected text'), findsNothing);
+      expect(find.text('Comment'), findsNothing);
+      expect(find.text('Created'), findsNothing);
+      expect(find.text('Last Modified'), findsNothing);
+      expect(find.byType(Divider), findsNothing);
+
+      expect(find.text('dev'), findsOneWidget);
       expect(find.text('Spoiler'), findsOneWidget);
-      expect(find.text('Page'), findsOneWidget);
-      expect(find.text('4'), findsOneWidget);
-      expect(find.text('Created'), findsOneWidget);
-      expect(find.text('Last Modified'), findsOneWidget);
+      expect(find.text('quoted text'), findsOneWidget);
+      expect(find.text('— Page 5, Chapter "Arrakis"'), findsOneWidget);
+      expect(find.text('original note'), findsOneWidget);
       expect(find.text('Edit'), findsOneWidget);
       expect(find.text('Delete'), findsOneWidget);
+
+      final accent = tester.widget<DecoratedBox>(
+        find.byKey(const ValueKey('annotation-highlight-accent')),
+      );
+      final border = (accent.decoration as BoxDecoration).border
+          as BorderDirectional;
+      expect(border.start.color, _yellow);
+    });
+
+    testWidgets('shows page-only attribution when TOC has no matching chapter', (
+      tester,
+    ) async {
+      await _pumpSheet(tester, toc: const []);
+
+      expect(find.text('— Page 5'), findsOneWidget);
+    });
+
+    testWidgets('shows single lastModified timestamp and falls back to created', (
+      tester,
+    ) async {
+      await _pumpSheet(
+        tester,
+        annotations: [
+          _annotation.copyWith(
+            created: DateTime(2025, 4, 10, 9, 0),
+            lastModified: DateTime(2026, 11, 25, 14, 30),
+          ),
+        ],
+      );
+
+      expect(find.textContaining('2026'), findsOneWidget);
+      expect(find.textContaining('2025'), findsNothing);
+
+      await _pumpSheet(
+        tester,
+        annotations: [
+          _annotation.copyWith(
+            created: DateTime(2025, 4, 10, 9, 0),
+            lastModified: null,
+          ),
+        ],
+      );
+
+      expect(find.textContaining('2025'), findsOneWidget);
     });
 
     testWidgets('shows a comment written in the Kavita web app', (
@@ -75,7 +147,9 @@ void main() {
       expect(find.text('first\nsecond'), findsOneWidget);
     });
 
-    testWidgets('shows no comment for an empty Kavita note', (tester) async {
+    testWidgets('shows no comment area for an empty Kavita note', (
+      tester,
+    ) async {
       await _pumpSheet(
         tester,
         annotations: [
@@ -83,11 +157,106 @@ void main() {
         ],
       );
 
-      expect(find.text('Comment'), findsNothing);
+      expect(
+        find.byKey(const ValueKey('annotation-comment-scroll')),
+        findsNothing,
+      );
       expect(find.text('{}'), findsNothing);
     });
 
-    testWidgets('saves a trimmed comment and selected slot', (tester) async {
+    testWidgets('scrolls long selected text and long comment independently', (
+      tester,
+    ) async {
+      final longQuote = List.generate(40, (i) => 'Quote line $i').join('\n');
+      final longComment = List.generate(40, (i) => 'Comment line $i').join(
+        '\n',
+      );
+
+      await _pumpSheet(
+        tester,
+        annotations: [
+          _annotation.copyWith(
+            selectedText: longQuote,
+            commentPlainText: longComment,
+          ),
+        ],
+      );
+
+      final quoteScroll = find.byKey(
+        const ValueKey('annotation-selected-text-scroll'),
+      );
+      final commentScroll = find.byKey(
+        const ValueKey('annotation-comment-scroll'),
+      );
+      expect(quoteScroll, findsOneWidget);
+      expect(commentScroll, findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      final quoteScrollable = tester.state<ScrollableState>(
+        find.descendant(of: quoteScroll, matching: find.byType(Scrollable)),
+      );
+      final commentScrollable = tester.state<ScrollableState>(
+        find.descendant(of: commentScroll, matching: find.byType(Scrollable)),
+      );
+
+      expect(quoteScrollable.position.maxScrollExtent, greaterThan(0));
+      expect(commentScrollable.position.maxScrollExtent, greaterThan(0));
+    });
+
+    testWidgets('does not overflow on cramped viewports in view and edit mode', (
+      tester,
+    ) async {
+      final longQuote = List.generate(20, (i) => 'Quote line $i').join('\n');
+      final longComment = List.generate(20, (i) => 'Comment line $i').join(
+        '\n',
+      );
+      final repository = MockAnnotationRepository();
+      when(repository.watchAnnotations(chapterId: _chapterId)).thenAnswer(
+        (_) => Stream.value([
+          _annotation.copyWith(
+            selectedText: longQuote,
+            commentPlainText: longComment,
+          ),
+        ]),
+      );
+      when(
+        repository.watchHighlightSlots(),
+      ).thenAnswer((_) => Stream.value(_slots));
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            annotationRepositoryProvider.overrideWithValue(repository),
+            bookChaptersProvider(chapterId: _chapterId).overrideWith(
+              (_) => Stream.value(_toc),
+            ),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SizedBox(
+                height: 220,
+                child: EpubAnnotationSheet(
+                  chapterId: _chapterId,
+                  annotationId: _annotation.id,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      await _tap(tester, find.text('Edit'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('saves trimmed comment, slot, and spoiler toggle', (
+      tester,
+    ) async {
       final repository = await _pumpSheet(tester);
 
       await _tap(tester, find.text('Edit'));
@@ -97,6 +266,15 @@ void main() {
         '  updated note  ',
       );
       await _tap(tester, find.byTooltip('Highlight color 2'));
+      await _tap(tester, find.byKey(const ValueKey('annotation-spoiler-toggle')));
+
+      final accent = tester.widget<DecoratedBox>(
+        find.byKey(const ValueKey('annotation-highlight-accent')),
+      );
+      final border = (accent.decoration as BoxDecoration).border
+          as BorderDirectional;
+      expect(border.start.color, _blue);
+
       await _tap(tester, find.text('Save'));
       await tester.pumpAndSettle();
 
@@ -106,7 +284,7 @@ void main() {
           comment: r'{"ops":[{"insert":"updated note\n"}]}',
           commentHtml: '<p>updated note</p>',
           commentPlainText: 'updated note',
-          containsSpoiler: true,
+          containsSpoiler: false,
           selectedSlotIndex: 1,
         ),
       ).called(1);
@@ -285,6 +463,9 @@ void main() {
           ProviderScope(
             overrides: [
               annotationRepositoryProvider.overrideWithValue(repository),
+              bookChaptersProvider(chapterId: _chapterId).overrideWith(
+                (_) => Stream.value(_toc),
+              ),
             ],
             child: MaterialApp(
               localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -353,20 +534,38 @@ void main() {
   });
 
   group('EpubAnnotationDraftSheet', () {
-    testWidgets('opens in edit mode with the selected text', (tester) async {
+    testWidgets('opens in edit mode without title or redundant labels', (
+      tester,
+    ) async {
       await _pumpDraftSheet(tester);
 
-      expect(find.text('New annotation'), findsOneWidget);
+      expect(find.text('New annotation'), findsNothing);
+      expect(find.text('Selected text'), findsNothing);
+      expect(find.byType(Divider), findsNothing);
       expect(find.text('selected words'), findsOneWidget);
+      expect(find.text('— Page 5, Chapter "Arrakis"'), findsOneWidget);
       expect(
         find.byKey(const ValueKey('annotation-comment-field')),
         findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('annotation-spoiler-toggle')),
+        findsOneWidget,
+      );
+      expect(find.byType(Switch), findsOneWidget);
+      expect(
+        tester.getTopRight(find.byType(Switch)).dx,
+        greaterThan(
+          tester.getTopRight(find.byTooltip('Highlight color 2')).dx,
+        ),
       );
       expect(find.text('Edit'), findsNothing);
       expect(find.text('Delete'), findsNothing);
     });
 
-    testWidgets('creates the annotation and closes', (tester) async {
+    testWidgets('creates the annotation with spoiler and closes', (
+      tester,
+    ) async {
       final actions = await _pumpDraftSheet(tester);
 
       await _enterText(
@@ -375,6 +574,7 @@ void main() {
         '  a note  ',
       );
       await _tap(tester, find.byTooltip('Highlight color 2'));
+      await _tap(tester, find.byKey(const ValueKey('annotation-spoiler-toggle')));
       await _tap(tester, find.text('Save'));
       await tester.pumpAndSettle();
 
@@ -384,10 +584,11 @@ void main() {
           pageNumber: 4,
           draft: _draft,
           comment: 'a note',
+          containsSpoiler: true,
           selectedSlotIndex: 1,
         ),
       ]);
-      expect(find.text('New annotation'), findsNothing);
+      expect(find.text('selected words'), findsNothing);
     });
 
     testWidgets('creates an annotation without a comment', (tester) async {
@@ -397,6 +598,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(actions.created.single.comment, isNull);
+      expect(actions.created.single.containsSpoiler, isFalse);
       expect(actions.created.single.selectedSlotIndex, 0);
     });
 
@@ -422,7 +624,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(actions.created, isEmpty);
-      expect(find.text('New annotation'), findsNothing);
+      expect(find.text('selected words'), findsNothing);
     });
 
     testWidgets('stays open and shows an error when creating fails', (
@@ -435,7 +637,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('Could not save annotation.'), findsOneWidget);
-      expect(find.text('New annotation'), findsOneWidget);
+      expect(find.text('selected words'), findsOneWidget);
     });
 
     testWidgets('does not pop reader if dismissed while save is pending', (
@@ -452,6 +654,9 @@ void main() {
         ProviderScope(
           overrides: [
             annotationRepositoryProvider.overrideWithValue(repository),
+            bookChaptersProvider(chapterId: _chapterId).overrideWith(
+              (_) => Stream.value(_toc),
+            ),
             annotationActionsProvider.overrideWith(
               () => _RecordingAnnotationActions(actions),
             ),
@@ -501,7 +706,7 @@ void main() {
       await tester.pump();
 
       // Dismiss the sheet before create completes.
-      Navigator.of(tester.element(find.text('New annotation'))).pop();
+      Navigator.of(tester.element(find.text('selected words'))).pop();
       await tester.pumpAndSettle();
 
       pendingCreate.complete();
@@ -517,6 +722,7 @@ typedef _Created = ({
   int pageNumber,
   AnnotationDraft draft,
   String? comment,
+  bool containsSpoiler,
   int selectedSlotIndex,
 });
 
@@ -539,6 +745,7 @@ class _RecordingAnnotationActions extends AnnotationActions {
     required int pageNumber,
     required AnnotationDraft draft,
     required String? comment,
+    bool containsSpoiler = false,
     required int selectedSlotIndex,
   }) async {
     if (_recorder.error case final error?) throw error;
@@ -551,6 +758,7 @@ class _RecordingAnnotationActions extends AnnotationActions {
       pageNumber: pageNumber,
       draft: draft,
       comment: comment,
+      containsSpoiler: containsSpoiler,
       selectedSlotIndex: selectedSlotIndex,
     ));
   }
@@ -560,6 +768,7 @@ class _RecordingAnnotationActions extends AnnotationActions {
 Future<_DraftActionRecorder> _pumpDraftSheet(
   WidgetTester tester, {
   List<HighlightSlotModel>? slots,
+  List<BookChapterModel>? toc,
 }) async {
   final recorder = _DraftActionRecorder();
   final repository = MockAnnotationRepository();
@@ -571,6 +780,9 @@ Future<_DraftActionRecorder> _pumpDraftSheet(
     ProviderScope(
       overrides: [
         annotationRepositoryProvider.overrideWithValue(repository),
+        bookChaptersProvider(chapterId: _chapterId).overrideWith(
+          (_) => Stream.value(toc ?? _toc),
+        ),
         annotationActionsProvider.overrideWith(
           () => _RecordingAnnotationActions(recorder),
         ),
@@ -624,6 +836,7 @@ Future<MockAnnotationRepository> _pumpSheet(
   WidgetTester tester, {
   List<AnnotationModel>? annotations,
   List<HighlightSlotModel>? slots,
+  List<BookChapterModel>? toc,
   Stream<List<AnnotationModel>>? annotationsStream,
   Stream<List<HighlightSlotModel>>? slotsStream,
 }) async {
@@ -641,6 +854,9 @@ Future<MockAnnotationRepository> _pumpSheet(
     ProviderScope(
       overrides: [
         annotationRepositoryProvider.overrideWithValue(repository),
+        bookChaptersProvider(chapterId: _chapterId).overrideWith(
+          (_) => Stream.value(toc ?? _toc),
+        ),
       ],
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,

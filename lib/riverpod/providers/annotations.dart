@@ -40,6 +40,7 @@ class AnnotationActions extends _$AnnotationActions {
     required int pageNumber,
     required AnnotationDraft draft,
     required String? comment,
+    bool containsSpoiler = false,
     required int selectedSlotIndex,
   }) async {
     // Read before any await: the provider can be disposed while it loads.
@@ -60,6 +61,7 @@ class AnnotationActions extends _$AnnotationActions {
       chapterId: chapter.id,
       libraryId: series.libraryId,
       ownerUserId: user.id,
+      ownerUsername: user.username,
       xPath: draft.xPath,
       endingXPath: draft.endingXPath,
       selectedText: draft.selectedText,
@@ -69,6 +71,7 @@ class AnnotationActions extends _$AnnotationActions {
       context: draft.context,
       // Kavita stores the number of selected characters.
       highlightCount: draft.selectedText.length,
+      containsSpoiler: containsSpoiler,
       pageNumber: pageNumber,
       selectedSlotIndex: selectedSlotIndex,
     );

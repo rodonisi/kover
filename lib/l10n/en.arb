@@ -820,21 +820,13 @@
             }
         }
     },
-    "annotationDetails": "Annotation details",
-    "@annotationDetails": {
-        "description": "Title for the annotation details bottom sheet"
-    },
     "annotationNotFound": "Annotation not found.",
     "@annotationNotFound": {
         "description": "Message shown when an opened annotation no longer exists"
     },
-    "selectedText": "Selected text",
-    "@selectedText": {
-        "description": "Label for the text highlighted by an annotation"
-    },
     "comment": "Comment",
     "@comment": {
-        "description": "Label for an annotation comment"
+        "description": "Hint text for an annotation comment input"
     },
     "highlightColor": "Highlight color",
     "@highlightColor": {
@@ -842,15 +834,34 @@
     },
     "spoiler": "Spoiler",
     "@spoiler": {
-        "description": "Badge shown on annotations marked as spoilers"
+        "description": "Badge and toggle label for annotations marked as spoilers"
     },
-    "page": "Page",
-    "@page": {
-        "description": "Label for the page number attached to an annotation"
+    "annotationPageLocation": "— Page {page}",
+    "@annotationPageLocation": {
+        "description": "Attribution showing the page number of an annotation when no chapter title is available",
+        "placeholders": {
+            "page": {
+                "description": "The 1-based page number of the annotation",
+                "type": "int",
+                "example": "17"
+            }
+        }
     },
-    "created": "Created",
-    "@created": {
-        "description": "Label for the annotation creation date"
+    "annotationPageChapterLocation": "Page {page}, Chapter \"{chapter}\"",
+    "@annotationPageChapterLocation": {
+        "description": "Attribution showing the page number and chapter title of an annotation",
+        "placeholders": {
+            "page": {
+                "description": "The 1-based page number of the annotation",
+                "type": "int",
+                "example": "17"
+            },
+            "chapter": {
+                "description": "The title of the chapter containing the annotation",
+                "type": "String",
+                "example": "Chapter 1"
+            }
+        }
     },
     "edit": "Edit",
     "@edit": {
@@ -879,10 +890,6 @@
     "annotate": "Annotate",
     "@annotate": {
         "description": "Label for the text selection menu entry that creates an annotation from the selected text"
-    },
-    "newAnnotation": "New annotation",
-    "@newAnnotation": {
-        "description": "Title for the bottom sheet that creates an annotation"
     },
     "annotationSelectionUnsupported": "This selection cannot be annotated.",
     "@annotationSelectionUnsupported": {
