@@ -263,6 +263,67 @@ void main() {
       );
     });
 
+    test('when selection spans a line break, then highlights both sides', () {
+      final root = _process(
+        '<div><p>Second<br>line.</p></div>',
+        annotations: [
+          _annotation(
+            id: 1,
+            xpath: '//body/p[1]',
+            selectedText: 'Second\nline.',
+          ),
+        ],
+      );
+
+      final highlights = root.querySelectorAll(
+        HtmlConstants.kavitaHighlightElementTag,
+      );
+      expect(highlights.map((element) => element.text), ['Second', 'line.']);
+      expect(root.querySelector('br'), isNotNull);
+    });
+
+    test(
+      'when an unknown highlight is unwrapped, then downstream ops visit its children',
+      () {
+        final annotation = _annotation(
+          id: 1,
+          xpath: '//body/p[1]',
+          selectedText: 'Hello world!',
+        );
+        final root = EpubPagePreprocessor(
+          html: dom.DocumentFragment.html(
+            '<div><p>Hello <app-epub-highlight data-annotation-id="99">'
+            '<em>world</em></app-epub-highlight>!</p></div>',
+          ),
+          operations: [
+            ScrollIdOperation(),
+            RemoveUnknownAnnotationsOperation(annotations: [annotation]),
+            EnsureAnnotationsOperation(annotations: [annotation]),
+          ],
+        ).process();
+
+        final highlights = root.querySelectorAll(
+          HtmlConstants.kavitaHighlightElementTag,
+        );
+        expect(
+          highlights.map((element) => element.text).join(),
+          'Hello world!',
+        );
+        expect(
+          highlights.every(
+            (element) =>
+                element.attributes[HtmlConstants.koverAnnotationIdAttribute] ==
+                '1',
+          ),
+          isTrue,
+        );
+        expect(
+          root.querySelector('em')!.attributes[HtmlConstants.scrollIdAttribute],
+          '//body/p[1]/em[1]',
+        );
+      },
+    );
+
     test('when xpath is unknown, then leaves the page untouched', () {
       final root = _process(
         '<div><p>abc</p></div>',

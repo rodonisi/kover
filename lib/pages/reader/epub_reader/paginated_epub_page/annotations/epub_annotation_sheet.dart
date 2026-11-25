@@ -13,7 +13,7 @@ import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Shows annotation details and controls for editing or removing it.
-class EpubAnnotationSheet extends ConsumerWidget {
+class EpubAnnotationSheet extends HookConsumerWidget {
   /// Creates a sheet for the annotation with [annotationId] in [chapterId].
   const EpubAnnotationSheet({
     super.key,
@@ -30,6 +30,8 @@ class EpubAnnotationSheet extends ConsumerWidget {
       chapterAnnotationsProvider(chapterId: chapterId),
     );
     final slots = ref.watch(highlightSlotsProvider);
+    final isDeleting = useState(false);
+    final lastAnnotation = useRef<AnnotationModel?>(null);
 
     return Async(
       asyncValue: annotations,
@@ -37,7 +39,15 @@ class EpubAnnotationSheet extends ConsumerWidget {
         final annotation = items
             .where((item) => item.id == annotationId)
             .firstOrNull;
-        if (annotation == null) {
+        if (annotation != null) {
+          lastAnnotation.value = annotation;
+        }
+
+        // Keep the last visible annotation mounted while our own delete is in
+        // flight so marking the row removed locally does not flash "not found".
+        final visible =
+            annotation ?? (isDeleting.value ? lastAnnotation.value : null);
+        if (visible == null) {
           return Padding(
             padding: LayoutConstants.largeEdgeInsets,
             child: Text(AppLocalizations.of(context).annotationNotFound),
@@ -47,8 +57,9 @@ class EpubAnnotationSheet extends ConsumerWidget {
         return Async(
           asyncValue: slots,
           data: (slots) => _AnnotationContent(
-            annotation: annotation,
+            annotation: visible,
             slots: slots,
+            isDeleting: isDeleting,
           ),
         );
       },
@@ -108,7 +119,6 @@ class _DraftContent extends HookConsumerWidget {
     Future<void> save() async {
       if (!canSave || isSaving.value) return;
 
-      final navigator = Navigator.of(context);
       final messenger = ScaffoldMessenger.of(context);
       final value = commentController.text.trim();
       isSaving.value = true;
@@ -122,7 +132,7 @@ class _DraftContent extends HookConsumerWidget {
               comment: value.isEmpty ? null : value,
               selectedSlotIndex: selectedSlot.value,
             );
-        if (navigator.mounted) navigator.pop();
+        if (context.mounted) Navigator.of(context).pop();
       } catch (error, stacktrace) {
         log.error(
           'failed to create annotation',
@@ -166,10 +176,12 @@ class _AnnotationContent extends HookConsumerWidget {
   const _AnnotationContent({
     required this.annotation,
     required this.slots,
+    required this.isDeleting,
   });
 
   final AnnotationModel annotation;
   final List<HighlightSlotModel> slots;
+  final ValueNotifier<bool> isDeleting;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -177,12 +189,12 @@ class _AnnotationContent extends HookConsumerWidget {
     final theme = Theme.of(context);
     final isEditing = useState(false);
     final isSaving = useState(false);
-    final isDeleting = useState(false);
+    final deleting = useValueListenable(isDeleting);
     final selectedSlot = useState(annotation.selectedSlotIndex);
     final commentController = useTextEditingController(
       text: _commentText(annotation),
     );
-    final isBusy = isSaving.value || isDeleting.value;
+    final isBusy = isSaving.value || deleting;
     final comment = _commentText(annotation).trim();
     final canSave = _hasColor(slots, selectedSlot.value);
 
@@ -251,27 +263,25 @@ class _AnnotationContent extends HookConsumerWidget {
       );
       if (confirmed != true || !context.mounted) return;
 
-      final navigator = Navigator.of(context);
       final messenger = ScaffoldMessenger.of(context);
       isDeleting.value = true;
       try {
         await ref
             .read(annotationActionsProvider.notifier)
             .remove(annotation.id);
-        if (navigator.mounted) navigator.pop();
+        if (context.mounted) Navigator.of(context).pop();
       } catch (error, stacktrace) {
         log.error(
           'failed to delete annotation',
           error: error,
           stacktrace: stacktrace,
         );
+        if (context.mounted) isDeleting.value = false;
         if (messenger.mounted) {
           messenger.showSnackBar(
             SnackBar(content: Text(l.annotationDeleteFailed)),
           );
         }
-      } finally {
-        if (context.mounted) isDeleting.value = false;
       }
     }
 
@@ -327,7 +337,7 @@ class _AnnotationContent extends HookConsumerWidget {
                   foregroundColor: theme.colorScheme.error,
                 ),
                 onPressed: isBusy ? null : remove,
-                icon: isDeleting.value
+                icon: deleting
                     ? const SizedBox.square(
                         dimension: 18,
                         child: CircularProgressIndicator(strokeWidth: 2),

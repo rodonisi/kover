@@ -48,34 +48,37 @@ class HorizontalEpubPageView extends HookWidget {
       return null;
     }, [current, pageController, settings.reduceAnimations]);
 
-    return PageView.builder(
-      controller: pageController,
-      itemCount: controller.subpageCount,
-      allowImplicitScrolling: true,
-      physics: settings.canScroll && !settings.reduceAnimations
-          ? const AlwaysScrollableScrollPhysics(
-              parent: ClampingScrollPhysics(),
-            )
-          : const NeverScrollableScrollPhysics(),
-      onPageChanged: controller.jumpToSubpage,
-      itemBuilder: (context, index) {
-        return OverflowBox(
-          maxHeight: double.infinity,
-          alignment: .topCenter,
-          child: EpubSubpageSelectionContainer(
-            child: PaginatedEpubPageContent(
-              html: controller.getSubpage(index),
-              settings: settings,
-              viewport: viewport,
-              cssEngine: controller.cssEngine,
-              annotations: controller.annotations,
-              onAnchorTap: onAnchorTap,
-              onAnnotationTap: onAnnotationTap,
-              selectionRegistry: selectionRegistry,
+    return EpubSubpagesSelectionContainer(
+      child: PageView.builder(
+        controller: pageController,
+        itemCount: controller.subpageCount,
+        allowImplicitScrolling: true,
+        physics: settings.canScroll && !settings.reduceAnimations
+            ? const AlwaysScrollableScrollPhysics(
+                parent: ClampingScrollPhysics(),
+              )
+            : const NeverScrollableScrollPhysics(),
+        onPageChanged: controller.jumpToSubpage,
+        itemBuilder: (context, index) {
+          return OverflowBox(
+            maxHeight: double.infinity,
+            alignment: .topCenter,
+            child: EpubSubpageSelectionContainer(
+              child: PaginatedEpubPageContent(
+                html: controller.getSubpage(index),
+                settings: settings,
+                viewport: viewport,
+                cssEngine: controller.cssEngine,
+                annotations: controller.annotations,
+                onAnchorTap: onAnchorTap,
+                onAnnotationTap: onAnnotationTap,
+                selectionRegistry: selectionRegistry,
+                subpageIndex: index,
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

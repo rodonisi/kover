@@ -76,6 +76,40 @@ void main() {
       expect(draft?.xPath, '//body/p[2]');
       expect(draft?.endingXPath, '//body/p[3]');
     });
+
+    testWidgets('keeps a selection inside the first subpage in RTL mode', (
+      tester,
+    ) async {
+      final registry = await _pumpSideBySide(tester, textDirection: .rtl);
+
+      await _select(
+        tester,
+        from: _position(tester, 'First paragraph.', 6),
+        to: _position(tester, 'Second paragraph.', 6),
+      );
+
+      final draft = registry.resolveDraft();
+      expect(draft?.selectedText, 'paragraph.\n\nSecond');
+      expect(draft?.xPath, '//body/p[1]');
+      expect(draft?.endingXPath, '//body/p[2]');
+    });
+
+    testWidgets('continues a selection to the left subpage in RTL mode', (
+      tester,
+    ) async {
+      final registry = await _pumpSideBySide(tester, textDirection: .rtl);
+
+      await _select(
+        tester,
+        from: _position(tester, 'Second paragraph.', 7),
+        to: _position(tester, 'Third paragraph.', 5),
+      );
+
+      final draft = registry.resolveDraft();
+      expect(draft?.selectedText, 'paragraph.\n\nThird');
+      expect(draft?.xPath, '//body/p[2]');
+      expect(draft?.endingXPath, '//body/p[3]');
+    });
   });
 
   group('EpubSelectionRegistry', () {
@@ -158,6 +192,61 @@ void main() {
       expect(draft?.endingXPath, '//body/p[1]');
     });
 
+    testWidgets('orders a paragraph split across three subpages by index', (
+      tester,
+    ) async {
+      final registry = EpubSelectionRegistry();
+      final base = EpubPagePreprocessor(
+        html: dom.DocumentFragment.html('<div><p>Part one</p></div>'),
+        operations: [NodeIndexingOperation(), ScrollIdOperation()],
+      ).process().outerHtml;
+      final middle = base
+          .replaceFirst('<p ', '<p kover-starts-mid-block="" ')
+          .replaceFirst('Part one', 'part two');
+      final tail = base
+          .replaceFirst('<p ', '<p kover-starts-mid-block="" ')
+          .replaceFirst('Part one', 'part three');
+
+      Widget subpage(String html, int index) => HtmlWidget(
+        html,
+        factoryBuilder: () => PaginatedEpubWidgetFactory(
+          selectionRegistry: registry,
+          subpageIndex: index,
+        ),
+      );
+
+      // Mount continuation subpage 2 before subpage 1 to prove ordering uses
+      // subpageIndex rather than registration order.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SelectionArea(
+              child: Column(
+                crossAxisAlignment: .start,
+                children: [
+                  subpage(base, 0),
+                  subpage(tail, 2),
+                  subpage(middle, 1),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await _select(
+        tester,
+        from: _position(tester, 'Part one', 0),
+        to: _position(tester, 'part two', 7),
+      );
+
+      final draft = registry.resolveDraft();
+      expect(draft?.selectedText, 'Part one part tw part three');
+      expect(draft?.xPath, '//body/p[1]');
+      expect(draft?.endingXPath, '//body/p[1]');
+    });
+
     testWidgets('forgets blocks that are no longer rendered', (tester) async {
       final registry = await _pump(tester, _html);
       await _select(
@@ -212,11 +301,14 @@ Future<EpubSelectionRegistry> _pump(
 }
 
 /// Renders the first two paragraphs of [_twoSubpagesHtml] as one subpage and
-/// the last two as another one to its right.
-Future<EpubSelectionRegistry> _pumpSideBySide(WidgetTester tester) async {
+/// the last two as another one to its right (or left in RTL).
+Future<EpubSelectionRegistry> _pumpSideBySide(
+  WidgetTester tester, {
+  TextDirection textDirection = .ltr,
+}) async {
   final registry = EpubSelectionRegistry();
 
-  Widget subpage(List<int> paragraphs) {
+  Widget subpage(List<int> paragraphs, int subpageIndex) {
     final root = EpubPagePreprocessor(
       html: dom.DocumentFragment.html(_twoSubpagesHtml),
       operations: [NodeIndexingOperation(), ScrollIdOperation()],
@@ -228,10 +320,15 @@ Future<EpubSelectionRegistry> _pumpSideBySide(WidgetTester tester) async {
 
     return Expanded(
       child: EpubSubpageSelectionContainer(
-        child: HtmlWidget(
-          root.outerHtml,
-          factoryBuilder: () =>
-              PaginatedEpubWidgetFactory(selectionRegistry: registry),
+        child: Directionality(
+          textDirection: .ltr,
+          child: HtmlWidget(
+            root.outerHtml,
+            factoryBuilder: () => PaginatedEpubWidgetFactory(
+              selectionRegistry: registry,
+              subpageIndex: subpageIndex,
+            ),
+          ),
         ),
       ),
     );
@@ -239,14 +336,19 @@ Future<EpubSelectionRegistry> _pumpSideBySide(WidgetTester tester) async {
 
   await tester.pumpWidget(
     MaterialApp(
-      home: Scaffold(
-        body: SelectionArea(
-          child: Row(
-            crossAxisAlignment: .start,
-            children: [
-              subpage([0, 1]),
-              subpage([2, 3]),
-            ],
+      home: Directionality(
+        textDirection: textDirection,
+        child: Scaffold(
+          body: SelectionArea(
+            child: EpubSubpagesSelectionContainer(
+              child: Row(
+                crossAxisAlignment: .start,
+                children: [
+                  subpage([0, 1], 0),
+                  subpage([2, 3], 1),
+                ],
+              ),
+            ),
           ),
         ),
       ),

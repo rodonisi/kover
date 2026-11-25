@@ -22,17 +22,17 @@ final class RemoveUnknownAnnotationsOperation
     _serverIds
       ..clear()
       ..addAll(annotations.map((annotation) => annotation.serverId).nonNulls);
-  }
 
-  @override
-  void enter(dom.Element element) {
-    if (element.localName != HtmlConstants.kavitaHighlightElementTag) return;
+    // Unwrap before the tree walk so downstream operations still visit the
+    // preserved children in place.
+    for (final element in root.querySelectorAll(
+      HtmlConstants.kavitaHighlightElementTag,
+    )) {
+      final serverId = HtmlConstants.annotationServerId(element.attributes);
+      if (serverId != null && _serverIds.contains(serverId)) continue;
 
-    final serverId = HtmlConstants.annotationServerId(element.attributes);
-
-    if (serverId != null && _serverIds.contains(serverId)) return;
-
-    _unwrap(element);
+      _unwrap(element);
+    }
   }
 
   static void _unwrap(dom.Element element) {

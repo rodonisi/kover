@@ -47,6 +47,55 @@ final class EpubSelectionRegistry {
   static final _whitespace = RegExp(r'\s+');
 }
 
+/// Orders side-by-side [EpubSubpageSelectionContainer]s in reading direction.
+///
+/// Flutter's default [SelectionArea] delegate always orders horizontal
+/// selectables left-to-right. Wrapping side-by-side subpage views in this
+/// container reverses the horizontal order in RTL mode so cross-subpage
+/// selections follow reading order.
+class EpubSubpagesSelectionContainer extends HookWidget {
+  const EpubSubpagesSelectionContainer({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final textDirection = Directionality.of(context);
+    final delegate = useMemoized(
+      () => _SubpagesSelectionDelegate(textDirection),
+      [textDirection],
+    );
+    useEffect(() => delegate.dispose, [delegate]);
+
+    return SelectionContainer(delegate: delegate, child: child);
+  }
+}
+
+final class _SubpagesSelectionDelegate
+    extends StaticSelectionContainerDelegate {
+  _SubpagesSelectionDelegate(this.textDirection);
+
+  final TextDirection textDirection;
+
+  @override
+  Comparator<Selectable> get compareOrder =>
+      textDirection == .rtl ? _compareRtlScreenOrder : super.compareOrder;
+
+  static int _compareRtlScreenOrder(Selectable a, Selectable b) {
+    final rectA = MatrixUtils.transformRect(
+      a.getTransformTo(null),
+      Offset.zero & a.size,
+    );
+    final rectB = MatrixUtils.transformRect(
+      b.getTransformTo(null),
+      Offset.zero & b.size,
+    );
+    if (rectA.bottom <= rectB.top) return -1;
+    if (rectB.bottom <= rectA.top) return 1;
+    return rectB.right.compareTo(rectA.right);
+  }
+}
+
 /// Keeps a text selection inside a subpage in reading order.
 ///
 /// Flutter orders selectable text row by row across the whole selection area.
@@ -62,6 +111,7 @@ class EpubSubpageSelectionContainer extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final delegate = useMemoized(_SubpageSelectionDelegate.new);
+    delegate.textDirection = Directionality.of(context);
     useEffect(() => delegate.dispose, [delegate]);
 
     return SelectionContainer(delegate: delegate, child: child);
@@ -74,6 +124,8 @@ class EpubSubpageSelectionContainer extends HookWidget {
 /// position in a neighbouring subpage is level with some rows and below
 /// others, and the subpage would claim the edge for itself.
 final class _SubpageSelectionDelegate extends StaticSelectionContainerDelegate {
+  TextDirection textDirection = .ltr;
+
   @override
   SelectionResult handleSelectionEdgeUpdate(SelectionEdgeUpdateEvent event) {
     final bounds = MatrixUtils.transformRect(
@@ -83,10 +135,17 @@ final class _SubpageSelectionDelegate extends StaticSelectionContainerDelegate {
     final position = event.globalPosition;
 
     // Above the first row is before all text, below the last row after it.
+    final isBefore = textDirection == .rtl
+        ? position.dx >= bounds.right
+        : position.dx < bounds.left;
+    final isAfter = textDirection == .rtl
+        ? position.dx < bounds.left
+        : position.dx >= bounds.right;
+
     final Offset moved;
-    if (position.dx < bounds.left) {
+    if (isBefore) {
       moved = Offset(position.dx, bounds.top - 1);
-    } else if (position.dx >= bounds.right) {
+    } else if (isAfter) {
       moved = Offset(position.dx, bounds.bottom + 1);
     } else {
       return super.handleSelectionEdgeUpdate(event);
@@ -109,11 +168,13 @@ class EpubSelectableBlock extends HookWidget {
     super.key,
     required this.registry,
     required this.element,
+    this.subpageIndex = 0,
     required this.child,
   });
 
   final EpubSelectionRegistry registry;
   final dom.Element element;
+  final int subpageIndex;
   final Widget child;
 
   @override
@@ -124,8 +185,8 @@ class EpubSelectableBlock extends HookWidget {
     final isNested =
         context.findAncestorWidgetOfExactType<EpubSelectableBlock>() != null;
     final block = useMemoized(
-      () => isNested ? null : _Block.tryCreate(element, delegate),
-      [element, delegate, isNested],
+      () => isNested ? null : _Block.tryCreate(element, delegate, subpageIndex),
+      [element, delegate, isNested, subpageIndex],
     );
 
     useEffect(() {
@@ -147,12 +208,14 @@ final class _Block implements Comparable<_Block> {
     required this.delegate,
     required this.xPath,
     required this.nodeIndex,
+    required this.subpageIndex,
   });
 
   /// Returns `null` when [element] was not prepared by the page preprocessor.
   static _Block? tryCreate(
     dom.Element element,
     StaticSelectionContainerDelegate delegate,
+    int subpageIndex,
   ) {
     final xPath = element.attributes[HtmlConstants.scrollIdAttribute];
     final nodeIndex = int.tryParse(
@@ -165,6 +228,7 @@ final class _Block implements Comparable<_Block> {
       delegate: delegate,
       xPath: xPath,
       nodeIndex: nodeIndex,
+      subpageIndex: subpageIndex,
     );
   }
 
@@ -174,6 +238,9 @@ final class _Block implements Comparable<_Block> {
 
   /// The position of [element] in the document.
   final int nodeIndex;
+
+  /// The subpage on which this block is rendered.
+  final int subpageIndex;
 
   /// Whether this block renders the rest of a paragraph that started on the
   /// previous subpage.
@@ -190,6 +257,10 @@ final class _Block implements Comparable<_Block> {
   int compareTo(_Block other) {
     final byElement = nodeIndex.compareTo(other.nodeIndex);
     if (byElement != 0) return byElement;
+
+    final bySubpage = subpageIndex.compareTo(other.subpageIndex);
+    if (bySubpage != 0) return bySubpage;
+
     if (startsMidBlock == other.startsMidBlock) return 0;
 
     return startsMidBlock ? 1 : -1;

@@ -261,6 +261,95 @@ void main() {
       expect(find.text('updated externally'), findsOneWidget);
       expect(find.text('original note'), findsNothing);
     });
+
+    testWidgets(
+      'keeps details mounted during delete and does not pop reader if dismissed',
+      (tester) async {
+        final annotations = StreamController<List<AnnotationModel>>();
+        addTearDown(annotations.close);
+        annotations.add([_annotation]);
+        final pendingRemove = Completer<void>();
+        final repository = MockAnnotationRepository();
+        when(
+          repository.watchAnnotations(chapterId: _chapterId),
+        ).thenAnswer((_) => annotations.stream);
+        when(
+          repository.watchHighlightSlots(),
+        ).thenAnswer((_) => Stream.value(_slots));
+        when(repository.removeAnnotation(10)).thenAnswer((_) {
+          annotations.add(const []);
+          return pendingRemove.future;
+        });
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              annotationRepositoryProvider.overrideWithValue(repository),
+            ],
+            child: MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) => TextButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (routeContext) => Scaffold(
+                          body: Column(
+                            children: [
+                              const Text('reader screen'),
+                              TextButton(
+                                onPressed: () => showModalBottomSheet<void>(
+                                  context: routeContext,
+                                  isScrollControlled: true,
+                                  builder: (_) => EpubAnnotationSheet(
+                                    chapterId: _chapterId,
+                                    annotationId: _annotation.id,
+                                  ),
+                                ),
+                                child: const Text('open'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    child: const Text('enter reader'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.text('enter reader'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('open'));
+        await tester.pumpAndSettle();
+
+        await _tap(tester, find.text('Delete'));
+        await tester.pumpAndSettle();
+        await _tap(
+          tester,
+          find.descendant(
+            of: find.byType(AlertDialog),
+            matching: find.text('Delete'),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.text('Annotation not found.'), findsNothing);
+        expect(find.text('quoted text'), findsOneWidget);
+
+        // Dismiss the sheet before the server call completes.
+        Navigator.of(tester.element(find.text('quoted text'))).pop();
+        await tester.pumpAndSettle();
+
+        pendingRemove.complete();
+        await tester.pumpAndSettle();
+
+        expect(find.text('reader screen'), findsOneWidget);
+      },
+    );
   });
 
   group('EpubAnnotationDraftSheet', () {
@@ -348,6 +437,78 @@ void main() {
       expect(find.text('Could not save annotation.'), findsOneWidget);
       expect(find.text('New annotation'), findsOneWidget);
     });
+
+    testWidgets('does not pop reader if dismissed while save is pending', (
+      tester,
+    ) async {
+      final pendingCreate = Completer<void>();
+      final actions = _DraftActionRecorder(pending: pendingCreate);
+      final repository = MockAnnotationRepository();
+      when(
+        repository.watchHighlightSlots(),
+      ).thenAnswer((_) => Stream.value(_slots));
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            annotationRepositoryProvider.overrideWithValue(repository),
+            annotationActionsProvider.overrideWith(
+              () => _RecordingAnnotationActions(actions),
+            ),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => TextButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (routeContext) => Scaffold(
+                        body: Column(
+                          children: [
+                            const Text('reader screen'),
+                            TextButton(
+                              onPressed: () => showModalBottomSheet<void>(
+                                context: routeContext,
+                                isScrollControlled: true,
+                                builder: (_) => const EpubAnnotationDraftSheet(
+                                  chapterId: _chapterId,
+                                  pageNumber: 4,
+                                  draft: _draft,
+                                ),
+                              ),
+                              child: const Text('open'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  child: const Text('enter reader'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('enter reader'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      await _tap(tester, find.text('Save'));
+      await tester.pump();
+
+      // Dismiss the sheet before create completes.
+      Navigator.of(tester.element(find.text('New annotation'))).pop();
+      await tester.pumpAndSettle();
+
+      pendingCreate.complete();
+      await tester.pumpAndSettle();
+
+      expect(find.text('reader screen'), findsOneWidget);
+    });
   });
 }
 
@@ -359,9 +520,18 @@ typedef _Created = ({
   int selectedSlotIndex,
 });
 
-class _RecordingAnnotationActions extends AnnotationActions {
+class _DraftActionRecorder {
+  _DraftActionRecorder({this.pending});
+
   final created = <_Created>[];
   Object? error;
+  final Completer<void>? pending;
+}
+
+class _RecordingAnnotationActions extends AnnotationActions {
+  _RecordingAnnotationActions(this._recorder);
+
+  final _DraftActionRecorder _recorder;
 
   @override
   Future<void> create({
@@ -371,9 +541,12 @@ class _RecordingAnnotationActions extends AnnotationActions {
     required String? comment,
     required int selectedSlotIndex,
   }) async {
-    if (error case final error?) throw error;
+    if (_recorder.error case final error?) throw error;
+    if (_recorder.pending case final pending?) {
+      await pending.future;
+    }
 
-    created.add((
+    _recorder.created.add((
       chapterId: chapterId,
       pageNumber: pageNumber,
       draft: draft,
@@ -384,11 +557,11 @@ class _RecordingAnnotationActions extends AnnotationActions {
 }
 
 /// Opens the draft sheet as a modal bottom sheet, like the reader does.
-Future<_RecordingAnnotationActions> _pumpDraftSheet(
+Future<_DraftActionRecorder> _pumpDraftSheet(
   WidgetTester tester, {
   List<HighlightSlotModel>? slots,
 }) async {
-  final actions = _RecordingAnnotationActions();
+  final recorder = _DraftActionRecorder();
   final repository = MockAnnotationRepository();
   when(
     repository.watchHighlightSlots(),
@@ -398,7 +571,9 @@ Future<_RecordingAnnotationActions> _pumpDraftSheet(
     ProviderScope(
       overrides: [
         annotationRepositoryProvider.overrideWithValue(repository),
-        annotationActionsProvider.overrideWith(() => actions),
+        annotationActionsProvider.overrideWith(
+          () => _RecordingAnnotationActions(recorder),
+        ),
       ],
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -424,7 +599,7 @@ Future<_RecordingAnnotationActions> _pumpDraftSheet(
   );
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
-  return actions;
+  return recorder;
 }
 
 Future<void> _tap(WidgetTester tester, Finder finder) async {

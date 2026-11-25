@@ -409,7 +409,7 @@ void main() {
         );
       });
 
-      test('rejects text that is not in the selected elements', () {
+      test('accepts a selection across a line break', () {
         final controller = _controller(paragraphs);
 
         expect(
@@ -418,6 +418,22 @@ void main() {
               xPath: '//body/p[2]',
               endingXPath: '//body/p[2]',
               selectedText: 'Second\nline.',
+              context: 'Secondline.',
+            ),
+          ),
+          isTrue,
+        );
+      });
+
+      test('rejects text that is not in the selected elements', () {
+        final controller = _controller(paragraphs);
+
+        expect(
+          controller.canHighlight(
+            const AnnotationDraft(
+              xPath: '//body/p[2]',
+              endingXPath: '//body/p[2]',
+              selectedText: 'Missing text.',
               context: 'Secondline.',
             ),
           ),

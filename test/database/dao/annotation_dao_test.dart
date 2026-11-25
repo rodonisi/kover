@@ -145,4 +145,27 @@ void main() {
 
     expect(await db.annotationDao.getAnnotation(row.id), isNull);
   });
+
+  test('upsert inserts when provided local id no longer exists', () async {
+    final inserted = await db.annotationDao.upsert(
+      entry(serverId: 7).copyWith(id: const Value(999)),
+    );
+
+    expect(inserted.serverId, 7);
+    expect(await db.select(db.annotations).get(), hasLength(1));
+  });
+
+  test(
+    'upsert updates row matched by server id when local id is missing',
+    () async {
+      final first = await db.annotationDao.upsert(entry(serverId: 7));
+      final updated = await db.annotationDao.upsert(
+        entry(serverId: 7, xPath: '/p[3]').copyWith(id: const Value(999)),
+      );
+
+      expect(updated.id, first.id);
+      expect(updated.xPath, '/p[3]');
+      expect(await db.select(db.annotations).get(), hasLength(1));
+    },
+  );
 }

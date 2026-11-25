@@ -121,6 +121,7 @@ class VerticalEpubPageView extends HookWidget {
                   onAnchorTap: onAnchorTap,
                   onAnnotationTap: onAnnotationTap,
                   selectionRegistry: selectionRegistry,
+                  subpageIndex: index,
                 );
               },
             ),

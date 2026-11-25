@@ -23,6 +23,7 @@ class PaginatedEpubWidgetFactory extends WidgetFactory {
     Iterable<PaginatedEpubAnnotation> annotations = const [],
     this.onAnnotationTap,
     this.selectionRegistry,
+    this.subpageIndex = 0,
   }) : _annotations = {
          for (final annotation in annotations) annotation.id: annotation,
        };
@@ -34,6 +35,7 @@ class PaginatedEpubWidgetFactory extends WidgetFactory {
 
   /// Receives every rendered text block, so selections can be annotated.
   final EpubSelectionRegistry? selectionRegistry;
+  final int subpageIndex;
   final Map<int, PaginatedEpubAnnotation> _annotations;
 
   // Runs after background styling so the saved slot color wins.
@@ -155,6 +157,7 @@ class PaginatedEpubWidgetFactory extends WidgetFactory {
     return EpubSelectableBlock(
       registry: registry,
       element: tree.element,
+      subpageIndex: subpageIndex,
       child: child,
     );
   }

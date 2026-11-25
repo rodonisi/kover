@@ -90,7 +90,7 @@ class AnnotationDao extends DatabaseAccessor<AppDatabase>
         existing = await getAnnotationByServerId(entry.serverId.value!);
       }
 
-      final id = entry.id.present ? entry.id.value : existing?.id;
+      final id = existing?.id;
       if (id != null) {
         final rows = await (update(annotations)..where((a) => a.id.equals(id)))
             .writeReturning(entry.copyWith(id: Value(id)));

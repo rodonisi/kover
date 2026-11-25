@@ -77,16 +77,16 @@ class CurrentUser extends _$CurrentUser {
     if (apiKey == null || apiKey.isEmpty) throw NoCredentialsException();
 
     if (state.hasValue) {
-      unawaited(_refreshUser(apiKey: apiKey));
+      unawaited(_refreshUser());
       return state.requireValue;
     }
 
-    return await _fetchUser(apiKey: apiKey);
+    return await _fetchUser();
   }
 
-  Future<void> _refreshUser({required String apiKey}) async {
+  Future<void> _refreshUser() async {
     try {
-      final user = await _fetchUser(apiKey: apiKey);
+      final user = await _fetchUser();
       state = AsyncValue.data(user);
     } catch (error, stackTrace) {
       log.warning(
@@ -107,7 +107,7 @@ class CurrentUser extends _$CurrentUser {
     }
   }
 
-  Future<UserModel> _fetchUser({required String apiKey}) async {
+  Future<UserModel> _fetchUser() async {
     final client = ref.read(restClientProvider);
     try {
       final res = await client.apiAccountGet();

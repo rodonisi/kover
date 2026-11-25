@@ -48,27 +48,29 @@ class SpreadsEpubPageView extends HookWidget {
       return null;
     }, [current, pageController, settings.reduceAnimations]);
 
-    return PageView.builder(
-      controller: pageController,
-      itemCount: (controller.subpageCount + 1) ~/ 2,
-      allowImplicitScrolling: true,
-      physics: settings.canScroll && !settings.reduceAnimations
-          ? const AlwaysScrollableScrollPhysics(
-              parent: ClampingScrollPhysics(),
-            )
-          : const NeverScrollableScrollPhysics(),
-      onPageChanged: (index) => controller.jumpToSubpage(index * 2),
-      itemBuilder: (context, index) {
-        return SizedBox(
-          height: viewport.height,
-          child: Row(
-            children: [
-              Expanded(child: _column(index * 2, viewport)),
-              Expanded(child: _column(index * 2 + 1, viewport)),
-            ],
-          ),
-        );
-      },
+    return EpubSubpagesSelectionContainer(
+      child: PageView.builder(
+        controller: pageController,
+        itemCount: (controller.subpageCount + 1) ~/ 2,
+        allowImplicitScrolling: true,
+        physics: settings.canScroll && !settings.reduceAnimations
+            ? const AlwaysScrollableScrollPhysics(
+                parent: ClampingScrollPhysics(),
+              )
+            : const NeverScrollableScrollPhysics(),
+        onPageChanged: (index) => controller.jumpToSubpage(index * 2),
+        itemBuilder: (context, index) {
+          return SizedBox(
+            height: viewport.height,
+            child: Row(
+              children: [
+                Expanded(child: _column(index * 2, viewport)),
+                Expanded(child: _column(index * 2 + 1, viewport)),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -88,6 +90,7 @@ class SpreadsEpubPageView extends HookWidget {
           onAnchorTap: onAnchorTap,
           onAnnotationTap: onAnnotationTap,
           selectionRegistry: selectionRegistry,
+          subpageIndex: index,
         ),
       ),
     );

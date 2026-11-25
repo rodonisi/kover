@@ -74,6 +74,13 @@ final class EnsureAnnotationsOperation extends EpubPagePreprocessorOperation {
       _noWrapDepth++;
     }
 
+    if (localName == 'br' && _noWrapDepth == 0 && _active.isNotEmpty) {
+      for (final annotation in _active) {
+        _buffers.putIfAbsent(annotation.id, _TextBuffer.new).addLineBreak();
+      }
+      return;
+    }
+
     if (localName == HtmlConstants.kavitaHighlightElementTag) {
       _adopt(element);
       return;
@@ -352,6 +359,8 @@ final class _TextBuffer {
   }
 
   void addSeparator() => text.write('\n\n');
+
+  void addLineBreak() => text.write('\n');
 
   _Match? match(String selectedText) {
     final raw = text.toString();

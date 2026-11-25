@@ -20,6 +20,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
   final void Function(EpubAnchorTarget)? onAnchorTap;
   final void Function(PaginatedEpubAnnotation)? onAnnotationTap;
   final EpubSelectionRegistry? selectionRegistry;
+  final int subpageIndex;
 
   const PaginatedEpubPageContent({
     super.key,
@@ -32,6 +33,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
     this.onAnchorTap,
     this.onAnnotationTap,
     this.selectionRegistry,
+    this.subpageIndex = 0,
     this.annotations = const [],
   });
 
@@ -66,6 +68,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
                 annotations: annotations,
                 onAnnotationTap: onAnnotationTap,
                 selectionRegistry: selectionRegistry,
+                subpageIndex: subpageIndex,
               ),
           customStylesBuilder: (element) =>
               cssEngine.stylesFor(element: element),
