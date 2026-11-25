@@ -20,6 +20,8 @@ on:
         required: true
       GOOGLE_PLAY_KEY_PASSWORD:
         required: true
+      SENTRY_AUTH_TOKEN:
+        required: true
 
 jobs:
   build-and-upload-apk:
@@ -51,12 +53,18 @@ jobs:
 
       - name: Build
         run: |
-          flutter build apk --release --build-name=${{ inputs.version }} --build-number=${{ inputs.build_number }}
+          flutter build apk --release --build-name=${{ inputs.version }} --build-number=${{ inputs.build_number }} --dart-define="SENTRY_DSN=${{ vars.SENTRY_DSN }}"
         env:
           KEYSTORE_PATH: "upload-keystore.jks"
           KEYSTORE_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.GOOGLE_PLAY_KEYSTORE_ALIAS }}
           KEY_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEY_PASSWORD }}
+
+      - name: Upload Debug Symbols to Sentry
+        env:
+          SENTRY_RELEASE: ${{ vars.SENTRY_PROJECT }}@${{ inputs.version }}+${{ inputs.build_number }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: dart run sentry_dart_plugin
 
       - name: Attach to release
         env:
