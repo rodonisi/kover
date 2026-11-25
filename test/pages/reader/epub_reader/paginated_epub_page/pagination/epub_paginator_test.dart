@@ -5,6 +5,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/pagination/epub_paginator.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/scroll_id_operation.dart';
 import 'package:kover/utils/constants/html_constants.dart';
 
 void main() {
@@ -212,13 +213,116 @@ void main() {
       expect(last, contains('<img'));
       expect(last, isNot(contains('Before')));
     });
+
+    group('scrollIdForSubpage', () {
+      test('reports the first paragraph of every subpage', () {
+        final paginator = _paginator('<div><p>First</p><p>Second</p></div>');
+        final paragraphs = paginator.root.querySelectorAll('p');
+
+        paginator.paginate([
+          _line(nodeIndex: _nodeIndex(paragraphs[0]), top: 0, bottom: 10),
+          _line(nodeIndex: _nodeIndex(paragraphs[1]), top: 10, bottom: 20),
+        ], 15);
+
+        expect(paginator.scrollIdForSubpage(0), '//body/p[1]');
+        expect(paginator.scrollIdForSubpage(1), '//body/p[2]');
+      });
+
+      test('reports paragraphs that are not <p> elements', () {
+        final paginator = _paginator(
+          '<section><div>First</div><div>Second</div></section>',
+        );
+        final paragraphs = paginator.root.querySelectorAll('section > div');
+
+        paginator.paginate([
+          _line(nodeIndex: _nodeIndex(paragraphs[0]), top: 0, bottom: 10),
+          _line(nodeIndex: _nodeIndex(paragraphs[1]), top: 10, bottom: 20),
+        ], 15);
+
+        expect(paginator.scrollIdForSubpage(0), '//body/div[1]');
+        expect(paginator.scrollIdForSubpage(1), '//body/div[2]');
+      });
+
+      test('prefers text over an image at the top of the subpage', () {
+        final paginator = _paginator(
+          '<div><img src="image.png"><p>Text</p></div>',
+        );
+
+        paginator.paginate([
+          _line(
+            nodeIndex: _nodeIndexOf(paginator.root, 'img'),
+            top: 0,
+            bottom: 10,
+            isLeaf: true,
+          ),
+          _line(
+            nodeIndex: _nodeIndexOf(paginator.root, 'p'),
+            top: 10,
+            bottom: 20,
+          ),
+        ], 100);
+
+        expect(paginator.scrollIdForSubpage(0), '//body/p[1]');
+      });
+
+      test('reports the image of a subpage without text', () {
+        final paginator = _paginator(
+          '<div><p>Before</p><img src="image.png"></div>',
+        );
+
+        paginator.paginate([
+          _line(
+            nodeIndex: _nodeIndexOf(paginator.root, 'p'),
+            top: 0,
+            bottom: 10,
+          ),
+          _line(
+            nodeIndex: _nodeIndexOf(paginator.root, 'img'),
+            top: 20,
+            bottom: 30,
+            isLeaf: true,
+          ),
+        ], 15);
+
+        expect(paginator.scrollIdForSubpage(1), '//body/img[1]');
+      });
+
+      test('reports the paragraph a subpage continues', () {
+        final paginator = _paginator('<div><p>AAAA BBBB</p></div>');
+        final block = _nodeIndexOf(paginator.root, 'p');
+
+        paginator.paginate([
+          _line(nodeIndex: block, top: 0, bottom: 10, childPath: const [0]),
+          _line(
+            nodeIndex: block,
+            top: 10,
+            bottom: 20,
+            offset: 5,
+            childPath: const [0],
+          ),
+        ], 15);
+
+        expect(paginator.scrollIdForSubpage(1), '//body/p[1]');
+      });
+
+      test('reports nothing for a subpage that does not exist', () {
+        final paginator = _paginator('<div><p>Only page</p></div>');
+
+        paginator.paginate([
+          _line(nodeIndex: _nodeIndexOf(paginator.root, 'p'), bottom: 10),
+        ], 100);
+
+        expect(paginator.scrollIdForSubpage(1), isNull);
+        expect(paginator.scrollIdForSubpage(-1), isNull);
+      });
+    });
   });
 }
 
 EpubPaginator _paginator(String html) {
   final root = EpubPagePreprocessor(
     html: dom.DocumentFragment.html(html),
-    operations: [NodeIndexingOperation()],
+    operations: [NodeIndexingOperation(), ScrollIdOperation()],
   ).process();
   return EpubPaginator(root: root);
 }

@@ -131,6 +131,22 @@ void main() {
         expect(changes, [(1, controller.scrollIdForSubpage(1))]);
       });
 
+      test('reports a position for paragraphs that are not <p> elements', () {
+        final changes = <(int, String?)>[];
+        final controller = _ready(
+          _controller(
+            '<section><div>First</div><div>Second</div></section>',
+            onSubpageChanged: _record(changes),
+          ),
+          paragraphs: 'section > div',
+        );
+        changes.clear();
+
+        controller.nextSubpage();
+
+        expect(changes, [(1, '//body/div[2]')]);
+      });
+
       test('jumping to the current subpage is a no-op', () {
         final changes = <(int, String?)>[];
         final controller = _ready(
@@ -626,12 +642,14 @@ PaginatedEpubPageController _ready(
   int linesPerParagraph = 1,
   double viewportHeight = 10,
   double? contentHeight,
+  String paragraphs = 'p',
 }) {
   _paginate(
     controller,
     linesPerParagraph: linesPerParagraph,
     viewportHeight: viewportHeight,
     contentHeight: contentHeight,
+    paragraphs: paragraphs,
   );
   return controller;
 }
@@ -642,11 +660,12 @@ void _paginate(
   double viewportHeight = 10,
   double? contentHeight,
   Object? layoutKey,
+  String paragraphs = 'p',
 }) {
   final units = <EpubMeasureUnit>[];
   var lineIndex = 0;
 
-  for (final block in controller.root!.querySelectorAll('p')) {
+  for (final block in controller.root!.querySelectorAll(paragraphs)) {
     for (var line = 0; line < linesPerParagraph; line++) {
       units.add(
         _line(

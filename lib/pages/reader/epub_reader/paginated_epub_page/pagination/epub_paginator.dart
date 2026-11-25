@@ -11,7 +11,9 @@ import 'package:kover/utils/logging.dart';
 class EpubPaginator({required final dom.DocumentFragment root}) {
   final List<EpubSubpage> _subpages = [];
   final Map<int, String> _subpageHtml = {};
-  final Map<int, String?> _subpageScrollId = {};
+
+  /// The node index of the block that marks the position of each subpage.
+  final List<int> _positionNodeIndexes = [];
   final Map<int, int> _nodeIndexSubpage = {};
 
   int get subpageCount => _subpages.length;
@@ -23,7 +25,7 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
   ) {
     _subpages.clear();
     _subpageHtml.clear();
-    _subpageScrollId.clear();
+    _positionNodeIndexes.clear();
     _nodeIndexSubpage.clear();
 
     if (units.isEmpty || pageHeight <= 0) {
@@ -60,6 +62,7 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
           startsMidBlock: startsMidBlock,
         ),
       );
+      _positionNodeIndexes.add(_positionNodeIndex(units, cursor, last));
 
       final subpageIndex = _subpages.length - 1;
       for (var i = cursor; i <= last; i++) {
@@ -100,21 +103,25 @@ class EpubPaginator({required final dom.DocumentFragment root}) {
     return _nodeIndexSubpage[nodeIndex];
   }
 
-  /// Returns the scroll id of the first paragraph on [index], if any.
+  /// Returns the scroll id that marks the reading position of [index].
+  ///
+  /// This is the block of the first line of text on the subpage, or its first
+  /// block when it has no text.
   String? scrollIdForSubpage(int index) {
     if (index < 0 || index >= subpageCount) return null;
-    if (_subpageScrollId.containsKey(index)) return _subpageScrollId[index];
 
-    final fragment = dom.DocumentFragment.html(getSubpage(index));
-    String? scrollId;
-    for (final paragraph in fragment.querySelectorAll('p')) {
-      if (!paragraph.hasText) continue;
-      scrollId = paragraph.attributes[HtmlConstants.scrollIdAttribute];
-      break;
+    final block = _blockAt(root, _positionNodeIndexes[index]);
+    return block?.attributes[HtmlConstants.scrollIdAttribute];
+  }
+
+  /// The node index of the first line of text in `units[first..last]`, or of
+  /// the first unit when none of them is text.
+  int _positionNodeIndex(List<EpubMeasureUnit> units, int first, int last) {
+    for (var index = first; index <= last; index++) {
+      if (units[index] is EpubLineUnit) return units[index].nodeIndex;
     }
 
-    _subpageScrollId[index] = scrollId;
-    return scrollId;
+    return units[first].nodeIndex;
   }
 
   /// Clears serialized subpage HTML while keeping the pagination geometry.
