@@ -351,6 +351,11 @@ class _Page extends HookConsumerWidget {
                 chapterId: chapterId,
                 annotationId: annotationId,
               ),
+          draftSheetBuilder: (context, draft) => EpubAnnotationDraftSheet(
+            chapterId: chapterId,
+            pageNumber: page,
+            draft: draft,
+          ),
         ),
       ),
     );

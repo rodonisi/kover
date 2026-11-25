@@ -1,10 +1,13 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:kover/generated/l10n/app_localizations.dart';
+import 'package:kover/models/annotation_draft.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/selection/epub_selection_registry.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/views/horizontal_epub_page_view.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/views/spreads_epub_page_view.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/views/vertical_epub_page_view.dart';
@@ -20,6 +23,12 @@ typedef EpubAnnotationSheetBuilder = Widget Function(
   int annotationId,
 );
 
+/// Builds the annotation sheet opened for a new text selection.
+typedef EpubAnnotationDraftSheetBuilder = Widget Function(
+  BuildContext context,
+  AnnotationDraft draft,
+);
+
 /// Paginate and layout a single EPUB page.
 class PaginatedEpubPage extends HookWidget {
   final PaginatedEpubPageController controller;
@@ -31,6 +40,9 @@ class PaginatedEpubPage extends HookWidget {
   final void Function(EpubAnchorTarget)? onAnchorTap;
   final EpubAnnotationSheetBuilder? annotationSheetBuilder;
 
+  /// When set, the selection menu offers to annotate the selected text.
+  final EpubAnnotationDraftSheetBuilder? draftSheetBuilder;
+
   const new({
     super.key,
     required this.controller,
@@ -41,6 +53,7 @@ class PaginatedEpubPage extends HookWidget {
     this.onSelectionChanged,
     this.onAnchorTap,
     this.annotationSheetBuilder,
+    this.draftSheetBuilder,
   });
 
   Map<String, Map<String, String>> computeThemeStyles(ThemeData theme) {
@@ -95,6 +108,7 @@ class PaginatedEpubPage extends HookWidget {
     );
 
     final viewport = useState<Size?>(null);
+    final selectionRegistry = useMemoized(EpubSelectionRegistry.new);
 
     useEffect(() {
       controller.attachRoot(
@@ -133,10 +147,7 @@ class PaginatedEpubPage extends HookWidget {
     final root = controller.root;
     final measuring = controller.status == .measuring;
 
-    void handleAnnotationTap(PaginatedEpubAnnotation annotation) {
-      final builder = annotationSheetBuilder;
-      if (builder == null) return;
-
+    void showSheet(WidgetBuilder builder) {
       final animation = settings.reduceAnimations
           ? const AnimationStyle(duration: .zero, reverseDuration: .zero)
           : null;
@@ -150,7 +161,54 @@ class PaginatedEpubPage extends HookWidget {
           maxWidth: LayoutBreakpoints.medium,
         ),
         sheetAnimationStyle: animation,
-        builder: (sheetContext) => builder(sheetContext, annotation.id),
+        builder: builder,
+      );
+    }
+
+    void handleAnnotationTap(PaginatedEpubAnnotation annotation) {
+      final builder = annotationSheetBuilder;
+      if (builder == null) return;
+
+      showSheet((sheetContext) => builder(sheetContext, annotation.id));
+    }
+
+    void handleAnnotate(SelectableRegionState selection) {
+      final builder = draftSheetBuilder;
+      final draft = selectionRegistry.resolveDraft();
+      if (builder == null || draft == null) return;
+
+      if (!controller.canHighlight(draft)) {
+        selection.hideToolbar(false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).annotationSelectionUnsupported,
+            ),
+          ),
+        );
+        return;
+      }
+
+      selection.hideToolbar();
+      selection.clearSelection();
+      showSheet((sheetContext) => builder(sheetContext, draft));
+    }
+
+    Widget buildSelectionMenu(
+      BuildContext context,
+      SelectableRegionState selection,
+    ) {
+      return AdaptiveTextSelectionToolbar.buttonItems(
+        anchors: selection.contextMenuAnchors,
+        buttonItems: [
+          ...selection.contextMenuButtonItems,
+          if (draftSheetBuilder != null &&
+              selectionRegistry.resolveDraft() != null)
+            ContextMenuButtonItem(
+              label: AppLocalizations.of(context).annotate,
+              onPressed: () => handleAnnotate(selection),
+            ),
+        ],
       );
     }
 
@@ -198,6 +256,7 @@ class PaginatedEpubPage extends HookWidget {
         }
 
         return SelectionArea(
+          contextMenuBuilder: buildSelectionMenu,
           onSelectionChanged: (selection) {
             onSelectionChanged?.call(
               selection != null && selection.plainText.isNotEmpty,
@@ -209,18 +268,21 @@ class PaginatedEpubPage extends HookWidget {
               settings: settings,
               onAnchorTap: onAnchorTap,
               onAnnotationTap: annotationTapHandler,
+              selectionRegistry: selectionRegistry,
             ),
             .vertical => VerticalEpubPageView(
               controller: controller,
               settings: settings,
               onAnchorTap: onAnchorTap,
               onAnnotationTap: annotationTapHandler,
+              selectionRegistry: selectionRegistry,
             ),
             .spreads => SpreadsEpubPageView(
               controller: controller,
               settings: settings,
               onAnchorTap: onAnchorTap,
               onAnnotationTap: annotationTapHandler,
+              selectionRegistry: selectionRegistry,
             ),
           },
         );

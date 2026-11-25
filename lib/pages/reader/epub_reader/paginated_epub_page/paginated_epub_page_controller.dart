@@ -1,5 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:kover/models/annotation_draft.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/css_engine.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
@@ -151,12 +152,41 @@ class PaginatedEpubPageController({
     _rebuildRoot();
   }
 
-  void _rebuildRoot() {
+  /// Whether the text selected in [draft] can be found again in the page.
+  ///
+  /// The page is processed the same way as for rendering, with [draft] added
+  /// as an annotation. A selection that gets no highlight would be saved as an
+  /// annotation that is never shown.
+  bool canHighlight(AnnotationDraft draft) {
+    final root = _preprocess([
+      ..._annotations,
+      PaginatedEpubAnnotation(
+        id: _draftAnnotationId,
+        xpath: draft.xPath,
+        endXpath: draft.endingXPath,
+        selectedText: draft.selectedText,
+        color: Colors.transparent,
+      ),
+    ]);
+
+    return root?.findByAttribute(
+          HtmlConstants.koverAnnotationIdAttribute,
+          '$_draftAnnotationId',
+        ) !=
+        null;
+  }
+
+  // Stored annotations have positive ids.
+  static const _draftAnnotationId = -1;
+
+  dom.DocumentFragment? _preprocess(
+    List<PaginatedEpubAnnotation> annotations,
+  ) {
     final source = _sourceHtml;
     final settings = _settings;
-    if (source == null || settings == null) return;
+    if (source == null || settings == null) return null;
 
-    final root = EpubPagePreprocessor(
+    return EpubPagePreprocessor(
       html: source,
       operations: [
         NodeIndexingOperation(),
@@ -164,10 +194,16 @@ class PaginatedEpubPageController({
         ResumeHighlightOperation(
           scrollId: settings.highlightResumePoint ? _initialXpath : null,
         ),
-        RemoveUnknownAnnotationsOperation(annotations: _annotations),
-        EnsureAnnotationsOperation(annotations: _annotations),
+        RemoveUnknownAnnotationsOperation(annotations: annotations),
+        EnsureAnnotationsOperation(annotations: annotations),
       ],
     ).process();
+  }
+
+  void _rebuildRoot() {
+    final settings = _settings;
+    final root = _preprocess(_annotations);
+    if (root == null || settings == null) return;
 
     _paginator = EpubPaginator(root: root);
     _cssEngine = CssEngine(

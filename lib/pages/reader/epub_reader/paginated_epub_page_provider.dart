@@ -79,7 +79,8 @@ Future<PaginatedEpubPageModel> paginatedEpubPage(
     resumeScrollId: scrollId,
     annotations: [
       for (final annotation in annotations)
-        ?toPaginatedEpubAnnotation(annotation, slots),
+        if (annotation.pageNumber == page)
+          ?toPaginatedEpubAnnotation(annotation, slots),
     ],
     settings: PaginatedEpubPageSettings(
       horizontalMarginSize: settings.horizontalMarginSize,

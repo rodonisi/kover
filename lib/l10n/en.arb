@@ -876,6 +876,18 @@
     "@annotationDeleteFailed": {
         "description": "Error shown when an annotation cannot be deleted"
     },
+    "annotate": "Annotate",
+    "@annotate": {
+        "description": "Label for the text selection menu entry that creates an annotation from the selected text"
+    },
+    "newAnnotation": "New annotation",
+    "@newAnnotation": {
+        "description": "Title for the bottom sheet that creates an annotation"
+    },
+    "annotationSelectionUnsupported": "This selection cannot be annotated.",
+    "@annotationSelectionUnsupported": {
+        "description": "Error shown when the selected text cannot be turned into an annotation"
+    },
     "invalidCredentials": "Invalid Credentials",
     "@invalidCredentials": {
         "description": "User display error displayed when credentials are invalid"

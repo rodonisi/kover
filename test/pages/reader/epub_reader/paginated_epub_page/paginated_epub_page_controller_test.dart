@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart' show Size;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:kover/models/annotation_draft.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_unit.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_position.dart';
@@ -369,6 +370,59 @@ void main() {
         controller.updateSettings(_pageSettings());
 
         expect(_resumeColor(controller), isNull);
+      });
+    });
+
+    group('canHighlight', () {
+      const paragraphs =
+          '<div><p>First paragraph.</p><p>Second<br>line.</p></div>';
+
+      test('accepts a selection across paragraphs', () {
+        final controller = _controller(paragraphs);
+
+        expect(
+          controller.canHighlight(
+            const AnnotationDraft(
+              xPath: '//body/p[1]',
+              endingXPath: '//body/p[2]',
+              selectedText: 'paragraph.\n\nSecond',
+              context: 'Secondline.',
+            ),
+          ),
+          isTrue,
+        );
+      });
+
+      test('rejects text that is not in the selected elements', () {
+        final controller = _controller(paragraphs);
+
+        expect(
+          controller.canHighlight(
+            const AnnotationDraft(
+              xPath: '//body/p[2]',
+              endingXPath: '//body/p[2]',
+              selectedText: 'Second\nline.',
+              context: 'Secondline.',
+            ),
+          ),
+          isFalse,
+        );
+      });
+
+      test('does not change the rendered page', () {
+        final controller = _controller(paragraphs);
+        final before = controller.root!.outerHtml;
+
+        controller.canHighlight(
+          const AnnotationDraft(
+            xPath: '//body/p[1]',
+            endingXPath: '//body/p[1]',
+            selectedText: 'First',
+            context: 'First paragraph.',
+          ),
+        );
+
+        expect(controller.root!.outerHtml, before);
       });
     });
 

@@ -4,6 +4,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epu
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_content.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/selection/epub_selection_registry.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -12,6 +13,7 @@ class HorizontalEpubPageView extends HookWidget {
   final PaginatedEpubPageSettings settings;
   final void Function(EpubAnchorTarget)? onAnchorTap;
   final void Function(PaginatedEpubAnnotation)? onAnnotationTap;
+  final EpubSelectionRegistry? selectionRegistry;
 
   const HorizontalEpubPageView({
     super.key,
@@ -19,6 +21,7 @@ class HorizontalEpubPageView extends HookWidget {
     required this.settings,
     this.onAnchorTap,
     this.onAnnotationTap,
+    this.selectionRegistry,
   });
 
   @override
@@ -59,14 +62,17 @@ class HorizontalEpubPageView extends HookWidget {
         return OverflowBox(
           maxHeight: double.infinity,
           alignment: .topCenter,
-          child: PaginatedEpubPageContent(
-            html: controller.getSubpage(index),
-            settings: settings,
-            viewport: viewport,
-            cssEngine: controller.cssEngine,
-            annotations: controller.annotations,
-            onAnchorTap: onAnchorTap,
-            onAnnotationTap: onAnnotationTap,
+          child: EpubSubpageSelectionContainer(
+            child: PaginatedEpubPageContent(
+              html: controller.getSubpage(index),
+              settings: settings,
+              viewport: viewport,
+              cssEngine: controller.cssEngine,
+              annotations: controller.annotations,
+              onAnchorTap: onAnchorTap,
+              onAnnotationTap: onAnnotationTap,
+              selectionRegistry: selectionRegistry,
+            ),
           ),
         );
       },

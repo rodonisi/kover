@@ -4,6 +4,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epu
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_content.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/selection/epub_selection_registry.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
@@ -13,6 +14,7 @@ class VerticalEpubPageView extends HookWidget {
   final PaginatedEpubPageSettings settings;
   final void Function(EpubAnchorTarget)? onAnchorTap;
   final void Function(PaginatedEpubAnnotation)? onAnnotationTap;
+  final EpubSelectionRegistry? selectionRegistry;
 
   const VerticalEpubPageView({
     super.key,
@@ -20,6 +22,7 @@ class VerticalEpubPageView extends HookWidget {
     required this.settings,
     this.onAnchorTap,
     this.onAnnotationTap,
+    this.selectionRegistry,
   });
 
   @override
@@ -117,6 +120,7 @@ class VerticalEpubPageView extends HookWidget {
                   annotations: controller.annotations,
                   onAnchorTap: onAnchorTap,
                   onAnnotationTap: onAnnotationTap,
+                  selectionRegistry: selectionRegistry,
                 );
               },
             ),

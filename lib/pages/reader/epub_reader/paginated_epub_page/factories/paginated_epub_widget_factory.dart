@@ -8,6 +8,7 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/selection/epub_selection_registry.dart';
 import 'package:kover/utils/constants/html_constants.dart';
 import 'package:kover/utils/extensions/color.dart';
 import 'package:kover/widgets/util/link_hit_region.dart';
@@ -21,6 +22,7 @@ class PaginatedEpubWidgetFactory extends WidgetFactory {
     this.onAnchorTap,
     Iterable<PaginatedEpubAnnotation> annotations = const [],
     this.onAnnotationTap,
+    this.selectionRegistry,
   }) : _annotations = {
          for (final annotation in annotations) annotation.id: annotation,
        };
@@ -29,6 +31,9 @@ class PaginatedEpubWidgetFactory extends WidgetFactory {
   final bool removeParagraphIndent;
   final void Function(EpubAnchorTarget)? onAnchorTap;
   final void Function(PaginatedEpubAnnotation)? onAnnotationTap;
+
+  /// Receives every rendered text block, so selections can be annotated.
+  final EpubSelectionRegistry? selectionRegistry;
   final Map<int, PaginatedEpubAnnotation> _annotations;
 
   // Runs after background styling so the saved slot color wins.
@@ -134,6 +139,23 @@ class PaginatedEpubWidgetFactory extends WidgetFactory {
       borderRadius: borderRadius,
       color: annotation?.color ?? color,
       image: image,
+    );
+  }
+
+  @override
+  Widget? buildText(
+    BuildTree tree,
+    InheritedProperties resolved,
+    InlineSpan text,
+  ) {
+    final child = super.buildText(tree, resolved, text);
+    final registry = selectionRegistry;
+    if (child == null || registry == null) return child;
+
+    return EpubSelectableBlock(
+      registry: registry,
+      element: tree.element,
+      child: child,
     );
   }
 

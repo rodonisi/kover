@@ -5,6 +5,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/pag
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_anchor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/selection/epub_selection_registry.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Shared content wrapper used by both rendering and measurement.
@@ -18,6 +19,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
   final WidgetFactory Function()? factoryBuilder;
   final void Function(EpubAnchorTarget)? onAnchorTap;
   final void Function(PaginatedEpubAnnotation)? onAnnotationTap;
+  final EpubSelectionRegistry? selectionRegistry;
 
   const PaginatedEpubPageContent({
     super.key,
@@ -29,6 +31,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
     this.factoryBuilder,
     this.onAnchorTap,
     this.onAnnotationTap,
+    this.selectionRegistry,
     this.annotations = const [],
   });
 
@@ -62,6 +65,7 @@ class PaginatedEpubPageContent extends StatelessWidget {
                 onAnchorTap: onAnchorTap,
                 annotations: annotations,
                 onAnnotationTap: onAnnotationTap,
+                selectionRegistry: selectionRegistry,
               ),
           customStylesBuilder: (element) =>
               cssEngine.stylesFor(element: element),

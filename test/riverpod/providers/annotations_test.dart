@@ -1,0 +1,164 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:kover/models/annotation_draft.dart';
+import 'package:kover/models/chapter_model.dart';
+import 'package:kover/models/series_model.dart';
+import 'package:kover/models/user_model.dart';
+import 'package:kover/riverpod/providers/annotations.dart';
+import 'package:kover/riverpod/providers/auth.dart';
+import 'package:kover/riverpod/repository/annotation_repository.dart';
+import 'package:kover/riverpod/repository/chapters_repository.dart';
+import 'package:kover/riverpod/repository/series_repository.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+@GenerateNiceMocks([
+  MockSpec<AnnotationRepository>(),
+  MockSpec<ChaptersRepository>(),
+  MockSpec<SeriesRepository>(),
+])
+import 'annotations_test.mocks.dart';
+
+const _chapter = ChapterModel(
+  id: 3,
+  seriesId: 1,
+  volumeId: 2,
+  title: 'Chapter',
+  pages: 10,
+);
+const _series = SeriesModel(
+  id: 1,
+  libraryId: 4,
+  name: 'Series',
+  format: .epub,
+  pages: 10,
+  avgHoursToRead: 0,
+  wordCount: null,
+  primaryColor: null,
+  secondaryColor: null,
+  lastSynced: null,
+);
+const _draft = AnnotationDraft(
+  xPath: '//body/p[1]',
+  endingXPath: '//body/p[2]',
+  selectedText: 'one\n\ntwo',
+  context: 'two and more',
+);
+
+class _FakeCurrentUser extends CurrentUser {
+  @override
+  Future<UserModel> build() async => const UserModel(id: 5, username: 'user');
+}
+
+void main() {
+  provideDummy<ChapterModel>(_chapter);
+  provideDummy<SeriesModel>(_series);
+
+  group('AnnotationActions', () {
+    late MockAnnotationRepository annotations;
+    late ProviderContainer container;
+
+    setUp(() {
+      annotations = MockAnnotationRepository();
+      final chapters = MockChaptersRepository();
+      final series = MockSeriesRepository();
+      when(chapters.getChapter(chapterId: 3)).thenAnswer((_) async => _chapter);
+      when(series.getSeries(seriesId: 1)).thenAnswer((_) async => _series);
+
+      container = ProviderContainer.test(
+        overrides: [
+          annotationRepositoryProvider.overrideWithValue(annotations),
+          chaptersRepositoryProvider.overrideWithValue(chapters),
+          seriesRepositoryProvider.overrideWithValue(series),
+          currentUserProvider.overrideWith(_FakeCurrentUser.new),
+        ],
+      );
+    });
+
+    test('create fills the annotation like the Kavita web app', () async {
+      await container
+          .read(annotationActionsProvider.notifier)
+          .create(
+            chapterId: 3,
+            pageNumber: 7,
+            draft: _draft,
+            comment: 'a note',
+            selectedSlotIndex: 2,
+          );
+
+      verify(
+        annotations.addAnnotation(
+          seriesId: 1,
+          volumeId: 2,
+          chapterId: 3,
+          libraryId: 4,
+          ownerUserId: 5,
+          xPath: '//body/p[1]',
+          endingXPath: '//body/p[2]',
+          selectedText: 'one\n\ntwo',
+          comment: r'{"ops":[{"insert":"a note\n"}]}',
+          commentHtml: '<p>a note</p>',
+          commentPlainText: 'a note',
+          context: 'two and more',
+          highlightCount: 8,
+          pageNumber: 7,
+          selectedSlotIndex: 2,
+        ),
+      ).called(1);
+    });
+
+    test('create leaves the comment empty without a note', () async {
+      await container
+          .read(annotationActionsProvider.notifier)
+          .create(
+            chapterId: 3,
+            pageNumber: 7,
+            draft: _draft,
+            comment: null,
+            selectedSlotIndex: 0,
+          );
+
+      verify(
+        annotations.addAnnotation(
+          seriesId: 1,
+          volumeId: 2,
+          chapterId: 3,
+          libraryId: 4,
+          ownerUserId: 5,
+          xPath: '//body/p[1]',
+          endingXPath: '//body/p[2]',
+          selectedText: 'one\n\ntwo',
+          comment: null,
+          commentHtml: null,
+          commentPlainText: null,
+          context: 'two and more',
+          highlightCount: 8,
+          pageNumber: 7,
+          selectedSlotIndex: 0,
+        ),
+      ).called(1);
+    });
+
+    test('save encodes the comment for Kavita', () async {
+      await container
+          .read(annotationActionsProvider.notifier)
+          .save(
+            id: 10,
+            comment: 'first\nsecond',
+            containsSpoiler: true,
+            selectedSlotIndex: 1,
+          );
+
+      verify(
+        annotations.updateAnnotation(
+          id: 10,
+          comment: r'{"ops":[{"insert":"first\nsecond\n"}]}',
+          commentHtml: '<p>first</p><p>second</p>',
+          commentPlainText: 'first\nsecond',
+          containsSpoiler: true,
+          selectedSlotIndex: 1,
+        ),
+      ).called(1);
+    });
+  });
+}
