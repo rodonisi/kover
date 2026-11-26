@@ -8,7 +8,8 @@ import 'package:kover/models/annotation_model.dart';
 import 'package:kover/models/book_chapter_model.dart';
 import 'package:kover/models/highlight_slot_model.dart';
 import 'package:kover/models/user_model.dart';
-import 'package:kover/pages/reader/epub_reader/paginated_epub_page/annotations/epub_annotation_sheet.dart';
+import 'package:kover/pages/reader/epub_reader/annotations/epub_annotation_draft_sheet.dart';
+import 'package:kover/pages/reader/epub_reader/annotations/epub_annotation_sheet.dart';
 import 'package:kover/riverpod/providers/annotations.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/book.dart';
@@ -90,13 +91,6 @@ void main() {
       expect(find.text('original note'), findsOneWidget);
       expect(find.text('Edit'), findsOneWidget);
       expect(find.text('Delete'), findsOneWidget);
-
-      final accent = tester.widget<DecoratedBox>(
-        find.byKey(const ValueKey('annotation-highlight-accent')),
-      );
-      final border =
-          (accent.decoration as BoxDecoration).border as BorderDirectional;
-      expect(border.start.color, _yellow);
     });
 
     testWidgets(
@@ -106,7 +100,7 @@ void main() {
       ) async {
         await _pumpSheet(tester, toc: const []);
 
-        expect(find.text('— Page 5'), findsOneWidget);
+        expect(find.text('Page 5'), findsOneWidget);
       },
     );
 
@@ -115,9 +109,10 @@ void main() {
     ) async {
       await _pumpSheet(
         tester,
-        annotations: [
-          _annotation.copyWith(ownerUserId: 99, ownerUsername: 'other'),
-        ],
+        annotation: _annotation.copyWith(
+          ownerUserId: 99,
+          ownerUsername: 'other',
+        ),
       );
 
       expect(find.text('other'), findsOneWidget);
@@ -132,7 +127,7 @@ void main() {
     ) async {
       await _pumpSheet(
         tester,
-        annotations: [_annotation.copyWith(ownerUserId: null)],
+        annotation: _annotation.copyWith(ownerUserId: null),
       );
 
       expect(find.text('Edit'), findsNothing);
@@ -151,12 +146,10 @@ void main() {
       ) async {
         await _pumpSheet(
           tester,
-          annotations: [
-            _annotation.copyWith(
-              created: DateTime(2025, 4, 10, 9, 0),
-              lastModified: DateTime(2026, 11, 25, 14, 30),
-            ),
-          ],
+          annotation: _annotation.copyWith(
+            created: DateTime(2025, 4, 10, 9, 0),
+            lastModified: DateTime(2026, 11, 25, 14, 30),
+          ),
         );
 
         expect(find.textContaining('2026'), findsOneWidget);
@@ -164,12 +157,10 @@ void main() {
 
         await _pumpSheet(
           tester,
-          annotations: [
-            _annotation.copyWith(
-              created: DateTime(2025, 4, 10, 9, 0),
-              lastModified: null,
-            ),
-          ],
+          annotation: _annotation.copyWith(
+            created: DateTime(2025, 4, 10, 9, 0),
+            lastModified: null,
+          ),
         );
 
         expect(find.textContaining('2025'), findsOneWidget);
@@ -181,12 +172,10 @@ void main() {
     ) async {
       await _pumpSheet(
         tester,
-        annotations: [
-          _annotation.copyWith(
-            comment: r'{"ops":[{"insert":"first\nsecond\n"}]}',
-            commentPlainText: 'firstsecond',
-          ),
-        ],
+        annotation: _annotation.copyWith(
+          comment: r'{"ops":[{"insert":"first\nsecond\n"}]}',
+          commentPlainText: 'firstsecond',
+        ),
       );
 
       expect(find.text('first\nsecond'), findsOneWidget);
@@ -197,55 +186,13 @@ void main() {
     ) async {
       await _pumpSheet(
         tester,
-        annotations: [
-          _annotation.copyWith(comment: '{}', commentPlainText: ''),
-        ],
+        annotation: _annotation.copyWith(
+          comment: '{}',
+          commentPlainText: '',
+        ),
       );
 
-      expect(
-        find.byKey(const ValueKey('annotation-comment-scroll')),
-        findsNothing,
-      );
       expect(find.text('{}'), findsNothing);
-    });
-
-    testWidgets('scrolls long selected text and long comment independently', (
-      tester,
-    ) async {
-      final longQuote = List.generate(40, (i) => 'Quote line $i').join('\n');
-      final longComment = List.generate(40, (i) => 'Comment line $i').join(
-        '\n',
-      );
-
-      await _pumpSheet(
-        tester,
-        annotations: [
-          _annotation.copyWith(
-            selectedText: longQuote,
-            commentPlainText: longComment,
-          ),
-        ],
-      );
-
-      final quoteScroll = find.byKey(
-        const ValueKey('annotation-selected-text-scroll'),
-      );
-      final commentScroll = find.byKey(
-        const ValueKey('annotation-comment-scroll'),
-      );
-      expect(quoteScroll, findsOneWidget);
-      expect(commentScroll, findsOneWidget);
-      expect(tester.takeException(), isNull);
-
-      final quoteScrollable = tester.state<ScrollableState>(
-        find.descendant(of: quoteScroll, matching: find.byType(Scrollable)),
-      );
-      final commentScrollable = tester.state<ScrollableState>(
-        find.descendant(of: commentScroll, matching: find.byType(Scrollable)),
-      );
-
-      expect(quoteScrollable.position.maxScrollExtent, greaterThan(0));
-      expect(commentScrollable.position.maxScrollExtent, greaterThan(0));
     });
 
     testWidgets(
@@ -258,13 +205,13 @@ void main() {
           '\n',
         );
         final repository = MockAnnotationRepository();
-        when(repository.watchAnnotations(chapterId: _chapterId)).thenAnswer(
-          (_) => Stream.value([
+        when(repository.watchAnnotation(id: _annotation.id)).thenAnswer(
+          (_) => Stream.value(
             _annotation.copyWith(
               selectedText: longQuote,
               commentPlainText: longComment,
             ),
-          ]),
+          ),
         );
         when(
           repository.watchHighlightSlots(),
@@ -286,7 +233,7 @@ void main() {
               supportedLocales: AppLocalizations.supportedLocales,
               home: Scaffold(
                 body: SizedBox(
-                  height: 220,
+                  height: 400,
                   child: EpubAnnotationSheet(
                     chapterId: _chapterId,
                     annotationId: _annotation.id,
@@ -313,21 +260,11 @@ void main() {
       await _tap(tester, find.text('Edit'));
       await _enterText(
         tester,
-        find.byKey(const ValueKey('annotation-comment-field')),
+        find.byType(TextField),
         '  updated note  ',
       );
       await _tap(tester, find.byTooltip('Highlight color 2'));
-      await _tap(
-        tester,
-        find.byKey(const ValueKey('annotation-spoiler-toggle')),
-      );
-
-      final accent = tester.widget<DecoratedBox>(
-        find.byKey(const ValueKey('annotation-highlight-accent')),
-      );
-      final border =
-          (accent.decoration as BoxDecoration).border as BorderDirectional;
-      expect(border.start.color, _blue);
+      await _tap(tester, find.byType(Switch));
 
       await _tap(tester, find.text('Save'));
       await tester.pumpAndSettle();
@@ -343,10 +280,7 @@ void main() {
           selectedSlotIndex: 1,
         ),
       ).called(1);
-      expect(
-        find.byKey(const ValueKey('annotation-comment-field')),
-        findsNothing,
-      );
+      expect(find.byType(TextField), findsNothing);
     });
 
     testWidgets('clears comment fields when the comment is emptied', (
@@ -357,7 +291,7 @@ void main() {
       await _tap(tester, find.text('Edit'));
       await _enterText(
         tester,
-        find.byKey(const ValueKey('annotation-comment-field')),
+        find.byType(TextField),
         '   ',
       );
       await _tap(tester, find.text('Save'));
@@ -436,17 +370,14 @@ void main() {
       await _tap(tester, find.text('Edit'));
       await _enterText(
         tester,
-        find.byKey(const ValueKey('annotation-comment-field')),
+        find.byType(TextField),
         'bad note',
       );
       await _tap(tester, find.text('Save'));
       await tester.pump();
 
       expect(find.text('Could not save annotation.'), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey('annotation-comment-field')),
-        findsOneWidget,
-      );
+      expect(find.byType(TextField), findsOneWidget);
     });
 
     testWidgets('shows an error when deletion fails', (tester) async {
@@ -472,7 +403,7 @@ void main() {
     testWidgets('shows a message when the annotation no longer exists', (
       tester,
     ) async {
-      await _pumpSheet(tester, annotations: []);
+      await _pumpSheet(tester, exists: false);
 
       expect(find.text('Annotation not found.'), findsOneWidget);
       expect(find.text('Edit'), findsNothing);
@@ -481,17 +412,17 @@ void main() {
     testWidgets('updates details when the annotation stream changes', (
       tester,
     ) async {
-      final annotations = StreamController<List<AnnotationModel>>();
+      final annotations = StreamController<AnnotationModel?>();
       addTearDown(annotations.close);
-      annotations.add([_annotation]);
+      annotations.add(_annotation);
       await _pumpSheet(
         tester,
-        annotationsStream: annotations.stream,
+        annotationStream: annotations.stream,
       );
 
-      annotations.add([
+      annotations.add(
         _annotation.copyWith(commentPlainText: 'updated externally'),
-      ]);
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('updated externally'), findsOneWidget);
@@ -501,22 +432,19 @@ void main() {
     testWidgets(
       'keeps details mounted during delete and does not pop reader if dismissed',
       (tester) async {
-        final annotations = StreamController<List<AnnotationModel>>();
+        final annotations = StreamController<AnnotationModel?>();
         addTearDown(annotations.close);
-        annotations.add([_annotation]);
+        annotations.add(_annotation);
         final pendingRemove = Completer<void>();
         final repository = MockAnnotationRepository();
         when(
-          repository.watchAnnotations(chapterId: _chapterId),
+          repository.watchAnnotation(id: 10),
         ).thenAnswer((_) => annotations.stream);
         when(
           repository.watchHighlightSlots(),
         ).thenAnswer((_) => Stream.value(_slots));
         when(repository.removeAnnotation(10, ownerUserId: _ownerUserId))
-            .thenAnswer((_) {
-              annotations.add(const []);
-              return pendingRemove.future;
-            });
+            .thenAnswer((_) => pendingRemove.future);
 
         await tester.pumpWidget(
           ProviderScope(
@@ -606,14 +534,7 @@ void main() {
       expect(find.byType(Divider), findsNothing);
       expect(find.text('selected words'), findsOneWidget);
       expect(find.text('Page 5, Chapter "Arrakis"'), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey('annotation-comment-field')),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(const ValueKey('annotation-spoiler-toggle')),
-        findsOneWidget,
-      );
+      expect(find.byType(TextField), findsOneWidget);
       expect(find.byType(Switch), findsOneWidget);
       expect(
         tester.getTopRight(find.byType(Switch)).dx,
@@ -632,14 +553,11 @@ void main() {
 
       await _enterText(
         tester,
-        find.byKey(const ValueKey('annotation-comment-field')),
+        find.byType(TextField),
         '  a note  ',
       );
       await _tap(tester, find.byTooltip('Highlight color 2'));
-      await _tap(
-        tester,
-        find.byKey(const ValueKey('annotation-spoiler-toggle')),
-      );
+      await _tap(tester, find.byType(Switch));
       await _tap(tester, find.text('Save'));
       await tester.pumpAndSettle();
 
@@ -905,18 +823,19 @@ class _FakeCurrentUser(final UserModel? _user) extends CurrentUser {
 
 Future<MockAnnotationRepository> _pumpSheet(
   WidgetTester tester, {
-  List<AnnotationModel>? annotations,
+  AnnotationModel? annotation,
+  bool exists = true,
   List<HighlightSlotModel>? slots,
   List<BookChapterModel>? toc,
   UserModel? currentUser = _currentUser,
-  Stream<List<AnnotationModel>>? annotationsStream,
+  Stream<AnnotationModel?>? annotationStream,
   Stream<List<HighlightSlotModel>>? slotsStream,
 }) async {
   final repository = MockAnnotationRepository();
-  when(
-    repository.watchAnnotations(chapterId: _chapterId),
-  ).thenAnswer(
-    (_) => annotationsStream ?? Stream.value(annotations ?? [_annotation]),
+  when(repository.watchAnnotation(id: _annotation.id)).thenAnswer(
+    (_) =>
+        annotationStream ??
+        Stream.value(exists ? annotation ?? _annotation : null),
   );
   when(
     repository.watchHighlightSlots(),

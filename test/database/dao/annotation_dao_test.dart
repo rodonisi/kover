@@ -190,6 +190,19 @@ void main() {
     expect(rows.map((row) => row.serverId), [2]);
   });
 
+  test('watchAnnotation emits the row and its tombstone', () async {
+    final row = await db.annotationDao.upsert(entry(serverId: 1));
+    final stream = db.annotationDao.watchAnnotation(row.id);
+
+    expect((await stream.first)?.id, row.id);
+
+    await db.annotationDao.markRemoved(row.id, ownerUserId: 1);
+    expect((await stream.first)?.removed, isTrue);
+
+    await db.annotationDao.deleteByIds([row.id]);
+    expect(await stream.first, isNull);
+  });
+
   test('deleteByIds removes dirty rows', () async {
     final row = await db.annotationDao.upsert(entry(dirty: true));
 

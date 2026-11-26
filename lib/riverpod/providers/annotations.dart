@@ -10,6 +10,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'annotations.g.dart';
 
+/// Watch the locally stored annotation with [id].
+@riverpod
+Stream<AnnotationModel?> annotation(Ref ref, {required int id}) {
+  return ref.watch(annotationRepositoryProvider).watchAnnotation(id: id);
+}
+
 /// Watch the locally stored annotations for [chapterId].
 @riverpod
 Stream<List<AnnotationModel>> chapterAnnotations(

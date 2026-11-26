@@ -239,6 +239,17 @@ class AnnotationRepository(
     await _db.annotationDao.mergeRemoteBatch(entries);
   }
 
+  /// Watch the locally stored annotation with local [id].
+  Stream<AnnotationModel?> watchAnnotation({required int id}) {
+    return _db.annotationDao
+        .watchAnnotation(id)
+        .map(
+          (annotation) => annotation == null
+              ? null
+              : AnnotationModel.fromDatabaseModel(annotation),
+        );
+  }
+
   /// Watch all locally stored, non-removed annotations for [chapterId].
   Stream<List<AnnotationModel>> watchAnnotations({required int chapterId}) {
     return _db.annotationDao

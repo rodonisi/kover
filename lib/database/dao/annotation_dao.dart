@@ -22,6 +22,16 @@ class AnnotationDao(super.attachedDatabase)
     )..where((a) => a.id.equals(id))).getSingleOrNull();
   }
 
+  /// Watch the annotation with local [id].
+  ///
+  /// Removed rows are included so the sheet stays populated while deletion is
+  /// still in flight. The row disappears once the server confirms removal.
+  Stream<Annotation?> watchAnnotation(int id) {
+    return (select(
+      annotations,
+    )..where((a) => a.id.equals(id))).watchSingleOrNull();
+  }
+
   /// Get the annotation with the remote [serverId].
   Future<Annotation?> getAnnotationByServerId(int serverId) {
     return (select(

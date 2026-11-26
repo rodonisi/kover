@@ -371,6 +371,18 @@ void main() {
     },
   );
 
+  test('watchAnnotation maps stored rows and nulls', () async {
+    final stored = storedAnnotation();
+    when(mockDao.watchAnnotation(1)).thenAnswer(
+      (_) => Stream.fromIterable([stored, null]),
+    );
+
+    final values = await repo.watchAnnotation(id: 1).toList();
+
+    expect(values.first?.id, stored.id);
+    expect(values.last, isNull);
+  });
+
   test('watchHighlightSlots delegates to the annotation dao', () async {
     when(mockDao.watchHighlightSlots()).thenAnswer((_) => const Stream.empty());
 
