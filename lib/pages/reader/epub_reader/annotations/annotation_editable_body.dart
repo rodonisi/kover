@@ -1,10 +1,13 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/highlight_slot_model.dart';
 import 'package:kover/pages/reader/epub_reader/annotations/annotation_quote.dart';
+import 'package:kover/utils/annotation_image.dart';
 import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
+import 'package:kover/utils/logging.dart';
 import 'package:material_ui/material_ui.dart';
 
 class AnnotationEditableBody extends StatelessWidget {
@@ -68,6 +71,29 @@ class AnnotationEditableBody extends StatelessWidget {
   }
 }
 
+Future<void> _insertImage(
+  BuildContext context,
+  AppLocalizations l,
+  String image,
+  QuillController controller,
+) async {
+  try {
+    final source = await AnnotationImage.toPortableSource(image);
+    AnnotationImage.insert(controller: controller, source: source);
+  } catch (error, stacktrace) {
+    log.error(
+      'failed to insert annotation image',
+      error: error,
+      stacktrace: stacktrace,
+    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l.annotationImageInsertFailed)),
+      );
+    }
+  }
+}
+
 class AnnotationCommentEditor extends HookWidget {
   static const double _editorMinHeight = 84.0;
 
@@ -98,7 +124,7 @@ class AnnotationCommentEditor extends HookWidget {
           ignoring: readOnly,
           child: QuillSimpleToolbar(
             controller: controller,
-            config: const QuillSimpleToolbarConfig(
+            config: QuillSimpleToolbarConfig(
               multiRowsDisplay: true,
               toolbarIconAlignment: .start,
               showDividers: true,
@@ -126,6 +152,15 @@ class AnnotationCommentEditor extends HookWidget {
               showSubscript: false,
               showSuperscript: false,
               showAlignmentButtons: false,
+              embedButtons: FlutterQuillEmbeds.toolbarButtons(
+                videoButtonOptions: null,
+                imageButtonOptions: QuillToolbarImageButtonOptions(
+                  imageButtonConfig: QuillToolbarImageConfig(
+                    onImageInsertCallback: (image, controller) =>
+                        _insertImage(context, l, image, controller),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -137,6 +172,17 @@ class AnnotationCommentEditor extends HookWidget {
             placeholder: l.comment,
             minHeight: _editorMinHeight,
             scrollable: false,
+            embedBuilders: [
+              QuillEditorImageEmbedBuilder(
+                config: QuillEditorImageEmbedConfig(
+                  imageErrorWidgetBuilder: (context, error, stacktrace) =>
+                      Semantics(
+                        label: l.annotationImageLoadFailed,
+                        child: const Icon(KoverIcons.imageError),
+                      ),
+                ),
+              ),
+            ],
             customStyles: DefaultStyles(
               paragraph: DefaultTextBlockStyle(
                 theme.textTheme.bodyMedium!,

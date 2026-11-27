@@ -20,6 +20,20 @@ void main() {
       );
     });
 
+    test('encodes image embeds as image html', () {
+      const image = 'https://example.com/image.png';
+      final document = quill.Document()
+        ..insert(0, 'before ')
+        ..insert(7, quill.BlockEmbed.image(image))
+        ..insert(8, '\n');
+
+      final encoded = AnnotationComment.fromDocument(document);
+
+      expect(encoded.comment, contains('"insert":{"image":"$image"}'));
+      expect(encoded.commentHtml, contains('src="$image"'));
+      expect(encoded.commentHtml, startsWith('<p>before <img'));
+    });
+
     test('encodes multi-line plain document as separate paragraphs', () {
       final document = quill.Document()..insert(0, 'first\nsecond');
       final encoded = AnnotationComment.fromDocument(document);

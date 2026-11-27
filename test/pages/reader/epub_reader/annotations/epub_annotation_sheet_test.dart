@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -557,6 +558,7 @@ void main() {
           tester.getTopRight(find.byTooltip('Highlight color 2')).dx,
         ),
       );
+      expect(find.byType(QuillToolbarImageButton), findsOneWidget);
       expect(find.text('Edit'), findsNothing);
       expect(find.text('Delete'), findsNothing);
     });

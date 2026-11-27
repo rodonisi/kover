@@ -53,6 +53,8 @@ dependencies:
   collection: ^1.19.1
   flutter_quill: ^11.6.0
   vsc_quill_delta_to_html: ^1.0.5
+  flutter_quill_extensions: ^11.0.0
+  image_picker: ^1.2.4
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0
   flutter_test:

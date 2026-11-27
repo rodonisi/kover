@@ -883,6 +883,14 @@
     "@annotationSaveFailed": {
         "description": "Error shown when an annotation edit cannot be saved"
     },
+    "annotationImageInsertFailed": "Could not insert image.",
+    "@annotationImageInsertFailed": {
+        "description": "Error shown when an image cannot be added to an annotation"
+    },
+    "annotationImageLoadFailed": "Image could not be loaded.",
+    "@annotationImageLoadFailed": {
+        "description": "Accessibility label shown when an annotation image cannot be loaded"
+    },
     "annotationDeleteFailed": "Could not delete annotation.",
     "@annotationDeleteFailed": {
         "description": "Error shown when an annotation cannot be deleted"

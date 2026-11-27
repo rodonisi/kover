@@ -139,6 +139,7 @@ sealed class KoverIcons {
   static const IconData debug = LucideIcons.bug;
   static const IconData warning = LucideIcons.alertTriangle;
   static const IconData error = LucideIcons.circleX;
+  static const IconData imageError = LucideIcons.imageOff;
   static const IconData fatal = LucideIcons.bomb;
   static const IconData alert = LucideIcons.triangleAlert;
   static const IconData noConnection = LucideIcons.wifiOff;
