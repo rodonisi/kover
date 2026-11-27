@@ -1,60 +1,94 @@
+import 'dart:convert';
+
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kover/utils/annotation_comment.dart';
 
 void main() {
   group('AnnotationComment', () {
-    group('toDelta', () {
-      test('encodes text as a single insert', () {
-        expect(
-          AnnotationComment.toDelta('a note'),
-          r'{"ops":[{"insert":"a note\n"}]}',
+    group('toDocument and fromDocument', () {
+      test('roundtrips rich Kavita delta with lists and bold text', () {
+        const kavitaDelta =
+            r'{"ops":[{"insert":"a"},{"attributes":{"list":"bullet"},"insert":"\n"},{"insert":"a"},{"attributes":{"list":"bullet"},"insert":"\n"},{"insert":"a"},{"attributes":{"list":"ordered"},"insert":"\n"},{"attributes":{"bold":true},"insert":"asd"},{"insert":"\n"}]}';
+
+        final document = AnnotationComment.toDocument(
+          comment: kavitaDelta,
+          commentPlainText: 'aaaasd',
         );
+        final encoded = AnnotationComment.fromDocument(document);
+
+        expect(
+          jsonDecode(encoded.comment!),
+          jsonDecode(kavitaDelta),
+        );
+        expect(
+          encoded.commentHtml,
+          '<ul><li>a</li><li>a</li></ul><ol><li>a</li></ol><p><strong>asd</strong></p>',
+        );
+        expect(encoded.commentPlainText, 'a\na\na\nasd');
       });
 
-      test('keeps line breaks', () {
+      test('encodes multi-line plain document as separate paragraphs', () {
+        final document = quill.Document()..insert(0, 'first\nsecond');
+        final encoded = AnnotationComment.fromDocument(document);
+
         expect(
-          AnnotationComment.toDelta('first\r\nsecond'),
+          encoded.comment,
           r'{"ops":[{"insert":"first\nsecond\n"}]}',
         );
+        expect(encoded.commentHtml, '<p>first</p><p>second</p>');
+        expect(encoded.commentPlainText, 'first\nsecond');
       });
 
-      test('returns null for blank text', () {
-        expect(AnnotationComment.toDelta(null), isNull);
-        expect(AnnotationComment.toDelta('  \n '), isNull);
-      });
-    });
+      test('escapes html markup in plain text', () {
+        final document = quill.Document()..insert(0, 'a <b> & c');
+        final encoded = AnnotationComment.fromDocument(document);
 
-    group('toHtml', () {
-      test('encodes every line as a paragraph', () {
+        expect(encoded.commentHtml, '<p>a &lt;b&gt; &amp; c</p>');
+      });
+
+      test('returns empty record for empty or whitespace document', () {
         expect(
-          AnnotationComment.toHtml('first\nsecond'),
-          '<p>first</p><p>second</p>',
+          AnnotationComment.fromDocument(quill.Document()),
+          AnnotationComment.empty,
+        );
+
+        final whitespace = quill.Document()..insert(0, '  \n  ');
+        expect(
+          AnnotationComment.fromDocument(whitespace),
+          AnnotationComment.empty,
         );
       });
 
-      test('escapes markup', () {
+      test('decodes empty Kavita note "{}" as empty document', () {
+        final document = AnnotationComment.toDocument(
+          comment: '{}',
+          commentPlainText: '',
+        );
+
         expect(
-          AnnotationComment.toHtml('a <b> & c'),
-          '<p>a &lt;b&gt; &amp; c</p>',
+          AnnotationComment.fromDocument(document),
+          AnnotationComment.empty,
         );
       });
 
-      test('returns null for blank text', () {
-        expect(AnnotationComment.toHtml(null), isNull);
-        expect(AnnotationComment.toHtml('   '), isNull);
+      test('decodes non-json comment string into document', () {
+        final document = AnnotationComment.toDocument(comment: 'plain note');
+
+        expect(document.toPlainText().trim(), 'plain note');
+      });
+
+      test('falls back to commentPlainText when comment is absent', () {
+        final document = AnnotationComment.toDocument(
+          comment: null,
+          commentPlainText: 'fallback note',
+        );
+
+        expect(document.toPlainText().trim(), 'fallback note');
       });
     });
 
     group('toPlainText', () {
-      test('decodes what toDelta encodes', () {
-        const text = 'first\nsecond';
-
-        expect(
-          AnnotationComment.toPlainText(AnnotationComment.toDelta(text)),
-          text,
-        );
-      });
-
       test('joins formatted inserts', () {
         expect(
           AnnotationComment.toPlainText(

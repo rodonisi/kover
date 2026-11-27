@@ -1,3 +1,4 @@
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:kover/pages/reader/epub_reader/annotations/annotation_quote.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
@@ -10,17 +11,28 @@ class AnnotationViewBody extends StatelessWidget {
     required this.selectedText,
     required this.accentColor,
     required this.attribution,
-    required this.comment,
+    required this.commentHtml,
+    required this.commentFallback,
   });
 
   final Widget header;
   final String selectedText;
   final Color? accentColor;
   final String attribution;
-  final String comment;
+  final String? commentHtml;
+  final String commentFallback;
 
   @override
   Widget build(BuildContext context) {
+    final Widget? commentWidget = switch (commentHtml) {
+      final html? => HtmlWidget(
+        html,
+        renderMode: .column,
+      ),
+      null when commentFallback.isNotEmpty => Text(commentFallback),
+      null => null,
+    };
+
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: .min,
@@ -34,7 +46,7 @@ class AnnotationViewBody extends StatelessWidget {
             attribution: attribution,
             scrollable: false,
           ),
-          Text(comment),
+          ?commentWidget,
         ],
       ),
     );

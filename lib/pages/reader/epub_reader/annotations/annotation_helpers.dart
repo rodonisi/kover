@@ -5,6 +5,16 @@ import 'package:kover/models/highlight_slot_model.dart';
 import 'package:kover/utils/annotation_comment.dart';
 import 'package:material_ui/material_ui.dart';
 
+/// The comment HTML when non-empty, or `null` for blank/empty Quill HTML.
+String? commentHtml(AnnotationModel annotation) {
+  final html = annotation.commentHtml?.trim();
+  if (html == null || html.isEmpty) return null;
+  if (html == '<p><br></p>' || html == '<p><br/></p>' || html == '<p></p>') {
+    return null;
+  }
+  return html;
+}
+
 /// The comment as plain text. Kavita's plain-text copy has no line breaks, so
 /// it is only used when the stored comment cannot be decoded.
 String commentText(AnnotationModel annotation) {

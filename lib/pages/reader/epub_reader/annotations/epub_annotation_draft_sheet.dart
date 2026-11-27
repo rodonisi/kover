@@ -1,4 +1,5 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/annotation_draft.dart';
@@ -69,7 +70,11 @@ class _DraftContent extends HookConsumerWidget {
     final isSaving = useState(false);
     final selectedSlot = useState(defaultSlot(slots));
     final containsSpoiler = useState(false);
-    final commentController = useTextEditingController();
+    final commentController = useMemoized(
+      quill.QuillController.basic,
+      const [],
+    );
+    useEffect(() => commentController.dispose, [commentController]);
     final canSave = hasColor(slots, selectedSlot.value);
     final accentColor = colorForSlot(slots, selectedSlot.value);
     final attribution = formatAttribution(
@@ -82,7 +87,6 @@ class _DraftContent extends HookConsumerWidget {
       if (!canSave || isSaving.value) return;
 
       final messenger = ScaffoldMessenger.of(context);
-      final value = commentController.text.trim();
       isSaving.value = true;
       try {
         await ref
@@ -91,7 +95,7 @@ class _DraftContent extends HookConsumerWidget {
               chapterId: chapterId,
               pageNumber: pageNumber,
               draft: draft,
-              comment: value.isEmpty ? null : value,
+              comment: commentController.document,
               containsSpoiler: containsSpoiler.value,
               selectedSlotIndex: selectedSlot.value,
             );
@@ -121,6 +125,7 @@ class _DraftContent extends HookConsumerWidget {
         slots: slots,
         selectedSlot: selectedSlot.value,
         containsSpoiler: containsSpoiler.value,
+        readOnly: isSaving.value,
         onSlotSelected: isSaving.value
             ? null
             : (slot) => selectedSlot.value = slot,

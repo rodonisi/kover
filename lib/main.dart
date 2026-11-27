@@ -1,3 +1,4 @@
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/riverpod/providers/local_log.dart';
@@ -61,6 +62,7 @@ class App extends ConsumerWidget {
             localizationsDelegates: const [
               ...AppLocalizations.localizationsDelegates,
               ...GlobalMaterialLocalizations.delegates,
+              FlutterQuillLocalizations.delegate,
             ],
             supportedLocales: AppLocalizations.supportedLocales,
             locale: locale,
@@ -102,6 +104,7 @@ class AppLoading extends StatelessWidget {
       localizationsDelegates: const [
         ...AppLocalizations.localizationsDelegates,
         ...GlobalMaterialLocalizations.delegates,
+        FlutterQuillLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(

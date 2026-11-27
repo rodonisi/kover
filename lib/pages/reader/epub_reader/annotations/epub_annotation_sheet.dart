@@ -1,4 +1,5 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/reader/epub_reader/annotations/annotation_editable_body.dart';
@@ -7,6 +8,7 @@ import 'package:kover/pages/reader/epub_reader/annotations/annotation_sheet_layo
 import 'package:kover/pages/reader/epub_reader/annotations/annotation_view_body.dart';
 import 'package:kover/pages/reader/epub_reader/annotations/epub_annotation_sheet_provider.dart';
 import 'package:kover/riverpod/providers/annotations.dart';
+import 'package:kover/utils/annotation_comment.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:kover/widgets/util/async_value.dart';
@@ -64,12 +66,21 @@ class _AnnotationContent extends HookConsumerWidget {
     final isDeleting = useState(false);
     final selectedSlot = useState(annotation.selectedSlotIndex);
     final containsSpoiler = useState(annotation.containsSpoiler);
-    final commentController = useTextEditingController(
-      text: commentText(annotation),
+    final commentController = useMemoized(
+      () => quill.QuillController(
+        document: AnnotationComment.toDocument(
+          comment: annotation.comment,
+          commentPlainText: annotation.commentPlainText,
+        ),
+        selection: const TextSelection.collapsed(offset: 0),
+      ),
+      const [],
     );
+    useEffect(() => commentController.dispose, [commentController]);
     final editing = isEditing.value && model.canModify;
     final isBusy = isSaving.value || isDeleting.value;
-    final comment = commentText(annotation).trim();
+    final html = commentHtml(annotation);
+    final fallbackComment = commentText(annotation).trim();
     final canSave =
         model.canModify && hasColor(model.slots, selectedSlot.value);
     final activeSlot = editing
@@ -84,7 +95,10 @@ class _AnnotationContent extends HookConsumerWidget {
 
     void startEditing() {
       if (!model.canModify) return;
-      commentController.text = commentText(annotation);
+      commentController.document = AnnotationComment.toDocument(
+        comment: annotation.comment,
+        commentPlainText: annotation.commentPlainText,
+      );
       selectedSlot.value = annotation.selectedSlotIndex;
       containsSpoiler.value = annotation.containsSpoiler;
       isEditing.value = true;
@@ -94,14 +108,13 @@ class _AnnotationContent extends HookConsumerWidget {
       if (!canSave || isBusy) return;
 
       final messenger = ScaffoldMessenger.of(context);
-      final value = commentController.text.trim();
       isSaving.value = true;
       try {
         await ref
             .read(annotationActionsProvider.notifier)
             .save(
               id: annotation.id,
-              comment: value.isEmpty ? null : value,
+              comment: commentController.document,
               containsSpoiler: containsSpoiler.value,
               selectedSlotIndex: selectedSlot.value,
             );
@@ -180,6 +193,7 @@ class _AnnotationContent extends HookConsumerWidget {
               slots: model.slots,
               selectedSlot: selectedSlot.value,
               containsSpoiler: containsSpoiler.value,
+              readOnly: isBusy,
               onSlotSelected: isBusy
                   ? null
                   : (slot) => selectedSlot.value = slot,
@@ -196,7 +210,8 @@ class _AnnotationContent extends HookConsumerWidget {
               selectedText: annotation.selectedText,
               accentColor: accentColor,
               attribution: attribution,
-              comment: comment,
+              commentHtml: html,
+              commentFallback: fallbackComment,
             ),
       footer: editing
           ? AnnotationSaveActions(

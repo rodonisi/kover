@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/annotation_draft.dart';
@@ -14,6 +16,7 @@ import 'package:kover/riverpod/providers/annotations.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/book.dart';
 import 'package:kover/riverpod/repository/annotation_repository.dart';
+import 'package:kover/utils/annotation_comment.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -146,6 +149,20 @@ void main() {
       expect(find.textContaining('2025'), findsNothing);
     });
 
+    testWidgets('renders html comments in view mode', (tester) async {
+      await _pumpSheet(
+        tester,
+        annotation: _annotation.copyWith(
+          comment: r'{"ops":[{"insert":"a"},{"attributes":{"list":"bullet"},"insert":"\n"},{"insert":"a"},{"attributes":{"list":"ordered"},"insert":"\n"},{"attributes":{"bold":true},"insert":"asd"},{"insert":"\n"}]}',
+          commentHtml: '<ul><li>a</li></ul><ol><li>a</li></ol><p><strong>asd</strong></p>',
+          commentPlainText: 'aaasd',
+        ),
+      );
+
+      expect(find.byType(HtmlWidget), findsOneWidget);
+      expect(find.textContaining('asd', findRichText: true), findsOneWidget);
+    });
+
     testWidgets('shows a comment written in the Kavita web app', (
       tester,
     ) async {
@@ -153,6 +170,7 @@ void main() {
         tester,
         annotation: _annotation.copyWith(
           comment: r'{"ops":[{"insert":"first\nsecond\n"}]}',
+          commentHtml: null,
           commentPlainText: 'firstsecond',
         ),
       );
@@ -167,11 +185,13 @@ void main() {
         tester,
         annotation: _annotation.copyWith(
           comment: '{}',
+          commentHtml: '<p><br></p>',
           commentPlainText: '',
         ),
       );
 
       expect(find.text('{}'), findsNothing);
+      expect(find.byType(HtmlWidget), findsNothing);
     });
 
     testWidgets(
@@ -207,10 +227,8 @@ void main() {
                 (_) => Stream.value(_toc),
               ),
             ],
-            child: MaterialApp(
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              home: Scaffold(
+            child: _testApp(
+              Scaffold(
                 body: SizedBox(
                   height: 400,
                   child: EpubAnnotationSheet(
@@ -231,16 +249,17 @@ void main() {
       },
     );
 
-    testWidgets('saves trimmed comment, slot, and spoiler toggle', (
+    testWidgets('saves rich comment, slot, and spoiler toggle', (
       tester,
     ) async {
       final repository = await _pumpSheet(tester);
 
       await _tap(tester, find.text('Edit'));
-      await _enterText(
+      await _setEditorDocument(
         tester,
-        find.byType(TextField),
-        '  updated note  ',
+        quill.Document()
+          ..insert(0, 'updated note')
+          ..format(0, 7, quill.Attribute.bold),
       );
       await _tap(tester, find.byTooltip('Highlight color 2'));
       await _tap(tester, find.byType(Switch));
@@ -252,14 +271,14 @@ void main() {
         repository.updateAnnotation(
           id: 10,
           ownerUserId: _ownerUserId,
-          comment: r'{"ops":[{"insert":"updated note\n"}]}',
-          commentHtml: '<p>updated note</p>',
+          comment: r'{"ops":[{"insert":"updated","attributes":{"bold":true}},{"insert":" note\n"}]}',
+          commentHtml: '<p><strong>updated</strong> note</p>',
           commentPlainText: 'updated note',
           containsSpoiler: false,
           selectedSlotIndex: 1,
         ),
       ).called(1);
-      expect(find.byType(TextField), findsNothing);
+      expect(find.byType(quill.QuillEditor), findsNothing);
     });
 
     testWidgets('clears comment fields when the comment is emptied', (
@@ -268,11 +287,7 @@ void main() {
       final repository = await _pumpSheet(tester);
 
       await _tap(tester, find.text('Edit'));
-      await _enterText(
-        tester,
-        find.byType(TextField),
-        '   ',
-      );
+      await _setEditorText(tester, '   ');
       await _tap(tester, find.text('Save'));
       await tester.pumpAndSettle();
 
@@ -293,7 +308,7 @@ void main() {
       await _pumpSheet(tester);
 
       await _tap(tester, find.text('Edit'));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(find.byTooltip('Highlight color 1'), findsOneWidget);
       expect(find.byTooltip('Highlight color 2'), findsOneWidget);
@@ -347,16 +362,13 @@ void main() {
       ).thenThrow(StateError('save failed'));
 
       await _tap(tester, find.text('Edit'));
-      await _enterText(
-        tester,
-        find.byType(TextField),
-        'bad note',
-      );
+      await tester.pumpAndSettle();
+      await _setEditorText(tester, 'bad note');
       await _tap(tester, find.text('Save'));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(find.text('Could not save annotation.'), findsOneWidget);
-      expect(find.byType(TextField), findsOneWidget);
+      expect(find.byType(quill.QuillEditor), findsOneWidget);
     });
 
     testWidgets('shows an error when deletion fails', (tester) async {
@@ -436,10 +448,8 @@ void main() {
                 (_) => Stream.value(_toc),
               ),
             ],
-            child: MaterialApp(
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              home: Scaffold(
+            child: _testApp(
+              Scaffold(
                 body: Builder(
                   builder: (context) => TextButton(
                     onPressed: () => Navigator.of(context).push(
@@ -513,7 +523,8 @@ void main() {
       expect(find.byType(Divider), findsNothing);
       expect(find.text('selected words'), findsOneWidget);
       expect(find.text('Page 5, Chapter "Arrakis"'), findsOneWidget);
-      expect(find.byType(TextField), findsOneWidget);
+      expect(find.byType(quill.QuillEditor), findsOneWidget);
+      expect(find.byType(quill.QuillSimpleToolbar), findsOneWidget);
       expect(find.byType(Switch), findsOneWidget);
       expect(
         tester.getTopRight(find.byType(Switch)).dx,
@@ -530,11 +541,7 @@ void main() {
     ) async {
       final actions = await _pumpDraftSheet(tester);
 
-      await _enterText(
-        tester,
-        find.byType(TextField),
-        '  a note  ',
-      );
+      await _setEditorText(tester, '  a note  ');
       await _tap(tester, find.byTooltip('Highlight color 2'));
       await _tap(tester, find.byType(Switch));
       await _tap(tester, find.text('Save'));
@@ -623,10 +630,8 @@ void main() {
               () => _RecordingAnnotationActions(actions),
             ),
           ],
-          child: MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(
+          child: _testApp(
+            Scaffold(
               body: Builder(
                 builder: (context) => TextButton(
                   onPressed: () => Navigator.of(context).push(
@@ -700,7 +705,7 @@ class _RecordingAnnotationActions(final _DraftActionRecorder _recorder)
     required int chapterId,
     required int pageNumber,
     required AnnotationDraft draft,
-    required String? comment,
+    required quill.Document? comment,
     bool containsSpoiler = false,
     required int selectedSlotIndex,
   }) async {
@@ -709,15 +714,35 @@ class _RecordingAnnotationActions(final _DraftActionRecorder _recorder)
       await pending.future;
     }
 
+    final encoded = comment == null
+        ? AnnotationComment.empty
+        : AnnotationComment.fromDocument(comment);
+
     _recorder.created.add((
       chapterId: chapterId,
       pageNumber: pageNumber,
       draft: draft,
-      comment: comment,
+      comment: encoded.commentPlainText,
       containsSpoiler: containsSpoiler,
       selectedSlotIndex: selectedSlotIndex,
     ));
   }
+}
+
+Widget _testApp(Widget home) {
+  return MaterialApp(
+    localizationsDelegates: const [
+      ...AppLocalizations.localizationsDelegates,
+      ...GlobalMaterialLocalizations.delegates,
+      quill.FlutterQuillLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    builder: (context, child) {
+      // ignore: deprecated_member_use
+      return MaterialUiCompatibilityBridge(child: child!);
+    },
+    home: home,
+  );
 }
 
 /// Opens the draft sheet as a modal bottom sheet, like the reader does.
@@ -744,10 +769,8 @@ Future<_DraftActionRecorder> _pumpDraftSheet(
           () => _RecordingAnnotationActions(recorder),
         ),
       ],
-      child: MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
+      child: _testApp(
+        Scaffold(
           body: Builder(
             builder: (context) => TextButton(
               onPressed: () => showModalBottomSheet<void>(
@@ -778,14 +801,21 @@ Future<void> _tap(WidgetTester tester, Finder finder) async {
   await tester.pump();
 }
 
-Future<void> _enterText(
+Future<void> _setEditorText(WidgetTester tester, String value) async {
+  await _setEditorDocument(
+    tester,
+    value.isEmpty ? quill.Document() : (quill.Document()..insert(0, value)),
+  );
+}
+
+Future<void> _setEditorDocument(
   WidgetTester tester,
-  Finder finder,
-  String value,
+  quill.Document document,
 ) async {
-  await tester.ensureVisible(finder);
-  await tester.pump();
-  await tester.enterText(finder, value);
+  final editor = tester.widget<quill.QuillEditor>(
+    find.byType(quill.QuillEditor),
+  );
+  editor.controller.document = document;
   await tester.pump();
 }
 
@@ -830,10 +860,8 @@ Future<MockAnnotationRepository> _pumpSheet(
           (_) => Stream.value(toc ?? _toc),
         ),
       ],
-      child: MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
+      child: _testApp(
+        Scaffold(
           body: EpubAnnotationSheet(
             chapterId: _chapterId,
             annotationId: _annotation.id,

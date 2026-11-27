@@ -1,3 +1,5 @@
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/highlight_slot_model.dart';
 import 'package:kover/pages/reader/epub_reader/annotations/annotation_quote.dart';
@@ -5,9 +7,10 @@ import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
-const int _commentMinLines = 3;
+const double _editorMinHeight = 84.0;
+const double _editorMaxHeight = 140.0;
 
-/// Edit/draft body with scrollable quote, expandable comment input, and controls.
+/// Edit/draft body with scrollable quote, rich-text comment editor, and controls.
 class AnnotationEditableBody extends StatelessWidget {
   const new({
     super.key,
@@ -20,22 +23,22 @@ class AnnotationEditableBody extends StatelessWidget {
     required this.containsSpoiler,
     required this.onSlotSelected,
     required this.onSpoilerChanged,
+    this.readOnly = false,
   });
 
   final String selectedText;
   final Color? accentColor;
   final String attribution;
-  final TextEditingController commentController;
+  final QuillController commentController;
   final List<HighlightSlotModel> slots;
   final int selectedSlot;
   final bool containsSpoiler;
   final void Function(int slotNumber)? onSlotSelected;
   final ValueChanged<bool>? onSpoilerChanged;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-
     final controls = AnnotationControls(
       slots: slots,
       selectedSlot: selectedSlot,
@@ -57,14 +60,104 @@ class AnnotationEditableBody extends StatelessWidget {
             scrollable: true,
           ),
         ),
-        TextField(
+        AnnotationCommentEditor(
           controller: commentController,
-          minLines: _commentMinLines,
-          maxLines: _commentMinLines,
-          textCapitalization: .sentences,
-          decoration: InputDecoration(labelText: l.comment),
+          readOnly: readOnly,
         ),
         controls,
+      ],
+    );
+  }
+}
+
+/// Compact rich-text Quill editor with a single-row formatting toolbar.
+class AnnotationCommentEditor extends HookWidget {
+  const new({
+    super.key,
+    required this.controller,
+    this.readOnly = false,
+  });
+
+  final QuillController controller;
+  final bool readOnly;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final focusNode = useFocusNode();
+    final scrollController = useScrollController();
+    useListenable(focusNode);
+
+    controller.readOnly = readOnly;
+
+    return Column(
+      mainAxisSize: .min,
+      crossAxisAlignment: .stretch,
+      children: [
+        IgnorePointer(
+          ignoring: readOnly,
+          child: QuillSimpleToolbar(
+            controller: controller,
+            config: const QuillSimpleToolbarConfig(
+              multiRowsDisplay: true,
+              showDividers: true,
+              showBoldButton: true,
+              showItalicButton: true,
+              showUnderLineButton: true,
+              showStrikeThrough: true,
+              showListBullets: true,
+              showListNumbers: true,
+              showQuote: true,
+              showClearFormat: true,
+              showUndo: true,
+              showRedo: true,
+              showFontSize: true,
+              showFontFamily: false,
+              showInlineCode: false,
+              showColorButton: false,
+              showBackgroundColorButton: false,
+              showHeaderStyle: false,
+              showListCheck: false,
+              showCodeBlock: false,
+              showIndent: false,
+              showLink: false,
+              showSearchButton: false,
+              showSubscript: false,
+              showSuperscript: false,
+              showAlignmentButtons: false,
+            ),
+          ),
+        ),
+        QuillEditor(
+          controller: controller,
+          focusNode: focusNode,
+          scrollController: scrollController,
+          config: QuillEditorConfig(
+            placeholder: l.comment,
+            minHeight: _editorMinHeight,
+            maxHeight: _editorMaxHeight,
+            scrollable: true,
+            customStyles: DefaultStyles(
+              paragraph: DefaultTextBlockStyle(
+                theme.textTheme.bodyMedium!,
+                .zero,
+                .zero,
+                .zero,
+                null,
+              ),
+              placeHolder: DefaultTextBlockStyle(
+                theme.textTheme.bodyMedium!.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                .zero,
+                .zero,
+                .zero,
+                null,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

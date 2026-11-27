@@ -1,3 +1,4 @@
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kover/models/annotation_draft.dart';
@@ -76,13 +77,14 @@ void main() {
     });
 
     test('create fills the annotation like the Kavita web app', () async {
+      final document = quill.Document()..insert(0, 'a note');
       await container
           .read(annotationActionsProvider.notifier)
           .create(
             chapterId: 3,
             pageNumber: 7,
             draft: _draft,
-            comment: 'a note',
+            comment: document,
             containsSpoiler: true,
             selectedSlotIndex: 2,
           );
@@ -117,7 +119,7 @@ void main() {
             chapterId: 3,
             pageNumber: 7,
             draft: _draft,
-            comment: null,
+            comment: quill.Document(),
             selectedSlotIndex: 0,
           );
 
@@ -145,11 +147,14 @@ void main() {
     });
 
     test('save encodes the comment for Kavita', () async {
+      final document = quill.Document()
+        ..insert(0, 'first\nsecond')
+        ..format(0, 5, quill.Attribute.bold);
       await container
           .read(annotationActionsProvider.notifier)
           .save(
             id: 10,
-            comment: 'first\nsecond',
+            comment: document,
             containsSpoiler: true,
             selectedSlotIndex: 1,
           );
@@ -158,8 +163,8 @@ void main() {
         annotations.updateAnnotation(
           id: 10,
           ownerUserId: 5,
-          comment: r'{"ops":[{"insert":"first\nsecond\n"}]}',
-          commentHtml: '<p>first</p><p>second</p>',
+          comment: r'{"ops":[{"insert":"first","attributes":{"bold":true}},{"insert":"\nsecond\n"}]}',
+          commentHtml: '<p><strong>first</strong></p><p>second</p>',
           commentPlainText: 'first\nsecond',
           containsSpoiler: true,
           selectedSlotIndex: 1,

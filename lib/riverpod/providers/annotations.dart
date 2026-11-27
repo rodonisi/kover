@@ -1,3 +1,4 @@
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:kover/models/annotation_draft.dart';
 import 'package:kover/models/annotation_model.dart';
 import 'package:kover/models/highlight_slot_model.dart';
@@ -45,7 +46,7 @@ class AnnotationActions extends _$AnnotationActions {
     required int chapterId,
     required int pageNumber,
     required AnnotationDraft draft,
-    required String? comment,
+    required quill.Document? comment,
     bool containsSpoiler = false,
     required int selectedSlotIndex,
   }) async {
@@ -60,6 +61,9 @@ class AnnotationActions extends _$AnnotationActions {
     final series = await seriesRepository.getSeries(
       seriesId: chapter.seriesId,
     );
+    final encoded = comment == null
+        ? AnnotationComment.empty
+        : AnnotationComment.fromDocument(comment);
 
     await annotations.addAnnotation(
       seriesId: series.id,
@@ -71,9 +75,9 @@ class AnnotationActions extends _$AnnotationActions {
       xPath: draft.xPath,
       endingXPath: draft.endingXPath,
       selectedText: draft.selectedText,
-      comment: AnnotationComment.toDelta(comment),
-      commentHtml: AnnotationComment.toHtml(comment),
-      commentPlainText: comment,
+      comment: encoded.comment,
+      commentHtml: encoded.commentHtml,
+      commentPlainText: encoded.commentPlainText,
       context: draft.context,
       // Kavita stores the number of selected characters.
       highlightCount: draft.selectedText.length,
@@ -83,21 +87,24 @@ class AnnotationActions extends _$AnnotationActions {
     );
   }
 
-  /// Saves a plain-text comment and highlight slot for the annotation.
+  /// Saves a rich-text comment and highlight slot for the annotation.
   Future<void> save({
     required int id,
-    required String? comment,
+    required quill.Document? comment,
     required bool containsSpoiler,
     required int selectedSlotIndex,
   }) async {
     final annotations = ref.read(annotationRepositoryProvider);
     final user = await ref.read(currentUserProvider.future);
+    final encoded = comment == null
+        ? AnnotationComment.empty
+        : AnnotationComment.fromDocument(comment);
     await annotations.updateAnnotation(
       id: id,
       ownerUserId: user.id,
-      comment: AnnotationComment.toDelta(comment),
-      commentHtml: AnnotationComment.toHtml(comment),
-      commentPlainText: comment,
+      comment: encoded.comment,
+      commentHtml: encoded.commentHtml,
+      commentPlainText: encoded.commentPlainText,
       containsSpoiler: containsSpoiler,
       selectedSlotIndex: selectedSlotIndex,
     );
