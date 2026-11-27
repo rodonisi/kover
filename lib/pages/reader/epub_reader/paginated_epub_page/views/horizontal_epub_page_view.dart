@@ -4,6 +4,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epu
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_content.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/selection/epub_selection_container.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/selection/epub_selection_registry.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';

@@ -7,6 +7,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/factories/pag
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/scroll_id_operation.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/selection/epub_selection_container.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/selection/epub_selection_registry.dart';
 import 'package:material_ui/material_ui.dart';
 
