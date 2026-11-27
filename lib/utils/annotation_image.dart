@@ -23,8 +23,8 @@ abstract final class AnnotationImage {
     required QuillController controller,
     required String source,
   }) {
-    final index = controller.selection.baseOffset;
-    final length = controller.selection.extentOffset - index;
+    final index = controller.selection.start;
+    final length = controller.selection.end - index;
     controller
       ..skipRequestKeyboard = true
       ..replaceText(index, length, BlockEmbed.image(source), null)

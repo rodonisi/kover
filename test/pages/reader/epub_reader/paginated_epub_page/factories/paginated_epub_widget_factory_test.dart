@@ -200,6 +200,28 @@ void main() {
       expect(tappedAnchors.single.part, 'note');
     });
 
+    testWidgets('keeps links tappable when they wrap an annotation', (
+      tester,
+    ) async {
+      final tappedAnnotations = <PaginatedEpubAnnotation>[];
+      final tappedAnchors = <EpubAnchorTarget>[];
+      await _pumpHtml(
+        tester,
+        '<p><a href="#note"><app-epub-highlight data-kover-annotation-id="1">'
+        'world</app-epub-highlight></a></p>',
+        const Size(300, 600),
+        annotations: [_annotation],
+        onAnnotationTap: tappedAnnotations.add,
+        onAnchorTap: tappedAnchors.add,
+      );
+
+      await tester.tapOnText(find.textRange.ofSubstring('world'));
+      await tester.pumpAndSettle();
+
+      expect(tappedAnnotations, isEmpty);
+      expect(tappedAnchors.single.part, 'note');
+    });
+
     testWidgets('marks block highlights as overlay-safe hit regions', (
       tester,
     ) async {

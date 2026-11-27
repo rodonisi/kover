@@ -242,7 +242,11 @@ class PaginatedEpubWidgetFactory({
 
   BuildTree _applyAnnotation(BuildTree tree) {
     final annotation = _annotationFor(tree.element);
-    if (annotation == null || onAnnotationTap == null) return tree;
+    if (annotation == null ||
+        onAnnotationTap == null ||
+        _insideLink(tree.element)) {
+      return tree;
+    }
 
     final recognizer = buildGestureRecognizer(tree);
     if (recognizer == null) return tree;
@@ -250,6 +254,17 @@ class PaginatedEpubWidgetFactory({
     return tree
       ..inherit(_annotationRecognizer, recognizer)
       ..setNonInherited(recognizer);
+  }
+
+  /// Link navigation wins for text inside a link.
+  static bool _insideLink(dom.Element element) {
+    for (var parent = element.parent; parent != null; parent = parent.parent) {
+      if (parent.localName == 'a' && parent.attributes.containsKey('href')) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   void _applyAnnotationColor(BuildTree tree) {

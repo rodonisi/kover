@@ -59,6 +59,28 @@ void main() {
       ]);
     });
 
+    test('replaces a reversed selection with an image block', () {
+      final controller = quill.QuillController.basic();
+      addTearDown(controller.dispose);
+      const source = 'https://example.com/image.png';
+
+      controller
+        ..replaceText(0, 0, 'selected text', null)
+        ..updateSelection(
+          controller.selection.copyWith(baseOffset: 13, extentOffset: 0),
+          quill.ChangeSource.local,
+        );
+
+      AnnotationImage.insert(controller: controller, source: source);
+
+      expect(controller.document.toDelta().toJson(), [
+        {
+          'insert': {'image': source},
+        },
+        {'insert': '\n'},
+      ]);
+    });
+
     test('rejects unsupported file contents', () async {
       final directory = await Directory.systemTemp.createTemp(
         'kover_annotation_image',
