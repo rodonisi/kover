@@ -1,21 +1,19 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/models/annotation_draft.dart';
 import 'package:kover/models/highlight_slot_model.dart';
 import 'package:kover/pages/reader/epub_reader/annotations/annotation_editable_body.dart';
-import 'package:kover/pages/reader/epub_reader/annotations/annotation_helpers.dart';
 import 'package:kover/pages/reader/epub_reader/annotations/annotation_sheet_layout.dart';
 import 'package:kover/pages/reader/epub_reader/annotations/epub_annotation_sheet_provider.dart';
 import 'package:kover/riverpod/providers/annotations.dart';
+import 'package:kover/utils/extensions/app_localizations.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:kover/widgets/util/async_value.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// Shows the editor for a new annotation and creates it on save.
 class EpubAnnotationDraftSheet extends ConsumerWidget {
-  /// Creates a sheet for annotating [draft] on [pageNumber] of [chapterId].
   const new({
     super.key,
     required this.chapterId,
@@ -68,17 +66,16 @@ class _DraftContent extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final isSaving = useState(false);
-    final selectedSlot = useState(defaultSlot(slots));
+    final selectedSlot = useState(slots.defaultSlotNumber);
     final containsSpoiler = useState(false);
     final commentController = useMemoized(
-      quill.QuillController.basic,
+      QuillController.basic,
       const [],
     );
     useEffect(() => commentController.dispose, [commentController]);
-    final canSave = hasColor(slots, selectedSlot.value);
-    final accentColor = colorForSlot(slots, selectedSlot.value);
-    final attribution = formatAttribution(
-      l,
+    final canSave = slots.colorForSlot(selectedSlot.value) != null;
+    final accentColor = slots.colorForSlot(selectedSlot.value);
+    final attribution = l.annotationLocation(
       pageNumber: pageNumber,
       chapterTitle: chapterTitle,
     );

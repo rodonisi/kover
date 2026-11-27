@@ -13,14 +13,28 @@ class HighlightSlotModel({
     slotNumber: data.slotNumber,
     color: _toColor(data),
   );
+
+  static Color? _toColor(HighlightSlot data) {
+    final red = data.red;
+    final green = data.green;
+    final blue = data.blue;
+    if (red == null || green == null || blue == null) return null;
+
+    final alpha = ((data.alpha ?? 1.0) * 255).round().clamp(0, 255);
+    return Color.fromARGB(alpha, red, green, blue);
+  }
 }
 
-Color? _toColor(HighlightSlot data) {
-  final red = data.red;
-  final green = data.green;
-  final blue = data.blue;
-  if (red == null || green == null || blue == null) return null;
+extension HighlightSlotListExtension on List<HighlightSlotModel> {
+  Color? colorForSlot(int slotNumber) {
+    return where((slot) => slot.slotNumber == slotNumber).firstOrNull?.color;
+  }
 
-  final alpha = ((data.alpha ?? 1.0) * 255).round().clamp(0, 255);
-  return Color.fromARGB(alpha, red, green, blue);
+  /// The slot preselected for a new annotation: Kavita's default slot `0`, or
+  /// the first slot that has a color.
+  int get defaultSlotNumber {
+    if (colorForSlot(0) != null) return 0;
+
+    return where((slot) => slot.color != null).firstOrNull?.slotNumber ?? 0;
+  }
 }

@@ -4,11 +4,7 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing
 import 'package:kover/utils/constants/html_constants.dart';
 
 /// Removes annotation highlights that Kavita injected for annotations that no
-/// longer exist locally.
-///
-/// Only highlights carrying a known server id are kept. Kover's own id
-/// attribute is written later by `EnsureAnnotationsOperation`, so it is not
-/// consulted here.
+/// longer exist locally. Only highlights carrying a known server id are kept.
 final class RemoveUnknownAnnotationsOperation({
   required final Iterable<PaginatedEpubAnnotation> annotations,
 }) extends EpubPagePreprocessorOperation {

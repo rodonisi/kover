@@ -29,9 +29,6 @@ class PaginatedEpubWidgetFactory({
     for (final annotation in annotations) annotation.id: annotation,
   };
 
-  // Runs after background styling so the saved slot color wins.
-  static const _annotationPriority = 9007199254740991;
-
   late final BuildOp _textIndentOp = BuildOp(
     alwaysRenderBlock: false,
     debugLabel: 'epub-text-indent',
@@ -46,7 +43,6 @@ class PaginatedEpubWidgetFactory({
     debugLabel: 'epub-annotation',
     onParsed: _applyAnnotation,
     onRenderInline: _applyAnnotationColor,
-    priority: _annotationPriority,
     onRenderBlock: (tree, placeholder) {
       final recognizer = tree.getNonInherited<GestureRecognizer>();
       if (recognizer == null) return placeholder;

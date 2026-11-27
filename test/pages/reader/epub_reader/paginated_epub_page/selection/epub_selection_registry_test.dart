@@ -174,10 +174,10 @@ void main() {
     ) async {
       final registry = await _pump(
         tester,
-        '<div><p>Head of it</p></div>',
+        '<div><p>Head of it </p></div>',
         secondSubpage: (html) => html
             .replaceFirst('<p ', '<p kover-starts-mid-block="" ')
-            .replaceFirst('Head of it', 'and the tail.'),
+            .replaceFirst('Head of it ', 'and the tail.'),
       );
 
       await _select(
@@ -192,20 +192,43 @@ void main() {
       expect(draft?.endingXPath, '//body/p[1]');
     });
 
+    testWidgets('joins a paragraph split inside a word without a space', (
+      tester,
+    ) async {
+      final registry = await _pump(
+        tester,
+        '<div><p>Head</p></div>',
+        secondSubpage: (html) => html
+            .replaceFirst('<p ', '<p kover-starts-mid-block="" ')
+            .replaceFirst('Head', 'ofit'),
+      );
+
+      await _select(
+        tester,
+        from: _position(tester, 'Head', 0),
+        to: _position(tester, 'ofit', 3),
+      );
+
+      final draft = registry.resolveDraft();
+      expect(draft?.selectedText, 'Headofi');
+      expect(draft?.xPath, '//body/p[1]');
+      expect(draft?.endingXPath, '//body/p[1]');
+    });
+
     testWidgets('orders a paragraph split across three subpages by index', (
       tester,
     ) async {
       final registry = EpubSelectionRegistry();
       final base = EpubPagePreprocessor(
-        html: dom.DocumentFragment.html('<div><p>Part one</p></div>'),
+        html: dom.DocumentFragment.html('<div><p>Part one </p></div>'),
         operations: [NodeIndexingOperation(), ScrollIdOperation()],
       ).process().outerHtml;
       final middle = base
           .replaceFirst('<p ', '<p kover-starts-mid-block="" ')
-          .replaceFirst('Part one', 'part two');
+          .replaceFirst('Part one ', 'part two ');
       final tail = base
           .replaceFirst('<p ', '<p kover-starts-mid-block="" ')
-          .replaceFirst('Part one', 'part three');
+          .replaceFirst('Part one ', 'part three');
 
       Widget subpage(String html, int index) => HtmlWidget(
         html,
@@ -363,7 +386,8 @@ Future<EpubSelectionRegistry> _pumpSideBySide(
 Offset _position(WidgetTester tester, String text, int offset) {
   final paragraph = tester.renderObject<RenderParagraph>(
     find.byWidgetPredicate(
-      (widget) => widget is RichText && widget.text.toPlainText() == text,
+      (widget) =>
+          widget is RichText && widget.text.toPlainText().trim() == text,
     ),
   );
   final box = paragraph

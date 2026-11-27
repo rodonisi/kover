@@ -23,9 +23,8 @@ class Annotations extends Table {
   TextColumn get xPath => text()();
   TextColumn get endingXPath => text()();
   TextColumn get selectedText => text()();
-  TextColumn get comment => text().nullable()();
+  TextColumn get comment => text().withDefault(const Constant('{}'))();
   TextColumn get commentHtml => text().nullable()();
-  TextColumn get commentPlainText => text().nullable()();
   TextColumn get context => text().nullable()();
   IntColumn get highlightCount => integer().nullable()();
   BoolColumn get containsSpoiler =>

@@ -9460,7 +9460,6 @@ final class Schema16 extends i0.VersionedSchema {
         _column_126,
         _column_127,
         _column_128,
-        _column_129,
         _column_52,
         _column_22,
         _column_42,
@@ -9478,11 +9477,11 @@ final class Schema16 extends i0.VersionedSchema {
       isStrict: false,
       tableConstraints: ['PRIMARY KEY(slot_number)'],
       columns: [
+        _column_129,
         _column_130,
         _column_131,
         _column_132,
         _column_133,
-        _column_134,
       ],
       attachedDatabase: database,
     ),
@@ -9768,8 +9767,6 @@ class Shape48 extends i0.VersionedTable {
       columnsByName['comment']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<String> get commentHtml =>
       columnsByName['comment_html']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<String> get commentPlainText =>
-      columnsByName['comment_plain_text']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<String> get context =>
       columnsByName['context']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<int> get highlightCount =>
@@ -9844,9 +9841,10 @@ i1.GeneratedColumn<String> _column_122(String aliasedName) =>
     i1.GeneratedColumn<String>(
       'comment',
       aliasedName,
-      true,
+      false,
       type: i1.DriftSqlType.string,
-      $customConstraints: 'NULL',
+      $customConstraints: 'NOT NULL DEFAULT \'{}\'',
+      defaultValue: const i1.CustomExpression('\'{}\''),
     );
 i1.GeneratedColumn<String> _column_123(String aliasedName) =>
     i1.GeneratedColumn<String>(
@@ -9858,21 +9856,13 @@ i1.GeneratedColumn<String> _column_123(String aliasedName) =>
     );
 i1.GeneratedColumn<String> _column_124(String aliasedName) =>
     i1.GeneratedColumn<String>(
-      'comment_plain_text',
-      aliasedName,
-      true,
-      type: i1.DriftSqlType.string,
-      $customConstraints: 'NULL',
-    );
-i1.GeneratedColumn<String> _column_125(String aliasedName) =>
-    i1.GeneratedColumn<String>(
       'context',
       aliasedName,
       true,
       type: i1.DriftSqlType.string,
       $customConstraints: 'NULL',
     );
-i1.GeneratedColumn<int> _column_126(String aliasedName) =>
+i1.GeneratedColumn<int> _column_125(String aliasedName) =>
     i1.GeneratedColumn<int>(
       'highlight_count',
       aliasedName,
@@ -9880,7 +9870,7 @@ i1.GeneratedColumn<int> _column_126(String aliasedName) =>
       type: i1.DriftSqlType.int,
       $customConstraints: 'NULL',
     );
-i1.GeneratedColumn<int> _column_127(String aliasedName) =>
+i1.GeneratedColumn<int> _column_126(String aliasedName) =>
     i1.GeneratedColumn<int>(
       'contains_spoiler',
       aliasedName,
@@ -9890,7 +9880,7 @@ i1.GeneratedColumn<int> _column_127(String aliasedName) =>
           'NOT NULL DEFAULT 0 CHECK (contains_spoiler IN (0, 1))',
       defaultValue: const i1.CustomExpression('0'),
     );
-i1.GeneratedColumn<int> _column_128(String aliasedName) =>
+i1.GeneratedColumn<int> _column_127(String aliasedName) =>
     i1.GeneratedColumn<int>(
       'selected_slot_index',
       aliasedName,
@@ -9898,7 +9888,7 @@ i1.GeneratedColumn<int> _column_128(String aliasedName) =>
       type: i1.DriftSqlType.int,
       $customConstraints: 'NOT NULL',
     );
-i1.GeneratedColumn<String> _column_129(String aliasedName) =>
+i1.GeneratedColumn<String> _column_128(String aliasedName) =>
     i1.GeneratedColumn<String>(
       'likes',
       aliasedName,
@@ -9922,7 +9912,7 @@ class Shape49 extends i0.VersionedTable {
       columnsByName['alpha']! as i1.GeneratedColumn<double>;
 }
 
-i1.GeneratedColumn<int> _column_130(String aliasedName) =>
+i1.GeneratedColumn<int> _column_129(String aliasedName) =>
     i1.GeneratedColumn<int>(
       'slot_number',
       aliasedName,
@@ -9930,7 +9920,7 @@ i1.GeneratedColumn<int> _column_130(String aliasedName) =>
       type: i1.DriftSqlType.int,
       $customConstraints: 'NOT NULL',
     );
-i1.GeneratedColumn<int> _column_131(String aliasedName) =>
+i1.GeneratedColumn<int> _column_130(String aliasedName) =>
     i1.GeneratedColumn<int>(
       'red',
       aliasedName,
@@ -9938,7 +9928,7 @@ i1.GeneratedColumn<int> _column_131(String aliasedName) =>
       type: i1.DriftSqlType.int,
       $customConstraints: 'NULL',
     );
-i1.GeneratedColumn<int> _column_132(String aliasedName) =>
+i1.GeneratedColumn<int> _column_131(String aliasedName) =>
     i1.GeneratedColumn<int>(
       'green',
       aliasedName,
@@ -9946,7 +9936,7 @@ i1.GeneratedColumn<int> _column_132(String aliasedName) =>
       type: i1.DriftSqlType.int,
       $customConstraints: 'NULL',
     );
-i1.GeneratedColumn<int> _column_133(String aliasedName) =>
+i1.GeneratedColumn<int> _column_132(String aliasedName) =>
     i1.GeneratedColumn<int>(
       'blue',
       aliasedName,
@@ -9954,7 +9944,7 @@ i1.GeneratedColumn<int> _column_133(String aliasedName) =>
       type: i1.DriftSqlType.int,
       $customConstraints: 'NULL',
     );
-i1.GeneratedColumn<double> _column_134(String aliasedName) =>
+i1.GeneratedColumn<double> _column_133(String aliasedName) =>
     i1.GeneratedColumn<double>(
       'alpha',
       aliasedName,

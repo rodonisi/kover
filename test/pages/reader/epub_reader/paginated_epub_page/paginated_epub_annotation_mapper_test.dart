@@ -69,6 +69,7 @@ AnnotationModel _annotation({
     xPath: xPath,
     endingXPath: endingXPath,
     selectedText: selectedText,
+    comment: '{}',
     selectedSlotIndex: selectedSlotIndex,
     created: timestamp,
     lastModified: timestamp,

@@ -46,6 +46,7 @@ void main() {
       expect(companion.xPath.value, '//div/p[1]');
       expect(companion.endingXPath.value, '//div/p[2]');
       expect(companion.selectedText.value, 'quoted text');
+      expect(companion.comment.value, '{}');
       expect(companion.pageNumber.value, 4);
       expect(companion.selectedSlotIndex.value, 1);
       expect(companion.containsSpoiler.value, isTrue);

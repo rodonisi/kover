@@ -4,6 +4,7 @@ class AnnotationSyncOperations(final Openapi _client) {
   /// Get all annotations visible to the current user.
   Future<List<AnnotationDto>> getAllAnnotations() async {
     final res = await _client.apiAnnotationAllFilteredPost(
+      pageSize: 0,
       body: const AnnotationFilterDto(
         id: 0,
         limitTo: 0,
@@ -17,6 +18,14 @@ class AnnotationSyncOperations(final Openapi _client) {
     );
     if (!res.isSuccessful || res.body == null) {
       throw Exception('Failed to load annotations: ${res.error}');
+    }
+    return res.body!;
+  }
+
+  Future<UserDto> getCurrentUser() async {
+    final res = await _client.apiAccountGet();
+    if (!res.isSuccessful || res.body == null) {
+      throw Exception('Failed to load current user: ${res.error}');
     }
     return res.body!;
   }

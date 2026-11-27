@@ -5,15 +5,15 @@ import 'package:kover/utils/constants/html_constants.dart';
 
 void main() {
   group('NodeIndexingOperation', () {
-    test('when finishing, then assigns sequential indexes', () {
+    test('when entering elements, then assigns sequential indexes', () {
       final operation = NodeIndexingOperation();
-      final root = dom.DocumentFragment.html('<div><p><span></span></p></div>');
-      final div = root.querySelector('div')!;
-      final p = root.querySelector('p')!;
-      final span = root.querySelector('span')!;
+      final div = dom.Element.tag('div');
+      final p = dom.Element.tag('p');
+      final span = dom.Element.tag('span');
 
-      operation.start(root);
-      operation.finish(root);
+      operation.enter(div);
+      operation.enter(p);
+      operation.enter(span);
 
       expect(_nodeIndex(div), '0');
       expect(_nodeIndex(p), '1');
@@ -22,15 +22,15 @@ void main() {
 
     test('when started, then resets the index', () {
       final operation = NodeIndexingOperation();
-      final root = dom.DocumentFragment.html('<div><p></p></div>');
 
-      operation.start(root);
-      operation.finish(root);
-      operation.start(root);
-      operation.finish(root);
+      operation.start(dom.DocumentFragment());
+      operation.enter(dom.Element.tag('div'));
+      operation.enter(dom.Element.tag('p'));
+      operation.start(dom.DocumentFragment());
+      final span = dom.Element.tag('span');
+      operation.enter(span);
 
-      expect(_nodeIndex(root.querySelector('div')!), '0');
-      expect(_nodeIndex(root.querySelector('p')!), '1');
+      expect(_nodeIndex(span), '0');
     });
   });
 }

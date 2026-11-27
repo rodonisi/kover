@@ -37,9 +37,8 @@ class AnnotationRepository(
     required String xPath,
     required String endingXPath,
     required String selectedText,
-    String? comment,
+    required String comment,
     String? commentHtml,
-    String? commentPlainText,
     String? context,
     int highlightCount = 1,
     bool containsSpoiler = false,
@@ -60,7 +59,6 @@ class AnnotationRepository(
         selectedText: selectedText,
         comment: Value(comment),
         commentHtml: Value(commentHtml),
-        commentPlainText: Value(commentPlainText),
         context: Value(context),
         highlightCount: Value(highlightCount),
         containsSpoiler: Value(containsSpoiler),
@@ -95,9 +93,8 @@ class AnnotationRepository(
   Future<void> updateAnnotation({
     required int id,
     required int ownerUserId,
-    required String? comment,
+    required String comment,
     required String? commentHtml,
-    required String? commentPlainText,
     required bool containsSpoiler,
     required int selectedSlotIndex,
   }) async {
@@ -113,7 +110,6 @@ class AnnotationRepository(
         id: Value(id),
         comment: Value(comment),
         commentHtml: Value(commentHtml),
-        commentPlainText: Value(commentPlainText),
         containsSpoiler: Value(containsSpoiler),
         selectedSlotIndex: Value(selectedSlotIndex),
         lastModified: Value(DateTime.now()),
@@ -146,6 +142,20 @@ class AnnotationRepository(
     );
 
     await _tryPush(removed);
+  }
+
+  /// Refreshes the user's highlight slots during annotation sync.
+  Future<void> refreshHighlightSlots() async {
+    try {
+      final user = await _client.getCurrentUser();
+      final slots = user.preferences?.bookReaderHighlightSlots;
+      if (slots != null) await replaceHighlightSlots(slots);
+    } catch (error) {
+      log.warning(
+        'could not refresh highlight slots',
+        attributes: {'error': error},
+      );
+    }
   }
 
   /// Merges all dirty annotations with the server.

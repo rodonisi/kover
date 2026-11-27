@@ -3,10 +3,6 @@ import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
-const double _progressIndicatorSize = 18.0;
-const double _progressIndicatorStrokeWidth = 2.0;
-
-/// Pinned-chrome sheet shell whose flexible [body] adapts to remaining height.
 class AnnotationSheetLayout extends StatelessWidget {
   const new({
     super.key,
@@ -20,29 +16,30 @@ class AnnotationSheetLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          LayoutConstants.mediumPadding,
-          0,
-          LayoutConstants.mediumPadding,
-          LayoutConstants.mediumPadding,
-        ),
-        child: Column(
-          mainAxisSize: .min,
-          crossAxisAlignment: .stretch,
-          spacing: LayoutConstants.mediumPadding,
-          children: [
-            Flexible(child: body),
-            ?footer,
-          ],
-        ),
+      padding: .only(
+        bottom:
+            MediaQuery.viewInsetsOf(context).bottom +
+            LayoutConstants.mediumPadding,
+      ),
+      child: Column(
+        mainAxisSize: .min,
+        crossAxisAlignment: .stretch,
+        spacing: LayoutConstants.mediumPadding,
+        children: [
+          Flexible(child: body),
+          if (footer case final footer?)
+            Padding(
+              padding: const .symmetric(
+                horizontal: LayoutConstants.mediumPadding,
+              ),
+              child: footer,
+            ),
+        ],
       ),
     );
   }
 }
 
-/// Compact metadata row showing owner username, single timestamp, and spoiler.
 class AnnotationHeader extends StatelessWidget {
   const new({
     super.key,
@@ -62,6 +59,8 @@ class AnnotationHeader extends StatelessWidget {
     final mutedColor = theme.colorScheme.onSurfaceVariant;
     final metaStyle = theme.textTheme.labelMedium?.copyWith(color: mutedColor);
     final owner = ownerUsername?.trim();
+    final dateString = MaterialLocalizations.of(context)
+        .formatShortDate(timestamp.toLocal());
 
     return Row(
       crossAxisAlignment: .center,
@@ -73,7 +72,7 @@ class AnnotationHeader extends StatelessWidget {
             spacing: LayoutConstants.smallPadding,
             runSpacing: LayoutConstants.smallerPadding,
             children: [
-              if (owner != null && owner.isNotEmpty)
+              if (owner != null && owner.isNotEmpty) ...[
                 Row(
                   mainAxisSize: .min,
                   spacing: LayoutConstants.smallerPadding,
@@ -86,7 +85,9 @@ class AnnotationHeader extends StatelessWidget {
                     Text(owner, style: metaStyle),
                   ],
                 ),
-              Text(_formatDateTime(context, timestamp), style: metaStyle),
+                Text('—', style: metaStyle),
+              ],
+              Text(dateString, style: metaStyle),
             ],
           ),
         ),
@@ -99,7 +100,7 @@ class AnnotationHeader extends StatelessWidget {
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
+              padding: const .symmetric(
                 horizontal: LayoutConstants.smallPadding,
                 vertical: LayoutConstants.smallerPadding,
               ),
@@ -127,7 +128,6 @@ class AnnotationHeader extends StatelessWidget {
   }
 }
 
-/// View-mode pinned footer with delete and edit buttons.
 class AnnotationViewActions extends StatelessWidget {
   const new({
     super.key,
@@ -158,10 +158,8 @@ class AnnotationViewActions extends StatelessWidget {
           onPressed: isBusy ? null : onDelete,
           icon: isDeleting
               ? const SizedBox.square(
-                  dimension: _progressIndicatorSize,
-                  child: CircularProgressIndicator(
-                    strokeWidth: _progressIndicatorStrokeWidth,
-                  ),
+                  dimension: LayoutConstants.smallIcon,
+                  child: CircularProgressIndicator(),
                 )
               : const Icon(KoverIcons.trash),
           label: Text(l.delete),
@@ -176,7 +174,6 @@ class AnnotationViewActions extends StatelessWidget {
   }
 }
 
-/// The cancel and save buttons of an annotation form.
 class AnnotationSaveActions extends StatelessWidget {
   const new({
     super.key,
@@ -202,10 +199,8 @@ class AnnotationSaveActions extends StatelessWidget {
           onPressed: onSave,
           icon: isSaving
               ? const SizedBox.square(
-                  dimension: _progressIndicatorSize,
-                  child: CircularProgressIndicator(
-                    strokeWidth: _progressIndicatorStrokeWidth,
-                  ),
+                  dimension: LayoutConstants.smallIcon,
+                  child: CircularProgressIndicator(),
                 )
               : const Icon(KoverIcons.save),
           label: Text(l.save),
@@ -213,10 +208,4 @@ class AnnotationSaveActions extends StatelessWidget {
       ],
     );
   }
-}
-
-String _formatDateTime(BuildContext context, DateTime value) {
-  final local = value.toLocal();
-  final l10n = MaterialLocalizations.of(context);
-  return '${l10n.formatShortDate(local)}, ${l10n.formatTimeOfDay(TimeOfDay.fromDateTime(local))}';
 }

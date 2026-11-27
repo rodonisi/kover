@@ -1,36 +1,57 @@
 import 'package:html/dom.dart';
+import 'package:kover/utils/constants/html_constants.dart';
 
 extension ScrollIdExtension on Element {
-  /// Computes the XPath of this element relative to the root of the document.
-  String xpath({bool pureXPath = false}) {
-    var xpath = _getXPath(this, pureXPath: pureXPath);
+  /// Computes the Kavita-compatible XPath for this element.
+  ///
+  /// Returns `null` for elements outside the Kavita content root.
+  String? xpath() {
+    final bodyRoot = _bodyRoot;
+    if (bodyRoot == null) return null;
+
+    final xpath = _getXPath(this, bodyRoot: bodyRoot);
+    if (xpath == null) return null;
     if (!xpath.startsWith('//') && !xpath.startsWith('id(')) {
-      xpath = '//$xpath';
+      return '//$xpath';
     }
 
     return xpath;
   }
 
-  static String _getXPath(Element? element, {bool pureXPath = false}) {
-    if (element == null || element.localName == null) {
-      return '';
+  Element? get _bodyRoot {
+    Element? wrapper;
+    Element? current = this;
+    while (current != null) {
+      if (current.classes.contains(HtmlConstants.kavitaWrapperClass)) {
+        wrapper = current;
+      }
+      current = current.parent;
     }
 
-    // Handle shortcuts (unless pureXPath is requested)
-    if (!pureXPath && element.id.isNotEmpty) {
+    if (wrapper == null) return null;
+    return wrapper.children.length == 1 ? wrapper.children.single : wrapper;
+  }
+
+  static String? _getXPath(Element? element, {required Element bodyRoot}) {
+    if (element == null || element.localName == null) {
+      return null;
+    }
+
+    // Handle shortcuts.
+    if (element.id.isNotEmpty) {
       return 'id("${element.id}")';
     }
 
-    if (element.localName == 'body') {
+    if (identical(element, bodyRoot) || element.localName == 'body') {
       return 'body';
     }
 
     final parent = element.parent;
     if (parent == null) {
-      return element.localName!.toLowerCase();
+      return null;
     }
 
-    // Count same-tag siblings
+    // Count same-tag siblings.
     int siblingIndex = 1;
     final tagName = element.localName;
 
@@ -44,8 +65,9 @@ extension ScrollIdExtension on Element {
     }
 
     final currentPath = '${element.localName!.toLowerCase()}[$siblingIndex]';
-    final parentPath = _getXPath(parent, pureXPath: pureXPath);
+    final parentPath = _getXPath(parent, bodyRoot: bodyRoot);
+    if (parentPath == null) return null;
 
-    return parentPath.isNotEmpty ? '$parentPath/$currentPath' : currentPath;
+    return '$parentPath/$currentPath';
   }
 }

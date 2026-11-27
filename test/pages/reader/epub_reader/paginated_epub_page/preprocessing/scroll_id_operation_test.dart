@@ -9,7 +9,7 @@ void main() {
     test('writes a body-relative xpath for the content root', () {
       final root = _process('<div><p>Text</p></div>');
       final contentRoot = root
-          .querySelector('.${HtmlConstants.koverWrapperClass}')!
+          .querySelector('.${HtmlConstants.kavitaWrapperClass}')!
           .children
           .single;
 
@@ -20,6 +20,18 @@ void main() {
       expect(
         root.querySelector('p')!.attributes[HtmlConstants.scrollIdAttribute],
         '//body/p[1]',
+      );
+    });
+
+    test('does not write a scroll id to a synthetic wrapper', () {
+      final root = _process('<div><p>Text</p></div>');
+      final wrapper = root.querySelector(
+        '.${HtmlConstants.kavitaWrapperClass}',
+      )!;
+
+      expect(
+        wrapper.attributes.containsKey(HtmlConstants.scrollIdAttribute),
+        isFalse,
       );
     });
 
@@ -45,6 +57,12 @@ void main() {
       final root = _process('<p>One</p><p>Two</p>');
       final paragraphs = root.querySelectorAll('p');
 
+      expect(
+        root
+            .querySelector('.${HtmlConstants.kavitaWrapperClass}')!
+            .attributes[HtmlConstants.scrollIdAttribute],
+        '//body',
+      );
       expect(
         paragraphs[0].attributes[HtmlConstants.scrollIdAttribute],
         '//body/p[1]',

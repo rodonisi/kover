@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:html/dom.dart';
 import 'package:kover/database/app_database.dart';
+import 'package:kover/utils/extensions/document_fragment.dart';
 
 part 'annotation_model.freezed.dart';
 
@@ -14,9 +16,8 @@ class AnnotationModel({
   required final String xPath,
   required final String endingXPath,
   required final String selectedText,
-  final String? comment,
+  required final String comment,
   final String? commentHtml,
-  final String? commentPlainText,
   final bool containsSpoiler = false,
   final int selectedSlotIndex = 0,
   required final DateTime created,
@@ -34,10 +35,22 @@ class AnnotationModel({
     selectedText: data.selectedText,
     comment: data.comment,
     commentHtml: data.commentHtml,
-    commentPlainText: data.commentPlainText,
     containsSpoiler: data.containsSpoiler,
     selectedSlotIndex: data.selectedSlotIndex,
     created: data.created,
     lastModified: data.lastModified,
   );
+
+  /// The comment HTML when non-empty, or `null` for blank/empty Quill HTML.
+  String? get displayCommentHtml {
+    final html = commentHtml?.trim();
+
+    if (html == null ||
+        html.isEmpty ||
+        !DocumentFragment.html(html).hasVisibleNodes) {
+      return null;
+    }
+
+    return html;
+  }
 }

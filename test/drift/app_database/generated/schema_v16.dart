@@ -8375,21 +8375,14 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
   late final GeneratedColumn<String> comment = GeneratedColumn<String>(
     'comment',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    $customConstraints: 'NULL',
+    $customConstraints: 'NOT NULL DEFAULT \'{}\'',
+    defaultValue: const CustomExpression('\'{}\''),
   );
   late final GeneratedColumn<String> commentHtml = GeneratedColumn<String>(
     'comment_html',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
-  );
-  late final GeneratedColumn<String> commentPlainText = GeneratedColumn<String>(
-    'comment_plain_text',
     aliasedName,
     true,
     type: DriftSqlType.string,
@@ -8496,7 +8489,6 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
     selectedText,
     comment,
     commentHtml,
-    commentPlainText,
     context,
     highlightCount,
     containsSpoiler,
@@ -8574,14 +8566,10 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
       comment: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}comment'],
-      ),
+      )!,
       commentHtml: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}comment_html'],
-      ),
-      commentPlainText: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}comment_plain_text'],
       ),
       context: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -8650,9 +8638,8 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
   final String xPath;
   final String endingXPath;
   final String selectedText;
-  final String? comment;
+  final String comment;
   final String? commentHtml;
-  final String? commentPlainText;
   final String? context;
   final int? highlightCount;
   final int containsSpoiler;
@@ -8676,9 +8663,8 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     required this.xPath,
     required this.endingXPath,
     required this.selectedText,
-    this.comment,
+    required this.comment,
     this.commentHtml,
-    this.commentPlainText,
     this.context,
     this.highlightCount,
     required this.containsSpoiler,
@@ -8709,14 +8695,9 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     map['x_path'] = Variable<String>(xPath);
     map['ending_x_path'] = Variable<String>(endingXPath);
     map['selected_text'] = Variable<String>(selectedText);
-    if (!nullToAbsent || comment != null) {
-      map['comment'] = Variable<String>(comment);
-    }
+    map['comment'] = Variable<String>(comment);
     if (!nullToAbsent || commentHtml != null) {
       map['comment_html'] = Variable<String>(commentHtml);
-    }
-    if (!nullToAbsent || commentPlainText != null) {
-      map['comment_plain_text'] = Variable<String>(commentPlainText);
     }
     if (!nullToAbsent || context != null) {
       map['context'] = Variable<String>(context);
@@ -8755,15 +8736,10 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       xPath: Value(xPath),
       endingXPath: Value(endingXPath),
       selectedText: Value(selectedText),
-      comment: comment == null && nullToAbsent
-          ? const Value.absent()
-          : Value(comment),
+      comment: Value(comment),
       commentHtml: commentHtml == null && nullToAbsent
           ? const Value.absent()
           : Value(commentHtml),
-      commentPlainText: commentPlainText == null && nullToAbsent
-          ? const Value.absent()
-          : Value(commentPlainText),
       context: context == null && nullToAbsent
           ? const Value.absent()
           : Value(context),
@@ -8801,9 +8777,8 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       xPath: serializer.fromJson<String>(json['xPath']),
       endingXPath: serializer.fromJson<String>(json['endingXPath']),
       selectedText: serializer.fromJson<String>(json['selectedText']),
-      comment: serializer.fromJson<String?>(json['comment']),
+      comment: serializer.fromJson<String>(json['comment']),
       commentHtml: serializer.fromJson<String?>(json['commentHtml']),
-      commentPlainText: serializer.fromJson<String?>(json['commentPlainText']),
       context: serializer.fromJson<String?>(json['context']),
       highlightCount: serializer.fromJson<int?>(json['highlightCount']),
       containsSpoiler: serializer.fromJson<int>(json['containsSpoiler']),
@@ -8832,9 +8807,8 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       'xPath': serializer.toJson<String>(xPath),
       'endingXPath': serializer.toJson<String>(endingXPath),
       'selectedText': serializer.toJson<String>(selectedText),
-      'comment': serializer.toJson<String?>(comment),
+      'comment': serializer.toJson<String>(comment),
       'commentHtml': serializer.toJson<String?>(commentHtml),
-      'commentPlainText': serializer.toJson<String?>(commentPlainText),
       'context': serializer.toJson<String?>(context),
       'highlightCount': serializer.toJson<int?>(highlightCount),
       'containsSpoiler': serializer.toJson<int>(containsSpoiler),
@@ -8861,9 +8835,8 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     String? xPath,
     String? endingXPath,
     String? selectedText,
-    Value<String?> comment = const Value.absent(),
+    String? comment,
     Value<String?> commentHtml = const Value.absent(),
-    Value<String?> commentPlainText = const Value.absent(),
     Value<String?> context = const Value.absent(),
     Value<int?> highlightCount = const Value.absent(),
     int? containsSpoiler,
@@ -8889,11 +8862,8 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     xPath: xPath ?? this.xPath,
     endingXPath: endingXPath ?? this.endingXPath,
     selectedText: selectedText ?? this.selectedText,
-    comment: comment.present ? comment.value : this.comment,
+    comment: comment ?? this.comment,
     commentHtml: commentHtml.present ? commentHtml.value : this.commentHtml,
-    commentPlainText: commentPlainText.present
-        ? commentPlainText.value
-        : this.commentPlainText,
     context: context.present ? context.value : this.context,
     highlightCount: highlightCount.present
         ? highlightCount.value
@@ -8935,9 +8905,6 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       commentHtml: data.commentHtml.present
           ? data.commentHtml.value
           : this.commentHtml,
-      commentPlainText: data.commentPlainText.present
-          ? data.commentPlainText.value
-          : this.commentPlainText,
       context: data.context.present ? data.context.value : this.context,
       highlightCount: data.highlightCount.present
           ? data.highlightCount.value
@@ -8976,7 +8943,6 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
           ..write('selectedText: $selectedText, ')
           ..write('comment: $comment, ')
           ..write('commentHtml: $commentHtml, ')
-          ..write('commentPlainText: $commentPlainText, ')
           ..write('context: $context, ')
           ..write('highlightCount: $highlightCount, ')
           ..write('containsSpoiler: $containsSpoiler, ')
@@ -9007,7 +8973,6 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     selectedText,
     comment,
     commentHtml,
-    commentPlainText,
     context,
     highlightCount,
     containsSpoiler,
@@ -9037,7 +9002,6 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
           other.selectedText == this.selectedText &&
           other.comment == this.comment &&
           other.commentHtml == this.commentHtml &&
-          other.commentPlainText == this.commentPlainText &&
           other.context == this.context &&
           other.highlightCount == this.highlightCount &&
           other.containsSpoiler == this.containsSpoiler &&
@@ -9063,9 +9027,8 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
   final Value<String> xPath;
   final Value<String> endingXPath;
   final Value<String> selectedText;
-  final Value<String?> comment;
+  final Value<String> comment;
   final Value<String?> commentHtml;
-  final Value<String?> commentPlainText;
   final Value<String?> context;
   final Value<int?> highlightCount;
   final Value<int> containsSpoiler;
@@ -9091,7 +9054,6 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     this.selectedText = const Value.absent(),
     this.comment = const Value.absent(),
     this.commentHtml = const Value.absent(),
-    this.commentPlainText = const Value.absent(),
     this.context = const Value.absent(),
     this.highlightCount = const Value.absent(),
     this.containsSpoiler = const Value.absent(),
@@ -9118,7 +9080,6 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     required String selectedText,
     this.comment = const Value.absent(),
     this.commentHtml = const Value.absent(),
-    this.commentPlainText = const Value.absent(),
     this.context = const Value.absent(),
     this.highlightCount = const Value.absent(),
     this.containsSpoiler = const Value.absent(),
@@ -9156,7 +9117,6 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     Expression<String>? selectedText,
     Expression<String>? comment,
     Expression<String>? commentHtml,
-    Expression<String>? commentPlainText,
     Expression<String>? context,
     Expression<int>? highlightCount,
     Expression<int>? containsSpoiler,
@@ -9183,7 +9143,6 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
       if (selectedText != null) 'selected_text': selectedText,
       if (comment != null) 'comment': comment,
       if (commentHtml != null) 'comment_html': commentHtml,
-      if (commentPlainText != null) 'comment_plain_text': commentPlainText,
       if (context != null) 'context': context,
       if (highlightCount != null) 'highlight_count': highlightCount,
       if (containsSpoiler != null) 'contains_spoiler': containsSpoiler,
@@ -9210,9 +9169,8 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     Value<String>? xPath,
     Value<String>? endingXPath,
     Value<String>? selectedText,
-    Value<String?>? comment,
+    Value<String>? comment,
     Value<String?>? commentHtml,
-    Value<String?>? commentPlainText,
     Value<String?>? context,
     Value<int?>? highlightCount,
     Value<int>? containsSpoiler,
@@ -9239,7 +9197,6 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
       selectedText: selectedText ?? this.selectedText,
       comment: comment ?? this.comment,
       commentHtml: commentHtml ?? this.commentHtml,
-      commentPlainText: commentPlainText ?? this.commentPlainText,
       context: context ?? this.context,
       highlightCount: highlightCount ?? this.highlightCount,
       containsSpoiler: containsSpoiler ?? this.containsSpoiler,
@@ -9298,9 +9255,6 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     if (commentHtml.present) {
       map['comment_html'] = Variable<String>(commentHtml.value);
     }
-    if (commentPlainText.present) {
-      map['comment_plain_text'] = Variable<String>(commentPlainText.value);
-    }
     if (context.present) {
       map['context'] = Variable<String>(context.value);
     }
@@ -9351,7 +9305,6 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
           ..write('selectedText: $selectedText, ')
           ..write('comment: $comment, ')
           ..write('commentHtml: $commentHtml, ')
-          ..write('commentPlainText: $commentPlainText, ')
           ..write('context: $context, ')
           ..write('highlightCount: $highlightCount, ')
           ..write('containsSpoiler: $containsSpoiler, ')

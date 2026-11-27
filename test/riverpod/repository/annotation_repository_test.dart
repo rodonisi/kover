@@ -53,6 +53,7 @@ void main() {
       xPath: '/p[1]',
       endingXPath: '/p[1]',
       selectedText: 'text',
+      comment: '{}',
       containsSpoiler: false,
       pageNumber: 1,
       selectedSlotIndex: 0,
@@ -105,6 +106,7 @@ void main() {
       xPath: '/p[1]',
       endingXPath: '/p[1]',
       selectedText: 'text',
+      comment: '{}',
       pageNumber: 1,
     );
 
@@ -132,6 +134,7 @@ void main() {
       xPath: '/p[1]',
       endingXPath: '/p[1]',
       selectedText: 'text',
+      comment: '{}',
       pageNumber: 1,
     );
 
@@ -156,6 +159,7 @@ void main() {
         xPath: '/p[1]',
         endingXPath: '/p[1]',
         selectedText: 'text',
+        comment: '{}',
         pageNumber: 1,
       );
 
@@ -208,7 +212,6 @@ void main() {
       ownerUserId: 2,
       comment: 'hijack',
       commentHtml: '<p>hijack</p>',
-      commentPlainText: 'hijack',
       containsSpoiler: false,
       selectedSlotIndex: 0,
     );
@@ -244,7 +247,6 @@ void main() {
       ownerUserId: 1,
       comment: 'updated',
       commentHtml: '<p>updated</p>',
-      commentPlainText: 'updated',
       containsSpoiler: false,
       selectedSlotIndex: 0,
     );
@@ -268,7 +270,6 @@ void main() {
       ownerUserId: 1,
       comment: 'updated',
       commentHtml: '<p>updated</p>',
-      commentPlainText: 'updated',
       containsSpoiler: false,
       selectedSlotIndex: 0,
     );
@@ -357,6 +358,23 @@ void main() {
     verifyNever(mockDao.deleteByIds(any));
   });
 
+  test('refreshAllAnnotations reconciles more than one remote page', () async {
+    final remote = List.generate(
+      25,
+      (index) => remoteAnnotation(id: index + 1),
+    );
+    when(mockClient.getAllAnnotations()).thenAnswer((_) async => remote);
+    when(mockChapterDao.getExistingChapterIds()).thenAnswer((_) async => {1});
+    when(mockDao.mergeRemoteBatch(any)).thenAnswer((_) async {});
+
+    await repo.refreshAllAnnotations();
+
+    final remoteIds =
+        verify(mockDao.deleteStaleAnnotations(captureAny)).captured.single
+            as Iterable<int>;
+    expect(remoteIds, unorderedEquals(List.generate(25, (index) => index + 1)));
+  });
+
   test('refreshAllAnnotations skips unknown chapters', () async {
     when(mockClient.getAllAnnotations()).thenAnswer(
       (_) async => [remoteAnnotation(id: 9, chapterId: 2)],
@@ -405,6 +423,34 @@ void main() {
       verifyNever(mockDao.deleteByIds(any));
     },
   );
+
+  test('refreshHighlightSlots stores current account preferences', () async {
+    when(mockClient.getCurrentUser()).thenAnswer(
+      (_) async => const UserDto(
+        preferences: UserPreferencesDto(
+          theme: SiteThemeDto(),
+          blurUnreadSummaries: false,
+          promptForDownloadSize: false,
+          noTransitions: false,
+          collapseSeriesRelationships: false,
+          locale: 'en',
+          colorScapeEnabled: false,
+          dataSaver: false,
+          promptForRereadsAfter: 0,
+          customKeyBinds: UserPreferencesDto$CustomKeyBinds(),
+          bookReaderHighlightSlots: [HighlightSlot(slotNumber: 0)],
+          socialPreferences: AppUserSocialPreferences(),
+          opdsPreferences: AppUserOpdsPreferences(),
+        ),
+      ),
+    );
+    when(mockDao.replaceHighlightSlots(any)).thenAnswer((_) async {});
+
+    await repo.refreshHighlightSlots();
+
+    verify(mockClient.getCurrentUser()).called(1);
+    verify(mockDao.replaceHighlightSlots(any)).called(1);
+  });
 
   test(
     'replaceHighlightSlots maps colors and skips missing slot numbers',

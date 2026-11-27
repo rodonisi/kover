@@ -7,10 +7,6 @@ import 'package:kover/utils/constants/kover_icons.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
-const double _editorMinHeight = 84.0;
-const double _editorMaxHeight = 140.0;
-
-/// Edit/draft body with scrollable quote, rich-text comment editor, and controls.
 class AnnotationEditableBody extends StatelessWidget {
   const new({
     super.key,
@@ -47,31 +43,34 @@ class AnnotationEditableBody extends StatelessWidget {
       onSpoilerChanged: onSpoilerChanged,
     );
 
-    return Column(
-      mainAxisSize: .min,
-      crossAxisAlignment: .stretch,
-      spacing: LayoutConstants.mediumPadding,
-      children: [
-        Flexible(
-          child: AnnotationQuoteBlock(
+    return SingleChildScrollView(
+      padding: const .symmetric(
+        horizontal: LayoutConstants.mediumPadding,
+      ),
+      child: Column(
+        mainAxisSize: .min,
+        crossAxisAlignment: .stretch,
+        spacing: LayoutConstants.mediumPadding,
+        children: [
+          AnnotationQuoteBlock(
             text: selectedText,
             accentColor: accentColor,
             attribution: attribution,
-            scrollable: true,
           ),
-        ),
-        AnnotationCommentEditor(
-          controller: commentController,
-          readOnly: readOnly,
-        ),
-        controls,
-      ],
+          AnnotationCommentEditor(
+            controller: commentController,
+            readOnly: readOnly,
+          ),
+          controls,
+        ],
+      ),
     );
   }
 }
 
-/// Compact rich-text Quill editor with a single-row formatting toolbar.
 class AnnotationCommentEditor extends HookWidget {
+  static const double _editorMinHeight = 84.0;
+
   const new({
     super.key,
     required this.controller,
@@ -101,6 +100,7 @@ class AnnotationCommentEditor extends HookWidget {
             controller: controller,
             config: const QuillSimpleToolbarConfig(
               multiRowsDisplay: true,
+              toolbarIconAlignment: .start,
               showDividers: true,
               showBoldButton: true,
               showItalicButton: true,
@@ -112,7 +112,7 @@ class AnnotationCommentEditor extends HookWidget {
               showClearFormat: true,
               showUndo: true,
               showRedo: true,
-              showFontSize: true,
+              showFontSize: false,
               showFontFamily: false,
               showInlineCode: false,
               showColorButton: false,
@@ -136,8 +136,7 @@ class AnnotationCommentEditor extends HookWidget {
           config: QuillEditorConfig(
             placeholder: l.comment,
             minHeight: _editorMinHeight,
-            maxHeight: _editorMaxHeight,
-            scrollable: true,
+            scrollable: false,
             customStyles: DefaultStyles(
               paragraph: DefaultTextBlockStyle(
                 theme.textTheme.bodyMedium!,
@@ -163,7 +162,6 @@ class AnnotationCommentEditor extends HookWidget {
   }
 }
 
-/// Highlight color picker and spoiler toggle for editing or creating annotations.
 class AnnotationControls extends StatelessWidget {
   const new({
     super.key,

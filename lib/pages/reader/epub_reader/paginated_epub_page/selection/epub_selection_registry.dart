@@ -27,11 +27,16 @@ final class EpubSelectionRegistry {
     for (var index = 1; index < selected.length; index++) {
       // A paragraph split over two subpages is rendered as two blocks of the
       // same element. Kavita separates different elements by a blank line.
-      final sameElement =
-          selected[index].block.nodeIndex ==
-          selected[index - 1].block.nodeIndex;
+      final previous = selected[index - 1].block;
+      final current = selected[index].block;
+      final sameElement = current.nodeIndex == previous.nodeIndex;
+      final separator = switch (sameElement) {
+        false => '\n\n',
+        true when _hasBoundaryWhitespace(previous, current) => ' ',
+        true => '',
+      };
       selectedText
-        ..write(sameElement ? ' ' : '\n\n')
+        ..write(separator)
         ..write(selected[index].text);
     }
 
@@ -42,6 +47,21 @@ final class EpubSelectionRegistry {
       selectedText: selectedText.toString(),
       context: end.element.text.replaceAll(_whitespace, ' ').trim(),
     );
+  }
+
+  static bool _hasBoundaryWhitespace(_Block before, _Block after) {
+    final beforeText = before.element.textContent(convertBRsToNewlines: true);
+    final afterText = after.element.textContent(convertBRsToNewlines: true);
+    final beforeHasWhitespace =
+        beforeText != null &&
+        beforeText.isNotEmpty &&
+        _whitespace.hasMatch(beforeText[beforeText.length - 1]);
+    final afterHasWhitespace =
+        afterText != null &&
+        afterText.isNotEmpty &&
+        _whitespace.hasMatch(afterText[0]);
+
+    return beforeHasWhitespace || afterHasWhitespace;
   }
 
   static final _whitespace = RegExp(r'\s+');

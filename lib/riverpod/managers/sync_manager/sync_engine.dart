@@ -247,6 +247,7 @@ class SyncEngine({
   Future<void> syncAnnotations() async {
     await _pool.withResource(annotationRepo.mergeAnnotations);
     await _pool.withResource(annotationRepo.refreshAllAnnotations);
+    await _pool.withResource(annotationRepo.refreshHighlightSlots);
   }
 
   Future<void> syncCollections() async {

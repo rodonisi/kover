@@ -5,8 +5,10 @@ import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/ensure_annotations_operation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/epub_page_preprocessor.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/node_indexing_operation.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/preprocessing/scroll_id_operation.dart';
 import 'package:kover/utils/constants/html_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -168,6 +170,43 @@ void main() {
         expect(
           result.measurements.units.whereType<EpubLineUnit>(),
           hasLength(1),
+        );
+      });
+
+      testWidgets('generated inline highlights need no node index', (
+        tester,
+      ) async {
+        final annotation = _annotation.copyWith(
+          xpath: '//body/p[1]',
+          endXpath: '//body/p[1]',
+          selectedText: 'Hello world',
+        );
+        final html = EpubPagePreprocessor(
+          html: dom.DocumentFragment.html('<div><p>Hello world</p></div>'),
+          operations: [
+            NodeIndexingOperation(),
+            ScrollIdOperation(),
+            EnsureAnnotationsOperation(annotations: [annotation]),
+          ],
+        ).process();
+        final highlight = html.querySelector(
+          HtmlConstants.kavitaHighlightElementTag,
+        )!;
+
+        expect(
+          highlight.attributes.containsKey(HtmlConstants.nodeIndexAttribute),
+          isFalse,
+        );
+
+        final result = await _measure(tester, html, annotations: [annotation]);
+
+        expect(
+          result.measurements.units.whereType<EpubLineUnit>(),
+          hasLength(1),
+        );
+        expect(
+          result.measurements.units.single.nodeIndex,
+          _nodeIndex(html, 'p'),
         );
       });
 

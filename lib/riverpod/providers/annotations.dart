@@ -77,7 +77,6 @@ class AnnotationActions extends _$AnnotationActions {
       selectedText: draft.selectedText,
       comment: encoded.comment,
       commentHtml: encoded.commentHtml,
-      commentPlainText: encoded.commentPlainText,
       context: draft.context,
       // Kavita stores the number of selected characters.
       highlightCount: draft.selectedText.length,
@@ -104,7 +103,6 @@ class AnnotationActions extends _$AnnotationActions {
       ownerUserId: user.id,
       comment: encoded.comment,
       commentHtml: encoded.commentHtml,
-      commentPlainText: encoded.commentPlainText,
       containsSpoiler: containsSpoiler,
       selectedSlotIndex: selectedSlotIndex,
     );

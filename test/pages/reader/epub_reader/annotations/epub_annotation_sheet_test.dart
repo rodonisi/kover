@@ -37,7 +37,8 @@ final _annotation = AnnotationModel(
   xPath: '//body/p[1]',
   endingXPath: '//body/p[1]',
   selectedText: 'quoted text',
-  commentPlainText: 'original note',
+  comment: r'{"ops":[{"insert":"original note\n"}]}',
+  commentHtml: '<p>original note</p>',
   containsSpoiler: true,
   selectedSlotIndex: 0,
   created: DateTime.utc(2026, 1, 2, 12),
@@ -93,7 +94,10 @@ void main() {
       expect(find.text('Spoiler'), findsOneWidget);
       expect(find.text('quoted text'), findsOneWidget);
       expect(find.text('Page 5, Chapter "Arrakis"'), findsOneWidget);
-      expect(find.text('original note'), findsOneWidget);
+      expect(
+        find.textContaining('original note', findRichText: true),
+        findsOneWidget,
+      );
       expect(find.text('Edit'), findsOneWidget);
       expect(find.text('Delete'), findsOneWidget);
     });
@@ -122,7 +126,10 @@ void main() {
 
       expect(find.text('other'), findsOneWidget);
       expect(find.text('quoted text'), findsOneWidget);
-      expect(find.text('original note'), findsOneWidget);
+      expect(
+        find.textContaining('original note', findRichText: true),
+        findsOneWidget,
+      );
       expect(find.text('Edit'), findsNothing);
       expect(find.text('Delete'), findsNothing);
     });
@@ -155,7 +162,6 @@ void main() {
         annotation: _annotation.copyWith(
           comment: r'{"ops":[{"insert":"a"},{"attributes":{"list":"bullet"},"insert":"\n"},{"insert":"a"},{"attributes":{"list":"ordered"},"insert":"\n"},{"attributes":{"bold":true},"insert":"asd"},{"insert":"\n"}]}',
           commentHtml: '<ul><li>a</li></ul><ol><li>a</li></ol><p><strong>asd</strong></p>',
-          commentPlainText: 'aaasd',
         ),
       );
 
@@ -163,19 +169,17 @@ void main() {
       expect(find.textContaining('asd', findRichText: true), findsOneWidget);
     });
 
-    testWidgets('shows a comment written in the Kavita web app', (
-      tester,
-    ) async {
+    testWidgets('renders multi-paragraph html comments', (tester) async {
       await _pumpSheet(
         tester,
         annotation: _annotation.copyWith(
           comment: r'{"ops":[{"insert":"first\nsecond\n"}]}',
-          commentHtml: null,
-          commentPlainText: 'firstsecond',
+          commentHtml: '<p>first</p><p>second</p>',
         ),
       );
 
-      expect(find.text('first\nsecond'), findsOneWidget);
+      expect(find.text('first', findRichText: true), findsOneWidget);
+      expect(find.text('second', findRichText: true), findsOneWidget);
     });
 
     testWidgets('shows no comment area for an empty Kavita note', (
@@ -186,7 +190,6 @@ void main() {
         annotation: _annotation.copyWith(
           comment: '{}',
           commentHtml: '<p><br></p>',
-          commentPlainText: '',
         ),
       );
 
@@ -208,7 +211,8 @@ void main() {
           (_) => Stream.value(
             _annotation.copyWith(
               selectedText: longQuote,
-              commentPlainText: longComment,
+              comment: '{}',
+              commentHtml: '<p>$longComment</p>',
             ),
           ),
         );
@@ -249,6 +253,21 @@ void main() {
       },
     );
 
+    testWidgets('edit sheet survives landscape keyboard insets', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 400);
+      tester.view.devicePixelRatio = 1;
+      tester.view.viewInsets = const FakeViewPadding(bottom: 250);
+      addTearDown(tester.view.reset);
+
+      await _pumpDraftSheet(tester);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Save'), findsOneWidget);
+    });
+
     testWidgets('saves rich comment, slot, and spoiler toggle', (
       tester,
     ) async {
@@ -273,7 +292,6 @@ void main() {
           ownerUserId: _ownerUserId,
           comment: r'{"ops":[{"insert":"updated","attributes":{"bold":true}},{"insert":" note\n"}]}',
           commentHtml: '<p><strong>updated</strong> note</p>',
-          commentPlainText: 'updated note',
           containsSpoiler: false,
           selectedSlotIndex: 1,
         ),
@@ -295,9 +313,8 @@ void main() {
         repository.updateAnnotation(
           id: 10,
           ownerUserId: _ownerUserId,
-          comment: null,
+          comment: '{}',
           commentHtml: null,
-          commentPlainText: null,
           containsSpoiler: true,
           selectedSlotIndex: 0,
         ),
@@ -355,7 +372,6 @@ void main() {
           ownerUserId: _ownerUserId,
           comment: r'{"ops":[{"insert":"bad note\n"}]}',
           commentHtml: '<p>bad note</p>',
-          commentPlainText: 'bad note',
           containsSpoiler: true,
           selectedSlotIndex: 0,
         ),
@@ -412,12 +428,21 @@ void main() {
       );
 
       annotations.add(
-        _annotation.copyWith(commentPlainText: 'updated externally'),
+        _annotation.copyWith(
+          comment: r'{"ops":[{"insert":"updated externally\n"}]}',
+          commentHtml: '<p>updated externally</p>',
+        ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('updated externally'), findsOneWidget);
-      expect(find.text('original note'), findsNothing);
+      expect(
+        find.text('updated externally', findRichText: true),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('original note', findRichText: true),
+        findsNothing,
+      );
     });
 
     testWidgets(
@@ -552,7 +577,7 @@ void main() {
           chapterId: _chapterId,
           pageNumber: 4,
           draft: _draft,
-          comment: 'a note',
+          comment: r'{"ops":[{"insert":"  a note  \n"}]}',
           containsSpoiler: true,
           selectedSlotIndex: 1,
         ),
@@ -566,7 +591,7 @@ void main() {
       await _tap(tester, find.text('Save'));
       await tester.pumpAndSettle();
 
-      expect(actions.created.single.comment, isNull);
+      expect(actions.created.single.comment, '{}');
       expect(actions.created.single.containsSpoiler, isFalse);
       expect(actions.created.single.selectedSlotIndex, 0);
     });
@@ -722,7 +747,7 @@ class _RecordingAnnotationActions(final _DraftActionRecorder _recorder)
       chapterId: chapterId,
       pageNumber: pageNumber,
       draft: draft,
-      comment: encoded.commentPlainText,
+      comment: encoded.comment,
       containsSpoiler: containsSpoiler,
       selectedSlotIndex: selectedSlotIndex,
     ));

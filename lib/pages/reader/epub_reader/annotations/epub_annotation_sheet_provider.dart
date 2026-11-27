@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kover/models/annotation_model.dart';
+import 'package:kover/models/book_chapter_model.dart';
 import 'package:kover/models/highlight_slot_model.dart';
-import 'package:kover/pages/reader/epub_reader/annotations/annotation_helpers.dart';
 import 'package:kover/riverpod/providers/annotations.dart';
 import 'package:kover/riverpod/providers/auth.dart';
 import 'package:kover/riverpod/providers/book.dart';
@@ -53,7 +53,7 @@ Future<EpubAnnotationSheetModel?> epubAnnotationSheet(
   return EpubAnnotationSheetModel(
     annotation: annotation,
     slots: slots,
-    chapterTitle: chapterTitleForPage(chapters, annotation.pageNumber),
+    chapterTitle: _chapterTitleForPage(chapters, annotation.pageNumber),
     canModify: currentUserId != null && annotation.ownerUserId == currentUserId,
   );
 }
@@ -73,6 +73,27 @@ Future<EpubAnnotationDraftSheetModel> epubAnnotationDraftSheet(
 
   return EpubAnnotationDraftSheetModel(
     slots: slots,
-    chapterTitle: chapterTitleForPage(chapters, pageNumber),
+    chapterTitle: _chapterTitleForPage(chapters, pageNumber),
   );
+}
+
+String? _chapterTitleForPage(List<BookChapterModel> chapters, int page) {
+  String? bestTitle;
+  var bestPage = -1;
+
+  void visit(List<BookChapterModel> nodes) {
+    for (final node in nodes) {
+      final title = node.title.trim();
+      if (node.page <= page && node.page >= bestPage && title.isNotEmpty) {
+        bestPage = node.page;
+        bestTitle = title;
+      }
+      if (node.children.isNotEmpty) {
+        visit(node.children);
+      }
+    }
+  }
+
+  visit(chapters);
+  return bestTitle;
 }

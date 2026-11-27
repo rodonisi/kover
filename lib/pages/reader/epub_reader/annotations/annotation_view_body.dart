@@ -3,7 +3,6 @@ import 'package:kover/pages/reader/epub_reader/annotations/annotation_quote.dart
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// View-mode body. Header, quote, attribution and comment share one scroll view.
 class AnnotationViewBody extends StatelessWidget {
   const new({
     super.key,
@@ -12,7 +11,6 @@ class AnnotationViewBody extends StatelessWidget {
     required this.accentColor,
     required this.attribution,
     required this.commentHtml,
-    required this.commentFallback,
   });
 
   final Widget header;
@@ -20,20 +18,20 @@ class AnnotationViewBody extends StatelessWidget {
   final Color? accentColor;
   final String attribution;
   final String? commentHtml;
-  final String commentFallback;
 
   @override
   Widget build(BuildContext context) {
-    final Widget? commentWidget = switch (commentHtml) {
-      final html? => HtmlWidget(
-        html,
-        renderMode: .column,
-      ),
-      null when commentFallback.isNotEmpty => Text(commentFallback),
-      null => null,
-    };
+    final commentWidget = commentHtml == null
+        ? null
+        : HtmlWidget(
+            commentHtml!,
+            renderMode: .column,
+          );
 
     return SingleChildScrollView(
+      padding: const .symmetric(
+        horizontal: LayoutConstants.mediumPadding,
+      ),
       child: Column(
         mainAxisSize: .min,
         crossAxisAlignment: .stretch,
@@ -44,7 +42,6 @@ class AnnotationViewBody extends StatelessWidget {
             text: selectedText,
             accentColor: accentColor,
             attribution: attribution,
-            scrollable: false,
           ),
           ?commentWidget,
         ],
