@@ -6,17 +6,17 @@ import 'package:material_ui/material_ui.dart';
 class AnnotationViewBody extends StatelessWidget {
   const new({
     super.key,
-    this.header,
+    required this.header,
     required this.selectedText,
     required this.accentColor,
     required this.attribution,
     required this.comment,
   });
 
-  final Widget? header;
+  final Widget header;
   final String selectedText;
   final Color? accentColor;
-  final String? attribution;
+  final String attribution;
   final String comment;
 
   @override
@@ -27,7 +27,7 @@ class AnnotationViewBody extends StatelessWidget {
         crossAxisAlignment: .stretch,
         spacing: LayoutConstants.mediumPadding,
         children: [
-          ?header,
+          header,
           AnnotationQuoteBlock(
             text: selectedText,
             accentColor: accentColor,

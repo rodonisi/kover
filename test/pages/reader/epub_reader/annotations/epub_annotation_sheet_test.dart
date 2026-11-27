@@ -31,6 +31,8 @@ final _annotation = AnnotationModel(
   pageNumber: 4,
   ownerUserId: _ownerUserId,
   ownerUsername: 'dev',
+  xPath: '//body/p[1]',
+  endingXPath: '//body/p[1]',
   selectedText: 'quoted text',
   commentPlainText: 'original note',
   containsSpoiler: true,
@@ -122,50 +124,27 @@ void main() {
       expect(find.text('Delete'), findsNothing);
     });
 
-    testWidgets('hides edit and delete when owner or current user is unknown', (
+    testWidgets('hides edit and delete when current user is unknown', (
       tester,
     ) async {
-      await _pumpSheet(
-        tester,
-        annotation: _annotation.copyWith(ownerUserId: null),
-      );
-
-      expect(find.text('Edit'), findsNothing);
-      expect(find.text('Delete'), findsNothing);
-
       await _pumpSheet(tester, currentUser: null);
 
       expect(find.text('Edit'), findsNothing);
       expect(find.text('Delete'), findsNothing);
     });
 
-    testWidgets(
-      'shows single lastModified timestamp and falls back to created',
-      (
+    testWidgets('shows single lastModified timestamp', (tester) async {
+      await _pumpSheet(
         tester,
-      ) async {
-        await _pumpSheet(
-          tester,
-          annotation: _annotation.copyWith(
-            created: DateTime(2025, 4, 10, 9, 0),
-            lastModified: DateTime(2026, 11, 25, 14, 30),
-          ),
-        );
+        annotation: _annotation.copyWith(
+          created: DateTime(2025, 4, 10, 9, 0),
+          lastModified: DateTime(2026, 11, 25, 14, 30),
+        ),
+      );
 
-        expect(find.textContaining('2026'), findsOneWidget);
-        expect(find.textContaining('2025'), findsNothing);
-
-        await _pumpSheet(
-          tester,
-          annotation: _annotation.copyWith(
-            created: DateTime(2025, 4, 10, 9, 0),
-            lastModified: null,
-          ),
-        );
-
-        expect(find.textContaining('2025'), findsOneWidget);
-      },
-    );
+      expect(find.textContaining('2026'), findsOneWidget);
+      expect(find.textContaining('2025'), findsNothing);
+    });
 
     testWidgets('shows a comment written in the Kavita web app', (
       tester,

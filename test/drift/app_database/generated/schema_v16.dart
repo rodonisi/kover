@@ -8351,26 +8351,26 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
   late final GeneratedColumn<String> xPath = GeneratedColumn<String>(
     'x_path',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<String> endingXPath = GeneratedColumn<String>(
     'ending_x_path',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<String> selectedText = GeneratedColumn<String>(
     'selected_text',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<String> comment = GeneratedColumn<String>(
     'comment',
@@ -8415,10 +8415,11 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
   late final GeneratedColumn<int> containsSpoiler = GeneratedColumn<int>(
     'contains_spoiler',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    $customConstraints: 'NULL CHECK (contains_spoiler IN (0, 1))',
+    $customConstraints: 'NOT NULL DEFAULT 0 CHECK (contains_spoiler IN (0, 1))',
+    defaultValue: const CustomExpression('0'),
   );
   late final GeneratedColumn<int> selectedSlotIndex = GeneratedColumn<int>(
     'selected_slot_index',
@@ -8448,18 +8449,18 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
   late final GeneratedColumn<int> created = GeneratedColumn<int>(
     'created',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<int> lastModified = GeneratedColumn<int>(
     'last_modified',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NULL',
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
   );
   late final GeneratedColumn<int> dirty = GeneratedColumn<int>(
     'dirty',
@@ -8561,15 +8562,15 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
       xPath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}x_path'],
-      ),
+      )!,
       endingXPath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}ending_x_path'],
-      ),
+      )!,
       selectedText: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}selected_text'],
-      ),
+      )!,
       comment: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}comment'],
@@ -8593,7 +8594,7 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
       containsSpoiler: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}contains_spoiler'],
-      ),
+      )!,
       selectedSlotIndex: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}selected_slot_index'],
@@ -8609,11 +8610,11 @@ class Annotations extends Table with TableInfo<Annotations, AnnotationsData> {
       created: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}created'],
-      ),
+      )!,
       lastModified: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}last_modified'],
-      ),
+      )!,
       dirty: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}dirty'],
@@ -8646,20 +8647,20 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
   final int pageNumber;
   final int ownerUserId;
   final String? ownerUsername;
-  final String? xPath;
-  final String? endingXPath;
-  final String? selectedText;
+  final String xPath;
+  final String endingXPath;
+  final String selectedText;
   final String? comment;
   final String? commentHtml;
   final String? commentPlainText;
   final String? context;
   final int? highlightCount;
-  final int? containsSpoiler;
+  final int containsSpoiler;
   final int selectedSlotIndex;
   final String likes;
   final int? ageRating;
-  final int? created;
-  final int? lastModified;
+  final int created;
+  final int lastModified;
   final int dirty;
   final int removed;
   const AnnotationsData({
@@ -8672,20 +8673,20 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     required this.pageNumber,
     required this.ownerUserId,
     this.ownerUsername,
-    this.xPath,
-    this.endingXPath,
-    this.selectedText,
+    required this.xPath,
+    required this.endingXPath,
+    required this.selectedText,
     this.comment,
     this.commentHtml,
     this.commentPlainText,
     this.context,
     this.highlightCount,
-    this.containsSpoiler,
+    required this.containsSpoiler,
     required this.selectedSlotIndex,
     required this.likes,
     this.ageRating,
-    this.created,
-    this.lastModified,
+    required this.created,
+    required this.lastModified,
     required this.dirty,
     required this.removed,
   });
@@ -8705,15 +8706,9 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     if (!nullToAbsent || ownerUsername != null) {
       map['owner_username'] = Variable<String>(ownerUsername);
     }
-    if (!nullToAbsent || xPath != null) {
-      map['x_path'] = Variable<String>(xPath);
-    }
-    if (!nullToAbsent || endingXPath != null) {
-      map['ending_x_path'] = Variable<String>(endingXPath);
-    }
-    if (!nullToAbsent || selectedText != null) {
-      map['selected_text'] = Variable<String>(selectedText);
-    }
+    map['x_path'] = Variable<String>(xPath);
+    map['ending_x_path'] = Variable<String>(endingXPath);
+    map['selected_text'] = Variable<String>(selectedText);
     if (!nullToAbsent || comment != null) {
       map['comment'] = Variable<String>(comment);
     }
@@ -8729,20 +8724,14 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     if (!nullToAbsent || highlightCount != null) {
       map['highlight_count'] = Variable<int>(highlightCount);
     }
-    if (!nullToAbsent || containsSpoiler != null) {
-      map['contains_spoiler'] = Variable<int>(containsSpoiler);
-    }
+    map['contains_spoiler'] = Variable<int>(containsSpoiler);
     map['selected_slot_index'] = Variable<int>(selectedSlotIndex);
     map['likes'] = Variable<String>(likes);
     if (!nullToAbsent || ageRating != null) {
       map['age_rating'] = Variable<int>(ageRating);
     }
-    if (!nullToAbsent || created != null) {
-      map['created'] = Variable<int>(created);
-    }
-    if (!nullToAbsent || lastModified != null) {
-      map['last_modified'] = Variable<int>(lastModified);
-    }
+    map['created'] = Variable<int>(created);
+    map['last_modified'] = Variable<int>(lastModified);
     map['dirty'] = Variable<int>(dirty);
     map['removed'] = Variable<int>(removed);
     return map;
@@ -8763,15 +8752,9 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       ownerUsername: ownerUsername == null && nullToAbsent
           ? const Value.absent()
           : Value(ownerUsername),
-      xPath: xPath == null && nullToAbsent
-          ? const Value.absent()
-          : Value(xPath),
-      endingXPath: endingXPath == null && nullToAbsent
-          ? const Value.absent()
-          : Value(endingXPath),
-      selectedText: selectedText == null && nullToAbsent
-          ? const Value.absent()
-          : Value(selectedText),
+      xPath: Value(xPath),
+      endingXPath: Value(endingXPath),
+      selectedText: Value(selectedText),
       comment: comment == null && nullToAbsent
           ? const Value.absent()
           : Value(comment),
@@ -8787,20 +8770,14 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       highlightCount: highlightCount == null && nullToAbsent
           ? const Value.absent()
           : Value(highlightCount),
-      containsSpoiler: containsSpoiler == null && nullToAbsent
-          ? const Value.absent()
-          : Value(containsSpoiler),
+      containsSpoiler: Value(containsSpoiler),
       selectedSlotIndex: Value(selectedSlotIndex),
       likes: Value(likes),
       ageRating: ageRating == null && nullToAbsent
           ? const Value.absent()
           : Value(ageRating),
-      created: created == null && nullToAbsent
-          ? const Value.absent()
-          : Value(created),
-      lastModified: lastModified == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastModified),
+      created: Value(created),
+      lastModified: Value(lastModified),
       dirty: Value(dirty),
       removed: Value(removed),
     );
@@ -8821,20 +8798,20 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       pageNumber: serializer.fromJson<int>(json['pageNumber']),
       ownerUserId: serializer.fromJson<int>(json['ownerUserId']),
       ownerUsername: serializer.fromJson<String?>(json['ownerUsername']),
-      xPath: serializer.fromJson<String?>(json['xPath']),
-      endingXPath: serializer.fromJson<String?>(json['endingXPath']),
-      selectedText: serializer.fromJson<String?>(json['selectedText']),
+      xPath: serializer.fromJson<String>(json['xPath']),
+      endingXPath: serializer.fromJson<String>(json['endingXPath']),
+      selectedText: serializer.fromJson<String>(json['selectedText']),
       comment: serializer.fromJson<String?>(json['comment']),
       commentHtml: serializer.fromJson<String?>(json['commentHtml']),
       commentPlainText: serializer.fromJson<String?>(json['commentPlainText']),
       context: serializer.fromJson<String?>(json['context']),
       highlightCount: serializer.fromJson<int?>(json['highlightCount']),
-      containsSpoiler: serializer.fromJson<int?>(json['containsSpoiler']),
+      containsSpoiler: serializer.fromJson<int>(json['containsSpoiler']),
       selectedSlotIndex: serializer.fromJson<int>(json['selectedSlotIndex']),
       likes: serializer.fromJson<String>(json['likes']),
       ageRating: serializer.fromJson<int?>(json['ageRating']),
-      created: serializer.fromJson<int?>(json['created']),
-      lastModified: serializer.fromJson<int?>(json['lastModified']),
+      created: serializer.fromJson<int>(json['created']),
+      lastModified: serializer.fromJson<int>(json['lastModified']),
       dirty: serializer.fromJson<int>(json['dirty']),
       removed: serializer.fromJson<int>(json['removed']),
     );
@@ -8852,20 +8829,20 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
       'pageNumber': serializer.toJson<int>(pageNumber),
       'ownerUserId': serializer.toJson<int>(ownerUserId),
       'ownerUsername': serializer.toJson<String?>(ownerUsername),
-      'xPath': serializer.toJson<String?>(xPath),
-      'endingXPath': serializer.toJson<String?>(endingXPath),
-      'selectedText': serializer.toJson<String?>(selectedText),
+      'xPath': serializer.toJson<String>(xPath),
+      'endingXPath': serializer.toJson<String>(endingXPath),
+      'selectedText': serializer.toJson<String>(selectedText),
       'comment': serializer.toJson<String?>(comment),
       'commentHtml': serializer.toJson<String?>(commentHtml),
       'commentPlainText': serializer.toJson<String?>(commentPlainText),
       'context': serializer.toJson<String?>(context),
       'highlightCount': serializer.toJson<int?>(highlightCount),
-      'containsSpoiler': serializer.toJson<int?>(containsSpoiler),
+      'containsSpoiler': serializer.toJson<int>(containsSpoiler),
       'selectedSlotIndex': serializer.toJson<int>(selectedSlotIndex),
       'likes': serializer.toJson<String>(likes),
       'ageRating': serializer.toJson<int?>(ageRating),
-      'created': serializer.toJson<int?>(created),
-      'lastModified': serializer.toJson<int?>(lastModified),
+      'created': serializer.toJson<int>(created),
+      'lastModified': serializer.toJson<int>(lastModified),
       'dirty': serializer.toJson<int>(dirty),
       'removed': serializer.toJson<int>(removed),
     };
@@ -8881,20 +8858,20 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     int? pageNumber,
     int? ownerUserId,
     Value<String?> ownerUsername = const Value.absent(),
-    Value<String?> xPath = const Value.absent(),
-    Value<String?> endingXPath = const Value.absent(),
-    Value<String?> selectedText = const Value.absent(),
+    String? xPath,
+    String? endingXPath,
+    String? selectedText,
     Value<String?> comment = const Value.absent(),
     Value<String?> commentHtml = const Value.absent(),
     Value<String?> commentPlainText = const Value.absent(),
     Value<String?> context = const Value.absent(),
     Value<int?> highlightCount = const Value.absent(),
-    Value<int?> containsSpoiler = const Value.absent(),
+    int? containsSpoiler,
     int? selectedSlotIndex,
     String? likes,
     Value<int?> ageRating = const Value.absent(),
-    Value<int?> created = const Value.absent(),
-    Value<int?> lastModified = const Value.absent(),
+    int? created,
+    int? lastModified,
     int? dirty,
     int? removed,
   }) => AnnotationsData(
@@ -8909,9 +8886,9 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     ownerUsername: ownerUsername.present
         ? ownerUsername.value
         : this.ownerUsername,
-    xPath: xPath.present ? xPath.value : this.xPath,
-    endingXPath: endingXPath.present ? endingXPath.value : this.endingXPath,
-    selectedText: selectedText.present ? selectedText.value : this.selectedText,
+    xPath: xPath ?? this.xPath,
+    endingXPath: endingXPath ?? this.endingXPath,
+    selectedText: selectedText ?? this.selectedText,
     comment: comment.present ? comment.value : this.comment,
     commentHtml: commentHtml.present ? commentHtml.value : this.commentHtml,
     commentPlainText: commentPlainText.present
@@ -8921,14 +8898,12 @@ class AnnotationsData extends DataClass implements Insertable<AnnotationsData> {
     highlightCount: highlightCount.present
         ? highlightCount.value
         : this.highlightCount,
-    containsSpoiler: containsSpoiler.present
-        ? containsSpoiler.value
-        : this.containsSpoiler,
+    containsSpoiler: containsSpoiler ?? this.containsSpoiler,
     selectedSlotIndex: selectedSlotIndex ?? this.selectedSlotIndex,
     likes: likes ?? this.likes,
     ageRating: ageRating.present ? ageRating.value : this.ageRating,
-    created: created.present ? created.value : this.created,
-    lastModified: lastModified.present ? lastModified.value : this.lastModified,
+    created: created ?? this.created,
+    lastModified: lastModified ?? this.lastModified,
     dirty: dirty ?? this.dirty,
     removed: removed ?? this.removed,
   );
@@ -9085,20 +9060,20 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
   final Value<int> pageNumber;
   final Value<int> ownerUserId;
   final Value<String?> ownerUsername;
-  final Value<String?> xPath;
-  final Value<String?> endingXPath;
-  final Value<String?> selectedText;
+  final Value<String> xPath;
+  final Value<String> endingXPath;
+  final Value<String> selectedText;
   final Value<String?> comment;
   final Value<String?> commentHtml;
   final Value<String?> commentPlainText;
   final Value<String?> context;
   final Value<int?> highlightCount;
-  final Value<int?> containsSpoiler;
+  final Value<int> containsSpoiler;
   final Value<int> selectedSlotIndex;
   final Value<String> likes;
   final Value<int?> ageRating;
-  final Value<int?> created;
-  final Value<int?> lastModified;
+  final Value<int> created;
+  final Value<int> lastModified;
   final Value<int> dirty;
   final Value<int> removed;
   const AnnotationsCompanion({
@@ -9138,9 +9113,9 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     required int pageNumber,
     required int ownerUserId,
     this.ownerUsername = const Value.absent(),
-    this.xPath = const Value.absent(),
-    this.endingXPath = const Value.absent(),
-    this.selectedText = const Value.absent(),
+    required String xPath,
+    required String endingXPath,
+    required String selectedText,
     this.comment = const Value.absent(),
     this.commentHtml = const Value.absent(),
     this.commentPlainText = const Value.absent(),
@@ -9150,8 +9125,8 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     required int selectedSlotIndex,
     this.likes = const Value.absent(),
     this.ageRating = const Value.absent(),
-    this.created = const Value.absent(),
-    this.lastModified = const Value.absent(),
+    required int created,
+    required int lastModified,
     this.dirty = const Value.absent(),
     this.removed = const Value.absent(),
   }) : seriesId = Value(seriesId),
@@ -9160,7 +9135,12 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
        libraryId = Value(libraryId),
        pageNumber = Value(pageNumber),
        ownerUserId = Value(ownerUserId),
-       selectedSlotIndex = Value(selectedSlotIndex);
+       xPath = Value(xPath),
+       endingXPath = Value(endingXPath),
+       selectedText = Value(selectedText),
+       selectedSlotIndex = Value(selectedSlotIndex),
+       created = Value(created),
+       lastModified = Value(lastModified);
   static Insertable<AnnotationsData> custom({
     Expression<int>? id,
     Expression<int>? serverId,
@@ -9227,20 +9207,20 @@ class AnnotationsCompanion extends UpdateCompanion<AnnotationsData> {
     Value<int>? pageNumber,
     Value<int>? ownerUserId,
     Value<String?>? ownerUsername,
-    Value<String?>? xPath,
-    Value<String?>? endingXPath,
-    Value<String?>? selectedText,
+    Value<String>? xPath,
+    Value<String>? endingXPath,
+    Value<String>? selectedText,
     Value<String?>? comment,
     Value<String?>? commentHtml,
     Value<String?>? commentPlainText,
     Value<String?>? context,
     Value<int?>? highlightCount,
-    Value<int?>? containsSpoiler,
+    Value<int>? containsSpoiler,
     Value<int>? selectedSlotIndex,
     Value<String>? likes,
     Value<int?>? ageRating,
-    Value<int?>? created,
-    Value<int?>? lastModified,
+    Value<int>? created,
+    Value<int>? lastModified,
     Value<int>? dirty,
     Value<int>? removed,
   }) {

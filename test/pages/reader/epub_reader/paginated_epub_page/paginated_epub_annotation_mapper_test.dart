@@ -33,49 +33,6 @@ void main() {
       expect(mapped!.serverId, isNull);
     });
 
-    test('uses start xpath when ending xpath is missing', () {
-      final mapped = toPaginatedEpubAnnotation(
-        _annotation(endingXPath: null),
-        slots,
-      );
-
-      expect(mapped, isNotNull);
-      expect(mapped!.endXpath, '//div/p[1]');
-    });
-
-    for (final endingXPath in ['', '   ']) {
-      test('uses start xpath when ending xpath is "$endingXPath"', () {
-        final mapped = toPaginatedEpubAnnotation(
-          _annotation(endingXPath: endingXPath),
-          slots,
-        );
-
-        expect(mapped, isNotNull);
-        expect(mapped!.endXpath, '//div/p[1]');
-      });
-    }
-
-    for (final xPath in [null, '', '   ']) {
-      test('skips annotation when xpath is "$xPath"', () {
-        expect(
-          toPaginatedEpubAnnotation(_annotation(xPath: xPath), slots),
-          isNull,
-        );
-      });
-    }
-
-    for (final selectedText in [null, '', '   ']) {
-      test('skips annotation when selected text is "$selectedText"', () {
-        expect(
-          toPaginatedEpubAnnotation(
-            _annotation(selectedText: selectedText),
-            slots,
-          ),
-          isNull,
-        );
-      });
-    }
-
     test('skips annotation when selected slot is missing', () {
       expect(
         toPaginatedEpubAnnotation(_annotation(selectedSlotIndex: 1), slots),
@@ -97,18 +54,23 @@ void main() {
 
 AnnotationModel _annotation({
   int? serverId,
-  String? xPath = '//div/p[1]',
-  String? endingXPath = '//div/p[2]',
-  String? selectedText = 'text',
+  String xPath = '//div/p[1]',
+  String endingXPath = '//div/p[2]',
+  String selectedText = 'text',
   int selectedSlotIndex = 0,
 }) {
+  final timestamp = DateTime.utc(2026);
   return AnnotationModel(
     id: 1,
     serverId: serverId,
     chapterId: 1,
+    pageNumber: 0,
+    ownerUserId: 1,
     xPath: xPath,
     endingXPath: endingXPath,
     selectedText: selectedText,
     selectedSlotIndex: selectedSlotIndex,
+    created: timestamp,
+    lastModified: timestamp,
   );
 }

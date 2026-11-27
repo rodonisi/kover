@@ -34,8 +34,8 @@ class AnnotationRepository(
     required int libraryId,
     required int ownerUserId,
     String? ownerUsername,
-    String? xPath,
-    String? endingXPath,
+    required String xPath,
+    required String endingXPath,
     required String selectedText,
     String? comment,
     String? commentHtml,
@@ -55,9 +55,9 @@ class AnnotationRepository(
         libraryId: libraryId,
         ownerUserId: ownerUserId,
         ownerUsername: Value(ownerUsername),
-        xPath: Value(xPath),
-        endingXPath: Value(endingXPath),
-        selectedText: Value(selectedText),
+        xPath: xPath,
+        endingXPath: endingXPath,
+        selectedText: selectedText,
         comment: Value(comment),
         commentHtml: Value(commentHtml),
         commentPlainText: Value(commentPlainText),
@@ -67,8 +67,8 @@ class AnnotationRepository(
         pageNumber: pageNumber,
         selectedSlotIndex: selectedSlotIndex,
         likes: const Value([]),
-        created: Value(now),
-        lastModified: Value(now),
+        created: now,
+        lastModified: now,
         dirty: const Value(true),
         removed: const Value(false),
       ),
@@ -172,8 +172,7 @@ class AnnotationRepository(
   /// the server.
   Future<void> refreshAllAnnotations() async {
     final remote = await _client.getAllAnnotations();
-    await _mergeRemote(remote);
-    await _deleteMissingRemote(remote);
+    await _reconcileRemote(remote);
   }
 
   /// Fetches the annotations for [chapterId] from the server and merges them
@@ -181,8 +180,7 @@ class AnnotationRepository(
   /// not present on the server are deleted.
   Future<void> refreshChapterAnnotations({required int chapterId}) async {
     final remote = await _client.getChapterAnnotations(chapterId);
-    await _mergeRemote(remote);
-    await _deleteMissingRemote(remote, chapterId: chapterId);
+    await _reconcileRemote(remote, chapterId: chapterId);
   }
 
   /// Push a local annotation and keep the row dirty if the request fails.
@@ -210,33 +208,38 @@ class AnnotationRepository(
     final remote = annotation.serverId == null
         ? await _client.create(annotation.toAnnotationDto())
         : await _client.update(annotation.toAnnotationDto());
-    await _db.annotationDao.upsert(
-      remote.toAnnotationCompanion(localId: annotation.id),
-    );
+    final companion = remote.toAnnotationCompanion(localId: annotation.id);
+    if (companion == null) {
+      throw StateError(
+        'Server returned an invalid annotation for local id ${annotation.id}',
+      );
+    }
+    await _db.annotationDao.upsert(companion);
   }
 
-  /// Deletes local rows that are clean and whose server id is absent from
-  /// [remote]. Dirty rows are never deleted.
-  Future<void> _deleteMissingRemote(
+  Future<void> _reconcileRemote(
     Iterable<api.AnnotationDto> remote, {
     int? chapterId,
   }) async {
-    final remoteIds = remote.map((dto) => dto.id).whereType<int>().toSet();
+    final validEntries = remote
+        .map((dto) => dto.toAnnotationCompanion())
+        .whereType<AnnotationsCompanion>()
+        .toList();
+    final existingChapterIds = await _db.chaptersDao.getExistingChapterIds();
+    final entries = validEntries
+        .where((entry) => existingChapterIds.contains(entry.chapterId.value))
+        .toList();
 
+    await _db.annotationDao.mergeRemoteBatch(entries);
+
+    final remoteIds = validEntries
+        .map((entry) => entry.serverId.value)
+        .whereType<int>()
+        .toSet();
     await _db.annotationDao.deleteStaleAnnotations(
       remoteIds,
       chapterId: chapterId,
     );
-  }
-
-  Future<void> _mergeRemote(Iterable<api.AnnotationDto> remote) async {
-    final existingChapterIds = await _db.chaptersDao.getExistingChapterIds();
-    final entries = remote
-        .where((dto) => existingChapterIds.contains(dto.chapterId))
-        .map((dto) => dto.toAnnotationCompanion())
-        .toList();
-
-    await _db.annotationDao.mergeRemoteBatch(entries);
   }
 
   /// Watch the locally stored annotation with local [id].

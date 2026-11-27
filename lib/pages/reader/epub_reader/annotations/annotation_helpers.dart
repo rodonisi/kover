@@ -33,9 +33,7 @@ int defaultSlot(List<HighlightSlotModel> slots) {
 }
 
 /// Returns the title of the latest TOC entry starting at or before [page].
-String? chapterTitleForPage(List<BookChapterModel> chapters, int? page) {
-  if (page == null) return null;
-
+String? chapterTitleForPage(List<BookChapterModel> chapters, int page) {
   String? bestTitle;
   var bestPage = -1;
 
@@ -56,12 +54,11 @@ String? chapterTitleForPage(List<BookChapterModel> chapters, int? page) {
   return bestTitle;
 }
 
-String? formatAttribution(
+String formatAttribution(
   AppLocalizations l, {
-  required int? pageNumber,
+  required int pageNumber,
   required String? chapterTitle,
 }) {
-  if (pageNumber == null) return null;
   final displayPage = pageNumber + 1;
   return switch (chapterTitle) {
     final chapter? when chapter.isNotEmpty => l.annotationPageChapterLocation(

@@ -41,6 +41,7 @@ void main() {
     bool removed = false,
     DateTime? lastModified,
   }) {
+    final created = DateTime.utc(2026);
     return Annotation(
       id: id,
       serverId: serverId,
@@ -50,22 +51,34 @@ void main() {
       libraryId: 1,
       ownerUserId: 1,
       xPath: '/p[1]',
+      endingXPath: '/p[1]',
       selectedText: 'text',
+      containsSpoiler: false,
       pageNumber: 1,
       selectedSlotIndex: 0,
       likes: const [],
-      created: DateTime(2026),
-      lastModified: lastModified,
+      created: created,
+      lastModified: lastModified ?? created,
       dirty: dirty,
       removed: removed,
     );
   }
 
-  AnnotationDto remoteAnnotation({int id = 9, int chapterId = 1}) {
+  AnnotationDto remoteAnnotation({
+    int id = 9,
+    int chapterId = 1,
+    String? xPath = '/p[1]',
+    String? endingXPath,
+    String? selectedText = 'text',
+    DateTime? createdUtc,
+    DateTime? lastModifiedUtc,
+  }) {
+    final timestamp = DateTime.utc(2026);
     return AnnotationDto(
       id: id,
-      xPath: '/p[1]',
-      selectedText: 'text',
+      xPath: xPath,
+      endingXPath: endingXPath,
+      selectedText: selectedText,
       pageNumber: 1,
       selectedSlotIndex: 0,
       chapterId: chapterId,
@@ -73,6 +86,8 @@ void main() {
       seriesId: 1,
       libraryId: 1,
       ownerUserId: 1,
+      createdUtc: createdUtc ?? timestamp,
+      lastModifiedUtc: lastModifiedUtc ?? timestamp,
     );
   }
 
@@ -88,6 +103,7 @@ void main() {
       libraryId: 1,
       ownerUserId: 1,
       xPath: '/p[1]',
+      endingXPath: '/p[1]',
       selectedText: 'text',
       pageNumber: 1,
     );
@@ -113,12 +129,39 @@ void main() {
       chapterId: 1,
       libraryId: 1,
       ownerUserId: 1,
+      xPath: '/p[1]',
+      endingXPath: '/p[1]',
       selectedText: 'text',
       pageNumber: 1,
     );
 
     verify(mockDao.upsert(any)).called(1);
   });
+
+  test(
+    'addAnnotation keeps the row dirty when server returns an invalid dto',
+    () async {
+      final stored = storedAnnotation(dirty: true);
+      when(mockDao.upsert(any)).thenAnswer((_) async => stored);
+      when(mockClient.create(any)).thenAnswer(
+        (_) async => remoteAnnotation(xPath: '   '),
+      );
+
+      await repo.addAnnotation(
+        seriesId: 1,
+        volumeId: 1,
+        chapterId: 1,
+        libraryId: 1,
+        ownerUserId: 1,
+        xPath: '/p[1]',
+        endingXPath: '/p[1]',
+        selectedText: 'text',
+        pageNumber: 1,
+      );
+
+      verify(mockDao.upsert(any)).called(1);
+    },
+  );
 
   test('removeAnnotation tombstones and clears a never-synced row', () async {
     when(
@@ -324,6 +367,26 @@ void main() {
 
     verify(mockDao.mergeRemoteBatch(argThat(isEmpty))).called(1);
     verifyNever(mockDao.upsert(any));
+  });
+
+  test('refreshAllAnnotations ignores unrenderable remote rows', () async {
+    when(mockClient.getAllAnnotations()).thenAnswer(
+      (_) async => [
+        remoteAnnotation(id: 1, xPath: '  '),
+        remoteAnnotation(id: 2, selectedText: ''),
+        remoteAnnotation(id: 3),
+      ],
+    );
+    when(mockChapterDao.getExistingChapterIds()).thenAnswer((_) async => {1});
+    when(mockDao.mergeRemoteBatch(any)).thenAnswer((_) async {});
+
+    await repo.refreshAllAnnotations();
+
+    final merged =
+        verify(mockDao.mergeRemoteBatch(captureAny)).captured.single
+            as Iterable<AnnotationsCompanion>;
+    expect(merged.map((entry) => entry.serverId.value), [3]);
+    verify(mockDao.deleteStaleAnnotations({3})).called(1);
   });
 
   test(

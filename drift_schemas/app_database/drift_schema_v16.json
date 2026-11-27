@@ -2675,7 +2675,7 @@
             "name": "x_path",
             "getter_name": "xPath",
             "moor_type": "string",
-            "nullable": true,
+            "nullable": false,
             "customConstraints": null,
             "default_dart": null,
             "default_client_dart": null,
@@ -2685,7 +2685,7 @@
             "name": "ending_x_path",
             "getter_name": "endingXPath",
             "moor_type": "string",
-            "nullable": true,
+            "nullable": false,
             "customConstraints": null,
             "default_dart": null,
             "default_client_dart": null,
@@ -2695,7 +2695,7 @@
             "name": "selected_text",
             "getter_name": "selectedText",
             "moor_type": "string",
-            "nullable": true,
+            "nullable": false,
             "customConstraints": null,
             "default_dart": null,
             "default_client_dart": null,
@@ -2755,13 +2755,13 @@
             "name": "contains_spoiler",
             "getter_name": "containsSpoiler",
             "moor_type": "bool",
-            "nullable": true,
+            "nullable": false,
             "customConstraints": null,
             "defaultConstraints": "CHECK (\"contains_spoiler\" IN (0, 1))",
             "dialectAwareDefaultConstraints": {
               "sqlite": "CHECK (\"contains_spoiler\" IN (0, 1))"
             },
-            "default_dart": null,
+            "default_dart": "const CustomExpression('0')",
             "default_client_dart": null,
             "dsl_features": []
           },
@@ -2807,7 +2807,7 @@
             "name": "created",
             "getter_name": "created",
             "moor_type": "dateTime",
-            "nullable": true,
+            "nullable": false,
             "customConstraints": null,
             "default_dart": null,
             "default_client_dart": null,
@@ -2817,7 +2817,7 @@
             "name": "last_modified",
             "getter_name": "lastModified",
             "moor_type": "dateTime",
-            "nullable": true,
+            "nullable": false,
             "customConstraints": null,
             "default_dart": null,
             "default_client_dart": null,
@@ -4570,7 +4570,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"annotations\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"server_id\" INTEGER NULL, \"series_id\" INTEGER NOT NULL REFERENCES series (id) ON DELETE CASCADE, \"volume_id\" INTEGER NOT NULL REFERENCES volumes (id) ON DELETE CASCADE, \"chapter_id\" INTEGER NOT NULL REFERENCES chapters (id) ON DELETE CASCADE, \"library_id\" INTEGER NOT NULL REFERENCES libraries (id) ON DELETE CASCADE, \"page_number\" INTEGER NOT NULL, \"owner_user_id\" INTEGER NOT NULL, \"owner_username\" TEXT NULL, \"x_path\" TEXT NULL, \"ending_x_path\" TEXT NULL, \"selected_text\" TEXT NULL, \"comment\" TEXT NULL, \"comment_html\" TEXT NULL, \"comment_plain_text\" TEXT NULL, \"context\" TEXT NULL, \"highlight_count\" INTEGER NULL, \"contains_spoiler\" INTEGER NULL CHECK (\"contains_spoiler\" IN (0, 1)), \"selected_slot_index\" INTEGER NOT NULL, \"likes\" TEXT NOT NULL DEFAULT '[]', \"age_rating\" INTEGER NULL, \"created\" INTEGER NULL, \"last_modified\" INTEGER NULL, \"dirty\" INTEGER NOT NULL DEFAULT 0 CHECK (\"dirty\" IN (0, 1)), \"removed\" INTEGER NOT NULL DEFAULT 0 CHECK (\"removed\" IN (0, 1)), UNIQUE (\"server_id\"));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"annotations\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"server_id\" INTEGER NULL, \"series_id\" INTEGER NOT NULL REFERENCES series (id) ON DELETE CASCADE, \"volume_id\" INTEGER NOT NULL REFERENCES volumes (id) ON DELETE CASCADE, \"chapter_id\" INTEGER NOT NULL REFERENCES chapters (id) ON DELETE CASCADE, \"library_id\" INTEGER NOT NULL REFERENCES libraries (id) ON DELETE CASCADE, \"page_number\" INTEGER NOT NULL, \"owner_user_id\" INTEGER NOT NULL, \"owner_username\" TEXT NULL, \"x_path\" TEXT NOT NULL, \"ending_x_path\" TEXT NOT NULL, \"selected_text\" TEXT NOT NULL, \"comment\" TEXT NULL, \"comment_html\" TEXT NULL, \"comment_plain_text\" TEXT NULL, \"context\" TEXT NULL, \"highlight_count\" INTEGER NULL, \"contains_spoiler\" INTEGER NOT NULL DEFAULT 0 CHECK (\"contains_spoiler\" IN (0, 1)), \"selected_slot_index\" INTEGER NOT NULL, \"likes\" TEXT NOT NULL DEFAULT '[]', \"age_rating\" INTEGER NULL, \"created\" INTEGER NOT NULL, \"last_modified\" INTEGER NOT NULL, \"dirty\" INTEGER NOT NULL DEFAULT 0 CHECK (\"dirty\" IN (0, 1)), \"removed\" INTEGER NOT NULL DEFAULT 0 CHECK (\"removed\" IN (0, 1)), UNIQUE (\"server_id\"));"
         }
       ]
     },

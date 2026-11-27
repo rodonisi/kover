@@ -1,7 +1,7 @@
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// Selected text card with optional attribution below.
+/// Selected text card with attribution below.
 class AnnotationQuoteBlock extends StatelessWidget {
   const new({
     super.key,
@@ -13,7 +13,7 @@ class AnnotationQuoteBlock extends StatelessWidget {
 
   final String text;
   final Color? accentColor;
-  final String? attribution;
+  final String attribution;
 
   /// When true the card expands to its flex share and scrolls internally.
   final bool scrollable;
@@ -32,8 +32,7 @@ class AnnotationQuoteBlock extends StatelessWidget {
       spacing: LayoutConstants.smallerPadding,
       children: [
         if (scrollable) Flexible(child: card) else card,
-        if (attribution case final attributionText?)
-          AnnotationAttribution(text: attributionText),
+        AnnotationAttribution(text: attribution),
       ],
     );
   }

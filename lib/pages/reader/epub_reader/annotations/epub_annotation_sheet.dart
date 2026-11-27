@@ -76,7 +76,6 @@ class _AnnotationContent extends HookConsumerWidget {
         ? selectedSlot.value
         : annotation.selectedSlotIndex;
     final accentColor = colorForSlot(model.slots, activeSlot);
-    final timestamp = annotation.lastModified ?? annotation.created;
     final attribution = formatAttribution(
       l,
       pageNumber: annotation.pageNumber,
@@ -171,16 +170,10 @@ class _AnnotationContent extends HookConsumerWidget {
       }
     }
 
-    final hasHeader =
-        !editing &&
-        ((annotation.ownerUsername?.trim().isNotEmpty ?? false) ||
-            timestamp != null ||
-            annotation.containsSpoiler);
-
     return AnnotationSheetLayout(
       body: editing
           ? AnnotationEditableBody(
-              selectedText: annotation.selectedText ?? '',
+              selectedText: annotation.selectedText,
               accentColor: accentColor,
               attribution: attribution,
               commentController: commentController,
@@ -195,14 +188,12 @@ class _AnnotationContent extends HookConsumerWidget {
                   : (value) => containsSpoiler.value = value,
             )
           : AnnotationViewBody(
-              header: hasHeader
-                  ? AnnotationHeader(
-                      ownerUsername: annotation.ownerUsername,
-                      timestamp: timestamp,
-                      containsSpoiler: annotation.containsSpoiler,
-                    )
-                  : null,
-              selectedText: annotation.selectedText ?? '',
+              header: AnnotationHeader(
+                ownerUsername: annotation.ownerUsername,
+                timestamp: annotation.lastModified,
+                containsSpoiler: annotation.containsSpoiler,
+              ),
+              selectedText: annotation.selectedText,
               accentColor: accentColor,
               attribution: attribution,
               comment: comment,

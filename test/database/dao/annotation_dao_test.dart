@@ -72,6 +72,7 @@ void main() {
     bool dirty = false,
     bool removed = false,
   }) {
+    final now = DateTime.utc(2026);
     return AnnotationsCompanion.insert(
       serverId: Value.absentIfNull(serverId),
       seriesId: 1,
@@ -79,11 +80,14 @@ void main() {
       chapterId: chapterId,
       libraryId: 1,
       ownerUserId: ownerUserId,
-      xPath: Value(xPath),
-      selectedText: const Value('text'),
+      xPath: xPath,
+      endingXPath: xPath,
+      selectedText: 'text',
       pageNumber: 1,
       selectedSlotIndex: 0,
       likes: const Value([]),
+      created: now,
+      lastModified: now,
       dirty: Value(dirty),
       removed: Value(removed),
     );

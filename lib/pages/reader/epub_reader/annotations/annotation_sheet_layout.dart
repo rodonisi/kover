@@ -52,7 +52,7 @@ class AnnotationHeader extends StatelessWidget {
   });
 
   final String? ownerUsername;
-  final DateTime? timestamp;
+  final DateTime timestamp;
   final bool containsSpoiler;
 
   @override
@@ -86,8 +86,7 @@ class AnnotationHeader extends StatelessWidget {
                     Text(owner, style: metaStyle),
                   ],
                 ),
-              if (timestamp case final time?)
-                Text(_formatDateTime(context, time), style: metaStyle),
+              Text(_formatDateTime(context, timestamp), style: metaStyle),
             ],
           ),
         ),

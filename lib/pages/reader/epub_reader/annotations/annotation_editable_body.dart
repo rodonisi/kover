@@ -24,7 +24,7 @@ class AnnotationEditableBody extends StatelessWidget {
 
   final String selectedText;
   final Color? accentColor;
-  final String? attribution;
+  final String attribution;
   final TextEditingController commentController;
   final List<HighlightSlotModel> slots;
   final int selectedSlot;

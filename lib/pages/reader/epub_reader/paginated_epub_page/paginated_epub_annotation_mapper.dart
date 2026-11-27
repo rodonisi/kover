@@ -5,33 +5,20 @@ import 'package:material_ui/material_ui.dart';
 
 /// Maps a stored annotation to the paginated EPUB render model.
 ///
-/// Returns `null` when the annotation has no usable selection or its selected
-/// highlight slot has no color.
+/// Returns `null` when the annotation's selected highlight slot has no color.
 PaginatedEpubAnnotation? toPaginatedEpubAnnotation(
   AnnotationModel annotation,
   List<HighlightSlotModel> slots,
 ) {
-  final xpath = annotation.xPath;
-  final selectedText = annotation.selectedText;
-  if (xpath == null ||
-      xpath.trim().isEmpty ||
-      selectedText == null ||
-      selectedText.trim().isEmpty) {
-    return null;
-  }
-
   final color = _colorForSlot(slots, annotation.selectedSlotIndex);
   if (color == null) return null;
 
-  final endingXPath = annotation.endingXPath;
   return PaginatedEpubAnnotation(
     id: annotation.id,
     serverId: annotation.serverId,
-    xpath: xpath,
-    endXpath: endingXPath != null && endingXPath.trim().isNotEmpty
-        ? endingXPath
-        : xpath,
-    selectedText: selectedText,
+    xpath: annotation.xPath,
+    endXpath: annotation.endingXPath,
+    selectedText: annotation.selectedText,
     color: color,
   );
 }
