@@ -63,9 +63,14 @@ jobs:
           wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -O linuxdeploy
           wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
           chmod +x linuxdeploy appimagetool
+          native_asset_args=()
+          for lib in build/native_assets/linux/*.so; do
+            [ -e "$lib" ] && native_asset_args+=(--library "$lib")
+          done
           ./linuxdeploy --appimage-extract-and-run \
             --appdir AppDir \
             --executable AppDir/usr/bin/kover \
+            "${native_asset_args[@]}" \
             --desktop-file linux/com.rodonisi.kover.desktop \
             --icon-file linux/com.rodonisi.kover.png
           ARCH=x86_64 VERSION=${{ inputs.version }} ./appimagetool --appimage-extract-and-run --no-appstream AppDir "$RELEASE_NAME"
