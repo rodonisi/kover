@@ -25,6 +25,9 @@ class PaginatedEpubWidgetFactory({
   final EpubSelectionRegistry? selectionRegistry,
   final int subpageIndex = 0,
 }) extends WidgetFactory {
+  // Runs after background styling so the saved slot color wins.
+  static const _annotationPriority = 9007199254740991;
+
   final Map<int, PaginatedEpubAnnotation> _annotations = {
     for (final annotation in annotations) annotation.id: annotation,
   };
@@ -43,6 +46,7 @@ class PaginatedEpubWidgetFactory({
     debugLabel: 'epub-annotation',
     onParsed: _applyAnnotation,
     onRenderInline: _applyAnnotationColor,
+    priority: _annotationPriority,
     onRenderBlock: (tree, placeholder) {
       final recognizer = tree.getNonInherited<GestureRecognizer>();
       if (recognizer == null) return placeholder;

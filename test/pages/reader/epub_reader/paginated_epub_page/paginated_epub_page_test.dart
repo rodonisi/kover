@@ -467,8 +467,10 @@ Future<void> _pumpPage(
   String? resumeScrollId,
   PaginatedEpubPageSettings settings = _settings,
   Iterable<PaginatedEpubAnnotation> annotations = const [],
-  EpubAnnotationSheetBuilder? annotationSheetBuilder,
-  EpubAnnotationDraftSheetBuilder? draftSheetBuilder,
+  Widget Function(BuildContext context, int annotationId)?
+  annotationSheetBuilder,
+  Widget Function(BuildContext context, AnnotationDraft draft)?
+  draftSheetBuilder,
   void Function(bool selected)? onSelectionChanged,
 }) async {
   const viewport = Size(320, 240);

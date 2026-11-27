@@ -163,7 +163,11 @@ void main() {
         pageNumber: 1,
       );
 
-      verify(mockDao.upsert(any)).called(1);
+      final writes = verify(mockDao.upsert(captureAny)).captured;
+      expect(writes, hasLength(2));
+      final retry = writes.last as AnnotationsCompanion;
+      expect(retry.serverId.value, 9);
+      expect(retry.dirty.present, isFalse);
     },
   );
 

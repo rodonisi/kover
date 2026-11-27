@@ -220,6 +220,15 @@ class AnnotationRepository(
         : await _client.update(annotation.toAnnotationDto());
     final companion = remote.toAnnotationCompanion(localId: annotation.id);
     if (companion == null) {
+      final serverId = remote.id;
+      if (annotation.serverId == null && serverId != null) {
+        await _db.annotationDao.upsert(
+          AnnotationsCompanion(
+            id: Value(annotation.id),
+            serverId: Value(serverId),
+          ),
+        );
+      }
       throw StateError(
         'Server returned an invalid annotation for local id ${annotation.id}',
       );

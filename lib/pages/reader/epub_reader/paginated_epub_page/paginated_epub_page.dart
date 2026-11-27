@@ -17,18 +17,6 @@ import 'package:kover/utils/constants/html_constants.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// Builds the annotation sheet opened from a paginated EPUB highlight.
-typedef EpubAnnotationSheetBuilder = Widget Function(
-  BuildContext context,
-  int annotationId,
-);
-
-/// Builds the annotation sheet opened for a new text selection.
-typedef EpubAnnotationDraftSheetBuilder = Widget Function(
-  BuildContext context,
-  AnnotationDraft draft,
-);
-
 /// Paginate and layout a single EPUB page.
 class PaginatedEpubPage extends HookWidget {
   final PaginatedEpubPageController controller;
@@ -38,10 +26,10 @@ class PaginatedEpubPage extends HookWidget {
   final String? resumeScrollId;
   final void Function(bool selected)? onSelectionChanged;
   final void Function(EpubAnchorTarget)? onAnchorTap;
-  final EpubAnnotationSheetBuilder? annotationSheetBuilder;
-
-  /// When set, the selection menu offers to annotate the selected text.
-  final EpubAnnotationDraftSheetBuilder? draftSheetBuilder;
+  final Widget Function(BuildContext context, int annotationId)?
+  annotationSheetBuilder;
+  final Widget Function(BuildContext context, AnnotationDraft draft)?
+  draftSheetBuilder;
 
   const new({
     super.key,

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 
 typedef EncodedAnnotationComment = ({String comment, String? commentHtml});
@@ -16,16 +16,18 @@ abstract final class AnnotationComment {
   );
 
   /// Decodes a stored Kavita comment Delta into a Quill [quill.Document].
-  static quill.Document toDocument(String comment) {
+  static Document toDocument(String comment) {
+    if (comment.trim().isEmpty) return Document();
+
     final decoded = jsonDecode(comment) as Map<String, dynamic>;
     final ops = decoded['ops'];
-    if (ops is! List || ops.isEmpty) return quill.Document();
+    if (ops is! List || ops.isEmpty) return Document();
 
-    return quill.Document.fromJson(ops);
+    return Document.fromJson(ops);
   }
 
   /// Encodes a Quill [document] into Kavita's Delta and HTML fields.
-  static EncodedAnnotationComment fromDocument(quill.Document document) {
+  static EncodedAnnotationComment fromDocument(Document document) {
     final ops = document.toDelta().toJson();
     final plainText = document.toPlainText().trim();
     final hasEmbed = ops.any((op) => op['insert'] is! String);
