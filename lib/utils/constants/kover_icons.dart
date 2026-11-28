@@ -118,6 +118,7 @@ sealed class KoverIcons {
   static const IconData refresh = LucideIcons.refreshCw;
   static const IconData copy = LucideIcons.copy;
   static const IconData trash = LucideIcons.trash;
+  static const IconData edit = LucideIcons.pencil;
   static const IconData remove = LucideIcons.x;
   static const IconData minus = LucideIcons.minus;
   static const IconData add = LucideIcons.plus;
@@ -138,6 +139,7 @@ sealed class KoverIcons {
   static const IconData debug = LucideIcons.bug;
   static const IconData warning = LucideIcons.alertTriangle;
   static const IconData error = LucideIcons.circleX;
+  static const IconData imageError = LucideIcons.imageOff;
   static const IconData fatal = LucideIcons.bomb;
   static const IconData alert = LucideIcons.triangleAlert;
   static const IconData noConnection = LucideIcons.wifiOff;

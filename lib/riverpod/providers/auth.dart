@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:hooks_riverpod/experimental/persist.dart';
+import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/models/user_model.dart';
 import 'package:kover/riverpod/providers/client.dart';
 import 'package:kover/riverpod/providers/settings/credentials.dart';
+import 'package:kover/riverpod/repository/annotation_repository.dart';
 import 'package:kover/riverpod/repository/storage_repository.dart';
 import 'package:kover/utils/logging.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
@@ -16,11 +18,7 @@ class NoCredentialsException implements Exception {}
 
 class InvalidCredentialsException implements Exception {}
 
-class CertificateValidationException implements Exception {
-  CertificateValidationException(this.cause);
-
-  final Object cause;
-
+class CertificateValidationException(final Object cause) implements Exception {
   @override
   String toString() => 'Certificate validation failed: $cause';
 }
@@ -75,16 +73,16 @@ class CurrentUser extends _$CurrentUser {
     if (apiKey == null || apiKey.isEmpty) throw NoCredentialsException();
 
     if (state.hasValue) {
-      unawaited(_refreshUser(apiKey: apiKey));
+      unawaited(_refreshUser());
       return state.requireValue;
     }
 
-    return await _fetchUser(apiKey: apiKey);
+    return await _fetchUser();
   }
 
-  Future<void> _refreshUser({required String apiKey}) async {
+  Future<void> _refreshUser() async {
     try {
-      final user = await _fetchUser(apiKey: apiKey);
+      final user = await _fetchUser();
       state = AsyncValue.data(user);
     } catch (error, stackTrace) {
       log.warning(
@@ -105,13 +103,11 @@ class CurrentUser extends _$CurrentUser {
     }
   }
 
-  Future<UserModel> _fetchUser({required String apiKey}) async {
-    final client = ref.watch(restClientProvider);
+  Future<UserModel> _fetchUser() async {
+    final client = ref.read(restClientProvider);
     try {
-      final res = await client.apiPluginAuthenticatePost(
-        apiKey: apiKey,
-        pluginName: 'kover',
-      );
+      final res = await client.apiAccountGet();
+
       if (res.statusCode == HttpStatus.unauthorized ||
           res.statusCode == HttpStatus.forbidden) {
         throw InvalidCredentialsException();
@@ -122,13 +118,31 @@ class CurrentUser extends _$CurrentUser {
           final error => Exception('Failed to authenticate: $error'),
         };
       }
-      return UserModel.fromUserDto(res.body!);
+      final user = res.body!;
+      await _storeHighlightSlots(user);
+      return UserModel.fromUserDto(user);
     } catch (error) {
       if (error is CertificateValidationException) rethrow;
       if (isCertificateValidationError(error)) {
         throw CertificateValidationException(error);
       }
       rethrow;
+    }
+  }
+
+  /// Store the user's book reader highlight slots locally. Slot storage is a
+  /// convenience for rendering annotations and must never prevent login.
+  Future<void> _storeHighlightSlots(UserDto user) async {
+    final slots = user.preferences?.bookReaderHighlightSlots;
+    if (slots == null) return;
+
+    try {
+      await ref.read(annotationRepositoryProvider).replaceHighlightSlots(slots);
+    } catch (error) {
+      log.warning(
+        'could not store highlight slots',
+        attributes: {'error': error},
+      );
     }
   }
 }

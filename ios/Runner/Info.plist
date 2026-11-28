@@ -32,6 +32,10 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Kover uses the camera to attach images to annotations.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Kover uses your photo library to attach images to annotations.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

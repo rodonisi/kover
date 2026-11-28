@@ -29,6 +29,7 @@ sealed class SyncPhase with _$SyncPhase {
   const factory covers() = Covers;
   const factory wantToRead() = WantToRead;
   const factory bookmarks() = Bookmarks;
+  const factory annotations() = Annotations;
   const factory collections() = Collections;
   const factory readingLists() = ReadingLists;
   const factory smartFilters() = SmartFilters;
@@ -41,6 +42,8 @@ sealed class SyncPhase with _$SyncPhase {
   const factory refreshToc({required int chapterId}) = RefreshToc;
   const factory refreshChapterProgress({required int chapterId}) =
       RefreshChapterProgress;
+  const factory refreshChapterAnnotations({required int chapterId}) =
+      RefreshChapterAnnotations;
   const factory ensureDetailsAndProgress({required int seriesId}) =
       EnsureDetailsAndProgress;
   const factory seriesDetails() = SeriesDetails;
@@ -54,7 +57,8 @@ sealed class SyncPhase with _$SyncPhase {
       RefreshMetadata() ||
       RefreshCovers() ||
       RefreshToc() ||
-      RefreshChapterProgress() => {},
+      RefreshChapterProgress() ||
+      RefreshChapterAnnotations() => {},
       AllSeries() => {const .libraries()},
       SeriesDetails() => {const .allSeries()},
       Metadata() ||
@@ -64,8 +68,10 @@ sealed class SyncPhase with _$SyncPhase {
       Collections() ||
       ReadingLists() ||
       EnsureDetailsAndProgress() => {const .allSeries()},
-      Tocs() || Progress() => {const .allSeries(), const .seriesDetails()},
-      Bookmarks() => {const .allSeries(), const .seriesDetails()},
+      Tocs() ||
+      Progress() ||
+      Bookmarks() ||
+      Annotations() => {const .allSeries(), const .seriesDetails()},
       SmartFilters() => {
         const .allSeries(),
         const .readingLists(),
@@ -140,6 +146,7 @@ class SyncManager extends _$SyncManager {
       const .readingLists(),
       const .wantToRead(),
       const .bookmarks(),
+      const .annotations(),
       const .sidenav(),
       const .dashboard(),
       const .smartFilters(),
@@ -178,6 +185,11 @@ class SyncManager extends _$SyncManager {
     _enqueuePhases({const .bookmarks()});
   }
 
+  /// Sync annotations
+  void syncAnnotations() {
+    _enqueuePhases({const .annotations()});
+  }
+
   /// Refresh metadata and details for series [seriesId]
   void refreshMetadataAndDetails({required int seriesId}) {
     _runPhase(.refreshMetadata(seriesId: seriesId));
@@ -201,6 +213,11 @@ class SyncManager extends _$SyncManager {
   /// Refresh reading progress for chapter [chapterId]
   Future<void> refreshChapterProgress({required int chapterId}) async {
     await _runPhase(.refreshChapterProgress(chapterId: chapterId));
+  }
+
+  /// Refresh annotations for chapter [chapterId]
+  Future<void> refreshChapterAnnotations({required int chapterId}) async {
+    await _runPhase(.refreshChapterAnnotations(chapterId: chapterId));
   }
 
   void _enqueuePhases(Set<SyncPhase> phases) {

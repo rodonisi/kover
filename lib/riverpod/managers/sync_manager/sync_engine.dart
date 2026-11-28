@@ -2,6 +2,7 @@ import 'package:kover/api/openapi.swagger.dart';
 import 'package:kover/database/app_database.dart';
 import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/riverpod/providers/client.dart';
+import 'package:kover/riverpod/repository/annotation_repository.dart';
 import 'package:kover/riverpod/repository/book_repository.dart';
 import 'package:kover/riverpod/repository/bookmark_repository.dart';
 import 'package:kover/riverpod/repository/chapters_repository.dart';
@@ -15,6 +16,7 @@ import 'package:kover/riverpod/repository/server_settings_repository.dart';
 import 'package:kover/riverpod/repository/smart_filters_repository.dart';
 import 'package:kover/riverpod/repository/volumes_repository.dart';
 import 'package:kover/riverpod/repository/want_to_read_repository.dart';
+import 'package:kover/sync/annotation_sync_operations.dart';
 import 'package:kover/sync/book_sync_operations.dart';
 import 'package:kover/sync/bookmark_sync_operations.dart';
 import 'package:kover/sync/chapter_sync_operations.dart';
@@ -34,6 +36,7 @@ class SyncEngine({
   required final SeriesRepository seriesRepo,
   required final BookRepository bookRepo,
   required final BookmarkRepository bookmarkRepo,
+  required final AnnotationRepository annotationRepo,
   required final LibrariesRepository librariesRepo,
   required final WantToReadRepository wantToReadRepo,
   required final ReaderRepository readerRepo,
@@ -73,6 +76,10 @@ class SyncEngine({
       BookSyncOperations(client: client, apiKey: apiKey),
     );
     final bookmarkRepo = BookmarkRepository(db, BookmarkSyncOperations(client));
+    final annotationRepo = AnnotationRepository(
+      db,
+      AnnotationSyncOperations(client),
+    );
     final librariesRepo = LibrariesRepository(
       db: db,
       client: LibrariesSyncOperations(client),
@@ -118,6 +125,7 @@ class SyncEngine({
       seriesRepo: seriesRepo,
       bookRepo: bookRepo,
       bookmarkRepo: bookmarkRepo,
+      annotationRepo: annotationRepo,
       librariesRepo: librariesRepo,
       wantToReadRepo: wantToReadRepo,
       readerRepo: readerRepo,
@@ -155,6 +163,8 @@ class SyncEngine({
           () async => await syncWantToRead(),
       bookmarks: () =>
           () async => await syncBookmarks(),
+      annotations: () =>
+          () async => await syncAnnotations(),
       collections: () =>
           () async => await syncCollections(),
       readingLists: () =>
@@ -177,6 +187,8 @@ class SyncEngine({
           () async => await refreshToc(chapterId: chapterId),
       refreshChapterProgress: (chapterId) =>
           () async => await refreshChapterProgress(chapterId: chapterId),
+      refreshChapterAnnotations: (chapterId) =>
+          () async => await refreshChapterAnnotations(chapterId: chapterId),
       ensureDetailsAndProgress: (seriesId) =>
           () async => await ensureDetailsAndProgress(seriesId: seriesId),
       seriesDetails: () =>
@@ -230,6 +242,12 @@ class SyncEngine({
   Future<void> syncBookmarks() async {
     await _pool.withResource(bookmarkRepo.mergeBookmarks);
     await _pool.withResource(bookmarkRepo.refreshAllBookmarks);
+  }
+
+  Future<void> syncAnnotations() async {
+    await _pool.withResource(annotationRepo.mergeAnnotations);
+    await _pool.withResource(annotationRepo.refreshAllAnnotations);
+    await _pool.withResource(annotationRepo.refreshHighlightSlots);
   }
 
   Future<void> syncCollections() async {
@@ -292,6 +310,12 @@ class SyncEngine({
   Future<void> refreshChapterProgress({required int chapterId}) async {
     await _pool.withResource(
       () => readerRepo.refreshChapterProgress(chapterId: chapterId),
+    );
+  }
+
+  Future<void> refreshChapterAnnotations({required int chapterId}) async {
+    await _pool.withResource(
+      () => annotationRepo.refreshChapterAnnotations(chapterId: chapterId),
     );
   }
 

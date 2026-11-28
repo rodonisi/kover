@@ -1,8 +1,10 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_content.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/selection/epub_selection_registry.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
@@ -11,12 +13,16 @@ class VerticalEpubPageView extends HookWidget {
   final PaginatedEpubPageController controller;
   final PaginatedEpubPageSettings settings;
   final void Function(EpubAnchorTarget)? onAnchorTap;
+  final void Function(PaginatedEpubAnnotation)? onAnnotationTap;
+  final EpubSelectionRegistry? selectionRegistry;
 
-  const VerticalEpubPageView({
+  const new({
     super.key,
     required this.controller,
     required this.settings,
     this.onAnchorTap,
+    this.onAnnotationTap,
+    this.selectionRegistry,
   });
 
   @override
@@ -111,7 +117,11 @@ class VerticalEpubPageView extends HookWidget {
                   settings: settings,
                   viewport: viewport,
                   cssEngine: controller.cssEngine,
+                  annotations: controller.annotations,
                   onAnchorTap: onAnchorTap,
+                  onAnnotationTap: onAnnotationTap,
+                  selectionRegistry: selectionRegistry,
+                  subpageIndex: index,
                 );
               },
             ),

@@ -7,7 +7,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/selection/epub_selection_registry.dart';
 import 'package:kover/utils/constants/html_constants.dart';
+import 'package:kover/utils/extensions/color.dart';
 import 'package:kover/widgets/util/link_hit_region.dart';
 
 /// A [WidgetFactory] that adjusts rendering for paginated EPUB content.
@@ -15,7 +18,20 @@ class PaginatedEpubWidgetFactory({
   final Size viewport = const Size(double.infinity, double.infinity),
   final bool removeParagraphIndent = false,
   final void Function(EpubAnchorTarget)? onAnchorTap,
+  Iterable<PaginatedEpubAnnotation> annotations = const [],
+  final void Function(PaginatedEpubAnnotation)? onAnnotationTap,
+
+  /// Receives every rendered text block, so selections can be annotated.
+  final EpubSelectionRegistry? selectionRegistry,
+  final int subpageIndex = 0,
 }) extends WidgetFactory {
+  // Runs after background styling so the saved slot color wins.
+  static const _annotationPriority = 9007199254740991;
+
+  final Map<int, PaginatedEpubAnnotation> _annotations = {
+    for (final annotation in annotations) annotation.id: annotation,
+  };
+
   late final BuildOp _textIndentOp = BuildOp(
     alwaysRenderBlock: false,
     debugLabel: 'epub-text-indent',
@@ -25,9 +41,29 @@ class PaginatedEpubWidgetFactory({
     },
   );
 
+  late final BuildOp _annotationOp = BuildOp(
+    alwaysRenderBlock: false,
+    debugLabel: 'epub-annotation',
+    onParsed: _applyAnnotation,
+    onRenderInline: _applyAnnotationColor,
+    priority: _annotationPriority,
+    onRenderBlock: (tree, placeholder) {
+      final recognizer = tree.getNonInherited<GestureRecognizer>();
+      if (recognizer == null) return placeholder;
+
+      return placeholder.wrapWith((context, child) {
+        if (child == widget0) return null;
+        return buildGestureDetector(tree, child, recognizer);
+      });
+    },
+  );
+
   @override
   void parse(BuildTree meta) {
     meta.register(_textIndentOp);
+    if (meta.element.localName == HtmlConstants.kavitaHighlightElementTag) {
+      meta.register(_annotationOp);
+    }
 
     super.parse(meta);
   }
@@ -37,6 +73,16 @@ class PaginatedEpubWidgetFactory({
     BuildTree tree, {
     GestureTapCallback? onTap,
   }) {
+    if (onAnnotationTap case final onAnnotationTap?) {
+      final annotation = _annotationFor(tree.element);
+      if (annotation != null) {
+        return super.buildGestureRecognizer(
+          tree,
+          onTap: () => onAnnotationTap(annotation),
+        );
+      }
+    }
+
     if (onAnchorTap != null) {
       final target = EpubAnchorTarget.fromElement(tree.element);
       if (target != null) {
@@ -57,11 +103,54 @@ class PaginatedEpubWidgetFactory({
     GestureRecognizer recognizer,
   ) {
     final built = super.buildGestureDetector(tree, child, recognizer);
-    if (built == null || onAnchorTap == null) return built;
+    if (built == null) return built;
 
-    if (EpubAnchorTarget.fromElement(tree.element) == null) return built;
+    final isAnnotation =
+        onAnnotationTap != null && _annotationFor(tree.element) != null;
+    final isAnchor =
+        onAnchorTap != null &&
+        EpubAnchorTarget.fromElement(tree.element) != null;
+    if (!isAnnotation && !isAnchor) return built;
 
     return LinkHitRegion(child: built);
+  }
+
+  @override
+  Widget? buildDecoration(
+    BuildTree tree,
+    Widget child, {
+    BoxBorder? border,
+    BorderRadius? borderRadius,
+    Color? color,
+    DecorationImage? image,
+  }) {
+    final annotation = _annotationFor(tree.element);
+    return super.buildDecoration(
+      tree,
+      child,
+      border: border,
+      borderRadius: borderRadius,
+      color: annotation?.color ?? color,
+      image: image,
+    );
+  }
+
+  @override
+  Widget? buildText(
+    BuildTree tree,
+    InheritedProperties resolved,
+    InlineSpan text,
+  ) {
+    final child = super.buildText(tree, resolved, text);
+    final registry = selectionRegistry;
+    if (child == null || registry == null) return child;
+
+    return EpubSelectableBlock(
+      registry: registry,
+      element: tree.element,
+      subpageIndex: subpageIndex,
+      child: child,
+    );
   }
 
   @override
@@ -128,6 +217,13 @@ class PaginatedEpubWidgetFactory({
       );
     }
 
+    if (element.localName == HtmlConstants.kavitaHighlightElementTag) {
+      final annotation = _annotationFor(element);
+      if (annotation != null) {
+        styles['background-color'] = annotation.color.toCssRgba();
+      }
+    }
+
     if (element.localName != 'img') return styles;
 
     if (viewport.height.isFinite) {
@@ -143,6 +239,63 @@ class PaginatedEpubWidgetFactory({
       ..['width'] = '${fitted.width}px'
       ..['height'] = '${fitted.height}px';
   }
+
+  BuildTree _applyAnnotation(BuildTree tree) {
+    final annotation = _annotationFor(tree.element);
+    if (annotation == null ||
+        onAnnotationTap == null ||
+        _insideLink(tree.element)) {
+      return tree;
+    }
+
+    final recognizer = buildGestureRecognizer(tree);
+    if (recognizer == null) return tree;
+
+    return tree
+      ..inherit(_annotationRecognizer, recognizer)
+      ..setNonInherited(recognizer);
+  }
+
+  /// Link navigation wins for text inside a link.
+  static bool _insideLink(dom.Element element) {
+    for (var parent = element.parent; parent != null; parent = parent.parent) {
+      if (parent.localName == 'a' && parent.attributes.containsKey('href')) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void _applyAnnotationColor(BuildTree tree) {
+    final annotation = _annotationFor(tree.element);
+    if (annotation == null) return;
+    tree.inherit(_annotationHighlight, annotation.color);
+  }
+
+  PaginatedEpubAnnotation? _annotationFor(dom.Element element) {
+    if (element.localName != HtmlConstants.kavitaHighlightElementTag) {
+      return null;
+    }
+
+    final id = int.tryParse(
+      element.attributes[HtmlConstants.koverAnnotationIdAttribute]?.trim() ??
+          '',
+    );
+    return id == null ? null : _annotations[id];
+  }
+
+  static InheritedProperties _annotationHighlight(
+    InheritedProperties resolving,
+    Color color,
+  ) => resolving.copyWith<TextStyleBackground>(
+    value: TextStyleBackground(CssColor.value(color)),
+  );
+
+  static InheritedProperties _annotationRecognizer(
+    InheritedProperties resolving,
+    GestureRecognizer recognizer,
+  ) => resolving.copyWith<GestureRecognizer>(value: recognizer);
 
   void _applyTextIndent(BuildTree tree) {
     if (removeParagraphIndent ||

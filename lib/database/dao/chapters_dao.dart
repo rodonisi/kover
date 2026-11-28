@@ -58,6 +58,13 @@ class ChaptersDao extends DatabaseAccessor<AppDatabase>
     return managers.chapters.filter((f) => f.id.equals(chapterId));
   }
 
+  /// Get the IDs of all chapters stored locally.
+  Future<Set<int>> getExistingChapterIds() async {
+    final query = selectOnly(chapters)..addColumns([chapters.id]);
+    final ids = await query.map((row) => row.read(chapters.id)!).get();
+    return ids.toSet();
+  }
+
   /// Search chapters by [query]. Optionally filter by [volumeId] and/or [seriesId]
   Future<List<Chapter>> searchChapters(
     String query, {

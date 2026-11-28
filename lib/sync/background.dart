@@ -43,6 +43,7 @@ void callbackDispatcher() {
       await engine.syncMetadata();
       await engine.syncProgress();
       await engine.syncBookmarks();
+      await engine.syncAnnotations();
       await engine.syncOnDeck();
 
       return true;

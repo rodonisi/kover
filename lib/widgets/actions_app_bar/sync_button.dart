@@ -8,7 +8,7 @@ import 'package:kover/riverpod/managers/sync_manager/sync_manager.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 
 class SyncButton extends HookConsumerWidget {
-  const SyncButton({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -83,7 +83,7 @@ class SyncButton extends HookConsumerWidget {
 }
 
 class SyncMenuOverlay extends ConsumerWidget {
-  const SyncMenuOverlay({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -160,6 +160,7 @@ String _phaseLabel(AppLocalizations l, SyncPhase phase) {
     covers: () => l.syncingCovers,
     wantToRead: () => l.syncingWantToRead,
     bookmarks: () => l.syncingBookmarks,
+    annotations: () => l.syncingAnnotations,
     collections: () => l.syncingCollections,
     readingLists: () => l.syncingReadingLists,
     smartFilters: () => l.syncingSmartFilters,
@@ -174,5 +175,7 @@ String _phaseLabel(AppLocalizations l, SyncPhase phase) {
     refreshToc: (chapterId) => l.refreshingChapterToc(chapterId),
     refreshChapterProgress: (chapterId) =>
         l.refreshingChapterProgress(chapterId),
+    refreshChapterAnnotations: (chapterId) =>
+        l.refreshingChapterAnnotations(chapterId),
   );
 }

@@ -482,6 +482,10 @@
     "@syncingBookmarks": {
         "description": "Label for the syncing bookmarks phase"
     },
+    "syncingAnnotations": "Syncing annotations",
+    "@syncingAnnotations": {
+        "description": "Label for the syncing annotations phase"
+    },
     "syncingCollections": "Syncing collections",
     "@syncingCollections": {
         "description": "Label for the syncing collections phase"
@@ -804,6 +808,100 @@
                 "example": "42"
             }
         }
+    },
+    "refreshingChapterAnnotations": "Refreshing annotations for chapter {chapterId}",
+    "@refreshingChapterAnnotations": {
+        "description": "Label for the syncing chapter annotations phase with the chapter ID",
+        "placeholders": {
+            "chapterId": {
+                "description": "The ID of the chapter which annotations are being refreshed",
+                "type": "int",
+                "example": "42"
+            }
+        }
+    },
+    "annotationNotFound": "Annotation not found.",
+    "@annotationNotFound": {
+        "description": "Message shown when an opened annotation no longer exists"
+    },
+    "comment": "Comment",
+    "@comment": {
+        "description": "Hint text for an annotation comment input"
+    },
+    "highlightColor": "Highlight color",
+    "@highlightColor": {
+        "description": "Label for selecting an annotation highlight color"
+    },
+    "spoiler": "Spoiler",
+    "@spoiler": {
+        "description": "Badge and toggle label for annotations marked as spoilers"
+    },
+    "annotationPageLocation": "Page {page}",
+    "@annotationPageLocation": {
+        "description": "Attribution showing the page number of an annotation when no chapter title is available",
+        "placeholders": {
+            "page": {
+                "description": "The 1-based page number of the annotation",
+                "type": "int",
+                "example": "17"
+            }
+        }
+    },
+    "annotationPageChapterLocation": "Page {page}, Chapter \"{chapter}\"",
+    "@annotationPageChapterLocation": {
+        "description": "Attribution showing the page number and chapter title of an annotation",
+        "placeholders": {
+            "page": {
+                "description": "The 1-based page number of the annotation",
+                "type": "int",
+                "example": "17"
+            },
+            "chapter": {
+                "description": "The title of the chapter containing the annotation",
+                "type": "String",
+                "example": "Chapter 1"
+            }
+        }
+    },
+    "edit": "Edit",
+    "@edit": {
+        "description": "Label for the button that edits an annotation"
+    },
+    "delete": "Delete",
+    "@delete": {
+        "description": "Label for the button that deletes an annotation"
+    },
+    "deleteAnnotationDialogTitle": "Delete annotation?",
+    "@deleteAnnotationDialogTitle": {
+        "description": "Title for the annotation deletion confirmation dialog"
+    },
+    "deleteAnnotationDialogContent": "The annotation will be deleted locally and from the server when possible. This cannot be undone.",
+    "@deleteAnnotationDialogContent": {
+        "description": "Warning shown before deleting an annotation"
+    },
+    "annotationSaveFailed": "Could not save annotation.",
+    "@annotationSaveFailed": {
+        "description": "Error shown when an annotation edit cannot be saved"
+    },
+    "annotationImageInsertFailed": "Could not insert image.",
+    "@annotationImageInsertFailed": {
+        "description": "Error shown when an image cannot be added to an annotation"
+    },
+    "annotationImageLoadFailed": "Image could not be loaded.",
+    "@annotationImageLoadFailed": {
+        "description": "Accessibility label shown when an annotation image cannot be loaded"
+    },
+    "annotationDeleteFailed": "Could not delete annotation.",
+    "@annotationDeleteFailed": {
+        "description": "Error shown when an annotation cannot be deleted"
+    },
+    "annotate": "Annotate",
+    "@annotate": {
+        "description": "Label for the text selection menu entry that creates an annotation from the selected text"
+    },
+    "annotationSelectionUnsupported": "This selection cannot be annotated.",
+    "@annotationSelectionUnsupported": {
+        "description": "Error shown when the selected text cannot be turned into an annotation"
     },
     "invalidCredentials": "Invalid Credentials",
     "@invalidCredentials": {

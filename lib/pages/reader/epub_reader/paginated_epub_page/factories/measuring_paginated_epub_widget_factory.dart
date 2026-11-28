@@ -10,6 +10,7 @@ import 'package:kover/utils/constants/html_constants.dart';
 class MeasuringPaginatedEpubWidgetFactory({
   super.viewport,
   super.removeParagraphIndent,
+  super.annotations,
   final void Function()? onChanged,
 }) extends PaginatedEpubWidgetFactory {
   var _isBuildComplete = false;
@@ -137,7 +138,7 @@ class _EpubImageLoadTracker extends StatefulWidget {
   final void Function() onExit;
   final Widget child;
 
-  const _EpubImageLoadTracker({
+  const new({
     super.key,
     required this.provider,
     required this.onEnter,

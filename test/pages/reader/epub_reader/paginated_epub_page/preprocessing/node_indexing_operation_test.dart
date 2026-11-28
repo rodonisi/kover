@@ -22,11 +22,11 @@ void main() {
 
     test('when started, then resets the index', () {
       final operation = NodeIndexingOperation();
-      operation.enter(dom.Element.tag('div'));
-      operation.enter(dom.Element.tag('p'));
 
       operation.start(dom.DocumentFragment());
-
+      operation.enter(dom.Element.tag('div'));
+      operation.enter(dom.Element.tag('p'));
+      operation.start(dom.DocumentFragment());
       final span = dom.Element.tag('span');
       operation.enter(span);
 

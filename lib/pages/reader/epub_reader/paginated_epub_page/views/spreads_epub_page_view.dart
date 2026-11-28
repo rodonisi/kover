@@ -1,8 +1,11 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/epub_anchor_target.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_annotation.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_content.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_controller.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/paginated_epub_page_settings.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/selection/epub_selection_container.dart';
+import 'package:kover/pages/reader/epub_reader/paginated_epub_page/selection/epub_selection_registry.dart';
 import 'package:kover/utils/constants/layout_constants.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -10,12 +13,16 @@ class SpreadsEpubPageView extends HookWidget {
   final PaginatedEpubPageController controller;
   final PaginatedEpubPageSettings settings;
   final void Function(EpubAnchorTarget)? onAnchorTap;
+  final void Function(PaginatedEpubAnnotation)? onAnnotationTap;
+  final EpubSelectionRegistry? selectionRegistry;
 
-  const SpreadsEpubPageView({
+  const new({
     super.key,
     required this.controller,
     required this.settings,
     this.onAnchorTap,
+    this.onAnnotationTap,
+    this.selectionRegistry,
   });
 
   @override
@@ -42,27 +49,29 @@ class SpreadsEpubPageView extends HookWidget {
       return null;
     }, [current, pageController, settings.reduceAnimations]);
 
-    return PageView.builder(
-      controller: pageController,
-      itemCount: (controller.subpageCount + 1) ~/ 2,
-      allowImplicitScrolling: true,
-      physics: settings.canScroll && !settings.reduceAnimations
-          ? const AlwaysScrollableScrollPhysics(
-              parent: ClampingScrollPhysics(),
-            )
-          : const NeverScrollableScrollPhysics(),
-      onPageChanged: (index) => controller.jumpToSubpage(index * 2),
-      itemBuilder: (context, index) {
-        return SizedBox(
-          height: viewport.height,
-          child: Row(
-            children: [
-              Expanded(child: _column(index * 2, viewport)),
-              Expanded(child: _column(index * 2 + 1, viewport)),
-            ],
-          ),
-        );
-      },
+    return EpubSubpagesSelectionContainer(
+      child: PageView.builder(
+        controller: pageController,
+        itemCount: (controller.subpageCount + 1) ~/ 2,
+        allowImplicitScrolling: true,
+        physics: settings.canScroll && !settings.reduceAnimations
+            ? const AlwaysScrollableScrollPhysics(
+                parent: ClampingScrollPhysics(),
+              )
+            : const NeverScrollableScrollPhysics(),
+        onPageChanged: (index) => controller.jumpToSubpage(index * 2),
+        itemBuilder: (context, index) {
+          return SizedBox(
+            height: viewport.height,
+            child: Row(
+              children: [
+                Expanded(child: _column(index * 2, viewport)),
+                Expanded(child: _column(index * 2 + 1, viewport)),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -72,12 +81,18 @@ class SpreadsEpubPageView extends HookWidget {
     return OverflowBox(
       maxHeight: double.infinity,
       alignment: .topCenter,
-      child: PaginatedEpubPageContent(
-        html: controller.getSubpage(index),
-        settings: settings,
-        viewport: viewport,
-        cssEngine: controller.cssEngine,
-        onAnchorTap: onAnchorTap,
+      child: EpubSubpageSelectionContainer(
+        child: PaginatedEpubPageContent(
+          html: controller.getSubpage(index),
+          settings: settings,
+          viewport: viewport,
+          cssEngine: controller.cssEngine,
+          annotations: controller.annotations,
+          onAnchorTap: onAnchorTap,
+          onAnnotationTap: onAnnotationTap,
+          selectionRegistry: selectionRegistry,
+          subpageIndex: index,
+        ),
       ),
     );
   }

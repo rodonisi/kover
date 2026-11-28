@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/mapping/enums/read_direction.dart';
+import 'package:kover/pages/reader/epub_reader/annotations/epub_annotation_draft_sheet.dart';
+import 'package:kover/pages/reader/epub_reader/annotations/epub_annotation_sheet.dart';
 import 'package:kover/pages/reader/epub_reader/epub_reader_provider.dart';
 import 'package:kover/pages/reader/epub_reader/epub_theme_override.dart';
 import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
@@ -24,7 +26,7 @@ class EpubReader extends HookConsumerWidget {
   final int chapterId;
   final int? readingListId;
 
-  const EpubReader({
+  const new({
     super.key,
     required this.seriesId,
     required this.chapterId,
@@ -341,9 +343,20 @@ class _Page extends HookConsumerWidget {
           controller: controller,
           html: data.html,
           settings: data.settings,
+          annotations: data.annotations,
           resumeScrollId: data.resumeScrollId,
           onSelectionChanged: onSelectionChanged,
           onAnchorTap: handleAnchor,
+          annotationSheetBuilder: (context, annotationId) =>
+              EpubAnnotationSheet(
+                chapterId: chapterId,
+                annotationId: annotationId,
+              ),
+          draftSheetBuilder: (context, draft) => EpubAnnotationDraftSheet(
+            chapterId: chapterId,
+            pageNumber: page,
+            draft: draft,
+          ),
         ),
       ),
     );

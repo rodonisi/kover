@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart' show Size;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:kover/models/annotation_draft.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measure_unit.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_measurements_collector.dart';
 import 'package:kover/pages/reader/epub_reader/paginated_epub_page/measure/epub_position.dart';
@@ -128,6 +129,22 @@ void main() {
         controller.nextSubpage();
 
         expect(changes, [(1, controller.scrollIdForSubpage(1))]);
+      });
+
+      test('reports a position for paragraphs that are not <p> elements', () {
+        final changes = <(int, String?)>[];
+        final controller = _ready(
+          _controller(
+            '<section><div>First</div><div>Second</div></section>',
+            onSubpageChanged: _record(changes),
+          ),
+          paragraphs: 'section > div',
+        );
+        changes.clear();
+
+        controller.nextSubpage();
+
+        expect(changes, [(1, '//body/div[2]')]);
       });
 
       test('jumping to the current subpage is a no-op', () {
@@ -372,6 +389,75 @@ void main() {
       });
     });
 
+    group('canHighlight', () {
+      const paragraphs =
+          '<div><p>First paragraph.</p><p>Second<br>line.</p></div>';
+
+      test('accepts a selection across paragraphs', () {
+        final controller = _controller(paragraphs);
+
+        expect(
+          controller.canHighlight(
+            const AnnotationDraft(
+              xPath: '//body/p[1]',
+              endingXPath: '//body/p[2]',
+              selectedText: 'paragraph.\n\nSecond',
+              context: 'Secondline.',
+            ),
+          ),
+          isTrue,
+        );
+      });
+
+      test('accepts a selection across a line break', () {
+        final controller = _controller(paragraphs);
+
+        expect(
+          controller.canHighlight(
+            const AnnotationDraft(
+              xPath: '//body/p[2]',
+              endingXPath: '//body/p[2]',
+              selectedText: 'Second\nline.',
+              context: 'Secondline.',
+            ),
+          ),
+          isTrue,
+        );
+      });
+
+      test('rejects text that is not in the selected elements', () {
+        final controller = _controller(paragraphs);
+
+        expect(
+          controller.canHighlight(
+            const AnnotationDraft(
+              xPath: '//body/p[2]',
+              endingXPath: '//body/p[2]',
+              selectedText: 'Missing text.',
+              context: 'Secondline.',
+            ),
+          ),
+          isFalse,
+        );
+      });
+
+      test('does not change the rendered page', () {
+        final controller = _controller(paragraphs);
+        final before = controller.root!.outerHtml;
+
+        controller.canHighlight(
+          const AnnotationDraft(
+            xPath: '//body/p[1]',
+            endingXPath: '//body/p[1]',
+            selectedText: 'First',
+            context: 'First paragraph.',
+          ),
+        );
+
+        expect(controller.root!.outerHtml, before);
+      });
+    });
+
     group('remeasurement', () {
       test('changed layout settings enter measuring', () {
         final controller = _ready(_controller(_singlePage));
@@ -572,12 +658,14 @@ PaginatedEpubPageController _ready(
   int linesPerParagraph = 1,
   double viewportHeight = 10,
   double? contentHeight,
+  String paragraphs = 'p',
 }) {
   _paginate(
     controller,
     linesPerParagraph: linesPerParagraph,
     viewportHeight: viewportHeight,
     contentHeight: contentHeight,
+    paragraphs: paragraphs,
   );
   return controller;
 }
@@ -588,11 +676,12 @@ void _paginate(
   double viewportHeight = 10,
   double? contentHeight,
   Object? layoutKey,
+  String paragraphs = 'p',
 }) {
   final units = <EpubMeasureUnit>[];
   var lineIndex = 0;
 
-  for (final block in controller.root!.querySelectorAll('p')) {
+  for (final block in controller.root!.querySelectorAll(paragraphs)) {
     for (var line = 0; line < linesPerParagraph; line++) {
       units.add(
         _line(
