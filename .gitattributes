@@ -1,0 +1,18 @@
+# Generated code
+*.g.dart linguist-generated=true
+*.freezed.dart linguist-generated=true
+*.chopper.dart linguist-generated=true
+*.mocks.dart linguist-generated=true
+lib/api/** linguist-generated=true
+lib/generated/** linguist-generated=true
+web/drift_worker.js linguist-generated=true
+
+# Drift migration generated code
+lib/database/app_database.steps.dart linguist-generated=true
+test/drift/app_database/generated/** linguist-generated=true
+drift_schemas/**/*.json linguist-generated=true
+
+# Flutter platform generated files
+**/generated_plugin_registrant.* linguist-generated=true
+**/generated_plugins.cmake linguist-generated=true
+macos/Flutter/GeneratedPluginRegistrant.swift linguist-generated=true
